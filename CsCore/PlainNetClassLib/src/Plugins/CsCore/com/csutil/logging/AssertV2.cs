@@ -8,7 +8,7 @@ namespace com.csutil {
 
         [Conditional("DEBUG")]
         public static void IsTrue(bool condition, string message, params object[] args) {
-            if (!condition) { Log.e(message, args); }
+            if (!condition) { Log.e(message, args); Debugger.Break(); }
         }
 
         [Conditional("DEBUG")]

@@ -1,44 +1,28 @@
 using System;
+using System.Diagnostics;
 using Newtonsoft.Json;
 using Xunit;
 
 namespace com.csutil.tests {
     public class JsonTests : IDisposable {
 
-        public JsonTests() {
-            // Setup before each test
+        public JsonTests() { // Setup before each test
         }
-
-        public void Dispose() {
-            // TearDown after each test
+        public void Dispose() { // TearDown after each test
         }
 
         [Fact]
         public void Test1() {
-
-            var serializer = new JsonSerializer();
-
-            // var r = JsonReader.NewReader();
-            // var w = JsonWriter.NewWriter();
-
+            MySubClass1 x1 = new MySubClass1("test");
+            var json = JsonWriter.NewWriter().Write((MyClass1)x1);
+            var x2 = JsonReader.NewReader().Read<MySubClass1>(json);
+            Assert.Equal(x1.s, x2.s);
         }
 
-        private class MyClass1 {
-            internal MyClass1() {
-
-            }
-
-        }
+        private class MyClass1 { }
         private class MySubClass1 : MyClass1 {
-
-            string s;
-            public int i;
-            private bool b;
-
-            public MySubClass1(string s) : base() {
-                Log.d("MySubClass1 created with s=" + s);
-            }
-
+            public string s;
+            public MySubClass1(string s) : base() { this.s = s; }
         }
 
     }
