@@ -3,9 +3,9 @@ using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace com.csutil.http {
-    public interface RestResponse {
+    public interface RestRequest {
 
-        RestResponse send(HttpMethod method);
-        Task onResult<T>(Action<T> onResult);
+        RestRequest send(HttpMethod method);
+        Task<T> getResult<T>(Action<T> onResult = null);
     }
 }

@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using com.csutil.http;
 
 namespace com.csutil.http {
-    internal class UriRestResponse : RestResponse {
+    internal class UriRestResponse : RestRequest {
         private Uri uri;
         public Action<UriRestResponse, HttpResponseMessage> handleResult = defaultHandler;
         public IJsonReader jsonReader = JsonReader.NewReader();
@@ -12,18 +12,21 @@ namespace com.csutil.http {
 
         public UriRestResponse(Uri uri) { this.uri = uri; }
 
-        public Task onResult<T>(Action<T> successCallback) {
+        public Task<T> getResult<T>(Action<T> successCallback) {
+            Func<T> getResult = null;
             handleResult = (self, resp) => {
                 using (var t = resp.Content.ReadAsStringAsync()) {
-                    successCallback(parseResultStringInto<T>(t.Result));
+                    var parsedResult = parseResultStringInto<T>(t.Result);
+                    getResult = () => { return parsedResult; };
+                    successCallback?.Invoke(parsedResult);
                 }
             };
-            return sendTask;
+            return sendTask.ContinueWith<T>((_) => { return getResult(); });
         }
 
         private T parseResultStringInto<T>(string result) { return jsonReader.Read<T>(result); }
 
-        public RestResponse send(HttpMethod method) {
+        public RestRequest send(HttpMethod method) {
             sendTask = Task.Run(() => {
                 using (var c = new HttpClient()) {
                     using (var req = c.SendAsync(new HttpRequestMessage(method, uri))) {

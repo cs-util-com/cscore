@@ -12,14 +12,22 @@ namespace com.csutil.tests {
 
         [Fact]
         public async Task Test1() {
-            await new Uri("https://httpbin.org/get").sendGET().onResult<HttpBinGetResponse>((x) => {
+            await new Uri("https://httpbin.org/get").sendGET().getResult<HttpBinGetResp>((x) => {
                 Log.d("Your external IP is " + x.origin);
                 Assert.NotNull(x);
                 Assert.NotNull(x.origin);
             });
         }
 
-        public class HttpBinGetResponse {
+        [Fact]
+        public async Task Test2() {
+            var x = await new Uri("https://httpbin.org/get").sendGET().getResult<HttpBinGetResp>();
+            Assert.NotNull(x);
+            Log.d("Your external IP is " + x.origin);
+            Assert.NotNull(x.origin);
+        }
+
+        public class HttpBinGetResp {
             public Dictionary<string, object> args { get; set; }
             public string origin { get; set; }
             public string url { get; set; }
