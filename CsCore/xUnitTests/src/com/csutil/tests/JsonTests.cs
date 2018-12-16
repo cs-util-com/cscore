@@ -5,7 +5,6 @@ using Xunit;
 
 namespace com.csutil.tests {
     public class JsonTests : IDisposable {
-
         public JsonTests() { // Setup before each test
         }
         public void Dispose() { // TearDown after each test
