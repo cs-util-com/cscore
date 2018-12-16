@@ -5,14 +5,13 @@ using Xunit;
 namespace com.csutil.tests {
     public class InjectionTests : IDisposable {
 
-        public InjectionTests() {
-            // Setup before each test
-        }
-
-        public void Dispose() { // TearDown after each test
-            // reset injection:
+        public InjectionTests() { // Setup before each test:
+            // Reset EventBus and Injection:
             EventBus.instance = new EventBus();
             IoC.inject = new Injector();
+        }
+
+        public void Dispose() { // TearDown after each test:
         }
 
         [Fact]

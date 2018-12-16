@@ -4,13 +4,12 @@ using Xunit;
 namespace com.csutil.tests {
     public class EventBusTests : IDisposable {
 
-        public EventBusTests() {
-            // Setup before each test
+        public EventBusTests() { // // Setup before each test:
+            // Reset Eventbus:
+            EventBus.instance = new EventBus();
         }
 
-        public void Dispose() {
-            // TearDown after each test
-            EventBus.instance = new EventBus();
+        public void Dispose() { // TearDown after each test:
         }
 
         [Fact]
