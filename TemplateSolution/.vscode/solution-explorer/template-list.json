@@ -1,0 +1,22 @@
+{
+    "templates": [
+        {
+            "name": "Class",
+            "extension": "cs",
+            "file": "./class.cs-template",
+            "parameters": "./template-parameters.js"
+        },
+        {
+            "name": "Interface",
+            "extension": "cs",
+            "file": "./interface.cs-template",
+            "parameters": "./template-parameters.js"
+        },
+        {
+            "name": "Enum",
+            "extension": "cs",
+            "file": "./enum.cs-template",
+            "parameters": "./template-parameters.js"
+        }
+    ]
+}

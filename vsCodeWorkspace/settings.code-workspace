@@ -1,0 +1,10 @@
+{
+	"folders": [
+		{
+			"path": "..\\CsCore"
+		}
+	],
+	"settings": {
+		"omnisharp.useEditorFormattingSettings": false
+	}
+}
