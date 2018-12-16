@@ -13,8 +13,8 @@ namespace com.csutil.tests {
         [Fact]
         public async Task Test1() {
             await new Uri("https://httpbin.org/get").sendGET().getResult<HttpBinGetResp>((x) => {
-                Log.d("Your external IP is " + x.origin);
                 Assert.NotNull(x);
+                Log.d("Your external IP is " + x.origin);
                 Assert.NotNull(x.origin);
             });
         }

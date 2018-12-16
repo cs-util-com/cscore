@@ -4,13 +4,13 @@ using System.Threading.Tasks;
 using com.csutil.http;
 
 namespace com.csutil.http {
-    internal class UriRestResponse : RestRequest {
+    internal class UriRestRequest : RestRequest {
         private Uri uri;
-        public Action<UriRestResponse, HttpResponseMessage> handleResult = defaultHandler;
+        public Action<UriRestRequest, HttpResponseMessage> handleResult = defaultHandler;
         public IJsonReader jsonReader = JsonReader.NewReader();
         private Task sendTask;
 
-        public UriRestResponse(Uri uri) { this.uri = uri; }
+        public UriRestRequest(Uri uri) { this.uri = uri; }
 
         public Task<T> getResult<T>(Action<T> successCallback) {
             Func<T> getResult = null;
@@ -37,7 +37,7 @@ namespace com.csutil.http {
             return this;
         }
 
-        private static void defaultHandler(UriRestResponse self, HttpResponseMessage result) {
+        private static void defaultHandler(UriRestRequest self, HttpResponseMessage result) {
             Log.d("Rest-result for " + self.uri + ": " + result);
         }
 
