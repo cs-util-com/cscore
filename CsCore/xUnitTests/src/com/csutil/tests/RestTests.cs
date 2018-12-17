@@ -12,7 +12,7 @@ namespace com.csutil.tests {
 
         [Fact]
         public async Task Test1() {
-            await new Uri("https://httpbin.org/get").sendGET().getResult<HttpBinGetResp>((x) => {
+            await new Uri("https://httpbin.org/get").SendGET().GetResult<HttpBinGetResp>((x) => {
                 Assert.NotNull(x);
                 Log.d("Your external IP is " + x.origin);
                 Assert.NotNull(x.origin);
@@ -21,7 +21,7 @@ namespace com.csutil.tests {
 
         [Fact]
         public async Task Test2() {
-            var x = await new Uri("https://httpbin.org/get").sendGET().getResult<HttpBinGetResp>();
+            var x = await new Uri("https://httpbin.org/get").SendGET().GetResult<HttpBinGetResp>();
             Assert.NotNull(x);
             Log.d("Your external IP is " + x.origin);
             Assert.NotNull(x.origin);

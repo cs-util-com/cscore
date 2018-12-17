@@ -1,12 +1,9 @@
 {
-    "name": "Tests",
+    "name": "CsCoreUnity",
     "references": [
-        "CsCore",
-        "CsCoreUnity"
+        "CsCore"
     ],
-    "optionalUnityReferences": [
-        "TestAssemblies"
-    ],
+    "optionalUnityReferences": [],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

@@ -6,17 +6,17 @@ using com.csutil.http;
 namespace com.csutil.http {
     internal class UriRestRequest : RestRequest {
         private Uri uri;
-        public Action<UriRestRequest, HttpResponseMessage> handleResult = defaultHandler;
+        public Action<UriRestRequest, HttpResponseMessage> handleResult = PrintToLog;
         public IJsonReader jsonReader = JsonReader.NewReader();
         private Task sendTask;
 
         public UriRestRequest(Uri uri) { this.uri = uri; }
 
-        public Task<T> getResult<T>(Action<T> successCallback) {
+        public Task<T> GetResult<T>(Action<T> successCallback) {
             Func<T> getResult = null;
             handleResult = (self, resp) => {
                 using (var t = resp.Content.ReadAsStringAsync()) {
-                    var parsedResult = parseResultStringInto<T>(t.Result);
+                    var parsedResult = ParseResultStringInto<T>(t.Result);
                     getResult = () => { return parsedResult; };
                     successCallback?.Invoke(parsedResult);
                 }
@@ -24,9 +24,9 @@ namespace com.csutil.http {
             return sendTask.ContinueWith<T>((_) => { return getResult(); });
         }
 
-        private T parseResultStringInto<T>(string result) { return jsonReader.Read<T>(result); }
+        private T ParseResultStringInto<T>(string result) { return jsonReader.Read<T>(result); }
 
-        public RestRequest send(HttpMethod method) {
+        public RestRequest Send(HttpMethod method) {
             sendTask = Task.Run(() => {
                 using (var c = new HttpClient()) {
                     using (var req = c.SendAsync(new HttpRequestMessage(method, uri))) {
@@ -37,7 +37,7 @@ namespace com.csutil.http {
             return this;
         }
 
-        private static void defaultHandler(UriRestRequest self, HttpResponseMessage result) {
+        private static void PrintToLog(UriRestRequest self, HttpResponseMessage result) {
             Log.d("Rest-result for " + self.uri + ": " + result);
         }
 

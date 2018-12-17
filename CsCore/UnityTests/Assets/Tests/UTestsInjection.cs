@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.TestTools;
 using com.csutil;
 
-namespace Tests {
+namespace com.csutil.injection.tests {
 
     public class UTestsInjection {
 
