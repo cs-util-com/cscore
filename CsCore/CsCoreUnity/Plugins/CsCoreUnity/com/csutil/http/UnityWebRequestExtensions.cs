@@ -15,56 +15,44 @@ namespace UnityEngine.Networking {
 
         public static RestRequest SendV2(this UnityWebRequest self) { return new UnityRestRequest(self); }
 
-        private static IEnumerator SendV2<T>(this UnityWebRequest self, Action<T> onResult, Action<UnityWebRequest, Exception> onError, Action<float> onProgress = null, long maxMsWithoutProgress = 60000) {
-
-            if (self.downloadHandler == null && onResult != null) { self.downloadHandler = newDefaultDownloadHandler<T>(); }
-
-            var req = self.SendWebRequest();
-            var wait = new WaitForSeconds(0.05f);
-            var timer = Stopwatch.StartNew();
-            var progress = new ChangeTracker<float>(0);
-            while (!req.isDone) {
-                if (progress.set(req.progress)) {
-                    timer.Restart();
-                    onProgress.InvokeIfNotNull(progress.value);
-                }
-                yield return wait;
-                if (timer.ElapsedMilliseconds > maxMsWithoutProgress) { self.Abort(); }
-            }
-
-            try {
-                if (self.isNetworkError || self.isHttpError) {
-                    throw new Exception(self.error);
-                } else {
-                    onResult.InvokeIfNotNull(self.GetResult<T>());
-                }
-            }
-            catch (Exception e) { if (!onError.InvokeIfNotNull(self, e)) { Log.e(e); }; }
-
-            yield return null;
+        public static IEnumerator SendWebRequestV2<T>(this UnityWebRequest self, Response<T> s) {
+            yield return self.SendAndWait(s);
+            HandleResult(self, s);
         }
 
+        private static IEnumerator SendAndWait<T>(this UnityWebRequest self, Response<T> s) {
+            if (self.downloadHandler == null && s.onResult != null) { self.downloadHandler = s.createDownloadHandler(); }
+            var req = self.SendWebRequest();
+            var timer = Stopwatch.StartNew();
+            while (!req.isDone) {
+                if (s.progressInPercent.setNewValue(req.progress * 100)) {
+                    timer.Restart();
+                    s.onProgress.InvokeIfNotNull(s.progressInPercent.value);
+                }
+                yield return s.wait;
+                if (timer.ElapsedMilliseconds > s.maxMsWithoutProgress) { self.Abort(); }
+            }
+            if (self.error.IsNullOrEmpty()) { s.progressInPercent.setNewValue(100); }
+            s.getResult = () => { return self.GetResult<T>(); };
+        }
 
-        private static T GetResult<T>(this UnityWebRequest self) { return self.GetResult<T>(JsonReader.NewReader()); }
+        private static void HandleResult<T>(UnityWebRequest self, Response<T> s) {
+            if (self.isNetworkError || self.isHttpError) {
+                s.onError(self, new Exception(self.error));
+            } else {
+                try { s.onResult.InvokeIfNotNull(self.GetResult<T>()); } catch (Exception e) { s.onError(self, e); }
+            }
+        }
 
-        private static T GetResult<T>(this UnityWebRequest self, IJsonReader r) {
+        public static T GetResult<T>(this UnityWebRequest self) { return self.GetResult<T>(JsonReader.NewReader()); }
+
+        public static T GetResult<T>(this UnityWebRequest self, IJsonReader r) {
             AssertV2.IsTrue(self.isDone, "web request was not done!");
             if (TypeCheck.AreEqual<T, UnityWebRequest>()) { return (T)(object)self; }
             if (typeof(Texture).IsAssignableFrom<T>()) { return (T)(object)((DownloadHandlerTexture)self.downloadHandler).texture; }
             var text = self.downloadHandler.text;
             if (TypeCheck.AreEqual<T, String>()) { return (T)(object)text; }
             return r.Read<T>(text);
-        }
-
-        private class ChangeTracker<T> {
-            public T value { get; private set; }
-            public ChangeTracker(T t) { value = t; }
-            public bool set(T t) { if (Equals(t, value)) { return false; } value = t; return true; }
-        }
-
-        private static DownloadHandler newDefaultDownloadHandler<T>() {
-            if (typeof(Texture2D).IsAssignableFrom<T>()) { return new DownloadHandlerTexture(false); }
-            return new DownloadHandlerBuffer();
         }
 
     }

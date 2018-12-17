@@ -14,9 +14,35 @@ namespace com.csutil.http.tests {
 
         [UnityTest]
         public IEnumerator Test1() {
-            var normalUnityWebRequest = UnityWebRequest.Get("https://httpbin.org/get");
+            var www = UnityWebRequest.Get("https://httpbin.org/get");
 
-            var runningTask = normalUnityWebRequest.SendV2().GetResult<HttpBinGetResp>(x => {
+            HttpBinGetResp a = null;
+            yield return www.SendWebRequestV2(new Response<HttpBinGetResp>().WithResultCallback((x) => {
+                Log.d("Your IP is " + x.origin);
+                a = x;
+            }));
+            HttpBinGetResp b = www.GetResult<HttpBinGetResp>();
+
+            var w = JsonWriter.NewWriter();
+            Assert.AreEqual(w.Write(a), w.Write(b));
+        }
+
+        [UnityTest]
+        public IEnumerator Test2() {
+            var resp = new Response<HttpBinGetResp>().WithProgress((p) => {
+                Log.d("Now progress=" + p + "%");
+            });
+            yield return UnityWebRequest.Get("https://httpbin.org/get").SendWebRequestV2(resp);
+            var result = resp.getResult();
+            Assert.NotNull(result.origin);
+            Assert.AreEqual(100, resp.progressInPercent.value);
+        }
+
+        [UnityTest]
+        public IEnumerator Test3() {
+            var www = UnityWebRequest.Get("https://httpbin.org/get");
+
+            var runningTask = www.SendV2().GetResult<HttpBinGetResp>(x => {
                 Log.d("Your IP is " + x.origin);
             });
             while (!runningTask.IsCompleted) {
@@ -25,7 +51,6 @@ namespace com.csutil.http.tests {
             }
             var x2 = runningTask.Result;
             Log.d("Your IP is " + x2.origin);
-            yield return null;
         }
 
         public class HttpBinGetResp {
