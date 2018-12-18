@@ -22,8 +22,10 @@ namespace UnityEngine.Networking {
 
         private static IEnumerator SendAndWait<T>(this UnityWebRequest self, Response<T> s) {
             if (self.downloadHandler == null && s.onResult != null) { self.downloadHandler = s.createDownloadHandler(); }
-            var req = self.SendWebRequest();
+            s.duration = Stopwatch.StartNew();
             var timer = Stopwatch.StartNew();
+            var req = self.SendWebRequest();
+            AssertV2.IsTrue(timer.ElapsedMilliseconds < 10, "timer.ElapsedMilliseconds already at " + timer.ElapsedMilliseconds + " ms");
             while (!req.isDone) {
                 if (s.progressInPercent.setNewValue(req.progress * 100)) {
                     timer.Restart();
@@ -32,6 +34,7 @@ namespace UnityEngine.Networking {
                 yield return s.wait;
                 if (timer.ElapsedMilliseconds > s.maxMsWithoutProgress) { self.Abort(); }
             }
+            s.duration.Stop();
             if (self.error.IsNullOrEmpty()) { s.progressInPercent.setNewValue(100); }
             s.getResult = () => { return self.GetResult<T>(); };
         }
@@ -49,7 +52,11 @@ namespace UnityEngine.Networking {
         public static T GetResult<T>(this UnityWebRequest self, IJsonReader r) {
             AssertV2.IsTrue(self.isDone, "web request was not done!");
             if (TypeCheck.AreEqual<T, UnityWebRequest>()) { return (T)(object)self; }
-            if (typeof(Texture).IsAssignableFrom<T>()) { return (T)(object)((DownloadHandlerTexture)self.downloadHandler).texture; }
+            if (typeof(Texture).IsAssignableFrom<T>()) {
+                AssertV2.IsTrue(self.downloadHandler is DownloadHandlerTexture, "self.downloadHandler was not a DownloadHandlerTexture");
+                var h = (DownloadHandlerTexture)self.downloadHandler;
+                return (T)(object)h.texture;
+            }
             var text = self.downloadHandler.text;
             if (TypeCheck.AreEqual<T, String>()) { return (T)(object)text; }
             return r.Read<T>(text);

@@ -13,7 +13,7 @@ namespace com.csutil.http.tests {
     public class RestCommunicationTests {
 
         [UnityTest]
-        public IEnumerator Test1() {
+        public IEnumerator TestResultCallback() {
             var www = UnityWebRequest.Get("https://httpbin.org/get");
 
             HttpBinGetResp a = null;
@@ -28,7 +28,7 @@ namespace com.csutil.http.tests {
         }
 
         [UnityTest]
-        public IEnumerator Test2() {
+        public IEnumerator TestProgress() {
             var resp = new Response<HttpBinGetResp>().WithProgress((p) => {
                 Log.d("Now progress=" + p + "%");
             });
@@ -39,7 +39,23 @@ namespace com.csutil.http.tests {
         }
 
         [UnityTest]
-        public IEnumerator Test3() {
+        public IEnumerator TestImageDownload() {
+            var imgWidth = 1024;
+            var imgHeight = 1024;
+            var downloadProgressUpdateCounter = 0;
+            var resp = new Response<Texture>().WithProgress((p) => { downloadProgressUpdateCounter++; });
+            yield return UnityWebRequestTexture.GetTexture("https://picsum.photos/" + imgWidth + "/" + imgHeight, true).SendWebRequestV2(resp);
+            Assert.NotNull(downloadProgressUpdateCounter > 5, "progressUpdateCounter=" + downloadProgressUpdateCounter);
+            Assert.AreEqual(100, resp.progressInPercent.value);
+            Assert.IsTrue(resp.duration.ElapsedMilliseconds > 100, "resp.duration=" + resp.duration.ElapsedMilliseconds + "ms");
+            var result = resp.getResult();
+            Assert.IsNotNull(result);
+            Assert.AreEqual(imgWidth, result.width);
+            Assert.AreEqual(imgHeight, result.height);
+        }
+
+        [UnityTest]
+        public IEnumerator TestGetResultMethod() {
             var www = UnityWebRequest.Get("https://httpbin.org/get");
 
             var runningTask = www.SendV2().GetResult<HttpBinGetResp>(x => {

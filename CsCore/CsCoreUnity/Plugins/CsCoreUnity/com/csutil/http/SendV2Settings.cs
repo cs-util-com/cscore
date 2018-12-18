@@ -20,6 +20,7 @@ namespace com.csutil.http {
         public ChangeTracker<float> progressInPercent = new ChangeTracker<float>(0);
         public Func<DownloadHandler> createDownloadHandler = NewDefaultDownloadHandler;
         public Func<T> getResult = () => { throw new Exception("Request not yet finished"); };
+        public Stopwatch duration;
 
         public Response<T> WithResultCallback(Action<T> callback) { onResult = callback; return this; }
         public Response<T> WithProgress(Action<float> callback) { onProgress = callback; return this; }
