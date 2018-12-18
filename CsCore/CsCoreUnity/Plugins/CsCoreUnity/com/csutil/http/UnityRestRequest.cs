@@ -7,6 +7,7 @@ using UnityEngine.Networking;
 namespace com.csutil.http {
 
     public class UnityRestRequest : RestRequest {
+
         private UnityWebRequest request;
 
         public UnityRestRequest(UnityWebRequest request) { this.request = request; }
@@ -15,7 +16,6 @@ namespace com.csutil.http {
             throw new NotImplementedException();
         }
 
-        
     }
 
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace com.csutil {
+
     public static class IEnumerableExtensions {
 
         public static IEnumerable<R> Map<T, R>(this IEnumerable<T> self, Func<T, R> selector) {
@@ -25,5 +26,12 @@ namespace com.csutil {
             return "[" + args.Map(x => "" + toString(x)).Reduce((x, y) => x + ", " + y) + "]";
         }
 
+        public static HashSet<TSource> ToHashSet<TSource>(this IEnumerable<TSource> source) {
+            var r = new HashSet<TSource>();
+            foreach (var e in source) { r.Add(e); }
+            return r;
+        }
+
     }
+
 }
