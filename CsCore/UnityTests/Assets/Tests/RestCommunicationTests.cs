@@ -29,26 +29,35 @@ namespace com.csutil.http.tests {
 
         [UnityTest]
         public IEnumerator TestProgress() {
+            var requestProgressUpdateCounter = 0;
             var resp = new Response<HttpBinGetResp>().WithProgress((p) => {
                 Log.d("Now progress=" + p + "%");
+                requestProgressUpdateCounter++;
             });
-            yield return UnityWebRequest.Get("https://httpbin.org/get").SendWebRequestV2(resp);
+
+            var www = UnityWebRequest.Get("https://httpbin.org/get");
+            yield return www.SendWebRequestV2(resp);
+
             var result = resp.getResult();
             Assert.NotNull(result.origin);
             Assert.AreEqual(100, resp.progressInPercent.value);
+            Assert.NotNull(requestProgressUpdateCounter > 0, "progressUpdateCounter=" + requestProgressUpdateCounter);
         }
 
         [UnityTest]
         public IEnumerator TestImageDownload() {
             var imgWidth = 1024;
             var imgHeight = 1024;
-            var downloadProgressUpdateCounter = 0;
-            var resp = new Response<Texture>().WithProgress((p) => { downloadProgressUpdateCounter++; });
-            yield return UnityWebRequestTexture.GetTexture("https://picsum.photos/" + imgWidth + "/" + imgHeight, true).SendWebRequestV2(resp);
-            Assert.NotNull(downloadProgressUpdateCounter > 5, "progressUpdateCounter=" + downloadProgressUpdateCounter);
-            Assert.AreEqual(100, resp.progressInPercent.value);
-            Assert.IsTrue(resp.duration.ElapsedMilliseconds > 100, "resp.duration=" + resp.duration.ElapsedMilliseconds + "ms");
-            var result = resp.getResult();
+
+            var response = new Response<Texture>();
+            var www = UnityWebRequestTexture.GetTexture("https://picsum.photos/" + imgWidth + "/" + imgHeight, true);
+
+            yield return www.SendWebRequestV2(response);
+
+            Assert.AreEqual(100, response.progressInPercent.value);
+            Assert.IsTrue(response.duration.ElapsedMilliseconds > 100, "resp.duration=" + response.duration.ElapsedMilliseconds + "ms");
+
+            var result = response.getResult();
             Assert.IsNotNull(result);
             Assert.AreEqual(imgWidth, result.width);
             Assert.AreEqual(imgHeight, result.height);
