@@ -6,6 +6,8 @@ using com.csutil.eventbus;
 namespace com.csutil.injection {
     public class Injector {
 
+        public static Injector newInjector(IEventBus eventbusToUse) { return new Injector { usedEventBus = eventbusToUse }; }
+
         public IEventBus usedEventBus = EventBus.instance;
 
         public void RegisterInjector<T>(object injector, Func<object, bool, T> createServiceAction) {

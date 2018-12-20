@@ -10,13 +10,13 @@ namespace com.csutil {
         public static IEventBus instance = new EventBus();
         private readonly ConcurrentDictionary<string, ConcurrentDictionary<object, Delegate>> map = new ConcurrentDictionary<string, ConcurrentDictionary<object, Delegate>>();
 
-        public void Subscribe(object c, string key, Action a) { Add(c, key, (Delegate)a); }
-        public void Subscribe<T>(object c, string key, Action<T> a) { Add(c, key, (Delegate)a); }
-        public void Subscribe<T, V>(object c, string key, Action<T, V> a) { Add(c, key, (Delegate)a); }
-        public void Subscribe<T, V, U>(object c, string key, Action<T, V, U> a) { Add(c, key, (Delegate)a); }
-        public void Subscribe<T, V, U>(object c, string key, Func<T> f) { Add(c, key, (Delegate)f); }
-        public void Subscribe<T, V, U>(object c, string key, Func<T, V> f) { Add(c, key, (Delegate)f); }
-        public void Subscribe<T, V, U>(object c, string key, Func<T, V, U> f) { Add(c, key, (Delegate)f); }
+        public void Subscribe(object c, string key, Action a) { Add(c, key, a); }
+        public void Subscribe<T>(object c, string key, Action<T> a) { Add(c, key, a); }
+        public void Subscribe<T, V>(object c, string key, Action<T, V> a) { Add(c, key, a); }
+        public void Subscribe<T, V, U>(object c, string key, Action<T, V, U> a) { Add(c, key, a); }
+        public void Subscribe<T, V, U>(object c, string key, Func<T> f) { Add(c, key, f); }
+        public void Subscribe<T, V, U>(object c, string key, Func<T, V> f) { Add(c, key, f); }
+        public void Subscribe<T, V, U>(object c, string key, Func<T, V, U> f) { Add(c, key, f); }
 
         private void Add(object caller, string eventName, Delegate callback) {
             var noExistingListener = GetOrAdd(eventName).AddOrReplace(caller, callback);

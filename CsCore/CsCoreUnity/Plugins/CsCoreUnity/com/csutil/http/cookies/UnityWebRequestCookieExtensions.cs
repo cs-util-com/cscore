@@ -21,10 +21,16 @@ namespace com.csutil {
         }
 
         private static List<Cookie> LoadStoredCookiesForUri(Uri uri) {
-            CookieJar ccc = IoC.inject.Get<CookieJar>(uri);
-            var c = ccc.GetCookies(new CookieAccessInfo(uri.Host, uri.AbsolutePath));
-            if (c.IsNullOrEmpty() && uri.Scheme.Equals("https")) { c = ccc.GetCookies(new CookieAccessInfo(uri.Host, uri.AbsolutePath, true)); }
-            return c;
+            try {
+                CookieJar ccc = IoC.inject.Get<CookieJar>(uri);
+                var c = ccc.GetCookies(new CookieAccessInfo(uri.Host, uri.AbsolutePath));
+                if (c.IsNullOrEmpty() && uri.Scheme.Equals("https")) { c = ccc.GetCookies(new CookieAccessInfo(uri.Host, uri.AbsolutePath, true)); }
+                return c;
+            }
+            catch (Exception e) {
+                Log.e(e);
+                return new List<Cookie>();
+            }
         }
 
         /// <summary> can be used to manually set a specific set of cookies, normally not needed since cookies are applied automatically by applyAllCookies()! </summary>
@@ -76,11 +82,17 @@ namespace com.csutil {
         }
 
         private static bool AddCookie(UnityWebRequest self, string cookieString) {
-            if (self == null || cookieString.IsNullOrEmpty()) { return false; }
-            // from Response.cs:
-            if (cookieString.IndexOf("domain=", StringComparison.CurrentCultureIgnoreCase) == -1) { cookieString += "; domain=" + self.url; }
-            if (cookieString.IndexOf("path=", StringComparison.CurrentCultureIgnoreCase) == -1) { cookieString += "; path=" + self.url; }
-            return IoC.inject.Get<CookieJar>(self).SetCookie(new Cookie(cookieString));
+            try {
+                if (self == null || cookieString.IsNullOrEmpty()) { return false; }
+                // from Response.cs:
+                if (cookieString.IndexOf("domain=", StringComparison.CurrentCultureIgnoreCase) == -1) { cookieString += "; domain=" + self.url; }
+                if (cookieString.IndexOf("path=", StringComparison.CurrentCultureIgnoreCase) == -1) { cookieString += "; path=" + self.url; }
+                return IoC.inject.Get<CookieJar>(self).SetCookie(new Cookie(cookieString));
+            }
+            catch (Exception e) {
+                Log.e(e);
+                return false;
+            }
         }
 
     }
