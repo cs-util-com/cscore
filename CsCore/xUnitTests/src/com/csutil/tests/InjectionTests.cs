@@ -94,18 +94,6 @@ namespace com.csutil.tests {
             Assert.Null(IoC.inject.Get<MyClass1>("caller 3"));
         }
 
-        [Fact]
-        public void TestIoCLifecycle() {
-            Log.d("TestIoCLifecycle started..");
-            bool setupEventWasBroadcasted = false;
-            EventBus.instance.Subscribe(this, "IoC system now set up!", () => {
-                setupEventWasBroadcasted = true;
-            });
-            Log.d("Will now use the IoC class the first time..");
-            IoC.inject.GetOrAddSingleton<MyClass1>(this);
-            Assert.True(setupEventWasBroadcasted);
-        }
-
         private class MyClass1 { }
         private class MySubClass1 : MyClass1 { }
         private class MySubClass2 : MyClass1 { }
