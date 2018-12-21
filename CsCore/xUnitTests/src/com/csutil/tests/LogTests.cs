@@ -14,13 +14,17 @@ namespace com.csutil.tests {
             AssertV2.IsTrue(1 + 1 == 4, "1+1 is not 4");
             MyCustomMethod123("aa", 22);
 
+            AssertV2.AreEqual(1, 2);
+            AssertV2.AreNotEqual(1, 1);
+            AssertV2.IsNull("I am myVarX and I am not null", "myVarX");
+
         }
 
         private static void MyCustomMethod123(string x, int i) {
             var t = AssertV2.TrackTiming();
             Thread.Sleep(10);
-            Assert.True(t.IsUnderXms(12));
-            t.AssertUnderXms(1);
+            t.AssertUnderXms(20);
+            Assert.True(t.IsUnderXms(20));
         }
     }
 }

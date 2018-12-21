@@ -1,5 +1,6 @@
 using System;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using com.csutil.http;
 
@@ -21,7 +22,10 @@ namespace com.csutil.http {
                     successCallback?.Invoke(parsedResult);
                 }
             };
-            return sendTask.ContinueWith<T>((_) => { return getResult(); });
+            return sendTask.ContinueWith<T>((_) => {
+                AssertV2.IsNotNull(getResult, "getResult");
+                return getResult();
+            });
         }
 
         private T ParseResultStringInto<T>(string result) { return jsonReader.Read<T>(result); }
