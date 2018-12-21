@@ -15,6 +15,8 @@ namespace com.csutil.tests {
             MyCustomMethod123("aa", 22);
 
             AssertV2.AreEqual(1, 2);
+            var s1 = "a";
+            AssertV2.AreNotEqual(s1, s1, "s1");
             AssertV2.AreNotEqual(1, 1);
             AssertV2.IsNull("I am myVarX and I am not null", "myVarX");
 

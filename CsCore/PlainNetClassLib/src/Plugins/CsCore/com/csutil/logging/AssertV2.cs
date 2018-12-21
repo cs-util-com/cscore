@@ -35,21 +35,23 @@ namespace com.csutil {
 
         [Conditional("DEBUG")]
         public static void AreEqual<T>(IEquatable<T> expected, IEquatable<T> actual, string varName = "", params object[] args) {
-            var errorMsg = "Assert.AreEqual() FAILED in " + GetCallingMethodName() + ": expected " + varName + "=" + expected + " NOT equal actual " + varName + "=" + actual;
+            var errorMsg = "Assert.AreEqual() FAILED in " + GetCallingMethodName() + ": expected " + varName + "= " + expected + " NOT equal to actual " + varName + "= " + actual;
             Assert(expected.Equals(actual), errorMsg, args);
         }
 
         [Conditional("DEBUG")]
         public static void AreNotEqual<T>(IEquatable<T> expected, IEquatable<T> actual, string varName = "", params object[] args) {
-            var errorMsg = "Assert.AreNotEqual() FAILED in " + GetCallingMethodName() + ": expected " + varName + "=" + expected + " IS equal to actual " + varName + "=" + actual;
+            string msg1 = "Assert.AreNotEqual() FAILED in " + GetCallingMethodName() + ": " + varName + " is same reference (expected == actual)";
+            Assert(expected != actual, msg1, args);
+            var errorMsg = "Assert.AreNotEqual() FAILED in " + GetCallingMethodName() + ": expected " + varName + "= " + expected + " IS equal to actual " + varName + "= " + actual;
             Assert(!expected.Equals(actual), errorMsg, args);
         }
 
         [Conditional("DEBUG")]
         public static void AreNotEqualLists<T>(IEnumerable<T> expected, IEnumerable<T> actual, string varName = "", params object[] args) {
-            string msg1 = "Assert.AreNotEqual() FAILED in " + GetCallingMethodName() + ": " + varName + " same reference (expected == actual)";
+            string msg1 = "Assert.AreNotEqual() FAILED in " + GetCallingMethodName() + ": " + varName + " is same reference (expected == actual)";
             Assert(expected != actual, msg1, args);
-            string msg2 = "Assert.AreNotEqual() FAILED in " + GetCallingMethodName() + ": expected " + varName + "=" + expected + " IS equal to actual " + varName + "=" + actual;
+            string msg2 = "Assert.AreNotEqual() FAILED in " + GetCallingMethodName() + ": expected " + varName + "= " + expected + " IS equal to actual " + varName + "= " + actual;
             Assert(!expected.SequenceEqual(actual), msg2, args);
         }
 
