@@ -14,7 +14,7 @@ namespace com.csutil.logging {
             private StringBuilder buffer = new StringBuilder();
 
             public override void Flush() {
-                Log.d(buffer.ToString());
+                myUnityLogger.d(buffer.ToString());
                 buffer.Length = 0;
             }
 

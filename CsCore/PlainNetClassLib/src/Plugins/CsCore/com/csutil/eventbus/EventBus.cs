@@ -7,7 +7,9 @@ using com.csutil.eventbus;
 namespace com.csutil {
     public class EventBus : IEventBus {
 
+        static EventBus() { Log.d("EventBus used the first time.."); }
         public static IEventBus instance = new EventBus();
+        
         private readonly ConcurrentDictionary<string, ConcurrentDictionary<object, Delegate>> map = new ConcurrentDictionary<string, ConcurrentDictionary<object, Delegate>>();
 
         public void Subscribe(object c, string key, Action a) { Add(c, key, a); }
@@ -44,9 +46,11 @@ namespace com.csutil {
                         var subset = args.Take(p.Length).ToArray();
                         results.Add(listener.DynamicInvoke(subset));
                     } else {
-                        Log.e("Listener skipped because not enough parameters passed: " + listener);
+                        Log.w("Listener skipped because not enough parameters passed: " + listener);
                     }
                 }
+            } else {
+                Log.e("No listeners registered for event: " + eventName);
             }
             return results;
         }

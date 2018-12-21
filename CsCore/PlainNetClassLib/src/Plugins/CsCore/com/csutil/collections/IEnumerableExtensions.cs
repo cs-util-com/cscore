@@ -20,10 +20,10 @@ namespace com.csutil {
 
         public static bool IsNullOrEmpty<T>(this IEnumerable<T> self) { return self == null || self.Count() == 0; }
 
-        public static string ToStringV2<T>(this IEnumerable<T> args, Func<T, string> toString) {
+        public static string ToStringV2<T>(this IEnumerable<T> args, Func<T, string> toString, string bracket1 = "[", string bracket2 = "]") {
             if (args == null) { return "null"; }
-            if (args.IsNullOrEmpty()) { return "[]"; }
-            return "[" + args.Map(x => "" + toString(x)).Reduce((x, y) => x + ", " + y) + "]";
+            if (args.IsNullOrEmpty()) { return bracket1 + bracket2; }
+            return bracket1 + args.Map(x => "" + toString(x)).Reduce((x, y) => x + ", " + y) + bracket2;
         }
 
         public static HashSet<TSource> ToHashSet<TSource>(this IEnumerable<TSource> source) {

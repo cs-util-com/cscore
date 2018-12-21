@@ -11,7 +11,7 @@ namespace com.csutil.injection {
         public IEventBus usedEventBus = EventBus.instance;
 
         public void RegisterInjector<T>(object injector, Func<object, bool, T> createServiceAction) {
-            AssertV2.IsFalse(HasInjectorRegistered<T>(), "There are already injectors registered for " + GetEventKey<T>());
+            if (HasInjectorRegistered<T>()) { Log.w("There are already injectors registered for " + GetEventKey<T>()); }
             usedEventBus.Subscribe(injector, GetEventKey<T>(), createServiceAction);
         }
 

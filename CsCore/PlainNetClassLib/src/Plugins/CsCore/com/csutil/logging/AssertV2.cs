@@ -2,9 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 
 namespace com.csutil {
-    public class AssertV2 {
+    public static class AssertV2 {
 
         [Conditional("DEBUG")]
         public static void IsTrue(bool condition, string message, params object[] args) {
@@ -14,6 +15,27 @@ namespace com.csutil {
         [Conditional("DEBUG")]
         public static void IsFalse(bool condition, string message, params object[] args) {
             IsTrue(!condition, message, args);
+        }
+
+        public static Stopwatch TrackTiming() { return Stopwatch.StartNew(); }
+
+        [Conditional("DEBUG")]
+        public static void AssertUnderXms(this Stopwatch self, int maxTimeInMs) {
+            float ms = self.ElapsedMilliseconds;
+            var p = ms * 100f / maxTimeInMs;
+            var errorText = GetCallingMethodName() + " took " + p + "% (" + ms + "ms) longer then allowed (" + maxTimeInMs + "ms)!";
+            IsTrue(IsUnderXms(self, maxTimeInMs), errorText);
+        }
+
+        public static bool IsUnderXms(this Stopwatch self, int maxTimeInMs) { return self.ElapsedMilliseconds <= maxTimeInMs; }
+
+        private static string GetCallingMethodName(int i = 2) { return new StackTrace().GetFrame(i).GetMethodName(); }
+
+        /// <summary> Will return a formated string in the form of ClassName.MethodName </summary>
+        public static string GetMethodName(this StackFrame self) {
+            var method = self.GetMethod(); // analyse stack trace for class name:
+            var paramsString = method.GetParameters().ToStringV2(x => "" + x, "", "");
+            return method.ReflectedType.Name + "." + method.Name + "(" + paramsString + ")";
         }
 
         [Conditional("DEBUG")]
