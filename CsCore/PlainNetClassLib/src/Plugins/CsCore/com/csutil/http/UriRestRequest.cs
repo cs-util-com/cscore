@@ -7,23 +7,24 @@ using com.csutil.http;
 namespace com.csutil.http {
     internal class UriRestRequest : RestRequest {
         private Uri uri;
-        public Action<UriRestRequest, HttpResponseMessage> handleResult = PrintToLog;
+        public Action<UriRestRequest, HttpResponseMessage> handleResult;
         public IJsonReader jsonReader = JsonReader.NewReader();
         private Task sendTask;
 
         public UriRestRequest(Uri uri) { this.uri = uri; }
 
         public Task<T> GetResult<T>(Action<T> successCallback) {
+            Task<string> readResultTask = null;
             Func<T> getResult = null;
             handleResult = (self, resp) => {
-                using (var t = resp.Content.ReadAsStringAsync()) {
-                    var parsedResult = ParseResultStringInto<T>(t.Result);
+                using (readResultTask = resp.Content.ReadAsStringAsync()) {
+                    var parsedResult = ParseResultStringInto<T>(readResultTask.Result);
                     getResult = () => { return parsedResult; };
                     successCallback?.Invoke(parsedResult);
                 }
             };
             return sendTask.ContinueWith<T>((_) => {
-                AssertV2.IsNotNull(getResult, "getResult");
+                readResultTask.Wait();
                 return getResult();
             });
         }
@@ -33,16 +34,13 @@ namespace com.csutil.http {
         public RestRequest Send(HttpMethod method) {
             sendTask = Task.Run(() => {
                 using (var c = new HttpClient()) {
-                    using (var req = c.SendAsync(new HttpRequestMessage(method, uri))) {
-                        handleResult.InvokeIfNotNull(this, req.Result); // calling resp.Result blocks the thread
+                    using (var asyncRestRequest = c.SendAsync(new HttpRequestMessage(method, uri))) {
+                        asyncRestRequest.Wait(); //helps so that other thread can set handleResult in time
+                        handleResult.InvokeIfNotNull(this, asyncRestRequest.Result); // calling resp.Result blocks the thread
                     }
                 }
             });
             return this;
-        }
-
-        private static void PrintToLog(UriRestRequest self, HttpResponseMessage result) {
-            Log.d("Rest-result for " + self.uri + ": " + result);
         }
 
     }
