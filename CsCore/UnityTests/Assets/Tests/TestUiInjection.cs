@@ -7,7 +7,7 @@ using com.csutil;
 
 namespace com.csutil.injection.tests {
 
-    public class UTestsInjection {
+    public class TestUiInjection {
 
         [Test]
         public void TestSingleton() {
@@ -27,4 +27,5 @@ namespace com.csutil.injection.tests {
 
         private class MySingleton { }
     }
+
 }

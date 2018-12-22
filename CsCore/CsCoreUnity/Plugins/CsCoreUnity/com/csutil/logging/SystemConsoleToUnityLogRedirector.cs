@@ -9,12 +9,14 @@ namespace com.csutil.logging {
 
     public class SystemConsoleToUnityLogRedirector {
 
+        public static void Setup() { Console.SetOut(new UnityTextWriter()); }
+
         private class UnityTextWriter : TextWriter {
 
             private StringBuilder buffer = new StringBuilder();
 
             public override void Flush() {
-                myUnityLogger.d(buffer.ToString());
+                UnityEngine.Debug.Log(buffer.ToString());
                 buffer.Length = 0;
             }
 
@@ -34,13 +36,13 @@ namespace com.csutil.logging {
                 if (value == '\n') { Flush(); }
             }
 
-            public override void Write(char[] value, int index, int count) { Write(new string(value, index, count)); }
+            public override void Write(char[] value, int index, int count) {
+                Write(new string(value, index, count));
+            }
 
             public override Encoding Encoding { get { return Encoding.Default; } }
 
         }
-
-        public static void Setup() { Console.SetOut(new UnityTextWriter()); }
 
     }
 

@@ -10,7 +10,8 @@ using UnityEngine.Networking;
 using UnityEngine.TestTools;
 
 namespace com.csutil.http.tests {
-    public class RestCommunicationTests {
+
+    public class TestRestCommunication {
 
         [UnityTest]
         public IEnumerator TestResultCallback() {
@@ -95,4 +96,5 @@ namespace com.csutil.http.tests {
         }
 
     }
+
 }
