@@ -27,7 +27,7 @@ namespace com.csutil {
             resp.duration = Stopwatch.StartNew();
             var timer = Stopwatch.StartNew();
             self.ApplyAllCookiesToRequest();
-            resp.debugInfo = self.method + " " + self.url + " with cookies: " + self.GetRequestHeader("Cookie");
+            resp.debugInfo = self.method + " " + self.url + " with cookies=[" + self.GetRequestHeader("Cookie") + "]";
             Log.d("Sending: " + resp);
             var req = self.SendWebRequest();
             timer.AssertUnderXms(40);
