@@ -10,7 +10,7 @@ namespace com.csutil.logging.tests {
     class TestLogging {
 
         [Test]
-        public void TestSingleton() {
+        public void RunLogExamples() {
             Log.instance = new LogViaUnityDebugLog();
             LoggingExamples.RunLogExamples();
         }

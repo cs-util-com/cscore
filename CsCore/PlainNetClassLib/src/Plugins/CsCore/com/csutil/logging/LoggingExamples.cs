@@ -26,6 +26,7 @@ namespace com.csutil.logging {
             Thread.Sleep(10);
             t.AssertUnderXms(20);
             AssertV2.IsTrue(t.IsUnderXms(20), "More time was needed than expected!");
+            t.AssertUnderXms(1); // This should always fail
         }
 
     }

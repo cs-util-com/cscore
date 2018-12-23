@@ -6,14 +6,14 @@ namespace com.csutil {
 
     public class LogViaConsole : ILog {
 
-        private const string LB = "\n";
+        private const string LB = "\r\n";
 
         public void LogDebug(string msg, params object[] args) {
-            Console.Write(msg + LB + "  in " + Log.CallingMethodName(args) + LB + LB, args);
+            Console.Write(msg + LB + "  at " + Log.CallingMethodStr(args) + LB + LB, args);
         }
 
         public void LogWarning(string warning, params object[] args) {
-            Console.Write("> WARNING: " + warning + LB + "  in " + Log.CallingMethodName(args) + LB + LB, args);
+            Console.Write("> WARNING: " + warning + LB + "  at " + Log.CallingMethodStr(args) + LB + LB, args);
         }
 
         public Exception LogError(string error, params object[] args) {
@@ -27,7 +27,7 @@ namespace com.csutil {
         }
 
         private static void printExceptionString(string e, object[] args) {
-            Console.Write(e + LB + "    in " + Log.CallingMethodName(args) + LB + LB, args);
+            Console.Write(e + LB + "    at " + Log.CallingMethodStr(args) + LB + LB, args);
         }
 
     }

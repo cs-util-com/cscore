@@ -7,9 +7,10 @@ using System.Reflection;
 namespace com.csutil {
     public static class AssertV2 {
 
+        private const string BR = "\r\n";
 
         private static void Assert(bool condition, string errorMsg, object[] args) {
-            args = Add(new StackTrace().GetFrame(2), args);
+            args = Add(new StackTrace(true).GetFrame(2), args);
             if (!condition) { Log.e(errorMsg, args); Debugger.Break(); }
         }
 
@@ -48,10 +49,12 @@ namespace com.csutil {
 
         [Conditional("DEBUG")]
         public static void AreNotEqual<T>(IEquatable<T> expected, IEquatable<T> actual, string varName = "", params object[] args) {
-            string msg1 = "Assert.AreNotEqual() FAILED: " + varName + " is same reference (expected == actual)";
-            Assert(expected != actual, msg1, args);
-            var errorMsg = "Assert.AreNotEqual() FAILED: expected " + varName + "= " + expected + " IS equal to actual " + varName + "= " + actual;
-            Assert(!expected.Equals(actual), errorMsg, args);
+            var isEqualRef = ReferenceEquals(expected, actual);
+            Assert(isEqualRef, "Assert.AreNotEqual() FAILED: " + varName + " is same reference (expected == actual)", args);
+            if (!isEqualRef) {
+                var errorMsg = "Assert.AreNotEqual() FAILED: expected " + varName + "= " + expected + " IS equal to actual " + varName + "= " + actual;
+                Assert(!expected.Equals(actual), errorMsg, args);
+            }
         }
 
         [Conditional("DEBUG")]
@@ -68,7 +71,8 @@ namespace com.csutil {
         public static void AssertUnderXms(this Stopwatch self, int maxTimeInMs, params object[] args) {
             var ms = self.ElapsedMilliseconds;
             int p = (int)(ms * 100f / maxTimeInMs);
-            var errorText = Log.CallingMethodName() + " took " + p + "% (" + ms + "ms) longer then allowed (" + maxTimeInMs + "ms)!";
+            var errorText = new StackTrace().GetFrame(1).GetMethodName(false);
+            errorText += " took " + p + "% (" + ms + "ms) longer then allowed (" + maxTimeInMs + "ms)!";
             Assert(IsUnderXms(self, maxTimeInMs), errorText, args);
         }
 

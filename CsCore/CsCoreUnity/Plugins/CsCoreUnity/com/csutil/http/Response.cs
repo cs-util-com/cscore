@@ -22,7 +22,7 @@ namespace com.csutil.http {
         public Func<T> getResult = () => { throw new Exception("Request not yet finished"); };
         public Stopwatch duration;
         public string debugInfo;
-        public StackTrace stacktrace = new StackTrace();
+        public StackTrace stacktrace = new StackTrace(true);
 
         public Response<T> WithResultCallback(Action<T> callback) { onResult = callback; return this; }
         public Response<T> WithProgress(Action<float> callback) { onProgress = callback; return this; }

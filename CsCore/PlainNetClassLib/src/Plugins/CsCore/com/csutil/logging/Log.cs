@@ -26,10 +26,11 @@ namespace com.csutil {
             return instance.LogExeption(e, args);
         }
 
-        public static string CallingMethodName(object[] args = null, int i = 3) {
+        public static string CallingMethodStr(object[] args = null, int i = 3) {
             StackFrame f = args?.FirstOrDefault(x => x is StackFrame) as StackFrame;
-            if (f == null) { f = new StackTrace().GetFrame(i); }
-            return f.GetMethodName();
+            if (f == null) { f = new StackTrace(true).GetFrame(i); }
+            Debugger.Break();
+            return f.GetMethodName() + " " + f.GetFileName() + ":line " + f.GetFileLineNumber();
         }
 
     }
@@ -41,12 +42,14 @@ namespace com.csutil {
         }
 
         /// <summary> Will return a formated string in the form of ClassName.MethodName </summary>
-        public static string GetMethodName(this StackFrame self) {
+        public static string GetMethodName(this StackFrame self, bool includeParams = true) {
             try {
                 var method = self.GetMethod(); // analyse stack trace for class name:
-                var paramsString = method.GetParameters().ToStringV2(x => "" + x, "", "");
-                return method.ReflectedType.Name + "." + method.Name + "(" + paramsString + ")";
-            } catch (Exception e) { Console.WriteLine("" + e); return ""; }
+                var methodString = method.ReflectedType.Name + "." + method.Name;
+                var paramsString = includeParams ? method.GetParameters().ToStringV2(x => "" + x, "", "") : "..";
+                return methodString + "(" + paramsString + ")";
+            }
+            catch (Exception e) { Console.WriteLine("" + e); return ""; }
         }
 
     }

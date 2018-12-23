@@ -7,18 +7,18 @@ namespace com.csutil {
 
     public class LogViaUnityDebugLog : ILog {
 
-        private const string LB = "\n";
+        private const string LB = "\r\n";
 
         public void LogDebug(string msg, params object[] args) {
-            Debug.Log(msg + LB + " in " + Log.CallingMethodName(args), getGoFrom(args));
+            Debug.Log(msg + LB + " at " + Log.CallingMethodStr(args) + LB, getGoFrom(args));
         }
 
         public void LogWarning(string warning, params object[] args) {
-            Debug.LogWarning("> WARNING:" + warning + LB + " in " + Log.CallingMethodName(args), getGoFrom(args));
+            Debug.LogWarning("> WARNING:" + warning + LB + " at " + Log.CallingMethodStr(args) + LB, getGoFrom(args));
         }
 
         public Exception LogError(string error, params object[] args) {
-            Debug.LogError(">>> ERROR " + error + LB + " in " + Log.CallingMethodName(args), getGoFrom(args));
+            Debug.LogError(">>> ERROR " + error + LB + " at " + Log.CallingMethodStr(args) + LB, getGoFrom(args));
             return new Exception(error);
         }
 
