@@ -32,7 +32,7 @@ namespace com.csutil.http {
             return new DownloadHandlerBuffer();
         }
 
-        public override string ToString() { return debugInfo + " \n Stacktrace:\n " + stacktrace; }
+        public override string ToString() { return debugInfo; }
 
     }
 

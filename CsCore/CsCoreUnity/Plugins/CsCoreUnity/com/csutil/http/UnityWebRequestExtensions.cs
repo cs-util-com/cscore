@@ -22,30 +22,31 @@ namespace com.csutil {
             HandleResult(self, s);
         }
 
-        private static IEnumerator SendAndWait<T>(this UnityWebRequest self, Response<T> s) {
-            s.debugInfo = self.method + " " + self.url;
-            SetupDownloadAndUploadHanders(self, s);
-            s.duration = Stopwatch.StartNew();
+        private static IEnumerator SendAndWait<T>(this UnityWebRequest self, Response<T> resp) {
+            SetupDownloadAndUploadHanders(self, resp);
+            resp.duration = Stopwatch.StartNew();
             var timer = Stopwatch.StartNew();
             self.ApplyAllCookiesToRequest();
+            resp.debugInfo = self.method + " " + self.url + " with cookies: " + self.GetRequestHeader("Cookie");
+            Log.d("Sending: " + resp);
             var req = self.SendWebRequest();
-            AssertV2.IsTrue(timer.ElapsedMilliseconds < 10, "timer.ElapsedMilliseconds already at " + timer.ElapsedMilliseconds + " ms");
+            timer.AssertUnderXms(40);
             while (!req.isDone) {
-                if (s.progressInPercent.setNewValue(req.progress * 100)) {
+                if (resp.progressInPercent.setNewValue(req.progress * 100)) {
                     timer.Restart();
-                    s.onProgress.InvokeIfNotNull(s.progressInPercent.value);
+                    resp.onProgress.InvokeIfNotNull(resp.progressInPercent.value);
                 }
-                yield return s.wait;
-                if (timer.ElapsedMilliseconds > s.maxMsWithoutProgress) { self.Abort(); }
+                yield return resp.wait;
+                if (timer.ElapsedMilliseconds > resp.maxMsWithoutProgress) { self.Abort(); }
             }
-            s.duration.Stop();
-            AssertResponseLooksNormal(self, s);
+            resp.duration.Stop();
+            AssertResponseLooksNormal(self, resp);
             self.SaveAllNewCookiesFromResponse();
-            if (self.error.IsNullOrEmpty()) { s.progressInPercent.setNewValue(100); }
-            s.getResult = () => { return self.GetResult<T>(); };
+            if (self.error.IsNullOrEmpty()) { resp.progressInPercent.setNewValue(100); }
+            resp.getResult = () => { return self.GetResult<T>(); };
         }
 
-        private static void SetupDownloadAndUploadHanders<T>(UnityWebRequest self, Response<T> s) {
+        private static void SetupDownloadAndUploadHanders<T>(UnityWebRequest self, Response<T> resp) {
             switch (self.method) {
                 case UnityWebRequest.kHttpVerbGET:
                     AssertV2.IsNotNull(self.downloadHandler, "Get-request had no downloadHandler set");
@@ -55,27 +56,27 @@ namespace com.csutil {
                     AssertV2.IsNotNull(self.uploadHandler, "Put/Post-request had no uploadHandler set");
                     break;
             }
-            if (self.downloadHandler == null && s.onResult != null) { self.downloadHandler = s.createDownloadHandler(); }
+            if (self.downloadHandler == null && resp.onResult != null) { self.downloadHandler = resp.createDownloadHandler(); }
         }
 
         [Conditional("DEBUG")]
-        private static void AssertResponseLooksNormal<T>(UnityWebRequest self, Response<T> s) {
-            AssertV2.IsNotNull(self, "WebRequest object was null: " + s);
+        private static void AssertResponseLooksNormal<T>(UnityWebRequest self, Response<T> resp) {
+            AssertV2.IsNotNull(self, "WebRequest object was null: " + resp);
             if (self != null) {
-                AssertV2.IsTrue(self.isDone, "Request never finished: " + s);
-                if (self.isNetworkError) { Log.w("isNetworkError=true for " + s); }
-                if (self.error != null) { Log.w("error=" + self.error + " for " + s); }
-                if (self.isHttpError) { Log.w("isHttpError=true for " + s); }
-                if (self.responseCode < 200 || self.responseCode >= 300) { Log.w("responseCode=" + self.responseCode + " for " + s); }
+                AssertV2.IsTrue(self.isDone, "Request never finished: " + resp);
+                if (self.isNetworkError) { Log.w("isNetworkError=true for " + resp); }
+                if (self.error != null) { Log.w("error=" + self.error + " for " + resp); }
+                if (self.isHttpError) { Log.w("isHttpError=true for " + resp); }
+                if (self.responseCode < 200 || self.responseCode >= 300) { Log.w("responseCode=" + self.responseCode + " for " + resp); }
                 if (self.isNetworkError && self.responseCode == 0 && self.useHttpContinue) { Log.w("useHttpContinue flag was true, request might work if its set to false"); }
             }
         }
 
-        private static void HandleResult<T>(UnityWebRequest self, Response<T> s) {
+        private static void HandleResult<T>(UnityWebRequest self, Response<T> resp) {
             if (self.isNetworkError || self.isHttpError) {
-                s.onError(self, new Exception(self.error));
+                resp.onError(self, new Exception(self.error));
             } else {
-                try { s.onResult.InvokeIfNotNull(self.GetResult<T>()); } catch (Exception e) { s.onError(self, e); }
+                try { resp.onResult.InvokeIfNotNull(self.GetResult<T>()); } catch (Exception e) { resp.onError(self, e); }
             }
         }
 

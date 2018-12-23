@@ -23,22 +23,18 @@ namespace com.csutil {
         private static List<Cookie> LoadStoredCookiesForUri(Uri uri) {
             try {
                 CookieJar ccc = IoC.inject.Get<CookieJar>(uri);
+                if (ccc == null) { return new List<Cookie>(); }
                 var c = ccc.GetCookies(new CookieAccessInfo(uri.Host, uri.AbsolutePath));
                 if (c.IsNullOrEmpty() && uri.Scheme.Equals("https")) { c = ccc.GetCookies(new CookieAccessInfo(uri.Host, uri.AbsolutePath, true)); }
                 return c;
             }
-            catch (Exception e) {
-                Log.e(e);
-                return new List<Cookie>();
-            }
+            catch (Exception e) { Log.e(e); }
+            return new List<Cookie>();
         }
 
         /// <summary> can be used to manually set a specific set of cookies, normally not needed since cookies are applied automatically by applyAllCookies()! </summary>
         private static bool SetCookies(this UnityWebRequest self, List<Cookie> cookieList) {
-            if (cookieList.IsNullOrEmpty()) {
-                Log.d("   > This request will have no cookies included (cookie string in cookie jar is empty), url=" + self.url);
-                return false;
-            }
+            if (cookieList.IsNullOrEmpty()) { return false; }
             bool allCookiesSetCorrectly = true;
             string cookieString = "";
             foreach (var cookie in cookieList) {
@@ -53,15 +49,6 @@ namespace com.csutil {
                     allCookiesSetCorrectly = false;
                 }
             }
-            var allUsedCookiesForRequest = self.GetRequestHeader("Cookie");
-            Log.d("  > applyAllCookies will add this Cookie header: " + allUsedCookiesForRequest);
-            if (allCookiesSetCorrectly) { // cookies were set so check if they are in there:
-                try {
-                    var wwwCookies = self.GetRequestHeader("Cookie");
-                    if (wwwCookies.IsNullOrEmpty()) { throw new Exception("No 'Cookie' Header included in the request!"); }
-                }
-                catch (Exception e) { Log.e(e); }
-            }
             return allCookiesSetCorrectly;
         }
 
@@ -72,7 +59,8 @@ namespace com.csutil {
                 foreach (var cookieString in cookies) { AddCookie(self, cookieString); }
                 return true;
             }
-            catch (Exception e) { Log.e(e); return false; }
+            catch (Exception e) { Log.e(e); }
+            return false;
         }
 
         private static List<string> GetResponseHeaders(UnityWebRequest self, string headerName) {
@@ -89,10 +77,8 @@ namespace com.csutil {
                 if (cookieString.IndexOf("path=", StringComparison.CurrentCultureIgnoreCase) == -1) { cookieString += "; path=" + self.url; }
                 return IoC.inject.Get<CookieJar>(self).SetCookie(new Cookie(cookieString));
             }
-            catch (Exception e) {
-                Log.e(e);
-                return false;
-            }
+            catch (Exception e) { Log.e(e); }
+            return false;
         }
 
     }

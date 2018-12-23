@@ -50,7 +50,7 @@ namespace com.csutil {
                     }
                 }
             } else {
-                Log.e("No listeners registered for event: " + eventName);
+                Log.w("No listeners registered for event: " + eventName);
             }
             return results;
         }
