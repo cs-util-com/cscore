@@ -7,10 +7,10 @@ namespace com.csutil.logging {
     public class LoggingExamples {
 
         public static void TestBasicLogOutputExamples() {
-            Log.d("This is a log");
-            Log.w("This is a warning", 123);
-            Log.e("This is an error", 123, 123);
-            Log.e(new Exception("I am an exception"), 123, 123, 123);
+            Log.d("I'm a log message");
+            Log.w("I'm a warning", 123);
+            Log.e("I'm an error", 123, 123);
+            Log.e(new Exception("I'm an exception"), 123, 123, 123);
         }
 
         public static void TestLoggingMethodStartAndEnd(string s, int i) {
