@@ -20,7 +20,7 @@ namespace com.csutil.http {
                 using (readResultTask = resp.Content.ReadAsStringAsync()) {
                     var parsedResult = ParseResultStringInto<T>(readResultTask.Result);
                     getResult = () => { return parsedResult; };
-                    successCallback?.Invoke(parsedResult);
+                    successCallback.InvokeIfNotNull(parsedResult);
                 }
             };
             return sendTask.ContinueWith<T>((_) => {
@@ -32,7 +32,7 @@ namespace com.csutil.http {
         private T ParseResultStringInto<T>(string result) { return jsonReader.Read<T>(result); }
 
         public RestRequest Send(HttpMethod method) {
-            sendTask = Task.Run(() => {
+            sendTask = new Task(() => {
                 using (var c = new HttpClient()) {
                     using (var asyncRestRequest = c.SendAsync(new HttpRequestMessage(method, uri))) {
                         asyncRestRequest.Wait(); //helps so that other thread can set handleResult in time
@@ -40,8 +40,12 @@ namespace com.csutil.http {
                     }
                 }
             });
+            sendTask.Start();
             return this;
         }
 
+        internal RestRequest Send(object get) {
+            throw new NotImplementedException();
+        }
     }
 }

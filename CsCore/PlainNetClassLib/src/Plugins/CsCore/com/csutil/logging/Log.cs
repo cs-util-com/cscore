@@ -27,7 +27,7 @@ namespace com.csutil {
         }
 
         public static string CallingMethodStr(object[] args = null, int i = 3) {
-            StackFrame f = args?.FirstOrDefault(x => x is StackFrame) as StackFrame;
+            StackFrame f = args != null ? args.FirstOrDefault(x => x is StackFrame) as StackFrame : null;
             if (f == null) { f = new StackTrace(true).GetFrame(i); }
             return f.GetMethodName() + " " + f.GetFileName() + ":line " + f.GetFileLineNumber();
         }
@@ -63,7 +63,8 @@ namespace com.csutil {
                 var methodString = method.ReflectedType.Name + "." + method.Name;
                 var paramsString = includeParams ? method.GetParameters().ToStringV2(x => "" + x, "", "") : "..";
                 return methodString + "(" + paramsString + ")";
-            } catch (Exception e) { Console.WriteLine("" + e); return ""; }
+            }
+            catch (Exception e) { Console.WriteLine("" + e); return ""; }
         }
 
         internal static object[] AddTo(this StackFrame stackFrame, object[] args) {

@@ -9,7 +9,7 @@ namespace com.csutil {
 
         static EventBus() { Log.d("EventBus used the first time.."); }
         public static IEventBus instance = new EventBus();
-        
+
         private readonly ConcurrentDictionary<string, ConcurrentDictionary<object, Delegate>> map = new ConcurrentDictionary<string, ConcurrentDictionary<object, Delegate>>();
 
         public void Subscribe(object c, string key, Action a) { Add(c, key, a); }
@@ -35,7 +35,8 @@ namespace com.csutil {
 
         public List<object> Publish(string eventName, params object[] args) {
             var results = new List<object>();
-            map.TryGetValue(eventName, out var dictForEventName);
+            ConcurrentDictionary<object, Delegate> dictForEventName;
+            map.TryGetValue(eventName, out dictForEventName);
             if (!dictForEventName.IsNullOrEmpty()) {
                 var listeners = dictForEventName.Values;
                 foreach (var listener in listeners) {
@@ -56,10 +57,16 @@ namespace com.csutil {
         }
 
         public bool Unsubscribe(object caller, string eventName) {
-            if (map[eventName].TryRemove(caller, out Delegate _)) { if (map[eventName].IsEmpty) return UnsubscribeAll(eventName); }
+            Delegate _;
+            if (map[eventName].TryRemove(caller, out _)) {
+                if (map[eventName].IsEmpty) return UnsubscribeAll(eventName);
+            }
             return false;
         }
 
-        public bool UnsubscribeAll(string eventName) { return map.TryRemove(eventName, out ConcurrentDictionary<object, Delegate> _); }
+        public bool UnsubscribeAll(string eventName) {
+            ConcurrentDictionary<object, Delegate> _;
+            return map.TryRemove(eventName, out _);
+        }
     }
 }
