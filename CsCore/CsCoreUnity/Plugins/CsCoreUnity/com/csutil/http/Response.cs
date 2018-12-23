@@ -12,6 +12,7 @@ namespace com.csutil.http {
 
     public class Response<T> {
 
+        public UnityWebRequest request;
         public Action<T> onResult;
         public Action<UnityWebRequest, Exception> onError = (r, e) => { Log.e(e); };
         public Action<float> onProgress;
