@@ -21,23 +21,30 @@ namespace com.csutil {
         public IEnumerator TestRunningMultipleCoroutines() {
 
             var runner = new GameObject().GetOrAddComponent<CoroutineRunner>();
-
+            List<Coroutine> parallelCoroutines;
             {
                 List<Func<IEnumerator>> tasks = new List<Func<IEnumerator>>();
                 tasks.Add(coroutineA);
                 tasks.Add(coroutineA);
-                var coroutines = runner.StartCoroutinesInParallel(tasks);
-                AssertV2.AreEqual(2, coroutines.Count);
+                tasks.Add(coroutineA);
+                tasks.Add(coroutineA);
+                tasks.Add(coroutineA);
+                tasks.Add(coroutineA);
+                parallelCoroutines = runner.StartCoroutinesInParallel(tasks);
+                AssertV2.AreEqual(tasks.Count, parallelCoroutines.Count);
             }
             {
                 List<Func<IEnumerator>> tasks = new List<Func<IEnumerator>>();
+                tasks.Add(() => coroutineB(1));
                 tasks.Add(() => coroutineB(2));
-                tasks.Add(() => coroutineB(5));
-                tasks.Add(() => coroutineB(7));
+                tasks.Add(() => coroutineB(3));
                 Log.d("Starting " + tasks.Count + " coroutines");
                 yield return runner.StartCoroutinesSequetially(tasks);
                 Log.d("All " + tasks.Count + " coroutines are done now");
             }
+
+            // make sure that the parallel started coroutines are all finished before the test ends:
+            foreach (var c in parallelCoroutines) { yield return c; }
 
         }
 
@@ -47,9 +54,9 @@ namespace com.csutil {
             Log.MethodDone(t);
         }
 
-        private IEnumerator coroutineB(int x) {
-            var t = Log.MethodEntered("x=" + x);
-            yield return new WaitForSeconds(2f);
+        private IEnumerator coroutineB(float duration) {
+            var t = Log.MethodEntered("duration=" + duration);
+            yield return new WaitForSeconds(duration);
             Log.MethodDone(t);
         }
 
