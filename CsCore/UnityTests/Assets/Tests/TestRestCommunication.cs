@@ -15,7 +15,7 @@ namespace com.csutil.http.tests {
 
         [SetUp]
         public void BeforeEachTest() {
-            UnitySetup.instance.setup();
+            UnitySetup.instance.Setup();
         }
 
         [TearDown]

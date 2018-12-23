@@ -11,7 +11,7 @@ namespace com.csutil {
 
         [SetUp]
         public void BeforeEachTest() {
-            UnitySetup.instance.setup();
+            UnitySetup.instance.Setup();
         }
 
         [TearDown]
@@ -21,40 +21,37 @@ namespace com.csutil {
         public IEnumerator TestRunningMultipleCoroutines() {
 
             var runner = new GameObject().GetOrAddComponent<CoroutineRunner>();
-            List<Coroutine> parallelCoroutines;
+            List<Coroutine> runningCoroutines;
             {
                 List<Func<IEnumerator>> tasks = new List<Func<IEnumerator>>();
-                tasks.Add(coroutineA);
-                tasks.Add(coroutineA);
-                tasks.Add(coroutineA);
-                tasks.Add(coroutineA);
-                tasks.Add(coroutineA);
-                tasks.Add(coroutineA);
-                parallelCoroutines = runner.StartCoroutinesInParallel(tasks);
-                AssertV2.AreEqual(tasks.Count, parallelCoroutines.Count);
+                tasks.Add(CoroutineA);
+                tasks.Add(CoroutineA);
+                runningCoroutines = runner.StartCoroutinesInParallel(tasks);
+                AssertV2.AreEqual(tasks.Count, runningCoroutines.Count);
             }
             {
                 List<Func<IEnumerator>> tasks = new List<Func<IEnumerator>>();
-                tasks.Add(() => coroutineB(1));
-                tasks.Add(() => coroutineB(2));
-                tasks.Add(() => coroutineB(3));
+                tasks.Add(() => CoroutineB(1));
+                tasks.Add(() => CoroutineB(2));
+                tasks.Add(() => CoroutineB(1));
                 Log.d("Starting " + tasks.Count + " coroutines");
                 yield return runner.StartCoroutinesSequetially(tasks);
                 Log.d("All " + tasks.Count + " coroutines are done now");
             }
 
             // make sure that the parallel started coroutines are all finished before the test ends:
-            foreach (var c in parallelCoroutines) { yield return c; }
+            yield return runningCoroutines.WaitForRunningCoroutinesToFinish();
+            Log.d("Now all coroutines (both the parallel and the sequential ones are finished");
 
         }
 
-        private IEnumerator coroutineA() {
+        private IEnumerator CoroutineA() {
             var t = Log.MethodEntered();
-            yield return new WaitForSeconds(2f);
+            yield return new WaitForSeconds(4f);
             Log.MethodDone(t);
         }
 
-        private IEnumerator coroutineB(float duration) {
+        private IEnumerator CoroutineB(float duration) {
             var t = Log.MethodEntered("duration=" + duration);
             yield return new WaitForSeconds(duration);
             Log.MethodDone(t);

@@ -19,6 +19,10 @@ namespace com.csutil {
             return r;
         }
 
+        public static IEnumerator WaitForRunningCoroutinesToFinish(this IEnumerable<Coroutine> self) {
+            foreach (var c in self) { yield return c; }
+        }
+
     }
 
 }

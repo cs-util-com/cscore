@@ -11,7 +11,7 @@ namespace com.csutil {
 
         public static UnitySetup instance = new UnitySetup();
 
-        public void setup() {
+        public void Setup() {
             Log.instance = new LogViaUnityDebugLog();
             SystemConsoleToUnityLogRedirector.Setup();
         }
