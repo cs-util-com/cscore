@@ -49,6 +49,7 @@ namespace com.csutil.logging {
 
             var stopWatch = AssertV2.TrackTiming();
             Thread.Sleep(10);
+            stopWatch.Stop();
             stopWatch.AssertUnderXms(20);
             AssertV2.Throws<Exception>(() => { stopWatch.AssertUnderXms(1); }); // This should always fail
             AssertV2.IsTrue(stopWatch.IsUnderXms(20), "More time was needed than expected!");

@@ -24,7 +24,8 @@ namespace com.csutil {
             try { actionThatShouldThrowAnException(); } catch (Exception e) {
                 // Log.w("typeof(T)=" + typeof(T));
                 // Log.w("e.GetType()=" + e.GetType());
-                if (!e.GetType().IsCastableTo(typeof(T))) { throw e; }
+                if (e.GetType().IsCastableTo(typeof(T))) { return; } // its the expected exception
+                throw e; // its an unexpected exception
             }
             throw new ThrowsException("No exception of type " + typeof(T) + " was thrown!");
         }
