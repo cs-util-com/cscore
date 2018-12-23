@@ -9,7 +9,7 @@ namespace com.csutil {
         private const string LB = "\r\n";
 
         public void LogDebug(string msg, params object[] args) {
-            Console.Write(msg + LB + "  at " + Log.CallingMethodStr(args) + LB + LB, args);
+            Console.Write("> " + msg + LB + "  at " + Log.CallingMethodStr(args) + LB + LB, args);
         }
 
         public void LogWarning(string warning, params object[] args) {

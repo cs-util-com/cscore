@@ -84,7 +84,7 @@ namespace com.csutil {
         public static T GetResult<T>(this UnityWebRequest self, IJsonReader r) {
             AssertV2.IsTrue(self.isDone, "web request was not done!");
             if (TypeCheck.AreEqual<T, UnityWebRequest>()) { return (T)(object)self; }
-            if (typeof(Texture).IsAssignableFrom<T>()) {
+            if (typeof(Texture2D).IsCastableTo(typeof(T))) {
                 AssertV2.IsTrue(self.downloadHandler is DownloadHandlerTexture, "self.downloadHandler was not a DownloadHandlerTexture");
                 var h = (DownloadHandlerTexture)self.downloadHandler;
                 return (T)(object)h.texture;

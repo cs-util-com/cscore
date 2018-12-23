@@ -13,6 +13,14 @@ namespace com.csutil.http.tests {
 
     public class TestRestCommunication {
 
+        [SetUp]
+        public void BeforeEachTest() {
+            UnitySetup.instance.setup();
+        }
+
+        [TearDown]
+        public void AfterEachTest() { }
+
         [UnityTest]
         public IEnumerator TestResultCallback() {
             var www = UnityWebRequest.Get("https://httpbin.org/get");
@@ -65,10 +73,19 @@ namespace com.csutil.http.tests {
         }
 
         [UnityTest]
-        public IEnumerator TestGetResultMethod() {
-            var www = UnityWebRequest.Get("https://httpbin.org/get");
+        public IEnumerator TestGetViaUnityWebRequest() {
+            RestRequest request = UnityWebRequest.Get("https://httpbin.org/get").SendV2();
+            yield return assertGetResult(request);
+        }
 
-            var runningTask = www.SendV2().GetResult<HttpBinGetResp>(x => {
+        [UnityTest]
+        public IEnumerator TestGetViaUri() {
+            RestRequest request = new Uri("https://httpbin.org/get").SendGET();
+            yield return assertGetResult(request);
+        }
+
+        private IEnumerator assertGetResult(RestRequest get) {
+            var runningTask = get.GetResult<HttpBinGetResp>(x => {
                 Log.d("Your IP is " + x.origin);
             });
             while (!runningTask.IsCompleted) {

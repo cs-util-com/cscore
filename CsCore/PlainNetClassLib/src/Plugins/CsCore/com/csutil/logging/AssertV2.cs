@@ -7,16 +7,33 @@ using System.Reflection;
 namespace com.csutil {
     public static class AssertV2 {
 
+        public static bool throwExeptionIfAssertionFails = false;
+
         private const string BR = "\r\n";
 
         private static void Assert(bool condition, string errorMsg, object[] args) {
-            args = Add(new StackTrace(true).GetFrame(2), args);
-            if (!condition) { Log.e(errorMsg, args); Debugger.Break(); }
+            args = new StackTrace(true).GetFrame(2).AddTo(args);
+            if (!condition) {
+                Debugger.Break();
+                var e = Log.e(errorMsg, args);
+                if (throwExeptionIfAssertionFails) { throw e; }
+            }
         }
 
-        private static object[] Add(StackFrame stackFrame, object[] args) {
-            return new object[1] { stackFrame }.Concat(args).ToArray();
+        public static void Throws<T>(Action actionThatShouldThrowAnException) where T : Exception {
+            try { actionThatShouldThrowAnException(); } catch (Exception e) {
+                // Log.w("typeof(T)=" + typeof(T));
+                // Log.w("e.GetType()=" + e.GetType());
+                if (!e.GetType().IsCastableTo(typeof(T))) { throw e; }
+            }
+            throw new ThrowsException("No exception of type " + typeof(T) + " was thrown!");
         }
+
+        public class ThrowsException : Exception {
+            public ThrowsException(string message) : base(message) { }
+        }
+
+
 
         [Conditional("DEBUG")]
         public static void IsTrue(bool condition, string errorMsg, params object[] args) {
@@ -50,7 +67,7 @@ namespace com.csutil {
         [Conditional("DEBUG")]
         public static void AreNotEqual<T>(IEquatable<T> expected, IEquatable<T> actual, string varName = "", params object[] args) {
             var isEqualRef = ReferenceEquals(expected, actual);
-            Assert(isEqualRef, "Assert.AreNotEqual() FAILED: " + varName + " is same reference (expected == actual)", args);
+            Assert(!isEqualRef, "Assert.AreNotEqual() FAILED: " + varName + " is same reference (expected " + expected + " == actual " + actual + " )", args);
             if (!isEqualRef) {
                 var errorMsg = "Assert.AreNotEqual() FAILED: expected " + varName + "= " + expected + " IS equal to actual " + varName + "= " + actual;
                 Assert(!expected.Equals(actual), errorMsg, args);

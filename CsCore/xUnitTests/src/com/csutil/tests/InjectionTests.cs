@@ -94,6 +94,13 @@ namespace com.csutil.tests {
             Assert.Null(IoC.inject.Get<MyClass1>("caller 3"));
         }
 
+        [Fact]
+        public void TestIsCastableTo() {
+            Assert.True(typeof(MySubClass1).IsCastableTo(typeof(MyClass1)));
+            Assert.True(typeof(MyClass1).IsCastableTo(typeof(MyClass1)));
+            Assert.False(typeof(MyClass1).IsCastableTo(typeof(MySubClass1)));
+        }
+
         private class MyClass1 { }
         private class MySubClass1 : MyClass1 { }
         private class MySubClass2 : MyClass1 { }

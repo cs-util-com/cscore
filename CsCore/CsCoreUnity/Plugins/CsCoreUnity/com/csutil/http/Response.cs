@@ -28,7 +28,7 @@ namespace com.csutil.http {
         public Response<T> WithProgress(Action<float> callback) { onProgress = callback; return this; }
 
         private static DownloadHandler NewDefaultDownloadHandler() {
-            if (typeof(Texture2D).IsAssignableFrom<T>()) { return new DownloadHandlerTexture(false); }
+            if (typeof(Texture2D).IsCastableTo(typeof(T))) { return new DownloadHandlerTexture(false); }
             return new DownloadHandlerBuffer();
         }
 

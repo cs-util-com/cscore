@@ -8,12 +8,9 @@ namespace com.csutil {
 
     public static class TypeExtensions {
 
-        public static bool IsSubclassOf<T>(this Type self) { return self.IsSubclassOf(typeof(T)); }
+        public static bool IsSubclassOf<T>(this Type self) { var t = typeof(T); return t == self || self.IsSubclassOf(t); }
 
-        public static bool IsAssignableFrom<T>(this Type possibleParentClassOrInterface) {
-            Type subclass = typeof(T);
-            return possibleParentClassOrInterface == subclass || possibleParentClassOrInterface.IsAssignableFrom(subclass);
-        }
+        public static bool IsCastableTo(this Type self, Type t) { return t == self || t.IsAssignableFrom(self); }
 
     }
 

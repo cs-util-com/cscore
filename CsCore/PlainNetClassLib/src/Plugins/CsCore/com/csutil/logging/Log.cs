@@ -29,8 +29,23 @@ namespace com.csutil {
         public static string CallingMethodStr(object[] args = null, int i = 3) {
             StackFrame f = args?.FirstOrDefault(x => x is StackFrame) as StackFrame;
             if (f == null) { f = new StackTrace(true).GetFrame(i); }
-            Debugger.Break();
             return f.GetMethodName() + " " + f.GetFileName() + ":line " + f.GetFileLineNumber();
+        }
+
+        public static Stopwatch MethodEntered(params object[] args) {
+#if DEBUG
+            var t = new StackTrace(true).GetFrame(1);
+            Log.d(" --> " + t.GetMethodName(false), t.AddTo(args));
+#endif
+            return AssertV2.TrackTiming();
+        }
+
+        [Conditional("DEBUG")]
+        public static void MethodDone(Stopwatch timing, int maxAllowedTimeInMs = -1) {
+            timing.Stop();
+            var t = new StackTrace(true).GetFrame(1);
+            Log.d(" <-- " + t.GetMethodName(false) + " finished after " + timing.ElapsedMilliseconds + "ms", t.AddTo(null));
+            if (maxAllowedTimeInMs > 0) { timing.AssertUnderXms(maxAllowedTimeInMs); }
         }
 
     }
@@ -48,8 +63,12 @@ namespace com.csutil {
                 var methodString = method.ReflectedType.Name + "." + method.Name;
                 var paramsString = includeParams ? method.GetParameters().ToStringV2(x => "" + x, "", "") : "..";
                 return methodString + "(" + paramsString + ")";
-            }
-            catch (Exception e) { Console.WriteLine("" + e); return ""; }
+            } catch (Exception e) { Console.WriteLine("" + e); return ""; }
+        }
+
+        internal static object[] AddTo(this StackFrame stackFrame, object[] args) {
+            if (args == null) { args = new object[0]; }
+            return new object[1] { stackFrame }.Concat(args).ToArray();
         }
 
     }
