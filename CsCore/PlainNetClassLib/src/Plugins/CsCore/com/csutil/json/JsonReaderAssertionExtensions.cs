@@ -25,7 +25,8 @@ namespace com.csutil.json {
                     && !(targetType.IsGenericType && targetType.GetGenericTypeDefinition() == typeof(System.Collections.Generic.List<>))) {
                     // do not do the validation for Dictionary<string, object> or generic lists to avoid stack overflow
                     var errorText = "Did not fully parse json=<<((" + input + "))>>";
-                    AssertV2.IsTrue(jsonCouldBeFullyParsed(jsonReader, jsonWriter, result, input), errorText);
+                    var args = new StackFrame(3, true).AddTo(null);
+                    AssertV2.IsTrue(jsonCouldBeFullyParsed(jsonReader, jsonWriter, result, input), errorText, args);
                 }
             } catch (Exception e) { Log.e(e); }
         }
@@ -34,14 +35,10 @@ namespace com.csutil.json {
             try {
                 AssertV2.IsFalse(string.IsNullOrEmpty(json), "Json isNullOrEmpty");
                 var input = jsonReader.Read<System.Collections.Generic.Dictionary<string, object>>(json);
-                //Log.w("input=" + input.ToStringV2());
                 var parsed = jsonReader.Read<System.Collections.Generic.Dictionary<string, object>>(jsonWriter.Write(result));
-                //Log.w("parsed=" + parsed.ToStringV2());
                 return jsonCouldBeFullyParsed(jsonReader, result.GetType().Name, input, parsed, 0);
-            } catch (Exception e) {
-                Log.e(new Exception("exception during parsing json=" + json, e));
-                return false;
-            }
+            } catch (Exception e) { Log.e(new Exception("exception during parsing json=" + json, e)); }
+            return false;
         }
 
         private static bool jsonCouldBeFullyParsed(IJsonReader reader, string path, IDictionary input, IDictionary parsed, int depth) {
@@ -55,20 +52,23 @@ namespace com.csutil.json {
                 if (!parsed.Contains(key) && value != null) {
                     var infoStringAboutField = "field " + path + "." + key + " = " + value;
                     if (value != null) { infoStringAboutField += ", value type=(" + value.GetType() + ")"; }
-                    Log.e(" > Missing " + infoStringAboutField);
+                    var args = new StackFrame(5 + depth, true).AddTo(null);
+                    Log.e(" > Missing " + infoStringAboutField, args);
                     return false;
                 } else if (value is IDictionary) {
                     var a = value as IDictionary;
                     var valueInParsedDict = JsonReader.convertToGenericDictionaryOrArray(parsed[key]);
                     var b = valueInParsedDict as IDictionary;
-                    AssertV2.IsNotNull(b, "Field was found but it was not a JsonObject, it was a " + valueInParsedDict.GetType());
+                    var args = new StackFrame(5 + depth, true).AddTo(null);
+                    AssertV2.IsNotNull(b, "Field was found but it was not a JsonObject, it was a " + valueInParsedDict.GetType(), args);
                     return jsonCouldBeFullyParsed(reader, path + "." + key, a, b, depth + 1);
                 } else if (value is IDictionary[]) {
                     var a = value as IDictionary[];
                     var valueInParsedArray = JsonReader.convertToGenericDictionaryOrArray(parsed[key]);
                     var b = valueInParsedArray as IDictionary[];
-                    AssertV2.IsNotNull(b, "Field was found but it was not a JsonArray, it was a " + valueInParsedArray.GetType());
-                    AssertV2.AreEqual(a.Length, b.Length);
+                    var args = new StackFrame(5 + depth, true).AddTo(null);
+                    AssertV2.IsNotNull(b, "Field was found but it was not a JsonArray, it was a " + valueInParsedArray.GetType(), args);
+                    AssertV2.AreEqual(a.Length, b.Length, "", args);
                     var r = true;
                     for (int i = 0; i < a.Length; i++) {
                         r &= jsonCouldBeFullyParsed(reader, path + "." + key + "[" + i + "]", a[i], b[i], depth + 1);

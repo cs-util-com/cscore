@@ -28,13 +28,13 @@ namespace com.csutil {
 
         public static string CallingMethodStr(object[] args = null, int i = 3) {
             StackFrame f = args != null ? args.FirstOrDefault(x => x is StackFrame) as StackFrame : null;
-            if (f == null) { f = new StackTrace(true).GetFrame(i); }
+            if (f == null) { f = new StackFrame(i, true); }
             return f.GetMethodName() + " " + f.GetFileName() + ":line " + f.GetFileLineNumber();
         }
 
         public static Stopwatch MethodEntered(params object[] args) {
 #if DEBUG
-            var t = new StackTrace(true).GetFrame(1);
+            var t = new StackFrame(1, true);
             Log.d(" --> " + t.GetMethodName(false), t.AddTo(args));
 #endif
             return AssertV2.TrackTiming();
@@ -43,7 +43,7 @@ namespace com.csutil {
         [Conditional("DEBUG")]
         public static void MethodDone(Stopwatch timing, int maxAllowedTimeInMs = -1) {
             timing.Stop();
-            var t = new StackTrace(true).GetFrame(1);
+            var t = new StackFrame(1, true);
             Log.d(" <-- " + t.GetMethodName(false) + " finished after " + timing.ElapsedMilliseconds + "ms", t.AddTo(null));
             if (maxAllowedTimeInMs > 0) { timing.AssertUnderXms(maxAllowedTimeInMs); }
         }
@@ -75,8 +75,8 @@ namespace com.csutil {
         }
 
         internal static object[] AddTo(this StackFrame stackFrame, object[] args) {
-            if (args == null) { args = new object[0]; }
-            return new object[1] { stackFrame }.Concat(args).ToArray();
+            var a = new object[1] { stackFrame };
+            if (args == null) { return a; } else { return args.Concat(a).ToArray(); }
         }
 
     }

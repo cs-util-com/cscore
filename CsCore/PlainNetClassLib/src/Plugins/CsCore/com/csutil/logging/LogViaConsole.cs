@@ -10,12 +10,12 @@ namespace com.csutil {
 
         public void LogDebug(string msg, params object[] args) {
             Console.Write("> " + msg + Log.ToArgsStr(args, toString) + LB
-                + "  at " + Log.CallingMethodStr(args) + LB + LB, args);
+                + "  at " + Log.CallingMethodStr(args) + LB + LB);
         }
 
         public void LogWarning(string warning, params object[] args) {
             Console.Write("> WARNING: " + warning + Log.ToArgsStr(args, toString) + LB
-                + "  at " + Log.CallingMethodStr(args) + LB + LB, args);
+                + "  at " + Log.CallingMethodStr(args) + LB + LB);
         }
 
         public Exception LogError(string error, params object[] args) {
@@ -30,7 +30,7 @@ namespace com.csutil {
 
         private static void printExceptionString(string e, object[] args) {
             Console.Write(e + Log.ToArgsStr(args, toString) + LB
-                + "    at " + Log.CallingMethodStr(args) + LB + LB, args);
+                + "    at " + Log.CallingMethodStr(args) + LB + LB);
         }
 
         private static string toString(object arg) {

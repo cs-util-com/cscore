@@ -12,7 +12,7 @@ namespace com.csutil {
         private const string BR = "\r\n";
 
         private static void Assert(bool condition, string errorMsg, object[] args) {
-            args = new StackTrace(true).GetFrame(2).AddTo(args);
+            args = new StackFrame(2, true).AddTo(args);
             if (!condition) {
                 Debugger.Break();
                 var e = Log.e(errorMsg, args);
@@ -90,7 +90,7 @@ namespace com.csutil {
         public static void AssertUnderXms(this Stopwatch self, int maxTimeInMs, params object[] args) {
             var ms = self.ElapsedMilliseconds;
             int p = (int)(ms * 100f / maxTimeInMs);
-            var errorText = new StackTrace().GetFrame(1).GetMethodName(false);
+            var errorText = new StackFrame(1).GetMethodName(false);
             errorText += " took " + p + "% (" + ms + "ms) longer then allowed (" + maxTimeInMs + "ms)!";
             Assert(IsUnderXms(self, maxTimeInMs), errorText, args);
         }
