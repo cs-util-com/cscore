@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 using UnityEngine;
 
 namespace com.csutil.http {
-    class WebRequestRunner : MonoBehaviour {
+
+    public class WebRequestRunner : MonoBehaviour {
 
         private void OnEnable() {
 
@@ -17,4 +18,5 @@ namespace com.csutil.http {
         }
 
     }
+
 }

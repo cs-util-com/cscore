@@ -3,6 +3,7 @@ using System.Runtime.Serialization;
 using com.csutil.injection;
 
 namespace com.csutil {
+
     public static class Singleton {
 
         public static object SetSingleton<V>(this Injector self, V singletonInstance) { return self.SetSingleton<V, V>(singletonInstance); }
@@ -18,6 +19,9 @@ namespace com.csutil {
             T singleton = self.Get<T>(caller, true);
             if (singleton == null) {
                 singleton = createNewInstance<T>();
+                if (ReferenceEquals(null, singleton) || "null".Equals("" + singleton)) {
+                    throw new Exception("Could not instantiate " + typeof(T));
+                }
                 self.SetSingleton<T>(singleton);
             }
             return singleton;
@@ -26,5 +30,7 @@ namespace com.csutil {
         private static T createNewInstance<T>() { return (T)Activator.CreateInstance(typeof(T)); }
 
         public class MultipleProvidersException : Exception { public MultipleProvidersException(string message) : base(message) { } }
+
     }
+
 }
