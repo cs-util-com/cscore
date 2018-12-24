@@ -22,7 +22,7 @@ namespace com.csutil {
                 if (ReferenceEquals(null, singleton) || "null".Equals("" + singleton)) {
                     throw new Exception("Could not instantiate " + typeof(T));
                 }
-                self.SetSingleton<T>(singleton);
+                self.SetSingleton(singleton);
             }
             return singleton;
         }

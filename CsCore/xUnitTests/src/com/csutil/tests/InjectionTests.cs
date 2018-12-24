@@ -50,8 +50,8 @@ namespace com.csutil.tests {
             Assert.True(IoC.inject.UnregisterInjector<MyClass1>(injectorRef));
             Assert.False(IoC.inject.HasInjectorRegistered<MyClass1>());
 
-            IoC.inject.SetSingleton<MyClass1, MySubClass1>(new MySubClass1());
-            Assert.True(IoC.inject.UnregisterAllInjectors<MyClass1>());
+            var injector = IoC.inject.SetSingleton<MyClass1, MySubClass1>(new MySubClass1());
+            Assert.True(IoC.inject.UnregisterInjector<MyClass1>(injector));
             Assert.False(IoC.inject.HasInjectorRegistered<MyClass1>());
         }
 

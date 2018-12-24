@@ -28,7 +28,5 @@ namespace com.csutil.injection {
 
         public bool UnregisterInjector<T>(object injector) { return usedEventBus.Unsubscribe(injector, GetEventKey<T>()); }
 
-        public bool UnregisterAllInjectors<T>() { return usedEventBus.UnsubscribeAll(GetEventKey<T>()); }
-
     }
 }

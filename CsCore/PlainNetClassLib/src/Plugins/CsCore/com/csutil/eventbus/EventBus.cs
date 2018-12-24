@@ -13,18 +13,18 @@ namespace com.csutil {
         private readonly ConcurrentDictionary<string, ConcurrentDictionary<object, Delegate>> map = new ConcurrentDictionary<string, ConcurrentDictionary<object, Delegate>>();
 
         public void Subscribe(object c, string key, Action a) { Add(c, key, a); }
+
         public void Subscribe<T>(object c, string key, Action<T> a) { Add(c, key, a); }
         public void Subscribe<T, V>(object c, string key, Action<T, V> a) { Add(c, key, a); }
-        public void Subscribe<T, V, U>(object c, string key, Action<T, V, U> a) { Add(c, key, a); }
-        public void Subscribe<T, V, U>(object c, string key, Func<T> f) { Add(c, key, f); }
-        public void Subscribe<T, V, U>(object c, string key, Func<T, V> f) { Add(c, key, f); }
-        public void Subscribe<T, V, U>(object c, string key, Func<T, V, U> f) { Add(c, key, f); }
+        public void Subscribe<T, U, V>(object c, string key, Action<T, U, V> a) { Add(c, key, a); }
+
+        public void Subscribe<T>(object c, string key, Func<T> f) { Add(c, key, f); }
+        public void Subscribe<T, V>(object c, string key, Func<T, V> f) { Add(c, key, f); }
+        public void Subscribe<T, U, V>(object c, string key, Func<T, U, V> f) { Add(c, key, f); }
 
         private void Add(object caller, string eventName, Delegate callback) {
             var noExistingListener = GetOrAdd(eventName).AddOrReplace(caller, callback);
-            if (!noExistingListener) {
-                Log.w("Existing listener was replaced for event=" + eventName);
-            }
+            if (!noExistingListener) { Log.w("Existing listener was replaced for event=" + eventName); }
         }
 
         private ConcurrentDictionary<object, Delegate> GetOrAdd(string eventName) {
@@ -40,15 +40,11 @@ namespace com.csutil {
             if (!dictForEventName.IsNullOrEmpty()) {
                 var listeners = dictForEventName.Values;
                 foreach (var listener in listeners) {
-                    var p = listener.Method.GetParameters();
-                    if (p.Length == args.Length) {
-                        results.Add(listener.DynamicInvoke(args));
-                    } else if (p.Length < args.Length) {
-                        var subset = args.Take(p.Length).ToArray();
-                        results.Add(listener.DynamicInvoke(subset));
-                    } else {
-                        Log.w("Listener skipped because not enough parameters passed: " + listener);
+                    try {
+                        object result;
+                        if (listener.DynamicInvokeV2(args, out result)) { results.Add(result); }
                     }
+                    catch (Exception e) { Log.e(e); }
                 }
             } else {
                 Log.w("No listeners registered for event: " + eventName);
@@ -64,9 +60,19 @@ namespace com.csutil {
             return false;
         }
 
-        public bool UnsubscribeAll(string eventName) {
-            ConcurrentDictionary<object, Delegate> _;
-            return map.TryRemove(eventName, out _);
+        public bool UnsubscribeAll(object caller) {
+            IEnumerable<string> registeredEvents = GetRegisteredEventsOf(caller);
+            var res = true;
+            foreach (var eventName in registeredEvents) { res &= TryRemove(map, eventName); }
+            return res;
+        }
+
+        private static bool TryRemove<K, V>(ConcurrentDictionary<K, V> self, K key) {
+            V _; var r = self.TryRemove(key, out _); return r;
+        }
+
+        private IEnumerable<string> GetRegisteredEventsOf(object caller) {
+            return map.Filter(x => x.Value.ContainsKey(caller)).Map(x => x.Key);
         }
     }
 }

@@ -11,6 +11,8 @@ namespace com.csutil.injection.tests {
 
     public class TestUiInjection {
 
+        private class MySingleton { }
+
         [SetUp]
         public void BeforeEachTest() {
             UnitySetup.instance.Setup();
@@ -30,21 +32,26 @@ namespace com.csutil.injection.tests {
             Assert.AreEqual(singletonInstance, a);
         }
 
-        private class MySingleton { }
-
-        [UnityTest]
-        public IEnumerator Test1WithEnumeratorPasses() {
-
+        [Test]
+        public void TestGetOrAddComponentSingleton() {
             // It should not be possible to create a mono via default constructor:
             AssertV2.Throws<Exception>(() => { IoC.inject.GetOrAddSingleton<WebRequestRunner>(this); });
+            {
+                var singletonsName = "SingletonsMaster1";
+                var x1 = IoC.inject.GetOrAddComponentSingleton<WebRequestRunner>(this, singletonsName);
+                Assert.NotNull(x1);
+                var go = x1.gameObject;
+                Assert.NotNull(go);
+                Assert.AreEqual(singletonsName, go.GetParent().name);
 
-            var singletonsName = "SingletonsMaster1";
-            var x = IoC.inject.GetOrAddComponentSingleton<WebRequestRunner>(this, true, singletonsName);
-            Assert.NotNull(x);
-            var go = x.gameObject;
-            Assert.NotNull(go);
-            Assert.AreEqual(singletonsName, go.GetParent().name);
+                var x2 = IoC.inject.Get<WebRequestRunner>(this);
+                Assert.AreEqual(x1, x2);
+                Assert.AreEqual(x1.gameObject, x2.gameObject);
+            }
+        }
 
+        [UnityTest]
+        public IEnumerator TestAsync1() {
             yield return null;
         }
 

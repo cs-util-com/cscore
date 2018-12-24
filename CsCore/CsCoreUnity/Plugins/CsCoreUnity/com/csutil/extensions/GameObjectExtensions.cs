@@ -26,6 +26,19 @@ namespace com.csutil {
             return child.transform.parent.gameObject;
         }
 
+        public static bool IsDestroyed(this GameObject self) {
+            // == operator overloaded by gameObject but reference still exists
+            return self == null && !ReferenceEquals(self, null);
+        }
+
+        public static bool Destroy(this GameObject self, bool destroyNextFrame = false) {
+            if (self == null) { return false; }
+            try { if (destroyNextFrame) { GameObject.Destroy(self); } else { GameObject.DestroyImmediate(self); } }
+            catch { return false; }
+            AssertV2.IsTrue(self.IsDestroyed(), "gameObject was not destroyed");
+            return true;
+        }
+
     }
 
 }

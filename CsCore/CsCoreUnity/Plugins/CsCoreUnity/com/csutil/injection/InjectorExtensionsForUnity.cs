@@ -10,10 +10,10 @@ namespace com.csutil {
     public static class InjectorExtensionsForUnity {
         private const string DEFAULT_SINGLETON_NAME = "Singletons";
 
-        public static T GetOrAddComponentSingleton<T>(this Injector self, object caller, bool createIfNull = true, string singletonGo = DEFAULT_SINGLETON_NAME) where T : Component {
-            var x = self.Get<T>(caller, createIfNull);
+        public static T GetOrAddComponentSingleton<T>(this Injector self, object caller, string singletonGo = DEFAULT_SINGLETON_NAME) where T : Component {
+            var x = self.Get<T>(caller, true);
             if (x == null) {
-                x = GetComponentSingleton<T>(createIfNull, singletonGo);
+                x = GetComponentSingleton<T>(true, singletonGo);
                 self.SetSingleton(x);
             }
             return x;
