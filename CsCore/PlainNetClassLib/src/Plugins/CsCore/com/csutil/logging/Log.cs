@@ -44,7 +44,7 @@ namespace com.csutil {
         public static void MethodDone(Stopwatch timing, int maxAllowedTimeInMs = -1) {
             timing.Stop();
             var t = new StackFrame(1, true);
-            Log.d(" <-- " + t.GetMethodName(false) + " finished after " + timing.ElapsedMilliseconds + "ms", t.AddTo(null));
+            Log.d("    <-- " + t.GetMethodName(false) + " finished after " + timing.ElapsedMilliseconds + "ms", t.AddTo(null));
             if (maxAllowedTimeInMs > 0) { timing.AssertUnderXms(maxAllowedTimeInMs); }
         }
 
