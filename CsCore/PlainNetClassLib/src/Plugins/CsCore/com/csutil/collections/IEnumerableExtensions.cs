@@ -23,7 +23,9 @@ namespace com.csutil {
         public static string ToStringV2<T>(this IEnumerable<T> args, Func<T, string> toString, string bracket1 = "[", string bracket2 = "]") {
             if (args == null) { return "null"; }
             if (args.IsNullOrEmpty()) { return bracket1 + bracket2; }
-            return bracket1 + args.Map(x => "" + toString(x)).Reduce((x, y) => x + ", " + y) + bracket2;
+            var filteredResultStrings = args.Map(x => "" + toString(x)).Filter(x => !x.IsNullOrEmpty());
+            if (filteredResultStrings.IsNullOrEmpty()) { return bracket1 + bracket2; }
+            return bracket1 + filteredResultStrings.Reduce((x, y) => x + ", " + y) + bracket2;
         }
 
         public static HashSet<TSource> ToHashSet<TSource>(this IEnumerable<TSource> source) {

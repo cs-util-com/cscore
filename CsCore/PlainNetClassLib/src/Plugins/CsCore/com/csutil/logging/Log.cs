@@ -48,6 +48,13 @@ namespace com.csutil {
             if (maxAllowedTimeInMs > 0) { timing.AssertUnderXms(maxAllowedTimeInMs); }
         }
 
+        public static string ToArgsStr(object[] args, Func<object, string> toString) {
+            if (args.IsNullOrEmpty()) { return ""; }
+            var s = args.ToStringV2(toString, "", "");
+            if (s.IsNullOrEmpty()) { return ""; }
+            return " : [[" + s + "]]";
+        }
+
     }
 
     public static class LogExtensions {

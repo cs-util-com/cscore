@@ -21,23 +21,20 @@ namespace com.csutil {
         public IEnumerator TestRunningMultipleCoroutines() {
 
             var runner = new GameObject().GetOrAddComponent<CoroutineRunner>();
-            List<Coroutine> runningCoroutines;
-            {
-                List<Func<IEnumerator>> tasks = new List<Func<IEnumerator>>();
-                tasks.Add(CoroutineA);
-                tasks.Add(CoroutineA);
-                runningCoroutines = runner.StartCoroutinesInParallel(tasks);
-                AssertV2.AreEqual(tasks.Count, runningCoroutines.Count);
-            }
-            {
-                List<Func<IEnumerator>> tasks = new List<Func<IEnumerator>>();
-                tasks.Add(() => CoroutineB(1));
-                tasks.Add(() => CoroutineB(2));
-                tasks.Add(() => CoroutineB(1));
-                Log.d("Starting " + tasks.Count + " coroutines");
-                yield return runner.StartCoroutinesSequetially(tasks);
-                Log.d("All " + tasks.Count + " coroutines are done now");
-            }
+
+            Log.d("Starting parallel coroutines");
+            var runningCoroutines = runner.StartCoroutinesInParallel(
+                CoroutineA,
+                CoroutineA
+            );
+            Log.d("All parallel coroutines are STARTED now");
+
+            Log.d("Starting sequential coroutines");
+            yield return runner.StartCoroutinesSequetially(
+                () => CoroutineB(3),
+                () => CoroutineB(1)
+            );
+            Log.d("All sequential coroutines are DONE now");
 
             // make sure that the parallel started coroutines are all finished before the test ends:
             yield return runningCoroutines.WaitForRunningCoroutinesToFinish();
