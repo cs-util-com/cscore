@@ -44,8 +44,5 @@ namespace com.csutil.http {
             return this;
         }
 
-        internal RestRequest Send(object get) {
-            throw new NotImplementedException();
-        }
     }
 }
