@@ -1,0 +1,42 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using UnityEngine;
+
+namespace com.csutil {
+
+    public class ScreenV2 : MonoBehaviour {
+
+        public const string EVENT_WINDOW_RESIZE = "EventWindowResize";
+
+        private static int _w = 0;
+        public static int width {
+            get { if (_w == 0) { Instance(); return Screen.width; } return _w; }
+        }
+
+        private static int _h = 0;
+        public static int height {
+            get { if (_h == 0) { Instance(); return Screen.height; } return _h; }
+        }
+
+        private static ScreenV2 Instance() { return IoC.inject.GetOrAddComponentSingleton<ScreenV2>(new object()); }
+
+        private void OnEnable() {
+            saveScreenSize(); // force initial init
+            this.ExecuteRepeated(checkIfWindowSizeChanged, delayInSecBetweenIterations: 1);
+        }
+
+        private bool checkIfWindowSizeChanged() {
+            if (height != Screen.height || width != Screen.width) {
+                saveScreenSize();
+                EventBus.instance.Publish(EVENT_WINDOW_RESIZE, width, height);
+            }
+            return true;
+        }
+
+        private static void saveScreenSize() { _h = Screen.height; _w = Screen.width; }
+
+    }
+
+}
