@@ -43,8 +43,7 @@ namespace com.csutil {
                     try {
                         object result;
                         if (listener.DynamicInvokeV2(args, out result)) { results.Add(result); }
-                    }
-                    catch (Exception e) { Log.e(e); }
+                    } catch (Exception e) { Log.e(e); }
                 }
             } else {
                 Log.w("No listeners registered for event: " + eventName);
@@ -55,24 +54,28 @@ namespace com.csutil {
         public bool Unsubscribe(object caller, string eventName) {
             Delegate _;
             if (map[eventName].TryRemove(caller, out _)) {
-                if (map[eventName].IsEmpty) return UnsubscribeAll(eventName);
+                if (map[eventName].IsEmpty) return TryRemove(map, eventName);
             }
             return false;
         }
 
         public bool UnsubscribeAll(object caller) {
-            IEnumerable<string> registeredEvents = GetRegisteredEventsOf(caller);
-            var res = true;
-            foreach (var eventName in registeredEvents) { res &= TryRemove(map, eventName); }
-            return res;
+
+            var registeredEvents = map.Filter(x => x.Value.ContainsKey(caller));
+
+            var callerRemovedEverywhere = true;
+            foreach (var eventMaps in registeredEvents) {
+                var eventName = eventMaps.Key;
+                var listenersForEventName = eventMaps.Value;
+                callerRemovedEverywhere &= TryRemove(listenersForEventName, caller);
+                if (listenersForEventName.IsNullOrEmpty()) { TryRemove(map, eventName); }
+            }
+            return callerRemovedEverywhere;
         }
 
         private static bool TryRemove<K, V>(ConcurrentDictionary<K, V> self, K key) {
-            V _; var r = self.TryRemove(key, out _); return r;
+            V _; return self.TryRemove(key, out _);
         }
 
-        private IEnumerable<string> GetRegisteredEventsOf(object caller) {
-            return map.Filter(x => x.Value.ContainsKey(caller)).Map(x => x.Key);
-        }
     }
 }
