@@ -1,5 +1,4 @@
 using System;
-using System.Runtime.Serialization;
 using com.csutil.injection;
 
 namespace com.csutil {
@@ -18,7 +17,7 @@ namespace com.csutil {
         public static T GetOrAddSingleton<T>(this Injector self, object caller) {
             T singleton = self.Get<T>(caller, true);
             if (singleton == null) {
-                singleton = createNewInstance<T>();
+                singleton = CreateNewInstance<T>();
                 if (ReferenceEquals(null, singleton) || "null".Equals("" + singleton)) {
                     throw new Exception("Could not instantiate " + typeof(T));
                 }
@@ -27,7 +26,7 @@ namespace com.csutil {
             return singleton;
         }
 
-        private static T createNewInstance<T>() { return (T)Activator.CreateInstance(typeof(T)); }
+        private static T CreateNewInstance<T>() { return (T)Activator.CreateInstance(typeof(T)); }
 
         public class MultipleProvidersException : Exception { public MultipleProvidersException(string message) : base(message) { } }
 
