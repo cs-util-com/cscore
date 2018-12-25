@@ -1,11 +1,12 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
 namespace com.csutil.http {
 
-    public class Headers {
+    public class Headers : IEnumerable<KeyValuePair<string, string>> {
 
         private Dictionary<string, string> headers = new Dictionary<string, string>();
 
@@ -40,8 +41,7 @@ namespace com.csutil.http {
                 string v = GetHeaderValue("last-modified", null);
                 if (v == null) { return fallbackValue; }
                 return new DateTime().NewDateTimeFromUnixTimestamp(long.Parse(v));
-            }
-            catch (Exception) {
+            } catch (Exception) {
                 return fallbackValue;
             }
         }
@@ -72,6 +72,9 @@ namespace com.csutil.http {
 
         public string GetContentMimeType(string fallbackValue) { return GetHeaderValue("Content-Type", fallbackValue); }
 
+        public IEnumerator<KeyValuePair<string, string>> GetEnumerator() { return headers.GetEnumerator(); }
+
+        IEnumerator IEnumerable.GetEnumerator() { return headers.GetEnumerator(); }
     }
 
 }

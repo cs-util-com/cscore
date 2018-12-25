@@ -1,17 +1,20 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using com.csutil.http;
 using Xunit;
 
 namespace com.csutil.tests {
     public class RestTests : IDisposable {
+
         public RestTests() { // Setup before each test
         }
+
         public void Dispose() { // TearDown after each test
         }
 
         [Fact]
-        public async Task Test1() {
+        public async Task TestSendGET1() {
             await new Uri("https://httpbin.org/get").SendGET().GetResult<HttpBinGetResp>((x) => {
                 Assert.NotNull(x);
                 Log.d("Your external IP is " + x.origin);
@@ -20,11 +23,22 @@ namespace com.csutil.tests {
         }
 
         [Fact]
-        public async Task Test2() {
-            var x = await new Uri("https://httpbin.org/get").SendGET().GetResult<HttpBinGetResp>();
-            Assert.NotNull(x);
-            Log.d("Your external IP is " + x.origin);
-            Assert.NotNull(x.origin);
+        public async Task TestSendGET2() {
+            var request = new Uri("https://httpbin.org/get").SendGET();
+            await ValidateResponse(request);
+        }
+
+        [Fact]
+        public async Task TestRestFactory1() {
+            RestRequest request = RestFactory.instance.SendGET(new Uri("https://httpbin.org/get"));
+            await ValidateResponse(request);
+        }
+
+        private static async Task ValidateResponse(RestRequest request) {
+            var response = await request.GetResult<HttpBinGetResp>();
+            Assert.NotNull(response);
+            Log.d("Your external IP is " + response.origin);
+            Assert.NotNull(response.origin);
         }
 
         public class HttpBinGetResp {

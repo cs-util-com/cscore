@@ -10,6 +10,7 @@ namespace com.csutil.http {
         public Action<UriRestRequest, HttpResponseMessage> handleResult;
         public IJsonReader jsonReader = JsonReader.NewReader();
         private Task sendTask;
+        public Headers requestHeadersToAdd;
 
         public UriRestRequest(Uri uri) { this.uri = uri; }
 
@@ -33,7 +34,9 @@ namespace com.csutil.http {
 
         public RestRequest Send(HttpMethod method) {
             sendTask = new Task(() => {
+                Thread.Sleep(5); // wait 5ms so that the created RestRequest can be modified before its sent
                 using (var c = new HttpClient()) {
+                    AddRequestHeaders(c, requestHeadersToAdd);
                     using (var asyncRestRequest = c.SendAsync(new HttpRequestMessage(method, uri))) {
                         asyncRestRequest.Wait(); //helps so that other thread can set handleResult in time
                         handleResult.InvokeIfNotNull(this, asyncRestRequest.Result); // calling resp.Result blocks the thread
@@ -44,5 +47,16 @@ namespace com.csutil.http {
             return this;
         }
 
+        private static bool AddRequestHeaders(HttpClient self, Headers requestHeadersToAdd) {
+            if (requestHeadersToAdd.IsNullOrEmpty()) { return false; }
+            bool r = true;
+            foreach (var h in requestHeadersToAdd) {
+                if (!self.DefaultRequestHeaders.TryAddWithoutValidation(h.Key, h.Value)) {
+                    Log.e("Could not add header to request: " + h);
+                    r = false;
+                }
+            }
+            return r;
+        }
     }
 }
