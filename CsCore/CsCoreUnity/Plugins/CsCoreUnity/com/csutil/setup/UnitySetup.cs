@@ -9,7 +9,7 @@ namespace com.csutil {
 
     public class UnitySetup {
 
-        public static UnitySetup instance = new UnitySetup();
+        public static UnitySetup instance = IoC.inject.GetOrAddSingleton<UnitySetup>(new object());
 
         public virtual void Setup() {
             Log.instance = new LogViaUnityDebugLog();

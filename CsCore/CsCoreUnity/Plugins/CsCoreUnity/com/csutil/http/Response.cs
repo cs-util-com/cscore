@@ -33,7 +33,11 @@ namespace com.csutil.http {
             return new DownloadHandlerBuffer();
         }
 
-        public override string ToString() { return debugInfo; }
+        public override string ToString() {
+            var s = debugInfo;
+            if (duration != null && !duration.IsRunning) { s += " (" + duration.ElapsedMilliseconds + "ms)"; }
+            return s;
+        }
 
     }
 

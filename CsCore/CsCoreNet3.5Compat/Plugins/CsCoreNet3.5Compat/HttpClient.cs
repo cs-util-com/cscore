@@ -3,6 +3,7 @@
 namespace System.Net.Http {
 
     public class HttpClient : IDisposable {
+        public HttpRequestHeaders DefaultRequestHeaders;
 
         public void Dispose() {
             throw new NotImplementedException();
@@ -12,6 +13,11 @@ namespace System.Net.Http {
             throw new NotImplementedException();
         }
 
+        public class HttpRequestHeaders {
+            public bool TryAddWithoutValidation(string key, string value) {
+                throw new NotImplementedException();
+            }
+        }
     }
 
 }

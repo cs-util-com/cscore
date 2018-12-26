@@ -24,7 +24,7 @@ namespace com.csutil.tests {
 
         [Fact]
         public async Task TestSendGET2() {
-            var request = new Uri("https://httpbin.org/get").SendGET();
+            RestRequest request = new Uri("https://httpbin.org/get").SendGET();
             await ValidateResponse(request);
         }
 
@@ -45,16 +45,7 @@ namespace com.csutil.tests {
             public Dictionary<string, object> args { get; set; }
             public string origin { get; set; }
             public string url { get; set; }
-            public Headers headers { get; set; }
-            public class Headers {
-                public string Accept { get; set; }
-                public string Accept_Encoding { get; set; }
-                public string Accept_Language { get; set; }
-                public string Connection { get; set; }
-                public string Host { get; set; }
-                public string Upgrade_Insecure_Requests { get; set; }
-                public string User_Agent { get; set; }
-            }
+            public Dictionary<string, object> headers { get; set; }
         }
     }
 }

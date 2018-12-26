@@ -32,7 +32,8 @@ namespace com.csutil {
             var req = self.SendWebRequest();
             timer.AssertUnderXms(40);
             while (!req.isDone) {
-                if (resp.progressInPercent.setNewValue(req.progress * 100)) {
+                var currentProgress = req.progress * 100;
+                if (resp.progressInPercent.setNewValue(currentProgress)) {
                     timer.Restart();
                     resp.onProgress.InvokeIfNotNull(resp.progressInPercent.value);
                 }
@@ -40,6 +41,7 @@ namespace com.csutil {
                 if (timer.ElapsedMilliseconds > resp.maxMsWithoutProgress) { self.Abort(); }
             }
             resp.duration.Stop();
+            Log.d("   > Finished " + resp);
             AssertResponseLooksNormal(self, resp);
             self.SaveAllNewCookiesFromResponse();
             if (self.error.IsNullOrEmpty()) { resp.progressInPercent.setNewValue(100); }
@@ -90,11 +92,18 @@ namespace com.csutil {
                 var h = (DownloadHandlerTexture)self.downloadHandler;
                 return (T)(object)h.texture;
             }
-            if (TypeCheck.AreEqual<T, Headers>()) { return (T)(object)new Headers(self.GetResponseHeaders()); }
+            if (TypeCheck.AreEqual<T, Headers>()) { return (T)(object)self.GetResponseHeadersV2(); }
             var text = self.downloadHandler.text;
             if (TypeCheck.AreEqual<T, String>()) { return (T)(object)text; }
             return r.Read<T>(text);
         }
+
+        public static UnityWebRequest SetRequestHeaders(this UnityWebRequest self, Headers headersToAdd) {
+            if (!headersToAdd.IsNullOrEmpty()) { foreach (var h in headersToAdd) { self.SetRequestHeader(h.Key, h.Value); } }
+            return self;
+        }
+
+        public static Headers GetResponseHeadersV2(this UnityWebRequest self) { return new Headers(self.GetResponseHeaders()); }
 
     }
 

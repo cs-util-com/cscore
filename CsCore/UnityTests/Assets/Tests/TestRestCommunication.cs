@@ -75,21 +75,21 @@ namespace com.csutil.http.tests {
         [UnityTest]
         public IEnumerator TestGetViaUnityWebRequest() {
             RestRequest request = UnityWebRequest.Get("https://httpbin.org/get").SendV2();
-            yield return assertGetResult(request);
+            yield return AssertGetResult(request);
         }
 
         [UnityTest]
         public IEnumerator TestGetViaUri() {
             RestRequest request = new Uri("https://httpbin.org/get").SendGET();
-            yield return assertGetResult(request);
+            yield return AssertGetResult(request);
         }
 
-        private IEnumerator assertGetResult(RestRequest get) {
+        private IEnumerator AssertGetResult(RestRequest get) {
             var runningTask = get.GetResult<HttpBinGetResp>(x => {
                 Log.d("Your IP is " + x.origin);
             });
             while (!runningTask.IsCompleted) {
-                Log.d("Waiting..");
+                Log.d("AssertGetResult: Waiting..");
                 yield return new WaitForSeconds(0.1f);
             }
             var x2 = runningTask.Result;
