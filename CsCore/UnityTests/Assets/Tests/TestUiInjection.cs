@@ -34,8 +34,11 @@ namespace com.csutil.injection.tests {
 
         [Test]
         public void TestGetOrAddComponentSingleton() {
+            IoC.inject.RemoveAllInjectorsFor<WebRequestRunner>();
             // It should not be possible to create a mono via default constructor:
-            AssertV2.Throws<Exception>(() => { IoC.inject.GetOrAddSingleton<WebRequestRunner>(this); });
+            AssertV2.Throws<Exception>(() => {
+                IoC.inject.GetOrAddSingleton<WebRequestRunner>(this);
+            });
             {
                 var singletonsName = "SingletonsMaster1";
                 var x1 = IoC.inject.GetOrAddComponentSingleton<WebRequestRunner>(this, singletonsName);
