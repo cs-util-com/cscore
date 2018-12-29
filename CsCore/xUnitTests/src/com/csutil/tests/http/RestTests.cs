@@ -37,15 +37,20 @@ namespace com.csutil.tests {
 
         private static async Task ValidateResponse(RestRequest request) {
             var includedRequestHeaders = new Dictionary<string, string>();
-            includedRequestHeaders.Add("aaa", "aaa 1");
-            includedRequestHeaders.Add("bbb", "bbb 2");
+            includedRequestHeaders.Add("Aaa", "aaa 1");
+            includedRequestHeaders.Add("Bbb", "bbb 2");
             request.WithRequestHeaders(new Headers(includedRequestHeaders));
             var response = await request.GetResult<HttpBinGetResp>();
             Assert.NotNull(response);
             Log.d("Your external IP is " + response.origin);
             Assert.NotNull(response.origin);
+
+            Log.d("response.headers contain the following elements:");
+            foreach (var h in response.headers) { Log.d(" > " + h.Key + " (with value " + h.Value + ")"); }
+
             foreach (var sentHeader in includedRequestHeaders) {
-                Assert.NotNull(response.headers.First(x => x.Key == sentHeader.Key && sentHeader.Value == "" + x.Value));
+                Log.d("Now looking for " + sentHeader.Key + " (with value " + sentHeader.Value + ")");
+                Assert.Equal(sentHeader.Value, response.headers.First(x => x.Key.Equals(sentHeader.Key)).Value);
             }
         }
 
