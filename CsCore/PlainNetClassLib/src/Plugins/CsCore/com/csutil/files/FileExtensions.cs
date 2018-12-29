@@ -12,11 +12,22 @@ namespace com.csutil {
             return new FileInfo(self.FullPath() + Path.DirectorySeparatorChar + childName);
         }
 
-        public static DirectoryInfo CreateIfNeeded(this DirectoryInfo self) { if (!self.Exists) { self.Create(); } return self; }
+        public static DirectoryInfo CreateIfNeeded(this DirectoryInfo self) {
+            if (!self.Exists) { self.Create(); }
+            return self;
+        }
 
-        public static string FullPath(this FileSystemInfo self) { return Path.GetFullPath("" + self); }
+        public static string FullPath(this FileSystemInfo self) {
+            return Path.GetFullPath("" + self);
+        }
 
-        public static DirectoryInfo ParentDir(this FileInfo self) { return self.Directory; }
+        public static bool IsNullOrDoesNotExist(this FileSystemInfo self) {
+            if (self == null) { return true; } else { return !self.Exists; }
+        }
+
+        public static DirectoryInfo ParentDir(this FileInfo self) {
+            return self.Directory;
+        }
 
         public static FileInfo SetExtension(this FileInfo self, string newExtension) {
             return new FileInfo(Path.ChangeExtension(self.FullPath(), newExtension));

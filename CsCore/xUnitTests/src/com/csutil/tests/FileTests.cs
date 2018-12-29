@@ -17,10 +17,16 @@ namespace com.csutil.tests {
 
         [Fact]
         public async Task TestFileLoading() {
-            DirectoryInfo dir = EnvironmentV2.instance.GetCurrentDirectory();
-            Log.d("dir=" + dir.FullPath());
+            var env = EnvironmentV2.instance;
+            DirectoryInfo dir = null;
+            Assert.True(dir.IsNullOrDoesNotExist());
+            dir = env.GetCurrentDirectory();
+            Assert.False(dir.IsNullOrDoesNotExist());
             dir = EnvironmentV2.instance.GetAppDataFolder();
             Log.d("dir=" + dir.FullPath());
+            Assert.False(dir.IsNullOrDoesNotExist());
+
+
 
         }
 
