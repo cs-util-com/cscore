@@ -6,6 +6,9 @@ using com.csutil.logging;
 namespace com.csutil {
 
     public static class Log {
+
+        // The log system instance is not accessed via injection to avoid loops because 
+        // the injection logic uses the logging logic itself
         public static ILog instance = new LogViaConsole();
 
         [Conditional("DEBUG")]
