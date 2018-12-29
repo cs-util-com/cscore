@@ -15,7 +15,9 @@ namespace com.csutil {
 
     public static class UnityWebRequestExtensions {
 
-        public static RestRequest SendV2(this UnityWebRequest self) { return new UnityRestRequest(self); }
+        public static RestRequest SendV2(this UnityWebRequest self) {
+            return new UnityRestRequest(self);
+        }
 
         public static IEnumerator SendWebRequestV2<T>(this UnityWebRequest self, Response<T> s) {
             yield return self.SendAndWait(s);

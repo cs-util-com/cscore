@@ -28,7 +28,8 @@ namespace com.csutil.json {
                     var args = new StackFrame(3, true).AddTo(null);
                     AssertV2.IsTrue(jsonCouldBeFullyParsed(jsonReader, jsonWriter, result, input), errorText, args);
                 }
-            } catch (Exception e) { Log.e(e); }
+            }
+            catch (Exception e) { Log.e(e); }
         }
 
         private static bool jsonCouldBeFullyParsed(IJsonReader jsonReader, IJsonWriter jsonWriter, object result, string json) {
@@ -37,7 +38,8 @@ namespace com.csutil.json {
                 var input = jsonReader.Read<System.Collections.Generic.Dictionary<string, object>>(json);
                 var parsed = jsonReader.Read<System.Collections.Generic.Dictionary<string, object>>(jsonWriter.Write(result));
                 return jsonCouldBeFullyParsed(jsonReader, result.GetType().Name, input, parsed, 0);
-            } catch (Exception e) { Log.e(new Exception("exception during parsing json=" + json, e)); }
+            }
+            catch (Exception e) { Log.e(new Exception("exception during parsing json=" + json, e)); }
             return false;
         }
 
@@ -71,7 +73,7 @@ namespace com.csutil.json {
                     AssertV2.AreEqual(a.Length, b.Length, "", args);
                     var r = true;
                     for (int i = 0; i < a.Length; i++) {
-                        r &= jsonCouldBeFullyParsed(reader, path + "." + key + "[" + i + "]", a[i], b[i], depth + 1);
+                        r = jsonCouldBeFullyParsed(reader, path + "." + key + "[" + i + "]", a[i], b[i], depth + 1) & r;
                     }
                     return r;
                 }

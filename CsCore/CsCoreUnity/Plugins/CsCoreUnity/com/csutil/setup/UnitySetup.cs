@@ -1,4 +1,5 @@
-﻿using com.csutil.logging;
+﻿using com.csutil.http;
+using com.csutil.logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,11 +10,12 @@ namespace com.csutil {
 
     public class UnitySetup {
 
-        public static UnitySetup instance = IoC.inject.GetOrAddSingleton<UnitySetup>(new object());
+        public static UnitySetup instance { get { return IoC.inject.GetOrAddSingleton<UnitySetup>(new object()); } }
 
         public virtual void Setup() {
             Log.instance = new LogViaUnityDebugLog();
             SystemConsoleToUnityLogRedirector.Setup();
+            IoC.inject.SetSingleton<RestFactory, UnityRestFactory>(new UnityRestFactory(), true);
         }
     }
 

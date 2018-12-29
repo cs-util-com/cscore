@@ -37,28 +37,7 @@ namespace com.csutil.http {
             this.requestHeaders = requestHeaders;
             return this;
         }
-
-        private class CoroutineScheduler : TaskScheduler {
-            private Coroutine c;
-
-            public CoroutineScheduler(Coroutine c) {
-                this.c = c;
-            }
-
-            protected override IEnumerable<Task> GetScheduledTasks() {
-                Log.MethodEntered();
-                return null;
-            }
-
-            protected override void QueueTask(Task task) {
-                Log.MethodEntered("task=" + task);
-            }
-
-            protected override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued) {
-                Log.MethodEntered("task=" + task, "taskWasPreviouslyQueued=" + taskWasPreviouslyQueued);
-                throw new NotImplementedException();
-            }
-        }
+        
     }
 
 }

@@ -80,6 +80,7 @@ namespace com.csutil.http.tests {
 
         [UnityTest]
         public IEnumerator TestGetViaUri() {
+            Assert.AreEqual(typeof(UnityRestFactory), RestFactory.instance.GetType());
             RestRequest request = new Uri("https://httpbin.org/get").SendGET();
             yield return AssertGetResult(request);
         }
