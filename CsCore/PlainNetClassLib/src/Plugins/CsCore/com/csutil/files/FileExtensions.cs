@@ -87,14 +87,10 @@ namespace com.csutil {
         }
 
         public static void SaveAsJson<T>(this FileInfo self, T objectToSave) {
-            if (typeof(T) == typeof(string)) {
-                self.SaveText((string)(object)objectToSave);
-            } else {
-                self.SaveText(JsonWriter.GetWriter().Write(objectToSave));
-            }
+            self.SaveAsText(JsonWriter.GetWriter().Write(objectToSave));
         }
 
-        private static void SaveText(this FileInfo self, string text) {
+        public static void SaveAsText(this FileInfo self, string text) {
             File.WriteAllText(self.FullPath(), text, Encoding.UTF8);
         }
     }

@@ -19,57 +19,81 @@ namespace com.csutil.tests {
 
         [Fact]
         public void TestIsNotNullAndExists() {
-            DirectoryInfo appDataFolder = null;
-            Assert.False(appDataFolder.IsNotNullAndExists());
-            appDataFolder = EnvironmentV2.instance.GetAppDataFolder();
-            Log.d("dir=" + appDataFolder.FullPath());
-            Assert.True(appDataFolder.IsNotNullAndExists());
+            DirectoryInfo appDataDir = null;
+            Assert.False(appDataDir.IsNotNullAndExists());
+            appDataDir = EnvironmentV2.instance.GetAppDataFolder();
+            Log.d("appDataDir=" + appDataDir.FullPath());
+            Assert.True(appDataDir.IsNotNullAndExists());
         }
 
         [Fact]
-        public void TestFileLoading() {
+        public void TestDirectoryMethods() {
             var rootDir = EnvironmentV2.instance.GetCurrentDirectory();
             Assert.True(rootDir.IsNotNullAndExists());
 
-            var c1 = rootDir.GetChildDir("testFolder1");
-            c1.DeleteV2();
-            Assert.False(c1.IsNotNullAndExists());
-            Assert.True(c1.CreateV2().Exists);
-            Assert.True(c1.IsNotNullAndExists());
-            c1.Create(); // should do nothing and not throw an exception
-            var testFile = c1.CreateSubdirectory("c1 child 1").GetChild("test");
-
-            var textToWrite = "Test 123";
-            testFile.SaveAsJson(textToWrite);
-            Assert.True(testFile.IsNotNullAndExists());
-            AssertV2.AreEqual(textToWrite, testFile.LoadAs<string>());
+            var dir1 = rootDir.GetChildDir("TestDir 1");
+            dir1.DeleteV2();
+            Assert.False(dir1.IsNotNullAndExists());
+            Assert.True(dir1.CreateV2().Exists);
+            Assert.True(dir1.IsNotNullAndExists());
+            dir1.Create(); // should do nothing and not throw an exception
+            var subDir = dir1.CreateSubdirectory("child dir 1");
+            SaveAndLoadTextToFile(subDir.GetChild("test file 1"));
+            SaveAndLoadTextToFile(subDir.GetChild("test file 2"));
 
             {
-                var oldPath = c1.FullPath();
-                var c2 = rootDir.GetChildDir("testFolder2");
-                c2.DeleteV2();
-                c1.MoveToV2(c2);
-                Assert.True(c2.IsNotNullAndExists());
-                AssertV2.AreEqual(c2.FullPath(), c1.FullPath());
+                var oldPath = dir1.FullPath();
+                var dir2 = rootDir.GetChildDir("TestDir 2");
+                dir2.DeleteV2();
+                dir1.MoveToV2(dir2);
+                Assert.True(dir2.IsNotNullAndExists());
+                AssertV2.AreEqual(dir2.FullPath(), dir1.FullPath());
                 Assert.False(new DirectoryInfo(oldPath).Exists);
             }
-            {
-                var c3 = rootDir.GetChildDir("testFolder3").CreateV2();
+            { // test that moving to existing folders fails:
+                var dir3 = rootDir.GetChildDir("TestDir 3").CreateV2();
                 AssertV2.Throws<Exception>(() => {
-                    c1.MoveToV2(c3); // this should fail since c3 already exists
+                    dir1.MoveToV2(dir3); // this should fail since dir3 already exists
                 });
-                AssertV2.AreNotEqual(c3.FullPath(), c1.FullPath());
-                c3.Delete();
+                AssertV2.AreNotEqual(dir3.FullPath(), dir1.FullPath());
+                dir3.Delete(); // cleanup after test
             }
             {
-                var oldPath = c1.FullPath();
-                var c4 = rootDir.GetChildDir("testFolder4");
-                c4.DeleteV2();
-                c1.CopyTo(c4);
-                Assert.True(c4.IsNotNullAndExists());
-                AssertV2.AreNotEqual(c4.FullPath(), c1.FullPath());
+                var oldPath = dir1.FullPath();
+                var dir4 = rootDir.GetChildDir("TestDir 4");
+                dir4.DeleteV2(); // make sure dir does not yet exist from previous tests
+                dir1.CopyTo(dir4);
+                Assert.True(dir4.IsNotNullAndExists());
+                AssertV2.AreNotEqual(dir4.FullPath(), dir1.FullPath());
                 Assert.True(new DirectoryInfo(oldPath).Exists);
+                dir4.DeleteV2(); // cleanup after test
             }
+            dir1.DeleteV2(); // cleanup after test
+        }
+
+        private static void SaveAndLoadTextToFile(FileInfo testFile, string textToSave = "Test 123") {
+            testFile.SaveAsText(textToSave);
+            Assert.True(testFile.IsNotNullAndExists());
+            AssertV2.AreEqual(textToSave, testFile.LoadAs<string>());
+        }
+
+        [Fact]
+        public void TestFileWriteAndRead() {
+            var dir = EnvironmentV2.instance.GetCurrentDirectory().CreateSubdirectory("TestFileWriteAndRead");
+            var file1 = dir.GetChild("f1.txt");
+            SaveAndLoadTextToFile(file1);
+            Assert.True(file1.IsNotNullAndExists());
+
+            var objToSave = new MyClass1() { s = "I am a string", i = 123 };
+            file1.SaveAsJson(objToSave);
+            var loadedObj = file1.LoadAs<MyClass1>();
+            AssertV2.AreEqual(objToSave.s, loadedObj.s);
+            AssertV2.AreEqual(objToSave.i, loadedObj.i);
+        }
+
+        private class MyClass1 {
+            public string s;
+            public int i;
         }
 
     }
