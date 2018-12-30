@@ -84,7 +84,7 @@ namespace com.csutil {
             }
         }
 
-        public static T GetResult<T>(this UnityWebRequest self) { return self.GetResult<T>(JsonReader.NewReader()); }
+        public static T GetResult<T>(this UnityWebRequest self) { return self.GetResult<T>(JsonReader.GetReader()); }
 
         public static T GetResult<T>(this UnityWebRequest self, IJsonReader r) {
             AssertV2.IsTrue(self.isDone, "web request was not done!");

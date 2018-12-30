@@ -18,7 +18,7 @@ namespace com.csutil.tests {
         }
 
         [Fact]
-        public async Task TestIsNotNullAndExists() {
+        public void TestIsNotNullAndExists() {
             DirectoryInfo appDataFolder = null;
             Assert.False(appDataFolder.IsNotNullAndExists());
             appDataFolder = EnvironmentV2.instance.GetAppDataFolder();
@@ -27,7 +27,7 @@ namespace com.csutil.tests {
         }
 
         [Fact]
-        public async Task TestFileLoading() {
+        public void TestFileLoading() {
             var rootDir = EnvironmentV2.instance.GetCurrentDirectory();
             Assert.True(rootDir.IsNotNullAndExists());
 
@@ -40,9 +40,9 @@ namespace com.csutil.tests {
             var testFile = c1.CreateSubdirectory("c1 child 1").GetChild("test");
 
             var textToWrite = "Test 123";
-            File.WriteAllText(testFile.FullPath(), textToWrite, Encoding.UTF8);
+            testFile.SaveAsJson(textToWrite);
             Assert.True(testFile.IsNotNullAndExists());
-            AssertV2.AreEqual(textToWrite, File.ReadAllText(testFile.FullPath(), Encoding.UTF8));
+            AssertV2.AreEqual(textToWrite, testFile.LoadAs<string>());
 
             {
                 var oldPath = c1.FullPath();
@@ -71,7 +71,6 @@ namespace com.csutil.tests {
                 Assert.True(new DirectoryInfo(oldPath).Exists);
             }
         }
-
 
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Text;
 using System.Threading;
 
 namespace com.csutil {
@@ -79,6 +80,23 @@ namespace com.csutil {
             target.Refresh();
         }
 
+        public static T LoadAs<T>(this FileInfo self) {
+            var s = File.ReadAllText(self.FullPath(), Encoding.UTF8);
+            if (typeof(T) == typeof(string)) { return (T)(object)s; }
+            return JsonReader.GetReader().Read<T>(s);
+        }
+
+        public static void SaveAsJson<T>(this FileInfo self, T objectToSave) {
+            if (typeof(T) == typeof(string)) {
+                self.SaveText((string)(object)objectToSave);
+            } else {
+                self.SaveText(JsonWriter.GetWriter().Write(objectToSave));
+            }
+        }
+
+        private static void SaveText(this FileInfo self, string text) {
+            File.WriteAllText(self.FullPath(), text, Encoding.UTF8);
+        }
     }
 
 }

@@ -10,7 +10,9 @@ namespace com.csutil {
 
     public static class JsonWriter {
 
-        public static IJsonWriter NewWriter() { return new JsonNetWriter(); }
+        public static IJsonWriter GetWriter() {
+            return IoC.inject.GetOrAddSingleton<IJsonWriter>(new object(), () => new JsonNetWriter());
+        }
 
     }
 

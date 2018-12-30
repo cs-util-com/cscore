@@ -13,16 +13,16 @@ namespace com.csutil.tests {
         [Fact]
         public void TestClassWithoutDefaultConstructor() {
             var x1 = new MySubClass1("test");
-            var json = JsonWriter.NewWriter().Write((MyClass1)x1);
-            var x2 = JsonReader.NewReader().Read<MySubClass1>(json);
+            var json = JsonWriter.GetWriter().Write((MyClass1)x1);
+            var x2 = JsonReader.GetReader().Read<MySubClass1>(json);
             Assert.Equal(x1.s, x2.s);
         }
 
         [Fact]
         public void TestMissingFieldInClass() {
             var x1 = new MySubClass2() { s = "s", s2 = "s2" };
-            var json = JsonWriter.NewWriter().Write((MyClass1)x1);
-            var x2 = JsonReader.NewReader().Read<MySubClass1>(json);
+            var json = JsonWriter.GetWriter().Write((MyClass1)x1);
+            var x2 = JsonReader.GetReader().Read<MySubClass1>(json);
             Assert.Equal(x1.s, x2.s);
         }
 

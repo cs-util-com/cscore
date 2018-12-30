@@ -18,7 +18,9 @@ namespace com.csutil {
 
     public static class JsonReader {
 
-        public static IJsonReader NewReader() { return new JsonNetReader(); }
+        public static IJsonReader GetReader() {
+            return IoC.inject.GetOrAddSingleton<IJsonReader>(new object(), () => new JsonNetReader());
+        }
 
         /// <summary> this method makes sure that classes provided by the internal json parsing libs are converted 
         /// to generic classes like Dictionary<string, object> or Dictionary<string, object>[] </summary>

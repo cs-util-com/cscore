@@ -21,9 +21,13 @@ namespace com.csutil {
         }
 
         public static T GetOrAddSingleton<T>(this Injector self, object caller) {
+            return GetOrAddSingleton(self, caller, () => CreateNewInstance<T>());
+        }
+
+        public static T GetOrAddSingleton<T>(this Injector self, object caller, Func<T> createSingletonInstance) {
             T singleton = self.Get<T>(caller, true);
             if (singleton == null) {
-                singleton = CreateNewInstance<T>();
+                singleton = createSingletonInstance();
                 if (ReferenceEquals(null, singleton) || "null".Equals("" + singleton)) {
                     throw new Exception("Could not instantiate " + typeof(T));
                 }

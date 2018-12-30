@@ -32,7 +32,7 @@ namespace com.csutil.http.tests {
             }));
             HttpBinGetResp b = www.GetResult<HttpBinGetResp>();
 
-            var w = JsonWriter.NewWriter();
+            var w = JsonWriter.GetWriter();
             Assert.AreEqual(w.Write(a), w.Write(b));
         }
 

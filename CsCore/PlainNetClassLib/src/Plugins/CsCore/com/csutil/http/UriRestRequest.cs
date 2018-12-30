@@ -8,7 +8,7 @@ namespace com.csutil.http {
     internal class UriRestRequest : RestRequest {
         private Uri uri;
         public Action<UriRestRequest, HttpResponseMessage> handleResult;
-        public IJsonReader jsonReader = JsonReader.NewReader();
+        public IJsonReader jsonReader = JsonReader.GetReader();
         private Task sendTask;
         private Headers requestHeaders;
 

@@ -50,7 +50,7 @@ namespace com.csutil {
                     catch (Exception e) { Log.e(e); }
                 }
             } else {
-                Log.w("No subscribers registered for event: " + eventName);
+                Log.d("No subscribers registered for event: " + eventName);
             }
             return results;
         }

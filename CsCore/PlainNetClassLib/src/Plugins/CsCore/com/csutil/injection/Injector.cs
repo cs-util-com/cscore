@@ -17,7 +17,7 @@ namespace com.csutil.injection {
 
         public T Get<T>(object caller, bool createIfNull = true) {
             var results = usedEventBus.Publish(GetEventKey<T>(), caller, createIfNull).Filter(x => x is T).Cast<T>();
-            if (results.IsNullOrEmpty()) { Log.w("No inject results for " + GetEventKey<T>()); }
+            if (results.IsNullOrEmpty()) { Log.d("No inject results for " + GetEventKey<T>()); }
             if (results.Count() > 2) { Log.w("Multiple injectors set for " + GetEventKey<T>()); }
             return results.FirstOrDefault();
         }
