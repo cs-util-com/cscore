@@ -26,6 +26,8 @@ namespace com.csutil {
             return self.Substring(pos + startAfter.Length);
         }
 
+        public static bool EndsWith(this string self, char end) { return self.EndsWith("" + end); }
+
         public static string[] Split(this string self, string separator) {
             return self.Split(new string[] { separator }, StringSplitOptions.None);
         }

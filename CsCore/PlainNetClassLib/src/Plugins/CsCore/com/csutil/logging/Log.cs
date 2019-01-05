@@ -29,11 +29,13 @@ namespace com.csutil {
             return instance.LogExeption(e, args);
         }
 
-        public static string CallingMethodStr(object[] args = null, int i = 3) {
-            StackFrame f = args != null ? args.FirstOrDefault(x => x is StackFrame) as StackFrame : null;
-            if (f == null) { f = new StackFrame(i, true); }
-            return f.GetMethodName() + " " + f.GetFileName() + ":line " + f.GetFileLineNumber();
+        public static string CallingMethodStr(object[] args = null, int offset = 3, int count = 3) {
+            var frame = args.Get<StackFrame>(); if (frame != null) { return frame.ToStringV2(); }
+            var trace = args.Get<StackTrace>(); if (trace != null) { return trace.ToStringV2(); }
+            return new StackTrace(true).ToStringV2(offset, count);
         }
+
+        private static T Get<T>(this object[] args) { return args != null ? (T)args.FirstOrDefault(x => x is T) : default(T); }
 
         public static Stopwatch MethodEntered(params object[] args) {
 #if DEBUG
@@ -62,6 +64,8 @@ namespace com.csutil {
 
     public static class LogExtensions {
 
+        private const string LB = "\r\n";
+
         public static Exception PrintStackTrace(this Exception self, params object[] args) {
             return Log.e(self, args);
         }
@@ -73,14 +77,22 @@ namespace com.csutil {
                 var methodString = method.ReflectedType.Name + "." + method.Name;
                 var paramsString = includeParams ? method.GetParameters().ToStringV2(x => "" + x, "", "") : "..";
                 return methodString + "(" + paramsString + ")";
-            }
-            catch (Exception e) { Console.WriteLine("" + e); return ""; }
+            } catch (Exception e) { Console.WriteLine("" + e); return ""; }
         }
 
         internal static object[] AddTo(this StackFrame stackFrame, object[] args) {
             var a = new object[1] { stackFrame };
             if (args == null) { return a; } else { return args.Concat(a).ToArray(); }
         }
+
+        public static string ToStringV2(this StackTrace self, int offset = 0, int count = -1) {
+            if (count <= 0) { count = self.FrameCount; }
+            var result = "";
+            for (int i = offset; i < offset + count; i++) { result += self.GetFrame(i).ToStringV2() + LB + "     "; }
+            return result;
+        }
+
+        public static string ToStringV2(this StackFrame f) { return f.GetMethodName() + " " + f.GetFileName() + ":line " + f.GetFileLineNumber(); }
 
     }
 

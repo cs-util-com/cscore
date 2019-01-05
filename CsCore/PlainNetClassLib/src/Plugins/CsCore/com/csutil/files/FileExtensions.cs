@@ -8,13 +8,13 @@ namespace com.csutil {
     public static class FileExtensions {
 
         public static DirectoryInfo GetChildDir(this DirectoryInfo self, string childFolder, bool assertThatChildMustExist = false) {
-            var c = new DirectoryInfo(self.FullPath() + Path.DirectorySeparatorChar + childFolder);
+            var c = new DirectoryInfo(self.FullPath() + childFolder);
             if (assertThatChildMustExist) { AssertV2.IsTrue(c.IsNotNullAndExists(), "childFolder '" + childFolder + "' does not exist! Full path: " + c.FullPath()); }
             return c;
         }
 
         public static FileInfo GetChild(this DirectoryInfo self, string childFile, bool assertThatChildMustExist = false) {
-            var c = new FileInfo(self.FullPath() + Path.DirectorySeparatorChar + childFile);
+            var c = new FileInfo(self.FullPath() + childFile);
             if (assertThatChildMustExist) { AssertV2.IsTrue(c.IsNotNullAndExists(), "childFile '" + childFile + "' does not exist! Full path: " + c.FullPath()); }
             return c;
         }
@@ -24,9 +24,12 @@ namespace com.csutil {
             return self;
         }
 
-        public static string FullPath(this FileSystemInfo self) {
-            return Path.GetFullPath("" + self);
+        public static string FullPath(this DirectoryInfo self) {
+            var p = self.FullName;
+            if (!p.EndsWith(Path.DirectorySeparatorChar)) { return p + Path.DirectorySeparatorChar; }
+            return p;
         }
+        public static string FullPath(this FileInfo self) { return self.FullName; }
 
         public static bool IsNotNullAndExists(this FileSystemInfo self) {
             if (self == null) { return false; } else { return self.Exists; }
@@ -52,24 +55,30 @@ namespace com.csutil {
             if (self != null && self.Exists) {
                 deleteAction();
                 self.Refresh();
-                AssertV2.IsFalse(self.Exists, "Still exists: " + self.FullPath());
+                AssertV2.IsFalse(self.Exists, "Still exists: " + self.FullName);
                 return true;
             }
             return false;
         }
 
         public static void MoveToV2(this DirectoryInfo self, DirectoryInfo target) {
-            // if (target.Exists) { throw Log.e("Cant move dir to already existing " + target.FullPath()); }
             self.MoveTo(target.FullPath());
             self.Refresh();
             target.Refresh();
         }
 
-        // From https://stackoverflow.com/a/3822913/165106
-        public static void CopyTo(this DirectoryInfo self, DirectoryInfo target) {
+        public static void Rename(this DirectoryInfo self, string newName) {
+            var target = self.Parent.GetChildDir(newName);
+            AssertV2.IsFalse(target.IsNotNullAndExists(), "Already exists: target=" + target.FullPath());
+            self.MoveToV2(target);
+        }
+
+        public static void CopyTo(this DirectoryInfo self, DirectoryInfo target, bool replaceExisting = false) {
+            if (!replaceExisting && target.IsNotNullAndExists()) { throw Log.e("Cant copy to existing folder " + target); }
             var sourcePath = self.FullPath();
             var targetPath = target.FullPath();
-            // Create all of the directories
+            // From https://stackoverflow.com/a/3822913/165106
+            // Create all empty directories
             foreach (string dirPath in Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories)) {
                 Directory.CreateDirectory(dirPath.Replace(sourcePath, targetPath));
             }
@@ -93,6 +102,7 @@ namespace com.csutil {
         public static void SaveAsText(this FileInfo self, string text) {
             File.WriteAllText(self.FullPath(), text, Encoding.UTF8);
         }
+
     }
 
 }
