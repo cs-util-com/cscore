@@ -58,6 +58,8 @@ namespace com.csutil.tests {
             }
             { // Test that moving to existing folders fails:
                 var dir3 = rootDir.GetChildDir("TestDir 3").CreateV2();
+                AssertV2.AreEqual("TestDir 3", dir3.Name);
+                dir3 = rootDir.CreateSubdirectory(dir3.Name);
                 AssertV2.Throws<Exception>(() => {
                     dir1.MoveToV2(dir3); // This should fail since dir3 already exists
                 });
@@ -103,7 +105,32 @@ namespace com.csutil.tests {
             var loadedObj = file1.LoadAs<MyClass1>(); // Load the object again and compare:
             AssertV2.AreEqual(objToSave.myString, loadedObj.myString);
             AssertV2.AreEqual(objToSave.myInt, loadedObj.myInt);
+            dir.DeleteV2();
         }
+
+        [Fact]
+        public void TestFileRenameAndMove() {
+            var dir = EnvironmentV2.instance.GetCurrentDirectory().CreateSubdirectory("TestFileRename");
+            var myFile = dir.GetChild("MyFile1.txt");
+            SaveAndLoadTextToFile(myFile);
+            Assert.True(myFile.IsNotNullAndExists());
+
+            var newName = "MyFile2.txt";
+            var oldPath = new FileInfo(myFile.FullPath());
+            myFile.Rename(newName);
+            AssertV2.AreEqual(oldPath.ParentDir().FullPath(), myFile.ParentDir().FullPath());
+            AssertV2.AreEqual(newName, myFile.Name);
+            AssertV2.AreNotEqual(oldPath.Name, myFile.Name);
+
+            var subdir = dir.CreateSubdirectory("subdir");
+            myFile.MoveToV2(subdir);
+            AssertV2.AreEqual(1, subdir.GetFiles().Count());
+            AssertV2.AreEqual(subdir.FullPath(), myFile.ParentDir().FullPath());
+
+            dir.DeleteV2();
+        }
+
+
 
         private class MyClass1 {
             public string myString;

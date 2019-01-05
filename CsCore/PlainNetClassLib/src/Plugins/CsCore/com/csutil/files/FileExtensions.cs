@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -58,6 +59,24 @@ namespace com.csutil {
                 AssertV2.IsFalse(self.Exists, "Still exists: " + self.FullName);
                 return true;
             }
+            return false;
+        }
+
+        public static void Rename(this FileInfo self, string newName) {
+            self.MoveTo(self.ParentDir().GetChild(newName).FullPath());
+        }
+
+        public static void MoveToV2(this FileInfo self, DirectoryInfo target) {
+            self.MoveTo(target.FullPath() + self.Name);
+            self.Refresh();
+            target.Refresh();
+        }
+
+        public static bool Open(this FileSystemInfo self) {
+            try {
+                System.Diagnostics.Process.Start(@self.FullName);
+                return true;
+            } catch (System.Exception e) { Log.e(e); }
             return false;
         }
 
