@@ -124,6 +124,25 @@ namespace com.csutil {
             Log.MethodDone(t);
         }
 
+        [UnityTest]
+        public IEnumerator TestExecuteDelayed2() {
+            {
+                MonoBehaviour myMonoBehaviour = CreateSomeMonoBehaviour();
+                myMonoBehaviour.enabled = false;
+                AssertV2.Throws<Exception>(() => {
+                    myMonoBehaviour.ExecuteDelayed(() => { throw Log.e("Executing coroutine of disabled mono"); });
+                });
+            }
+            {
+                MonoBehaviour myMonoBehaviour = CreateSomeMonoBehaviour();
+                myMonoBehaviour.gameObject.SetActive(false);
+                AssertV2.Throws<Exception>(() => {
+                    myMonoBehaviour.ExecuteDelayed(() => { throw Log.e("Executing coroutine of inactive GO"); });
+                });
+            }
+            yield return null;
+        }
+
     }
 
 }
