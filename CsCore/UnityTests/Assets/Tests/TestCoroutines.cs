@@ -147,7 +147,7 @@ namespace com.csutil {
         public IEnumerator TestCoroutinesAsTasks() {
             MonoBehaviour myMonoBehaviour = CreateSomeMonoBehaviour();
             var someData = new MyDataClass1() { myString = "Not started yet" };
-            var coroutineTask = myMonoBehaviour.StartCoroutineAsTask(() => MyCoroutine1(someData), () => someData.myString);
+            var coroutineTask = myMonoBehaviour.StartCoroutineAsTask(MyCoroutine1(someData), () => someData.myString);
 
             while (!coroutineTask.IsCompleted) {
                 Log.d("Waiting for task to finish..");

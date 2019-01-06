@@ -57,7 +57,7 @@ namespace com.csutil {
             foreach (var c in self) { yield return c; }
         }
 
-        public static Task<T> StartCoroutineAsTask<T>(this MonoBehaviour self, Func<IEnumerator> routine, Func<T> onRoutineDone) {
+        public static Task<T> StartCoroutineAsTask<T>(this MonoBehaviour self, IEnumerator routine, Func<T> onRoutineDone) {
             var tcs = new TaskCompletionSource<T>();
             self.StartCoroutine(wrapperRoutine(routine, () => {
                 try { tcs.TrySetResult(onRoutineDone()); }
@@ -65,8 +65,8 @@ namespace com.csutil {
             }));
             return tcs.Task;
         }
-        private static IEnumerator wrapperRoutine(Func<IEnumerator> coroutineToWrap, Action onRoutineDone) {
-            yield return coroutineToWrap();
+        private static IEnumerator wrapperRoutine(IEnumerator coroutineToWrap, Action onRoutineDone) {
+            yield return coroutineToWrap;
             onRoutineDone();
         }
 
