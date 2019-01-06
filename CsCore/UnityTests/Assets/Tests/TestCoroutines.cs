@@ -143,6 +143,31 @@ namespace com.csutil {
             yield return null;
         }
 
+        [UnityTest]
+        public IEnumerator TestCoroutinesAsTasks() {
+            MonoBehaviour myMonoBehaviour = CreateSomeMonoBehaviour();
+            var someData = new MyDataClass1() { myString = "Not started yet" };
+            var coroutineTask = myMonoBehaviour.StartCoroutineAsTask(() => MyCoroutine1(someData), () => someData.myString);
+
+            while (!coroutineTask.IsCompleted) {
+                Log.d("Waiting for task to finish..");
+                Assert.AreEqual("Started", someData.myString);
+                yield return new WaitForSeconds(0.05f);
+            }
+            var result = coroutineTask.Result;
+            Assert.AreEqual("Finished", result);
+        }
+
+        private IEnumerator MyCoroutine1(MyDataClass1 someData) {
+            someData.myString = "Started";
+            yield return new WaitForSeconds(2);
+            someData.myString = "Finished";
+        }
+
+        private class MyDataClass1 {
+            public string myString;
+        }
+
     }
 
 }
