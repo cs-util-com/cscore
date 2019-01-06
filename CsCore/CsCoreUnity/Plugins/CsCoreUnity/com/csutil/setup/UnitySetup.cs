@@ -16,6 +16,7 @@ namespace com.csutil {
         public virtual void Setup() {
             Log.instance = new LogViaUnityDebugLog();
             SystemConsoleToUnityLogRedirector.Setup();
+            var initMainThread = MainThread.instance;
             IoC.inject.SetSingleton<RestFactory, UnityRestFactory>(new UnityRestFactory(), true);
             IoC.inject.SetSingleton<EnvironmentV2, EnvironmentV2Unity>(new EnvironmentV2Unity(), true);
         }

@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace com.csutil {
 
-    class MainThread : MonoBehaviour {
+    public class MainThread : MonoBehaviour {
 
         public static MainThread instance { get { return IoC.inject.GetOrAddComponentSingleton<MainThread>(new object()); } }
 
@@ -22,6 +22,7 @@ namespace com.csutil {
         public long maxAllowedTaskDurationInMsPerFrame = 33;
 
         private void Awake() {
+            Log.d("Now initializing MainThread helper");
             AssertV2.IsTrue(mainThreadRef == null || mainThreadRef == Thread.CurrentThread, "MainThread already set to " + mainThreadRef);
             mainThreadRef = Thread.CurrentThread;
             stopWatch = Stopwatch.StartNew();
