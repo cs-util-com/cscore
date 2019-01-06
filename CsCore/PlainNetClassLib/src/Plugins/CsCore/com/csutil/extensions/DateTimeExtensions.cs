@@ -1,7 +1,7 @@
 using System;
 
 namespace com.csutil {
-    public static class DateTimeHelper {
+    public static class DateTimeExtensions {
         /// <summary> sortable, short, hard to read wrong, can be used in pathes. read also https://stackoverflow.com/a/15952652/165106 </summary>
         public static string ToReadableString(this DateTime self) {
             return self.ToUniversalTime().ToString("yyyy-MM-dd_HH.mm");

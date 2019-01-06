@@ -1,3 +1,4 @@
+using com.csutil.encryption;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -41,7 +42,8 @@ namespace com.csutil.http {
                 string v = GetHeaderValue("last-modified", null);
                 if (v == null) { return fallbackValue; }
                 return new DateTime().NewDateTimeFromUnixTimestamp(long.Parse(v));
-            } catch (Exception) {
+            }
+            catch (Exception) {
                 return fallbackValue;
             }
         }

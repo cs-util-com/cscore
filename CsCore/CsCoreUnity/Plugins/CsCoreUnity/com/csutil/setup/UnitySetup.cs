@@ -1,4 +1,5 @@
 ﻿using com.csutil.http;
+using com.csutil.io;
 using com.csutil.logging;
 using System;
 using System.Collections.Generic;
@@ -16,6 +17,7 @@ namespace com.csutil {
             Log.instance = new LogViaUnityDebugLog();
             SystemConsoleToUnityLogRedirector.Setup();
             IoC.inject.SetSingleton<RestFactory, UnityRestFactory>(new UnityRestFactory(), true);
+            IoC.inject.SetSingleton<EnvironmentV2, EnvironmentV2Unity>(new EnvironmentV2Unity(), true);
         }
     }
 

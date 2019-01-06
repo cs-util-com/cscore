@@ -4,7 +4,7 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace com.csutil.files.tests {
+namespace com.csutil.io.tests {
 
     public class TestFiles {
 
@@ -16,13 +16,12 @@ namespace com.csutil.files.tests {
         [TearDown]
         public void AfterEachTest() { }
 
-        [UnityTest]
-        public IEnumerator TestFilesWithEnumeratorPasses() {
+        [Test]
+        public void TestFilesWithEnumeratorPasses() {
             var dir = EnvironmentV2.instance.GetCurrentDirectory();
             Log.d("dir=" + dir.FullPath());
             dir = EnvironmentV2.instance.GetAppDataFolder();
             Log.d("dir=" + dir.FullPath());
-            yield return null;
         }
 
     }

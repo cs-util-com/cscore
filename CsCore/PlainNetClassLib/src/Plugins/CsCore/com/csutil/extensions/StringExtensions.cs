@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace com.csutil {
 
@@ -32,23 +27,6 @@ namespace com.csutil {
             return self.Split(new string[] { separator }, StringSplitOptions.None);
         }
 
-        /// <summary>
-        /// Take any string and encrypt it using SHA1 then return the encrypted data
-        /// </summary>
-        /// <param name="data">input text you will enterd to encrypt it</param>
-        /// <returns>return the encrypted text as hexadecimal string</returns>
-        public static string GetSHA1Hash(this string data) {
-            if (data == null) { Log.e("GetSHA1Hash: passed string is null"); return null; }
-            string strResult = string.Empty;
-            SHA1CryptoServiceProvider sha1Obj = new SHA1CryptoServiceProvider();
-            byte[] bytesToHash = Encoding.ASCII.GetBytes(data);
-            bytesToHash = sha1Obj.ComputeHash(bytesToHash);
-            foreach (Byte b in bytesToHash) {
-                strResult += b.ToString("x2");
-            }
-            return strResult;
-        }
-
-    }
+     }
 
 }
