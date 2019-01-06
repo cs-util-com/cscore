@@ -85,7 +85,7 @@ namespace com.csutil {
             }
         }
 
-        private static CoroutineRunner CreateSomeMonoBehaviour() { return new GameObject().GetOrAddComponent<CoroutineRunner>(); }
+        private static TaskRunner CreateSomeMonoBehaviour() { return new GameObject().GetOrAddComponent<TaskRunner>(); }
 
         [UnityTest]
         public IEnumerator TestRunningMultipleCoroutines() {

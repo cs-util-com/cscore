@@ -72,7 +72,7 @@ namespace com.csutil {
             target.Refresh();
         }
 
-        public static bool Open(this FileSystemInfo self) {
+        public static bool OpenInExternalApp(this FileSystemInfo self) {
             try {
                 System.Diagnostics.Process.Start(@self.FullName);
                 return true;

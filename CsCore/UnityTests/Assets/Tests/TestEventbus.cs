@@ -48,7 +48,7 @@ namespace com.csutil.eventbus.tests {
 
         [Test]
         public void SubscribingWithMonoBehaviour() {
-            var someMono = new GameObject().GetOrAddComponent<CoroutineRunner>();
+            var someMono = new GameObject().GetOrAddComponent<TaskRunner>();
 
             var event1 = "MyEvent1";
             var counter = 0;
