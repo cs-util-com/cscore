@@ -9,14 +9,12 @@ namespace com.csutil {
 
     public class PlayerPrefsV2 : PlayerPrefs {
 
-        private const string BOOL = "_bool_";
-
         public static void SetBool(string key, bool value) {
-            SetInt(BOOL + key, BoolToInt(value));
+            SetInt(key, BoolToInt(value));
         }
 
         public static bool GetBool(string key, bool defaultValue) {
-            return IntToBool(GetInt(BOOL + key, BoolToInt(defaultValue)));
+            return IntToBool(GetInt(key, BoolToInt(defaultValue)));
         }
 
         private static bool IntToBool(int i) { return i == 0 ? false : true; }
@@ -27,7 +25,8 @@ namespace com.csutil {
         }
 
         public static string GetStringDecrypted(string key, string defaultValue, string password) {
-            try { return GetString(key, defaultValue).Decrypt(password); } catch (Exception e) { Log.e(e); }
+            try { return GetString(key, defaultValue).Decrypt(password); }
+            catch (Exception e) { Log.w("" + e); }
             return defaultValue;
         }
 
