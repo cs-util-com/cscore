@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace com.csutil {
@@ -54,6 +55,19 @@ namespace com.csutil {
 
         public static IEnumerator WaitForRunningCoroutinesToFinish(this IEnumerable<Coroutine> self) {
             foreach (var c in self) { yield return c; }
+        }
+
+        public static Task<T> StartCoroutineAsTask<T>(this MonoBehaviour self, Func<IEnumerator> routine, Func<T> onRoutineDone) {
+            var tcs = new TaskCompletionSource<T>();
+            self.StartCoroutine(wrapperRoutine(routine, () => {
+                try { tcs.TrySetResult(onRoutineDone()); }
+                catch (Exception e) { tcs.TrySetException(e); }
+            }));
+            return tcs.Task;
+        }
+        private static IEnumerator wrapperRoutine(Func<IEnumerator> coroutineToWrap, Action onRoutineDone) {
+            yield return coroutineToWrap();
+            onRoutineDone();
         }
 
     }

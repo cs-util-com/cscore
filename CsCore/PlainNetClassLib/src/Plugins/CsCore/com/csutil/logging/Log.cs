@@ -88,11 +88,16 @@ namespace com.csutil {
         public static string ToStringV2(this StackTrace self, int offset = 0, int count = -1) {
             if (count <= 0) { count = self.FrameCount; }
             var result = "";
-            for (int i = offset; i < offset + count; i++) { result += self.GetFrame(i).ToStringV2() + LB + "     "; }
+            for (int i = offset; i < offset + count; i++) {
+                if (i >= self.FrameCount) { break; }
+                result += self.GetFrame(i).ToStringV2() + LB + "     ";
+            }
             return result;
         }
 
-        public static string ToStringV2(this StackFrame f) { return f.GetMethodName() + " " + f.GetFileName() + ":line " + f.GetFileLineNumber(); }
+        public static string ToStringV2(this StackFrame f) {
+            return f.GetMethodName() + " " + f.GetFileName() + ":line " + f.GetFileLineNumber();
+        }
 
     }
 
