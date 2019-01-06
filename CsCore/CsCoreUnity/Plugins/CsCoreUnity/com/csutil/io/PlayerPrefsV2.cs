@@ -25,9 +25,18 @@ namespace com.csutil {
         }
 
         public static string GetStringDecrypted(string key, string defaultValue, string password) {
-            try { return GetString(key, defaultValue).Decrypt(password); }
+            try { if (HasKey(key)) { return GetString(key, defaultValue).Decrypt(password); } }
             catch (Exception e) { Log.w("" + e); }
             return defaultValue;
+        }
+
+        public static T GetObject<T>(string key, T defaultValue) {
+            if (!HasKey(key)) { return defaultValue; }
+            return JsonReader.GetReader().Read<T>(GetString(key));
+        }
+
+        public static void SetObject(string key, object obj) {
+            SetString(key, JsonWriter.GetWriter().Write(obj));
         }
 
     }
