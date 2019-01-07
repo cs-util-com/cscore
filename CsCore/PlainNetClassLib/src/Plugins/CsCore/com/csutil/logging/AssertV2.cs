@@ -23,8 +23,6 @@ namespace com.csutil {
         public static void Throws<T>(Action actionThatShouldThrowAnException) where T : Exception {
             try { actionThatShouldThrowAnException(); }
             catch (Exception e) {
-                // Log.w("typeof(T)=" + typeof(T));
-                // Log.w("e.GetType()=" + e.GetType());
                 if (e.GetType().IsCastableTo(typeof(T))) { return; } // its the expected exception
                 throw e; // its an unexpected exception
             }
