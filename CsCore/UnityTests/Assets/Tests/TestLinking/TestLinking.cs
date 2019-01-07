@@ -34,11 +34,16 @@ namespace com.csutil.linking.tests {
             Assert.IsNotNull(links.Get<GameObject>("Button 1"));
             AssertV2.Throws<Exception>(() => { links.Get<Button>("Button 2"); });
 
+            links.Get<Text>("Text 1").text = "Some text";
+            Assert.AreEqual("Some text", links.Get<Text>("Text 1").text);
             links.Get<Button>("Button 1").SetOnClickAction(delegate {
                 Log.d("Button 1 clicked");
             });
-            links.Get<Text>("Text 1").text = "Some text";
-            Assert.AreEqual("Some text", links.Get<Text>("Text 1").text);
+            links.Get<Toggle>("Toggle 1").SetOnValueChangedAction((isNowChecked) => {
+                Log.d("Toggle 1 is now " + (isNowChecked ? "checked" : "unchecked"));
+                return true;
+            });
+
         }
 
     }
