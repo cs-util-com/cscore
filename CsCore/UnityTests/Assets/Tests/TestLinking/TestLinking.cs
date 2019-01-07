@@ -28,8 +28,16 @@ namespace com.csutil.linking.tests {
 
         [Test]
         public void TestLinkMap() {
+            bool prefabLoadedEventReceived = false;
+            EventBus.instance.Subscribe(new object(), IoEvents.PREFAB_LOADED, () => { prefabLoadedEventReceived = true; });
             var p = ResourcesV2.LoadPrefab("ExamplePrefab1");
+            Assert.IsTrue(prefabLoadedEventReceived);
+
+            bool linkMapCreationEventReceived = false;
+            EventBus.instance.Subscribe(new object(), LinkingEvents.LINK_MAP_CREATED, () => { linkMapCreationEventReceived = true; });
             var links = p.GetLinkMap();
+            Assert.IsTrue(linkMapCreationEventReceived);
+
             Assert.IsNotNull(links.Get<Button>("Button 1"));
             Assert.IsNotNull(links.Get<GameObject>("Button 1"));
             AssertV2.Throws<Exception>(() => { links.Get<Button>("Button 2"); });

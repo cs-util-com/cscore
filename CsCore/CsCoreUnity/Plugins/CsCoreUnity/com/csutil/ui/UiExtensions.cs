@@ -10,9 +10,6 @@ namespace com.csutil {
 
     public static class UiExtensions {
 
-        public const string TOGGLE_CHANGED = "Toggle changed";
-        public const string BUTTON_CLICKED = "Button clicked";
-
         public static void SetOnClickAction(this Button self, Action<GameObject> onClickAction) {
             if (self.onClick != null && self.onClick.GetPersistentEventCount() > 0) {
                 Log.w("Overriding existing onClick action in " + self, self.gameObject);
@@ -24,7 +21,7 @@ namespace com.csutil {
         public static void AddOnClickAction(this Button self, Action<GameObject> onClickAction) {
             if (onClickAction != null) {
                 self.onClick.AddListener(() => {
-                    EventBus.instance.Publish(BUTTON_CLICKED, self);
+                    EventBus.instance.Publish(UiEvents.BUTTON_CLICKED, self);
                     try { onClickAction(self.gameObject); } catch (Exception e) { Log.e(e); }
                 });
             }
@@ -41,7 +38,7 @@ namespace com.csutil {
         public static void AddOnValueChangedAction(this Toggle self, Func<bool, bool> onValueChanged) {
             if (onValueChanged != null) {
                 self.onValueChanged.AddListener((newCheckedState) => {
-                    EventBus.instance.Publish(TOGGLE_CHANGED, self);
+                    EventBus.instance.Publish(UiEvents.TOGGLE_CHANGED, self);
                     var changeAllowed = onValueChanged(newCheckedState);
                     if (!changeAllowed) { self.isOn = !newCheckedState; } // Undo the change
                 });

@@ -22,6 +22,7 @@ namespace com.csutil {
 #endif
             var prefabInstance = GameObject.Instantiate(prefab) as GameObject;
             prefabInstance.name = "Prefab:" + pathInResourcesFolder;
+            EventBus.instance.Publish(IoEvents.PREFAB_LOADED, prefabInstance);
             return prefabInstance;
         }
 

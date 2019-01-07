@@ -8,8 +8,6 @@ namespace com.csutil {
 
     public static class LinkingExtensions {
 
-        public const string LINK_MAP_CREATED = "newUiLinkMapInjected";
-
         public static Dictionary<string, Link> GetLinkMap(this GameObject self) {
             var linkArray = self.GetComponentsInChildren<Link>(true);
             var linkMap = new Dictionary<string, Link>();
@@ -18,7 +16,7 @@ namespace com.csutil {
                 linkMap.Add(link.id, link);
                 //link.NowLoadedIntoLinkMap(links); // TODO?
             }
-            EventBus.instance.Publish(LINK_MAP_CREATED, self, linkMap);
+            EventBus.instance.Publish(LinkingEvents.LINK_MAP_CREATED, self, linkMap);
             return linkMap;
         }
 
