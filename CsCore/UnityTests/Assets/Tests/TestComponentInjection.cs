@@ -9,7 +9,7 @@ using System;
 
 namespace com.csutil.injection.tests {
 
-    public class TestUiInjection {
+    public class TestComponentInjection {
 
         private class MySingleton { }
 
