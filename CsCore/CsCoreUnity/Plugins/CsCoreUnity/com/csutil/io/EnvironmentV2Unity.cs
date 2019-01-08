@@ -11,7 +11,7 @@ namespace com.csutil.io {
 
         public override DirectoryInfo GetTempFolder() {
             var d = new DirectoryInfo(Application.temporaryCachePath);
-            AssertV2.AreEqual(base.GetTempFolder().FullPath(), d.FullPath());
+            AssertV2.AreEqual(base.GetTempFolder().FullPath(), d.FullPath()); // TODO test this
             return d;
         }
 
