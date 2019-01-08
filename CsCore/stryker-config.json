@@ -1,0 +1,7 @@
+{
+	"stryker-config": {
+		"reporters": ["All"],
+		"log-file": true,
+		"timeout-ms":15000
+	}
+}
