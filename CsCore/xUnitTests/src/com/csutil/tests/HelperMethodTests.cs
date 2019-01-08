@@ -41,11 +41,10 @@ namespace com.csutil.tests {
 
         [Fact]
         public void DictionaryExtensionTests() {
-            var dic = new Dictionary<string, int>();
-            Assert.True(dic.AddOrReplace("s1", 123));
-            Assert.False(dic.AddOrReplace("s1", 124));
-            Assert.False(dic.AddOrReplace("s1", 123));
-            Assert.True(dic.AddOrReplace("s2", 234));
+            var dic = new Dictionary<string, string>();
+            Assert.Null(dic.AddOrReplace("s1", "a"));
+            Assert.Equal("a", dic.AddOrReplace("s1", "b"));
+            Assert.Equal("b", dic.AddOrReplace("s1", "a"));
         }
 
         [Fact]
@@ -53,12 +52,15 @@ namespace com.csutil.tests {
             IEnumerable<string> list = null;
             Assert.True(list.IsNullOrEmpty());
             Assert.Equal("null", list.ToStringV2((s) => s));
+
             list = new List<string>();
             Assert.True(list.IsNullOrEmpty());
             Assert.Equal("()", list.ToStringV2((s) => s, bracket1: "(", bracket2: ")"));
+
             (list as List<string>).Add("s1");
             Assert.False(list.IsNullOrEmpty());
             Assert.Equal("{s1}", list.ToStringV2((s) => s, bracket1: "{", bracket2: "}"));
+
             (list as List<string>).Add("s2");
             Assert.False(list.IsNullOrEmpty());
             Assert.Equal("[s1, s2]", list.ToStringV2((s) => s, bracket1: "[", bracket2: "]"));

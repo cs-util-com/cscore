@@ -2,10 +2,14 @@ namespace System.Collections.Generic {
     public static class IDictionaryExtensions {
 
         /// <summary> Returns false if an existing value was replaced </summary>
-        public static bool AddOrReplace<T, V>(this IDictionary<T, V> self, T key, V value) {
-            if (self.ContainsKey(key)) { self[key] = value; return false; }
+        public static V AddOrReplace<T, V>(this IDictionary<T, V> self, T key, V value) {
+            if (self.ContainsKey(key)) {
+                var oldV = self[key];
+                self[key] = value;
+                return oldV;
+            }
             self.Add(key, value);
-            return true;
+            return default(V);
         }
 
         public static V GetValue<T, V>(this IDictionary<T, V> self, T key, V fallback) {

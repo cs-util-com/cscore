@@ -23,8 +23,8 @@ namespace com.csutil {
         public void Subscribe<T, U, V>(object s, string key, Func<T, U, V> f) { Add(s, key, f); }
 
         private void Add(object subscriber, string eventName, Delegate callback) {
-            var noExistingSubscriber = GetOrAdd(eventName).AddOrReplace(subscriber, callback);
-            if (!noExistingSubscriber) { Log.w("Existing subscriber was replaced for event=" + eventName); }
+            var replacedDelegate = GetOrAdd(eventName).AddOrReplace(subscriber, callback);
+            if (replacedDelegate != null) { Log.w("Existing subscriber was replaced for event=" + eventName); }
         }
 
         private ConcurrentDictionary<object, Delegate> GetOrAdd(string eventName) {
@@ -46,8 +46,7 @@ namespace com.csutil {
                     try {
                         object result;
                         if (subscriber.DynamicInvokeV2(args, out result)) { results.Add(result); }
-                    }
-                    catch (Exception e) { Log.e(e); }
+                    } catch (Exception e) { Log.e(e); }
                 }
             } else {
                 Log.d("No subscribers registered for event: " + eventName);
