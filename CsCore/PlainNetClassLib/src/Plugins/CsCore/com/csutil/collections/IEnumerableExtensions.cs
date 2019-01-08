@@ -18,7 +18,7 @@ namespace com.csutil {
             return self.Where(predicate);
         }
 
-        public static bool IsNullOrEmpty<T>(this IEnumerable<T> self) { return self == null || self.Count() == 0; }
+        public static bool IsNullOrEmpty<T>(this IEnumerable<T> self) { return self == null || !self.Any(); }
 
         public static string ToStringV2<T>(this IEnumerable<T> args, Func<T, string> toString, string bracket1 = "[", string bracket2 = "]") {
             if (args == null) { return "null"; }
