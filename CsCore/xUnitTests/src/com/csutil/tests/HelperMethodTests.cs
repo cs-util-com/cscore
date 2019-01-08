@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using com.csutil.datastructures;
 using Xunit;
 
 namespace com.csutil.tests {
@@ -64,6 +65,24 @@ namespace com.csutil.tests {
             (list as List<string>).Add("s2");
             Assert.False(list.IsNullOrEmpty());
             Assert.Equal("[s1, s2]", list.ToStringV2((s) => s, bracket1: "[", bracket2: "]"));
+        }
+
+        [Fact]
+        public void ChangeTrackerTests() {
+            var t = new ChangeTracker<string>("a");
+            Assert.True(t.setNewValue("b"));
+            Assert.False(t.setNewValue("b"));
+            Assert.Equal("b", t.value);
+        }
+
+        [Fact]
+        public void FixedSizedQueueTests() {
+            var q = new FixedSizedQueue<string>(3);
+            q.Enqueue("a").Enqueue("b").Enqueue("c");
+            Assert.Equal(3, q.Count);
+            q.Enqueue("d");
+            Assert.Equal(3, q.Count); // "a" fell out of the queue
+            Assert.Equal("b", q.Dequeue());
         }
 
     }

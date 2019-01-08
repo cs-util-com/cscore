@@ -64,14 +64,17 @@ namespace com.csutil {
 
         public bool UnsubscribeAll(object subscriber) {
             var registeredEvents = map.Filter(x => x.Value.ContainsKey(subscriber));
-            var r = true;
+            var removedCallbacks = new List<Delegate>();
             foreach (var eventMaps in registeredEvents) {
                 var eventName = eventMaps.Key;
                 var subscribersForEventName = eventMaps.Value;
-                r = TryRemove(subscribersForEventName, subscriber) & r;
+                Delegate removedCallback;
+                if (subscribersForEventName.TryRemove(subscriber, out removedCallback)) {
+                    removedCallbacks.Add(removedCallback);
+                }
                 if (subscribersForEventName.IsNullOrEmpty()) { TryRemove(map, eventName); }
             }
-            return r;
+            return removedCallbacks.Count > 0;
         }
 
         private static bool TryRemove<K, V>(ConcurrentDictionary<K, V> self, K key) {
