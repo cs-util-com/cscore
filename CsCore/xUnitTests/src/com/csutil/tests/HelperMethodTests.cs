@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using com.csutil.datastructures;
+using com.csutil.encryption;
 using Xunit;
 
 namespace com.csutil.tests {
@@ -84,6 +86,32 @@ namespace com.csutil.tests {
             Assert.Equal(3, q.Count); // "a" fell out of the queue
             Assert.Equal("b", q.Dequeue());
         }
+
+        [Fact]
+        public void DateTimeTests() {
+            var d1 = new DateTime().NewDateTimeFromUnixTimestamp(-2);
+            var d2 = new DateTime().NewDateTimeFromUnixTimestamp(2);
+            Assert.True(d1.IsBefore(d2));
+            Assert.False(d2.IsBefore(d1));
+            Assert.True(d2.IsAfter(d1));
+            Assert.False(d1.IsAfter(d2));
+        }
+
+        [Fact]
+        public void StringEncryptionTests() {
+            var s = "some text..";
+            var encrypted = s.Encrypt("123");
+            Log.e(encrypted);
+            Assert.NotEqual(s, encrypted);
+            Assert.NotEqual(encrypted, s.Encrypt("124"));
+
+            Assert.Equal(s, encrypted.Decrypt("123"));
+            Assert.Throws<CryptographicException>(() => {
+                Assert.NotEqual(s, encrypted.Decrypt("124"));
+            });
+        }
+
+
 
     }
 }
