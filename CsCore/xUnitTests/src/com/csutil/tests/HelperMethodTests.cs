@@ -6,13 +6,7 @@ using com.csutil.encryption;
 using Xunit;
 
 namespace com.csutil.tests {
-    public class HelperMethodTests : IDisposable {
-
-        public HelperMethodTests() { // // Setup before each test:
-        }
-
-        public void Dispose() { // TearDown after each test:
-        }
+    public class HelperMethodTests : DefaultTest {
 
         [Fact]
         public void DelegateExtensionTests() {
@@ -89,12 +83,30 @@ namespace com.csutil.tests {
 
         [Fact]
         public void DateTimeTests() {
-            var d1 = new DateTime().NewDateTimeFromUnixTimestamp(-2);
-            var d2 = new DateTime().NewDateTimeFromUnixTimestamp(2);
-            Assert.True(d1.IsBefore(d2));
-            Assert.False(d2.IsBefore(d1));
-            Assert.True(d2.IsAfter(d1));
-            Assert.False(d1.IsAfter(d2));
+            AssertV2.ThrowExeptionIfAssertionFails(false, () => {
+                var d1 = DateTimeParser.NewDateTimeFromUnixTimestamp(-2);
+                var d2 = DateTimeParser.NewDateTimeFromUnixTimestamp(2);
+                Assert.True(d1.IsBefore(d2));
+                Assert.False(d2.IsBefore(d1));
+                Assert.True(d2.IsAfter(d1));
+                Assert.False(d1.IsAfter(d2));
+            });
+        }
+
+        [Fact]
+        public void StringExtensionMethodTests() {
+            string s = "abc";
+            Assert.Equal("bc", s.Substring(1, "d", includeEnd: true));
+            Assert.Equal("bc", s.Substring(1, "c", includeEnd: true));
+            Assert.Equal("ab", s.Substring("c", includeEnd: false));
+
+            s = "[{a}]-[{b}]";
+            Assert.Equal("a}]-[{b}]", s.SubstringAfter("{"));
+            Assert.Equal("{b}]", s.SubstringAfter("[", startFromBack: true));
+            Assert.Throws<Exception>(() => { s.SubstringAfter("("); });
+
+            s = "[(abc)]";
+            Assert.Equal("abc", s.SubstringAfter("(").Substring(")", includeEnd: false));
         }
 
         [Fact]
@@ -110,8 +122,6 @@ namespace com.csutil.tests {
                 Assert.NotEqual(s, encrypted.Decrypt("124"));
             });
         }
-
-
 
     }
 }

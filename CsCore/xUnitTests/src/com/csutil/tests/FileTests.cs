@@ -8,14 +8,7 @@ using com.csutil.http;
 using Xunit;
 
 namespace com.csutil.tests {
-    public class FileTests : IDisposable {
-
-        public FileTests() { // Setup before each test
-            AssertV2.throwExeptionIfAssertionFails = true;
-        }
-
-        public void Dispose() { // TearDown after each test
-        }
+    public class FileTests : DefaultTest {
 
         [Fact]
         public void TestIsNotNullAndExists() {

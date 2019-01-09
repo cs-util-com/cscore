@@ -7,8 +7,6 @@ using System.Reflection;
 namespace com.csutil {
     public static class AssertV2 {
 
-        public static bool throwExeptionIfAssertionFails = false;
-
         private const string BR = "\r\n";
 
         private static void Assert(bool condition, string errorMsg, object[] args) {
@@ -21,8 +19,7 @@ namespace com.csutil {
         }
 
         public static void Throws<T>(Action actionThatShouldThrowAnException) where T : Exception {
-            try { actionThatShouldThrowAnException(); }
-            catch (Exception e) {
+            try { actionThatShouldThrowAnException(); } catch (Exception e) {
                 if (e.GetType().IsCastableTo(typeof(T))) { return; } // its the expected exception
                 throw e; // its an unexpected exception
             }
@@ -32,8 +29,6 @@ namespace com.csutil {
         public class ThrowsException : Exception {
             public ThrowsException(string message) : base(message) { }
         }
-
-
 
         [Conditional("DEBUG")]
         public static void IsTrue(bool condition, string errorMsg, params object[] args) {
@@ -94,6 +89,22 @@ namespace com.csutil {
         }
 
         public static bool IsUnderXms(this Stopwatch self, int maxTimeInMs) { return self.ElapsedMilliseconds <= maxTimeInMs; }
+
+        private static object syncLock = new object();
+        public static bool throwExeptionIfAssertionFails = false;
+
+        public static void ThrowExeptionIfAssertionFails(Action taskToExecute) {
+            ThrowExeptionIfAssertionFails(true, taskToExecute);
+        }
+
+        public static void ThrowExeptionIfAssertionFails(bool shouldThrow, Action taskToExecute) {
+            lock (syncLock) {
+                var oldVal = throwExeptionIfAssertionFails;
+                throwExeptionIfAssertionFails = shouldThrow;
+                taskToExecute();
+                throwExeptionIfAssertionFails = oldVal;
+            }
+        }
 
     }
 }

@@ -54,16 +54,16 @@ namespace com.csutil.http.cookies {
             if (this.domain.IsNullOrEmpty()) { Log.e(("domain is null or empty, full cookieString=" + cookieString)); }
         }
 
-        private void ParseTimestamp(string s) {
+        private void ParseTimestamp(string timestampString) {
             try {
-                if (s.Contains("GMT")) { s = s.Substring(0, "GMT"); } else
-                    if (s.Contains("UTC")) { s = s.Substring(0, "UTC", false) + "GMT"; } // RFC1123Pattern expects GMT and crashes on UTC
-                expirationDate = DateTime.Parse(s);
+                expirationDate = DateTimeParser.ParseV2(timestampString);
                 if (expirationDate.ToUnixTimestamp() <= 0) {
-                    if (expirationDate.ToUnixTimestamp() < 0) { Log.e("cookie[" + ToString() + "]: will reject received expirationDate, dateString=" + s); }
+                    if (expirationDate.ToUnixTimestamp() < 0) {
+                        Log.e("cookie[" + ToString() + "]: will reject received expirationDate, dateString=" + timestampString);
+                    }
                     expirationDate = DateTime.MaxValue;
                 }
-            } catch (Exception e) { Log.e("Error during parseTimestamp of: '" + s + "'", e); }
+            } catch (Exception e) { Log.e("Error during parseTimestamp of: '" + timestampString + "'", e); }
         }
 
         public bool Matches(CookieAccessInfo accessInfo) {
