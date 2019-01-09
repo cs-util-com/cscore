@@ -6,13 +6,8 @@ using com.csutil.http;
 using Xunit;
 
 namespace com.csutil.tests {
-    public class RestTests : IDisposable {
 
-        public RestTests() { // Setup before each test
-        }
-
-        public void Dispose() { // TearDown after each test
-        }
+    public class RestTests : DefaultTest {
 
         [Fact]
         public async Task TestSendGET1() {
@@ -60,5 +55,7 @@ namespace com.csutil.tests {
             public string url { get; set; }
             public Dictionary<string, object> headers { get; set; }
         }
+
     }
+    
 }

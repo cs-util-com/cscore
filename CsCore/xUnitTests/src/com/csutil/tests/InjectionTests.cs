@@ -101,11 +101,13 @@ namespace com.csutil.tests {
         }
 
         [Fact]
-        public void TestIsCastableTo() {
+        public void TestRemoveAllInjectors() {
             var IoC_inject = GetInjectorForTest();
-            Assert.True(typeof(MySubClass1).IsCastableTo(typeof(MyClass1)));
-            Assert.True(typeof(MyClass1).IsCastableTo(typeof(MyClass1)));
-            Assert.False(typeof(MyClass1).IsCastableTo(typeof(MySubClass1)));
+            var injector1 = new object();
+            Assert.False(IoC_inject.RemoveAllInjectorsFor<string>());
+            IoC_inject.RegisterInjector<string>(injector1, (c, _) => "");
+            Assert.True(IoC_inject.RemoveAllInjectorsFor<string>());
+            Assert.False(IoC_inject.RemoveAllInjectorsFor<string>());
         }
 
         private class MyClass1 { }

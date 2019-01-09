@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
+using System.Threading.Tasks;
 using com.csutil.datastructures;
 using com.csutil.encryption;
 using Xunit;
@@ -122,6 +123,43 @@ namespace com.csutil.tests {
                 Assert.NotEqual(s, encrypted.Decrypt("124"));
             });
         }
+
+        [Fact]
+        public void TaskExtensionTests() {
+            Task t = null;
+            Assert.Throws<AggregateException>(() => {
+                t = Task.Run(() => { throw Log.e("Some error"); });
+                t.Wait();
+            });
+            Assert.NotNull(t);
+            Assert.NotNull(t.Exception);
+            Assert.Throws<AggregateException>(() => {
+                t.ThrowIfException();
+            });
+        }
+
+        [Fact]
+        public void TypeExtensionsTests() {
+            var MySubClass1 = typeof(MySubClass1);
+            Assert.True(MySubClass1.IsSubclassOf<MyClass1>());
+            Assert.False(MySubClass1.IsSubclassOf<MySubClass2>());
+            Assert.True(typeof(MySubClass2).IsSubclassOf<MyClass1>());
+            Assert.False(typeof(MyClass1).IsSubclassOf<MySubClass1>());
+
+            Assert.True(TypeCheck.AreEqual<MyClass1, MyClass1>());
+            Assert.False(TypeCheck.AreEqual<MySubClass1, MyClass1>());
+
+            Assert.True(typeof(MySubClass2).IsCastableTo<MyClass1>());
+            Assert.False(typeof(MyClass1).IsCastableTo<MySubClass2>());
+
+            Assert.True(typeof(MySubClass1).IsCastableTo(typeof(MyClass1)));
+            Assert.True(typeof(MyClass1).IsCastableTo(typeof(MyClass1)));
+            Assert.False(typeof(MyClass1).IsCastableTo(typeof(MySubClass1)));
+        }
+
+        private class MyClass1 { }
+        private class MySubClass1 : MyClass1 { }
+        private class MySubClass2 : MyClass1 { }
 
     }
 }
