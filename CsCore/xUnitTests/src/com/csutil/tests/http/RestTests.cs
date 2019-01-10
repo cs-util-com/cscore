@@ -7,7 +7,7 @@ using Xunit;
 
 namespace com.csutil.tests {
 
-    public class RestTests : DefaultTest {
+    public class RestTests {
 
         [Fact]
         public async Task TestSendGET1() {

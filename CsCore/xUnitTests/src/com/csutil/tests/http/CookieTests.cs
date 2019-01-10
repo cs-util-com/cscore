@@ -1,7 +1,7 @@
 using Xunit;
 
 namespace com.csutil.tests.http {
-    public class CookieTests : DefaultTest {
+    public class CookieTests {
 
         [Fact]
         public void TestCookieClass() {

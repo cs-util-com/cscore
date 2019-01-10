@@ -2,7 +2,6 @@
 	"stryker-config": {
 		"reporters": ["All"],
 		"log-file": true,
-		"log-level":"warning",
 		"timeout-ms":15000
 	}
 }

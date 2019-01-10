@@ -5,7 +5,7 @@ using Xunit;
 
 namespace com.csutil.tests {
 
-    public class LogTests : DefaultTest {
+    public class LogTests {
 
         [Fact]
         public static void TestBasicLogOutputExamples() {

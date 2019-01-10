@@ -3,7 +3,8 @@ using com.csutil.injection;
 using Xunit;
 
 namespace com.csutil.tests {
-    public class InjectionTests : DefaultTest {
+
+    public class InjectionTests {
 
         /// <summary> 
         /// The global static injector IoC.inject should not be used since the test

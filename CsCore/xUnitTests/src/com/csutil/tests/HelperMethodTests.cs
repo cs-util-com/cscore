@@ -7,7 +7,8 @@ using com.csutil.encryption;
 using Xunit;
 
 namespace com.csutil.tests {
-    public class HelperMethodTests : DefaultTest {
+
+    public class HelperMethodTests {
 
         [Fact]
         public void DelegateExtensionTests() {
@@ -114,7 +115,6 @@ namespace com.csutil.tests {
         public void StringEncryptionTests() {
             var s = "some text..";
             var encrypted = s.Encrypt("123");
-            Log.e(encrypted);
             Assert.NotEqual(s, encrypted);
             Assert.NotEqual(encrypted, s.Encrypt("124"));
 

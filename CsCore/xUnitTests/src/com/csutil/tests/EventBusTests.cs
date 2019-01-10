@@ -2,7 +2,7 @@ using System;
 using Xunit;
 
 namespace com.csutil.tests {
-    public class EventBusTests : DefaultTest {
+    public class EventBusTests {
 
         [Fact]
         public void ExampleUsage1() {

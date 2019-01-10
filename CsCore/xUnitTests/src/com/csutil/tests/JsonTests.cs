@@ -4,7 +4,8 @@ using Newtonsoft.Json;
 using Xunit;
 
 namespace com.csutil.tests {
-    public class JsonTests : DefaultTest {
+
+    public class JsonTests {
 
         [Fact]
         public void TestClassWithoutDefaultConstructor() {

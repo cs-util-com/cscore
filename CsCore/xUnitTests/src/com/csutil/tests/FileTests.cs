@@ -8,7 +8,8 @@ using com.csutil.http;
 using Xunit;
 
 namespace com.csutil.tests {
-    public class FileTests : DefaultTest {
+    
+    public class FileTests {
 
         [Fact]
         public void TestIsNotNullAndExists() {

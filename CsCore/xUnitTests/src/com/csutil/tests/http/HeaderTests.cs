@@ -1,7 +1,7 @@
 using Xunit;
 
 namespace com.csutil.tests.http {
-    public class HeaderTests : DefaultTest {
+    public class HeaderTests {
 
         [Fact]
         public void TestHeadersClass() {
