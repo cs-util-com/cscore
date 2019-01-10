@@ -33,7 +33,7 @@ namespace com.csutil {
 
         public ICollection<object> GetSubscribersFor(string eventName) {
             var subscribers = map.GetValue(eventName, null);
-            return subscribers == null ? null : subscribers.Keys;
+            return subscribers == null ? new List<object>() : subscribers.Keys;
         }
 
         public List<object> Publish(string eventName, params object[] args) {
@@ -55,9 +55,11 @@ namespace com.csutil {
         }
 
         public bool Unsubscribe(object subscriber, string eventName) {
+            if (!map.ContainsKey(eventName)) { return false; }
             Delegate _;
             if (map[eventName].TryRemove(subscriber, out _)) {
                 if (map[eventName].IsEmpty) return TryRemove(map, eventName);
+                return true;
             }
             return false;
         }
