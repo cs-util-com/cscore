@@ -30,22 +30,50 @@ namespace com.csutil.tests {
         }
 
         [Fact]
-        public void TestSingleton2() {
+        public void TestSetSingleton() {
             var IoC_inject = GetInjectorForTest();
-            IoC_inject.SetSingleton<MyClass1, MySubClass1>(new MySubClass1());
+
+            // Set an injector i1 for MyClass1:
+            var i1 = IoC_inject.SetSingleton<MyClass1, MySubClass1>(new MySubClass1());
+            Assert.Equal(typeof(MySubClass1), IoC_inject.Get<MyClass1>(null).GetType());
+
+            // Try to register an additional injector for the same class:
             Assert.Throws<Singleton.MultipleProvidersException>(() => {
                 IoC_inject.SetSingleton<MyClass1, MySubClass2>(new MySubClass2());
             });
+            Assert.Equal(typeof(MySubClass1), IoC_inject.Get<MyClass1>(null).GetType());
+
+            // Force overriding the initial injector i1:
+            var i2 = IoC_inject.SetSingleton<MyClass1, MySubClass2>(new MySubClass2(), true);
+            Assert.Equal(typeof(MySubClass2), IoC_inject.Get<MyClass1>(null).GetType());
+
+            // Check that the initial injector i1 was overwritten by i2:
+            Assert.False(IoC_inject.UnregisterInjector<MyClass1>(i1));
+            Assert.True(IoC_inject.UnregisterInjector<MyClass1>(i2));
+            Assert.Null(IoC_inject.Get<MyClass1>(null));
         }
 
         [Fact]
-        public void TestSingleton3() {
+        public void TestGetOrAddSingleton() {
             var IoC_inject = GetInjectorForTest();
+
             var refA = IoC_inject.GetOrAddSingleton<MyClass1>(this);
             Assert.NotNull(refA);
             Assert.True(refA is MyClass1);
+
             var refB = IoC_inject.GetOrAddSingleton<MyClass1>(this);
             Assert.True(Object.ReferenceEquals(refA, refB));
+
+            Assert.NotNull(IoC_inject.Get<MyClass1>(this));
+            Assert.True(IoC_inject.RemoveAllInjectorsFor<MyClass1>());
+            Assert.Null(IoC_inject.Get<MyClass1>(this));
+
+            var singletonInstance = new MySubClass1();
+            IoC_inject.RegisterInjector<MyClass1>(new object(), (_, createIfNull) => {
+                return createIfNull ? singletonInstance : null;
+            });
+            Assert.Same(singletonInstance, IoC_inject.Get<MyClass1>(this));
+            Assert.Same(singletonInstance, IoC_inject.GetOrAddSingleton<MyClass1>(this));
         }
 
         [Fact]

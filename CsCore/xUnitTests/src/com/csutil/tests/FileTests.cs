@@ -8,7 +8,7 @@ using com.csutil.http;
 using Xunit;
 
 namespace com.csutil.tests {
-    
+
     public class FileTests {
 
         [Fact]
@@ -33,7 +33,9 @@ namespace com.csutil.tests {
             }
 
             dir1.DeleteV2();
+
             Assert.False(dir1.IsNotNullAndExists());
+            Assert.False(dir1.Exists);
             Assert.True(dir1.CreateV2().Exists);
             Assert.True(dir1.IsNotNullAndExists());
             dir1.Create(); // Should do nothing and not throw an exception
