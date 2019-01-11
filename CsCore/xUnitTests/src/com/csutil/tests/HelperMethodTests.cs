@@ -15,26 +15,34 @@ namespace com.csutil.tests {
             {
                 Action a = null;
                 Assert.False(a.InvokeIfNotNull());
-                a = () => { };
+                var wasCalled = false;
+                a = () => { wasCalled = true; };
                 Assert.True(a.InvokeIfNotNull());
+                Assert.True(wasCalled);
             }
             {
                 Action<string> a = null;
                 Assert.False(a.InvokeIfNotNull(""));
-                a = (s) => { };
+                var wasCalled = false;
+                a = (s) => { wasCalled = true; };
                 Assert.True(a.InvokeIfNotNull(""));
+                Assert.True(wasCalled);
             }
             {
                 Action<string, int> a = null;
                 Assert.False(a.InvokeIfNotNull("", 123));
-                a = (s, i) => { };
+                var wasCalled = false;
+                a = (s, i) => { wasCalled = true; };
                 Assert.True(a.InvokeIfNotNull("", 123));
+                Assert.True(wasCalled);
             }
             {
                 Action<string, int, bool> a = null;
                 Assert.False(a.InvokeIfNotNull("", 123, true));
-                a = (s, i, b) => { };
+                var wasCalled = false;
+                a = (s, i, b) => { wasCalled = true; };
                 Assert.True(a.InvokeIfNotNull("", 123, true));
+                Assert.True(wasCalled);
             }
         }
 
