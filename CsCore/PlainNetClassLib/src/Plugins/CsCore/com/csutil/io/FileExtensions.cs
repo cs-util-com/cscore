@@ -109,13 +109,16 @@ namespace com.csutil {
         }
 
         public static T LoadAs<T>(this FileInfo self) {
-            var s = File.ReadAllText(self.FullPath(), Encoding.UTF8);
-            if (typeof(T) == typeof(string)) { return (T)(object)s; }
-            return JsonReader.GetReader().Read<T>(s);
+            using (StreamReader s = File.OpenText(self.FullPath())) {
+                if (typeof(T) == typeof(string)) { return (T)(object)s.ReadToEnd(); }
+                return JsonReader.GetReader().Read<T>(s);
+            }
         }
 
         public static void SaveAsJson<T>(this FileInfo self, T objectToSave) {
-            self.SaveAsText(JsonWriter.GetWriter().Write(objectToSave));
+            using (StreamWriter file = File.CreateText(self.FullPath())) {
+                JsonWriter.GetWriter().Write(objectToSave, file);
+            }
         }
 
         public static void SaveAsText(this FileInfo self, string text) {

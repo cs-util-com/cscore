@@ -40,8 +40,8 @@ namespace com.csutil.tests {
             Assert.True(dir1.IsNotNullAndExists());
             dir1.Create(); // Should do nothing and not throw an exception
             var subDir = dir1.CreateSubdirectory("ChildDir 1");
-            SaveAndLoadTextToFile(subDir.GetChild("Test file 1"));
-            SaveAndLoadTextToFile(subDir.GetChild("Test file 2.txt"));
+            SaveAndLoadTextToFile(subDir.GetChild("Test file 1"), textToSave: "Test 123");
+            SaveAndLoadTextToFile(subDir.GetChild("Test file 2.txt"), textToSave: "Test 123");
 
             { // Test moving folders:
                 var oldPath = dir1.FullPath();
@@ -83,7 +83,7 @@ namespace com.csutil.tests {
             dir1.DeleteV2(); // Cleanup after test
         }
 
-        private static void SaveAndLoadTextToFile(FileInfo testFile, string textToSave = "Test 123") {
+        private static void SaveAndLoadTextToFile(FileInfo testFile, string textToSave) {
             testFile.SaveAsText(textToSave);
             Assert.True(testFile.IsNotNullAndExists());
             AssertV2.AreEqual(textToSave, testFile.LoadAs<string>()); // Load again and compare
@@ -92,13 +92,17 @@ namespace com.csutil.tests {
         [Fact]
         public void TestFileWriteAndRead() {
             var dir = EnvironmentV2.instance.GetCurrentDirectory().CreateSubdirectory("TestFileWriteAndRead");
-            var file1 = dir.GetChild("f1.txt");
-            SaveAndLoadTextToFile(file1);
-            Assert.True(file1.IsNotNullAndExists());
+            SaveAndLoadTextToFile(dir.GetChild("f1.txt"), textToSave: "Test 123");
+            Assert.True(dir.GetChild("f1.txt").IsNotNullAndExists());
 
             var objToSave = new MyClass1() { myString = "I am a string", myInt = 123 };
-            file1.SaveAsJson(objToSave); // This will override the existing file
-            var loadedObj = file1.LoadAs<MyClass1>(); // Load the object again and compare:
+            var jsonFile = dir.GetChild("MyClass1InAJsonFile.txt");
+            jsonFile.SaveAsJson(objToSave);
+            jsonFile.SaveAsJson(objToSave); // This will override the existing file
+            var loadedObj = jsonFile.LoadAs<MyClass1>(); // Load the object again and compare:
+            AssertV2.AreEqual(objToSave.myString, loadedObj.myString);
+            AssertV2.AreEqual(objToSave.myInt, loadedObj.myInt);
+            loadedObj = jsonFile.LoadAs<MyClass1>(); // Load the object again and compare:
             AssertV2.AreEqual(objToSave.myString, loadedObj.myString);
             AssertV2.AreEqual(objToSave.myInt, loadedObj.myInt);
             dir.DeleteV2();
@@ -108,7 +112,7 @@ namespace com.csutil.tests {
         public void TestFileRenameAndMove() {
             var dir = EnvironmentV2.instance.GetCurrentDirectory().CreateSubdirectory("TestFileRename");
             var myFile = dir.GetChild("MyFile1.txt");
-            SaveAndLoadTextToFile(myFile);
+            SaveAndLoadTextToFile(myFile, textToSave: "Test 123");
             Assert.True(myFile.IsNotNullAndExists());
 
             var newName = "MyFile2.txt";
