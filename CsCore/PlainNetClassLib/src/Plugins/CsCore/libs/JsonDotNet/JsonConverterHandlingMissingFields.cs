@@ -33,7 +33,7 @@ namespace com.csutil.json {
                 if (field != null) { field.SetValue(targetObjectToFill, jsonField.Value.ToObject(field.FieldType)); continue; }
                 // Then search for a property of this name:
                 var property = targetObjectType.GetProperty(jsonField.Key);
-                if (property != null) { property.SetValue(targetObjectToFill, jsonField.Value.ToObject(property.PropertyType)); continue; }
+                if (property != null) { property.SetValue(targetObjectToFill, jsonField.Value.ToObject(property.PropertyType), null); continue; }
                 // Then add it to the list of lissing fields:
                 fieldsMissingInTargetObjectType.Add(jsonField);
             }
