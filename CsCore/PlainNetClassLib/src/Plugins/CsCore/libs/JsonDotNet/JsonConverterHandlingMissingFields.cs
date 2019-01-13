@@ -20,7 +20,7 @@ namespace com.csutil.json {
             var missingFieldList = FillTargetObjectAndCollectMissingFields(targetObjectType, targetObjectToFill, sourceJson);
             if (!missingFieldList.IsNullOrEmpty()) {
                 var missingFields = missingFieldList.ToDictionary(x => x.Key, x => (object)x.Value);
-                (targetObjectToFill as HandleAdditionalJsonFields).SetAdditionalJsonFields(missingFields);
+                (targetObjectToFill as HandleAdditionalJsonFields).AdditionalJsonFields = missingFields;
             }
             return targetObjectToFill;
         }
@@ -45,7 +45,7 @@ namespace com.csutil.json {
             JToken t = JToken.FromObject(value);
             if (t is JObject) {
                 JObject o = (JObject)t;
-                var missingFields = (value as HandleAdditionalJsonFields).GetAdditionalJsonFields();
+                var missingFields = (value as HandleAdditionalJsonFields).AdditionalJsonFields;
                 if (!missingFields.IsNullOrEmpty()) {
                     foreach (var f in missingFields) { o.Add(new JProperty(f.Key, f.Value)); }
                 }

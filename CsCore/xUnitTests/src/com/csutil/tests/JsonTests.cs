@@ -31,7 +31,7 @@ namespace com.csutil.tests {
             var x1JsonString = JsonWriter.GetWriter().Write(x1);
             var x2 = JsonReader.GetReader().Read<MySubClassThatKeepsAdditionalJsonFields>(x1JsonString);
             // myString2 and myComplexChildField are missing x2 as fields/porperties so the count of additionl json fields must be 2:
-            Assert.Equal(2, x2.GetAdditionalJsonFields().Count);
+            Assert.Equal(2, x2.AdditionalJsonFields.Count);
             // The json will still contain the additional fields since they are attached again during serialization:
             var x2JsonString = JsonWriter.GetWriter().Write(x2);
             // Now parse it back to a MySubClass1 type:
@@ -43,13 +43,11 @@ namespace com.csutil.tests {
         }
 
         private class MyClass1 {
-
         }
 
         private class MySubClass1 : MyClass1 {
             public string myString;
             public string myString2;
-
             public MySubClass1 myComplexField { get; set; }
         }
 
@@ -63,15 +61,7 @@ namespace com.csutil.tests {
         private class MySubClassThatKeepsAdditionalJsonFields : MyClass1, HandleAdditionalJsonFields {
             public string myString;
 
-            private Dictionary<string, object> additionalFieldsFromJsonThatAreMissingInClass;
-            public Dictionary<string, object> GetAdditionalJsonFields() {
-                // additionalFieldsFromJsonThatAreMissingInClass = new Dictionary<string, object>();
-                // additionalFieldsFromJsonThatAreMissingInClass.Add("test", "test");
-                return additionalFieldsFromJsonThatAreMissingInClass;
-            }
-            public void SetAdditionalJsonFields(Dictionary<string, object> additionalFieldsFromJsonThatAreMissingInClass) {
-                this.additionalFieldsFromJsonThatAreMissingInClass = additionalFieldsFromJsonThatAreMissingInClass;
-            }
+            public Dictionary<string, object> AdditionalJsonFields { get; set; }
         }
 
     }
