@@ -3,6 +3,7 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Linq;
 
 namespace com.csutil.editor {
 
@@ -12,93 +13,87 @@ namespace com.csutil.editor {
 
         internal static PropertyInspectorUi[] GetAllProperties(System.Object obj) {
             if (obj == null) { return null; }
-            List<PropertyInspectorUi> fields = new List<PropertyInspectorUi>();
-            PropertyInfo[] infos = obj.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);
-            foreach (PropertyInfo info in infos) {
-                if (!(info.CanRead && info.CanWrite)) { continue; }
-                object[] attributes = info.GetCustomAttributes(true);
-                bool isExposed = false;
-                foreach (object o in attributes) {
-                    if (o.GetType() == typeof(ShowInInspectorAttribute)) {
-                        isExposed = true;
-                        break;
-                    }
-                }
-                if (!isExposed) { continue; }
-                SerializedPropertyType type = SerializedPropertyType.Integer;
-                if (PropertyInspectorUi.GetPropertyType(info, out type)) {
-                    PropertyInspectorUi field = new PropertyInspectorUi(obj, info, type);
-                    fields.Add(field);
-                }
+            var readableProps = obj.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).Where(p => p.CanRead);
+
+            var propertyInspectorUis = new List<PropertyInspectorUi>();
+            foreach (PropertyInfo property in readableProps) {
+                var type = SerializedPropertyType.Integer;
+                if (GetPropertyType(property, out type)) { propertyInspectorUis.Add(new PropertyInspectorUi(obj, property, type)); }
             }
-            return fields.ToArray();
+            return propertyInspectorUis.ToArray();
         }
 
         internal static void DrawPropertiesInInspector(PropertyInspectorUi[] properties) {
             if (properties == null || properties.Length == 0) { return; }
             GUILayoutOption[] emptyOptions = new GUILayoutOption[0];
             EditorGUILayout.BeginVertical(emptyOptions);
-            foreach (PropertyInspectorUi field in properties) {
+            foreach (PropertyInspectorUi property in properties) {
                 EditorGUILayout.BeginHorizontal(emptyOptions);
-                switch (field.Type) {
-                    case SerializedPropertyType.Integer:
-                        field.SetValue(EditorGUILayout.IntField(field.Name, (int)field.GetValue(), emptyOptions));
-                        break;
-                    case SerializedPropertyType.Float:
-                        field.SetValue(EditorGUILayout.FloatField(field.Name, (float)field.GetValue(), emptyOptions));
-                        break;
-                    case SerializedPropertyType.Boolean:
-                        field.SetValue(EditorGUILayout.Toggle(field.Name, (bool)field.GetValue(), emptyOptions));
-                        break;
-                    case SerializedPropertyType.String:
-                        field.SetValue(EditorGUILayout.TextField(field.Name, (String)field.GetValue(), emptyOptions));
-                        break;
-                    case SerializedPropertyType.Vector2:
-                        field.SetValue(EditorGUILayout.Vector2Field(field.Name, (Vector2)field.GetValue(), emptyOptions));
-                        break;
-                    case SerializedPropertyType.Vector3:
-                        field.SetValue(EditorGUILayout.Vector3Field(field.Name, (Vector3)field.GetValue(), emptyOptions));
-                        break;
-                    case SerializedPropertyType.Enum:
-                        field.SetValue(EditorGUILayout.EnumPopup(field.Name, (Enum)field.GetValue(), emptyOptions));
-                        break;
-                    case SerializedPropertyType.ObjectReference:
-                        field.SetValue(EditorGUILayout.ObjectField(field.Name, (UnityEngine.Object)field.GetValue(), field.GetPropertyType(), true, emptyOptions));
-                        break;
-                    default:
-                        break;
-                }
+                GUI.enabled = property.PropertyHasASetter();
+                ShowEditorInspectorUiForField(property, emptyOptions);
+                GUI.enabled = true;
                 EditorGUILayout.EndHorizontal();
             }
             EditorGUILayout.EndVertical();
         }
 
-        private System.Object m_Instance;
-        private PropertyInfo m_Info;
-        private SerializedPropertyType m_Type;
-        private MethodInfo m_Getter;
-        private MethodInfo m_Setter;
-
-        private SerializedPropertyType Type { get { return m_Type; } }
-
-        private string Name { get { return ObjectNames.NicifyVariableName(m_Info.Name); } }
-
-        private PropertyInspectorUi(System.Object instance, PropertyInfo info, SerializedPropertyType type) {
-            m_Instance = instance;
-            m_Info = info;
-            m_Type = type;
-            m_Getter = m_Info.GetGetMethod();
-            m_Setter = m_Info.GetSetMethod();
+        private static void ShowEditorInspectorUiForField(PropertyInspectorUi prop, GUILayoutOption[] o) {
+            switch (prop.propertyType) {
+                case SerializedPropertyType.Integer:
+                    prop.SetValue(EditorGUILayout.IntField(prop.propertyName, (int)prop.GetValue(), o));
+                    break;
+                case SerializedPropertyType.Float:
+                    prop.SetValue(EditorGUILayout.FloatField(prop.propertyName, (float)prop.GetValue(), o));
+                    break;
+                case SerializedPropertyType.Boolean:
+                    prop.SetValue(EditorGUILayout.Toggle(prop.propertyName, (bool)prop.GetValue(), o));
+                    break;
+                case SerializedPropertyType.String:
+                    prop.SetValue(EditorGUILayout.TextField(prop.propertyName, (String)prop.GetValue(), o));
+                    break;
+                case SerializedPropertyType.Vector2:
+                    prop.SetValue(EditorGUILayout.Vector2Field(prop.propertyName, (Vector2)prop.GetValue(), o));
+                    break;
+                case SerializedPropertyType.Vector3:
+                    prop.SetValue(EditorGUILayout.Vector3Field(prop.propertyName, (Vector3)prop.GetValue(), o));
+                    break;
+                case SerializedPropertyType.Enum:
+                    prop.SetValue(EditorGUILayout.EnumPopup(prop.propertyName, (Enum)prop.GetValue(), o));
+                    break;
+                case SerializedPropertyType.ObjectReference:
+                    prop.SetValue(EditorGUILayout.ObjectField(prop.propertyName, (UnityEngine.Object)prop.GetValue(), prop.GetPropertyType(), true, o));
+                    break;
+                default:
+                    break;
+            }
         }
 
-        private System.Object GetValue() { return m_Getter.Invoke(m_Instance, null); }
+        private System.Object objInstance;
+        private PropertyInfo property;
+        private SerializedPropertyType propertyType;
+        private MethodInfo propertyGet;
+        private MethodInfo propertySet;
+        private string propertyName;
+
+        private PropertyInspectorUi(System.Object objectInstance, PropertyInfo prop, SerializedPropertyType propertyType) {
+            this.objInstance = objectInstance;
+            this.property = prop;
+            this.propertyType = propertyType;
+            this.propertyName = ObjectNames.NicifyVariableName(property.Name);
+            this.propertyGet = property.GetGetMethod();
+            this.propertySet = property.GetSetMethod();
+        }
+
+        private System.Object GetValue() { return propertyGet.Invoke(objInstance, null); }
 
         private void SetValue(System.Object value) {
-            if (m_Setter == null) { return; }
-            m_Setter.Invoke(m_Instance, new System.Object[] { value });
+            if (!PropertyHasASetter()) { return; }
+            propertySet.Invoke(objInstance, new System.Object[] { value });
         }
 
-        public Type GetPropertyType() { return m_Info.PropertyType; }
+        private bool PropertyHasASetter() { return propertySet != null; }
+
+        public Type GetPropertyType() { return property.PropertyType; }
 
         private static bool GetPropertyType(PropertyInfo info, out SerializedPropertyType propertyType) {
             propertyType = SerializedPropertyType.Generic;

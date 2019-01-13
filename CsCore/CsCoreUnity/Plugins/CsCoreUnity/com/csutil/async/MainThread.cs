@@ -13,13 +13,13 @@ namespace com.csutil {
 
         public static MainThread instance { get { return IoC.inject.GetOrAddComponentSingleton<MainThread>(new object()); } }
 
-        private static Thread mainThreadRef;
-        private Stopwatch stopWatch;
-
         public static bool isMainThread { get { return mainThreadRef.Equals(Thread.CurrentThread); } }
 
-        private ConcurrentQueue<Action> actionsForMainThread = new ConcurrentQueue<Action>();
+        private static Thread mainThreadRef;
+
         public long maxAllowedTaskDurationInMsPerFrame = 33;
+        private Stopwatch stopWatch;
+        private ConcurrentQueue<Action> actionsForMainThread = new ConcurrentQueue<Action>();
 
         private void Awake() {
             Log.d("Now initializing MainThread helper");
