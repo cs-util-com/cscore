@@ -22,23 +22,22 @@ namespace com.csutil.tests {
 
         [Fact]
         public void TestDirectoryMethods() {
-            var rootDir = EnvironmentV2.instance.GetCurrentDirectory().CreateSubdirectory("TestDirectoryMethods");
-            Assert.True(rootDir.IsNotNullAndExists());
+            var rootDir = CreateDirectoryForTesting("TestDirectoryMethods");
 
+            // Test FullPath:
             var dir1 = rootDir.GetChildDir("TestDir 1");
+            var alsoDir1 = dir1.Parent.GetChildDir("TestDir 1");
+            AssertV2.AreEqual(dir1.FullPath(), alsoDir1.FullPath());
 
-            {
-                var dir1Clone = dir1.Parent.GetChildDir("TestDir 1");
-                AssertV2.AreEqual(dir1.FullPath(), dir1Clone.FullPath());
-            }
-
+            // Test deleting and creating Dir 1:
             dir1.DeleteV2();
-
             Assert.False(dir1.IsNotNullAndExists());
             Assert.False(dir1.Exists);
             Assert.True(dir1.CreateV2().Exists);
             Assert.True(dir1.IsNotNullAndExists());
             dir1.Create(); // Should do nothing and not throw an exception
+
+            // Test creating sub dirs and files:
             var subDir = dir1.CreateSubdirectory("ChildDir 1");
             SaveAndLoadTextToFile(subDir.GetChild("Test file 1"), textToSave: "Test 123");
             SaveAndLoadTextToFile(subDir.GetChild("Test file 2.txt"), textToSave: "Test 123");
@@ -92,12 +91,13 @@ namespace com.csutil.tests {
 
         [Fact]
         public void TestFileWriteAndRead() {
-            var dir = EnvironmentV2.instance.GetCurrentDirectory().CreateSubdirectory("TestFileWriteAndRead");
-            SaveAndLoadTextToFile(dir.GetChild("f1.txt"), textToSave: "Test 123");
-            Assert.True(dir.GetChild("f1.txt").IsNotNullAndExists());
+            DirectoryInfo rootDir = CreateDirectoryForTesting("TestFileWriteAndRead");
+
+            SaveAndLoadTextToFile(rootDir.GetChild("f1.txt"), textToSave: "Test 123");
+            Assert.True(rootDir.GetChild("f1.txt").IsNotNullAndExists());
 
             var objToSave = new MyClass1() { myString = "I am a string", myInt = 123 };
-            var jsonFile = dir.GetChild("MyClass1InAJsonFile.txt");
+            var jsonFile = rootDir.GetChild("MyClass1InAJsonFile.txt");
             jsonFile.SaveAsJson(objToSave);
             jsonFile.SaveAsJson(objToSave); // This will override the existing file
             var loadedObj = jsonFile.LoadAs<MyClass1>(); // Load the object again and compare:
@@ -106,13 +106,22 @@ namespace com.csutil.tests {
             loadedObj = jsonFile.LoadAs<MyClass1>(); // Load the object again and compare:
             AssertV2.AreEqual(objToSave.myString, loadedObj.myString);
             AssertV2.AreEqual(objToSave.myInt, loadedObj.myInt);
-            dir.DeleteV2();
+            rootDir.DeleteV2();
+        }
+
+        private static DirectoryInfo CreateDirectoryForTesting(string name) {
+            var rootDir = EnvironmentV2.instance.GetCurrentDirectory().CreateSubdirectory(name);
+            rootDir.DeleteV2();
+            rootDir.CreateV2();
+            Assert.True(rootDir.IsNotNullAndExists());
+            return rootDir;
         }
 
         [Fact]
         public void TestFileRenameAndMove() {
-            var dir = EnvironmentV2.instance.GetCurrentDirectory().CreateSubdirectory("TestFileRename");
-            var myFile = dir.GetChild("MyFile1.txt");
+            var rootDir = CreateDirectoryForTesting("TestFileRename");
+
+            var myFile = rootDir.GetChild("MyFile1.txt");
             SaveAndLoadTextToFile(myFile, textToSave: "Test 123");
             Assert.True(myFile.IsNotNullAndExists());
 
@@ -123,12 +132,12 @@ namespace com.csutil.tests {
             AssertV2.AreEqual(newName, myFile.Name);
             AssertV2.AreNotEqual(oldPath.Name, myFile.Name);
 
-            var subdir = dir.CreateSubdirectory("subdir");
+            var subdir = rootDir.CreateSubdirectory("subdir");
             myFile.MoveToV2(subdir);
             AssertV2.AreEqual(1, subdir.GetFiles().Count());
             AssertV2.AreEqual(subdir.FullPath(), myFile.ParentDir().FullPath());
 
-            dir.DeleteV2();
+            rootDir.DeleteV2();
         }
 
 
