@@ -14,9 +14,7 @@ namespace com.csutil.http.tests {
     public class TestRestCommunication {
 
         [SetUp]
-        public void BeforeEachTest() {
-            UnitySetup.instance.Setup();
-        }
+        public void BeforeEachTest() { }
 
         [TearDown]
         public void AfterEachTest() { }

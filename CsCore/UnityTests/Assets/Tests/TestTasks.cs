@@ -15,9 +15,7 @@ namespace com.csutil {
     class TestTasks {
 
         [SetUp]
-        public void BeforeEachTest() {
-            UnitySetup.instance.Setup();
-        }
+        public void BeforeEachTest() { }
 
         [TearDown]
         public void AfterEachTest() { }

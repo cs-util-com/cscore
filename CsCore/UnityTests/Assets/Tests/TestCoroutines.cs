@@ -10,9 +10,7 @@ namespace com.csutil {
     class TestCoroutines {
 
         [SetUp]
-        public void BeforeEachTest() {
-            UnitySetup.instance.Setup();
-        }
+        public void BeforeEachTest() { }
 
         [TearDown]
         public void AfterEachTest() { }

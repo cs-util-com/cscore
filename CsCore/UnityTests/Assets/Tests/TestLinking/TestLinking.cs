@@ -13,9 +13,7 @@ namespace com.csutil.linking.tests {
         private class MySingleton { }
 
         [SetUp]
-        public void BeforeEachTest() {
-            UnitySetup.instance.Setup();
-        }
+        public void BeforeEachTest() { }
 
         [TearDown]
         public void AfterEachTest() { }

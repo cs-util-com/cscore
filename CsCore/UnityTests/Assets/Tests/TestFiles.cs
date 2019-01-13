@@ -9,9 +9,7 @@ namespace com.csutil.io.tests {
     public class TestFiles {
 
         [SetUp]
-        public void BeforeEachTest() {
-            UnitySetup.instance.Setup();
-        }
+        public void BeforeEachTest() { }
 
         [TearDown]
         public void AfterEachTest() { }
