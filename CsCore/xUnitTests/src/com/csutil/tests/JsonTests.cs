@@ -20,18 +20,18 @@ namespace com.csutil.tests {
         [Fact]
         public void TestMissingFieldInClass() {
             var x1 = new MySubClass1() { myString = "I am s1", myString2 = "I am s2" };
-            var json = JsonWriter.GetWriter().Write((MyClass1)x1);
-            var x2 = JsonReader.GetReader().Read<MySubClassWithoutADefaultConstructor>(json);
+            var jsonString = JsonWriter.GetWriter().Write(x1 as MyClass1);
+            var x2 = JsonReader.GetReader().Read<MySubClassWithoutADefaultConstructor>(jsonString);
             Assert.Equal(x1.myString, x2.myString);
         }
 
         [Fact]
         public void TestMissingFieldInClass2() {
             var x1 = new MySubClass1() { myString = "I am s1", myString2 = "I am s2" };
-            var json = JsonWriter.GetWriter().Write(x1);
-            Log.d("json=" + json);
-            var x3 = JsonReader.GetReader().Read<MySubClassThatKeepsAdditionalJsonFields>(json);
-            Assert.Equal(x1.myString, x3.myString);
+            var jsonString = JsonWriter.GetWriter().Write(x1);
+            var x2 = JsonReader.GetReader().Read<MySubClassThatKeepsAdditionalJsonFields>(jsonString);
+            Assert.Equal(x1.myString, x2.myString);
+            Log.d("x2.json=" + JsonWriter.GetWriter().Write(x2));
         }
 
         private class MyClass1 {
@@ -55,9 +55,15 @@ namespace com.csutil.tests {
         private class MySubClassThatKeepsAdditionalJsonFields : MyClass1, HandleAdditionalJsonFields {
             public string myString;
 
-            private Dictionary<string, object> missingFields;
-            public Dictionary<string, object> GetMissingFields() { return missingFields; }
-            public void SetMissingFields(Dictionary<string, object> missingFields) { this.missingFields = missingFields; }
+            private Dictionary<string, object> additionalFieldsFromJsonThatAreMissingInClass;
+            public Dictionary<string, object> GetMissingFields() {
+                // additionalFieldsFromJsonThatAreMissingInClass = new Dictionary<string, object>();
+                // additionalFieldsFromJsonThatAreMissingInClass.Add("test", "test");
+                return additionalFieldsFromJsonThatAreMissingInClass;
+            }
+            public void SetMissingFields(Dictionary<string, object> additionalFieldsFromJsonThatAreMissingInClass) {
+                this.additionalFieldsFromJsonThatAreMissingInClass = additionalFieldsFromJsonThatAreMissingInClass;
+            }
         }
 
     }
