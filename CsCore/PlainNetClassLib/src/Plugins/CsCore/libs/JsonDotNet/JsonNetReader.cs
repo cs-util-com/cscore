@@ -12,14 +12,14 @@ namespace com.csutil.json {
 
         public T Read<T>(string jsonString) {
             var r = JsonConvert.DeserializeObject<T>(jsonString, JsonNetSettings.defaultSettings);
-            this.assertThatJsonWasFullyParsedIntoFields(debugWriter, jsonString, r);
+            this.AssertThatJsonWasFullyParsedIntoFields(debugWriter, jsonString, r);
             if (r is JsonReaderFinished) { ((JsonReaderFinished)r).onJsonReadingFinished(jsonString); }
             return r;
         }
 
         public T Read<T>(StreamReader jsonString) {
             var r = (T)reader.Deserialize(jsonString, typeof(T));
-            this.assertThatJsonWasFullyParsedIntoFields(debugWriter, jsonString.ReadToEnd(), r);
+            this.AssertThatJsonWasFullyParsedIntoFields(debugWriter, jsonString.ReadToEnd(), r);
             return r;
         }
 
