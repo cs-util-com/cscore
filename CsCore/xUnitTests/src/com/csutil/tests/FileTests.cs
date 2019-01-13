@@ -22,7 +22,7 @@ namespace com.csutil.tests {
 
         [Fact]
         public void TestDirectoryMethods() {
-            var rootDir = EnvironmentV2.instance.GetCurrentDirectory();
+            var rootDir = EnvironmentV2.instance.GetCurrentDirectory().CreateSubdirectory("TestDirectoryMethods");
             Assert.True(rootDir.IsNotNullAndExists());
 
             var dir1 = rootDir.GetChildDir("TestDir 1");
@@ -77,10 +77,11 @@ namespace com.csutil.tests {
                 rootDir.GetChildDir(newName).DeleteV2();
                 var oldPath = dir1.FullPath();
                 dir1.Rename(newName);
-                AssertV2.AreEqual(newName, dir1.Name);
                 Assert.False(new DirectoryInfo(oldPath).Exists);
+                AssertV2.AreEqual(newName, dir1.Name);
             }
-            dir1.DeleteV2(); // Cleanup after test
+
+            rootDir.DeleteV2(); // Cleanup after test
         }
 
         private static void SaveAndLoadTextToFile(FileInfo testFile, string textToSave) {

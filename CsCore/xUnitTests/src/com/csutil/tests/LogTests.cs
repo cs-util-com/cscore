@@ -27,7 +27,7 @@ namespace com.csutil.tests {
             // .. here would be some method logic ..
             Thread.Sleep(1);
 
-            Log.MethodDone(timing, maxAllowedTimeInMs: 10);
+            Log.MethodDone(timing, maxAllowedTimeInMs: 50);
         }
 
         [Fact]
@@ -61,10 +61,10 @@ namespace com.csutil.tests {
                 var stopWatch = AssertV2.TrackTiming();
                 Thread.Sleep(10);
                 stopWatch.Stop();
-                stopWatch.AssertUnderXms(20);
                 AssertV2.Throws<Exception>(() => { stopWatch.AssertUnderXms(1); }); // This should always fail
-                AssertV2.IsTrue(stopWatch.IsUnderXms(20), "More time was needed than expected!");
 
+                stopWatch.AssertUnderXms(50);
+                AssertV2.IsTrue(stopWatch.IsUnderXms(50), "More time was needed than expected!");
             });
 
         }
