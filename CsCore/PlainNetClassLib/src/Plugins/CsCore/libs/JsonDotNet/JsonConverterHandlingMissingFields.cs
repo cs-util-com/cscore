@@ -20,7 +20,7 @@ namespace com.csutil.json {
             var missingFieldList = FillTargetObjectAndCollectMissingFields(targetObjectType, targetObjectToFill, sourceJson);
             if (!missingFieldList.IsNullOrEmpty()) {
                 var missingFields = missingFieldList.ToDictionary(x => x.Key, x => (object)x.Value);
-                (targetObjectToFill as HandleAdditionalJsonFields).SetMissingFields(missingFields);
+                (targetObjectToFill as HandleAdditionalJsonFields).SetAdditionalJsonFields(missingFields);
             }
             return targetObjectToFill;
         }
@@ -43,14 +43,14 @@ namespace com.csutil.json {
         public override void WriteJson(Newtonsoft.Json.JsonWriter writer, object value, JsonSerializer serializer) {
             // See also reference example at https://www.newtonsoft.com/json/help/html/CustomJsonConverter.htm
             JToken t = JToken.FromObject(value);
-            if (t.Type != JTokenType.Object) {
-                t.WriteTo(writer);
-            } else {
+            if (t is JObject) {
                 JObject o = (JObject)t;
-                var missingFields = (value as HandleAdditionalJsonFields).GetMissingFields();
-                if (!missingFields.IsNullOrEmpty()) { foreach (var f in missingFields) { o.Add(new JProperty(f.Key, f.Value)); } }
-                o.WriteTo(writer);
+                var missingFields = (value as HandleAdditionalJsonFields).GetAdditionalJsonFields();
+                if (!missingFields.IsNullOrEmpty()) {
+                    foreach (var f in missingFields) { o.Add(new JProperty(f.Key, f.Value)); }
+                }
             }
+            t.WriteTo(writer);
         }
 
     }
