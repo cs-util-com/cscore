@@ -91,8 +91,13 @@ namespace com.csutil.http.tests {
                 Log.d("AssertGetResult: Waiting..");
                 yield return new WaitForSeconds(0.1f);
             }
-            var x2 = runningTask.Result;
-            Log.d("Your IP is " + x2.origin);
+            Assert.IsTrue(runningTask.IsCompleted);
+            Assert.IsFalse(runningTask.IsFaulted);
+            Assert.IsFalse(runningTask.IsCanceled);
+
+            var httpBinGetResponse = runningTask.Result;
+            Log.d("Your IP is " + httpBinGetResponse.origin);
+            Assert.IsNotNull(httpBinGetResponse.origin);
         }
 
         public class HttpBinGetResp {

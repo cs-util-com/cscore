@@ -10,7 +10,17 @@ namespace com.csutil {
         static EventBus() { Log.d("EventBus used the first time.."); }
         public static IEventBus instance = new EventBus();
 
-        private readonly ConcurrentDictionary<string, ConcurrentDictionary<object, Delegate>> map = new ConcurrentDictionary<string, ConcurrentDictionary<object, Delegate>>();
+        public ConcurrentQueue<string> eventHistory { get; set; }
+
+        /// <summary> sync subscribing and publishing to not happen at the same time </summary>
+        private object threadLock = new object();
+
+        private readonly ConcurrentDictionary<string, ConcurrentDictionary<object, Delegate>> map =
+            new ConcurrentDictionary<string, ConcurrentDictionary<object, Delegate>>();
+
+        public EventBus() {
+            eventHistory = new ConcurrentQueue<string>();
+        }
 
         public void Subscribe(object s, string key, Action a) { Add(s, key, a); }
 
@@ -23,8 +33,10 @@ namespace com.csutil {
         public void Subscribe<T, U, V>(object s, string key, Func<T, U, V> f) { Add(s, key, f); }
 
         private void Add(object subscriber, string eventName, Delegate callback) {
-            var replacedDelegate = GetOrAdd(eventName).AddOrReplace(subscriber, callback);
-            if (replacedDelegate != null) { Log.w("Existing subscriber was replaced for event=" + eventName); }
+            lock (threadLock) {
+                var replacedDelegate = GetOrAdd(eventName).AddOrReplace(subscriber, callback);
+                if (replacedDelegate != null) { Log.w("Existing subscriber was replaced for event=" + eventName); }
+            }
         }
 
         private ConcurrentDictionary<object, Delegate> GetOrAdd(string eventName) {
@@ -37,21 +49,25 @@ namespace com.csutil {
         }
 
         public List<object> Publish(string eventName, params object[] args) {
-            var results = new List<object>();
-            ConcurrentDictionary<object, Delegate> dictForEventName;
-            map.TryGetValue(eventName, out dictForEventName);
-            if (!dictForEventName.IsNullOrEmpty()) {
-                var subscribers = dictForEventName.Values;
-                foreach (var subscriber in subscribers) {
-                    try {
-                        object result;
-                        if (subscriber.DynamicInvokeV2(args, out result)) { results.Add(result); }
-                    } catch (Exception e) { Log.e(e); }
+            lock (threadLock) {
+                var results = new List<object>();
+                ConcurrentDictionary<object, Delegate> dictForEventName;
+                map.TryGetValue(eventName, out dictForEventName);
+                if (!dictForEventName.IsNullOrEmpty()) {
+                    var subscribers = dictForEventName.Values;
+                    foreach (var subscriber in subscribers) {
+                        try {
+                            object result;
+                            if (subscriber.DynamicInvokeV2(args, out result)) { results.Add(result); }
+                        }
+                        catch (Exception e) { Log.e(e); }
+                    }
+                } else {
+                    Log.d("No subscribers registered for event: " + eventName);
                 }
-            } else {
-                Log.d("No subscribers registered for event: " + eventName);
+                eventHistory.Enqueue(eventName);
+                return results;
             }
-            return results;
         }
 
         public bool Unsubscribe(object subscriber, string eventName) {
