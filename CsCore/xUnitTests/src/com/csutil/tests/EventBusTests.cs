@@ -71,6 +71,45 @@ namespace com.csutil.tests {
             Assert.False(EventBus_instance.UnsubscribeAll(subscriber));
         }
 
+        [Fact]
+        public void TestSubscribeForOnePublish() {
+            EventBus EventBus_instance = GetEventBusForTesting();
+            var eventName = "TestEvent1";
+            Assert.Empty(EventBus_instance.Publish(eventName));
+            var wasAlreadyReceived = false;
+            EventBus_instance.SubscribeForOnePublish(new object(), eventName, () => {
+                Assert.False(wasAlreadyReceived);
+                wasAlreadyReceived = true;
+            });
+            Assert.Single(EventBus_instance.Publish(eventName));
+            Assert.Empty(EventBus_instance.Publish(eventName));
+        }
+
+        [Fact]
+        public void TestSubscribeForOnePublishOrInstantInvokeIfInHistory() {
+            EventBus EventBus_instance = GetEventBusForTesting();
+            {
+                var eventName1 = "TestEvent1";
+                Assert.Empty(EventBus_instance.Publish(eventName1));
+                var wasAlreadyReceived = false;
+                Assert.True(EventBus_instance.SubscribeForOnePublishOrInstantInvokeIfInHistory(eventName1, () => {
+                    Assert.False(wasAlreadyReceived);
+                    wasAlreadyReceived = true;
+                }));
+                Assert.Empty(EventBus_instance.Publish(eventName1));
+            }
+            {
+                var eventName2 = "TestEvent2";
+                var wasAlreadyReceived = false;
+                Assert.False(EventBus_instance.SubscribeForOnePublishOrInstantInvokeIfInHistory(eventName2, () => {
+                    Assert.False(wasAlreadyReceived);
+                    wasAlreadyReceived = true;
+                }));
+                Assert.Single(EventBus_instance.Publish(eventName2));
+                Assert.Empty(EventBus_instance.Publish(eventName2));
+            }
+        }
+
         /// <summary> 
         /// The global static EventBus.instance should not be used since the test
         /// System will execute many tests in parallel and other tests might change
