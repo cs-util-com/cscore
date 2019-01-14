@@ -45,12 +45,12 @@ namespace com.csutil {
                 Log.d("Task 2 is done now");
             }, scheduler).task;
 
-            yield return task1.WaitForTaskToFinish();
+            yield return task1.AsCoroutine();
             Assert.IsTrue(task1.IsCompleted);
             Assert.IsTrue(task1.IsFaulted);
             Log.d("Task 1 error was: " + task1.Exception);
 
-            yield return task2.WaitForTaskToFinish();
+            yield return task2.AsCoroutine();
             Assert.IsTrue(task2.IsCompleted);
             Assert.IsFalse(task2.IsFaulted);
         }
@@ -67,7 +67,7 @@ namespace com.csutil {
                 Log.d("Background thread now done");
             }).task;
             Assert.IsNull(go);
-            yield return task.WaitForTaskToFinish();
+            yield return task.AsCoroutine();
             task.ThrowIfException();
             Assert.IsNotNull(go);
             Assert.AreEqual("B", go.name);

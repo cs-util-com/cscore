@@ -99,6 +99,15 @@ namespace com.csutil {
             catch (Exception e) { Log.e(e); }
         }
 
+        /// <summary> This will ensure that the subscribe callback happens on the main thread </summary>
+        public static void SubscribeOnMainThread(this IEventBus self, object subscriber, string eventName, Action callback) {
+            self.Subscribe(subscriber, eventName, () => {
+                MainThread.Invoke(() => {
+                    callback.InvokeIfNotNull();
+                });
+            });
+        }
+
     }
 
 }

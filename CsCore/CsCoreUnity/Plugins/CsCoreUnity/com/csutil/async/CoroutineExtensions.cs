@@ -10,13 +10,17 @@ namespace com.csutil {
 
     public static class CoroutineExtensions {
 
-        public static IEnumerator WaitForTaskToFinish(this Task self, float waitInterval = 0.02f) {
+        public static IEnumerator AsCoroutine(this Task self, float waitInterval = 0.02f) {
             var waitIntervalBeforeNextCheck = new WaitForSeconds(waitInterval);
             while (!self.IsCompleted) { yield return waitIntervalBeforeNextCheck; }
         }
 
+        public static IEnumerator AsCoroutine(this TaskRunner.MonitoredTask self, float waitInterval = 0.02f) {
+            return self.task.AsCoroutine(waitInterval);
+        }
+
         public static Coroutine ExecuteRepeated(this MonoBehaviour self, Func<bool> task,
-                float delayInSecBetweenIterations, float delayInSecBeforeFirstExecution = 0, float repetitions = -1) {
+            float delayInSecBetweenIterations, float delayInSecBeforeFirstExecution = 0, float repetitions = -1) {
             if (!self.isActiveAndEnabled) { throw new Exception("ExecuteRepeated called on inactive mono"); }
             return self.StartCoroutine(ExecuteRepeated(task,
                 delayInSecBetweenIterations, delayInSecBeforeFirstExecution, repetitions));

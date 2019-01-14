@@ -1,9 +1,11 @@
 ﻿using NUnit.Framework;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using UnityEngine.TestTools;
 
 namespace com.csutil.eventbus.tests {
     public class TestEventbus {
@@ -74,6 +76,26 @@ namespace com.csutil.eventbus.tests {
             someMono.gameObject.Destroy();
             EventBus.instance.Publish(event1, "s2"); // event should not be received
             Assert.AreEqual(2, counter); // because gameObject is destroyed
+        }
+
+        [UnityTest]
+        public IEnumerator TestSubscribeOnMainThread() {
+            string eventName = "EventSendFromBackgroundThread";
+            var counter = 0;
+            EventBus.instance.Subscribe(new object(), eventName, () => {
+                Assert.IsFalse(MainThread.isMainThread);
+                counter++;
+            });
+            EventBus.instance.SubscribeOnMainThread(new object(), eventName, () => {
+                Assert.IsTrue(MainThread.isMainThread);
+                counter++;
+            });
+            yield return TaskRunner.instance.RunInBackground((cancel) => {
+                EventBus.instance.Publish(eventName);
+                Assert.AreEqual(1, counter);
+            }).AsCoroutine();
+            yield return new WaitForSeconds(0.1f);
+            Assert.AreEqual(2, counter);
         }
 
     }
