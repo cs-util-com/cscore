@@ -15,7 +15,7 @@ namespace com.csutil {
         public static void SubscribeOnMainThread(this IEventBus self, object subscriber, string eventName, Delegate callback) {
             self.Subscribe(subscriber, eventName, () => {
                 MainThread.Invoke(() => {
-                    callback.InvokeIfNotNull();
+                    callback.DynamicInvokeV2();
                 });
             });
         }
