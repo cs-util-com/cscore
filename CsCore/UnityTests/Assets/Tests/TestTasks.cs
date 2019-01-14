@@ -62,7 +62,7 @@ namespace com.csutil {
                 // Test that its not be possible to create a GO in a background thread:
                 AssertV2.Throws<Exception>(() => { go = new GameObject(name: "A"); });
                 // Test that on MainThread the gameobject can be created:
-                MainThread.RunOnMainThread(() => { go = new GameObject(name: "B"); });
+                MainThread.Invoke(() => { go = new GameObject(name: "B"); });
                 Thread.Sleep(1000); // wait for main thread action to execute
                 Log.d("Background thread now done");
             }).task;

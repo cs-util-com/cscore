@@ -44,7 +44,9 @@ namespace com.csutil {
             }
         }
 
-        public static void RunOnMainThread(Action a) { instance.actionsForMainThread.Enqueue(a); }
+        public static void Invoke(Action a) { instance.ExecuteOnMainThread(a); }
+
+        public void ExecuteOnMainThread(Action a) { actionsForMainThread.Enqueue(a); }
 
     }
 

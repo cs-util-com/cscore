@@ -7,6 +7,7 @@ namespace com.csutil.eventbus {
 
         List<object> Publish(string eventName, params object[] parameters);
 
+        void Subscribe(object subscriber, string eventName, Delegate callback);
         void Subscribe(object subscriber, string eventName, Action callback);
         void Subscribe<T>(object subscriber, string eventName, Action<T> callback);
         void Subscribe<T, V>(object subscriber, string eventName, Action<T, V> callback);

@@ -17,7 +17,7 @@ namespace System {
             if (a == null) { return false; } else { a.Invoke(t, u, v); return true; }
         }
 
-        public static object DynamicInvokeV2(this Delegate self, object[] passedParams) {
+        public static object DynamicInvokeV2(this Delegate self, params object[] passedParams) {
             object result;
             DynamicInvokeV2(self, passedParams, out result);
             return result;

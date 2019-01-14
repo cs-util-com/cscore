@@ -22,17 +22,17 @@ namespace com.csutil {
             eventHistory = new ConcurrentQueue<string>();
         }
 
-        public void Subscribe(object s, string key, Action a) { Add(s, key, a); }
+        public void Subscribe(object s, string key, Action a) { Subscribe(s, key, (Delegate)a); }
 
-        public void Subscribe<T>(object s, string key, Action<T> a) { Add(s, key, a); }
-        public void Subscribe<T, V>(object s, string key, Action<T, V> a) { Add(s, key, a); }
-        public void Subscribe<T, U, V>(object s, string key, Action<T, U, V> a) { Add(s, key, a); }
+        public void Subscribe<T>(object s, string key, Action<T> a) { Subscribe(s, key, (Delegate)a); }
+        public void Subscribe<T, V>(object s, string key, Action<T, V> a) { Subscribe(s, key, (Delegate)a); }
+        public void Subscribe<T, U, V>(object s, string key, Action<T, U, V> a) { Subscribe(s, key, (Delegate)a); }
 
-        public void Subscribe<T>(object s, string key, Func<T> f) { Add(s, key, f); }
-        public void Subscribe<T, V>(object s, string key, Func<T, V> f) { Add(s, key, f); }
-        public void Subscribe<T, U, V>(object s, string key, Func<T, U, V> f) { Add(s, key, f); }
+        public void Subscribe<T>(object s, string key, Func<T> f) { Subscribe(s, key, (Delegate)f); }
+        public void Subscribe<T, V>(object s, string key, Func<T, V> f) { Subscribe(s, key, (Delegate)f); }
+        public void Subscribe<T, U, V>(object s, string key, Func<T, U, V> f) { Subscribe(s, key, (Delegate)f); }
 
-        private void Add(object subscriber, string eventName, Delegate callback) {
+        public void Subscribe(object subscriber, string eventName, Delegate callback) {
             lock (threadLock) {
                 var replacedDelegate = GetOrAdd(eventName).AddOrReplace(subscriber, callback);
                 if (replacedDelegate != null) { Log.w("Existing subscriber was replaced for event=" + eventName); }

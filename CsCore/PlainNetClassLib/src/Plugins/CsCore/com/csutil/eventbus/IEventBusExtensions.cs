@@ -27,7 +27,7 @@ namespace com.csutil {
         public static void SubscribeForOnePublish(this IEventBus self, object subscriber, string eventName, Action callback) {
             self.Subscribe(subscriber, eventName, () => {
                 self.Unsubscribe(subscriber, eventName);
-                callback();
+                callback.DynamicInvokeV2();
             });
         }
     }
