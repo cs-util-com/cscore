@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using com.csutil.eventbus;
 
 namespace com.csutil {
+
     public class EventBus : IEventBus {
 
         static EventBus() { Log.d("EventBus used the first time.."); }
@@ -21,16 +22,6 @@ namespace com.csutil {
         public EventBus() {
             eventHistory = new ConcurrentQueue<string>();
         }
-
-        public void Subscribe(object s, string key, Action a) { Subscribe(s, key, (Delegate)a); }
-
-        public void Subscribe<T>(object s, string key, Action<T> a) { Subscribe(s, key, (Delegate)a); }
-        public void Subscribe<T, V>(object s, string key, Action<T, V> a) { Subscribe(s, key, (Delegate)a); }
-        public void Subscribe<T, U, V>(object s, string key, Action<T, U, V> a) { Subscribe(s, key, (Delegate)a); }
-
-        public void Subscribe<T>(object s, string key, Func<T> f) { Subscribe(s, key, (Delegate)f); }
-        public void Subscribe<T, V>(object s, string key, Func<T, V> f) { Subscribe(s, key, (Delegate)f); }
-        public void Subscribe<T, U, V>(object s, string key, Func<T, U, V> f) { Subscribe(s, key, (Delegate)f); }
 
         public void Subscribe(object subscriber, string eventName, Delegate callback) {
             lock (threadLock) {
@@ -100,4 +91,5 @@ namespace com.csutil {
         }
 
     }
+
 }

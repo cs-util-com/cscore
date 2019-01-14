@@ -4,17 +4,19 @@ using System.Linq;
 namespace System {
     public static class DelegateExtensions {
 
-        public static bool InvokeIfNotNull(this Action a) {
-            if (a == null) { return false; } else { a.Invoke(); return true; }
+        public static bool InvokeIfNotNull(this Delegate self, params object[] passedParams) {
+            if (self == null) { return false; }
+            var res = InvokeIfNotNull<object>(self, passedParams);
+            if (res is bool) { return (bool)res; }
+            return true;
         }
-        public static bool InvokeIfNotNull<T>(this Action<T> a, T t) {
-            if (a == null) { return false; } else { a.Invoke(t); return true; }
-        }
-        public static bool InvokeIfNotNull<T, V>(this Action<T, V> a, T t, V v) {
-            if (a == null) { return false; } else { a.Invoke(t, v); return true; }
-        }
-        public static bool InvokeIfNotNull<T, U, V>(this Action<T, U, V> a, T t, U u, V v) {
-            if (a == null) { return false; } else { a.Invoke(t, u, v); return true; }
+
+        public static T InvokeIfNotNull<T>(this Delegate self, params object[] passedParams) {
+            if (self != null) {
+                object result;
+                if (DynamicInvokeV2(self, passedParams, out result)) { return (T)result; }
+            }
+            return default(T);
         }
 
         public static object DynamicInvokeV2(this Delegate self, params object[] passedParams) {
