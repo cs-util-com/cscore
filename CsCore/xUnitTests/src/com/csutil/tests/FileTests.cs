@@ -32,7 +32,7 @@ namespace com.csutil.tests {
             // Saving and loading from files:
             string someTextToStoreInTheFile = "Some text to store in the file";
             file1.SaveAsText(someTextToStoreInTheFile);
-            string loadedText = file1.LoadAs<string>(); // loading JSON works as well
+            string loadedText = file1.LoadAs<string>(); // loading JSON would work as well
             Assert.Equal(someTextToStoreInTheFile, loadedText);
 
             // Deleting directories:

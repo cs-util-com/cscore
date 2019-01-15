@@ -4,10 +4,18 @@ namespace com.csutil {
 
     public static class DateTimeParser {
 
-        public static DateTime NewDateTimeFromUnixTimestamp(long unixTimeInMs) {
+        public static DateTime NewDateTimeFromUnixTimestamp(long unixTimeInMs, bool autoCorrectIfPassedInSeconds = true) {
             AssertV2.IsTrue(unixTimeInMs > 0, "NewDateTimeFromUnixTimestamp: unixTimeInMs was " + unixTimeInMs);
             System.DateTime dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
-            return dtDateTime.AddMilliseconds(unixTimeInMs);
+            var result = dtDateTime.AddMilliseconds(unixTimeInMs);
+            if (autoCorrectIfPassedInSeconds && result.Year == 1970) {
+                var incorrectDate = result.ToReadableString();
+                var correctedDate = NewDateTimeFromUnixTimestamp(unixTimeInMs * 1000);
+                Log.e("The passed unixTimeInMs was likely passed in seconds instead of milliseconds,"
+                    + " it was too small by a factor of *1000, which would result in " + correctedDate.ToReadableString());
+                return correctedDate;
+            }
+            return result;
         }
 
         public static DateTime ParseV2(string utcString) {
