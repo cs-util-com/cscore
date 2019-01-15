@@ -5,15 +5,15 @@ namespace com.csutil.editor {
 
     [CustomEditor(typeof(MonoBehaviour), true)]
     public class DefaultMonoInspectorV2 : Editor {
-        private PropertyInspectorUi[] propertiesMarkedAsShowInInspector;
+        private ShowPropertiesInInspector[] propsToShowInInspector;
 
         public void OnEnable() {
-            propertiesMarkedAsShowInInspector = PropertyInspectorUi.GetAllProperties(target);
+            propsToShowInInspector = ShowPropertiesInInspector.GetPropertiesToDraw(target);
         }
 
         public override void OnInspectorGUI() {
             DrawDefaultInspector();
-            PropertyInspectorUi.DrawPropertiesInInspector(propertiesMarkedAsShowInInspector);
+            ShowPropertiesInInspector.DrawInInspector(propsToShowInInspector);
         }
 
     }

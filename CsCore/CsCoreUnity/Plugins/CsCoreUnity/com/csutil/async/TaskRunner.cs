@@ -15,7 +15,7 @@ namespace com.csutil {
 
         public static TaskRunner instance { get { return IoC.inject.GetOrAddComponentSingleton<TaskRunner>(new object()); } }
 
-        ConcurrentQueue<MonitoredTask> monitoredTasks = new ConcurrentQueue<MonitoredTask>();
+        private ConcurrentQueue<MonitoredTask> monitoredTasks = new ConcurrentQueue<MonitoredTask>();
 
         public MonitoredTask RunInBackground(Action<CancellationToken> action) {
             return RunInBackground(action, TaskScheduler.Default);

@@ -1,6 +1,8 @@
 {
     "name": "CsCoreUnityEditor",
-    "references": [],
+    "references": [
+        "CsCoreUnity"
+    ],
     "optionalUnityReferences": [],
     "includePlatforms": [
         "Editor"
