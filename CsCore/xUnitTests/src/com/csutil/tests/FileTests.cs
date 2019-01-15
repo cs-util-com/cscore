@@ -12,6 +12,36 @@ namespace com.csutil.tests {
     public class FileTests {
 
         [Fact]
+        public void ExampleUsage1() {
+            // Get a directory to work in:
+            DirectoryInfo myDirectory = EnvironmentV2.instance.GetAppDataFolder();
+            Log.d("The directory path is: " + myDirectory.FullPath());
+
+            // Get a non-existing child directory
+            var childDir = myDirectory.GetChildDir("MyExampleSubDirectory1");
+
+            // Create the sub directory:
+            childDir.CreateV2(); // dir.CreateSubdirectory("..") would work too
+
+            // Rename the directory:
+            childDir.Rename("MyExampleSubDirectory2");
+
+            // Get a file in the child directory:
+            FileInfo file1 = childDir.GetChild("MyFile1.txt");
+
+            // Saving and loading from files:
+            string someTextToStoreInTheFile = "Some text to store in the file";
+            file1.SaveAsText(someTextToStoreInTheFile);
+            string loadedText = file1.LoadAs<string>(); // loading JSON works as well
+            Assert.Equal(someTextToStoreInTheFile, loadedText);
+
+            // Deleting directories:
+            Assert.True(childDir.DeleteV2()); // (Deleting non-existing directories would returns false)
+            // Check that the directory no longer exists:
+            Assert.False(childDir.IsNotNullAndExists());
+        }
+
+        [Fact]
         public void TestIsNotNullAndExists() {
             DirectoryInfo appDataDir = null;
             Assert.False(appDataDir.IsNotNullAndExists());
@@ -139,8 +169,6 @@ namespace com.csutil.tests {
 
             rootDir.DeleteV2();
         }
-
-
 
         private class MyClass1 {
             public string myString;
