@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using System.Threading.Tasks;
 using com.csutil.datastructures;
 using com.csutil.encryption;
+using com.csutil.random;
 using Xunit;
 
 namespace com.csutil.tests {
@@ -196,6 +197,92 @@ namespace com.csutil.tests {
             Assert.NotNull(myFailedTask);
             Assert.NotNull(myFailedTask.Exception);
             return myFailedTask;
+        }
+
+        [Fact]
+        public void RandomExtensions_Examples() {
+
+            var random = new Random();
+
+            { // Example for random.NextBool:
+                var heads = 0;
+                var tails = 0;
+                for (int i = 0; i < 1000; i++) {
+                    var coinFlip = random.NextBool();
+                    if (coinFlip) { heads++; } else { tails++; }
+                }
+                var diff = Math.Abs(heads - tails);
+                Assert.True(diff < 100, "diff between heads and tails was " + diff);
+            }
+
+            var name = random.NextRandomName();
+            Log.e("name=" + name);
+
+            { // Test with MinValue and MaxValue:
+                float f = random.NextFloat(float.MinValue, float.MaxValue);
+                Assert.True(float.MinValue < f && f < float.MaxValue, "f=" + f);
+            }
+
+            { // Test with MinValue and MaxValue:
+                double d = random.NextDouble(double.MinValue, double.MaxValue);
+                Assert.True(double.MinValue < d && d < double.MaxValue, "d=" + d);
+            }
+
+            // Example for random.NextFloat():
+            TestRandomFloat(random, 0, 1);
+            TestRandomFloat(random, -0.1f, 0);
+            TestRandomFloat(random, 10, 20000);
+            TestRandomFloat(random, -100000, -100);
+            TestRandomFloat(random, -10000, 10000);
+            TestRandomFloat(random, float.MinValue, float.MaxValue);
+
+            { // Example for random.NextDouble(min, max):
+                double min = -1000;
+                double max = 1000;
+                double sum = 0;
+                for (int i = 0; i < 10000; i++) {
+                    double x = random.NextDouble(min, max);
+                    Assert.InRange(x, min, max);
+                    sum += x;
+                } // The sum should be normally distributed around 0:
+                Assert.InRange(sum, min * 200, max * 200);
+            }
+
+            { // Example for random.NextFloat(min, max):
+                float min = -1000;
+                float max = 1000;
+                float sum = 0;
+                for (int i = 0; i < 10000; i++) {
+                    float x = random.NextFloat(min, max);
+                    Assert.InRange(x, min, max);
+                    sum += x;
+                } // The sum should be normally distributed around 0:
+                Assert.InRange(sum, min * 200, max * 200);
+            }
+
+        }
+
+        private static void TestRandomFloat(Random random, float lowerBound, float upperBound) {
+            double min = float.MaxValue;
+            double max = float.MinValue;
+            var results = new List<float>();
+            for (int i = 0; i < 100000; i++) {
+                float x = random.NextFloat(lowerBound, upperBound);
+                Assert.True(x <= upperBound, "x=" + x);
+                Assert.True(lowerBound <= x, "x=" + x);
+                if (x < min) { min = x; }
+                if (x > max) { max = x; }
+                results.Add(x);
+            }
+            Assert.True(isNormallyDistributed(results));
+            var reachedUpperBound = 100d * (1d - (upperBound - max) / (upperBound - lowerBound));
+            var reachedLowerBound = 100d * (1d - (min - lowerBound) / (upperBound - lowerBound));
+            Assert.True(reachedLowerBound > 98 && reachedUpperBound > 98, "min%=" + reachedLowerBound + ", max%=" + reachedUpperBound);
+            Assert.True(reachedLowerBound <= 100 && reachedUpperBound <= 100, "min%=" + reachedLowerBound + ", max%=" + reachedUpperBound);
+        }
+
+        private static bool isNormallyDistributed(List<float> results) {
+            return true; // TODO
         }
 
         [Fact]
