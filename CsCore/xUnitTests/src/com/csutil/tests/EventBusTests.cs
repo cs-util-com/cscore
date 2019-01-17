@@ -7,6 +7,7 @@ namespace com.csutil.tests {
 
         [Fact]
         public void ExampleUsage1() {
+
             // The EventBus can be accessed via EventBus.instance
             EventBus eventBus = GetEventBusForTesting();
             var eventName = "TestEvent1";
@@ -22,10 +23,12 @@ namespace com.csutil.tests {
 
             // When subscribers dont want to receive events anymore they can unsubscribe:
             eventBus.Unsubscribe(subscriber1, eventName);
+
         }
 
         [Fact]
-        public void ExampleUsage2() {
+        public void TestMultipleSubscribers() {
+
             EventBus EventBus_instance = GetEventBusForTesting();
 
             var myEventName = "TestEvent1";
@@ -61,6 +64,7 @@ namespace com.csutil.tests {
             // Unsubscribing to events that dont exist does not do anything:
             Assert.False(EventBus_instance.Unsubscribe(subscriber2, myEventName));
             Assert.False(EventBus_instance.Unsubscribe(subscriber2, "eventThatDoesNotExist"));
+
         }
 
         [Fact]

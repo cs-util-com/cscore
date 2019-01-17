@@ -30,6 +30,219 @@ namespace com.csutil.tests {
         }
 
         [Fact]
+        public void DictionaryExtensions_Examples() {
+
+            var myDictionary = new Dictionary<string, string>();
+            // Add an entry s1 with value "a":
+            Assert.Null(myDictionary.AddOrReplace("s1", "a"));
+
+            // Replacing the value of s1 with b:
+            Assert.Equal("a", myDictionary.AddOrReplace("s1", "b"));
+
+            // The replaced value "b" is returned by the method:
+            Assert.Equal("b", myDictionary.AddOrReplace("s1", "a"));
+
+        }
+
+        [Fact]
+        public void IEnumerableExtensions_Examples() {
+
+            string myString = null;
+            // If the string is null this will not throw a nullpointer exception:
+            Assert.True(myString.IsNullOrEmpty());
+
+            List<string> myList = null;
+            // If the List is null this will not throw a nullpointer exception:
+            Assert.True(myList.IsNullOrEmpty());
+            Assert.Equal("null", myList.ToStringV2((s) => s));
+
+            myList = new List<string>();
+            Assert.True(myList.IsNullOrEmpty());
+            Assert.Equal("()", myList.ToStringV2((s) => s, bracket1: "(", bracket2: ")"));
+
+            myList.Add("s1");
+            Assert.False(myList.IsNullOrEmpty());
+            Assert.Equal("{s1}", myList.ToStringV2((s) => s, bracket1: "{", bracket2: "}"));
+
+            myList.Add("s2");
+            Assert.False(myList.IsNullOrEmpty());
+            Assert.Equal("[s1, s2]", myList.ToStringV2((s) => s, bracket1: "[", bracket2: "]"));
+
+        }
+
+        [Fact]
+        public void ChangeTrackerUsage_Examples() {
+
+            // The ChangeTracker tracks if a variable changes:
+            var myChangeTracker = new ChangeTracker<string>("a"); // init its value with "a"
+
+            // Switch its value form "a" to "b"
+            Assert.True(myChangeTracker.setNewValue("b"));
+
+            // If "b" is set again, the change tracker return false:
+            Assert.False(myChangeTracker.setNewValue("b"));
+            Assert.Equal("b", myChangeTracker.value);
+
+        }
+
+        [Fact]
+        public void FixedSizedQueue_Examples() {
+
+            // A queue with a fixed maximum size:
+            var queue = new FixedSizedQueue<string>(3);
+
+            // The queue is filled with 3 values:
+            queue.Enqueue("a");
+            queue.Enqueue("b");
+            queue.Enqueue("c");
+            Assert.Equal(3, queue.Count);
+
+            // If the queue is filled with a 4th value the oldes will be dropped:
+            queue.Enqueue("d");
+            Assert.Equal(3, queue.Count); // "a" was dropped from the queue
+
+            // The first entry in the queue will be "b" because "a" was dropped:
+            Assert.Equal("b", queue.Dequeue());
+            Assert.Equal("c", queue.Dequeue());
+            Assert.Equal("d", queue.Dequeue());
+            // Now the queue is emtpy and will return null when dequeued:
+            Assert.Equal(null, queue.Dequeue());
+
+        }
+
+        [Fact]
+        public void DateTime_Examples() {
+
+            // Parse a Unix timestamp into a DateTime object:
+            DateTime myDateTime = DateTimeParser.NewDateTimeFromUnixTimestamp(1547535889000);
+
+            // Create a compromise of a human readable sting that is usable for file names etc:
+            Assert.Equal("2019-01-15_07.04", myDateTime.ToReadableString());
+
+        }
+
+        [Fact]
+        public void StringExtension_Examples() {
+
+            string myString = "abc";
+
+            // myString.Substring(..) examples:
+            Assert.Equal("bc", myString.Substring(1, "d", includeEnd: true));
+            Assert.Equal("bc", myString.Substring(1, "c", includeEnd: true));
+            Assert.Equal("ab", myString.Substring("c", includeEnd: false));
+
+            // myString.SubstringAfter(..) examples:
+            myString = "[{a}]-[{b}]";
+            Assert.Equal("a}]-[{b}]", myString.SubstringAfter("{"));
+            Assert.Equal("{b}]", myString.SubstringAfter("[", startFromBack: true));
+            Assert.Throws<Exception>(() => { myString.SubstringAfter("("); });
+
+            // Often SubstringAfter and Substring are used in combination:
+            myString = "[(abc)]";
+            Assert.Equal("abc", myString.SubstringAfter("(").Substring(")", includeEnd: false));
+
+        }
+
+        [Fact]
+        public void StringEncryption_Examples() {
+
+            var myString = "some text..";
+
+            // Encrypt myString with the password "123":
+            var myEncryptedString = myString.Encrypt("123");
+
+            // The encrypted string is different to myString:
+            Assert.NotEqual(myString, myEncryptedString);
+            // Encrypting with a different password results into another encrypted string:
+            Assert.NotEqual(myEncryptedString, myString.Encrypt("124"));
+
+            // Decrypt the encrypted string back with the correct password:
+            Assert.Equal(myString, myEncryptedString.Decrypt("123"));
+
+            // Using the wrong password results in an exception:
+            Assert.Throws<CryptographicException>(() => {
+                Assert.NotEqual(myString, myEncryptedString.Decrypt("124"));
+            });
+
+        }
+
+        [Fact]
+        public void RandomExtensions_Examples() {
+
+            var random = new Random();
+
+            { // Example for random.NextBool:
+                int heads = 0;
+                int tails = 0;
+                for (int i = 0; i < 10000; i++) {
+                    bool coinFlip = random.NextBool();
+                    if (coinFlip) { heads++; } else { tails++; }
+                }
+                int diff = Math.Abs(heads - tails);
+                Assert.True(diff < 100, "Coin flips were not normally distributed around 0! diff=" + diff);
+            }
+
+            var randomName = random.NextRandomName();
+            Log.d("The generated random name is: " + randomName);
+
+            // random.NextDouble() with a range from lowerBound to upperBound:
+            double randomDouble = random.NextDouble(lowerBound: -100, upperBound: 100);
+            Assert.InRange(randomDouble, -100, 100);
+
+            // random.NextFloat() with a range from lowerBound to upperBound:
+            float randomFloat = random.NextFloat(lowerBound: 20, upperBound: 50);
+            Assert.InRange(randomFloat, 20, 50);
+
+        }
+
+        private class MyClass1 { }
+        private class MySubClass1 : MyClass1 { }
+        private class MySubClass2 : MyClass1 { }
+
+        [Fact]
+        public void TypeExtension_Examples() {
+            Type MySubClass1 = typeof(MySubClass1);
+
+            // type.IsSubclassOf<..>() examples:
+            Assert.True(MySubClass1.IsSubclassOf<MyClass1>());
+            Assert.False(MySubClass1.IsSubclassOf<MySubClass2>());
+            Assert.True(typeof(MySubClass2).IsSubclassOf<MyClass1>());
+            Assert.False(typeof(MyClass1).IsSubclassOf<MySubClass1>());
+
+            // Checking if 2 types are equal using the TypeCheck class:
+            Assert.True(TypeCheck.AreEqual<MyClass1, MyClass1>());
+            Assert.False(TypeCheck.AreEqual<MySubClass1, MyClass1>());
+
+            // type.IsCastableTo<..>() examples:
+            Assert.True(typeof(MySubClass2).IsCastableTo<MyClass1>());
+            Assert.False(typeof(MyClass1).IsCastableTo<MySubClass2>());
+
+            // type.IsCastableTo(..) examples:
+            Assert.True(typeof(MySubClass1).IsCastableTo(typeof(MyClass1)));
+            Assert.True(typeof(MyClass1).IsCastableTo(typeof(MyClass1)));
+            Assert.False(typeof(MyClass1).IsCastableTo(typeof(MySubClass1)));
+        }
+
+        [Fact]
+        public void DateTime_MoreTests() {
+            AssertV2.ThrowExeptionIfAssertionFails(false, () => {
+                var dateTime1 = DateTimeParser.NewDateTimeFromUnixTimestamp(1547535889);
+                var dateTime2 = DateTimeParser.NewDateTimeFromUnixTimestamp(1547535889000);
+                Assert.Equal(dateTime1, dateTime2);
+                var dateTime3 = DateTimeParser.NewDateTimeFromUnixTimestamp(1547535889, autoCorrectIfPassedInSeconds: false);
+                Assert.NotEqual(dateTime1, dateTime3);
+            });
+            AssertV2.ThrowExeptionIfAssertionFails(false, () => {
+                var dateTime1 = DateTimeParser.NewDateTimeFromUnixTimestamp(-2);
+                var dateTime2 = DateTimeParser.NewDateTimeFromUnixTimestamp(2);
+                Assert.True(dateTime1.IsBefore(dateTime2));
+                Assert.False(dateTime2.IsBefore(dateTime1));
+                Assert.True(dateTime2.IsAfter(dateTime1));
+                Assert.False(dateTime1.IsAfter(dateTime2));
+            });
+        }
+
+        [Fact]
         public void DelegateExtensions_MoreTests() {
             {
                 Action<string> a = null;
@@ -58,130 +271,7 @@ namespace com.csutil.tests {
         }
 
         [Fact]
-        public void DictionaryExtensions_Examples() {
-            var dic = new Dictionary<string, string>();
-            Assert.Null(dic.AddOrReplace("s1", "a"));
-            Assert.Equal("a", dic.AddOrReplace("s1", "b"));
-            Assert.Equal("b", dic.AddOrReplace("s1", "a"));
-        }
-
-        [Fact]
-        public void IEnumerableExtensions_Examples() {
-            List<string> myList = null;
-
-            Assert.True(myList.IsNullOrEmpty());
-            Assert.Equal("null", myList.ToStringV2((s) => s));
-
-            myList = new List<string>();
-            Assert.True(myList.IsNullOrEmpty());
-            Assert.Equal("()", myList.ToStringV2((s) => s, bracket1: "(", bracket2: ")"));
-
-            myList.Add("s1");
-            Assert.False(myList.IsNullOrEmpty());
-            Assert.Equal("{s1}", myList.ToStringV2((s) => s, bracket1: "{", bracket2: "}"));
-
-            myList.Add("s2");
-            Assert.False(myList.IsNullOrEmpty());
-            Assert.Equal("[s1, s2]", myList.ToStringV2((s) => s, bracket1: "[", bracket2: "]"));
-        }
-
-        [Fact]
-        public void ChangeTrackerUsage_Example1() {
-            // The ChangeTracker tracks if a variable changes:
-            var myChangeTracker = new ChangeTracker<string>("a"); // init its value with "a"
-            // Switch its value form "a" to "b"
-            Assert.True(myChangeTracker.setNewValue("b"));
-            // If "b" is set again, the change tracker return false:
-            Assert.False(myChangeTracker.setNewValue("b"));
-            Assert.Equal("b", myChangeTracker.value);
-        }
-
-        [Fact]
-        public void FixedSizedQueue_Example1() {
-            // A queue with a fixed maximum size:
-            var q = new FixedSizedQueue<string>(3);
-
-            // The queue is filled with 3 values:
-            q.Enqueue("a").Enqueue("b").Enqueue("c");
-            Assert.Equal(3, q.Count);
-
-            // If the queue is filled with a 4th value the oldes will be dropped:
-            q.Enqueue("d");
-            Assert.Equal(3, q.Count); // "a" was dropped from the queue
-
-            // The first entry in the queue will be "b" because "a" was dropped:
-            Assert.Equal("b", q.Dequeue());
-        }
-
-        [Fact]
-        public void DateTime_Example1() {
-            DateTime myDate = DateTimeParser.NewDateTimeFromUnixTimestamp(1547535889000);
-            // Create a compromise of a human readable sting that is usable for file names etc:
-            Assert.Equal("2019-01-15_07.04", myDate.ToReadableString());
-        }
-
-        [Fact]
-        public void DateTime_MoreTests() {
-            AssertV2.ThrowExeptionIfAssertionFails(false, () => {
-                var dateTime1 = DateTimeParser.NewDateTimeFromUnixTimestamp(1547535889);
-                var dateTime2 = DateTimeParser.NewDateTimeFromUnixTimestamp(1547535889000);
-                Assert.Equal(dateTime1, dateTime2);
-                var dateTime3 = DateTimeParser.NewDateTimeFromUnixTimestamp(1547535889, autoCorrectIfPassedInSeconds: false);
-                Assert.NotEqual(dateTime1, dateTime3);
-            });
-            AssertV2.ThrowExeptionIfAssertionFails(false, () => {
-                var dateTime1 = DateTimeParser.NewDateTimeFromUnixTimestamp(-2);
-                var dateTime2 = DateTimeParser.NewDateTimeFromUnixTimestamp(2);
-                Assert.True(dateTime1.IsBefore(dateTime2));
-                Assert.False(dateTime2.IsBefore(dateTime1));
-                Assert.True(dateTime2.IsAfter(dateTime1));
-                Assert.False(dateTime1.IsAfter(dateTime2));
-            });
-        }
-
-        [Fact]
-        public void StringExtension_Examples() {
-            string myString = "abc";
-
-            // myString.Substring(..) examples:
-            Assert.Equal("bc", myString.Substring(1, "d", includeEnd: true));
-            Assert.Equal("bc", myString.Substring(1, "c", includeEnd: true));
-            Assert.Equal("ab", myString.Substring("c", includeEnd: false));
-
-            // myString.SubstringAfter(..) examples:
-            myString = "[{a}]-[{b}]";
-            Assert.Equal("a}]-[{b}]", myString.SubstringAfter("{"));
-            Assert.Equal("{b}]", myString.SubstringAfter("[", startFromBack: true));
-            Assert.Throws<Exception>(() => { myString.SubstringAfter("("); });
-
-            // Often SubstringAfter and Substring are used in combination:
-            myString = "[(abc)]";
-            Assert.Equal("abc", myString.SubstringAfter("(").Substring(")", includeEnd: false));
-        }
-
-        [Fact]
-        public void StringEncryptionTests() {
-            var myString = "some text..";
-
-            // Encrypt myString with the password "123":
-            var myEncryptedString = myString.Encrypt("123");
-
-            // The encrypted string is different to myString:
-            Assert.NotEqual(myString, myEncryptedString);
-            // Encrypting with a different password results into another encrypted string:
-            Assert.NotEqual(myEncryptedString, myString.Encrypt("124"));
-
-            // Decrypt the encrypted string back with the correct password:
-            Assert.Equal(myString, myEncryptedString.Decrypt("123"));
-
-            // Using the wrong password results in an exception:
-            Assert.Throws<CryptographicException>(() => {
-                Assert.NotEqual(myString, myEncryptedString.Decrypt("124"));
-            });
-        }
-
-        [Fact]
-        public void TaskExtensionTests() {
+        public void TestTaskThrowIfException() {
             Task myFailedTask = CreateAndRunATaskThatFails();
             Assert.Throws<AggregateException>(() => {
                 myFailedTask.ThrowIfException(); // the task failed so this will throw
@@ -200,23 +290,9 @@ namespace com.csutil.tests {
         }
 
         [Fact]
-        public void RandomExtensions_Examples() {
+        public void RandomExtensions_MoreTests() {
 
             var random = new Random();
-
-            { // Example for random.NextBool:
-                var heads = 0;
-                var tails = 0;
-                for (int i = 0; i < 1000; i++) {
-                    var coinFlip = random.NextBool();
-                    if (coinFlip) { heads++; } else { tails++; }
-                }
-                var diff = Math.Abs(heads - tails);
-                Assert.True(diff < 100, "diff between heads and tails was " + diff);
-            }
-
-            var name = random.NextRandomName();
-            Log.e("name=" + name);
 
             { // Test with MinValue and MaxValue:
                 float f = random.NextFloat(float.MinValue, float.MaxValue);
@@ -259,7 +335,6 @@ namespace com.csutil.tests {
                 } // The sum should be normally distributed around 0:
                 Assert.InRange(sum, min * 200, max * 200);
             }
-
         }
 
         private static void TestRandomFloat(Random random, float lowerBound, float upperBound) {
@@ -285,33 +360,7 @@ namespace com.csutil.tests {
             return true; // TODO
         }
 
-        [Fact]
-        public void TypeExtension_Examples() {
-            Type MySubClass1 = typeof(MySubClass1);
-
-            // type.IsSubclassOf<..>() examples:
-            Assert.True(MySubClass1.IsSubclassOf<MyClass1>());
-            Assert.False(MySubClass1.IsSubclassOf<MySubClass2>());
-            Assert.True(typeof(MySubClass2).IsSubclassOf<MyClass1>());
-            Assert.False(typeof(MyClass1).IsSubclassOf<MySubClass1>());
-
-            // Checking if 2 types are equal using the TypeCheck class:
-            Assert.True(TypeCheck.AreEqual<MyClass1, MyClass1>());
-            Assert.False(TypeCheck.AreEqual<MySubClass1, MyClass1>());
-
-            // type.IsCastableTo<..>() examples:
-            Assert.True(typeof(MySubClass2).IsCastableTo<MyClass1>());
-            Assert.False(typeof(MyClass1).IsCastableTo<MySubClass2>());
-
-            // type.IsCastableTo(..) examples:
-            Assert.True(typeof(MySubClass1).IsCastableTo(typeof(MyClass1)));
-            Assert.True(typeof(MyClass1).IsCastableTo(typeof(MyClass1)));
-            Assert.False(typeof(MyClass1).IsCastableTo(typeof(MySubClass1)));
-        }
-
-        private class MyClass1 { }
-        private class MySubClass1 : MyClass1 { }
-        private class MySubClass2 : MyClass1 { }
 
     }
+
 }
