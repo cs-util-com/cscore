@@ -1,8 +1,9 @@
 
-using com.csutil;
+using System;
 using System.Linq;
 
-namespace System {
+namespace com.csutil {
+
     public static class DelegateExtensions {
 
         public static bool InvokeIfNotNull(this Action a) {
@@ -41,4 +42,5 @@ namespace System {
         }
 
     }
+
 }

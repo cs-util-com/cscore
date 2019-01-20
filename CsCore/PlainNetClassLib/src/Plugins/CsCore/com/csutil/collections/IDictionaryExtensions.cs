@@ -1,4 +1,7 @@
-namespace System.Collections.Generic {
+using System.Collections.Generic;
+
+namespace com.csutil {
+
     public static class IDictionaryExtensions {
 
         /// <summary> Returns false if an existing value was replaced </summary>
@@ -17,4 +20,5 @@ namespace System.Collections.Generic {
         }
 
     }
+
 }

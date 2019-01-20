@@ -7,6 +7,7 @@ using com.csutil;
 using Newtonsoft.Json.Linq;
 
 namespace com.csutil.json {
+
     public static class JsonReaderAssertionExtensions {
 
         private const int MAX_DEPTH = 10;
@@ -81,4 +82,5 @@ namespace com.csutil.json {
         }
 
     }
+
 }

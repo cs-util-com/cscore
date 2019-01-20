@@ -8,6 +8,7 @@ using UnityEngine;
 namespace com.csutil {
 
     public static class InjectorExtensionsForUnity {
+
         private const string DEFAULT_SINGLETON_NAME = "Singletons";
 
         public static T GetOrAddComponentSingleton<T>(this Injector self, object caller, string singletonGo = DEFAULT_SINGLETON_NAME) where T : Component {

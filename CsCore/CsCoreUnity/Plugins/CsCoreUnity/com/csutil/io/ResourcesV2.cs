@@ -5,6 +5,7 @@ using System.Text;
 using UnityEngine;
 
 namespace com.csutil {
+
     public static class ResourcesV2 {
 
         /// <summary> 
@@ -39,4 +40,5 @@ namespace com.csutil {
         }
 
     }
+
 }
