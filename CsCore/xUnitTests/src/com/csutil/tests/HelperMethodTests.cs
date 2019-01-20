@@ -130,7 +130,7 @@ namespace com.csutil.tests {
                     if (coinFlip) { heads++; } else { tails++; }
                 }
                 int diff = Math.Abs(heads - tails);
-                Assert.True(diff < 100, "Coin flips were not normally distributed around 0! diff=" + diff);
+                Assert.True(diff < 200, "Coin flips were not normally distributed around 0! diff=" + diff);
             }
 
             var randomName = random.NextRandomName();
