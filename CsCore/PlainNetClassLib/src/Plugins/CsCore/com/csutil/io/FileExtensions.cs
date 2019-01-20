@@ -108,7 +108,7 @@ namespace com.csutil {
             target.Refresh();
         }
 
-        public static T LoadAs<T>(this FileInfo self) {
+        public static T LoadJsonAs<T>(this FileInfo self) {
             using (StreamReader s = File.OpenText(self.FullPath())) {
                 if (typeof(T) == typeof(string)) { return (T)(object)s.ReadToEnd(); }
                 return JsonReader.GetReader().Read<T>(s);

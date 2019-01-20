@@ -33,7 +33,7 @@ namespace com.csutil.tests {
             // Saving and loading from files:
             string someTextToStoreInTheFile = "Some text to store in the file";
             file1.SaveAsText(someTextToStoreInTheFile);
-            string loadedText = file1.LoadAs<string>(); // loading JSON would work as well
+            string loadedText = file1.LoadJsonAs<string>(); // loading JSON would work as well
             Assert.Equal(someTextToStoreInTheFile, loadedText);
 
             // Deleting directories:
@@ -118,7 +118,7 @@ namespace com.csutil.tests {
         private static void SaveAndLoadTextToFile(FileInfo testFile, string textToSave) {
             testFile.SaveAsText(textToSave);
             Assert.True(testFile.IsNotNullAndExists());
-            AssertV2.AreEqual(textToSave, testFile.LoadAs<string>()); // Load again and compare
+            AssertV2.AreEqual(textToSave, testFile.LoadJsonAs<string>()); // Load again and compare
         }
 
         [Fact]
@@ -132,10 +132,10 @@ namespace com.csutil.tests {
             var jsonFile = rootDir.GetChild("MyClass1InAJsonFile.txt");
             jsonFile.SaveAsJson(objToSave);
             jsonFile.SaveAsJson(objToSave); // This will override the existing file
-            var loadedObj = jsonFile.LoadAs<MyClass1>(); // Load the object again and compare:
+            MyClass1 loadedObj = jsonFile.LoadJsonAs<MyClass1>(); // Load the object again and compare:
             AssertV2.AreEqual(objToSave.myString, loadedObj.myString);
             AssertV2.AreEqual(objToSave.myInt, loadedObj.myInt);
-            loadedObj = jsonFile.LoadAs<MyClass1>(); // Load the object again and compare:
+            loadedObj = jsonFile.LoadJsonAs<MyClass1>(); // Load the object again and compare:
             AssertV2.AreEqual(objToSave.myString, loadedObj.myString);
             AssertV2.AreEqual(objToSave.myInt, loadedObj.myInt);
             rootDir.DeleteV2();

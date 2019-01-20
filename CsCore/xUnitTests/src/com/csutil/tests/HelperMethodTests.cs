@@ -47,10 +47,6 @@ namespace com.csutil.tests {
         [Fact]
         public void IEnumerableExtensions_Examples() {
 
-            string myString = null;
-            // If the string is null this will not throw a nullpointer exception:
-            Assert.True(myString.IsNullOrEmpty());
-
             List<string> myList = null;
             // If the List is null this will not throw a nullpointer exception:
             Assert.True(myList.IsNullOrEmpty());
@@ -106,7 +102,7 @@ namespace com.csutil.tests {
             Assert.Equal("c", queue.Dequeue());
             Assert.Equal("d", queue.Dequeue());
             // Now the queue is emtpy and will return null when dequeued:
-            Assert.Equal(null, queue.Dequeue());
+            Assert.Null(queue.Dequeue());
 
         }
 
@@ -118,51 +114,6 @@ namespace com.csutil.tests {
 
             // Create a compromise of a human readable sting that is usable for file names etc:
             Assert.Equal("2019-01-15_07.04", myDateTime.ToReadableString());
-
-        }
-
-        [Fact]
-        public void StringExtension_Examples() {
-
-            string myString = "abc";
-
-            // myString.Substring(..) examples:
-            Assert.Equal("bc", myString.Substring(1, "d", includeEnd: true));
-            Assert.Equal("bc", myString.Substring(1, "c", includeEnd: true));
-            Assert.Equal("ab", myString.Substring("c", includeEnd: false));
-
-            // myString.SubstringAfter(..) examples:
-            myString = "[{a}]-[{b}]";
-            Assert.Equal("a}]-[{b}]", myString.SubstringAfter("{"));
-            Assert.Equal("{b}]", myString.SubstringAfter("[", startFromBack: true));
-            Assert.Throws<Exception>(() => { myString.SubstringAfter("("); });
-
-            // Often SubstringAfter and Substring are used in combination:
-            myString = "[(abc)]";
-            Assert.Equal("abc", myString.SubstringAfter("(").Substring(")", includeEnd: false));
-
-        }
-
-        [Fact]
-        public void StringEncryption_Examples() {
-
-            var myString = "some text..";
-
-            // Encrypt myString with the password "123":
-            var myEncryptedString = myString.Encrypt("123");
-
-            // The encrypted string is different to myString:
-            Assert.NotEqual(myString, myEncryptedString);
-            // Encrypting with a different password results into another encrypted string:
-            Assert.NotEqual(myEncryptedString, myString.Encrypt("124"));
-
-            // Decrypt the encrypted string back with the correct password:
-            Assert.Equal(myString, myEncryptedString.Decrypt("123"));
-
-            // Using the wrong password results in an exception:
-            Assert.Throws<CryptographicException>(() => {
-                Assert.NotEqual(myString, myEncryptedString.Decrypt("124"));
-            });
 
         }
 
@@ -239,6 +190,9 @@ namespace com.csutil.tests {
                 Assert.False(dateTime2.IsBefore(dateTime1));
                 Assert.True(dateTime2.IsAfter(dateTime1));
                 Assert.False(dateTime1.IsAfter(dateTime2));
+                Assert.True(DateTimeParser.NewDateTimeFromUnixTimestamp(0).IsBetween(dateTime1, dateTime2));
+                Assert.False(DateTimeParser.NewDateTimeFromUnixTimestamp(0).IsBetween(dateTime2, dateTime1));
+                Assert.False(DateTimeParser.NewDateTimeFromUnixTimestamp(3).IsBetween(dateTime1, dateTime2));
             });
         }
 

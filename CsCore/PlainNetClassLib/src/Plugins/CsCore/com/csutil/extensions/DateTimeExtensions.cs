@@ -10,7 +10,7 @@ namespace com.csutil {
             var result = dtDateTime.AddMilliseconds(unixTimeInMs);
             if (autoCorrectIfPassedInSeconds && result.Year == 1970) {
                 var incorrectDate = result.ToReadableString();
-                var correctedDate = NewDateTimeFromUnixTimestamp(unixTimeInMs * 1000);
+                var correctedDate = NewDateTimeFromUnixTimestamp(unixTimeInMs * 1000, false);
                 Log.e("The passed unixTimeInMs was likely passed in seconds instead of milliseconds,"
                     + " it was too small by a factor of *1000, which would result in " + correctedDate.ToReadableString());
                 return correctedDate;
@@ -26,6 +26,10 @@ namespace com.csutil {
                 utcString = utcString.Substring(0, "UTC", false) + "GMT";
             }
             return DateTime.Parse(utcString);
+        }
+
+        public static bool IsBetween(this DateTime self, DateTime lowerBound, DateTime upperBound) {
+            return self.Ticks >= lowerBound.Ticks && self.Ticks <= upperBound.Ticks;
         }
 
     }
