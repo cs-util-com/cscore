@@ -27,13 +27,14 @@ namespace com.csutil.encryption {
 
     }
 
-    public static class StringEncryption { // from https://stackoverflow.com/a/10177020/165106
+    public static class StringEncryption { // Modified version of https://stackoverflow.com/a/10177020/165106
+        
         // This constant is used to determine the keysize of the encryption algorithm in bits.
         // We divide this by 8 within the code below to get the equivalent number of bytes.
         private const int Keysize = 128;
 
         // This constant determines the number of iterations for the password bytes generation function.
-        private const int DerivationIterations = 1000;
+        private const int DerivationIterations = 10000;
 
         public static string Encrypt(this string plainText, string passPhrase) {
             // Salt and IV is randomly generated each time, but is preprended to encrypted cipher text
