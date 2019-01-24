@@ -5,7 +5,9 @@ using System.Threading.Tasks;
 using com.csutil.http;
 
 namespace com.csutil.http {
-    internal class UriRestRequest : RestRequest {
+
+    internal class UriRestRequest : RestRequest, IDisposable {
+
         private Uri uri;
         public Action<UriRestRequest, HttpResponseMessage> handleResult;
         public IJsonReader jsonReader = JsonReader.GetReader();
@@ -47,6 +49,8 @@ namespace com.csutil.http {
             return this;
         }
 
+        public void Dispose() { sendTask.Dispose(); }
+
         private static bool AddRequestHeaders(HttpClient self, Headers requestHeadersToAdd) {
             if (requestHeadersToAdd.IsNullOrEmpty()) { return false; }
             bool r = true;
@@ -62,4 +66,5 @@ namespace com.csutil.http {
         public RestRequest WithRequestHeaders(Headers requestHeaders) { this.requestHeaders = requestHeaders; return this; }
 
     }
+
 }

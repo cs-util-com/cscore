@@ -46,6 +46,7 @@ namespace com.csutil {
             return (T)Activator.CreateInstance(typeof(T));
         }
 
+        [Serializable]
         public class MultipleProvidersException : Exception {
             public MultipleProvidersException(string message) : base(message) { }
         }

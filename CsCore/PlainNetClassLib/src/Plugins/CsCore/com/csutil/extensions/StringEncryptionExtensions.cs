@@ -57,8 +57,6 @@ namespace com.csutil.encryption {
                             var cipherTextBytes = saltStringBytes;
                             cipherTextBytes = cipherTextBytes.Concat(ivStringBytes).ToArray();
                             cipherTextBytes = cipherTextBytes.Concat(memoryStream.ToArray()).ToArray();
-                            memoryStream.Close();
-                            cryptoStream.Close();
                             return Convert.ToBase64String(cipherTextBytes);
                         }
                     }
@@ -88,8 +86,6 @@ namespace com.csutil.encryption {
                         using (var cryptoStream = new CryptoStream(memoryStream, decryptor, CryptoStreamMode.Read)) {
                             var plainTextBytes = new byte[cipherTextBytes.Length];
                             var decryptedByteCount = cryptoStream.Read(plainTextBytes, 0, plainTextBytes.Length);
-                            memoryStream.Close();
-                            cryptoStream.Close();
                             return Encoding.UTF8.GetString(plainTextBytes, 0, decryptedByteCount);
                         }
                     }

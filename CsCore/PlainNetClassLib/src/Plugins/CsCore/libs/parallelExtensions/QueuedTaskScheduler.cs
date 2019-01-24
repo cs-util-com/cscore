@@ -383,6 +383,9 @@ namespace System.Threading.Tasks.Schedulers {
         /// <summary>Initiates shutdown of the scheduler.</summary>
         public void Dispose() {
             _disposeCancellation.Cancel();
+            _disposeCancellation.Dispose();
+            _blockingTaskQueue.Dispose();
+
         }
 
         /// <summary>Creates and activates a new scheduling queue for this scheduler.</summary>
