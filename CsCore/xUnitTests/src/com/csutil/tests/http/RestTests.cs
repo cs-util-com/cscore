@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using com.csutil.http;
 using Xunit;
 
-namespace com.csutil.tests {
+namespace com.csutil.tests.http {
 
     public class RestTests {
 
@@ -26,7 +27,7 @@ namespace com.csutil.tests {
 
         [Fact]
         public async Task TestRestFactory1() {
-            RestRequest request = RestFactory.instance.SendGET(new Uri("https://httpbin.org/get"));
+            RestRequest request = RestFactory.instance.SendRequest(new Uri("https://httpbin.org/get"), HttpMethod.Get);
             await ValidateResponse(request);
         }
 
@@ -57,5 +58,5 @@ namespace com.csutil.tests {
         }
 
     }
-    
+
 }

@@ -7,8 +7,8 @@ namespace com.csutil.http {
 
         public static RestFactory instance { get { return IoC.inject.GetOrAddSingleton<RestFactory>(new object()); } }
 
-        public virtual RestRequest SendGET(Uri uri) {
-            return new UriRestRequest(uri).Send(HttpMethod.Get);
+        public virtual RestRequest SendRequest(Uri uri, HttpMethod method) {
+            return new UriRestRequest(uri).Send(method);
         }
 
     }
