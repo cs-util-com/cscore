@@ -11,7 +11,20 @@ namespace com.csutil.tests.http {
     public class RestTests {
 
         [Fact]
-        public async Task TestSendGET1() {
+        public async void ExampleUsage1() {
+            RestRequest request = new Uri("https://httpbin.org/get").SendGET();
+            // Send the request and parse the response into the HttpBinGetResp class:
+            HttpBinGetResp response = await request.GetResult<HttpBinGetResp>();
+            Log.d("Your external IP is " + response.origin);
+        }
+
+        public class HttpBinGetResp { // The https://httpbin.org/get json as a class
+            public string origin { get; set; }
+            public Dictionary<string, object> headers { get; set; }
+        }
+
+        [Fact]
+        public async void TestSendGET1() {
             await new Uri("https://httpbin.org/get").SendGET().GetResult<HttpBinGetResp>((x) => {
                 Assert.NotNull(x);
                 Log.d("Your external IP is " + x.origin);
@@ -20,13 +33,13 @@ namespace com.csutil.tests.http {
         }
 
         [Fact]
-        public async Task TestSendGET2() {
+        public async void TestSendGET2() {
             RestRequest request = new Uri("https://httpbin.org/get").SendGET();
             await ValidateResponse(request);
         }
 
         [Fact]
-        public async Task TestRestFactory1() {
+        public async void TestRestFactory1() {
             RestRequest request = RestFactory.instance.SendRequest(new Uri("https://httpbin.org/get"), HttpMethod.Get);
             await ValidateResponse(request);
         }
@@ -48,13 +61,6 @@ namespace com.csutil.tests.http {
                 Log.d("Now looking for " + sentHeader.Key + " (with value " + sentHeader.Value + ")");
                 Assert.Equal(sentHeader.Value, response.headers.First(x => x.Key.Equals(sentHeader.Key)).Value);
             }
-        }
-
-        public class HttpBinGetResp {
-            public Dictionary<string, object> args { get; set; }
-            public string origin { get; set; }
-            public string url { get; set; }
-            public Dictionary<string, object> headers { get; set; }
         }
 
     }

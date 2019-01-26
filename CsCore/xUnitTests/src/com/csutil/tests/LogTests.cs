@@ -9,7 +9,7 @@ namespace com.csutil.tests {
     public class LogTests {
 
         [Fact]
-        public static void TestBasicLogOutputExamples() {
+        public void TestBasicLogOutputExamples() {
             Log.d("I'm a log message");
             Log.w("I'm a warning");
             Log.e("I'm an error");
@@ -17,14 +17,13 @@ namespace com.csutil.tests {
             Log.w("I'm a warning with parmas:", "param 1", 2, "..");
         }
 
-
         [Fact]
-        public static void TestLoggingMethodStartAndEnd() {
+        public void TestLoggingMethodStartAndEnd() {
             SomeExampleMethod1("I am a string", 123);
         }
 
         // Logging when I method is entered and left:
-        private static void SomeExampleMethod1(string s, int i) {
+        private void SomeExampleMethod1(string s, int i) {
             Stopwatch timing = Log.MethodEntered("s=" + s, "i=" + i);
             { // .. here would be some method logic ..
                 Thread.Sleep(1);
@@ -33,7 +32,7 @@ namespace com.csutil.tests {
         }
 
         [Fact]
-        public static void TestAssertV2Methods() {
+        public void TestAssertV2Methods() {
 
             AssertV2.ThrowExeptionIfAssertionFails(() => {
 
@@ -72,7 +71,7 @@ namespace com.csutil.tests {
         }
 
         [Fact]
-        public static void TestAssertV2Throws() {
+        public void TestAssertV2Throws() {
 
             AssertV2.ThrowExeptionIfAssertionFails(() => {
 
