@@ -12,7 +12,7 @@ using UnityEngine.TestTools;
 
 namespace com.csutil.tests {
 
-    class TestTasks {
+    class TaskTests {
 
         [SetUp]
         public void BeforeEachTest() { }

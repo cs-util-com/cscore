@@ -1,8 +1,10 @@
 # ☄️ The cscore Library
 `cscore` is a minimal, zero-dependency collection of common patterns & helpers needed in most C# projects. It can be used in both pure **C#** and **Unity** projects. 
 
+
 #  Overview 
 See the [examples](#💡-Usage-&-Examples) below to get a quick overview of all library features:
+
 
 ### Pure C# Components
 * [Log](#Logging) - A minimalistic logging wrapper 
@@ -13,6 +15,7 @@ See the [examples](#💡-Usage-&-Examples) below to get a quick overview of all 
 * [Directory & File Extensions](#Directory-&-File-Extensions) - To simplify handling handing files and persisting data
 * String extension methods demonstrated in StringExtensionTests.cs
 * Many other helpfull extension methods demonstrated in HelperMethodTests.cs
+
 
 ### Additional Unity Components
 * 
@@ -29,8 +32,12 @@ See the [examples](#💡-Usage-&-Examples) below to get a quick overview of all 
 * To ensure full test coverage mutation testing is used (thanks to [Stryker](#https://github.com/stryker-mutator/stryker-net)!)
 * To get in contact and stay updated [see the links below](#How-to-get-in-contact)
 
+
+
+
 # 💡 Usage & Examples
 See below for a full usage overview to explain the APIs with simple examples.
+
 
 ## Logging
 
@@ -42,11 +49,13 @@ Log.e(new Exception("I'm an exception"));
 Log.w("I'm a warning with parmas:", "param 1", 2, "..");
 ```
 
+
 ### AssertV2
 `AssertV2` can be used anywhere in your code, it will be automatically removed from your production code:
 ```cs
 AssertV2.IsTrue(1 + 1 == 3, "This assertion will fail");
 ```
+
 
 ### Log.MethodEntered
 
@@ -54,9 +63,11 @@ Simple monitoring of method calls and method-timings to detect abnormal behavior
 ```cs
 private void SomeExampleMethod1(string s, int i) {
     Stopwatch timing = Log.MethodEntered("s=" + s, "i=" + i);
+    
     { // .. here would be some method logic ..
         Thread.Sleep(1);
     } // .. as the last line in the tracked method add:
+    
     Log.MethodDone(timing, maxAllowedTimeInMs: 50);
     // If the method needed more then 50ms an error is logged
 }
@@ -82,7 +93,9 @@ eventBus.Publish(eventName);
 eventBus.Unsubscribe(subscriber1, eventName);
 ```
 
+
 __Rule of thumb__: Only use the `EventBus` if you can't exactly tell who will listen to the published events. Do not use the `EventBus` to pass an event from x to y if you know exactly who x and y will be! 
+
 
 ## Injection Logic
 ```cs
@@ -109,6 +122,7 @@ Assert.Same(myClass1Singleton, myClass1); // Its the same object reference
 
 Another extended example usage can be found in `InjectionTests.ExampleUsage2()`
 
+
 ## JSON Parsing 
 ```cs
 class MyClass1 { // example class with a field and a property
@@ -117,13 +131,16 @@ class MyClass1 { // example class with a field and a property
 }
 
 MyClass1 x1 = new MyClass1() { myString = "abc", myString2 = "def" };
+
 // Generate a json object from the object that includes all public fields and props:
 string jsonString = JsonWriter.GetWriter().Write(x1);
+
 // Parse the json string back into a second instance x2 and compare both:
 MyClass1 x2 = JsonReader.GetReader().Read<MyClass1>(jsonString);
 Assert.Equal(x1.myString, x2.myString);
 Assert.Equal(x1.myString2, x2.myString2);
 ```
+
 
 ## REST Extensions 
 ```cs
@@ -133,11 +150,14 @@ class HttpBinGetResp {
     public Dictionary<string, object> headers { get; set; }
 }
 
+
 RestRequest request = new Uri("https://httpbin.org/get").SendGET();
+
 // Send the request and parse the response into the HttpBinGetResp class:
 HttpBinGetResp response = await request.GetResult<HttpBinGetResp>();
 Log.d("Your external IP is " + response.origin);
 ```
+
 
 ## Directory & File Extensions 
 ```cs
@@ -169,39 +189,54 @@ Assert.True(childDir.DeleteV2()); // (Deleting non-existing directories would re
 Assert.False(childDir.IsNotNullAndExists());
 ```
 
+
+
 ## Unity Component Examples
 There are additional components specifically created for Unity, that will be explained below:
 
-### Component and MonoBehaviour Injection
-Often specific MonoBehaviours should only exist once in the complete scene, for this scenario `IoC.inject.GetOrAddComponentSingleton()` and `IoC.inject.GetComponentSingleton()` can be used:
+### MonoBehaviour Injection & Singletons
+Often specific MonoBehaviours should only exist once in the complete scene, for this scenario `IoC.inject.GetOrAddComponentSingleton()` and `IoC.inject.GetComponentSingleton()` can be used.
 
 ```cs
-// There is currently no MonoBehaviour registered in the system:
+// Initially there is no MonoBehaviour registered in the system:
 Assert.IsNull(IoC.inject.Get<MyExampleMono1>(this));
-// Calling GetOrAddComponentSingleton will create a singleton
+
+// Calling GetOrAddComponentSingleton will create a singleton:
 MyExampleMono1 x1 = IoC.inject.GetOrAddComponentSingleton<MyExampleMono1>(this);
+
 // Calling GetOrAddComponentSingleton again now returns the singleton:
 MyExampleMono1 x2 = IoC.inject.GetOrAddComponentSingleton<MyExampleMono1>(this);
-Assert.AreSame(x1, x2); // both references point to the same object
+Assert.AreSame(x1, x2); // Both references point to the same object
+
 // Calling the default IoC.inject.Get will also return the same singleton:
 MyExampleMono1 x3 = IoC.inject.Get<MyExampleMono1>(this);
-Assert.AreSame(x1, x3); // both references point to the same object
+Assert.AreSame(x1, x3); // Both references point to the same object
 ```
+
+Calling `GetOrAddComponentSingleton` will create a singleton. The parent gameobject of this singleton will be created together with it in the scene. The location of the singleton will be:
+
+`"Singletons" GameObject` -> `"MyExampleMono1" GameObject` -> `MyExampleMono1`
+
+This way all created singletons will be created and grouped together in the `"Singletons" GameObject` and accessible like any other MonoBehaviour as well.
 
 ### The Link Pattern
 Connecting prefabs created by designers with internal logic often is beneficial to happen in a central place. To access all required parts of the prefab the `Link` pattern and helper methods like `gameObject.GetLinkMap()` can be used:
 ```cs
 // Load a prefab that contains Link MonoBehaviours:
 GameObject prefab = ResourcesV2.LoadPrefab("ExamplePrefab1.prefab");
+
 // Collect all Link MonoBehaviours in the prefab:
 Dictionary<string, Link> links = prefab.GetLinkMap();
+
 // Via the Link.id the objects can quickly be accessed: 
 Assert.IsNotNull(links.Get<GameObject>("Button 1"));
+
 // The GameObject "Button 1" contains a Button-Mono that can be accessed:
 Button button1 = links.Get<Button>("Button 1");
 button1.SetOnClickAction(delegate {
     Log.d("Button 1 clicked");
 });
+
 // The prefab also contains other Links in other places to quickly setup the UI:
 links.Get<Text>("Text 1").text = "Some text";
 links.Get<Toggle>("Toggle 1").SetOnValueChangedAction((isNowChecked) => {
@@ -209,6 +244,9 @@ links.Get<Toggle>("Toggle 1").SetOnValueChangedAction((isNowChecked) => {
     return true;
 });
 ```
+
+
+
 
 # 💾 Installation
 
@@ -226,6 +264,9 @@ After adding the references, install the packages by executing `dotnet restore` 
 
 ## 🎮 Installing cscore into Unity projects
 Download the Unity package from the release page.
+
+
+
 
 # 💚 Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.

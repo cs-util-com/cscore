@@ -6,7 +6,7 @@ using System.Text;
 
 namespace com.csutil.tests.io {
 
-    public class TestPlayerPrefsV2 {
+    public class PlayerPrefsV2Tests {
 
         [SetUp]
         public void BeforeEachTest() { }

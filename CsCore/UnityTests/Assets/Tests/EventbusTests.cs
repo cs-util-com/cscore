@@ -9,7 +9,7 @@ using UnityEngine.TestTools;
 
 namespace com.csutil.tests.eventbus {
 
-    public class TestEventbus {
+    public class EventbusTests {
 
         private class MySingleton { }
 

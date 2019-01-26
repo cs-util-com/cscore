@@ -8,7 +8,7 @@ using UnityEngine.TestTools;
 
 namespace com.csutil.tests {
 
-    class TestCoroutines {
+    class CoroutineTests {
 
         [UnityTest]
         public IEnumerator TestExecuteDelayed() {

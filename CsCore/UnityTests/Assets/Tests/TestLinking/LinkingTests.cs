@@ -8,22 +8,26 @@ using UnityEngine.UI;
 
 namespace com.csutil.tests.linking {
 
-    public class TestLinking {
+    public class LinkingTests {
 
         [Test]
         public void ExampleUsage1() {
 
             // Load a prefab that contains Link MonoBehaviours:
             GameObject prefab = ResourcesV2.LoadPrefab("ExamplePrefab1.prefab");
+            
             // Collect all Link MonoBehaviours in the prefab:
             Dictionary<string, Link> links = prefab.GetLinkMap();
+            
             // Via the Link.id the objects can quickly be accessed: 
             Assert.IsNotNull(links.Get<GameObject>("Button 1"));
+            
             // The GameObject "Button 1" contains a Button-Mono that can be accessed:
             Button button1 = links.Get<Button>("Button 1");
             button1.SetOnClickAction(delegate {
                 Log.d("Button 1 clicked");
             });
+            
             // The prefab also contains other Links in other places to quickly setup the UI:
             links.Get<Text>("Text 1").text = "Some text";
             links.Get<Toggle>("Toggle 1").SetOnValueChangedAction((isNowChecked) => {

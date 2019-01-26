@@ -3,16 +3,10 @@ using UnityEngine;
 
 namespace com.csutil.tests.injection {
 
-    class TestInjectionSetup {
-
-        [SetUp]
-        public void BeforeEachTest() { }
-
-        [TearDown]
-        public void AfterEachTest() { }
+    class InjectionSetupTests {
 
         [Test]
-        public void TestThatInjectionSetupWasAlreadyDone() {
+        public void Test__UnitySetup_InvokeAfterUnitySetupDone() {
             // See MyExampleInjectionSetup below why instance will not be null:
             var instance = IoC.inject.Get<MyExampleClass1ToInject>(this);
             Assert.NotNull(instance);

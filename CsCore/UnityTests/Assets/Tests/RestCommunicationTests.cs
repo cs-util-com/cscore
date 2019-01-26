@@ -12,7 +12,7 @@ using UnityEngine.TestTools;
 
 namespace com.csutil.tests.http {
 
-    public class TestRestCommunication {
+    public class RestCommunicationTests {
 
         [SetUp]
         public void BeforeEachTest() { }

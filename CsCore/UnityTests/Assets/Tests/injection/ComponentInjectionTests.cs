@@ -4,7 +4,7 @@ using System;
 
 namespace com.csutil.tests.injection {
 
-    public class TestComponentInjection {
+    public class ComponentInjectionTests {
 
         [SetUp]
         public void BeforeEachTest() { }
@@ -16,20 +16,27 @@ namespace com.csutil.tests.injection {
         /// Calling GetOrAddComponentSingleton will create a singleton. The parent 
         /// gameobject of this singleton will be created together with it in
         /// the scene. The location of the singleton will be:
+        /// 
         /// "Singletons" GameObject -> "MyExampleMono1" GameObject -> MyExampleMono1
+        /// 
+        /// This way all created singletons will be created and grouped together in the 
+        /// "Singletons" GameObject and accessible like any other MonoBehaviour as well.
         /// </summary>
         [Test]
         public void ExampleUsage1() {
-            // There is currently no MonoBehaviour registered in the system:
+            // Initially there is no MonoBehaviour registered in the system:
             Assert.IsNull(IoC.inject.Get<MyExampleMono1>(this));
-            // Calling GetOrAddComponentSingleton will create a singleton
+
+            // Calling GetOrAddComponentSingleton will create a singleton:
             MyExampleMono1 x1 = IoC.inject.GetOrAddComponentSingleton<MyExampleMono1>(this);
+
             // Calling GetOrAddComponentSingleton again now returns the singleton:
             MyExampleMono1 x2 = IoC.inject.GetOrAddComponentSingleton<MyExampleMono1>(this);
-            Assert.AreSame(x1, x2); // both references point to the same object
+            Assert.AreSame(x1, x2); // Both references point to the same object
+
             // Calling the default IoC.inject.Get will also return the same singleton:
             MyExampleMono1 x3 = IoC.inject.Get<MyExampleMono1>(this);
-            Assert.AreSame(x1, x3); // both references point to the same object
+            Assert.AreSame(x1, x3); // Both references point to the same object
         }
 
         [Test]

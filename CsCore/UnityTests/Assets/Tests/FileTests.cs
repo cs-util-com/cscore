@@ -6,7 +6,7 @@ using UnityEngine.TestTools;
 
 namespace com.csutil.tests.io {
 
-    public class TestFiles {
+    public class FileTests {
 
         [SetUp]
         public void BeforeEachTest() { }
