@@ -10,12 +10,14 @@ namespace com.csutil {
 
         /// <summary> 
         /// Load prefab from a Resources subpath, for example:
-        ///      MyUi1.prefab is located in Assets/Ui/Resources/Ui1 
-        ///   -> The path must be "Ui1/MyUi1"
+        ///   MyUi1.prefab is located in Assets/Ui/Resources/Ui1 
+        ///   -> The path must be "Ui1/MyUi1.prefab" or "Ui1/MyUi1"
         /// </summary>
-        /// <param name="pathInResourcesFolder"></param>
-        /// <param name="keepReferenceToEditorPrefab"> Set to true if prefab loaded by editor script </param>
+        /// <param name="keepReferenceToEditorPrefab"> Set it true if prefab loaded by editor script </param>
         public static GameObject LoadPrefab(string pathInResourcesFolder, bool keepReferenceToEditorPrefab = false) {
+            if (pathInResourcesFolder.EndsWith(".prefab")) {
+                pathInResourcesFolder = pathInResourcesFolder.Substring(".prefab", false);
+            }
             GameObject prefab = LoadV2<GameObject>(pathInResourcesFolder);
             if (prefab == null) { throw new Exception("could not load prefab from path=" + pathInResourcesFolder); }
 #if UNITY_EDITOR

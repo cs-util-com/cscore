@@ -11,19 +11,19 @@ namespace com.csutil {
 
         private const string DEFAULT_SINGLETON_NAME = "Singletons";
 
-        public static T GetOrAddComponentSingleton<T>(this Injector self, object caller, string singletonGo = DEFAULT_SINGLETON_NAME) where T : Component {
+        public static T GetOrAddComponentSingleton<T>(this Injector self, object caller, string singletonsGoName = DEFAULT_SINGLETON_NAME) where T : Component {
             var x = self.Get<T>(caller, true);
             if (x == null) {
-                x = GetComponentSingleton<T>(true, singletonGo);
+                x = GetComponentSingleton<T>(true, singletonsGoName);
                 self.SetSingleton(x);
             }
             return x;
         }
 
-        public static T GetComponentSingleton<T>(bool createIfNull, string masterGo = DEFAULT_SINGLETON_NAME) where T : Component {
-            var s = GetOrAddGameObject(masterGo);
-            if (createIfNull) { return s.GetOrAddChild("" + typeof(T)).GetOrAddComponent<T>(); }
-            var t = s.transform.Find("" + typeof(T));
+        public static T GetComponentSingleton<T>(bool createIfNull, string singletonsGoName = DEFAULT_SINGLETON_NAME) where T : Component {
+            var singletonsGo = GetOrAddGameObject(singletonsGoName);
+            if (createIfNull) { return singletonsGo.GetOrAddChild("" + typeof(T)).GetOrAddComponent<T>(); }
+            var t = singletonsGo.transform.Find("" + typeof(T));
             return t != null ? t.GetComponent<T>() : null;
         }
 

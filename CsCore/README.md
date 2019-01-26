@@ -169,12 +169,52 @@ Assert.True(childDir.DeleteV2()); // (Deleting non-existing directories would re
 Assert.False(childDir.IsNotNullAndExists());
 ```
 
+## Unity Component Examples
+There are additional components specifically created for Unity, that will be explained below:
+
+## Component and MonoBehaviour Injection
+Often specific MonoBehaviours should only exist once in the complete scene, for this scenario `IoC.inject.GetOrAddComponentSingleton()` and `IoC.inject.GetComponentSingleton()` can be used:
+
+```cs
+// There is currently no MonoBehaviour registered in the system:
+Assert.IsNull(IoC.inject.Get<MyExampleMono1>(this));
+// Calling GetOrAddComponentSingleton will create a singleton
+MyExampleMono1 x1 = IoC.inject.GetOrAddComponentSingleton<MyExampleMono1>(this);
+// Calling GetOrAddComponentSingleton again now returns the singleton:
+MyExampleMono1 x2 = IoC.inject.GetOrAddComponentSingleton<MyExampleMono1>(this);
+Assert.AreSame(x1, x2); // both references point to the same object
+// Calling the default IoC.inject.Get will also return the same singleton:
+MyExampleMono1 x3 = IoC.inject.Get<MyExampleMono1>(this);
+Assert.AreSame(x1, x3); // both references point to the same object
+```
+
+## The Link Pattern
+Connecting prefabs created by designers with internal logic often is beneficial to happen in a central place. To access all required parts of the prefab the `Link` pattern and helper methods like `gameObject.GetLinkMap()` can be used:
+```cs
+// Load a prefab that contains Link MonoBehaviours:
+GameObject prefab = ResourcesV2.LoadPrefab("ExamplePrefab1.prefab");
+// Collect all Link MonoBehaviours in the prefab:
+Dictionary<string, Link> links = prefab.GetLinkMap();
+// Via the Link.id the objects can quickly be accessed: 
+Assert.IsNotNull(links.Get<GameObject>("Button 1"));
+// The GameObject "Button 1" contains a Button-Mono that can be accessed:
+Button button1 = links.Get<Button>("Button 1");
+button1.SetOnClickAction(delegate {
+    Log.d("Button 1 clicked");
+});
+// The prefab also contains other Links in other places to quickly setup the UI:
+links.Get<Text>("Text 1").text = "Some text";
+links.Get<Toggle>("Toggle 1").SetOnValueChangedAction((isNowChecked) => {
+    Log.d("Toggle 1 is now " + (isNowChecked ? "checked" : "unchecked"));
+    return true;
+});
+```
 
 # 💾 Installation
 
 ## 📦 Installing cscore into pure C# projects
 
- `cscore` can be installed via [NuGet](https://www.nuget.org/profiles/csutil.com), add the following lines to the root of your `.csproj` file: 
+ `cscore` can be installed via [NuGet](https://www.nuget.org/profiles/csutil.com), just add the following lines to the root of your `.csproj` file: 
 
 ``` XML
 <ItemGroup>
