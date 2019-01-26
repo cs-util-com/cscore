@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace com.csutil.io.tests {
+namespace com.csutil.tests.io {
 
     public class TestPlayerPrefsV2 {
 

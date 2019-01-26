@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using com.csutil.http;
+using NUnit.Framework;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -9,7 +10,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.TestTools;
 
-namespace com.csutil.http.tests {
+namespace com.csutil.tests.http {
 
     public class TestRestCommunication {
 

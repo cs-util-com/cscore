@@ -10,7 +10,7 @@ using System.Threading.Tasks.Schedulers;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace com.csutil {
+namespace com.csutil.tests {
 
     class TestTasks {
 

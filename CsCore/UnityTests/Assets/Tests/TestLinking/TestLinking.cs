@@ -6,7 +6,7 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace com.csutil.linking.tests {
+namespace com.csutil.tests.linking {
 
     public class TestLinking {
 

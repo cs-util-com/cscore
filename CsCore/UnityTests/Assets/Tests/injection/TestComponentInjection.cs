@@ -1,7 +1,8 @@
-﻿using NUnit.Framework;
+﻿using com.csutil.tests;
+using NUnit.Framework;
 using System;
 
-namespace com.csutil.injection.tests {
+namespace com.csutil.tests.injection {
 
     public class TestComponentInjection {
 

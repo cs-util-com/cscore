@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace com.csutil.injection.tests {
+namespace com.csutil.tests {
 
     public class MyExampleMono1 : MonoBehaviour {
 

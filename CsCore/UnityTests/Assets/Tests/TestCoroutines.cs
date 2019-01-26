@@ -1,19 +1,14 @@
-﻿using NUnit.Framework;
+﻿using com.csutil.tests;
+using NUnit.Framework;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace com.csutil {
+namespace com.csutil.tests {
 
     class TestCoroutines {
-
-        [SetUp]
-        public void BeforeEachTest() { }
-
-        [TearDown]
-        public void AfterEachTest() { }
 
         [UnityTest]
         public IEnumerator TestExecuteDelayed() {
@@ -83,7 +78,7 @@ namespace com.csutil {
             }
         }
 
-        private static TaskRunner CreateSomeMonoBehaviour() { return new GameObject().GetOrAddComponent<TaskRunner>(); }
+        private static MonoBehaviour CreateSomeMonoBehaviour() { return new GameObject().GetOrAddComponent<MyExampleMono1>(); }
 
         [UnityTest]
         public IEnumerator TestRunningMultipleCoroutines() {

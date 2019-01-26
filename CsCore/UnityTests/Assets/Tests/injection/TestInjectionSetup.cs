@@ -1,7 +1,7 @@
 ﻿using NUnit.Framework;
 using UnityEngine;
 
-namespace com.csutil.injection.tests {
+namespace com.csutil.tests.injection {
 
     class TestInjectionSetup {
 

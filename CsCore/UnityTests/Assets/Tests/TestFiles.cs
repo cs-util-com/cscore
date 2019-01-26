@@ -4,7 +4,7 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace com.csutil.io.tests {
+namespace com.csutil.tests.io {
 
     public class TestFiles {
 

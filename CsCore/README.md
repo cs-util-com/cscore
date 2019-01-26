@@ -172,7 +172,7 @@ Assert.False(childDir.IsNotNullAndExists());
 ## Unity Component Examples
 There are additional components specifically created for Unity, that will be explained below:
 
-## Component and MonoBehaviour Injection
+### Component and MonoBehaviour Injection
 Often specific MonoBehaviours should only exist once in the complete scene, for this scenario `IoC.inject.GetOrAddComponentSingleton()` and `IoC.inject.GetComponentSingleton()` can be used:
 
 ```cs
@@ -188,7 +188,7 @@ MyExampleMono1 x3 = IoC.inject.Get<MyExampleMono1>(this);
 Assert.AreSame(x1, x3); // both references point to the same object
 ```
 
-## The Link Pattern
+### The Link Pattern
 Connecting prefabs created by designers with internal logic often is beneficial to happen in a central place. To access all required parts of the prefab the `Link` pattern and helper methods like `gameObject.GetLinkMap()` can be used:
 ```cs
 // Load a prefab that contains Link MonoBehaviours:

@@ -7,7 +7,8 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace com.csutil.eventbus.tests {
+namespace com.csutil.tests.eventbus {
+
     public class TestEventbus {
 
         private class MySingleton { }
