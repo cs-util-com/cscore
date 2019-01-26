@@ -1,11 +1,15 @@
+# This batch script can be used to link the folder its contained in
+# into a target Unity project directory. The target directory must contain an 
+# Assets folder as a savety guard to prevent linking mistakes
+# https://developer.apple.com/library/archive/documentation/OpenSource/Conceptual/ShellScripting/shell_scripts/shell_scripts.html
+
 #!/bin/bash
-echo "Format: createLinks.sh <destination>"
+echo "Format: linkThisIntoAUnityProject.sh <destination>"
 
 src=$PWD
 
 if [[ $# < 1 ]]; then
-	echo "Destination directory - Unity Project"
-    echo "Copy+Paste the project folder path the component should be placed in:"
+    echo "Copy+Paste the target Unity project path where I should be linked into:"
 	read tmp_dest
 else
 	tmp_dest="$@"
@@ -36,18 +40,18 @@ echo "Searching for Assets directory.."
 
 if [ ! -d "Assets" ]; then
     echo "Error: Assets directory not found."
-    echo "Destination: Unity Project, should contain an Assets folder"
+    echo "Destination: Unity Project, must contain an Assets folder"
     exit 1
 fi
 
-echo "SUCCESS: Assets folder found."
+echo "Assets folder found. Will start linking now.."
 
 dest="$dest/Assets"
 
 cd "$src"
 echo cd $PWD
 
-echo "Create symlinks.."
+echo "Will start creating symlinks now.."
 
 
 for dir in */; do
@@ -59,14 +63,14 @@ for dir in */; do
 
 	for base in */; do
 		base=${base%/}
-		if [ "$(ls -d $base)" ]; then # Folder not empty
+		if [ "$(ls -d $base)" ]; then # Folder is not empty
 			if [[ ($base == "Android" || $base == "iOS" || $base == "OSX") ]]; then
 				mkdir -p "$dest/$dir/$base"
 				cd "$base"
 				echo cd $PWD
 				for pluginBase in */; do
 					pluginBase=${pluginBase%/}
-					if [ "$(ls -d $pluginBase)" ]; then # Folder not empty
+					if [ "$(ls -d $pluginBase)" ]; then # Folder is not empty
 						echo "Link (Plugin) directory: $src/$dir/$base/$pluginBase to $dest/$dir/$base/$pluginBase"
 						ln -s "$src/$dir/$base/$pluginBase" "$dest/$dir/$base/$pluginBase"
 					fi
@@ -76,7 +80,6 @@ for dir in */; do
 			else
 				echo "Link directory: $src/$dir/$base to $dest/$dir/$base"
 				ln -s "$src/$dir/$base" "$dest/$dir/$base"
-				# echo "$target"
 			fi
 		fi
 	done

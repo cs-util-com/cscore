@@ -51,7 +51,7 @@ dest="$dest/Assets"
 cd "$src"
 echo cd $PWD
 
-echo "Create symlinks.."
+echo "Will start creating symlinks now.."
 
 
 for dir in */; do

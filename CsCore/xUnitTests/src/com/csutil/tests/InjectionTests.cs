@@ -16,22 +16,24 @@ namespace com.csutil.tests {
         [Fact]
         public void ExampleUsage1() {
             // The default injector can be accessed via IoC.inject
-            Injector IoC_inject = GetInjectorForTest();
+            Injector injector = GetInjectorForTest();
 
-            // Requesting an instance of MyClass1 will fail because
-            // no injector registered yet to handle requests for the MyClass1 type:
-            Assert.Null(IoC_inject.Get<MyClass1>(this));
+            // Requesting an instance of MyClass1 will fail because no injector registered yet to handle requests for the MyClass1 type:
+            Assert.Null(injector.Get<MyClass1>(this));
 
-            // Setup an injector that will always return the same instance for MyClass1
-            // when IoC.inject.Get<MyClass1>() is called:
-            var singletonInstance = new MySubClass1();
-            IoC_inject.SetSingleton<MyClass1, MySubClass1>(singletonInstance);
+            // Setup an injector that will always return the same instance for MyClass1 when IoC.inject.Get<MyClass1>() is called:
+            MySubClass1 myClass1Singleton = new MySubClass1();
+            injector.SetSingleton<MyClass1, MySubClass1>(myClass1Singleton);
+
+            // Internally .SetSingleton() will register an injector for the class like this:
+            injector.RegisterInjector<MyClass1>(new object(), (caller, createIfNull) => {
+                // Whenever injector.Get is called the injector always returns the same instance:
+                return myClass1Singleton;
+            });
 
             // Now calling IoC.inject.Get<MyClass1>() will always result in the same instance:
-            var refA = IoC_inject.Get<MyClass1>(this);
-            Assert.Equal(singletonInstance, refA);
-            var refB = IoC_inject.Get<MyClass1>(this);
-            Assert.Equal(singletonInstance, refB);
+            MyClass1 myClass1 = injector.Get<MyClass1>(this);
+            Assert.Same(myClass1Singleton, myClass1); // Its the same object reference
         }
 
         [Fact]

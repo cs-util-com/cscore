@@ -1,4 +1,8 @@
-	:: https://de.wikibooks.org/wiki/Batch-Programmierung:_Batch-Befehle
+:: This batch script can be used to link the folder its contained in
+:: into a target Unity project directory. The target directory must contain an 
+:: Assets folder as a savety guard to prevent linking mistakes
+:: https://en.wikibooks.org/wiki/Windows_Batch_Scripting
+
 	@echo off
 	cls
 	@setlocal enabledelayedexpansion
@@ -8,9 +12,9 @@
 	set UserInput=%1
 	set "targetFiles=!UserInput!\Assets"
 	IF EXIST "!targetFiles!" (
-		echo passed parameter used as folder
+		echo The passed parameter will be used as the target Unity project folder
 	) else (
-		set /p UserInput= "Copy+Paste the project folder path the component should be placed in:"
+		set /p UserInput= "Copy+Paste the target Unity project path where I should be linked into:"
 	)
 	set "targetFiles=!UserInput!\Assets"
 	IF EXIST "!targetFiles!" (
@@ -19,7 +23,6 @@
 	) else (
 		echo Could not find targetFiles=!targetFiles!
 	)
-	echo Finished :)
 	pause
 	:: exit script
 	goto :eof
@@ -37,14 +40,10 @@ SETLOCAL
 	set currentFolder=%currentFolder:"=%
 
 	set "sourceFolder=!sourceBaseFolder!!currentFolder!"
-	::set "targetFolder=!targetBaseFolder!!currentFolder!"
-
 
 	echo Now searching in folder !currentFolder!
-	:: echo    - sourceBaseFolder    =!sourceBaseFolder!
 	echo    - sourceFolder=!sourceFolder!
 	echo    - targetBaseFolder=!targetBaseFolder!
-	::echo    - targetFolder=!targetFolder!
 
 	for /f "delims=" %%d in ('dir /b /ad-h-s') do (
 		set "subfolder=%%d"
@@ -80,8 +79,6 @@ SETLOCAL
 	mkdir "!targetFolder!"
 
 	echo Now searching in folder !currentFolder!
-	:: echo    - sourceBaseFolder    =!sourceBaseFolder!
-	:: echo    - targetBaseFolder=!targetBaseFolder!
 	echo    - targetFolder=!targetFolder!
 		
 	for /f "delims=" %%d in ('dir /b /ad-h-s') do (

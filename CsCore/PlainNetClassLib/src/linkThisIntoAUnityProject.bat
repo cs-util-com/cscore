@@ -12,7 +12,7 @@
 	set UserInput=%1
 	set "targetFiles=!UserInput!\Assets"
 	IF EXIST "!targetFiles!" (
-		echo passed parameter used as folder
+		echo The passed parameter will be used as the target Unity project folder
 	) else (
 		set /p UserInput= "Copy+Paste the target Unity project path where I should be linked into:"
 	)
@@ -23,7 +23,6 @@
 	) else (
 		echo Could not find targetFiles=!targetFiles!
 	)
-	echo The linking finished successfully :)
 	pause
 	:: exit script
 	goto :eof
@@ -41,14 +40,10 @@ SETLOCAL
 	set currentFolder=%currentFolder:"=%
 
 	set "sourceFolder=!sourceBaseFolder!!currentFolder!"
-	::set "targetFolder=!targetBaseFolder!!currentFolder!"
-
 
 	echo Now searching in folder !currentFolder!
-	:: echo    - sourceBaseFolder    =!sourceBaseFolder!
 	echo    - sourceFolder=!sourceFolder!
 	echo    - targetBaseFolder=!targetBaseFolder!
-	::echo    - targetFolder=!targetFolder!
 
 	for /f "delims=" %%d in ('dir /b /ad-h-s') do (
 		set "subfolder=%%d"
@@ -84,8 +79,6 @@ SETLOCAL
 	mkdir "!targetFolder!"
 
 	echo Now searching in folder !currentFolder!
-	:: echo    - sourceBaseFolder    =!sourceBaseFolder!
-	:: echo    - targetBaseFolder=!targetBaseFolder!
 	echo    - targetFolder=!targetFolder!
 		
 	for /f "delims=" %%d in ('dir /b /ad-h-s') do (
