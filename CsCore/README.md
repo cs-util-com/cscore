@@ -1,8 +1,10 @@
 # ☄️ The cscore Library
-cscore is a minimal, zero-dependency collection of common patterns & helpers needed in most C# projects. It can be used in both pure **C#** and **Unity** projects. 
+`cscore` is a minimal, zero-dependency collection of common patterns & helpers needed in most C# projects. It can be used in both pure **C#** and **Unity** projects. 
 
 #  Overview 
 See the [examples](#💡-Usage-&-Examples) below to get a quick overview of all library features:
+
+### Pure C# Components
 * [Log](#Logging) - A minimalistic logging wrapper 
 * [EventBus](#The-EventBus) - Publish and subscribe to global events from anywhere in your code
 * [Injection Logic](#Injection-Logic) - A simple inversion of control pattern that does not rely on magic 
@@ -10,7 +12,12 @@ See the [examples](#💡-Usage-&-Examples) below to get a quick overview of all 
 * [REST Extensions](#REST-Extensions) - Extensions to simplify doing REST calls 
 * [Directory & File Extensions](#Directory-&-File-Extensions) - To simplify handling handing files and persisting data
 * String extension methods demonstrated in StringExtensionTests.cs
-* Many other helpfull extension methods best summarized in HelperMethodTests.cs
+* Many other helpfull extension methods demonstrated in HelperMethodTests.cs
+
+### Additional Unity Components
+* 
+* 
+* 
 
 <!-- ### Status -->
 ![](https://img.shields.io/badge/Maintained%3F-yes-green.svg?style=flat-square)
@@ -36,7 +43,7 @@ Log.w("I'm a warning with parmas:", "param 1", 2, "..");
 ```
 
 ### AssertV2
-AssertV2 can be used anywhere in your code, it will be automatically removed from your production code:
+`AssertV2` can be used anywhere in your code, it will be automatically removed from your production code:
 ```cs
 AssertV2.IsTrue(1 + 1 == 3, "This assertion will fail");
 ```
@@ -75,7 +82,7 @@ eventBus.Publish(eventName);
 eventBus.Unsubscribe(subscriber1, eventName);
 ```
 
-__Rule of thumb__: Only use the EventBus pattern if you can't exactly tell who wants to listen to the published events. Do not use the eventbus to pass an event from x to y if you know exactly who x and y are! 
+__Rule of thumb__: Only use the `EventBus` if you can't exactly tell who will listen to the published events. Do not use the `EventBus` to pass an event from x to y if you know exactly who x and y will be! 
 
 ## Injection Logic
 ```cs
@@ -100,7 +107,7 @@ MyClass1 myClass1 = injector.Get<MyClass1>(this);
 Assert.Same(myClass1Singleton, myClass1); // Its the same object reference
 ```
 
-Another extended example usage can be found in InjectionTests.ExampleUsage2()
+Another extended example usage can be found in `InjectionTests.ExampleUsage2()`
 
 ## JSON Parsing 
 ```cs
@@ -167,7 +174,7 @@ Assert.False(childDir.IsNotNullAndExists());
 
 ## 📦 Installing cscore into pure C# projects
 
- cscore can be installed via [NuGet](https://www.nuget.org/profiles/csutil.com), add the following lines to the root of your `.csproj` file: 
+ `cscore` can be installed via [NuGet](https://www.nuget.org/profiles/csutil.com), add the following lines to the root of your `.csproj` file: 
 
 ``` XML
 <ItemGroup>
