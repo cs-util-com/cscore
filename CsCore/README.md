@@ -1,22 +1,26 @@
-# The cscore Library
+# ☄️ The cscore Library
 cscore is a minimal, zero-dependency collection of common patterns & helpers needed in most C# projects. It can be used in both pure **C#** and **Unity** projects. 
 
-# Overview
-See the [examples](#Usage-&-Examples) below to get a quick overview of all library features:
+# 📑 Overview 
+See the [examples](#🔍-Usage-&-Examples) below to get a quick overview of all library features:
 * [Log](#Logging) - A minimalistic logging wrapper 
 * [EventBus](#The-EventBus) - Publish and subscribe to global events from anywhere in your code
 * [Injection Logic](#Injection-Logic) - A simple inversion of control pattern that does not rely on magic 
 * [REST Extensions](#REST-Extensions) - Extensions to simplify doing REST calls 
 
+<!-- 
+### Status
+-->
 ![](https://img.shields.io/badge/Maintained%3F-yes-green.svg?style=flat-square)
 ![](https://img.shields.io/github/last-commit/cs-util-com/cscore.svg?colorB=4267b2&style=flat-square)
 ![](https://img.shields.io/github/issues-closed/cs-util-com/cscore.svg?colorB=006400&style=flat-square)
 [![](https://badge.waffle.io/cs-util-com/cscore.svg?columns=all&style=flat-square)](https://waffle.io/cs-util-com/cscore)
 
-* To get started, see the [installation instructions](#Installation) below.
+* To get started, see the [installation instructions](#💾-Installation) below.
 * To ensure full test coverage mutation testing is used (thanks to [Stryker](#https://github.com/stryker-mutator/stryker-net)!)
+* To stay updated see https://www.csutil.com/updates
 
-# Usage & Examples
+# 🔍 Usage & Examples
 See below for a full usage overview to explain the APIs with simple examples.
 
 ## Logging
@@ -109,7 +113,7 @@ public class HttpBinGetResp { // The https://httpbin.org/get json as a class
 }
 ```
 
-# Installation
+# 💾 Installation
 
 ## Installing cscore into pure C# projects
 
@@ -126,7 +130,7 @@ After adding the references, install the packages by executing `dotnet restore` 
 ## Installing cscore into Unity projects
 Download the Unity package from the release page.
 
-# Contributing
+# 💚 Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 <!---
 See current features in development here: https://github.com/cs-util-com/cscore/projects/1
