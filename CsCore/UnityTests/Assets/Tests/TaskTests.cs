@@ -14,12 +14,6 @@ namespace com.csutil.tests {
 
     class TaskTests {
 
-        [SetUp]
-        public void BeforeEachTest() { }
-
-        [TearDown]
-        public void AfterEachTest() { }
-
         [UnityTest]
         public IEnumerator TestRunTaskInBackground() {
 

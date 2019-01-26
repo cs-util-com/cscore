@@ -18,9 +18,12 @@ See the [examples](#💡-Usage-&-Examples) below to get a quick overview of all 
 
 
 ### Additional Unity Components
-* 
-* 
-* 
+* `GameObject.Subscribe()` & `MonoBehaviour.Subscribe()` - Listening to events while respecting the livecycle of Unity objects
+* MonoBehaviour Injection & Singletons - Using the injection logic to create and access Unity objects 
+* The `Link` Pattern - Making it easy to connect prefabs with logic
+* `MonoBehaviour.ExecuteDelayed` & `MonoBehaviour.ExecuteRepeated` - Executing asyncronous actions delayed and/or repeated
+* `UnityWebRequest.SendV2()` - UnityWebRequest extension methods
+* PlayerPrefsV2 that adds Bool as a type and encrypted strings, see PlayerPrefsV2Tests.cs for examples
 
 <!-- ### Status -->
 ![](https://img.shields.io/badge/Maintained%3F-yes-green.svg?style=flat-square)
@@ -220,11 +223,33 @@ Assert.False(childDir.IsNotNullAndExists());
 
 
 
-## Unity Component Examples
+# Unity Component Examples
 There are additional components specifically created for Unity, that will be explained below:
 
-### MonoBehaviour Injection & Singletons
-Often specific MonoBehaviours should only exist once in the complete scene, for this scenario `IoC.inject.GetOrAddComponentSingleton()` and `IoC.inject.GetComponentSingleton()` can be used.
+## `GameObject.Subscribe()` & `MonoBehaviour.Subscribe()`
+
+There are extension methods for both `GameObjects` and `Behaviours` which internally handle the lifecycle of their subscribers correctly. If a `GameObject` for example is currently not active or was destroyed the published events will not reach it.
+
+```cs
+// GameObjects can subscribe to events:
+var myGameObject = new GameObject("MyGameObject 1");
+myGameObject.Subscribe("MyEvent1", () => {
+    Log.d("I received the event because I'm active");
+});
+
+// Behaviours can subscribe to events too:
+var myExampleMono = myGameObject.GetOrAddComponent<MyExampleMono1>();
+myExampleMono.Subscribe("MyEvent1", () => {
+    Log.d("I received the event because I'm enabled and active");
+});
+
+// The broadcast will reach both the GameObject and the MonoBehaviour:
+EventBus.instance.Publish("MyEvent1");
+```
+
+
+## MonoBehaviour Injection & Singletons
+Often specific `MonoBehaviours` should only exist once in the complete scene, for this scenario `IoC.inject.GetOrAddComponentSingleton()` and `IoC.inject.GetComponentSingleton()` can be used.
 
 ```cs
 // Initially there is no MonoBehaviour registered in the system:
@@ -248,7 +273,9 @@ Calling `GetOrAddComponentSingleton` will create a singleton. The parent gameobj
 
 This way all created singletons will be created and grouped together in the `"Singletons" GameObject` and accessible like any other MonoBehaviour as well.
 
-### The Link Pattern
+
+
+## The `Link` Pattern
 Connecting prefabs created by designers with internal logic often is beneficial to happen in a central place. To access all required parts of the prefab the `Link` pattern and helper methods like `gameObject.GetLinkMap()` can be used:
 ```cs
 // Load a prefab that contains Link MonoBehaviours:
@@ -275,7 +302,7 @@ links.Get<Toggle>("Toggle 1").SetOnValueChangedAction((isNowChecked) => {
 ```
 
 
-### MonoBehaviour.ExecuteDelayed and MonoBehaviour.ExecuteRepeated
+## `MonoBehaviour.ExecuteDelayed` & `MonoBehaviour.ExecuteRepeated`
 ```cs
 // Execute a task after a defined time:
 myMonoBehaviour.ExecuteDelayed(() => {
@@ -290,6 +317,25 @@ myMonoBehaviour.ExecuteRepeated(() => {
 ```
 
 Additionally there is myMono.StartCoroutinesInParallel(..) and myMono.StartCoroutinesSequetially(..), see TODO for details
+
+
+
+## `UnityWebRequest.SendV2()` 
+It is recommended to use the `Uri` extension methods for requests (see TODO). If `UnityWebRequest` has to be used, then `UnityWebRequest.SendV2()` should be a good alternative. `SendV2` creates the same `RestRequest` objects that the `Uri` extension methods create as well. 
+
+```cs
+RestRequest request1 = UnityWebRequest.Get("https://httpbin.org/get").SendV2();
+Task<HttpBinGetResp> requestTask = request1.GetResult<HttpBinGetResp>();
+yield return requestTask.AsCoroutine();
+HttpBinGetResp response = requestTask.Result;
+Log.d("Your IP is " + response.origin);
+
+// Alternatively the asynchronous callback in GetResult can be used:
+UnityWebRequest.Get("https://httpbin.org/get").SendV2().GetResult<HttpBinGetResp>((result) => {
+    Log.d("Your IP is " + response.origin);
+});
+```
+
 
 
 

@@ -11,21 +11,33 @@ namespace com.csutil.tests.eventbus {
 
     public class EventbusTests {
 
-        private class MySingleton { }
+        [Test]
+        public void ExampleUsage1() {
 
-        [SetUp]
-        public void BeforeEachTest() { }
+            // GameObjects can subscribe to events:
+            var myGameObject = new GameObject("MyGameObject 1");
+            myGameObject.Subscribe("MyEvent1", () => {
+                Log.d("I received the event because I'm active");
+            });
 
-        [TearDown]
-        public void AfterEachTest() { }
+            // Behaviours can subscribe to events too:
+            var myExampleMono = myGameObject.GetOrAddComponent<MyExampleMono1>();
+            myExampleMono.Subscribe("MyEvent1", () => {
+                Log.d("I received the event because I'm enabled and active");
+            });
+
+            // The broadcast will reach both the GameObject and the MonoBehaviour:
+            EventBus.instance.Publish("MyEvent1");
+
+        }
 
         [Test]
         public void SubscribingWithGameObjects() {
-            var go = new GameObject();
+            var myGameObject = new GameObject();
             var event1 = "MyEvent1";
             var counter = 0;
 
-            go.Subscribe(event1, () => {
+            myGameObject.Subscribe(event1, () => {
                 Log.d("Event1 was received!");
                 counter++;
             });
@@ -34,22 +46,22 @@ namespace com.csutil.tests.eventbus {
             EventBus.instance.Publish(event1);
             Assert.AreEqual(1, counter);
 
-            go.SetActive(false);
+            myGameObject.SetActive(false);
             EventBus.instance.Publish(event1); // event should not be received
             Assert.AreEqual(1, counter); // because gameObject is inactive
 
-            go.SetActive(true);
+            myGameObject.SetActive(true);
             EventBus.instance.Publish(event1, "I am an ignored parameter");
             Assert.AreEqual(2, counter);
 
-            go.Destroy();
+            myGameObject.Destroy();
             EventBus.instance.Publish(event1); // event should not be received
             Assert.AreEqual(2, counter); // because gameObject is destroyed
         }
 
         [Test]
         public void SubscribingWithMonoBehaviour() {
-            var someMono = new GameObject().GetOrAddComponent<TaskRunner>();
+            var someMono = new GameObject().GetOrAddComponent<MyExampleMono1>();
 
             var event1 = "MyEvent1";
             var counter = 0;

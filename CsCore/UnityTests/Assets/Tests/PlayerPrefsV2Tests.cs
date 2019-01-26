@@ -8,12 +8,6 @@ namespace com.csutil.tests.io {
 
     public class PlayerPrefsV2Tests {
 
-        [SetUp]
-        public void BeforeEachTest() { }
-
-        [TearDown]
-        public void AfterEachTest() { }
-
         [Test]
         public void TestGetAndSetBool() {
             var key = "b1";

@@ -14,11 +14,21 @@ namespace com.csutil.tests.http {
 
     public class RestCommunicationTests {
 
-        [SetUp]
-        public void BeforeEachTest() { }
+        [UnityTest]
+        public IEnumerator ExampleUsage() {
 
-        [TearDown]
-        public void AfterEachTest() { }
+            RestRequest request1 = UnityWebRequest.Get("https://httpbin.org/get").SendV2();
+            Task<HttpBinGetResp> requestTask = request1.GetResult<HttpBinGetResp>();
+            yield return requestTask.AsCoroutine();
+            HttpBinGetResp response = requestTask.Result;
+            Log.d("Your IP is " + response.origin);
+
+            // Alternatively the asynchronous callback in GetResult can be used:
+            UnityWebRequest.Get("https://httpbin.org/get").SendV2().GetResult<HttpBinGetResp>((result) => {
+                Log.d("Your IP is " + response.origin);
+            });
+
+        }
 
         [UnityTest]
         public IEnumerator TestResultCallback() {
@@ -58,17 +68,17 @@ namespace com.csutil.tests.http {
             var imgHeight = 1024;
 
             var response = new Response<Texture>();
-            var www = UnityWebRequestTexture.GetTexture("https://picsum.photos/" + imgWidth + "/" + imgHeight, true);
+            var downloadTextureRequest = UnityWebRequestTexture.GetTexture("https://picsum.photos/" + imgWidth + "/" + imgHeight, true);
 
-            yield return www.SendWebRequestV2(response);
+            yield return downloadTextureRequest.SendWebRequestV2(response);
 
             Assert.AreEqual(100, response.progressInPercent.value);
             Assert.IsTrue(response.duration.ElapsedMilliseconds > 100, "resp.duration=" + response.duration.ElapsedMilliseconds + "ms");
 
-            var result = response.getResult();
-            Assert.IsNotNull(result);
-            Assert.AreEqual(imgWidth, result.width);
-            Assert.AreEqual(imgHeight, result.height);
+            Texture downloadedTexture = response.getResult();
+            Assert.IsNotNull(downloadedTexture);
+            Assert.AreEqual(imgWidth, downloadedTexture.width);
+            Assert.AreEqual(imgHeight, downloadedTexture.height);
         }
 
         [UnityTest]
