@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Threading;
 using com.csutil.logging;
 using Xunit;
@@ -10,9 +11,10 @@ namespace com.csutil.tests {
         [Fact]
         public static void TestBasicLogOutputExamples() {
             Log.d("I'm a log message");
-            Log.w("I'm a warning", 123);
-            Log.e("I'm an error", 123, 123);
-            Log.e(new Exception("I'm an exception"), 123, 123, 123);
+            Log.w("I'm a warning");
+            Log.e("I'm an error");
+            Log.e(new Exception("I'm an exception"));
+            Log.w("I'm a warning with parmas:", "param 1", 2, "..");
         }
 
 
@@ -21,12 +23,12 @@ namespace com.csutil.tests {
             SomeExampleMethod1("I am a string", 123);
         }
 
+        // Logging when I method is entered and left:
         private static void SomeExampleMethod1(string s, int i) {
-            var timing = Log.MethodEntered("s=" + s, "i=" + i);
-
-            // .. here would be some method logic ..
-            Thread.Sleep(1);
-
+            Stopwatch timing = Log.MethodEntered("s=" + s, "i=" + i);
+            { // .. here would be some method logic ..
+                Thread.Sleep(1);
+            } // .. as the last line in the tracked method add:
             Log.MethodDone(timing, maxAllowedTimeInMs: 50);
         }
 

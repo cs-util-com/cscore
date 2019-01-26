@@ -3,13 +3,39 @@ cscore is a minimal zero dependency library of core logic needed in each C# proj
 
 ## Overview
 
-* [EventBus](#EventBus) - Publish and subscribe to global events
-* [Injection](#Injection)
+* [Log](#Logging) - A minimalistic logging wrapper 
+* [EventBus](#The-EventBus) - Publish and subscribe to global events from anywhere in your code
+* [Injection Logic](#Injection-Logic) - A simple inversion of control pattern that does not rely on magic 
 
 ## Usage & Examples
 See below for a full usage overview to explain the APIs with simple examples.
 
+### Logging
+
+```cs
+Log.d("I'm a log message");
+Log.w("I'm a warning");
+Log.e("I'm an error");
+Log.e(new Exception("I'm an exception"));
+Log.w("I'm a warning with parmas:", "param 1", 2, "..");
+AssertV2.IsTrue(1 + 1 == 3, "This assertion will fail");
+```
+AssertV2 can be used anywhere in your code, it will be automatically removed from your production code.
+
+Additional Log-helpers to log when a method is entered and left:
+```cs
+private static void SomeExampleMethod1(string s, int i) {
+    Stopwatch timing = Log.MethodEntered("s=" + s, "i=" + i);
+    { // .. here would be some method logic ..
+        Thread.Sleep(1);
+    } // .. as the last line in the tracked method add:
+    Log.MethodDone(timing, maxAllowedTimeInMs: 50);
+    // If the method needed more then 50ms an error is logged
+}
+```
+
 ### The EventBus
+
 ```cs
 // The EventBus can be accessed via EventBus.instance
 EventBus eventBus = EventBus.instance;
@@ -27,6 +53,8 @@ eventBus.Publish(eventName);
 // When subscribers dont want to receive events anymore they can unsubscribe:
 eventBus.Unsubscribe(subscriber1, eventName);
 ```
+
+__Rule of thumb__: Only use the EventBus pattern if you can't exactly tell who wants to listen to the published events. Do not use the eventbus to pass an event from x to y if you know exactly who x and y are! 
 
 ### Injection Logic
 ```cs
