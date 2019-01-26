@@ -1,16 +1,18 @@
 # ☄️ The cscore Library
 cscore is a minimal, zero-dependency collection of common patterns & helpers needed in most C# projects. It can be used in both pure **C#** and **Unity** projects. 
 
-# 📑 Overview 
-See the [examples](#🔍-Usage-&-Examples) below to get a quick overview of all library features:
+#  Overview 
+See the [examples](#💡-Usage-&-Examples) below to get a quick overview of all library features:
 * [Log](#Logging) - A minimalistic logging wrapper 
 * [EventBus](#The-EventBus) - Publish and subscribe to global events from anywhere in your code
 * [Injection Logic](#Injection-Logic) - A simple inversion of control pattern that does not rely on magic 
+* [JSON Parsing](#JSON-Parsing) - Reading and writing JSON through a simple interface
 * [REST Extensions](#REST-Extensions) - Extensions to simplify doing REST calls 
+* [Directory & File Extensions](#Directory-&-File-Extensions) - To simplify handling handing files and persisting data
+* String extension methods demonstrated in StringExtensionTests.cs
+* Many other helpfull extension methods best summarized in HelperMethodTests.cs
 
-<!-- 
-### Status
--->
+<!-- ### Status -->
 ![](https://img.shields.io/badge/Maintained%3F-yes-green.svg?style=flat-square)
 ![](https://img.shields.io/github/last-commit/cs-util-com/cscore.svg?colorB=4267b2&style=flat-square)
 ![](https://img.shields.io/github/issues-closed/cs-util-com/cscore.svg?colorB=006400&style=flat-square)
@@ -18,9 +20,9 @@ See the [examples](#🔍-Usage-&-Examples) below to get a quick overview of all 
 
 * To get started, see the [installation instructions](#💾-Installation) below.
 * To ensure full test coverage mutation testing is used (thanks to [Stryker](#https://github.com/stryker-mutator/stryker-net)!)
-* To stay updated see https://www.csutil.com/updates
+* To get in contact and stay updated [see the links below](#How-to-get-in-contact)
 
-# 🔍 Usage & Examples
+# 💡 Usage & Examples
 See below for a full usage overview to explain the APIs with simple examples.
 
 ## Logging
@@ -100,22 +102,70 @@ Assert.Same(myClass1Singleton, myClass1); // Its the same object reference
 
 Another extended example usage can be found in InjectionTests.ExampleUsage2()
 
+## JSON Parsing 
+```cs
+class MyClass1 { // example class with a field and a property
+    public string myString;
+    public string myString2 { get; set; }
+}
+
+MyClass1 x1 = new MyClass1() { myString = "abc", myString2 = "def" };
+// Generate a json object from the object that includes all public fields and props:
+string jsonString = JsonWriter.GetWriter().Write(x1);
+// Parse the json string back into a second instance x2 and compare both:
+MyClass1 x2 = JsonReader.GetReader().Read<MyClass1>(jsonString);
+Assert.Equal(x1.myString, x2.myString);
+Assert.Equal(x1.myString2, x2.myString2);
+```
+
 ## REST Extensions 
 ```cs
+// The property names are based on the https://httpbin.org/get json response
+class HttpBinGetResp { 
+    public string origin { get; set; }
+    public Dictionary<string, object> headers { get; set; }
+}
+
 RestRequest request = new Uri("https://httpbin.org/get").SendGET();
 // Send the request and parse the response into the HttpBinGetResp class:
 HttpBinGetResp response = await request.GetResult<HttpBinGetResp>();
 Log.d("Your external IP is " + response.origin);
-
-public class HttpBinGetResp { // The https://httpbin.org/get json as a class
-    public string origin { get; set; }
-    public Dictionary<string, object> headers { get; set; }
-}
 ```
+
+## Directory & File Extensions 
+```cs
+// Get a directory to work in:
+DirectoryInfo myDirectory = EnvironmentV2.instance.GetAppDataFolder();
+Log.d("The directory path is: " + myDirectory.FullPath());
+
+// Get a non-existing child directory
+var childDir = myDirectory.GetChildDir("MyExampleSubDirectory1");
+
+// Create the sub directory:
+childDir.CreateV2(); // myDirectory.CreateSubdirectory("..") works too
+
+// Rename the directory:
+childDir.Rename("MyExampleSubDirectory2");
+
+// Get a file in the child directory:
+FileInfo file1 = childDir.GetChild("MyFile1.txt");
+
+// Saving and loading from files:
+string someTextToStoreInTheFile = "Some text to store in the file";
+file1.SaveAsText(someTextToStoreInTheFile);
+string loadedText = file1.LoadAs<string>(); // loading JSON would work as well
+Assert.Equal(someTextToStoreInTheFile, loadedText);
+
+// Deleting directories:
+Assert.True(childDir.DeleteV2()); // (Deleting non-existing directories would returns false)
+// Check that the directory no longer exists:
+Assert.False(childDir.IsNotNullAndExists());
+```
+
 
 # 💾 Installation
 
-## Installing cscore into pure C# projects
+## 📦 Installing cscore into pure C# projects
 
  cscore can be installed via [NuGet](https://www.nuget.org/profiles/csutil.com), add the following lines to the root of your `.csproj` file: 
 
@@ -127,7 +177,7 @@ public class HttpBinGetResp { // The https://httpbin.org/get json as a class
 
 After adding the references, install the packages by executing `dotnet restore` inside the project folder.
 
-## Installing cscore into Unity projects
+## 🎮 Installing cscore into Unity projects
 Download the Unity package from the release page.
 
 # 💚 Contributing
@@ -143,6 +193,8 @@ See current features in development here: https://github.com/cs-util-com/cscore/
 [![Discord](https://img.shields.io/discord/518684359667089409.svg?logo=discord&label=chat%20on%20discord&style=for-the-badge)](https://discord.gg/bgGqRe)
 
 [![Gitter](https://img.shields.io/gitter/room/csutil-com/community.svg?style=for-the-badge&logo=gitter-white)](https://gitter.im/csutil-com)
+
+To stay updated via Email see https://www.csutil.com/updates
 
 # License
 

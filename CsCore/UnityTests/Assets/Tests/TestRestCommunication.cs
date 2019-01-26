@@ -101,6 +101,7 @@ namespace com.csutil.http.tests {
         }
 
         public class HttpBinGetResp {
+            // The property names are based on the https://httpbin.org/get json response
             public Dictionary<string, object> args { get; set; }
             public string origin { get; set; }
             public string url { get; set; }

@@ -22,7 +22,7 @@ namespace com.csutil.tests {
             var childDir = myDirectory.GetChildDir("MyExampleSubDirectory1");
 
             // Create the sub directory:
-            childDir.CreateV2(); // dir.CreateSubdirectory("..") would work too
+            childDir.CreateV2(); // myDirectory.CreateSubdirectory("..") works too
 
             // Rename the directory:
             childDir.Rename("MyExampleSubDirectory2");
