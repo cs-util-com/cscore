@@ -1,17 +1,20 @@
-# cscore
-cscore is a minimal, zero-dependency collection of common helpers needed in most C# projects. It can be used in both pure C# and **Unity** projects.
-
-See the examples below to get a quick overview of all library features:
+# The cscore Library
+cscore is a minimal, zero-dependency collection of common patterns & helpers needed in most C# projects. It can be used in both pure **C#** and **Unity** projects. 
 
 # Overview
-
+See the [examples](#Usage-&-Examples) below to get a quick overview of all library features:
 * [Log](#Logging) - A minimalistic logging wrapper 
 * [EventBus](#The-EventBus) - Publish and subscribe to global events from anywhere in your code
 * [Injection Logic](#Injection-Logic) - A simple inversion of control pattern that does not rely on magic 
+* [REST Extensions](#REST-Extensions) - Extensions to simplify doing REST calls 
 
-### Current Status
+![](https://img.shields.io/badge/Maintained%3F-yes-green.svg?style=flat-square)
+![](https://img.shields.io/github/last-commit/cs-util-com/cscore.svg?colorB=4267b2&style=flat-square)
+![](https://img.shields.io/github/issues-closed/cs-util-com/cscore.svg?colorB=006400&style=flat-square)
+[![](https://badge.waffle.io/cs-util-com/cscore.svg?columns=all&style=flat-square)](https://waffle.io/cs-util-com/cscore)
 
-![](https://img.shields.io/github/last-commit/cs-util-com/cscore.svg?colorB=4267b2&style=for-the-badge)
+* To get started, see the [installation instructions](#Installation) below.
+* To ensure full test coverage mutation testing is used (thanks to [Stryker](#https://github.com/stryker-mutator/stryker-net)!)
 
 # Usage & Examples
 See below for a full usage overview to explain the APIs with simple examples.
@@ -108,11 +111,20 @@ public class HttpBinGetResp { // The https://httpbin.org/get json as a class
 
 # Installation
 
-Use the package manager [pip](https://pip.pypa.io/en/stable/) to install foobar.
+## Installing cscore into pure C# projects
 
-```bash
-pip install foobar
+ cscore can be installed via [NuGet](https://www.nuget.org/profiles/csutil.com), add the following lines to the root of your `.csproj` file: 
+
+``` XML
+<ItemGroup>
+    <PackageReference Include="com.csutil.cscore" Version="*" />
+</ItemGroup>
 ```
+
+After adding the references, install the packages by executing `dotnet restore` inside the project folder.
+
+## Installing cscore into Unity projects
+Download the Unity package from the release page.
 
 # Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
@@ -120,11 +132,13 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 See current features in development here: https://github.com/cs-util-com/cscore/projects/1
 -->
 
-## How to contact us
-
-[![csutil.com](https://img.shields.io/discord/518684359667089409.svg?logo=discord&label=chat%20on%20discord&style=for-the-badge)](https://discord.gg/bgGqRe)
+## How to get in contact
 
 [![Twitter](https://img.shields.io/twitter/follow/csutil_com.svg?style=for-the-badge&logo=twitter)](https://twitter.com/intent/follow?screen_name=csutil_com)
+
+[![Discord](https://img.shields.io/discord/518684359667089409.svg?logo=discord&label=chat%20on%20discord&style=for-the-badge)](https://discord.gg/bgGqRe)
+
+[![Gitter](https://img.shields.io/gitter/room/csutil-com/community.svg?style=for-the-badge&logo=gitter-white)](https://gitter.im/csutil-com)
 
 # License
 
