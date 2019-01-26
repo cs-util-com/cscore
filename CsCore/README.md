@@ -46,8 +46,29 @@ Log.d("I'm a log message");
 Log.w("I'm a warning");
 Log.e("I'm an error");
 Log.e(new Exception("I'm an exception"));
-Log.w("I'm a warning with parmas:", "param 1", 2, "..");
+Log.w("I'm a warning with parmas", "param 1", 2, "..");
 ```
+
+This will result in the following output in the Log:
+```
+> I'm a log message
+  at LogTests.TestBasicLogOutputExamples() 
+
+> WARNING: I'm a warning
+  at LogTests.TestBasicLogOutputExamples() 
+
+>>> ERROR: I'm an error
+    at Log.e(System.String error, System.Object[] args) c:\...\Log.cs:line 25
+     LogTests.TestBasicLogOutputExamples() c:\...\LogTests.cs:line 15
+
+>>> EXCEPTION: System.Exception: I'm an exception
+    at Log.e(System.Exception e, System.Object[] args) c:\...\Log.cs:line 29
+     LogTests.TestBasicLogOutputExamples() c:\...\LogTests.cs:line 16
+
+> WARNING: I'm a warning with parmas : [[param 1, 2, ..]]
+  at LogTests.TestBasicLogOutputExamples()
+```
+
 
 
 ### AssertV2
@@ -65,12 +86,21 @@ private void SomeExampleMethod1(string s, int i) {
     Stopwatch timing = Log.MethodEntered("s=" + s, "i=" + i);
     
     { // .. here would be some method logic ..
-        Thread.Sleep(1);
+        Thread.Sleep(3);
     } // .. as the last line in the tracked method add:
     
     Log.MethodDone(timing, maxAllowedTimeInMs: 50);
     // If the method needed more then 50ms an error is logged
 }
+```
+
+This will result in the following output in the Log:
+```cs
+>  --> LogTests.SomeExampleMethod1(..) : [[s=I am a string, i=123]]
+  at LogTests.SomeExampleMethod1(System.String s, Int32 i) 
+
+>     <-- LogTests.SomeExampleMethod1(..) finished after 3 ms
+  at LogTests.SomeExampleMethod1(System.String s, Int32 i) 
 ```
 
 ## The EventBus
@@ -144,12 +174,11 @@ Assert.Equal(x1.myString2, x2.myString2);
 
 ## REST Extensions 
 ```cs
-// The property names are based on the https://httpbin.org/get json response
+// The property names are based on the https://httpbin.org/get json response:
 class HttpBinGetResp { 
     public string origin { get; set; }
     public Dictionary<string, object> headers { get; set; }
 }
-
 
 RestRequest request = new Uri("https://httpbin.org/get").SendGET();
 
@@ -245,6 +274,22 @@ links.Get<Toggle>("Toggle 1").SetOnValueChangedAction((isNowChecked) => {
 });
 ```
 
+
+### MonoBehaviour.ExecuteDelayed and MonoBehaviour.ExecuteRepeated
+```cs
+// Execute a task after a defined time:
+myMonoBehaviour.ExecuteDelayed(() => {
+    Log.d("I am executed after 0.6 seconds");
+}, delayInSecBeforeExecution: 0.6f);
+
+// Execute a task multiple times:
+myMonoBehaviour.ExecuteRepeated(() => {
+    Log.d("I am executed every 0.3 seconds until I return false");
+    return true;
+}, delayInSecBetweenIterations: 0.3f, delayInSecBeforeFirstExecution: .2f);
+```
+
+Additionally there is myMono.StartCoroutinesInParallel(..) and myMono.StartCoroutinesSequetially(..), see TODO for details
 
 
 

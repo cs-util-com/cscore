@@ -11,6 +11,25 @@ namespace com.csutil.tests {
     class CoroutineTests {
 
         [UnityTest]
+        public IEnumerator ExampleUsage1() {
+
+            MonoBehaviour myMonoBehaviour = CreateSomeMonoBehaviour();
+
+            // Execute a task after a defined time:
+            myMonoBehaviour.ExecuteDelayed(() => {
+                Log.d("I am executed after 0.6 seconds");
+            }, delayInSecBeforeExecution: 0.6f);
+
+            // Execute a task multiple times:
+            myMonoBehaviour.ExecuteRepeated(() => {
+                Log.d("I am executed every 0.3 seconds until I return false");
+                return true;
+            }, delayInSecBetweenIterations: 0.3f, delayInSecBeforeFirstExecution: .2f);
+
+            yield return null;
+        }
+
+        [UnityTest]
         public IEnumerator TestExecuteDelayed() {
 
             var counter = 0;
