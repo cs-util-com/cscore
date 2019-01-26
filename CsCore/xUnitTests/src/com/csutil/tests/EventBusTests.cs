@@ -10,10 +10,10 @@ namespace com.csutil.tests {
 
             // The EventBus can be accessed via EventBus.instance
             EventBus eventBus = GetEventBusForTesting();
-            var eventName = "TestEvent1";
+            string eventName = "TestEvent1";
 
             //Register a subscriber for the eventName that gets notified when ever an event is send:
-            var subscriber1 = new object();
+            object subscriber1 = new object(); // can be of any type
             eventBus.Subscribe(subscriber1, eventName, () => {
                 Log.d("The event was received!");
             });
