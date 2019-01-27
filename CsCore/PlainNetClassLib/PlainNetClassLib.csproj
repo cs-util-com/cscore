@@ -17,10 +17,9 @@
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
   </PropertyGroup>
 
-<ItemGroup>
-  <Reference Include="Newtonsoft.Json">
-    <HintPath>\src\Plugins\CsCore\libs\JsonDotNet\Newtonsoft.Json.dll</HintPath>
-  </Reference>
-</ItemGroup>
+  <!-- https://www.nuget.org/packages/Newtonsoft.Json -->
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="*" />
+  </ItemGroup>
 
 </Project>
