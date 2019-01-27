@@ -4,11 +4,13 @@
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>com.csutil.cscore</PackageId>
-    <Version>1.0.2</Version>
+    <Version>1.0.3</Version>
     <Authors>csutil.com</Authors>
     <Company>csutil.com</Company>
     <Product>cscore</Product>
-    <Description>https://github.com/cs-util-com/cscore</Description>
+    <Description>cscore is a lightweight library providing commonly used helpers & 
+    patterns for all your C# projects including Logging, PubSub and Injection. 
+    See more details at https://github.com/cs-util-com/cscore</Description>
     <PackageProjectUrl>https://github.com/cs-util-com/cscore</PackageProjectUrl>
     <RepositoryUrl>https://github.com/cs-util-com/cscore</RepositoryUrl>
     <Copyright>https://github.com/cs-util-com/cscore</Copyright>

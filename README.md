@@ -1,6 +1,6 @@
 # ☄️ The cscore Library
 
-`cscore` is a lightweight, efficient & minimal-footprint library providing commonly used helpers & patterns for all your C# projects. It can be used in both pure **C#** and **Unity** projects. 
+`cscore` is a lightweight minimal-footprint library providing commonly used helpers & patterns for all your C# projects. It can be used in both pure **C#** and **Unity** projects. 
 
 [**Website**](https://www.csutil.com/projects/cscore) 
 **•**
@@ -329,12 +329,12 @@ myMonoBehaviour.ExecuteRepeated(() => {
 }, delayInSecBetweenIterations: 0.3f, delayInSecBeforeFirstExecution: .2f);
 ```
 
-Additionally there is myMono.StartCoroutinesInParallel(..) and myMono.StartCoroutinesSequetially(..), see TODO for details
+Additionally there is myMono.StartCoroutinesInParallel(..) and myMono.StartCoroutinesSequetially(..), see [here](https://github.com/cs-util-com/cscore/blob/master/CsCore/UnityTests/Assets/Tests/CoroutineTests.cs#L103) for details
 
 
 
 ## `UnityWebRequest.SendV2()` 
-It is recommended to use the `Uri` extension methods for requests (see TODO). If `UnityWebRequest` has to be used, then `UnityWebRequest.SendV2()` should be a good alternative. `SendV2` creates the same `RestRequest` objects that the `Uri` extension methods create as well. 
+It is recommended to use the `Uri` extension methods for requests (see [here](#REST-Extensions)). If `UnityWebRequest` has to be used, then `UnityWebRequest.SendV2()` should be a good alternative. `SendV2` creates the same `RestRequest` objects that the `Uri` extension methods create as well. 
 
 ```cs
 RestRequest request1 = UnityWebRequest.Get("https://httpbin.org/get").SendV2();
@@ -352,40 +352,32 @@ UnityWebRequest.Get("https://httpbin.org/get").SendV2().GetResult<HttpBinGetResp
 
 
 
-# 💾 Installation
+# 📦 Getting started
 
-## 📦 Installing cscore into pure C# projects
+## Install via NuGet
 
- `cscore` can be installed via [NuGet](https://www.nuget.org/packages/com.csutil.cscore), just add the following lines to the root of your `.csproj` file: 
+The NuGet package from [nuget.org/packages/com.csutil.cscore](https://www.nuget.org/packages/com.csutil.cscore) can be installed in [multiple ways](https://docs.microsoft.com/en-us/nuget/consume-packages/ways-to-install-a-package), for example via the dotnet CLI:
+```XML
+dotnet add package com.csutil.cscore
+```
 
-``` XML
+Or you manually add the following lines to the your `.csproj` file: 
+```XML
 <Project Sdk="Microsoft.NET.Sdk">
-
-  <PropertyGroup>
-    ...
-    <TargetFramework>netcoreapp2.1</TargetFramework>
-  </PropertyGroup>
-
   ...
-  
-  <!-- https://github.com/cs-util-com/cscore#-installation -->
   <ItemGroup>
     <PackageReference Include="com.csutil.cscore" Version="*" />
-  </ItemGroup>
-  
-  <!-- https://www.nuget.org/packages/Newtonsoft.Json -->
-  <ItemGroup>
+    <!-- https://www.nuget.org/packages/Newtonsoft.Json -->
     <PackageReference Include="Newtonsoft.Json" Version="*" />
   </ItemGroup>
-  
+  ...
 </Project>
 ```
 
 After adding the references, install the packages by executing `dotnet restore` inside the project folder.
 
-## 🎮 Installing cscore into Unity projects
+## 🎮 Install cscore into Unity projects
 Download the Unity package from the release page.
-
 
 
 
