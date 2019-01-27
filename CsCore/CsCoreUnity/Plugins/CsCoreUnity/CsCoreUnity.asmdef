@@ -1,0 +1,15 @@
+{
+    "name": "CsCoreUnity",
+    "references": [
+        "CsCore",
+        "CsCoreNet3.5Compat"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": []
+}
