@@ -6,12 +6,12 @@
 **•**
 [**GitHub**](https://github.com/cs-util-com/cscore) 
 **•**
-[**Examples**](#💡-Usage-&-Examples) 
+[**Examples**](#-Usage-&-Examples) 
 **•**
-[**Getting started**](#💾-Installation)
+[**Getting started**](#-installation)
 
 #  Overview 
-See the [examples](#💡-Usage-&-Examples) below to get a quick overview of all library features:
+See the [examples](#-Usage-&-Examples) below to get a quick overview of all library features:
 
 
 ### Pure C# Components
