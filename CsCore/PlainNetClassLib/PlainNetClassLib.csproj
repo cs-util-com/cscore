@@ -2,6 +2,19 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageId>com.csutil.cscore</PackageId>
+    <Authors>csutil.com</Authors>
+    <Company>csutil.com</Company>
+    <Product>cscore</Product>
+    <Description>https://github.com/cs-util-com/cscore</Description>
+    <PackageProjectUrl>https://github.com/cs-util-com/cscore</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/cs-util-com/cscore</RepositoryUrl>
+    <Copyright>https://github.com/cs-util-com/cscore</Copyright>
+    <PackageReleaseNotes>https://github.com/cs-util-com/cscore</PackageReleaseNotes>
+    <RootNamespace>com.csutil</RootNamespace>
+    <AssemblyName>cscore</AssemblyName>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
   </PropertyGroup>
 
 <ItemGroup>
