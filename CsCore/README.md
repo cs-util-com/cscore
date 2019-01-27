@@ -1,6 +1,14 @@
 # ☄️ The cscore Library
+
 `cscore` is a minimal, zero-dependency collection of common patterns & helpers needed in most C# projects. It can be used in both pure **C#** and **Unity** projects. 
 
+[**Website**](https://www.csutil.com/projects/cscore) 
+**•**
+[**GitHub**](https://github.com/cs-util-com/cscore) 
+**•**
+[**Examples**](#💡-Usage-&-Examples) 
+**•**
+[**Getting started**](#💾-Installation)
 
 #  Overview 
 See the [examples](#💡-Usage-&-Examples) below to get a quick overview of all library features:
@@ -8,12 +16,12 @@ See the [examples](#💡-Usage-&-Examples) below to get a quick overview of all 
 
 ### Pure C# Components
 * [Log](#Logging) - A minimalistic logging wrapper 
-* [EventBus](#The-EventBus) - Publish and subscribe to global events from anywhere in your code
-* [Injection Logic](#Injection-Logic) - A simple inversion of control pattern that does not rely on magic 
-* [JSON Parsing](#JSON-Parsing) - Reading and writing JSON through a simple interface
-* [REST Extensions](#REST-Extensions) - Extensions to simplify doing REST calls 
-* [Directory & File Extensions](#Directory-&-File-Extensions) - To simplify handling handing files and persisting data
-* String extension methods demonstrated in StringExtensionTests.cs
+* [EventBus](#The-EventBus) - Publish and subscribe to global events from anywhere in your code. Sends **1 million events in under 3 seconds** with minimal memory footprint!
+* [Injection Logic](#Injection-Logic) - A simple inversion of control pattern that does not rely on magic. Relies on the EventBus system, so its super fast as well!
+* [JSON Parsing](#JSON-Parsing) - Reading and writing JSON through a simple interface. Default implementation uses [Json.NET](https://github.com/JamesNK/Newtonsoft.Json) to ensure high performance
+* [REST Extensions](#REST-Extensions) - Extensions to simplify sending REST requests in as few lines as possible without limiting flexibility
+* [Directory & File Extensions](#Directory-&-File-Extensions) - To simplify handling files, folders and persisting data
+* Common String extension methods demonstrated in StringExtensionTests.cs
 * Many other helpfull extension methods best demonstrated in HelperMethodTests.cs
 
 
@@ -33,7 +41,7 @@ See the [examples](#💡-Usage-&-Examples) below to get a quick overview of all 
 [![](https://badge.waffle.io/cs-util-com/cscore.svg?columns=all&style=flat-square)](https://waffle.io/cs-util-com/cscore)
 
 * To get started, see the [installation instructions](#💾-Installation) below.
-* To ensure full test coverage mutation testing is used (thanks to [Stryker](#https://github.com/stryker-mutator/stryker-net)!)
+* To ensure full test coverage mutation testing is used (thanks to [Stryker](https://github.com/stryker-mutator/stryker-net)!)
 * To get in contact and stay updated [see the links below](#How-to-get-in-contact)
 
 
@@ -75,14 +83,14 @@ This will result in the following output in the Log:
 
 
 
-### AssertV2
+## AssertV2
 `AssertV2` can be used anywhere in your code, it will be automatically removed from your production code:
 ```cs
 AssertV2.IsTrue(1 + 1 == 3, "This assertion will fail");
 ```
 
 
-### Log.MethodEntered
+## Log.MethodEntered
 
 Simple monitoring of method calls and method-timings to detect abnormal behavior:
 ```cs
@@ -158,7 +166,7 @@ Another extended example usage can be found in `InjectionTests.ExampleUsage2()`
 
 
 ## JSON Parsing 
-The JsonWriter and JsonReader interfaces are an abstraction that should be flexiable enough to be used for most usecases. The underlying implementation can easily be swapped of needed and the default implementation uses [Json.NET](#https://github.com/JamesNK/Newtonsoft.Json).
+The JsonWriter and JsonReader interfaces are an abstraction that should be flexiable enough to be used for most usecases. The underlying implementation can easily be swapped of needed and the default implementation uses [Json.NET](https://github.com/JamesNK/Newtonsoft.Json).
 
 ```cs
 class MyClass1 { // example class with a field and a property
@@ -373,9 +381,7 @@ See current features in development here: https://github.com/cs-util-com/cscore/
 ## How to get in contact
 
 [![Twitter](https://img.shields.io/twitter/follow/csutil_com.svg?style=for-the-badge&logo=twitter)](https://twitter.com/intent/follow?screen_name=csutil_com)
-
 [![Discord](https://img.shields.io/discord/518684359667089409.svg?logo=discord&label=chat%20on%20discord&style=for-the-badge)](https://discord.gg/bgGqRe)
-
 [![Gitter](https://img.shields.io/gitter/room/csutil-com/community.svg?style=for-the-badge&logo=gitter-white)](https://gitter.im/csutil-com)
 
 To stay updated via Email see https://www.csutil.com/updates
