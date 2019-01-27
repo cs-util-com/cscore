@@ -34,7 +34,7 @@ namespace com.csutil.tests.eventbus {
         [Test]
         public void SubscribingWithGameObjects() {
             var myGameObject = new GameObject();
-            var event1 = "MyEvent1";
+            var event1 = "MyEvent1 - SubscribingWithGameObjects";
             var counter = 0;
 
             myGameObject.Subscribe(event1, () => {
@@ -63,7 +63,7 @@ namespace com.csutil.tests.eventbus {
         public void SubscribingWithMonoBehaviour() {
             var someMono = new GameObject().GetOrAddComponent<MyExampleMono1>();
 
-            var event1 = "MyEvent1";
+            var event1 = "MyEvent1 - SubscribingWithMonoBehaviour";
             var counter = 0;
 
             someMono.Subscribe(event1, (string s) => {

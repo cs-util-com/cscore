@@ -14,18 +14,19 @@ See the [examples](#💡-Usage-&-Examples) below to get a quick overview of all 
 * [REST Extensions](#REST-Extensions) - Extensions to simplify doing REST calls 
 * [Directory & File Extensions](#Directory-&-File-Extensions) - To simplify handling handing files and persisting data
 * String extension methods demonstrated in StringExtensionTests.cs
-* Many other helpfull extension methods demonstrated in HelperMethodTests.cs
+* Many other helpfull extension methods best demonstrated in HelperMethodTests.cs
 
 
 ### Additional Unity Components
-* `GameObject.Subscribe()` & `MonoBehaviour.Subscribe()` - Listening to events while respecting the livecycle of Unity objects
-* MonoBehaviour Injection & Singletons - Using the injection logic to create and access Unity objects 
-* The `Link` Pattern - Making it easy to connect prefabs with logic
-* `MonoBehaviour.ExecuteDelayed` & `MonoBehaviour.ExecuteRepeated` - Executing asyncronous actions delayed and/or repeated
-* `UnityWebRequest.SendV2()` - UnityWebRequest extension methods
+* [GameObject.Subscribe() & MonoBehaviour.Subscribe()](#`GameObject.Subscribe()`-&-`MonoBehaviour.Subscribe()`) - Listening to events while respecting the livecycle of Unity objects
+* [MonoBehaviour Injection & Singletons](#MonoBehaviour-Injection-&-Singletons) - Using the injection logic to create and access Unity objects 
+* [The Link Pattern](#The-`Link`-Pattern) - Making it easy to connect prefabs with code (and by that separate design & UI from your logic)
+* [MonoBehaviour.ExecuteDelayed & MonoBehaviour.ExecuteRepeated](#`MonoBehaviour.ExecuteDelayed`-&-`MonoBehaviour.ExecuteRepeated`) - Executing asyncronous actions delayed and/or repeated
+* [UnityWebRequest.SendV2()](#`UnityWebRequest.SendV2()`) - UnityWebRequest extension methods
 * PlayerPrefsV2 that adds Bool as a type and encrypted strings, see PlayerPrefsV2Tests.cs for examples
 
-<!-- ### Status -->
+
+### Status
 ![](https://img.shields.io/badge/Maintained%3F-yes-green.svg?style=flat-square)
 ![](https://img.shields.io/github/last-commit/cs-util-com/cscore.svg?colorB=4267b2&style=flat-square)
 ![](https://img.shields.io/github/issues-closed/cs-util-com/cscore.svg?colorB=006400&style=flat-square)
@@ -127,7 +128,7 @@ eventBus.Unsubscribe(subscriber1, eventName);
 ```
 
 
-__Rule of thumb__: Only use the `EventBus` if you can't exactly tell who will listen to the published events. Do not use the `EventBus` to pass an event from x to y if you know exactly who x and y will be! 
+__Rule of thumb__: Only use an `EventBus` if you can't exactly tell who will listen to the published events. Do not use the `EventBus` to pass an event from x to y if you know exactly who x and y will be! Atificially separating 2 components that tightly belong together does not help
 
 
 ## Injection Logic
@@ -157,6 +158,8 @@ Another extended example usage can be found in `InjectionTests.ExampleUsage2()`
 
 
 ## JSON Parsing 
+The JsonWriter and JsonReader interfaces are an abstraction that should be flexiable enough to be used for most usecases. The underlying implementation can easily be swapped of needed and the default implementation uses [Json.NET](#https://github.com/JamesNK/Newtonsoft.Json).
+
 ```cs
 class MyClass1 { // example class with a field and a property
     public string myString;
@@ -192,6 +195,8 @@ Log.d("Your external IP is " + response.origin);
 
 
 ## Directory & File Extensions 
+The [DirectoryInfo](https://docs.microsoft.com/en-us/dotnet/api/system.io.directoryinfo) and [FileInfo](https://docs.microsoft.com/en-us/dotnet/api/system.io.fileinfo) classes already provide helpful interfaces to files and directories and the following extensions improve the usability if these classes:
+
 ```cs
 // Get a directory to work in:
 DirectoryInfo myDirectory = EnvironmentV2.instance.GetAppDataFolder();
