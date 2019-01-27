@@ -356,7 +356,7 @@ UnityWebRequest.Get("https://httpbin.org/get").SendV2().GetResult<HttpBinGetResp
 
 ## 📦 Installing cscore into pure C# projects
 
- `cscore` can be installed via [NuGet](https://www.nuget.org/profiles/csutil.com), just add the following lines to the root of your `.csproj` file: 
+ `cscore` can be installed via [NuGet](https://www.nuget.org/packages/com.csutil.cscore), just add the following lines to the root of your `.csproj` file: 
 
 ``` XML
 <ItemGroup>
