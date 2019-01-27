@@ -36,7 +36,7 @@ namespace com.csutil.tests {
 
             AssertV2.ThrowExeptionIfAssertionFails(() => {
 
-                AssertV2.AreEqual(true, AssertV2.throwExeptionIfAssertionFails, "AssertV2.throwExeptionIfAssertionFails");
+                AssertV2.IsTrue(AssertV2.throwExeptionIfAssertionFails, "AssertV2.throwExeptionIfAssertionFails");
 
                 AssertV2.IsTrue(1 + 1 == 2, "This assertion must not fail");
                 AssertV2.Throws<Exception>(() => {
@@ -46,6 +46,8 @@ namespace com.csutil.tests {
 
                 var s1 = "a";
                 AssertV2.AreEqual(s1, s1);
+
+                AssertV2.IsTrue(AssertV2.throwExeptionIfAssertionFails, "AssertV2.throwExeptionIfAssertionFails");
                 AssertV2.Throws<Exception>(() => { AssertV2.AreNotEqual(s1, s1, "s1"); });
 
                 string myVarX = null;
