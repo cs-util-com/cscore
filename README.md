@@ -6,12 +6,12 @@
 **•**
 [**GitHub**](https://github.com/cs-util-com/cscore) 
 **•**
-[**Examples**](#-Usage-&-Examples) 
+[**Examples**](#-usage--examples) 
 **•**
 [**Getting started**](#-installation)
 
 #  Overview 
-See the [examples](#-Usage-&-Examples) below to get a quick overview of all library features:
+See the [examples](#-usage--examples) below to get a quick overview of all library features:
 
 
 ### Pure C# Components
@@ -40,7 +40,7 @@ See the [examples](#-Usage-&-Examples) below to get a quick overview of all libr
 ![](https://img.shields.io/github/issues-closed/cs-util-com/cscore.svg?colorB=006400&style=flat-square)
 [![](https://badge.waffle.io/cs-util-com/cscore.svg?columns=all&style=flat-square)](https://waffle.io/cs-util-com/cscore)
 
-* To get started, see the [installation instructions](#💾-Installation) below.
+* To get started, see the [installation instructions](#-installation) below.
 * To ensure full test coverage mutation testing is used (thanks to [Stryker](https://github.com/stryker-mutator/stryker-net)!)
 * To get in contact and stay updated [see the links below](#How-to-get-in-contact)
 
