@@ -4,7 +4,7 @@
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>com.csutil.cscore</PackageId>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <Authors>csutil.com</Authors>
     <Company>csutil.com</Company>
     <Product>cscore</Product>
@@ -20,7 +20,7 @@
 
   <!-- https://www.nuget.org/packages/Newtonsoft.Json -->
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="*" />
+    <PackageReference Include="Newtonsoft.Json" Version="(8.0.0,)" />
   </ItemGroup>
 
 </Project>
