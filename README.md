@@ -1,6 +1,6 @@
 # ☄️ The cscore Library
 
-`cscore` is a minimal, zero-dependency collection of common patterns & helpers needed in most C# projects. It can be used in both pure **C#** and **Unity** projects. 
+`cscore` is a lightweight, efficient & minimal-footprint library providing commonly used helpers & patterns for all your C# projects. It can be used in both pure **C#** and **Unity** projects. 
 
 [**Website**](https://www.csutil.com/projects/cscore) 
 **•**
@@ -359,9 +359,26 @@ UnityWebRequest.Get("https://httpbin.org/get").SendV2().GetResult<HttpBinGetResp
  `cscore` can be installed via [NuGet](https://www.nuget.org/packages/com.csutil.cscore), just add the following lines to the root of your `.csproj` file: 
 
 ``` XML
-<ItemGroup>
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    ...
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+
+  ...
+  
+  <!-- https://github.com/cs-util-com/cscore#-installation -->
+  <ItemGroup>
     <PackageReference Include="com.csutil.cscore" Version="*" />
-</ItemGroup>
+  </ItemGroup>
+  
+  <!-- https://www.nuget.org/packages/Newtonsoft.Json -->
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="*" />
+  </ItemGroup>
+  
+</Project>
 ```
 
 After adding the references, install the packages by executing `dotnet restore` inside the project folder.
