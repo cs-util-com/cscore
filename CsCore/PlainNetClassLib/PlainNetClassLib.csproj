@@ -8,7 +8,7 @@
     <Authors>csutil.com</Authors>
     <Company>csutil.com</Company>
     <Product>cscore</Product>
-    <Description>cscore is a lightweight library providing commonly used helpers & 
+    <Description>cscore is a lightweight library providing commonly used helpers and 
     patterns for all your C# projects including Logging, PubSub and Injection. 
     See more details at https://github.com/cs-util-com/cscore</Description>
     <PackageProjectUrl>https://github.com/cs-util-com/cscore</PackageProjectUrl>
