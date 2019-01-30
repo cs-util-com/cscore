@@ -377,7 +377,7 @@ Or you manually add the following lines to the your `.csproj` file:
 After adding the references, install the packages by executing `dotnet restore` inside the project folder.
 
 ## 🎮 Install cscore into Unity projects
-Download the Unity package from the release page.
+Download the Unity package from the [asset store: http://u3d.as/1rqY](http://u3d.as/1rqY)
 
 
 
