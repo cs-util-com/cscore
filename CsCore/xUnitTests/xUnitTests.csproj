@@ -15,8 +15,8 @@
 
   <!-- Mutation testing via https://github.com/stryker-mutator/stryker-net -->
   <ItemGroup>
-      <DotNetCliToolReference Include="StrykerMutator.DotNetCoreCli" Version="*" />
-      <PackageReference Include="StrykerMutator.DotNetCoreCli" Version="*" />
+      <DotNetCliToolReference Include="StrykerMutator.DotNetCoreCli" Version="0.8.2" />
+      <PackageReference Include="StrykerMutator.DotNetCoreCli" Version="0.8.2" />
   </ItemGroup>
 
   <ItemGroup>
