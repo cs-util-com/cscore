@@ -84,13 +84,15 @@ This will result in the following output in the Log:
 
 
 ## AssertV2
-`AssertV2` can be used anywhere in your code, it will be automatically removed from your production code:
+- `AssertV2` can be used anywhere in your code
+- Will be automatically removed/stripped from your production code
+- Can be configured to Log.e an error (the default) or to throw an exception 
 ```cs
 AssertV2.IsTrue(1 + 1 == 3, "This assertion will fail");
 ```
+See [here](https://github.com/cs-util-com/cscore/blob/master/CsCore/xUnitTests/src/com/csutil/tests/LogTests.cs#L35) for more examples.
 
-
-## Log.MethodEntered
+## Log.MethodEntered & Log.MethodDone
 
 Simple monitoring of method calls and method-timings to detect abnormal behavior:
 ```cs
@@ -117,6 +119,9 @@ This will result in the following output in the Log:
 
 ## The EventBus
 
+- Publish and subscribe to global events from anywhere in your code
+- Sends **1 million events in under 3 seconds** with minimal memory footprint! ([Tested](https://github.com/cs-util-com/cscore/blob/master/CsCore/xUnitTests/src/com/csutil/tests/EventBusTests.cs#L158) on a normal laptop)
+
 ```cs
 // The EventBus can be accessed via EventBus.instance
 EventBus eventBus = EventBus.instance;
@@ -140,6 +145,10 @@ __Rule of thumb__: Only use an `EventBus` if you can't exactly tell who will lis
 
 
 ## Injection Logic
+
+- A simple inversion of control pattern that does not rely on magic. 
+- Relies on the EventBus system, so its super fast as well!
+
 ```cs
 // The default injector can be accessed via IoC.inject
 Injector injector = IoC.inject;
@@ -166,7 +175,8 @@ Another extended example usage can be found in `InjectionTests.ExampleUsage2()`
 
 
 ## JSON Parsing 
-The JsonWriter and JsonReader interfaces are an abstraction that should be flexiable enough to be used for most usecases. The underlying implementation can easily be swapped of needed and the default implementation uses [Json.NET](https://github.com/JamesNK/Newtonsoft.Json).
+- The `JsonWriter` and `JsonReader` interfaces are an abstraction that should be flexiable enough to be used for most usecases. 
+- The underlying implementation can easily be swapped of needed and the default implementation uses [Json.NET](https://github.com/JamesNK/Newtonsoft.Json).
 
 ```cs
 class MyClass1 { // example class with a field and a property
@@ -239,7 +249,7 @@ Assert.False(childDir.IsNotNullAndExists());
 # Unity Component Examples
 There are additional components specifically created for Unity, that will be explained below:
 
-## `GameObject.Subscribe()` & `MonoBehaviour.Subscribe()`
+## `GameObject.Subscribe` & `MonoBehaviour.Subscribe`
 
 There are extension methods for both `GameObjects` and `Behaviours` which internally handle the lifecycle of their subscribers correctly. If a `GameObject` for example is currently not active or was destroyed the published events will not reach it.
 
@@ -333,8 +343,11 @@ Additionally there is myMono.StartCoroutinesInParallel(..) and myMono.StartCorou
 
 
 
-## `UnityWebRequest.SendV2()` 
-It is recommended to use the `Uri` extension methods for requests (see [here](#REST-Extensions)). If `UnityWebRequest` has to be used, then `UnityWebRequest.SendV2()` should be a good alternative. `SendV2` creates the same `RestRequest` objects that the `Uri` extension methods create as well. 
+## `UnityWebRequest.SendV2` 
+
+- It is recommended to use the `Uri` extension methods for requests (see [here](#REST-Extensions)). 
+- If `UnityWebRequest` has to be used, then `UnityWebRequest.SendV2()` should be a good alternative. 
+- `SendV2` creates the same `RestRequest` objects that the `Uri` extension methods create as well. 
 
 ```cs
 RestRequest request1 = UnityWebRequest.Get("https://httpbin.org/get").SendV2();
