@@ -58,6 +58,8 @@ namespace com.csutil.tests {
                 // Test that on MainThread the gameobject can be created:
                 MainThread.Invoke(() => { go = new GameObject(name: "B"); });
                 Thread.Sleep(1000); // wait for main thread action to execute
+                Assert.IsTrue(go != null);
+                // Assert.AreEqual("B", go.name); // go.name not allowed in background thread
                 Log.d("Background thread now done");
             }).task;
             Assert.IsNull(go);
