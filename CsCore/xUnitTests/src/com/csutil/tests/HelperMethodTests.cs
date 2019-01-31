@@ -194,6 +194,14 @@ namespace com.csutil.tests {
                 Assert.False(DateTimeParser.NewDateTimeFromUnixTimestamp(0).IsBetween(dateTime2, dateTime1));
                 Assert.False(DateTimeParser.NewDateTimeFromUnixTimestamp(3).IsBetween(dateTime1, dateTime2));
             });
+
+            // Make sure the assertions in DateTimeParser.NewDateTimeFromUnixTimestamp work correctly and detect abnormal behavior:
+            Assert.Throws<Exception>(() => {
+                AssertV2.ThrowExeptionIfAssertionFails(() => {
+                    DateTimeParser.NewDateTimeFromUnixTimestamp(-1);
+                });
+            });
+
         }
 
         [Fact]

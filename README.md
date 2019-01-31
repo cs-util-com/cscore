@@ -89,6 +89,7 @@ This will result in the following output in the Log:
 - Will be automatically removed/stripped from your production code
 - Can be configured to `Log.e` an error (the default) or to throw an exception 
 - Use `AssertV2` in places where you would otherwise add a temporary `Log` line while testing. `AssertV2` can stay in your code and will let you know of any unexpected behaviour 
+- Will automatically pause the Debugger if it fails while debugging
 
 ```cs
 AssertV2.IsTrue(1 + 1 == 3, "This assertion will fail");
