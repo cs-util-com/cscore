@@ -31,8 +31,7 @@ See the [examples](#-usage--examples) below to get a quick overview of all libra
 * [The Link Pattern](#the-link-pattern) - Making it easy to connect prefabs with code (and by that separate design & UI from your logic)
 * [MonoBehaviour.ExecuteDelayed & MonoBehaviour.ExecuteRepeated](#monobehaviourexecutedelayed--monobehaviourexecuterepeated) - Executing asyncronous actions delayed and/or repeated
 * [UnityWebRequest.SendV2](#unitywebrequestsendv2) - UnityWebRequest extension methods
-* PlayerPrefsV2 that adds Bool as a type and encrypted strings, see PlayerPrefsV2Tests.cs for examples
-
+* [PlayerPrefsV2](#playerprefsv2) - Adds `SetBool`, `SetStringEncrypted` and more, see PlayerPrefsV2Tests.cs for all examples
 
 ### Status
 ![](https://img.shields.io/badge/Maintained%3F-yes-green.svg?style=flat-square)
