@@ -373,6 +373,42 @@ UnityWebRequest.Get("https://httpbin.org/get").SendV2().GetResult<HttpBinGetResp
 
 
 
+## `PlayerPrefsV2` 
+
+Since the Unity `PlayerPrefs` class uses static methods my normal approach with extension methods won't work here, thats why there is now `PlayerPrefsV2` which extends `PlayerPrefs` and adds the following methods:
+
+- PlayerPrefsV2.`SetBool` & PlayerPrefsV2.`GetBool`
+- PlayerPrefsV2.`SetStringEncrypted` & PlayerPrefsV2.`GetStringDecrypted`
+- PlayerPrefsV2.`SetObject` & PlayerPrefsV2.`GetObject`
+
+```cs
+// PlayerPrefsV2.SetBool and PlayerPrefsV2.GetBool example:
+bool myBool = true;
+PlayerPrefsV2.SetBool("myBool", myBool);
+Assert.AreEqual(myBool, PlayerPrefsV2.GetBool("myBool", defaultValue: false));
+
+// PlayerPrefsV2.SetStringEncrypted and PlayerPrefsV2.GetStringDecrypted example:
+PlayerPrefsV2.SetStringEncrypted("mySecureString", "some text to encrypt", password: "myPassword123");
+var decryptedAgain = PlayerPrefsV2.GetStringDecrypted("mySecureString", null, password: "myPassword123");
+Assert.AreEqual("some text to encrypt", decryptedAgain);
+
+// PlayerPrefsV2.SetObject and PlayerPrefsV2.GetObject example (uses JSON internally):
+MyClass1 myObjectToSave = new MyClass1() { myString = "Im a string", myInt = 123 };
+PlayerPrefsV2.SetObject("myObject1", myObjectToSave);
+MyClass1 objLoadedAgain = PlayerPrefsV2.GetObject<MyClass1>("myObject1", defaultValue: null);
+Assert.AreEqual(myObjectToSave.myInt, objLoadedAgain.myInt);
+
+    // MyClass1 would look e.g. like this:
+    class MyClass1 {
+        public string myString;
+        public int myInt;
+    }
+
+```
+
+
+
+
 
 # 📦 Getting started
 
