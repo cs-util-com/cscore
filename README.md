@@ -15,7 +15,7 @@ See the [examples](#-usage--examples) below to get a quick overview of all libra
 
 
 ### Pure C# Components
-* [Log](#Logging) - A minimalistic logging wrapper 
+* [Log](#logging) - A minimalistic logging wrapper + [AssertV2](#assertv2) to add saveguards anywhere in your logic
 * [EventBus](#The-EventBus) - Publish and subscribe to global events from anywhere in your code. Sends **1 million events in under 3 seconds** with minimal memory footprint!
 * [Injection Logic](#Injection-Logic) - A simple inversion of control pattern that does not rely on magic. Relies on the EventBus system, so its super fast as well!
 * [JSON Parsing](#JSON-Parsing) - Reading and writing JSON through a simple interface. Default implementation uses [Json.NET](https://github.com/JamesNK/Newtonsoft.Json) to ensure high performance
@@ -26,11 +26,11 @@ See the [examples](#-usage--examples) below to get a quick overview of all libra
 
 
 ### Additional Unity Components
-* [GameObject.Subscribe() & MonoBehaviour.Subscribe()](#`GameObject.Subscribe()`-&-`MonoBehaviour.Subscribe()`) - Listening to events while respecting the livecycle of Unity objects
-* [MonoBehaviour Injection & Singletons](#MonoBehaviour-Injection-&-Singletons) - Using the injection logic to create and access Unity objects 
-* [The Link Pattern](#The-`Link`-Pattern) - Making it easy to connect prefabs with code (and by that separate design & UI from your logic)
-* [MonoBehaviour.ExecuteDelayed & MonoBehaviour.ExecuteRepeated](#`MonoBehaviour.ExecuteDelayed`-&-`MonoBehaviour.ExecuteRepeated`) - Executing asyncronous actions delayed and/or repeated
-* [UnityWebRequest.SendV2()](#`UnityWebRequest.SendV2()`) - UnityWebRequest extension methods
+* [GameObject.Subscribe & MonoBehaviour.Subscribe](#gameobjectsubscribe--monobehavioursubscribe) - Listening to events while respecting the livecycle of Unity objects
+* [MonoBehaviour Injection & Singletons](#monobehaviour-injection--singletons) - Using the injection logic to create and access Unity objects 
+* [The Link Pattern](#the-link-pattern) - Making it easy to connect prefabs with code (and by that separate design & UI from your logic)
+* [MonoBehaviour.ExecuteDelayed & MonoBehaviour.ExecuteRepeated](#monobehaviourexecutedelayed--monobehaviourexecuterepeated) - Executing asyncronous actions delayed and/or repeated
+* [UnityWebRequest.SendV2](#unitywebrequestsendv2) - UnityWebRequest extension methods
 * PlayerPrefsV2 that adds Bool as a type and encrypted strings, see PlayerPrefsV2Tests.cs for examples
 
 
@@ -84,9 +84,12 @@ This will result in the following output in the Log:
 
 
 ## AssertV2
-- `AssertV2` can be used anywhere in your code
+
+- `AssertV2` can be used anywhere in your code 
 - Will be automatically removed/stripped from your production code
-- Can be configured to Log.e an error (the default) or to throw an exception 
+- Can be configured to `Log.e` an error (the default) or to throw an exception 
+- Use `AssertV2` in places where you would otherwise add a temporary `Log` line while testing. `AssertV2` can stay in your code and will let you know of any unexpected behaviour 
+
 ```cs
 AssertV2.IsTrue(1 + 1 == 3, "This assertion will fail");
 ```
@@ -94,7 +97,11 @@ See [here](https://github.com/cs-util-com/cscore/blob/master/CsCore/xUnitTests/s
 
 ## Log.MethodEntered & Log.MethodDone
 
-Simple monitoring of method calls and method-timings to detect abnormal behavior:
+- Simple monitoring of method calls and method-timings to detect abnormal behavior
+- Easy to follow logging pattern for each method or method section where logging is helpful
+- Optional `maxAllowedTimeInMs` assertion at the end of the method
+- The returned `Stopwatch` can be used for additional logging if needed  
+
 ```cs
 private void SomeExampleMethod1(string s, int i) {
     Stopwatch timing = Log.MethodEntered("s=" + s, "i=" + i);
@@ -146,8 +153,9 @@ __Rule of thumb__: Only use an `EventBus` if you can't exactly tell who will lis
 
 ## Injection Logic
 
-- A simple inversion of control pattern that does not rely on magic. 
-- Relies on the EventBus system, so its super fast as well!
+- A simple inversion of control pattern with the main call being `MyClass1 x = IoC.inject.Get<MyClass1>(this);` where `this` is the requesting entity
+- Relies on the EventBus system, so its **super fast** with **minimal memory footprint** as well!
+- Free of any magic via anotations (at least for now;)
 
 ```cs
 // The default injector can be accessed via IoC.inject
