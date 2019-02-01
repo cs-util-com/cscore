@@ -22,14 +22,14 @@ See the [examples](#-usage--examples) below to get a quick overview of all libra
 * [REST Extensions](#REST-Extensions) - Extensions to simplify sending REST requests in as few lines as possible without limiting flexibility
 * [Directory & File Extensions](#Directory-&-File-Extensions) - To simplify handling files, folders and persisting data
 * Common String extension methods demonstrated in StringExtensionTests.cs
-* Many other helpfull extension methods best demonstrated in HelperMethodTests.cs
+* Many other helpful extension methods best demonstrated in HelperMethodTests.cs
 
 
 ### Additional Unity Components
-* [GameObject.Subscribe & MonoBehaviour.Subscribe](#gameobjectsubscribe--monobehavioursubscribe) - Listening to events while respecting the livecycle of Unity objects
+* [GameObject.Subscribe & MonoBehaviour.Subscribe](#gameobjectsubscribe--monobehavioursubscribe) - Listening to events while respecting the lifecycle of Unity objects
 * [MonoBehaviour Injection & Singletons](#monobehaviour-injection--singletons) - Using the injection logic to create and access Unity objects 
 * [The Link Pattern](#the-link-pattern) - Making it easy to connect prefabs with code (and by that separate design & UI from your logic)
-* [MonoBehaviour.ExecuteDelayed & MonoBehaviour.ExecuteRepeated](#monobehaviourexecutedelayed--monobehaviourexecuterepeated) - Executing asyncronous actions delayed and/or repeated
+* [MonoBehaviour.ExecuteDelayed & MonoBehaviour.ExecuteRepeated](#monobehaviourexecutedelayed--monobehaviourexecuterepeated) - Executing asynchronous actions delayed and/or repeated
 * [UnityWebRequest.SendV2](#unitywebrequestsendv2) - UnityWebRequest extension methods
 * [PlayerPrefsV2](#playerprefsv2) - Adds `SetBool`, `SetStringEncrypted` and more, see PlayerPrefsV2Tests.cs for all examples
 
