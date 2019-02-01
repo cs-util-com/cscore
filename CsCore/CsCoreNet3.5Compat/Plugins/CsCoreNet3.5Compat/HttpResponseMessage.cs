@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿#if NET_2_0 || NET_2_0_SUBSET
+
+using System.Threading.Tasks;
 
 namespace System.Net.Http {
     public class HttpResponseMessage {
@@ -11,3 +13,5 @@ namespace System.Net.Http {
         }
     }
 }
+
+#endif

@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿#if NET_2_0 || NET_2_0_SUBSET
+
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 
 namespace com.csutil {
     public static class StopWatchCompatExtensions {
@@ -14,3 +12,5 @@ namespace com.csutil {
 
     }
 }
+
+#endif
