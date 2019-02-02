@@ -1,24 +1,23 @@
 using System;
 using System.Diagnostics;
-using com.csutil.logging;
 
-namespace com.csutil {
+namespace com.csutil.logging {
 
     public class LogViaConsole : LogDefaultImpl {
 
-        internal override void PrintDebugMessage(string debugLogMsg, params object[] args) {
+        protected override void PrintDebugMessage(string debugLogMsg, object[] args) {
             Console.Write(debugLogMsg);
         }
 
-        internal override void PrintErrorMessage(string errorMsg, params object[] args) {
+        protected override void PrintErrorMessage(string errorMsg, object[] args) {
             Console.Write(errorMsg);
         }
 
-        internal override void PrintWarningMessage(string warningMsg, params object[] args) {
+        protected override void PrintWarningMessage(string warningMsg, object[] args) {
             Console.Write(warningMsg);
         }
 
-        internal override string ToString(object arg) {
+        protected override string ToString(object arg) {
             if (arg is StackFrame) { return null; }
             return "" + arg;
         }

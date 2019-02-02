@@ -1,12 +1,11 @@
 using System;
-using System.Diagnostics;
 using com.csutil.logging;
 
 namespace com.csutil {
 
     public abstract class LogDefaultImpl : ILog {
 
-        private const string LB = "\r\n";
+        private const string LB = "\r\n"; // LineBreak
 
         public void LogDebug(string msg, params object[] args) {
             PrintDebugMessage("> " + msg + Log.ToArgsStr(args, ToString) + LB
@@ -33,15 +32,15 @@ namespace com.csutil {
                 + "    at " + Log.CallingMethodStr(args) + LB + LB);
         }
 
-        internal abstract void PrintDebugMessage(string debugLogMsg, params object[] args);
-        internal abstract void PrintWarningMessage(string warningMsg, params object[] args);
-        internal abstract void PrintErrorMessage(string errorMsg, params object[] args);
-        internal virtual void PrintException(Exception e, object[] args) {
+        protected abstract void PrintDebugMessage(string debugLogMsg, params object[] args);
+        protected abstract void PrintWarningMessage(string warningMsg, params object[] args);
+        protected abstract void PrintErrorMessage(string errorMsg, params object[] args);
+        protected virtual void PrintException(Exception e, object[] args) {
             // The default implementation prints exceptions the same as errors:
             PrintErrorString(">>> EXCEPTION: " + e, args);
         }
 
-        internal abstract string ToString(object arg);
+        protected abstract string ToString(object arg);
 
     }
 
