@@ -98,19 +98,64 @@ namespace com.csutil.tests {
         public void TestLoggingToFile() {
             var targetFileToLogInto = EnvironmentV2.instance.GetTempFolder().GetChild("TestLoggingToFile.txt");
             targetFileToLogInto.DeleteV2();
-            ILog log = new LogToFile(targetFileToLogInto);
+            ILog fileLogger = new LogToFile(targetFileToLogInto);
 
-            var logText = "Test LogDebug";
-            log.LogDebug(logText);
-            log.LogWarning("Test LogWarning");
-            Assert.NotNull(log.LogError("Test LogError"));
-            var e = new Exception("Test LogExeption");
-            Assert.Same(e, log.LogExeption(e));
+            var logText = "!! Test LogDebug 123 !!";
+            fileLogger.LogDebug(logText);
+            SendSomeEventsToLog(fileLogger);
 
             LogToFile.LogStructure logStructure = targetFileToLogInto.LoadAs<LogToFile.LogStructure>();
             List<LogToFile.LogEntry> entries = logStructure.logEntries;
             Assert.Equal(4, entries.Count);
             Assert.Contains(logText, entries.First().text);
+        }
+
+        [Fact]
+        public void TestLoggingToMultipleLoggers() {
+            var targetFileToLogInto = EnvironmentV2.instance.GetTempFolder().GetChild("TestLoggingToMultipleLoggers.txt");
+            targetFileToLogInto.DeleteV2();
+            var multiLogger = new LogToMultipleLoggers();
+            multiLogger.loggers.Add(new LogToConsole());
+            multiLogger.loggers.Add(new LogToFile(targetFileToLogInto));
+            var mockLog = new LogToTestMock();
+            multiLogger.loggers.Add(mockLog);
+
+            SendSomeEventsToLog(multiLogger);
+
+            LogToFile.LogStructure logStructure = targetFileToLogInto.LoadAs<LogToFile.LogStructure>();
+            Assert.Equal(5, logStructure.logEntries.Count);
+        }
+
+        [Fact]
+        public void TestLogToTestMock() {
+            SendSomeEventsToLog(new LogToTestMock());
+        }
+
+        private static void SendSomeEventsToLog(ILog log) {
+            log.LogDebug("Test LogDebug");
+            log.LogWarning("Test LogWarning");
+            Assert.NotNull(log.LogError("Test LogError"));
+            var e = new Exception("Test LogExeption");
+            Assert.Same(e, log.LogExeption(e));
+            if (log is LogToTestMock mockLog) { mockLog.AssertAllMethodsOfMockLogWereCalled(); }
+        }
+
+        private class LogToTestMock : LogDefaultImpl {
+            private string latestLog;
+            private string latestWarning;
+            private string latestError;
+
+            protected override void PrintDebugMessage(string l, object[] args) { this.latestLog = l; }
+            protected override void PrintErrorMessage(string e, object[] args) { this.latestError = e; }
+            protected override void PrintWarningMessage(string w, object[] args) { this.latestWarning = w; }
+
+            protected override string ToString(object arg) { return "" + arg; }
+
+            internal void AssertAllMethodsOfMockLogWereCalled() {
+                Assert.NotEmpty(latestLog);
+                Assert.NotEmpty(latestWarning);
+                Assert.NotEmpty(latestError);
+            }
         }
 
     }

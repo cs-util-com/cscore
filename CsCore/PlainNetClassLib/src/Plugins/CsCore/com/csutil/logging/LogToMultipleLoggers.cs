@@ -5,7 +5,7 @@ using System.Linq;
 namespace com.csutil.logging {
 
     /// <summary> Can be used to log to multiple loggers at once </summary>
-    public abstract class LogToMultipleLoggers : ILog {
+    public class LogToMultipleLoggers : ILog {
 
         public List<ILog> loggers = new List<ILog>();
 
