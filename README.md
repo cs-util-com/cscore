@@ -80,11 +80,18 @@ This will result in the following output in the Log:
   at LogTests.TestBasicLogOutputExamples()
 ```
 
-Adding additional Logging adapters is very simple, see [LogToConsole.cs](https://github.com/cs-util-com/cscore/blob/master/CsCore/PlainNetClassLib/src/Plugins/CsCore/com/csutil/logging/LogToConsole.cs) and [LogToUnityDebugLog.cs](https://github.com/cs-util-com/cscore/blob/master/CsCore/CsCoreUnity/Plugins/CsCoreUnity/com/csutil/logging/LogToUnityDebugLog.cs) as existing examples/templates. You can set your own implementation via `Log.instance = new MyCustomLogImpl();`
+Creating logging-adapters is simple, the following logging-adapters can be used out of the box (and they can be seen as examples/templates):
+
+- [LogToConsole.cs](https://github.com/cs-util-com/cscore/blob/master/CsCore/PlainNetClassLib/src/Plugins/CsCore/com/csutil/logging/LogToConsole.cs) - The default logger which uses the normal `System.Console` 
+- [LogToUnityDebugLog.cs](https://github.com/cs-util-com/cscore/blob/master/CsCore/CsCoreUnity/Plugins/CsCoreUnity/com/csutil/logging/LogToUnityDebugLog.cs) - The default logger when using the library in Unity projects, when using it `UnityEngine.Debug.Log` is used for all logging events  
+- [LogToFile.cs](https://github.com/cs-util-com/cscore/blob/master/CsCore/PlainNetClassLib/src/Plugins/CsCore/com/csutil/logging/LogToFile.cs) - Allows to write all log outputs into a persisted file
+- [LogToMultipleLoggers.cs](https://github.com/cs-util-com/cscore/blob/master/CsCore/PlainNetClassLib/src/Plugins/CsCore/com/csutil/logging/LogToMultipleLoggers.cs) - Allows to use multiple loggers in parallel, e.g. to log to the console, a file and a custom error reporting system simultaneously
+
+The used logging-adapter can be set via `Log.instance = new MyCustomLogImpl();`
 
 Through this abstraction it becomes easy to later switch to more complex logging backends, e.g. the [Serilog logging library](https://github.com/serilog/serilog), while keeping your code unchanged. 
 
-## AssertV2
+### AssertV2
 
 - `AssertV2` can be used anywhere in your code 
 - Will be automatically removed/stripped from your production code
@@ -97,7 +104,7 @@ AssertV2.IsTrue(1 + 1 == 3, "This assertion will fail");
 ```
 See [here](https://github.com/cs-util-com/cscore/blob/master/CsCore/xUnitTests/src/com/csutil/tests/LogTests.cs#L35) for more examples.
 
-## Log.MethodEntered & Log.MethodDone
+### Log.MethodEntered & Log.MethodDone
 
 - Simple monitoring of method calls and method-timings to detect abnormal behavior
 - Easy to follow logging pattern for each method or method section where logging is helpful

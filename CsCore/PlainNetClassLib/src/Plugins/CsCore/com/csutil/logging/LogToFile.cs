@@ -7,37 +7,39 @@ namespace com.csutil.logging {
     public class LogToFile : LogDefaultImpl, IDisposable {
 
         private const string JSON_LB = LB + ",";
-        private FileStream s;
-        private TextWriter w;
+        public FileInfo logFile;
+        private FileStream fileStream;
+        private TextWriter writer;
         private IJsonWriter jsonWriter;
 
         public LogToFile(FileInfo targetFileToLogInto) {
-            s = new FileStream(targetFileToLogInto.FullPath(), FileMode.Append, FileAccess.Write, FileShare.Read);
-            w = TextWriter.Synchronized(new StreamWriter(s));
+            this.logFile=targetFileToLogInto;
+            fileStream = new FileStream(targetFileToLogInto.FullPath(), FileMode.Append, FileAccess.Write, FileShare.Read);
+            writer = TextWriter.Synchronized(new StreamWriter(fileStream));
             jsonWriter = JsonWriter.GetWriter();
         }
 
         protected override void PrintDebugMessage(string debugLogMsg, params object[] args) {
             var asJson = jsonWriter.Write(new LogEntry() { d = debugLogMsg });
-            w.WriteLine(asJson + JSON_LB);
-            w.Flush();
+            writer.WriteLine(asJson + JSON_LB);
+            writer.Flush();
         }
 
         protected override void PrintWarningMessage(string warningMsg, params object[] args) {
             var asJson = jsonWriter.Write(new LogEntry() { w = warningMsg });
-            w.WriteLine(asJson + JSON_LB);
-            w.Flush();
+            writer.WriteLine(asJson + JSON_LB);
+            writer.Flush();
         }
 
         protected override void PrintErrorMessage(string errorMsg, params object[] args) {
             var asJson = jsonWriter.Write(new LogEntry() { e = errorMsg });
-            w.WriteLine(asJson + JSON_LB);
-            w.Flush();
+            writer.WriteLine(asJson + JSON_LB);
+            writer.Flush();
         }
 
         public void Dispose() {
-            w.Dispose();
-            s.Dispose();
+            writer.Dispose();
+            fileStream.Dispose();
         }
 
         public static LogToFile.LogStructure LoadLogFile(System.IO.FileInfo targetFileToLogInto) {
