@@ -80,7 +80,7 @@ This will result in the following output in the Log:
   at LogTests.TestBasicLogOutputExamples()
 ```
 
-
+Adding additional Logging adapters is very simple, see [LogViaConsole.cs](https://github.com/cs-util-com/cscore/blob/master/CsCore/PlainNetClassLib/src/Plugins/CsCore/com/csutil/logging/LogViaConsole.cs) and [LogViaUnityDebugLog.cs](https://github.com/cs-util-com/cscore/blob/master/CsCore/CsCoreUnity/Plugins/CsCoreUnity/com/csutil/logging/LogViaUnityDebugLog.cs) as existing examples/templates.
 
 ## AssertV2
 
