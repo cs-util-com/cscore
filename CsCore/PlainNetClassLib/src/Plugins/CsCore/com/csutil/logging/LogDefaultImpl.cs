@@ -1,7 +1,6 @@
 using System;
-using com.csutil.logging;
 
-namespace com.csutil {
+namespace com.csutil.logging {
 
     public abstract class LogDefaultImpl : ILog {
 

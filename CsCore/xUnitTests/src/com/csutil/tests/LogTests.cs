@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using com.csutil.logging;
 using Xunit;
@@ -90,6 +92,25 @@ namespace com.csutil.tests {
 
             });
 
+        }
+
+        [Fact]
+        public void TestLoggingToFile() {
+            var targetFileToLogInto = EnvironmentV2.instance.GetTempFolder().GetChild("TestLoggingToFile.txt");
+            targetFileToLogInto.DeleteV2();
+            ILog log = new LogToFile(targetFileToLogInto);
+
+            var logText = "Test LogDebug";
+            log.LogDebug(logText);
+            log.LogWarning("Test LogWarning");
+            Assert.NotNull(log.LogError("Test LogError"));
+            var e = new Exception("Test LogExeption");
+            Assert.Same(e, log.LogExeption(e));
+
+            LogToFile.LogStructure logStructure = targetFileToLogInto.LoadAs<LogToFile.LogStructure>();
+            List<LogToFile.LogEntry> entries = logStructure.logEntries;
+            Assert.Equal(4, entries.Count);
+            Assert.Contains(logText, entries.First().text);
         }
 
     }

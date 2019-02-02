@@ -80,7 +80,9 @@ This will result in the following output in the Log:
   at LogTests.TestBasicLogOutputExamples()
 ```
 
-Adding additional Logging adapters is very simple, see [LogViaConsole.cs](https://github.com/cs-util-com/cscore/blob/master/CsCore/PlainNetClassLib/src/Plugins/CsCore/com/csutil/logging/LogViaConsole.cs) and [LogViaUnityDebugLog.cs](https://github.com/cs-util-com/cscore/blob/master/CsCore/CsCoreUnity/Plugins/CsCoreUnity/com/csutil/logging/LogViaUnityDebugLog.cs) as existing examples/templates. You can set your own implementation via `Log.instance = new MyCustomLogImpl();`
+Adding additional Logging adapters is very simple, see [LogToConsole.cs](https://github.com/cs-util-com/cscore/blob/master/CsCore/PlainNetClassLib/src/Plugins/CsCore/com/csutil/logging/LogToConsole.cs) and [LogToUnityDebugLog.cs](https://github.com/cs-util-com/cscore/blob/master/CsCore/CsCoreUnity/Plugins/CsCoreUnity/com/csutil/logging/LogToUnityDebugLog.cs) as existing examples/templates. You can set your own implementation via `Log.instance = new MyCustomLogImpl();`
+
+Through this abstraction it becomes easy to later switch to more complex logging backends like the [Serilog logging library](https://github.com/serilog/serilog) while keeping the code unchanged. 
 
 ## AssertV2
 

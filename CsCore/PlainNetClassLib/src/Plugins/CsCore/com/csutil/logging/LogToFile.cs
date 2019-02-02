@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 
 namespace com.csutil.logging {
@@ -6,7 +7,9 @@ namespace com.csutil.logging {
 
         private FileInfo targetFile;
 
-        public LogToFile(FileInfo targetFileToLogInto) { targetFile = targetFileToLogInto; }
+        public LogToFile(FileInfo targetFileToLogInto) {
+            targetFile = targetFileToLogInto;
+        }
 
         protected override void PrintDebugMessage(string debugLogMsg, params object[] args) {
             throw new System.NotImplementedException();
@@ -24,6 +27,13 @@ namespace com.csutil.logging {
             throw new System.NotImplementedException();
         }
 
+        public class LogStructure {
+            public List<LogEntry> logEntries;
+        }
+
+        public class LogEntry {
+            public string text;
+        }
     }
 
 }
