@@ -32,36 +32,36 @@ namespace com.csutil {
             public ThrowsException(string message) : base(message) { }
         }
 
-        [Conditional("DEBUG")]
+        [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         public static void IsTrue(bool condition, string errorMsg, params object[] args) {
             Assert(condition, "Assert.IsTrue() FAILED: " + errorMsg, args);
         }
 
-        [Conditional("DEBUG")]
+        [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         public static void IsFalse(bool condition, string errorMsg, params object[] args) {
             Assert(!condition, "Assert.IsFalse() FAILED: " + errorMsg, args);
         }
 
-        [Conditional("DEBUG")]
+        [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         public static void IsNull(object o, string varName, params object[] args) {
             string errorMsg = "Assert.IsNull(" + varName + ") FAILED";
             Assert(o == null, errorMsg, args);
         }
 
-        [Conditional("DEBUG")]
+        [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         public static void IsNotNull(object o, string varName, params object[] args) {
             string errorMsg = "Assert.IsNotNull(" + varName + ") FAILED";
             Assert(o != null, errorMsg, args);
         }
 
-        [Conditional("DEBUG")]
+        [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         public static void AreEqual<T>(IEquatable<T> expected, IEquatable<T> actual, string varName = "", params object[] args) {
             var errorMsg = "Assert.AreEqual() FAILED: expected " +
                 varName + "= " + expected + " NOT equal to actual " + varName + "= " + actual;
             Assert(expected.Equals(actual), errorMsg, args);
         }
 
-        [Conditional("DEBUG")]
+        [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         public static void AreNotEqual<T>(IEquatable<T> expected, IEquatable<T> actual, string varName = "", params object[] args) {
             var isEqualRef = ReferenceEquals(expected, actual);
             Assert(!isEqualRef, "Assert.AreNotEqual() FAILED: " + varName + " is same reference (expected " + expected + " == actual " + actual + " )", args);
@@ -71,7 +71,7 @@ namespace com.csutil {
             }
         }
 
-        [Conditional("DEBUG")]
+        [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         public static void AreNotEqualLists<T>(IEnumerable<T> expected, IEnumerable<T> actual, string varName = "", params object[] args) {
             string msg1 = "Assert.AreNotEqual() FAILED: " + varName + " is same reference (expected == actual)";
             Assert(expected != actual, msg1, args);
@@ -81,7 +81,7 @@ namespace com.csutil {
 
         public static Stopwatch TrackTiming() { return Stopwatch.StartNew(); }
 
-        [Conditional("DEBUG")]
+        [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         public static void AssertUnderXms(this Stopwatch self, int maxTimeInMs, params object[] args) {
             var ms = self.ElapsedMilliseconds;
             int p = (int)(ms * 100f / maxTimeInMs);

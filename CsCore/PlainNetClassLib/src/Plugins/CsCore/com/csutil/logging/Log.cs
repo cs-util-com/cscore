@@ -11,12 +11,12 @@ namespace com.csutil {
         // the injection logic uses the logging logic itself
         public static ILog instance = new LogToConsole();
 
-        [Conditional("DEBUG")]
+        [Conditional("DEBUG"), Conditional("ENFORCE_FULL_LOGGING")]
         public static void d(string msg, params object[] args) {
             instance.LogDebug(msg, args);
         }
 
-        [Conditional("DEBUG")]
+        [Conditional("DEBUG"), Conditional("ENFORCE_FULL_LOGGING")]
         public static void w(string warning, params object[] args) {
             instance.LogWarning(warning, args);
         }
@@ -45,7 +45,7 @@ namespace com.csutil {
             return AssertV2.TrackTiming();
         }
 
-        [Conditional("DEBUG")]
+        [Conditional("DEBUG"), Conditional("ENFORCE_FULL_LOGGING")]
         public static void MethodDone(Stopwatch timing, int maxAllowedTimeInMs = -1) {
             timing.Stop();
             var t = new StackFrame(1, true);

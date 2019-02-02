@@ -63,7 +63,7 @@ namespace com.csutil {
             if (self.downloadHandler == null && resp.onResult != null) { self.downloadHandler = resp.createDownloadHandler(); }
         }
 
-        [Conditional("DEBUG")]
+        [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         private static void AssertResponseLooksNormal<T>(UnityWebRequest self, Response<T> resp) {
             AssertV2.IsNotNull(self, "WebRequest object was null: " + resp);
             if (self != null) {

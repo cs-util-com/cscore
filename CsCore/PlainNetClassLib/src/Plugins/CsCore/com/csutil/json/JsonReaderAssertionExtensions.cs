@@ -12,7 +12,7 @@ namespace com.csutil.json {
 
         private const int MAX_DEPTH = 10;
 
-        [Conditional("DEBUG")]
+        [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         public static void AssertThatJsonWasFullyParsedIntoFields<T>(this IJsonReader jsonReader, IJsonWriter jsonWriter, string input, T result) {
             if (jsonWriter == null) { return; }
             ValidateIfAllJsonFieldsWereParsedIntoObject(jsonReader, jsonWriter, input, typeof(T), result);
