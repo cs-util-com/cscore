@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace com.csutil.logging {
 
-    public class LogViaUnityDebugLog : LogDefaultImpl {
+    public class LogToUnityDebugLog : LogDefaultImpl {
 
         protected override void PrintDebugMessage(string debugLogMsg, object[] args) {
             Debug.Log(debugLogMsg, getGoFrom(args));

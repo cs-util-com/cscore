@@ -24,7 +24,7 @@ namespace com.csutil {
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         static void Setup() {
-            Log.instance = new LogViaUnityDebugLog();
+            Log.instance = new LogToUnityDebugLog();
             SystemConsoleToUnityLogRedirector.Setup();
             var initMainThread = MainThread.instance;
             IoC.inject.SetSingleton<EnvironmentV2, EnvironmentV2Unity>(new EnvironmentV2Unity(), true);

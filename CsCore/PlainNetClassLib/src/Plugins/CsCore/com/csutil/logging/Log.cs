@@ -9,7 +9,7 @@ namespace com.csutil {
 
         // The log system instance is not accessed via injection to avoid loops because 
         // the injection logic uses the logging logic itself
-        public static ILog instance = new LogViaConsole();
+        public static ILog instance = new LogToConsole();
 
         [Conditional("DEBUG")]
         public static void d(string msg, params object[] args) {

@@ -3,7 +3,7 @@ using System.Diagnostics;
 
 namespace com.csutil.logging {
 
-    public class LogViaConsole : LogDefaultImpl {
+    public class LogToConsole : LogDefaultImpl {
 
         protected override void PrintDebugMessage(string debugLogMsg, object[] args) {
             Console.Write(debugLogMsg);
