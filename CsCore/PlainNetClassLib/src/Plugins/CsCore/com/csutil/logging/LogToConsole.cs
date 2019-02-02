@@ -17,11 +17,6 @@ namespace com.csutil.logging {
             Console.Write(warningMsg);
         }
 
-        protected override string ToString(object arg) {
-            if (arg is StackFrame) { return null; }
-            return "" + arg;
-        }
-
     }
 
 }

@@ -14,11 +14,11 @@ namespace com.csutil.logging {
         }
 
         public Exception LogError(string error, params object[] args) {
-            return loggers.Map(l => l.LogError(error, args)).FirstOrDefault();
+            return loggers.Map(l => l.LogError(error, args)).ToList().FirstOrDefault();
         }
 
         public Exception LogExeption(Exception e, params object[] args) {
-            return loggers.Map(l => l.LogExeption(e, args)).FirstOrDefault();
+            return loggers.Map(l => l.LogExeption(e, args)).ToList().FirstOrDefault();
         }
 
         public void LogWarning(string warning, params object[] args) {

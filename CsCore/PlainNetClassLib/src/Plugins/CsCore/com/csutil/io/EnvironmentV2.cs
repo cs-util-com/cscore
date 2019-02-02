@@ -19,6 +19,10 @@ namespace com.csutil {
             return new DirectoryInfo(Path.GetTempPath());
         }
 
+        public virtual DirectoryInfo GetTempFolder(string tempSubfolderName) {
+            return GetTempFolder().CreateSubdirectory(tempSubfolderName);
+        }
+
         public virtual DirectoryInfo GetSpecialFolder(Environment.SpecialFolder specialFolder) {
             return new DirectoryInfo(Environment.GetFolderPath(specialFolder));
         }

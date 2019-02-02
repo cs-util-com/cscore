@@ -1,18 +1,20 @@
 using System;
+using System.Diagnostics;
 
 namespace com.csutil.logging {
 
     public abstract class LogDefaultImpl : ILog {
 
-        private const string LB = "\r\n"; // LineBreak
+        /// <summary> LineBreak </summary>
+        public const string LB = "\r\n";
 
         public void LogDebug(string msg, params object[] args) {
-            PrintDebugMessage("> " + msg + Log.ToArgsStr(args, ToString) + LB
+            PrintDebugMessage("> " + msg + Log.ToArgsStr(args, ArgToString) + LB
                 + "  at " + Log.CallingMethodStr(args) + LB + LB);
         }
 
         public void LogWarning(string warning, params object[] args) {
-            PrintWarningMessage("> WARNING: " + warning + Log.ToArgsStr(args, ToString) + LB
+            PrintWarningMessage("> WARNING: " + warning + Log.ToArgsStr(args, ArgToString) + LB
                 + "  at " + Log.CallingMethodStr(args) + LB + LB);
         }
 
@@ -27,19 +29,23 @@ namespace com.csutil.logging {
         }
 
         private void PrintErrorString(string e, object[] args) {
-            PrintErrorMessage(e + Log.ToArgsStr(args, ToString) + LB
+            PrintErrorMessage(e + Log.ToArgsStr(args, ArgToString) + LB
                 + "    at " + Log.CallingMethodStr(args) + LB + LB);
         }
 
         protected abstract void PrintDebugMessage(string debugLogMsg, params object[] args);
         protected abstract void PrintWarningMessage(string warningMsg, params object[] args);
         protected abstract void PrintErrorMessage(string errorMsg, params object[] args);
+
         protected virtual void PrintException(Exception e, object[] args) {
             // The default implementation prints exceptions the same as errors:
             PrintErrorString(">>> EXCEPTION: " + e, args);
         }
 
-        protected abstract string ToString(object arg);
+        protected virtual string ArgToString(object arg) {
+            if (arg is StackFrame) { return null; }
+            return "" + arg;
+        }
 
     }
 

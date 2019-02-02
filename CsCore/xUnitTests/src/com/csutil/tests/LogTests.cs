@@ -96,23 +96,23 @@ namespace com.csutil.tests {
 
         [Fact]
         public void TestLoggingToFile() {
-            var targetFileToLogInto = EnvironmentV2.instance.GetTempFolder().GetChild("TestLoggingToFile.txt");
+            var targetFileToLogInto = EnvironmentV2.instance.GetTempFolder("TestLoggingToFile").GetChild("log.txt");
             targetFileToLogInto.DeleteV2();
-            ILog fileLogger = new LogToFile(targetFileToLogInto);
 
+            ILog fileLogger = new LogToFile(targetFileToLogInto);
             var logText = "!! Test LogDebug 123 !!";
             fileLogger.LogDebug(logText);
             SendSomeEventsToLog(fileLogger);
-
-            LogToFile.LogStructure logStructure = targetFileToLogInto.LoadAs<LogToFile.LogStructure>();
+            LogToFile.LogStructure logStructure = LogToFile.LoadLogFile(targetFileToLogInto);
+            Assert.NotNull(logStructure);
             List<LogToFile.LogEntry> entries = logStructure.logEntries;
-            Assert.Equal(4, entries.Count);
-            Assert.Contains(logText, entries.First().text);
+            Assert.Equal(5, entries.Count);
+            Assert.Contains(logText, entries.First().d);
         }
 
         [Fact]
         public void TestLoggingToMultipleLoggers() {
-            var targetFileToLogInto = EnvironmentV2.instance.GetTempFolder().GetChild("TestLoggingToMultipleLoggers.txt");
+            var targetFileToLogInto = EnvironmentV2.instance.GetTempFolder("TestLoggingToMultipleLoggers").GetChild("log.txt");
             targetFileToLogInto.DeleteV2();
             var multiLogger = new LogToMultipleLoggers();
             multiLogger.loggers.Add(new LogToConsole());
@@ -121,9 +121,10 @@ namespace com.csutil.tests {
             multiLogger.loggers.Add(mockLog);
 
             SendSomeEventsToLog(multiLogger);
+            mockLog.AssertAllMethodsOfMockLogWereCalled();
 
-            LogToFile.LogStructure logStructure = targetFileToLogInto.LoadAs<LogToFile.LogStructure>();
-            Assert.Equal(5, logStructure.logEntries.Count);
+            LogToFile.LogStructure logStructure = LogToFile.LoadLogFile(targetFileToLogInto);
+            Assert.Equal(4, logStructure.logEntries.Count);
         }
 
         [Fact]
@@ -148,8 +149,6 @@ namespace com.csutil.tests {
             protected override void PrintDebugMessage(string l, object[] args) { this.latestLog = l; }
             protected override void PrintErrorMessage(string e, object[] args) { this.latestError = e; }
             protected override void PrintWarningMessage(string w, object[] args) { this.latestWarning = w; }
-
-            protected override string ToString(object arg) { return "" + arg; }
 
             internal void AssertAllMethodsOfMockLogWereCalled() {
                 Assert.NotEmpty(latestLog);

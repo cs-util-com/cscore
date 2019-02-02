@@ -6,16 +6,18 @@ namespace com.csutil {
     public static class StringExtensions {
 
         /// <summary> 
-        /// "abc)]".Substring(")", includeEnd: false) == "abc"
-        /// AND
-        /// "abc)]".Substring("bc", includeEnd: true) == "abc" 
+        /// Examples: 
+        /// <para> "abc)]".Substring(")", includeEnd: false) == "abc"   </para>
+        /// <para> AND                                                  </para>
+        /// <para> "abc)]".Substring("bc", includeEnd: true) == "abc"   </para>
         /// </summary>
         public static string Substring(this string self, string end, bool includeEnd) { return Substring(self, 0, end, includeEnd); }
 
         /// <summary> 
-        /// "[(abc)]".Substring(2, ")", includeEnd: false) == "abc"
-        /// AND
-        /// "abc)]".Substring(2, "bc", includeEnd: true) == "abc" 
+        /// Examples: 
+        /// <para> "[(abc)]".Substring(2, ")", includeEnd: false) == "abc"  </para>
+        /// <para> AND                                                      </para>
+        /// <para> "abc)]".Substring(2, "bc", includeEnd: true) == "abc"    </para>
         /// </summary>
         public static string Substring(this string self, int startIndex, string end, bool includeEnd) {
             var lengthUntilEndStarts = self.LastIndexOf(end);
