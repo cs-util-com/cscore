@@ -462,6 +462,11 @@ See current features in development here: https://github.com/cs-util-com/cscore/
 
 To stay updated via Email see https://www.csutil.com/updates
 
+## Core principles
+- **The main goal**: Keep the API simple to use and provide an intuitive framework for common usecases. Stick to essential features only to keep the library lightweight
+- Use examples as a kind of test driven development but with focus on usablility of the APIs (tests must focus more on validating correctness but examples can focus more on ease of use of the target API). Thats why each test class contains also a few methods that contain example usage
+- Use mutation testing to check for test coverage on a logic level
+
 # License
 
 ![](https://img.shields.io/github/license/cs-util-com/cscore.svg?style=for-the-badge)
