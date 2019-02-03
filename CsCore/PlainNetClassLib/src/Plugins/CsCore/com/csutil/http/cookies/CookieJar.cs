@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 
 namespace com.csutil.http.cookies {
 
-    public abstract class CookieJar {
+    public abstract class CookieJar { // Ported version of https://github.com/bmeck/node-cookiejar
         private const string version = "v2";
         private const string cookiesStringPattern = "[:](?=\\s*[a-zA-Z0-9_\\-]+\\s*[=])";
         private const string boundary = "\n!!::!!\n";

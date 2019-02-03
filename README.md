@@ -8,7 +8,7 @@
 **•**
 [**Examples**](#-usage--examples) 
 **•**
-[**Getting started**](#-installation)
+[**Getting started**](#-getting-started)
 
 #  Overview 
 See the [examples](#-usage--examples) below to get a quick overview of all library features:
@@ -20,7 +20,7 @@ See the [examples](#-usage--examples) below to get a quick overview of all libra
 * [Injection Logic](#Injection-Logic) - A simple inversion of control pattern that does not rely on magic. Relies on the EventBus system, so its super fast as well!
 * [JSON Parsing](#JSON-Parsing) - Reading and writing JSON through a simple interface. Default implementation uses [Json.NET](https://github.com/JamesNK/Newtonsoft.Json) to ensure high performance
 * [REST Extensions](#REST-Extensions) - Extensions to simplify sending REST requests in as few lines as possible without limiting flexibility
-* [Directory & File Extensions](#Directory-&-File-Extensions) - To simplify handling files, folders and persisting data
+* [Directory & File Extensions](#directory--file-extensions) - To simplify handling files, folders and persisting data
 * Common String extension methods demonstrated in StringExtensionTests.cs
 * Many other helpful extension methods best demonstrated in HelperMethodTests.cs
 
@@ -39,7 +39,7 @@ See the [examples](#-usage--examples) below to get a quick overview of all libra
 ![](https://img.shields.io/github/issues-closed/cs-util-com/cscore.svg?colorB=006400&style=flat-square)
 [![](https://badge.waffle.io/cs-util-com/cscore.svg?columns=all&style=flat-square)](https://waffle.io/cs-util-com/cscore)
 
-* To get started, see the [installation instructions](#-installation) below.
+* To get started, see the [installation instructions](#-getting-started) below.
 * To ensure full test coverage mutation testing is used (thanks to [Stryker](https://github.com/stryker-mutator/stryker-net)!)
 * To get in contact and stay updated [see the links below](#How-to-get-in-contact)
 
