@@ -137,7 +137,7 @@ This will result in the following output in the Log:
 ## The EventBus
 
 - Publish and subscribe to global events from anywhere in your code
-- Sends **1 million events in under 3 seconds** with minimal memory footprint! ([Tested](https://github.com/cs-util-com/cscore/blob/master/CsCore/xUnitTests/src/com/csutil/tests/EventBusTests.cs#L158) on a normal laptop)
+- Sends **1 million events in under 3 seconds** with minimal memory footprint! ([Tested](https://github.com/cs-util-com/cscore/blob/master/CsCore/xUnitTests/src/com/csutil/tests/EventBusTests.cs#L158) on my mid-range laptop - will add some more detailed numbers soon)
 
 ```cs
 // The EventBus can be accessed via EventBus.instance
@@ -165,7 +165,7 @@ __Rule of thumb__: Only use an `EventBus` if you can't exactly tell who will lis
 
 - A simple inversion of control pattern with the main call being `MyClass1 x = IoC.inject.Get<MyClass1>(this);` where `this` is the requesting entity
 - Relies on the EventBus system, so its **super fast** with **minimal memory footprint** as well!
-- Free of any magic via anotations (at least for now;)
+- Free of any magic via anotations (at least for now;) - I tried to keep the injection API as simple as possible, existing libraries often tend to overcomplicate things in my opinion
 
 ```cs
 // The default injector can be accessed via IoC.inject
@@ -189,12 +189,12 @@ MyClass1 myClass1 = injector.Get<MyClass1>(this);
 Assert.Same(myClass1Singleton, myClass1); // Its the same object reference
 ```
 
-Another extended example usage can be found in `InjectionTests.ExampleUsage2()`
+Another extended example usage can be found in [`InjectionTests.ExampleUsage2()` (see here)](https://github.com/cs-util-com/cscore/blob/master/CsCore/xUnitTests/src/com/csutil/tests/InjectionTests.cs#L40)
 
 
 ## JSON Parsing 
 - The `JsonWriter` and `JsonReader` interfaces are an abstraction that should be flexiable enough to be used for most usecases. 
-- The underlying implementation can easily be swapped of needed and the default implementation uses [Json.NET](https://github.com/JamesNK/Newtonsoft.Json).
+- The underlying implementation can easily be swapped if needed and the default implementation uses [Json.NET](https://github.com/JamesNK/Newtonsoft.Json).
 
 ```cs
 class MyClass1 { // example class with a field and a property
@@ -444,7 +444,7 @@ Or you manually add the following lines to the your `.csproj` file:
 After adding the references, install the packages by executing `dotnet restore` inside the project folder.
 
 ## 🎮 Install cscore into Unity projects
-Download the Unity package from the [asset store: http://u3d.as/1rqY](http://u3d.as/1rqY)
+Download the Unity package from the [asset store: http://u3d.as/1rqY](http://u3d.as/1rqY) or download it from the [CsCore/UnityPackages folder](https://github.com/cs-util-com/cscore/raw/master/CsCore/UnityPackages/cscore.unitypackage)
 
 
 
