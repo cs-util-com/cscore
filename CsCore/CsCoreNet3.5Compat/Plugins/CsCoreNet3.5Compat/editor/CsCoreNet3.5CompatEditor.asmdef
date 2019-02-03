@@ -1,10 +1,10 @@
 {
-    "name": "CsCoreNet3.5Compat",
-    "references": [
-        "CsCoreNet3.5CompatEditor"
-    ],
+    "name": "CsCoreNet3.5CompatEditor",
+    "references": [],
     "optionalUnityReferences": [],
-    "includePlatforms": [],
+    "includePlatforms": [
+        "Editor"
+    ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,
