@@ -421,10 +421,11 @@ Assert.AreEqual(myObjectToSave.myInt, objLoadedAgain.myInt);
 
 # 📦 Getting started
 
-## Install via NuGet
+## Install via NuGet (For pure C#/.net projects)
 
 The NuGet package from [nuget.org/packages/com.csutil.cscore](https://www.nuget.org/packages/com.csutil.cscore) can be installed in [multiple ways](https://docs.microsoft.com/en-us/nuget/consume-packages/ways-to-install-a-package), for example via the dotnet CLI:
 ```XML
+dotnet add package Newtonsoft.Json
 dotnet add package com.csutil.cscore
 ```
 
@@ -443,7 +444,7 @@ Or you manually add the following lines to the your `.csproj` file:
 
 After adding the references, install the packages by executing `dotnet restore` inside the project folder.
 
-## 🎮 Install cscore into Unity projects
+## 🎮 Install cscore into your Unity project
 Download the Unity package from the [asset store: http://u3d.as/1rqY](http://u3d.as/1rqY) or download it from the [CsCore/UnityPackages folder](https://github.com/cs-util-com/cscore/raw/master/CsCore/UnityPackages/cscore.unitypackage)
 
 
