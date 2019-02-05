@@ -13,9 +13,11 @@ namespace com.csutil.tests {
 
         [Fact]
         public void ExampleUsage1() {
+            // First cleanup existing test folder if they already exist:
+            EnvironmentV2.instance.GetTempFolder("ExampleUsage1").DeleteV2();
 
             // Get a directory to work in:
-            DirectoryInfo myDirectory = EnvironmentV2.instance.GetAppDataFolder();
+            DirectoryInfo myDirectory = EnvironmentV2.instance.GetTempFolder("ExampleUsage1");
             Log.d("The directory path is: " + myDirectory.FullPath());
 
             // Get a non-existing child directory
@@ -40,7 +42,7 @@ namespace com.csutil.tests {
             Assert.True(childDir.DeleteV2()); // (Deleting non-existing directories would returns false)
             // Check that the directory no longer exists:
             Assert.False(childDir.IsNotNullAndExists());
-            
+
         }
 
         [Fact]
