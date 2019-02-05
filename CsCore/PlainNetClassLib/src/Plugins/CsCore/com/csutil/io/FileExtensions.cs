@@ -11,13 +11,17 @@ namespace com.csutil {
 
         public static DirectoryInfo GetChildDir(this DirectoryInfo self, string childFolder, bool assertThatChildMustExist = false) {
             var c = new DirectoryInfo(self.FullPath() + childFolder);
-            if (assertThatChildMustExist) { AssertV2.IsTrue(c.IsNotNullAndExists(), "childFolder '" + childFolder + "' does not exist! Full path: " + c.FullPath()); }
+            if (assertThatChildMustExist) {
+                AssertV2.IsTrue(c.IsNotNullAndExists(), "childFolder '" + childFolder + "' doesnt exist! Path=" + c.FullPath());
+            }
             return c;
         }
 
         public static FileInfo GetChild(this DirectoryInfo self, string childFile, bool assertThatChildMustExist = false) {
             var c = new FileInfo(self.FullPath() + childFile);
-            if (assertThatChildMustExist) { AssertV2.IsTrue(c.IsNotNullAndExists(), "childFile '" + childFile + "' does not exist! Full path: " + c.FullPath()); }
+            if (assertThatChildMustExist) {
+                AssertV2.IsTrue(c.IsNotNullAndExists(), "childFile '" + childFile + "' doesnt exist! Path=" + c.FullPath());
+            }
             return c;
         }
 
@@ -26,11 +30,24 @@ namespace com.csutil {
             return self;
         }
 
+        /// <summary> 
+        /// After renaming a Directory its .Name property does not return the correct folder name anymore! 
+        /// Thats why NameV2 has to be used instead, which is more expensive but always updated correctly
+        /// </summary>
+        public static string NameV2(this DirectoryInfo self) {
+            var p = self.FullName;
+            if (p.EndsWith(Path.DirectorySeparatorChar)) {
+                p = p.Substring("" + Path.DirectorySeparatorChar, false);
+            }
+            return Path.GetFileName(p); // GetFileName works for folders if the path doesnt end in /
+        }
+
         public static string FullPath(this DirectoryInfo self) {
             var p = self.FullName;
             if (!p.EndsWith(Path.DirectorySeparatorChar)) { return p + Path.DirectorySeparatorChar; }
             return p;
         }
+
         public static string FullPath(this FileInfo self) { return self.FullName; }
 
         public static bool IsNotNullAndExists(this FileSystemInfo self) {

@@ -61,7 +61,7 @@ namespace com.csutil.tests {
             // Test FullPath:
             var dir1 = rootDir.GetChildDir("TestDir 1");
             var alsoDir1 = dir1.Parent.GetChildDir("TestDir 1");
-            AssertV2.AreEqual(dir1.FullPath(), alsoDir1.FullPath());
+            Assert.Equal(dir1.FullPath(), alsoDir1.FullPath());
 
             // Test deleting and creating Dir 1:
             dir1.DeleteV2();
@@ -82,17 +82,17 @@ namespace com.csutil.tests {
                 dir2.DeleteV2();
                 dir1.MoveToV2(dir2);
                 Assert.True(dir2.IsNotNullAndExists());
-                AssertV2.AreEqual(dir2.FullPath(), dir1.FullPath());
+                Assert.Equal(dir2.FullPath(), dir1.FullPath());
                 Assert.False(new DirectoryInfo(oldPath).Exists);
             }
             { // Test that moving to existing folders fails:
                 var dir3 = rootDir.GetChildDir("TestDir 3").CreateV2();
-                AssertV2.AreEqual("TestDir 3", dir3.Name);
+                Assert.Equal("TestDir 3", dir3.Name);
                 dir3 = rootDir.CreateSubdirectory(dir3.Name);
                 AssertV2.Throws<Exception>(() => {
                     dir1.MoveToV2(dir3); // This should fail since dir3 already exists
                 });
-                AssertV2.AreNotEqual(dir3.FullPath(), dir1.FullPath());
+                Assert.NotEqual(dir3.FullPath(), dir1.FullPath());
                 dir3.Delete(); // Cleanup after test
             }
             { // Test copying folders:
@@ -101,7 +101,7 @@ namespace com.csutil.tests {
                 dir4.DeleteV2(); // Make sure dir does not yet exist from previous tests
                 dir1.CopyTo(dir4);
                 Assert.True(dir4.IsNotNullAndExists(), "dir=" + dir4.FullPath());
-                AssertV2.AreNotEqual(dir4.FullPath(), dir1.FullPath());
+                Assert.NotEqual(dir4.FullPath(), dir1.FullPath());
                 Assert.True(new DirectoryInfo(oldPath).Exists);
                 dir4.DeleteV2(); // Cleanup after test
             }
@@ -111,7 +111,14 @@ namespace com.csutil.tests {
                 var oldPath = dir1.FullPath();
                 dir1.Rename(newName);
                 Assert.False(new DirectoryInfo(oldPath).Exists);
-                AssertV2.AreEqual(newName, dir1.Name);
+                Assert.True(dir1.Exists);
+                Assert.Equal(newName, dir1.NameV2());
+
+                // DirectoryInfo.Name does not correctly update after renaming, 
+                // Thats why DirectoryInfo.name must return an incorrect value:
+                Assert.NotEqual(newName, dir1.Name);
+                // TODO is DirectoryInfo.Name broken for all .net versions?
+
             }
 
             rootDir.DeleteV2(); // Cleanup after test
@@ -120,7 +127,7 @@ namespace com.csutil.tests {
         private static void SaveAndLoadTextToFile(FileInfo testFile, string textToSave) {
             testFile.SaveAsText(textToSave);
             Assert.True(testFile.IsNotNullAndExists());
-            AssertV2.AreEqual(textToSave, testFile.LoadAs<string>()); // Load again and compare
+            Assert.Equal(textToSave, testFile.LoadAs<string>()); // Load again and compare
         }
 
         [Fact]
@@ -135,11 +142,11 @@ namespace com.csutil.tests {
             jsonFile.SaveAsJson(objToSave);
             jsonFile.SaveAsJson(objToSave); // This will override the existing file
             MyClass1 loadedObj = jsonFile.LoadAs<MyClass1>(); // Load the object again and compare:
-            AssertV2.AreEqual(objToSave.myString, loadedObj.myString);
-            AssertV2.AreEqual(objToSave.myInt, loadedObj.myInt);
+            Assert.Equal(objToSave.myString, loadedObj.myString);
+            Assert.Equal(objToSave.myInt, loadedObj.myInt);
             loadedObj = jsonFile.LoadAs<MyClass1>(); // Load the object again and compare:
-            AssertV2.AreEqual(objToSave.myString, loadedObj.myString);
-            AssertV2.AreEqual(objToSave.myInt, loadedObj.myInt);
+            Assert.Equal(objToSave.myString, loadedObj.myString);
+            Assert.Equal(objToSave.myInt, loadedObj.myInt);
             rootDir.DeleteV2();
         }
 
@@ -162,14 +169,14 @@ namespace com.csutil.tests {
             var newName = "MyFile2.txt";
             var oldPath = new FileInfo(myFile.FullPath());
             myFile.Rename(newName);
-            AssertV2.AreEqual(oldPath.ParentDir().FullPath(), myFile.ParentDir().FullPath());
-            AssertV2.AreEqual(newName, myFile.Name);
-            AssertV2.AreNotEqual(oldPath.Name, myFile.Name);
+            Assert.Equal(oldPath.ParentDir().FullPath(), myFile.ParentDir().FullPath());
+            Assert.Equal(newName, myFile.Name);
+            Assert.NotEqual(oldPath.Name, myFile.Name);
 
             var subdir = rootDir.CreateSubdirectory("subdir");
             myFile.MoveToV2(subdir);
-            AssertV2.AreEqual(1, subdir.GetFiles().Count());
-            AssertV2.AreEqual(subdir.FullPath(), myFile.ParentDir().FullPath());
+            Assert.Single(subdir.GetFiles()); // The folder should now contain 1 entry
+            Assert.Equal(subdir.FullPath(), myFile.ParentDir().FullPath());
 
             rootDir.DeleteV2();
         }
