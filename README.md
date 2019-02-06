@@ -428,6 +428,7 @@ The NuGet package from [nuget.org/packages/com.csutil.cscore](https://www.nuget.
 dotnet add package Newtonsoft.Json
 dotnet add package com.csutil.cscore
 ```
+(If you already have `json.net` installed you dont need to add the `Newtonsoft.Json` package)
 
 Or you manually add the following lines to the your `.csproj` file: 
 ```XML
@@ -445,14 +446,30 @@ Or you manually add the following lines to the your `.csproj` file:
 After adding the references, install the packages by executing `dotnet restore` inside the project folder.
 
 ## 🎮 Install cscore into your Unity project
-Download the Unity package here:
+
+The cscore project has some components that are only usable in Unity projects. The provided Unity package below includes all these components.
+
+**Important:** If you use `.net 4` or later do not import the `CsCoreNet3.5Compat` folder in the Unity package, it contains only classes that are already available in `.net 4`
+
+### Download the Unity package here:
 * From the [Asset Store (https://assetstore.unity.com/packages/tools/integration/cscore-138254)](https://assetstore.unity.com/packages/tools/integration/cscore-138254) 
 * From the [/CsCore/UnityPackages folder](https://github.com/cs-util-com/cscore/raw/master/CsCore/UnityPackages/) 
 
-
-
 # 💚 Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+
+## Repository structure and instructions
+The cscore project is separated into multiple folders:
+
+* **PlainNetClassLib** - Contains the pure .net logic
+* **CsCoreUnity** - Contains the Unity specific logic
+* **CsCoreNet3.5Compat** - Contains classes for older Unity projects (that do not use `.net 4+` yet)
+* **xUnitTests** - Contains the xunit tests that cover all functionality of the PlainNetClassLib folder
+* **UnityTests** - Contains the Unity project with all NUnit tests that cover the Unity spefic CsCoreUnity features
+* **UnityPackages** - Contains the ready to download Unity package that can alternatively be loaded via the AssetStore
+
+**Sym Links** can be used to link the original `PlainNetClassLib`, `CsCoreUnity` and `CsCoreNet3.5Compat` folders into your target Unity project. The sym link setup scripts (always named `linkThisIntoAUnityProject`) are located in the component folders (use the `.bat` on Win and `.sh` on Mac). 
+
 <!---
 See current features in development here: https://github.com/cs-util-com/cscore/projects/1
 -->
@@ -460,15 +477,16 @@ See current features in development here: https://github.com/cs-util-com/cscore/
 ## How to get in contact
 
 [![Twitter](https://img.shields.io/twitter/follow/csutil_com.svg?style=for-the-badge&logo=twitter)](https://twitter.com/intent/follow?screen_name=csutil_com)
-[![Discord](https://img.shields.io/discord/518684359667089409.svg?logo=discord&label=chat%20on%20discord&style=for-the-badge)](https://discord.gg/bgGqRe)
-[![Gitter](https://img.shields.io/gitter/room/csutil-com/community.svg?style=for-the-badge&logo=gitter-white)](https://gitter.im/csutil-com)
+-- [![Discord](https://img.shields.io/discord/518684359667089409.svg?logo=discord&label=chat%20on%20discord&style=for-the-badge)](https://discord.gg/bgGqRe)
+-- [![Gitter](https://img.shields.io/gitter/room/csutil-com/community.svg?style=for-the-badge&logo=gitter-white)](https://gitter.im/csutil-com)
 
 To stay updated via Email see https://www.csutil.com/updates
 
 ## Core principles
 - **The main goal**: Keep the API simple to use and provide an intuitive framework for common usecases. Stick to essential features only to keep the library lightweight
-- Use examples as a kind of test driven development but with focus on usablility of the APIs (tests must focus more on validating correctness but examples can focus more on ease of use of the target API). Thats why each test class contains also a few methods that contain example usage
-- Use mutation testing to check for test coverage on a logic level
+- Use **examples** as a kind of test driven development but with focus on usablility of the APIs (tests must focus more on validating correctness but examples can focus more on ease of use of the target API). Thats why each test class contains also a few methods that contain example usage
+- Write as much of the logic in pure C# as reasonable, stay backwards compatible to .net 3.5 to support older Unity projects as well
+- Use mutation testing to check for **test coverage** on a logic level
 
 # License
 
