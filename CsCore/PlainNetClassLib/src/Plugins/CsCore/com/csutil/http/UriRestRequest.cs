@@ -18,17 +18,19 @@ namespace com.csutil.http {
 
         public Task<T> GetResult<T>(Action<T> successCallback) {
             Task<string> readResultTask = null;
-            Func<T> getResult = null;
+            T result = default(T); // Init in case the request fails
             handleResult = (self, resp) => {
                 using (readResultTask = resp.Content.ReadAsStringAsync()) {
-                    var parsedResult = ParseResultStringInto<T>(readResultTask.Result);
-                    getResult = () => { return parsedResult; };
-                    successCallback.InvokeIfNotNull(parsedResult);
+                    result = ParseResultStringInto<T>(readResultTask.Result);
+                    successCallback.InvokeIfNotNull(result);
                 }
             };
             return sendTask.ContinueWith<T>((_) => {
-                readResultTask.Wait();
-                return getResult();
+                if (readResultTask != null) { readResultTask.Wait(); }
+                if (sendTask.Status != TaskStatus.RanToCompletion) {
+                    Log.e("Web-request failed, returned result will be null");
+                }
+                return result;
             });
         }
 

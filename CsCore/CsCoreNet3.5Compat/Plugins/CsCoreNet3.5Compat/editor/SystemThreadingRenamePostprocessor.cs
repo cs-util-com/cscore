@@ -43,7 +43,7 @@ class SystemThreadingRenamePostprocessor : AssetPostprocessor {
     static void RuntimeInitializeOnLoadMethod() { Debug.Log("RuntimeInitializeOnLoadMethod"); }
 
     [UnityEditor.Callbacks.DidReloadScripts]
-    static void DidReloadScripts() { Debug.LogError("UnityEditor.Callbacks.DidReloadScripts"); }
+    static void DidReloadScripts() { Debug.Log("UnityEditor.Callbacks.DidReloadScripts"); }
 
     [UnityEditor.Callbacks.OnOpenAsset]
     static void OnOpenAsset() { Debug.Log("UnityEditor.Callbacks.OnOpenAsset"); }
