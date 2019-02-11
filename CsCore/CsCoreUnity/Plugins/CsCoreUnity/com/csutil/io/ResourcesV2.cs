@@ -15,11 +15,8 @@ namespace com.csutil {
         /// </summary>
         /// <param name="keepReferenceToEditorPrefab"> Set it true if prefab loaded by editor script </param>
         public static GameObject LoadPrefab(string pathInResourcesFolder, bool keepReferenceToEditorPrefab = false) {
-            if (pathInResourcesFolder.EndsWith(".prefab")) {
-                pathInResourcesFolder = pathInResourcesFolder.Substring(".prefab", false);
-            }
             GameObject prefab = LoadV2<GameObject>(pathInResourcesFolder);
-            if (prefab == null) { throw new Exception("could not load prefab from path=" + pathInResourcesFolder); }
+            if (prefab == null) { throw new Exception("Could not load prefab from path=" + pathInResourcesFolder); }
 #if UNITY_EDITOR
             if (keepReferenceToEditorPrefab) { return UnityEditor.PrefabUtility.InstantiatePrefab(prefab) as GameObject; }
 #endif
@@ -29,7 +26,23 @@ namespace com.csutil {
             return prefabInstance;
         }
 
-        public static T LoadV2<T>(string path) { return (T)(object)Resources.Load(path, typeof(T)); }
+        public static T LoadV2<T>(string pathInResourcesFolder) {
+            if (pathInResourcesFolder.EndsWith(".prefab")) {
+                pathInResourcesFolder = pathInResourcesFolder.Substring(".prefab", false);
+            }
+            return (T)(object)Resources.Load(pathInResourcesFolder, typeof(T));
+        }
+
+        /// <summary> 
+        /// Load a ScriptableObject instance from a Resources subpath, for example:
+        ///   MyExampleScriptableObject_Instance1.asset is located in Assets/Ui/Resources/MyFolderX 
+        ///   -> The path must be "MyFolderX/MyExampleScriptableObject_Instance1" 
+        /// </summary>
+        public static T LoadScriptableObjectInstance<T>(string pathInResourcesFolder) where T : ScriptableObject {
+            var so = LoadV2<T>(pathInResourcesFolder);
+            AssertV2.IsNotNull(so, "ScriptableObject (" + typeof(T) + ") instance " + pathInResourcesFolder);
+            return so;
+        }
 
         /// <summary> Returns all comp. in scene (including all inactive) </summary>
         public static IEnumerable<T> FindAllInScene<T>() where T : Component {
