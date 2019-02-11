@@ -63,6 +63,13 @@ namespace com.csutil.tests.http {
             }
         }
 
+        [Fact]
+        public static async void TestGetCurrentPing() {
+            var pingInMs = await RestFactory.instance.GetCurrentPing();
+            Assert.NotEqual(-1, pingInMs);
+            Assert.True(0 < pingInMs && pingInMs < 500, "pingInMs=" + pingInMs);
+        }
+
     }
 
 }

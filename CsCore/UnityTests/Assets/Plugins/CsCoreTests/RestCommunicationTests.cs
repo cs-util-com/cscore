@@ -88,6 +88,15 @@ namespace com.csutil.tests.http {
         }
 
         [UnityTest]
+        public IEnumerator TestGetCurrentPing() {
+            Task<long> pingTask = RestFactory.instance.GetCurrentPing();
+            yield return pingTask.AsCoroutine();
+            var pingInMs = pingTask.Result;
+            Assert.AreNotEqual(-1, pingInMs);
+            Assert.True(0 < pingInMs && pingInMs < 500, "pingInMs=" + pingInMs);
+        }
+
+        [UnityTest]
         public IEnumerator TestGetViaUri() {
             Assert.AreEqual(typeof(UnityRestFactory), RestFactory.instance.GetType());
             RestRequest request = new Uri("https://httpbin.org/get").SendGET();
@@ -107,8 +116,9 @@ namespace com.csutil.tests.http {
             Assert.IsFalse(runningTask.IsCanceled);
 
             var httpBinGetResponse = runningTask.Result;
-            Log.d("Your IP is " + httpBinGetResponse.origin);
+            Assert.IsNotNull(httpBinGetResponse);
             Assert.IsNotNull(httpBinGetResponse.origin);
+            Log.d("Your IP is " + httpBinGetResponse.origin);
         }
 
         public class HttpBinGetResp {
