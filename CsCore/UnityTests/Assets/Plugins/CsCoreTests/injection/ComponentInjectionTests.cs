@@ -56,10 +56,11 @@ namespace com.csutil.tests.injection {
         }
 
         [Test]
-        public void TestGetOrAddScriptableObject() {
-            string pathToSoInstance1 = "MyExampleScriptableObject_Instance1";
+        public void TestScriptableObjectSingleton() {
+            // The path to an ScriptableObject instance .asset file in a Resources folder:
+            string pathToSoInstance1 = "MyExampleScriptableObject_Instance1.asset";
             string someStringValue = "some string 123";
-            { // 
+            { // ScriptableObject instances can be accessed via ResourcesV2.LoadScriptableObjectInstance:
                 var i = ResourcesV2.LoadScriptableObjectInstance<MyExampleScriptableObject>(pathToSoInstance1);
                 Assert.IsNotNull(i);
                 i.myString1 = someStringValue; 

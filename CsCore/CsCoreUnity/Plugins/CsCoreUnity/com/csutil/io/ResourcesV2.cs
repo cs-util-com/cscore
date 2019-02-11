@@ -27,10 +27,14 @@ namespace com.csutil {
         }
 
         public static T LoadV2<T>(string pathInResourcesFolder) {
-            if (pathInResourcesFolder.EndsWith(".prefab")) {
-                pathInResourcesFolder = pathInResourcesFolder.Substring(".prefab", false);
-            }
+            pathInResourcesFolder = RemoveExtensionIfNeeded(pathInResourcesFolder, ".prefab");
+            pathInResourcesFolder = RemoveExtensionIfNeeded(pathInResourcesFolder, ".asset");
             return (T)(object)Resources.Load(pathInResourcesFolder, typeof(T));
+        }
+
+        private static string RemoveExtensionIfNeeded(string path, string fileExtension) {
+            if (path.EndsWith(fileExtension)) { return path.Substring(fileExtension, includeEnd: false); }
+            return path;
         }
 
         /// <summary> 
