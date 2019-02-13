@@ -14,14 +14,13 @@ namespace com.csutil.http {
         }
 
         public Task<long> GetCurrentPing(string domainToPing = "8.8.8.8", int timeoutInMs = 500) {
-            return new Ping().SendPingAsync(domainToPing, timeoutInMs).ContinueWith((a) => {
-                var pingResponse = a.Result;
-                if (pingResponse != null && pingResponse.Status == IPStatus.Success) {
-                    return pingResponse.RoundtripTime; // return ping in MS
-                } else {
-                    return -1; // No internet available
-                }
-            });
+            Task<PingReply> pingTask = new Ping().SendPingAsync(domainToPing, timeoutInMs);
+            AssertV2.IsNotNull(pingTask, "ping");
+            return pingTask.ContinueWith(finishedPingTask => {
+                var pingReply = finishedPingTask.Result;
+                AssertV2.IsNotNull(pingReply, "result");
+                return pingReply.RoundtripTime;
+            }); // return ping in MS
         }
 
     }
