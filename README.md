@@ -314,6 +314,23 @@ Calling `GetOrAddComponentSingleton` will create a singleton. The parent gameobj
 
 This way all created singletons will be created and grouped together in the `"Singletons" GameObject` and accessible like any other MonoBehaviour as well.
 
+### Scriptable Object Injection & Singletons
+Scriptable objects are ment as data containers created not at runtime but at editor time to store configuration data and use it in the editor UI or load it during runtime. 
+* The scriptable object consists of the class that extends `ScriptableObject` and the instance file that typically is created via the [CreateAssetMenu](https://docs.unity3d.com/ScriptReference/CreateAssetMenuAttribute.html) annotation or via an editor script (see [ScriptableObject.CreateInstance](https://docs.unity3d.com/ScriptReference/ScriptableObject.CreateInstance.html)).
+* This allows to have many parallel instance files for a scriptable object that contain different configurations. These asset files can be loaded during runtime when placed in a [Resources folder](https://unity3d.com/learn/tutorials/topics/best-practices/resources-folder) or can be linked directly in prefabs and Unity scenes in the Editor UI. 
+
+If scriptable object instances have to be dynamically loaded during runtime, the following example can help to avoid loading multiple different instances for the same ScriptableObject subclass into memory at once:
+
+```cs
+// Load a ScriptableObject instance and set it as the singleton:
+var path = "MyExampleScriptableObject_Instance1.asset";
+MyExampleScriptableObject x1 = ResourcesV2.LoadScriptableObjectInstance<MyExampleScriptableObject>(path);
+IoC.inject.SetSingleton(x1);
+
+// Now that the singleton is set this instance is always returned for the ScriptableObject class:
+MyExampleScriptableObject x2 = IoC.inject.Get<MyExampleScriptableObject>(this);
+Assert.AreSame(x1, x2);
+```
 
 
 ## The `Link` Pattern
