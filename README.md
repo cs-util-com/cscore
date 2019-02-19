@@ -51,7 +51,7 @@ See below for a full usage overview to explain the APIs with simple examples.
 
 
 ## Logging
-A lightweight zero config Log wrapper that can be combined with other logging libraries like Serilog for more complex usecases
+A lightweight zero config Log wrapper that is automatically **stripped from production** builds and can be combined with other logging libraries like Serilog for more complex usecases
 
 ```cs
 Log.d("I'm a log message");
@@ -494,7 +494,7 @@ See current features in development here: https://github.com/cs-util-com/cscore/
 ## How to get in contact
 
 [![Twitter](https://img.shields.io/twitter/follow/csutil_com.svg?style=for-the-badge&logo=twitter)](https://twitter.com/intent/follow?screen_name=csutil_com)
--- [![Discord](https://img.shields.io/discord/518684359667089409.svg?logo=discord&label=chat%20on%20discord&style=for-the-badge)](https://discord.gg/bgGqRe)
+-- [![Discord](https://img.shields.io/discord/518684359667089409.svg?logo=discord&label=chat%20on%20discord&style=for-the-badge)](https://discord.gg/UCqJjEU)
 -- [![Gitter](https://img.shields.io/gitter/room/csutil-com/community.svg?style=for-the-badge&logo=gitter-white)](https://gitter.im/csutil-com)
 
 To stay updated via Email see https://www.csutil.com/updates
