@@ -20,6 +20,10 @@ namespace com.csutil {
 
         public static bool IsNullOrEmpty<T>(this IEnumerable<T> self) { return self == null || !self.Any(); }
 
+        public static string ToStringV2(this IEnumerable<string> args, string bracket1 = "[", string bracket2 = "]") {
+            return args.ToStringV2<string>(x => x, bracket1, bracket2);
+        }
+
         public static string ToStringV2<T>(this IEnumerable<T> args, Func<T, string> toString, string bracket1 = "[", string bracket2 = "]") {
             if (args == null) { return "null"; }
             if (args.IsNullOrEmpty()) { return bracket1 + bracket2; }

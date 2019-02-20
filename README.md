@@ -229,6 +229,18 @@ HttpBinGetResp response = await request.GetResult<HttpBinGetResp>();
 Log.d("Your external IP is " + response.origin);
 ```
 
+A more complex REST example can be found in the `WeatherReportExamples` test class. It uses your IP to detect
+the city name you are located in and then sends a weather report request to MetaWeather.com:
+```cs
+var ipLookupResult = await IpApiCom.GetResponse();
+string yourCity = ipLookupResult.city;
+var cityLookupResult = await MetaWeatherLocationLookup.GetLocation(yourCity);
+int whereOnEarthIDOfYourCity = cityLookupResult.First().woeid;
+var weatherReports = await MetaWeatherReport.GetReport(whereOnEarthIDOfYourCity);
+var currentWeather = weatherReports.consolidated_weather.Map(r => r.weather_state_name);
+Log.d("The weather today in " + yourCity + " is: " + currentWeather.ToStringV2());
+```
+
 
 ## Directory & File Extensions 
 The [DirectoryInfo](https://docs.microsoft.com/en-us/dotnet/api/system.io.directoryinfo) and [FileInfo](https://docs.microsoft.com/en-us/dotnet/api/system.io.fileinfo) classes already provide helpful interfaces to files and directories and the following extensions improve the usability if these classes:
