@@ -12,6 +12,10 @@ namespace com.csutil.tests.http {
             var ipLookupResult = await IpApiCom.GetResponse();
             string yourCity = ipLookupResult.city;
             var cityLookupResult = await MetaWeatherLocationLookup.GetLocation(yourCity);
+            if (cityLookupResult.IsNullOrEmpty()) {
+                cityLookupResult = await MetaWeatherLocationLookup.GetLocation((float)ipLookupResult.lat, (float)ipLookupResult.lon);
+            }
+            Assert.False(cityLookupResult.IsNullOrEmpty(), "Did not find any location for city=" + yourCity);
             int whereOnEarthIDOfYourCity = cityLookupResult.First().woeid;
             var report = await MetaWeatherReport.GetReport(whereOnEarthIDOfYourCity);
             var currentWeather = report.consolidated_weather.Map(r => r.weather_state_name);
