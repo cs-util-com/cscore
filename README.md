@@ -134,6 +134,8 @@ This will result in the following output in the Log:
   at LogTests.SomeExampleMethod1(System.String s, Int32 i) 
 ```
 
+
+
 ## The EventBus
 
 - Publish and subscribe to global events from anywhere in your code
@@ -159,6 +161,7 @@ eventBus.Unsubscribe(subscriber1, eventName);
 
 
 __Rule of thumb__: Only use an `EventBus` if you can't exactly tell who will listen to the published events. Do not use the `EventBus` to pass an event from x to y if you know exactly who x and y will be! Atificially separating 2 components that tightly belong together does not help
+
 
 
 ## Injection Logic
@@ -190,6 +193,24 @@ Assert.Same(myClass1Singleton, myClass1); // Its the same object reference
 ```
 
 Another extended example usage can be found in [`InjectionTests.ExampleUsage2()` (see here)](https://github.com/cs-util-com/cscore/blob/master/CsCore/xUnitTests/src/com/csutil/tests/InjectionTests.cs#L40)
+
+
+
+## IEnumerable Extensions
+For common tasks on IEnumerables cscore provides methods like `Map` (same as LINQs Select), `Reduce` (same as LINQs Aggregate) and `Filter` (same as LINQs Where) but also `IsNullOrEmpty` and `ToStringV2` which are explained in this simple example:
+
+```cs
+IEnumerable<string> myStrings = new List<string>() { "1", "2", "3", "4", "5" };
+IEnumerable<int> convertedToInts = myStrings.Map(s => int.Parse(s));
+IEnumerable<int> filteredInts = convertedToInts.Filter(i => i <= 3); // Keep 1,2,3
+Assert.False(filteredInts.IsNullOrEmpty());
+Log.d("Filtered ints: " + filteredInts.ToStringV2(i => "" + i)); // "[1, 2, 3]"
+int sumOfAllInts = filteredInts.Reduce((sum, i) => sum + i); // Sum up all ints
+Assert.Equal(6, sumOfAllInts); // 1+2+3 is 6
+```
+
+More usage examples can be found in the [HelperMethodTests.cs](https://github.com/cs-util-com/cscore/blob/master/CsCore/xUnitTests/src/com/csutil/tests/HelperMethodTests.cs)
+
 
 
 ## JSON Parsing 

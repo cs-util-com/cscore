@@ -67,6 +67,19 @@ namespace com.csutil.tests {
         }
 
         [Fact]
+        public void Filter_Map_Reduce_Examples() {
+
+            IEnumerable<string> myStrings = new List<string>() { "1", "2", "3", "4", "5" };
+            IEnumerable<int> convertedToInts = myStrings.Map(s => int.Parse(s));
+            IEnumerable<int> filteredInts = convertedToInts.Filter(i => i <= 3); // Keep 1,2,3
+            Assert.False(filteredInts.IsNullOrEmpty());
+            Log.d("Filtered ints: " + filteredInts.ToStringV2(i => "" + i)); // "[1, 2, 3]"
+            int sumOfAllInts = filteredInts.Reduce((sum, i) => sum + i); // Sum up all ints
+            Assert.Equal(6, sumOfAllInts); // 1+2+3 is 6
+
+        }
+
+        [Fact]
         public void ChangeTrackerUsage_Examples() {
 
             // The ChangeTracker tracks if a variable changes:
