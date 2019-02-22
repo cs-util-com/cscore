@@ -48,16 +48,12 @@ namespace com.csutil.tests.ui {
             public IEnumerator LoadModelIntoView(MyUserModel userToShow, GameObject userUi) {
                 Dictionary<string, Link> links = userUi.GetLinkMap();
 
-                AssertV2.IsNotNull(userToShow, "userToShow");
-                AssertV2.IsFalse(links.IsNullOrEmpty(), "Links map is emtpy");
-                AssertV2.IsNotNull(links.Get<Text>("Name"), "Name Link");
-
-                links.Get<Text>("Name").text = userToShow.userName;
-                links.Get<Text>("Age").text = "" + userToShow.userAge;
+                links.Get<InputField>("Name").text = userToShow.userName;
+                links.Get<InputField>("Age").text = "" + userToShow.userAge;
 
                 links.Get<Button>("Save").SetOnClickAction(delegate {
-                    userToShow.userName = links.Get<Text>("Name").text;
-                    userToShow.userAge = int.Parse(links.Get<Text>("Age").text);
+                    userToShow.userName = links.Get<InputField>("Name").text;
+                    userToShow.userAge = int.Parse(links.Get<InputField>("Age").text);
                     Log.d("User saved: " + userToShow);
                 });
 
