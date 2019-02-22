@@ -508,6 +508,8 @@ The cscore project has some components that are only usable in Unity projects. T
 # 💚 Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
+[![Open Source Helpers](https://www.codetriage.com/cs-util-com/cscore/badges/users.svg)](https://www.codetriage.com/cs-util-com/cscore)
+
 ## Repository structure and instructions
 The cscore project is separated into multiple folders:
 
