@@ -24,7 +24,7 @@ namespace com.csutil.tests.ui {
             {
                 var user1 = new MyUserModel() { userName = "Carl", userAge = 4 };
                 yield return userUiPresenter.Unload();
-                yield return userUiPresenter.LoadModelIntoView(user1, myUserUi1);
+                yield return userUiPresenter.LoadModelIntoViewAsync(user1, myUserUi1);
             }
 
             yield return new WaitForSeconds(4); // Load another user into the UI:
@@ -32,7 +32,7 @@ namespace com.csutil.tests.ui {
             {
                 var user2 = new MyUserModel() { userName = "Anna", userAge = 55 };
                 yield return userUiPresenter.Unload();
-                yield return userUiPresenter.LoadModelIntoView(user2, myUserUi1);
+                yield return userUiPresenter.LoadModelIntoViewAsync(user2, myUserUi1);
             }
 
             yield return new WaitForSeconds(20);
@@ -47,7 +47,7 @@ namespace com.csutil.tests.ui {
 
         public class MyUserUi : Presenter<MyUserModel> {
 
-            public IEnumerator LoadModelIntoView(MyUserModel userToShow, GameObject userUi) {
+            public IEnumerator LoadModelIntoViewAsync(MyUserModel userToShow, GameObject userUi) {
                 Dictionary<string, Link> links = userUi.GetLinkMap();
 
                 links.Get<InputField>("Name").text = userToShow.userName;
@@ -57,6 +57,7 @@ namespace com.csutil.tests.ui {
                     userToShow.userName = links.Get<InputField>("Name").text;
                     userToShow.userAge = int.Parse(links.Get<InputField>("Age").text);
                     Log.d("User saved: " + userToShow);
+                    ScreenStack.SwitchBackToLastScreen(userUi);
                 });
 
                 yield return null;

@@ -46,8 +46,6 @@ namespace com.csutil {
             }
         }
 
-        
-
         public static void SelectV2(this InputField self) {
             self.Select();
             self.ActivateInputField();

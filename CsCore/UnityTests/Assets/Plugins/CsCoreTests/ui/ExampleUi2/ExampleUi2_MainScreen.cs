@@ -27,7 +27,6 @@ namespace com.csutil.tests.ui {
             presenter.LoadModelIntoView(currentUser, ui);
 
             var links = ui.GetLinkMap();
-            links.Get<Button>("Save").SetOnClickAction(delegate { ScreenStack.SwitchBackToLastScreen(ui); });
             AssertV2.AreEqual(currentUser.userName, links.Get<InputField>("Name").text, "userName");
         }
     }
