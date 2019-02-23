@@ -1,4 +1,5 @@
-﻿using System;
+﻿using com.csutil.ui;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -43,6 +44,10 @@ namespace com.csutil {
                     if (!changeAllowed) { self.isOn = !newCheckedState; } // Undo the change
                 });
             }
+        }
+
+        public static void CopyCanvasSettingsFrom(this Canvas self, Canvas canvasToUseSettingsFrom) {
+            // TODO
         }
 
         public static void SelectV2(this InputField self) {

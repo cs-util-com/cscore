@@ -142,7 +142,10 @@ namespace com.csutil.editor {
                     SetValue(EditorGUILayout.EnumPopup(propertyName, (Enum)GetValue(), o));
                     break;
                 case SerializedPropertyType.ObjectReference:
-                    SetValue(EditorGUILayout.ObjectField(propertyName, (UnityEngine.Object)GetValue(), GetPropertyType(), true, o));
+                    var v = GetValue() as UnityEngine.Object;
+                    if (v != null) {
+                        SetValue(EditorGUILayout.ObjectField(propertyName, v, GetPropertyType(), true, o));
+                    }
                     break;
                 default:
                     break;

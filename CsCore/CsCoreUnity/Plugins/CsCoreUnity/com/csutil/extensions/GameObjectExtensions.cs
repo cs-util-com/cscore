@@ -13,6 +13,11 @@ namespace com.csutil {
             return existingComp == null ? self.AddComponent<T>() : existingComp;
         }
 
+        public static GameObject AddChild(this GameObject parentGo, GameObject child, bool worldPositionStays = false) {
+            child.transform.SetParent(parentGo.transform, worldPositionStays); // add it to parent
+            return child;
+        }
+
         public static GameObject GetOrAddChild(this GameObject parentGo, string childName) {
             var childGo = parentGo.transform.Find(childName);
             if (childGo != null) { return childGo.gameObject; } // child found, return it

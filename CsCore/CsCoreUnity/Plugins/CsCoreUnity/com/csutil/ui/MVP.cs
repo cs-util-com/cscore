@@ -2,11 +2,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-// https://en.wikipedia.org/wiki/Model–view–presenter
-public interface Presenter<T> {
+namespace com.csutil.ui {
 
-    IEnumerator LoadModelIntoView(T model, GameObject view);
+    // https://en.wikipedia.org/wiki/Model–view–presenter
+    public interface Presenter<T> {
 
-    IEnumerator Unload();
+        IEnumerator LoadModelIntoView(T model, GameObject view);
+
+        IEnumerator Unload();
+
+    }
 
 }

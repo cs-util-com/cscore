@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using com.csutil.ui;
+using NUnit.Framework;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -10,7 +11,7 @@ using UnityEngine.UI;
 
 namespace com.csutil.tests.ui {
 
-    class ExampleUi1 {
+    public class ExampleUi1 {
 
         [UnityTest]
         public IEnumerator ExampleUsage1() {
@@ -37,13 +38,13 @@ namespace com.csutil.tests.ui {
             yield return new WaitForSeconds(20);
         }
 
-        private class MyUserModel {
+        public class MyUserModel {
             public string userName;
             public int userAge;
             public override string ToString() { return JsonWriter.GetWriter().Write(this); }
         }
 
-        private class MyUserUi : Presenter<MyUserModel> {
+        public class MyUserUi : Presenter<MyUserModel> {
 
             public IEnumerator LoadModelIntoView(MyUserModel userToShow, GameObject userUi) {
                 Dictionary<string, Link> links = userUi.GetLinkMap();
