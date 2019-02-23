@@ -46,9 +46,7 @@ namespace com.csutil {
             }
         }
 
-        public static void CopyCanvasSettingsFrom(this Canvas self, Canvas canvasToUseSettingsFrom) {
-            // TODO
-        }
+        
 
         public static void SelectV2(this InputField self) {
             self.Select();

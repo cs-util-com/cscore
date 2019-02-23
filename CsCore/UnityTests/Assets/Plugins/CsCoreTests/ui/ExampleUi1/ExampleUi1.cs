@@ -38,6 +38,7 @@ namespace com.csutil.tests.ui {
             yield return new WaitForSeconds(20);
         }
 
+        [System.Serializable]
         public class MyUserModel {
             public string userName;
             public int userAge;
