@@ -25,11 +25,29 @@ namespace com.csutil.ui {
 
         public static bool SwitchBackToLastScreen(GameObject gameObject) {
             var screenStack = GetScreenStack(gameObject);
-            var oldScreen = screenStack.GetRootFor(gameObject);
-            var oldIndex = oldScreen.transform.GetSiblingIndex();
-            AssertV2.AreEqual(oldIndex, screenStack.transform.childCount - 1, "Current was not last screen in the stack");
-            if (oldIndex > 0) { screenStack.transform.GetChild(oldIndex - 1).gameObject.SetActive(true); }
-            oldScreen.Destroy();
+            if (screenStack == null) { return false; }
+            var currentScreen = screenStack.GetRootFor(gameObject);
+            var currentIndex = currentScreen.transform.GetSiblingIndex();
+            AssertV2.AreEqual(currentIndex, screenStack.transform.childCount - 1, "Current was not last screen in the stack");
+            if (currentIndex > 0) {
+                var lastScreen = screenStack.transform.GetChild(currentIndex - 1).gameObject;
+                lastScreen.SetActive(true);
+            }
+            currentScreen.Destroy();
+            return true;
+        }
+
+        public static bool SwitchToNextScreen(GameObject gameObject, bool hideCurrentScreen = true) {
+            var screenStack = GetScreenStack(gameObject);
+            if (screenStack == null) { return false; }
+            var currentScreen = screenStack.GetRootFor(gameObject);
+            var currentIndex = currentScreen.transform.GetSiblingIndex();
+            AssertV2.AreNotEqual(currentIndex, screenStack.transform.childCount - 1, "Current was last screen in the stack");
+            if (currentIndex < screenStack.transform.childCount - 1) {
+                var lastScreen = screenStack.transform.GetChild(currentIndex - 1).gameObject;
+                lastScreen.SetActive(true);
+            }
+            if (hideCurrentScreen) { currentScreen.SetActive(false); }
             return true;
         }
 

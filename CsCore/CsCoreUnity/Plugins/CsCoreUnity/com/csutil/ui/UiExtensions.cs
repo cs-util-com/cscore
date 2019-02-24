@@ -15,7 +15,7 @@ namespace com.csutil {
             if (self.onClick != null && self.onClick.GetPersistentEventCount() > 0) {
                 Log.w("Overriding existing onClick action in " + self, self.gameObject);
             }
-            self.onClick = new Button.ButtonClickedEvent();
+            self.onClick = new Button.ButtonClickedEvent(); // clear previous onClick listeners
             self.AddOnClickAction(onClickAction);
         }
 
@@ -32,7 +32,7 @@ namespace com.csutil {
             if (self.onValueChanged != null && self.onValueChanged.GetPersistentEventCount() > 0) {
                 Log.w("Overriding old onValueChanged listener for toggle " + self, self.gameObject);
             }
-            self.onValueChanged = new Toggle.ToggleEvent();
+            self.onValueChanged = new Toggle.ToggleEvent(); // clear previous onValueChanged listeners
             AddOnValueChangedAction(self, onValueChanged);
         }
 
