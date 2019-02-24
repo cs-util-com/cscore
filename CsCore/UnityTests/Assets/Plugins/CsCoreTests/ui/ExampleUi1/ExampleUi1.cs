@@ -34,6 +34,9 @@ namespace com.csutil.tests.ui {
                 var user2 = new MyUserModel() { userName = "Anna", userAge = 55 };
                 yield return userUiPresenter.Unload();
                 yield return userUiPresenter.LoadModelIntoViewAsync(user2, myUserUi1);
+
+                Assert.AreEqual("Anna", userUiPresenter.NameInputField().text);
+                Assert.AreEqual("55", userUiPresenter.AgeInputField().text);
             }
 
         }
