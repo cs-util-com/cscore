@@ -21,23 +21,22 @@ namespace com.csutil.ui.elements {
 
         private void Start() {
             var b = GetComponent<Button>();
-            if (b == null) { throw Log.e("No button found", gameObject); }
+            if (b == null) { throw Log.e("No button found, cant setup automatic switch trigger", gameObject); }
             if (b.onClick.GetPersistentEventCount() == 0 || forceAddingAction) {
-                b.AddOnClickAction(delegate {
-                    if (!SwitchScreen()) { CouldNotSwitchScreen(); }
-                });
+                b.AddOnClickAction(delegate { TriggerSwitchScreen(); });
             }
         }
 
-        private void CouldNotSwitchScreen() {
-            Log.w("Cant switch screen in direction " + switchDirection);
-            var isForwardOrBackward = switchDirection != SwitchDirection.loadNextScreenViaPrefab;
-            if (isForwardOrBackward && destroyScreenStackWhenLastScreenReached) {
-                ScreenStack.GetScreenStack(gameObject).gameObject.Destroy();
+        public void TriggerSwitchScreen() {
+            if (!TrySwitchScreen()) {
+                var isForwardOrBackward = switchDirection != SwitchDirection.loadNextScreenViaPrefab;
+                if (isForwardOrBackward && destroyScreenStackWhenLastScreenReached) {
+                    ScreenStack.GetScreenStack(gameObject).gameObject.Destroy();
+                } else { Log.w("Cant switch screen in direction " + switchDirection); }
             }
         }
 
-        private bool SwitchScreen() {
+        private bool TrySwitchScreen() {
             switch (switchDirection) {
                 case SwitchDirection.backwards: return ScreenStack.SwitchBackToLastScreen(gameObject);
                 case SwitchDirection.forwards: return ScreenStack.SwitchToNextScreen(gameObject);

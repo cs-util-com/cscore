@@ -16,7 +16,7 @@ namespace com.csutil {
         /// <param name="keepReferenceToEditorPrefab"> Set it true if prefab loaded by editor script </param>
         public static GameObject LoadPrefab(string pathInResourcesFolder, bool keepReferenceToEditorPrefab = false) {
             GameObject prefab = LoadV2<GameObject>(pathInResourcesFolder);
-            if (prefab == null) { throw new Exception("Could not load prefab from path=" + pathInResourcesFolder); }
+            if (prefab == null) { throw new Exception("Could not find prefab at path='" + pathInResourcesFolder + "'"); }
 #if UNITY_EDITOR
             if (keepReferenceToEditorPrefab) { return UnityEditor.PrefabUtility.InstantiatePrefab(prefab) as GameObject; }
 #endif
