@@ -79,6 +79,22 @@ MonoBehaviour:
     m_VerticalOverflow: 0
     m_LineSpacing: 1
   m_Text: Some Options...
+--- !u!114 &7634017048080969237
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5917057070012604180}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e4098e9116567e49ba973b4e3f07e72, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  switchDirection: 0
+  nextScreenPrefabName: 
+  forceAddingAction: 0
+  destroyScreenStackWhenLastScreenReached: 0
 --- !u!1 &8006131566406589846
 GameObject:
   m_ObjectHideFlags: 0
@@ -479,6 +495,12 @@ PrefabInstance:
 --- !u!224 &3844035589202037434 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 3669466213353768839, guid: 5e47b68f728a8f448b43a9e3fde04086,
+    type: 3}
+  m_PrefabInstance: {fileID: 555158900536970557}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &5917057070012604180 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6172691375381254697, guid: 5e47b68f728a8f448b43a9e3fde04086,
     type: 3}
   m_PrefabInstance: {fileID: 555158900536970557}
   m_PrefabAsset: {fileID: 0}

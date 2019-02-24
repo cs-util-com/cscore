@@ -1,6 +1,7 @@
 ﻿using com.csutil.ui;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using UnityEngine;
@@ -21,9 +22,11 @@ namespace com.csutil {
 
         public static void AddOnClickAction(this Button self, Action<GameObject> onClickAction) {
             if (onClickAction != null) {
+                var originTrace = new StackTrace();
                 self.onClick.AddListener(() => {
                     EventBus.instance.Publish(UiEvents.BUTTON_CLICKED, self);
-                    try { onClickAction(self.gameObject); } catch (Exception e) { Log.e(e); }
+                    try { onClickAction(self.gameObject); }
+                    catch (Exception e) { Log.e(e + " at " + originTrace); }
                 });
             }
         }

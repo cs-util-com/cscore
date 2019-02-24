@@ -6,21 +6,34 @@ using UnityEngine.UI;
 
 namespace com.csutil.ui.elements {
 
+    [RequireComponent(typeof(Button))]
     public class DefaultSwitchScreenAction : MonoBehaviour {
 
         public enum SwitchDirection { backwards, forwards, loadNextScreenViaPrefab }
 
         public SwitchDirection switchDirection = SwitchDirection.backwards;
+        /// <summary> e.g. "uis/MyScreenPrefab1" - The path of the prefab that should be loaded as the next screen </summary>
         public string nextScreenPrefabName;
-        public bool forceAction = false;
+        /// <summary> If true the action will be added even if there are already other click listeners registered for the button </summary>
+        public bool forceAddingAction = false;
+        /// <summary> If true and the final screen in the stack is reached then the stack will be destroyed </summary>
+        public bool destroyScreenStackWhenLastScreenReached = false;
 
-        void Start() {
+        private void Start() {
             var b = GetComponent<Button>();
             if (b == null) { throw Log.e("No button found", gameObject); }
-            if (b.onClick.GetPersistentEventCount() == 0 || forceAction) {
+            if (b.onClick.GetPersistentEventCount() == 0 || forceAddingAction) {
                 b.AddOnClickAction(delegate {
-                    if (!SwitchScreen()) { Log.w("Cant switch screen " + switchDirection); }
+                    if (!SwitchScreen()) { CouldNotSwitchScreen(); }
                 });
+            }
+        }
+
+        private void CouldNotSwitchScreen() {
+            Log.w("Cant switch screen in direction " + switchDirection);
+            var isForwardOrBackward = switchDirection != SwitchDirection.loadNextScreenViaPrefab;
+            if (isForwardOrBackward && destroyScreenStackWhenLastScreenReached) {
+                ScreenStack.GetScreenStack(gameObject).gameObject.Destroy();
             }
         }
 

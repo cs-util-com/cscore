@@ -1,5 +1,21 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &6944745172548773912
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1003553117993159701}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e4098e9116567e49ba973b4e3f07e72, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  switchDirection: 2
+  nextScreenPrefabName: SideBar
+  forceAddingAction: 0
+  destroyScreenStackWhenLastScreenReached: 0
 --- !u!1 &1560433004050050222
 GameObject:
   m_ObjectHideFlags: 0
@@ -133,6 +149,22 @@ MonoBehaviour:
   m_EffectColor: {r: 0, g: 0, b: 0, a: 0.3764706}
   m_EffectDistance: {x: 0, y: -1}
   m_UseGraphicAlpha: 1
+--- !u!114 &481418056322707001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8304121859568443991}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e4098e9116567e49ba973b4e3f07e72, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  switchDirection: 0
+  nextScreenPrefabName: 
+  forceAddingAction: 0
+  destroyScreenStackWhenLastScreenReached: 0
 --- !u!1 &8473828115249956650
 GameObject:
   m_ObjectHideFlags: 0
@@ -362,6 +394,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1c599e31dd8ea2d40acdfa6166c8de0d, type: 3}
+--- !u!1 &1003553117993159701 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3671181214303023935, guid: 1c599e31dd8ea2d40acdfa6166c8de0d,
+    type: 3}
+  m_PrefabInstance: {fileID: 4548620108069191466}
+  m_PrefabAsset: {fileID: 0}
 --- !u!224 &492769874182471310 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 4163958791269859748, guid: 1c599e31dd8ea2d40acdfa6166c8de0d,
@@ -492,6 +530,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1c599e31dd8ea2d40acdfa6166c8de0d, type: 3}
+--- !u!1 &8304121859568443991 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3671181214303023935, guid: 1c599e31dd8ea2d40acdfa6166c8de0d,
+    type: 3}
+  m_PrefabInstance: {fileID: 4741319575692136808}
+  m_PrefabAsset: {fileID: 0}
 --- !u!224 &8648555591687278796 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 4163958791269859748, guid: 1c599e31dd8ea2d40acdfa6166c8de0d,
