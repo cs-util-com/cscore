@@ -23,7 +23,7 @@ namespace com.csutil.ui {
             return op;
         }
 
-        public static bool SwitchBackToLastScreen(GameObject gameObject) {
+        public static bool SwitchBackToLastScreen(GameObject gameObject, bool destroyFinalScreen = false) {
             var screenStack = GetScreenStack(gameObject);
             if (screenStack == null) { return false; }
             var currentScreen = screenStack.GetRootFor(gameObject);
@@ -33,7 +33,7 @@ namespace com.csutil.ui {
                 var lastScreen = screenStack.transform.GetChild(currentIndex - 1).gameObject;
                 lastScreen.SetActive(true);
             }
-            currentScreen.Destroy();
+            if (destroyFinalScreen || currentIndex > 0) { currentScreen.Destroy(); }
             return true;
         }
 

@@ -18,6 +18,8 @@ namespace com.csutil.ui.elements {
         public bool forceAddingAction = false;
         /// <summary> If true and the final screen in the stack is reached then the stack will be destroyed </summary>
         public bool destroyScreenStackWhenLastScreenReached = false;
+        /// <summary> If false the current active screen will not be hidden and the new one shown on top </summary>
+        public bool hideCurrentScreen = true;
 
         private void Start() {
             var b = GetComponent<Button>();
@@ -38,10 +40,10 @@ namespace com.csutil.ui.elements {
 
         private bool TrySwitchScreen() {
             switch (switchDirection) {
-                case SwitchDirection.backwards: return ScreenStack.SwitchBackToLastScreen(gameObject);
-                case SwitchDirection.forwards: return ScreenStack.SwitchToNextScreen(gameObject);
+                case SwitchDirection.backwards: return ScreenStack.SwitchBackToLastScreen(gameObject, destroyScreenStackWhenLastScreenReached);
+                case SwitchDirection.forwards: return ScreenStack.SwitchToNextScreen(gameObject, hideCurrentScreen);
                 case SwitchDirection.loadNextScreenViaPrefab:
-                    return ScreenStack.SwitchToScreen(gameObject, nextScreenPrefabName) != null;
+                    return ScreenStack.SwitchToScreen(gameObject, nextScreenPrefabName, hideCurrentScreen) != null;
                 default: return false;
             }
         }

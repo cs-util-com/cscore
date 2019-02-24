@@ -16,6 +16,7 @@ MonoBehaviour:
   nextScreenPrefabName: SideBar
   forceAddingAction: 0
   destroyScreenStackWhenLastScreenReached: 0
+  hideCurrentScreen: 0
 --- !u!1 &1560433004050050222
 GameObject:
   m_ObjectHideFlags: 0
@@ -165,6 +166,7 @@ MonoBehaviour:
   nextScreenPrefabName: 
   forceAddingAction: 0
   destroyScreenStackWhenLastScreenReached: 0
+  hideCurrentScreen: 1
 --- !u!1 &8473828115249956650
 GameObject:
   m_ObjectHideFlags: 0
