@@ -120,6 +120,42 @@ namespace com.csutil.tests {
         }
 
         [Fact]
+        public void ReferenceExampleWithPrimitives() {
+
+            Double a = 123;
+            Double b = 123;
+            Assert.Equal(a, b); // Both have an equal value
+            // They dont share the same reference in memory:
+            Assert.NotSame(a, b);
+            // For primitives c=b will copy the memory:
+            Double c = b;
+            // They still dont have the same reference:
+            Assert.NotSame(b, c);
+
+            string s1 = "123";
+            string s2 = "1" + "2" + "3";
+            Assert.Equal(s1, s2);
+            // For strings the compiler optimizes memory:
+            Assert.Same(s1, s2);
+
+        }
+
+        [Fact]
+        public void ReferenceExampleWithObjects() {
+
+            Object a = new Object();
+            Object b = new Object();
+            Assert.NotEqual(a, b);
+            Assert.NotSame(a, b);
+            // Point var b and c on the same object:
+            Object c = b;
+            Assert.Same(b, c);
+            // They are equal because they are the same:
+            Assert.Equal(b, c);
+
+        }
+
+        [Fact]
         public void DateTime_Examples() {
 
             // Parse a Unix timestamp into a DateTime object:

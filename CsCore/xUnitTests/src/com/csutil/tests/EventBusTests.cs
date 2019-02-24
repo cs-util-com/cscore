@@ -175,7 +175,7 @@ namespace com.csutil.tests {
                 eventBus.Publish(eventName);
             }
             AssertV2.ThrowExeptionIfAssertionFails(() => {
-                timing.AssertUnderXms(5000);
+                timing.AssertUnderXms(10000);
             });
             Assert.Equal(nrOfEventsSendOut, receivedEventsCounter);
 

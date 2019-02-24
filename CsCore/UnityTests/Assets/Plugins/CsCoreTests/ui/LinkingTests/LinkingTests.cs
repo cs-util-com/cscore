@@ -19,6 +19,8 @@ namespace com.csutil.tests.ui {
             // Collect all Link MonoBehaviours in the prefab:
             Dictionary<string, Link> links = prefab.GetLinkMap();
             
+            // In the Prefab Link-Monos are placed in all GameObjects that need 
+            // to be accessed by the code. Links have a id to reference them:
             // Via the Link.id the objects can quickly be accessed: 
             Assert.IsNotNull(links.Get<GameObject>("Button 1"));
             

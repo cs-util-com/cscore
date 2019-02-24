@@ -30,7 +30,7 @@ namespace com.csutil.tests {
             { // .. here would be some method logic ..
                 Thread.Sleep(1);
             } // .. as the last line in the tracked method add:
-            Log.MethodDone(timing, maxAllowedTimeInMs: 50);
+            Log.MethodDone(timing, maxAllowedTimeInMs: 200);
         }
 
         [Fact]

@@ -8,16 +8,13 @@ namespace com.csutil {
 
     public static class GameObjectExtensions {
 
-        public static T GetOrAddComponent<T>(this GameObject self) where T : Component {
-            var existingComp = self.GetComponent<T>();
-            return existingComp == null ? self.AddComponent<T>() : existingComp;
-        }
-
+        /// <summary> Adds a child GameObject to the calling new parent GameObject </summary>
         public static GameObject AddChild(this GameObject parentGo, GameObject child, bool worldPositionStays = false) {
             child.transform.SetParent(parentGo.transform, worldPositionStays); // add it to parent
             return child;
         }
 
+        /// <summary> Used for lazy-initialization of a GameObject, combine with go.GetOrAddComponent </summary>
         public static GameObject GetOrAddChild(this GameObject parentGo, string childName) {
             var childGo = parentGo.transform.Find(childName);
             if (childGo != null) { return childGo.gameObject; } // child found, return it
@@ -26,11 +23,19 @@ namespace com.csutil {
             return newChild;
         }
 
+        /// <summary> Used for lazy-initialization of a Mono, combine with go.GetOrAddChild </summary>
+        public static T GetOrAddComponent<T>(this GameObject self) where T : Component {
+            var existingComp = self.GetComponent<T>();
+            return existingComp == null ? self.AddComponent<T>() : existingComp;
+        }
+
+        /// <summary> Returns the parent GameObject or null if top scene level is reached </summary>
         public static GameObject GetParent(this GameObject child) {
             if (child == null || child.transform.parent == null) { return null; }
             return child.transform.parent.gameObject;
         }
 
+        /// <summary> Returns true if the GameObject is null because it was destroyed </summary>
         public static bool IsDestroyed(this GameObject self) {
             // == operator overloaded by gameObject but reference still exists
             return self == null && !ReferenceEquals(self, null);

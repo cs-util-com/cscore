@@ -300,6 +300,30 @@ Assert.False(childDir.IsNotNullAndExists());
 # Unity Component Examples
 There are additional components specifically created for Unity, that will be explained below:
 
+## `GameObject` and `MonoBehaviour` Extensions
+
+Some helper methods are added when the com.csutil namespace is imported to help with scene graph manipulation via code. The added extension methods are `GetParent`, `AddChild`, `GetOrAddChild`, `GetOrAddComponent`, `Destroy` and `IsDestroyed`. Here are some examples:
+
+```cs
+GameObject myGo = new GameObject();
+// Adding children GameObjects via AddChild:
+GameObject myChildGo = myGo.AddChild(new GameObject());
+// Getting the parent of the child via GetParent:
+Assert.AreSame(myGo, myChildGo.GetParent());
+
+// Lazy-initialization of the GameObject in case it does not yet exist:
+GameObject child1 = myGo.GetOrAddChild("Child 1");
+// Lazy-initialization of the Mono in case it does not yet exist:
+MyExampleMono1 myMono1 = child1.GetOrAddComponent<MyExampleMono1>();
+// Calling the 2 methods again results always in the same mono:
+var myMono1_ref2 = myGo.GetOrAddChild("Child 1").GetOrAddComponent<MyExampleMono1>();
+Assert.AreSame(myMono1, myMono1_ref2);
+
+myGo.Destroy(); // Destroy the gameobject
+Assert.IsTrue(myGo.IsDestroyed()); // Check if it was destroyed
+```
+
+
 ## `GameObject.Subscribe` & `MonoBehaviour.Subscribe`
 
 There are extension methods for both `GameObjects` and `Behaviours` which internally handle the lifecycle of their subscribers correctly. If a `GameObject` for example is currently not active or was destroyed the published events will not reach it.
@@ -367,7 +391,7 @@ Assert.AreSame(x1, x2);
 
 
 ## The `Link` Pattern
-Connecting prefabs created by designers with internal logic often is beneficial to happen in a central place. To access all required parts of the prefab the `Link` pattern and helper methods like `gameObject.GetLinkMap()` can be used:
+Connecting prefabs created by designers with internal logic (e.g what should happen when the user presses Button 1) often is beneficial to happen in a central place. To access all required parts of the prefab the `Link` pattern and helper methods like `gameObject.GetLinkMap()` can be used:
 ```cs
 // Load a prefab that contains Link MonoBehaviours:
 GameObject prefab = ResourcesV2.LoadPrefab("ExamplePrefab1.prefab");
@@ -375,6 +399,8 @@ GameObject prefab = ResourcesV2.LoadPrefab("ExamplePrefab1.prefab");
 // Collect all Link MonoBehaviours in the prefab:
 Dictionary<string, Link> links = prefab.GetLinkMap();
 
+// In the Prefab Link-Monos are placed in all GameObjects that need 
+// to be accessed by the code. Links have a id to reference them:
 // Via the Link.id the objects can quickly be accessed: 
 Assert.IsNotNull(links.Get<GameObject>("Button 1"));
 

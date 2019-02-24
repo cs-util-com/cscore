@@ -17,17 +17,18 @@ namespace com.csutil.tests.ui {
         public IEnumerator ExampleUsage1() {
 
             GameObject myUserUi1 = ResourcesV2.LoadPrefab("MyUserUi1");
-            Presenter<MyUserModel> userUiPresenter = new MyUserUi();
-
-            yield return new WaitForSeconds(4); // After 4 seconds load a user:
+            MyUserUi userUiPresenter = new MyUserUi();
 
             {
                 var user1 = new MyUserModel() { userName = "Carl", userAge = 4 };
                 yield return userUiPresenter.Unload();
                 yield return userUiPresenter.LoadModelIntoViewAsync(user1, myUserUi1);
+
+                Assert.AreEqual("Carl", userUiPresenter.NameInputField().text);
+                Assert.AreEqual("4", userUiPresenter.AgeInputField().text);
             }
 
-            yield return new WaitForSeconds(4); // Load another user into the UI:
+            yield return new WaitForSeconds(0.5f); // Load another user into the UI:
 
             {
                 var user2 = new MyUserModel() { userName = "Anna", userAge = 55 };
@@ -35,7 +36,6 @@ namespace com.csutil.tests.ui {
                 yield return userUiPresenter.LoadModelIntoViewAsync(user2, myUserUi1);
             }
 
-            yield return new WaitForSeconds(20);
         }
 
         [System.Serializable]
@@ -46,16 +46,17 @@ namespace com.csutil.tests.ui {
         }
 
         public class MyUserUi : Presenter<MyUserModel> {
+            Dictionary<string, Link> links;
 
             public IEnumerator LoadModelIntoViewAsync(MyUserModel userToShow, GameObject userUi) {
-                Dictionary<string, Link> links = userUi.GetLinkMap();
+                links = userUi.GetLinkMap();
 
-                links.Get<InputField>("Name").text = userToShow.userName;
-                links.Get<InputField>("Age").text = "" + userToShow.userAge;
+                NameInputField().text = userToShow.userName;
+                AgeInputField().text = "" + userToShow.userAge;
 
                 links.Get<Button>("Save").SetOnClickAction(delegate {
-                    userToShow.userName = links.Get<InputField>("Name").text;
-                    userToShow.userAge = int.Parse(links.Get<InputField>("Age").text);
+                    userToShow.userName = NameInputField().text;
+                    userToShow.userAge = int.Parse(AgeInputField().text);
                     Log.d("User saved: " + userToShow);
                     ScreenStack.SwitchBackToLastScreen(userUi);
                 });
@@ -63,8 +64,12 @@ namespace com.csutil.tests.ui {
                 yield return null;
             }
 
+            public InputField AgeInputField() { return links.Get<InputField>("Age"); }
+            public InputField NameInputField() { return links.Get<InputField>("Name"); }
+
             public IEnumerator Unload() {
-                Log.d("Nothing to clean up");
+                links.Clear();
+                links = null;
                 yield return null;
             }
 
