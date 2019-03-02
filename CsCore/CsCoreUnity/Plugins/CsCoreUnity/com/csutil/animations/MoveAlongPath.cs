@@ -1,61 +1,59 @@
 ﻿using com.csutil;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace com.csutil.animations {
 
     public class MoveAlongPath : MonoBehaviour {
 
-        public Transform targetToMove;
-        public Transform waypointToMoveTo;
-        public AnimationCurve moveAnim = AnimationCurve.EaseInOut(0, 0, 1, 1);
-        public AnimationCurve rotateAnim = AnimationCurve.EaseInOut(0, 0, 1, 1);
-        public float moveSpeed = 1;
-        public float rotateSpeed = 1;
+        public AnimationCurve moveAnim = NewDefaultAnimCurve();
+        public AnimationCurve rotateAnim = NewDefaultAnimCurve();
+        public float moveSpeed = 3;
+        public float rotateSpeed = 70;
 
-        private Vector3 startPos;
-        private Quaternion startRot;
-        private bool loop = true;
+        private Coroutine runningMove;
+        private Coroutine runningRotate;
+
+        public Transform targetToMove;
+        private Transform _waypointToMoveTo;
+        public Transform waypointToMoveTo {
+            get { return _waypointToMoveTo; }
+            set {
+                if (_waypointToMoveTo != value) {
+                    Log.d("new waypointToMoveTo=" + value);
+                    _waypointToMoveTo = value;
+                    if (runningMove != null) { StopCoroutine(runningMove); }
+                    runningMove = StartCoroutine(targetToMove.MoveTo(_waypointToMoveTo, moveSpeed, moveAnim));
+                    if (runningRotate != null) { StopCoroutine(runningRotate); }
+                    runningRotate = StartCoroutine(targetToMove.RotateTo(_waypointToMoveTo, rotateSpeed, rotateAnim));
+                }
+            }
+        }
+
+        private bool loopWaypoints = true;
+
+        private static AnimationCurve NewDefaultAnimCurve() {
+            var a = AnimationCurve.EaseInOut(0, 0, 1, 1);
+            a.preWrapMode = WrapMode.Clamp;
+            a.postWrapMode = WrapMode.Clamp;
+            return a;
+        }
 
         public void MoveTargetToNextWaypoint() {
             if (waypointToMoveTo == null) {
-                waypointToMoveTo = NextChild(this.transform, -1, loop);
+                waypointToMoveTo = GetNextChild(this.transform, -1, loopWaypoints);
             } else {
-                waypointToMoveTo = NextChild(waypointToMoveTo.parent, waypointToMoveTo.GetSiblingIndex(), loop);
+                waypointToMoveTo = GetNextChild(waypointToMoveTo.parent, waypointToMoveTo.GetSiblingIndex(), loopWaypoints);
             }
-            startPos = targetToMove.position;
-            startRot = targetToMove.rotation;
         }
 
-        private static Transform NextChild(Transform parent, int currentIndex, bool loop) {
+        private static Transform GetNextChild(Transform parent, int currentIndex, bool loopChildren) {
             AssertV2.AreNotEqual(0, parent.childCount);
-            if (currentIndex + 1 >= parent.childCount) { return loop ? parent.GetChild(0) : null; }
+            if (currentIndex + 1 >= parent.childCount) { return loopChildren ? parent.GetChild(0) : null; }
             return parent.GetChild(currentIndex + 1);
-        }
-
-        private void Update() {
-            if (waypointToMoveTo == null || targetToMove == null) { return; }
-            if (startPos == null) { startPos = targetToMove.position; }
-            if (startRot == null) { startRot = targetToMove.rotation; }
-            {
-                var fullDistance = waypointToMoveTo.position - startPos;
-                var traveledDistance = targetToMove.position - startPos;
-                var d = traveledDistance.magnitude / fullDistance.magnitude;
-                AssertV2.IsTrue(d > 0, "d=" + d, "traveledDistance=" + traveledDistance, "fullDistance=" + fullDistance, "startPos=" + startPos, "waypointToMoveTo.position=" + waypointToMoveTo.position);
-                AssertV2.IsTrue(d < 1, "d=" + d, "traveledDistance=" + traveledDistance, "fullDistance=" + fullDistance, "startPos=" + startPos, "waypointToMoveTo.position=" + waypointToMoveTo.position);
-                d = moveAnim.Evaluate(Mathf.Clamp(d, 0, 1));
-                AssertV2.IsFalse(d == 0, "d==0 so nothing will move!");
-                d *= moveSpeed * Time.deltaTime;
-                targetToMove.position = Vector3.Lerp(startPos, waypointToMoveTo.position, d);
-            }
-            {
-                var fullRot = Quaternion.Angle(waypointToMoveTo.rotation, startRot);
-                var traveledRot = Quaternion.Angle(targetToMove.rotation, startRot);
-                var d = rotateAnim.Evaluate(Mathf.Clamp(traveledRot / fullRot, 0, 1));
-                d *= rotateSpeed * Time.deltaTime;
-                targetToMove.rotation = Quaternion.Lerp(startRot, waypointToMoveTo.rotation, d);
-            }
         }
 
     }

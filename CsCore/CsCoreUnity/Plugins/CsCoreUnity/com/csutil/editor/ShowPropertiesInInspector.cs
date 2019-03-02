@@ -143,9 +143,9 @@ namespace com.csutil.editor {
                     break;
                 case SerializedPropertyType.ObjectReference:
                     var v = GetValue() as UnityEngine.Object;
-                    if (v != null) {
+                    try { 
                         SetValue(EditorGUILayout.ObjectField(propertyName, v, GetPropertyType(), true, o));
-                    }
+                    } catch { }
                     break;
                 default:
                     break;
