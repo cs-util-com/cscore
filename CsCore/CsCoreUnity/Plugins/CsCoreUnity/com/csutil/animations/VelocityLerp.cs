@@ -23,7 +23,7 @@ namespace com.csutil {
         /// <param name="currentVelocity"> Should be a field which is passed with every call again </param>
         /// <param name="dt"> Normally Time.deltaTime </param>
         /// <param name="omega"> Try something between 10 and 100 </param>
-        public static Vector3 LerpWithVelocity(this Vector3 self, Vector3 destination, Vector3 currentVelocity, float dt, float omega = 20f) {
+        public static Vector3 LerpWithVelocity(this Vector3 self, Vector3 destination, ref Vector3 currentVelocity, float dt, float omega = 20f) {
             var n1 = currentVelocity - (self - destination) * (omega * omega * dt);
             var n2 = 1 + omega * dt;
             currentVelocity = n1 / (n2 * n2);
