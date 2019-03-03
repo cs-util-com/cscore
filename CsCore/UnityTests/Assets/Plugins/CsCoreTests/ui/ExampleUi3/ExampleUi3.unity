@@ -342,16 +342,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6234148007737893121, guid: a087c400d1a284e4cbba82e7b5d1d453,
         type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6234148007737893121, guid: a087c400d1a284e4cbba82e7b5d1d453,
-        type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 6234148007737893121, guid: a087c400d1a284e4cbba82e7b5d1d453,
-        type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 1265527412}
@@ -362,8 +352,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6234148007737893121, guid: a087c400d1a284e4cbba82e7b5d1d453,
         type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6234148007737893121, guid: a087c400d1a284e4cbba82e7b5d1d453,
+        type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
       value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
+    - target: {fileID: 6234148007737893121, guid: a087c400d1a284e4cbba82e7b5d1d453,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a087c400d1a284e4cbba82e7b5d1d453, type: 3}
@@ -724,96 +724,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 1265527411}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e61cc80be2fcf1c46ae7ff83ba85a919, type: 3}
+  m_Script: {fileID: 11500000, guid: 324fc792c72e9fd448b6516cb29a491f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveAnim:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0.2163605
-      outSlope: 0.2163605
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0.07620289
-    - serializedVersion: 3
-      time: 0.7164887
-      value: 1.0021785
-      inSlope: -1.0855496
-      outSlope: -1.0855496
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.062319066
-      outWeight: 0.29905212
-    - serializedVersion: 3
-      time: 1.0013428
-      value: 1
-      inSlope: -0.23069479
-      outSlope: -0.23069479
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.06827307
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  rotateAnim:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: -0.0023498535
-      inSlope: -0.24726568
-      outSlope: -0.24726568
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0.16017589
-    - serializedVersion: 3
-      time: 0.55706555
-      value: 0.9603077
-      inSlope: 1.3654387
-      outSlope: 1.3654387
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.07567736
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 0.7756491
-      value: 0.9778992
-      inSlope: -0.24160819
-      outSlope: -0.24160819
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.3538629
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 0.90904266
-      value: 1.0039936
-      inSlope: -0.459861
-      outSlope: -0.459861
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.48471543
-      outWeight: 0.64148146
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: -0.09427677
-      outSlope: -0.09427677
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.07228923
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  moveSpeed: 3
-  rotateSpeed: 70
+  moveOmega: 5
+  rotateOmega: 5
+  moveSpeed: 1
+  rotateSpeed: 1
   targetToMove: {fileID: 1568238257}
+  waypointToMoveTo: {fileID: 0}
 --- !u!4 &1265527413
 Transform:
   m_ObjectHideFlags: 0
