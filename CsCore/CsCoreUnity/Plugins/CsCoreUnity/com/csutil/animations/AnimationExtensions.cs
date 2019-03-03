@@ -5,15 +5,6 @@ namespace com.csutil {
 
     public static class AnimationExtensions {
 
-        public static IEnumerator MoveTo(this Transform self, Transform target, float moveSpeed, float omega = 20) {
-            var currentVelocity = new Vector3();
-            var waitForEndOfFrame = new WaitForEndOfFrame();
-            while (true) {
-                self.position = self.position.LerpWithVelocity(target.position, ref currentVelocity, Time.deltaTime * moveSpeed, omega);
-                yield return waitForEndOfFrame;
-            }
-        }
-
         public static IEnumerator MoveTo(this Transform self, Transform target, float moveSpeed, AnimationCurve curve) {
             var start = self.position;
             var waitForEndOfFrame = new WaitForEndOfFrame();
@@ -27,15 +18,6 @@ namespace com.csutil {
                 self.position = Vector3.LerpUnclamped(start, target.position, curve.Evaluate(percent));
                 yield return waitForEndOfFrame;
             } while (percent < 1);
-        }
-
-        public static IEnumerator RotateTo(this Transform self, Transform target, float rotateSpeed, float omega = 1) {
-            var currentVelocity = new Vector4();
-            var waitForEndOfFrame = new WaitForEndOfFrame();
-            while (true) {
-                self.rotation = self.rotation.LerpWithVelocity(target.rotation, ref currentVelocity, Time.deltaTime * rotateSpeed, omega);
-                yield return waitForEndOfFrame;
-            }
         }
 
         public static IEnumerator RotateTo(this Transform self, Transform target, float rotateSpeed, AnimationCurve curve) {

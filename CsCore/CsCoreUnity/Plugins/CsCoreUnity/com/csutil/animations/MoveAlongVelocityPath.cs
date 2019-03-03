@@ -9,30 +9,19 @@ namespace com.csutil.animations {
 
     public class MoveAlongVelocityPath : MonoBehaviour {
 
-        public float moveOmega = 1;
-        public float rotateOmega = 20;
+        
+
+        public float moveOmega = 3;
+        public float rotateOmega = 3;
 
         public float moveSpeed = 1;
         public float rotateSpeed = 1;
-
-        private Coroutine runningMove;
-        private Coroutine runningRotate;
-
+        
         public Transform targetToMove;
-        private Transform _waypointToMoveTo;
-        public Transform waypointToMoveTo {
-            get { return _waypointToMoveTo; }
-            set {
-                if (_waypointToMoveTo != value) {
-                    Log.d("new waypointToMoveTo=" + value);
-                    _waypointToMoveTo = value;
-                    if (runningMove != null) { StopCoroutine(runningMove); }
-                    runningMove = StartCoroutine(targetToMove.MoveTo(_waypointToMoveTo, moveSpeed, moveOmega));
-                    if (runningRotate != null) { StopCoroutine(runningRotate); }
-                    runningRotate = StartCoroutine(targetToMove.RotateTo(_waypointToMoveTo, rotateSpeed, rotateOmega));
-                }
-            }
-        }
+        public Transform waypointToMoveTo;
+
+        private Vector3 moveVelocity = new Vector3();
+        private Vector4 rotateVelocity = new Vector4();
 
         private bool loopWaypoints = true;
 
@@ -48,6 +37,13 @@ namespace com.csutil.animations {
             AssertV2.AreNotEqual(0, parent.childCount);
             if (currentIndex + 1 >= parent.childCount) { return loopChildren ? parent.GetChild(0) : null; }
             return parent.GetChild(currentIndex + 1);
+        }
+
+        private void Update() {
+            if (targetToMove == null || waypointToMoveTo == null) { return; }
+            var t = Time.deltaTime;
+            targetToMove.position = targetToMove.position.LerpWithVelocity(waypointToMoveTo.position, ref moveVelocity, t * moveSpeed, moveOmega);
+            targetToMove.rotation = targetToMove.rotation.LerpWithVelocity(waypointToMoveTo.rotation, ref rotateVelocity, t * rotateSpeed, rotateOmega);
         }
 
     }
