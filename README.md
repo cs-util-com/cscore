@@ -1,6 +1,6 @@
 # ☄️ The cscore Library
 
-`cscore` is a lightweight, zero-config and minimal-footprint library providing commonly used helpers & patterns for all your C# projects. It can be used in both pure **C#** and **Unity** projects. 
+`cscore` is a minimal-footprint library providing commonly used helpers & patterns for your C# projects. It can be used in both pure **C#** and **Unity** projects. 
 
 [**Website**](https://www.csutil.com/projects/cscore) 
 **•**
