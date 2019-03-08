@@ -94,20 +94,28 @@ namespace com.csutil.tests {
             stateMachine.AddToValues(MyStates.MyState1, MyStates.MyState2);
             MyStates currentState = MyStates.MyState1;
 
-            var listener1Triggered = false;
-            var listener2Triggered = false;
+            var listenerForAllTransitionsTriggered = false;
+            var listenerForSpecificTransitionTriggered = false;
+            var listenerForExitingState1Triggered = false;
+            var listenerForEnteringState2Triggered = false;
             StateMachine.SubscribeToAllTransitions(new object(), (MyStates oldState, MyStates newState) => {
-                listener1Triggered = true;
+                listenerForAllTransitionsTriggered = true;
             });
             StateMachine.SubscribeToTransition(new object(), MyStates.MyState1, MyStates.MyState2, () => {
-                listener2Triggered = true;
+                listenerForSpecificTransitionTriggered = true;
+            });
+            StateMachine.SubscribeToStateExited(new object(), MyStates.MyState1, () => {
+                listenerForExitingState1Triggered = true;
+            });
+            StateMachine.SubscribeToStateEntered(new object(), MyStates.MyState2, () => {
+                listenerForEnteringState2Triggered = true;
             });
 
-            Assert.False(listener1Triggered);
-            Assert.False(listener2Triggered);
             currentState = stateMachine.TransitionTo(currentState, MyStates.MyState2);
-            Assert.True(listener1Triggered);
-            Assert.True(listener2Triggered);
+            Assert.True(listenerForAllTransitionsTriggered);
+            Assert.True(listenerForSpecificTransitionTriggered);
+            Assert.True(listenerForExitingState1Triggered);
+            Assert.True(listenerForEnteringState2Triggered);
 
         }
 
