@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using System.Threading.Tasks;
 using com.csutil.datastructures;
 using com.csutil.encryption;
+using com.csutil.model;
 using com.csutil.random;
 using Xunit;
 
@@ -47,6 +48,12 @@ namespace com.csutil.tests {
             Assert.True("joe".IsRegexMatch("[!aeiou]*"));
             Assert.False("joe".IsRegexMatch("?at"));
             Assert.False("joe".IsRegexMatch("[A-Z][a-z][a-z]"));
+
+            Assert.True("YES".IsRegexMatch("YES|MAYBE|NO"));
+
+            Assert.True("Anna123".IsRegexMatch(RegexTemplates.USERNAME));
+            Assert.True("aa@bb.com".IsRegexMatch(RegexTemplates.EMAIL_ADDRESS));
+            Assert.False("a@a@bb.com".IsRegexMatch(RegexTemplates.EMAIL_ADDRESS));
 
         }
 

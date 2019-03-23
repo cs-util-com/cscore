@@ -78,9 +78,9 @@ namespace com.csutil.tests {
                 currentState = MyStates.MyState1;
             }
 
-            internal void SwitchToFirstState() { SwitchToState(MyStates.MyState1); }
-            internal void SwitchToSecondState() { SwitchToState(MyStates.MyState2); }
-            internal void SwitchToFinalState() { SwitchToState(MyStates.MyState3); }
+            public void SwitchToFirstState() { SwitchToState(MyStates.MyState1); }
+            public void SwitchToSecondState() { SwitchToState(MyStates.MyState2); }
+            public void SwitchToFinalState() { SwitchToState(MyStates.MyState3); }
             private void SwitchToState(MyStates newState) {
                 currentState = allowedTransitions.TransitionTo(currentState, newState);
             }
