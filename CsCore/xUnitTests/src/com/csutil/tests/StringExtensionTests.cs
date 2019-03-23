@@ -41,17 +41,25 @@ namespace com.csutil.tests {
             myString = "<{0}, {1}>".With("A", "B");
             Assert.Equal("<A, B>", myString);
 
+        }
+
+        [Fact]
+        public void StringExtension_RegexExamples() {
+
             // Check the structure of a string by providing a regex:
             Assert.True("abc".IsRegexMatch("a*"));
+
             Assert.True("Abc".IsRegexMatch("[A-Z][a-z][a-z]"));
-            Assert.True("hat".IsRegexMatch("?at"));
-            Assert.True("joe".IsRegexMatch("[!aeiou]*"));
-            Assert.False("joe".IsRegexMatch("?at"));
             Assert.False("joe".IsRegexMatch("[A-Z][a-z][a-z]"));
+            Assert.True("hat".IsRegexMatch(".at"));
+            Assert.False("joe".IsRegexMatch(".at"));
+            Assert.True("joe".IsRegexMatch("[!aeiou]*"));
 
-            Assert.True("YES".IsRegexMatch("YES|MAYBE|NO"));
+            Assert.True("lalala".IsRegexMatch("(la)+"));
 
-            Assert.True("Anna123".IsRegexMatch(RegexTemplates.USERNAME));
+            Assert.True("YES".IsRegexMatch("(YES|MAYBE|NO)"));
+
+            Assert.True("anna123".IsRegexMatch(RegexTemplates.USERNAME));
             Assert.True("aa@bb.com".IsRegexMatch(RegexTemplates.EMAIL_ADDRESS));
             Assert.False("a@a@bb.com".IsRegexMatch(RegexTemplates.EMAIL_ADDRESS));
 

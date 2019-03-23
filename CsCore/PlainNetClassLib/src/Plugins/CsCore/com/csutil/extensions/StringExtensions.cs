@@ -54,13 +54,8 @@ namespace com.csutil {
         /// </summary>
         public static bool IsRegexMatch(this string self, string regexToMatch) {
             if (self == null || regexToMatch.IsNullOrEmpty()) return false;
-            // turn into regex pattern, and match the whole string with ^$
-            var patt = "^" + Regex.Escape(regexToMatch) + "$";
-            // add support for ?, #, *, [], and [!]
-            patt = patt.Replace(@"\[!", "[^").Replace(@"\[", "[").Replace(@"\]", "]")
-                       .Replace(@"\?", ".").Replace(@"\*", ".*").Replace(@"\#", @"\d");
-            try { return Regex.IsMatch(self, patt); } catch (ArgumentException e) {
-                throw new ArgumentException("Invalid pattern: {0}".With(regexToMatch), e);
+            try { return Regex.IsMatch(self, regexToMatch); } catch (ArgumentException e) {
+                throw new ArgumentException("Invalid pattern: " + regexToMatch, e);
             }
         }
 
