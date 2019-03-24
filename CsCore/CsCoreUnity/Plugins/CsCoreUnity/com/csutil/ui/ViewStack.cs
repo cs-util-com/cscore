@@ -8,7 +8,7 @@ namespace com.csutil.ui {
 
     public class ViewStack : MonoBehaviour {
 
-        public static ViewStack GetScreenStack(GameObject gameObject) {
+        public static ViewStack GetViewStack(GameObject gameObject) {
             return gameObject.GetComponentInParent<ViewStack>();
         }
 
@@ -17,20 +17,20 @@ namespace com.csutil.ui {
         }
 
         public static GameObject SwitchToScreen(GameObject gameObject, GameObject newScreen, bool hideCurrentScreen = true) {
-            var stack = GetScreenStack(gameObject);
+            var stack = GetViewStack(gameObject);
             var op = stack.AddScreen(newScreen);
             if (hideCurrentScreen) { stack.GetRootFor(gameObject).SetActive(false); }
             return op;
         }
 
         public static bool SwitchBackToLastScreen(GameObject gameObject, bool destroyFinalScreen = false) {
-            var screenStack = GetScreenStack(gameObject);
-            if (screenStack == null) { return false; }
-            var currentScreen = screenStack.GetRootFor(gameObject);
+            var viewStack = GetViewStack(gameObject);
+            if (viewStack == null) { return false; }
+            var currentScreen = viewStack.GetRootFor(gameObject);
             var currentIndex = currentScreen.transform.GetSiblingIndex();
-            AssertV2.AreEqual(currentIndex, screenStack.transform.childCount - 1, "Current was not last screen in the stack");
+            AssertV2.AreEqual(currentIndex, viewStack.transform.childCount - 1, "Current was not last screen in the stack");
             if (currentIndex > 0) {
-                var lastScreen = screenStack.transform.GetChild(currentIndex - 1).gameObject;
+                var lastScreen = viewStack.transform.GetChild(currentIndex - 1).gameObject;
                 lastScreen.SetActive(true);
             }
             if (destroyFinalScreen || currentIndex > 0) { currentScreen.Destroy(); }
@@ -38,22 +38,22 @@ namespace com.csutil.ui {
         }
 
         public static bool SwitchToNextScreen(GameObject gameObject, bool hideCurrentScreen = true) {
-            var screenStack = GetScreenStack(gameObject);
-            if (screenStack == null) { return false; }
-            var currentScreen = screenStack.GetRootFor(gameObject);
+            var viewStack = GetViewStack(gameObject);
+            if (viewStack == null) { return false; }
+            var currentScreen = viewStack.GetRootFor(gameObject);
             var currentIndex = currentScreen.transform.GetSiblingIndex();
-            AssertV2.AreNotEqual(currentIndex, screenStack.transform.childCount - 1, "Current was last screen in the stack");
-            if (currentIndex < screenStack.transform.childCount - 1) {
-                var lastScreen = screenStack.transform.GetChild(currentIndex - 1).gameObject;
+            AssertV2.AreNotEqual(currentIndex, viewStack.transform.childCount - 1, "Current was last screen in the stack");
+            if (currentIndex < viewStack.transform.childCount - 1) {
+                var lastScreen = viewStack.transform.GetChild(currentIndex - 1).gameObject;
                 lastScreen.SetActive(true);
             }
             if (hideCurrentScreen) { currentScreen.SetActive(false); }
             return true;
         }
 
-        /// <summary> Moves up the tree until it reaches the direct child of the screenstack </summary>
+        /// <summary> Moves up the tree until it reaches the direct child of the viewstack </summary>
         private GameObject GetRootFor(GameObject go) {
-            AssertV2.IsFalse(go == gameObject, "Cant get root for ScreenStack gameobject");
+            AssertV2.IsFalse(go == gameObject, "Cant get root for ViewStack gameobject");
             var parent = go.GetParent();
             if (parent == gameObject) { return go; }
             return GetRootFor(parent);

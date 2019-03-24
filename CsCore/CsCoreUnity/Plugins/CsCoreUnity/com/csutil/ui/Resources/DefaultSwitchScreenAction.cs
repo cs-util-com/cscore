@@ -17,7 +17,7 @@ namespace com.csutil.ui.elements {
         /// <summary> If true the action will be added even if there are already other click listeners registered for the button </summary>
         public bool forceAddingAction = false;
         /// <summary> If true and the final screen in the stack is reached then the stack will be destroyed </summary>
-        public bool destroyScreenStackWhenLastScreenReached = false;
+        public bool destroyViewStackWhenLastScreenReached = false;
         /// <summary> If false the current active screen will not be hidden and the new one shown on top </summary>
         public bool hideCurrentScreen = true;
 
@@ -32,15 +32,15 @@ namespace com.csutil.ui.elements {
         public void TriggerSwitchScreen() {
             if (!TrySwitchScreen()) {
                 var isForwardOrBackward = switchDirection != SwitchDirection.loadNextScreenViaPrefab;
-                if (isForwardOrBackward && destroyScreenStackWhenLastScreenReached) {
-                    ViewStack.GetScreenStack(gameObject).gameObject.Destroy();
+                if (isForwardOrBackward && destroyViewStackWhenLastScreenReached) {
+                    ViewStack.GetViewStack(gameObject).gameObject.Destroy();
                 } else { Log.w("Cant switch screen in direction " + switchDirection); }
             }
         }
 
         private bool TrySwitchScreen() {
             switch (switchDirection) {
-                case SwitchDirection.backwards: return ViewStack.SwitchBackToLastScreen(gameObject, destroyScreenStackWhenLastScreenReached);
+                case SwitchDirection.backwards: return ViewStack.SwitchBackToLastScreen(gameObject, destroyViewStackWhenLastScreenReached);
                 case SwitchDirection.forwards: return ViewStack.SwitchToNextScreen(gameObject, hideCurrentScreen);
                 case SwitchDirection.loadNextScreenViaPrefab:
                     return ViewStack.SwitchToScreen(gameObject, nextScreenPrefabName, hideCurrentScreen) != null;
