@@ -12,6 +12,10 @@ namespace com.csutil {
 
     public static class UiExtensions {
 
+        public static ViewStack GetViewStack(this GameObject gameObject) {
+            return gameObject.GetComponentInParent<ViewStack>();
+        }
+
         public static void SetOnClickAction(this Button self, Action<GameObject> onClickAction) {
             if (self.onClick != null && self.onClick.GetPersistentEventCount() > 0) {
                 Log.w("Overriding existing onClick action in " + self, self.gameObject);

@@ -15,13 +15,13 @@ namespace com.csutil.tests.ui {
         void Start() {
             var links = gameObject.GetLinkMap();
             links.Get<Button>("OptionsButton").SetOnClickAction(delegate {
-                ViewStack.SwitchToScreen(gameObject, "ExampleUi2_OptionsScreen");
+                gameObject.GetViewStack().ShowView(gameObject, "ExampleUi2_OptionsScreen");
             });
             links.Get<Button>("UserDetailsButton").SetOnClickAction(ShowUserUi);
         }
 
         private void ShowUserUi(GameObject buttonGo) {
-            GameObject ui = ViewStack.SwitchToScreen(gameObject, "MyUserUi1");
+            GameObject ui = gameObject.GetViewStack().ShowView(gameObject, "MyUserUi1");
 
             ExampleUi1.MyUserUi presenter = new ExampleUi1.MyUserUi();
             presenter.LoadModelIntoView(currentUser, ui);

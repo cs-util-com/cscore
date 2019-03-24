@@ -61,7 +61,7 @@ namespace com.csutil.tests.ui {
                     userToShow.userName = NameInputField().text;
                     userToShow.userAge = int.Parse(AgeInputField().text);
                     Log.d("User saved: " + userToShow);
-                    ViewStack.SwitchBackToLastScreen(userUi);
+                    userUi.GetViewStack().SwitchBackToLastView(userUi);
                 });
 
                 yield return null;

@@ -1,53 +1,45 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace com.csutil.ui {
 
     public class ViewStack : MonoBehaviour {
 
-        public static ViewStack GetViewStack(GameObject gameObject) {
-            return gameObject.GetComponentInParent<ViewStack>();
+        public GameObject ShowView(GameObject gameObject, string prefabName, bool hideCurrentView = true) {
+            return ShowView(gameObject, ResourcesV2.LoadPrefab(prefabName), hideCurrentView);
         }
 
-        public static GameObject SwitchToScreen(GameObject gameObject, string prefabName, bool hideCurrentScreen = true) {
-            return SwitchToScreen(gameObject, ResourcesV2.LoadPrefab(prefabName), hideCurrentScreen);
+        public GameObject ShowView(GameObject gameObject, GameObject newView, bool hideCurrentView = true) {
+            var v = AddView(newView);
+            EventBus.instance.Publish(UiEvents.SHOW_VIEW, v);
+            if (hideCurrentView) { GetRootFor(gameObject).SetActive(false); }
+            return v;
         }
 
-        public static GameObject SwitchToScreen(GameObject gameObject, GameObject newScreen, bool hideCurrentScreen = true) {
-            var stack = GetViewStack(gameObject);
-            var op = stack.AddScreen(newScreen);
-            if (hideCurrentScreen) { stack.GetRootFor(gameObject).SetActive(false); }
-            return op;
-        }
+        private GameObject AddView(GameObject newView) { return gameObject.AddChild(newView); }
 
-        public static bool SwitchBackToLastScreen(GameObject gameObject, bool destroyFinalScreen = false) {
-            var viewStack = GetViewStack(gameObject);
-            if (viewStack == null) { return false; }
-            var currentScreen = viewStack.GetRootFor(gameObject);
-            var currentIndex = currentScreen.transform.GetSiblingIndex();
-            AssertV2.AreEqual(currentIndex, viewStack.transform.childCount - 1, "Current was not last screen in the stack");
+        public bool SwitchBackToLastView(GameObject gameObject, bool destroyFinalView = false) {
+            var currentView = GetRootFor(gameObject);
+            var currentIndex = currentView.transform.GetSiblingIndex();
+            AssertV2.AreEqual(currentIndex, transform.childCount - 1, "Current was not last view in the stack");
             if (currentIndex > 0) {
-                var lastScreen = viewStack.transform.GetChild(currentIndex - 1).gameObject;
-                lastScreen.SetActive(true);
+                var lastView = transform.GetChild(currentIndex - 1).gameObject;
+                lastView.SetActive(true);
+                EventBus.instance.Publish(UiEvents.SWITCH_BACK_TO_LAST_VIEW, lastView);
             }
-            if (destroyFinalScreen || currentIndex > 0) { currentScreen.Destroy(); }
-            return true;
+            if (currentIndex == 0 && !destroyFinalView) { return false; }
+            return currentView.Destroy();
         }
 
-        public static bool SwitchToNextScreen(GameObject gameObject, bool hideCurrentScreen = true) {
-            var viewStack = GetViewStack(gameObject);
-            if (viewStack == null) { return false; }
-            var currentScreen = viewStack.GetRootFor(gameObject);
-            var currentIndex = currentScreen.transform.GetSiblingIndex();
-            AssertV2.AreNotEqual(currentIndex, viewStack.transform.childCount - 1, "Current was last screen in the stack");
-            if (currentIndex < viewStack.transform.childCount - 1) {
-                var lastScreen = viewStack.transform.GetChild(currentIndex - 1).gameObject;
-                lastScreen.SetActive(true);
+        public bool SwitchToNextView(GameObject gameObject, bool hideCurrentView = true) {
+            var currentView = GetRootFor(gameObject);
+            var currentIndex = currentView.transform.GetSiblingIndex();
+            AssertV2.AreNotEqual(currentIndex, transform.childCount - 1, "Current was last view in the stack");
+            if (currentIndex < transform.childCount - 1) {
+                var lastView = transform.GetChild(currentIndex - 1).gameObject;
+                lastView.SetActive(true);
+                EventBus.instance.Publish(UiEvents.SWITCH_TO_NEXT_VIEW, lastView);
             }
-            if (hideCurrentScreen) { currentScreen.SetActive(false); }
+            if (hideCurrentView) { currentView.SetActive(false); }
             return true;
         }
 
@@ -55,11 +47,9 @@ namespace com.csutil.ui {
         private GameObject GetRootFor(GameObject go) {
             AssertV2.IsFalse(go == gameObject, "Cant get root for ViewStack gameobject");
             var parent = go.GetParent();
-            if (parent == gameObject) { return go; }
+            if (parent == gameObject) { return go; } // stop when the GO of the viewstack is reached
             return GetRootFor(parent);
         }
-
-        public GameObject AddScreen(GameObject newScreen) { return gameObject.AddChild(newScreen); }
 
     }
 
