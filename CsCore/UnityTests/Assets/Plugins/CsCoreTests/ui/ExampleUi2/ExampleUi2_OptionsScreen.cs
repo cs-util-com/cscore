@@ -23,7 +23,7 @@ namespace com.csutil.tests.ui {
                 PlayerPrefsV2.SetBool(TOGGLE1, toggle1().isOn);
                 PlayerPrefsV2.SetBool(TOGGLE2, toggle2().isOn);
                 PlayerPrefsV2.SetBool(TOGGLE3, toggle3().isOn);
-                ScreenStack.SwitchBackToLastScreen(gameObject);
+                ViewStack.SwitchBackToLastScreen(gameObject);
             });
         }
 

@@ -6,10 +6,10 @@ using UnityEngine;
 
 namespace com.csutil.ui {
 
-    public class ScreenStack : MonoBehaviour {
+    public class ViewStack : MonoBehaviour {
 
-        public static ScreenStack GetScreenStack(GameObject gameObject) {
-            return gameObject.GetComponentInParent<ScreenStack>();
+        public static ViewStack GetScreenStack(GameObject gameObject) {
+            return gameObject.GetComponentInParent<ViewStack>();
         }
 
         public static GameObject SwitchToScreen(GameObject gameObject, string prefabName, bool hideCurrentScreen = true) {

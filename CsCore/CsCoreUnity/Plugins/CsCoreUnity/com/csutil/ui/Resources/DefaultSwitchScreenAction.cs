@@ -33,17 +33,17 @@ namespace com.csutil.ui.elements {
             if (!TrySwitchScreen()) {
                 var isForwardOrBackward = switchDirection != SwitchDirection.loadNextScreenViaPrefab;
                 if (isForwardOrBackward && destroyScreenStackWhenLastScreenReached) {
-                    ScreenStack.GetScreenStack(gameObject).gameObject.Destroy();
+                    ViewStack.GetScreenStack(gameObject).gameObject.Destroy();
                 } else { Log.w("Cant switch screen in direction " + switchDirection); }
             }
         }
 
         private bool TrySwitchScreen() {
             switch (switchDirection) {
-                case SwitchDirection.backwards: return ScreenStack.SwitchBackToLastScreen(gameObject, destroyScreenStackWhenLastScreenReached);
-                case SwitchDirection.forwards: return ScreenStack.SwitchToNextScreen(gameObject, hideCurrentScreen);
+                case SwitchDirection.backwards: return ViewStack.SwitchBackToLastScreen(gameObject, destroyScreenStackWhenLastScreenReached);
+                case SwitchDirection.forwards: return ViewStack.SwitchToNextScreen(gameObject, hideCurrentScreen);
                 case SwitchDirection.loadNextScreenViaPrefab:
-                    return ScreenStack.SwitchToScreen(gameObject, nextScreenPrefabName, hideCurrentScreen) != null;
+                    return ViewStack.SwitchToScreen(gameObject, nextScreenPrefabName, hideCurrentScreen) != null;
                 default: return false;
             }
         }
