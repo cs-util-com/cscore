@@ -15,6 +15,24 @@ namespace com.csutil.tests.ui {
             viewStackGo.AddComponent<ViewStack>();
 
             var view1 = viewStackGo.AddChild(new GameObject("View 1"));
+
+            var view2 = view1.GetViewStack().ShowView(view1, new GameObject("View 2"));
+            Assert.IsFalse(view1.activeInHierarchy);
+
+            Assert.IsTrue(view2.GetViewStack().SwitchBackToLastView(view2));
+            Assert.IsTrue(view2.IsDestroyed());
+            Assert.IsTrue(view1.activeInHierarchy);
+
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator TestViewStack1() {
+
+            var viewStackGo = new GameObject();
+            viewStackGo.AddComponent<ViewStack>();
+
+            var view1 = viewStackGo.AddChild(new GameObject("View 1"));
             Assert.AreEqual(viewStackGo.GetComponent<ViewStack>(), view1.GetViewStack());
 
             var view2 = view1.GetViewStack().ShowView(view1, new GameObject("View 2"));
