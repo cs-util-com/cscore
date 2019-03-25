@@ -33,11 +33,11 @@ namespace com.csutil.ui {
         public bool SwitchToNextView(GameObject gameObject, bool hideCurrentView = true) {
             var currentView = GetRootFor(gameObject);
             var currentIndex = currentView.transform.GetSiblingIndex();
-            AssertV2.AreNotEqual(currentIndex, transform.childCount - 1, "Current was last view in the stack");
+            if (currentIndex == transform.childCount - 1) { Log.w("Current was last view in the stack"); }
             if (currentIndex < transform.childCount - 1) {
-                var lastView = transform.GetChild(currentIndex - 1).gameObject;
-                lastView.SetActive(true);
-                EventBus.instance.Publish(UiEvents.SWITCH_TO_NEXT_VIEW, lastView);
+                var nextView = transform.GetChild(currentIndex + 1).gameObject;
+                nextView.SetActive(true);
+                EventBus.instance.Publish(UiEvents.SWITCH_TO_NEXT_VIEW, nextView);
             }
             if (hideCurrentView) { currentView.SetActive(false); }
             return true;
