@@ -167,8 +167,9 @@ __Rule of thumb__: Only use an `EventBus` if you can't exactly tell who will lis
 ## Injection Logic
 
 - A simple inversion of control pattern with the main call being `MyClass1 x = IoC.inject.Get<MyClass1>(this);` where `this` is the requesting entity
-- Relies on the EventBus system, so its **super fast** with **minimal memory footprint** as well!
+- Relies on the EventBus system, so its **very fast** with **minimal memory footprint** as well!
 - Free of any magic via anotations (at least for now;) - I tried to keep the injection API as simple as possible, existing libraries often tend to overcomplicate things in my opinion
+- Lazy loading, singletons and transient types (every inject request creates a new instance) are all easily implementable via `.RegisterInjector`, see examples below:
 
 ```cs
 // The default injector can be accessed via IoC.inject
@@ -184,7 +185,7 @@ injector.SetSingleton<MyClass1, MySubClass1>(myClass1Singleton);
 // Internally .SetSingleton() will register an injector for the class like this:
 injector.RegisterInjector<MyClass1>(new object(), (caller, createIfNull) => {
     // Whenever injector.Get is called the injector always returns the same instance:
-    return myClass1Singleton;
+    return myClass1Singleton; // Here the singleton could be lazy loaded
 });
 
 // Now calling IoC.inject.Get<MyClass1>() will always result in the same instance:

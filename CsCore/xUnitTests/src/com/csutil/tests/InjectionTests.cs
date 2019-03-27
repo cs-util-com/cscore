@@ -28,7 +28,7 @@ namespace com.csutil.tests {
             // Internally .SetSingleton() will register an injector for the class like this:
             injector.RegisterInjector<MyClass1>(new object(), (caller, createIfNull) => {
                 // Whenever injector.Get is called the injector always returns the same instance:
-                return myClass1Singleton;
+                return myClass1Singleton; // Here the singleton could be lazy loaded
             });
 
             // Now calling IoC.inject.Get<MyClass1>() will always result in the same instance:
@@ -67,30 +67,30 @@ namespace com.csutil.tests {
         }
 
         [Fact]
-        public void ExampleUsage3() {
+        public void ExampleUsage3_LazyInit() {
             var IoC_inject = GetInjectorForTest();
 
             { // Setup an injector1 that will answer all requests for class type string:
 
                 // A string that will lazy initialize when createIfNull=true is called the first time
-                string stringThatWillLazyInit = null;
+                MyClass1 objectThatWillLazyInit = null;
                 var injector1 = new object();
-                IoC_inject.RegisterInjector<string>(injector1, (caller, createIfNull) => {
+                IoC_inject.RegisterInjector<MyClass1>(injector1, (caller, createIfNull) => {
                     // The caller passes itself in IoC.inject.Get(..) so that the injector can 
                     // react different for different callers
                     Assert.Equal(this, caller);
-                    // If createIfNull was true lazy init the string:
-                    if (createIfNull) { stringThatWillLazyInit = "I am not null anymore"; }
-                    return stringThatWillLazyInit;
+                    // If createIfNull was true lazy init the object:
+                    if (createIfNull) { objectThatWillLazyInit = new MyClass1(); }
+                    return objectThatWillLazyInit;
                 });
             }
 
             // Calling IoC.inject.Get(..) with createIfNull false will not cause injector1 to init the string 
-            Assert.Null(IoC_inject.Get<string>(this, createIfNull: false));
+            Assert.Null(IoC_inject.Get<MyClass1>(this, createIfNull: false));
             // If createIfNull=true is passed the string will be initialized:
-            Assert.NotNull(IoC_inject.Get<string>(this, createIfNull: true));
+            Assert.NotNull(IoC_inject.Get<MyClass1>(this, createIfNull: true));
             // Now the string is initialized, it will not return null anymore even when createIfNull=false is passed
-            Assert.NotNull(IoC_inject.Get<string>(this, createIfNull: false));
+            Assert.NotNull(IoC_inject.Get<MyClass1>(this, createIfNull: false));
         }
 
         [Fact]
