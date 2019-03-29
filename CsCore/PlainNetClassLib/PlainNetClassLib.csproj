@@ -22,7 +22,7 @@
 
   <!-- https://www.nuget.org/packages/Newtonsoft.Json -->
   <ItemGroup>
-    <!-- Version 8.0.3 chosen because https://assetstore.unity.com/packages/tools/input-management/json-net-for-unity-11347 uses this version -->
+    <!-- Version 9.0.1 chosen because https://github.com/SaladLab/Json.Net.Unity3D uses this version -->
     <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
   </ItemGroup>
 
