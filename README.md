@@ -498,6 +498,19 @@ Assert.AreEqual(myObjectToSave.myInt, objLoadedAgain.myInt);
 
 # 📦 Getting started
 
+cscore can be used in **Unity** projects but also in pure **C#/.net** projects (see below):
+
+## 🎮 Install cscore into your Unity project
+
+The cscore project has some components that are only usable in Unity projects. The provided Unity package below includes all these components.
+
+**Important:** If you use `.net 4` or later do not import the `CsCoreNet3.5Compat` folder in the Unity package, it contains only classes that are already available in `.net 4`
+
+### Download the Unity package here:
+* From the [Asset Store (https://assetstore.unity.com/packages/tools/integration/cscore-138254)](https://assetstore.unity.com/packages/tools/integration/cscore-138254) 
+* From the [/CsCore/UnityPackages folder](https://github.com/cs-util-com/cscore/raw/master/CsCore/UnityPackages/) 
+
+
 ## Install via NuGet (For pure C#/.net projects)
 
 The NuGet package from [nuget.org/packages/com.csutil.cscore](https://www.nuget.org/packages/com.csutil.cscore) can be installed in [multiple ways](https://docs.microsoft.com/en-us/nuget/consume-packages/ways-to-install-a-package), for example via the dotnet CLI:
@@ -522,15 +535,6 @@ Or you manually add the following lines to the your `.csproj` file:
 
 After adding the references, install the packages by executing `dotnet restore` inside the project folder.
 
-## 🎮 Install cscore into your Unity project
-
-The cscore project has some components that are only usable in Unity projects. The provided Unity package below includes all these components.
-
-**Important:** If you use `.net 4` or later do not import the `CsCoreNet3.5Compat` folder in the Unity package, it contains only classes that are already available in `.net 4`
-
-### Download the Unity package here:
-* From the [Asset Store (https://assetstore.unity.com/packages/tools/integration/cscore-138254)](https://assetstore.unity.com/packages/tools/integration/cscore-138254) 
-* From the [/CsCore/UnityPackages folder](https://github.com/cs-util-com/cscore/raw/master/CsCore/UnityPackages/) 
 
 # 💚 Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
