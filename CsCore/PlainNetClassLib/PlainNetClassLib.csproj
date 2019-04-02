@@ -22,7 +22,8 @@
 
   <!-- https://www.nuget.org/packages/Newtonsoft.Json -->
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="(8.0.0,)" />
+    <!-- Version 9.0.1 chosen because https://github.com/SaladLab/Json.Net.Unity3D uses this version -->
+    <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
   </ItemGroup>
 
 </Project>

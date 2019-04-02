@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
-
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
@@ -15,8 +14,9 @@
 
   <!-- Mutation testing via https://github.com/stryker-mutator/stryker-net -->
   <ItemGroup>
-      <DotNetCliToolReference Include="StrykerMutator.DotNetCoreCli" Version="0.8.2" />
-      <PackageReference Include="StrykerMutator.DotNetCoreCli" Version="0.8.2" />
+      <!-- NuGet package: https://www.nuget.org/packages/StrykerMutator.DotNetCoreCli/ -->
+      <DotNetCliToolReference Include="StrykerMutator.DotNetCoreCli" Version="0.8.3" />
+      <PackageReference Include="StrykerMutator.DotNetCoreCli" Version="0.8.3" />
   </ItemGroup>
 
   <ItemGroup>
