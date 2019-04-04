@@ -1,7 +1,7 @@
+using com.csutil.eventbus;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using com.csutil.eventbus;
 
 namespace com.csutil.injection {
     public class Injector {
@@ -23,7 +23,7 @@ namespace com.csutil.injection {
 
         public IEnumerable<T> GetAll<T>(object caller, bool createIfNull = true) {
             var results = usedEventBus.Publish(GetEventKey<T>(), caller, createIfNull).Filter(x => x is T).Cast<T>();
-            if (results.IsNullOrEmpty()) { Log.d("No inject results for " + GetEventKey<T>()); }
+            // if (results.IsNullOrEmpty()) { Log.d("No inject results for " + GetEventKey<T>()); }
             return results;
         }
 

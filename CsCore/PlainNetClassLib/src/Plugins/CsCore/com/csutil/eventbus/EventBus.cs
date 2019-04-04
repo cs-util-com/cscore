@@ -54,7 +54,7 @@ namespace com.csutil {
                         catch (Exception e) { Log.e(e); }
                     }
                 } else {
-                    Log.d("No subscribers registered for event: " + eventName);
+                    // Log.d("No subscribers registered for event: " + eventName);
                 }
                 eventHistory.Enqueue(eventName);
                 return results;
