@@ -9,19 +9,24 @@ namespace com.csutil {
     public class UnitySetup {
 
         public const string UNITY_SETUP_DONE = "Unity setup now done";
-         
+
         static UnitySetup() { // This method is only executed only once at the very beginning 
             Debug.Log("com.csutil.UnitySetup initializing..");
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         static void Setup() {
-            Log.instance = new LogToUnityDebugLog();
             SystemConsoleToUnityLogRedirector.Setup();
             var initMainThread = MainThread.instance; // Called to init main thread
-            IoC.inject.SetSingleton<EnvironmentV2, EnvironmentV2Unity>(new EnvironmentV2Unity(), true);
-            IoC.inject.SetSingleton<RestFactory, UnityRestFactory>(new UnityRestFactory(), true);
+            SetupDefaultSingletonsIfNeeded();
             EventBus.instance.Publish(UNITY_SETUP_DONE);
+        }
+
+        public static void SetupDefaultSingletonsIfNeeded() {
+            var caller = new object();
+            Log.instance = IoC.inject.GetOrAddSingleton<ILog>(caller, () => new LogToUnityDebugLog());
+            IoC.inject.GetOrAddSingleton<EnvironmentV2>(caller, () => new EnvironmentV2Unity());
+            IoC.inject.GetOrAddSingleton<RestFactory>(caller, () => new UnityRestFactory());
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]

@@ -11,7 +11,8 @@ namespace com.csutil {
             return self.SetSingleton<V, V>(singletonInstance, overrideExisting);
         }
 
-        public static object SetSingleton<T, V>(this Injector self, V singletonInstance, bool overrideExisting = false) where V : T {
+        // private because normally prefer GetOrAddSingleton should be used instead
+        private static object SetSingleton<T, V>(this Injector self, V singletonInstance, bool overrideExisting = false) where V : T {
             lock (syncLock) {
                 if (self.HasInjectorRegistered<T>()) {
                     if (!overrideExisting) { throw new MultipleProvidersException("Existing provider found for " + typeof(T)); }
