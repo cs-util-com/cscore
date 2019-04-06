@@ -65,7 +65,6 @@ namespace com.csutil.encryption {
         }
 
         public static string Decrypt(this string cipherText, string passPhrase) {
-            Log.MethodEntered("cipherText=" + cipherText, "passPhrase=" + passPhrase);
             // Get the complete stream of bytes that represent:
             // [16 bytes of Salt] + [16 bytes of IV] + [n bytes of CipherText]
             var cipherTextBytesWithSaltAndIv = Convert.FromBase64String(cipherText);

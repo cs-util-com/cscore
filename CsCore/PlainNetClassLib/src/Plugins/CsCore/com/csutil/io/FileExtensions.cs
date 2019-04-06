@@ -147,6 +147,7 @@ namespace com.csutil {
         }
 
         public static void SaveAsText(this FileInfo self, string text) {
+            self.ParentDir().Create();
             File.WriteAllText(self.FullPath(), text, Encoding.UTF8);
         }
 
