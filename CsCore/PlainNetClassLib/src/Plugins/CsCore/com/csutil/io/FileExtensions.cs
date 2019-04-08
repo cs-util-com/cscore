@@ -1,9 +1,8 @@
+using com.csutil.encryption;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading;
 
 namespace com.csutil {
 
@@ -144,6 +143,16 @@ namespace com.csutil {
             using (StreamWriter file = File.CreateText(self.FullPath())) {
                 JsonWriter.GetWriter().Write(objectToSave, file);
             }
+        }
+
+        /// <summary> This method helps with decrypting the string before parsing it as a json object </summary>
+        public static T LoadAsEncyptedJson<T>(this FileInfo self, string jsonEncrKey, Func<T> getDefaultValue) {
+            try { return JsonReader.GetReader().Read<T>(self.LoadAs<string>().Decrypt(jsonEncrKey)); }
+            catch (Exception e) { Log.w("" + e); return getDefaultValue(); }
+        }
+
+        public static void SaveAsEncryptedJson<T>(this FileInfo self, T objectToSave, string jsonEncrKey) {
+            self.SaveAsText(JsonWriter.GetWriter().Write(objectToSave).Encrypt(jsonEncrKey));
         }
 
         public static void SaveAsText(this FileInfo self, string text) {

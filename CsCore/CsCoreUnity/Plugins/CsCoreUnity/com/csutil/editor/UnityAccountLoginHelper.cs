@@ -1,5 +1,4 @@
-﻿using com.csutil.encryption;
-using System;
+﻿using System;
 using System.IO;
 using System.Reflection;
 using UnityEditor;
@@ -9,62 +8,47 @@ namespace com.csutil.editor {
 
     class UnityAccountLoginHelper : AssetPostprocessor {
 
-        // Just to make it harder to understand the json file on disk that contains the user details:
-        const string jsonEncryptionKey = "spfvwnsregpwrgp34645345";
-
         private class LoginDetails { public string email = ""; public string pw = ""; }
-
-        private class UiWindow : EditorWindow { public Action onGUI; void OnGUI() { onGUI(); } }
 
         [InitializeOnLoadMethod]
         static void InitializeOnLoadMethod() {
+
             UnitySetup.SetupDefaultSingletonsIfNeeded();
-            var unityConnect = GetUnityConnect();
+            var unityConnect = NewUnityConnect();
 
-            LoginDetails loginDetails = ReadLoginDetails();
-            if (loginDetails == null) {
-                loginDetails = new LoginDetails() { email = GetUserEmail(unityConnect) };
-                SaveLoginDetails(loginDetails);
+            // Just to make it harder to understand the json file on disk that contains the user details:
+            const string jsonEncrKey = "eo34546o34o35t438t36z84gto34wto3t4g34t3w24ef";
+            LoginDetails loginDetails = GetFile().LoadAsEncyptedJson(jsonEncrKey, () => {
+                return new LoginDetails() { email = GetUserEmail(unityConnect) };
+            });
+            // If the user is not logged in or the password is not entered show the input UI:
+            if (!IsUserLoggedIn(unityConnect) || loginDetails.pw.IsNullOrEmpty()) {
+                ShowLoginDetailsWindow(loginDetails, () => GetFile().SaveAsEncryptedJson(loginDetails, jsonEncrKey));
             }
-
-            if (IsUserLoggedIn(unityConnect)) {
-                // If the password is not entered show the input UI:
-                if (loginDetails.pw.IsNullOrEmpty()) { ShowLoginDetailsWindow(loginDetails, () => SaveLoginDetails(loginDetails)); }
-            } else { ShowLoginDetailsWindow(loginDetails, () => SaveLoginDetails(loginDetails)); }
         }
 
-        private static LoginDetails ReadLoginDetails() {
-            try { return JsonReader.GetReader().Read<LoginDetails>(GetFile().LoadAs<string>().Decrypt(jsonEncryptionKey)); }
-            catch (Exception e) { Log.w("" + e); return null; }
-        }
+        private static FileInfo GetFile() { return EnvironmentV2.instance.GetAppDataFolder().GetChildDir("UnitySettings").GetChild("ualhs"); }
 
         private static void ShowLoginDetailsWindow(LoginDetails loginDetails, Action onSave) {
-            UiWindow uiWindow = ScriptableObject.CreateInstance<UiWindow>();
-            uiWindow.position = new Rect(Screen.width / 2, Screen.height / 2, 250, 150);
-            uiWindow.onGUI = () => {
+            EditorWindowV2.ShowUtilityWindow((EditorWindowV2 ui) => {
                 EditorGUILayout.LabelField("Save your Unity Login information for quick access", EditorStyles.wordWrappedLabel);
                 loginDetails.email = GUILayout.TextField(loginDetails.email, 25);
                 if (GUILayout.Button("Copy to clipboard")) { GUIUtility.systemCopyBuffer = loginDetails.email; }
                 loginDetails.pw = GUILayout.PasswordField(loginDetails.pw, "*"[0], 25);
                 if (GUILayout.Button("Copy to clipboard")) { GUIUtility.systemCopyBuffer = loginDetails.pw; }
-                if (GUILayout.Button("Save")) { onSave(); uiWindow.Close(); }
-            };
-            uiWindow.Show();
+                if (GUILayout.Button("Save")) { onSave(); ui.Close(); }
+            });
         }
 
-        private static object GetUnityConnect() {
-            Assembly assembly = Assembly.GetAssembly(typeof(EditorWindow));
-            return assembly.CreateInstance("UnityEditor.Connect.UnityConnect", false, BindingFlags.NonPublic | BindingFlags.Instance, null, null, null, null);
+        private static object NewUnityConnect() {
+            Assembly a = Assembly.GetAssembly(typeof(EditorWindow));
+            return a.CreateInstance("UnityEditor.Connect.UnityConnect", false, BindingFlags.NonPublic | BindingFlags.Instance, null, null, null, null);
         }
 
-        private static void SaveLoginDetails(LoginDetails l) {
-            var j2 = JsonWriter.GetWriter().Write(l);
-            GetFile().SaveAsText(j2.Encrypt(jsonEncryptionKey));
+        private static string GetUserEmail(object uc) {
+            try { return GetProp<string>(GetProp<object>(uc, "userInfo"), "userName"); }
+            catch (Exception e) { Log.w("" + e); return ""; }
         }
-
-        private static FileInfo GetFile() { return EnvironmentV2.instance.GetAppDataFolder().GetChildDir("UnitySettings").GetChild("lhsettings"); }
-
-        private static string GetUserEmail(object uc) { return GetProp<string>(GetProp<object>(uc, "userInfo"), "userName"); }
 
         private static bool IsUserLoggedIn(object uc) { return GetProp<bool>(uc, "loggedIn"); }
 
