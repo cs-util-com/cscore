@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -19,7 +20,9 @@ namespace com.csutil.http.apis {
     public class MetaWeatherLocationLookup {
 
         public static Task<List<LocationResp>> GetLocation(float latitude, float longiude) {
-            return new Uri("https://www.metaweather.com/api/location/search/?lattlong=" + latitude + "," + longiude).SendGET().GetResult<List<LocationResp>>();
+            var la = latitude.ToString(CultureInfo.InvariantCulture);
+            var lo = longiude.ToString(CultureInfo.InvariantCulture);
+            return new Uri("https://www.metaweather.com/api/location/search/?lattlong=" + la + "," + lo).SendGET().GetResult<List<LocationResp>>();
         }
 
         public static Task<List<LocationResp>> GetLocation(string locationName) {

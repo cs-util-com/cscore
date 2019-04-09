@@ -50,8 +50,7 @@ namespace com.csutil {
                         try {
                             object result;
                             if (subscriber.DynamicInvokeV2(args, out result)) { results.Add(result); }
-                        }
-                        catch (Exception e) { Log.e(e); }
+                        } catch (Exception e) { Log.e(e); }
                     }
                 } else {
                     // Log.d("No subscribers registered for event: " + eventName);
@@ -68,6 +67,7 @@ namespace com.csutil {
                 if (map[eventName].IsEmpty) return TryRemove(map, eventName);
                 return true;
             }
+            Log.w("Could not unsubscribe subscriber=" + subscriber + " from event '" + eventName + "'");
             return false;
         }
 

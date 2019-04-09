@@ -23,7 +23,7 @@ namespace com.csutil.tests {
 
             // Setup an injector that will always return the same instance for MyClass1 when IoC.inject.Get<MyClass1>() is called:
             MySubClass1 myClass1Singleton = new MySubClass1();
-            injector.SetSingleton<MyClass1, MySubClass1>(myClass1Singleton);
+            injector.GetOrAddSingleton<MyClass1>(this, () => myClass1Singleton);
 
             // Internally .SetSingleton() will register an injector for the class like this:
             injector.RegisterInjector<MyClass1>(new object(), (caller, createIfNull) => {
@@ -96,38 +96,43 @@ namespace com.csutil.tests {
         [Fact]
         public void TestSingletons2() {
             var IoC_inject = GetInjectorForTest();
+            var injector = new object();
 
             // Set an injector1 for MyClass1:
-            var injector1 = IoC_inject.SetSingleton<MyClass1, MySubClass1>(new MySubClass1());
+            MyClass1 ref1 = IoC_inject.GetOrAddSingleton<MyClass1>(injector, () => new MySubClass1());
+            Assert.Same(ref1, IoC_inject.Get<MyClass1>(null));
             Assert.Equal(typeof(MySubClass1), IoC_inject.Get<MyClass1>(null).GetType());
 
             // Try to register an additional injector for the same class which should fail:
             Assert.Throws<Singleton.MultipleProvidersException>(() => {
-                IoC_inject.SetSingleton<MyClass1, MySubClass2>(new MySubClass2());
+                IoC_inject.SetSingleton<MyClass1>(new MySubClass2());
             });
             // The first provider is still active and provides the same singleton instance as before:
             Assert.Equal(typeof(MySubClass1), IoC_inject.Get<MyClass1>(null).GetType());
 
-            // Force overriding the initial injector1:
-            var injector2 = IoC_inject.SetSingleton<MyClass1, MySubClass2>(new MySubClass2(), true);
+            // Remove the initial singleton to replace it with a new one:
+            Assert.True(IoC_inject.UnregisterInjector<MyClass1>(injector));
+            MyClass1 ref2 = IoC_inject.GetOrAddSingleton<MyClass1>(injector, () => new MySubClass2());
             Assert.Equal(typeof(MySubClass2), IoC_inject.Get<MyClass1>(null).GetType());
+            Assert.NotEqual(ref1, ref2);
 
             // Check that the initial injector1 was overwritten by injector2:
-            Assert.False(IoC_inject.UnregisterInjector<MyClass1>(injector1));
-            Assert.True(IoC_inject.UnregisterInjector<MyClass1>(injector2));
+            Assert.True(IoC_inject.UnregisterInjector<MyClass1>(injector));
             Assert.Null(IoC_inject.Get<MyClass1>(null));
         }
 
         [Fact]
         public void TestUnsubscribe1() {
             var IoC_inject = GetInjectorForTest();
+            var injector = new object();
 
             // Setup a normal singleton injector1:
-            var injector1 = IoC_inject.SetSingleton<MyClass1, MySubClass1>(new MySubClass1());
+            MyClass1 ref1 = IoC_inject.GetOrAddSingleton<MyClass1>(injector, () => new MySubClass1());
             Assert.NotNull(IoC_inject.Get<MyClass1>(this));
+            Assert.Same(ref1, IoC_inject.Get<MyClass1>(this));
 
             // Now unregister the injector1 again:
-            Assert.True(IoC_inject.UnregisterInjector<MyClass1>(injector1));
+            Assert.True(IoC_inject.UnregisterInjector<MyClass1>(injector));
             Assert.False(IoC_inject.HasInjectorRegistered<MyClass1>());
             Assert.Null(IoC_inject.Get<MyClass1>(this));
         }

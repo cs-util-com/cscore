@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Linq;
 using com.csutil.http.apis;
 using com.csutil.http.apis.iplookup;
@@ -51,7 +52,7 @@ namespace com.csutil.tests.http {
             var whereOnEarthID = foundLocations.First().woeid;
             var weatherReports1 = await MetaWeatherReport.GetReport(whereOnEarthID);
 
-            Assert.False(("" + berlinLatitude).Contains(","), "latitude as string contains a comma: " + berlinLatitude);
+            Assert.False(berlinLatitude.ToString(CultureInfo.InvariantCulture).Contains(","), "float.toString contains comma, this would break the REST query");
             var foundLocations2 = await MetaWeatherLocationLookup.GetLocation(berlinLatitude, berlinLongitude);
             var whereOnEarthID2 = foundLocations2.First().woeid;
             var weatherReports2 = await MetaWeatherReport.GetReport(whereOnEarthID2);
