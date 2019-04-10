@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -17,13 +16,13 @@ namespace com.csutil.http {
         }
 
         public override Task<long> GetCurrentPing(string domainToPing = "8.8.8.8", int timeoutInMs = 500) {
-            var pings = new List<Task<long>>();
-            try { pings.Add(PingViaUnity(domainToPing, timeoutInMs)); } catch (Exception e) { Log.w("" + e); }
-            try { pings.Add(base.GetCurrentPing(domainToPing, timeoutInMs)); } catch (Exception e) { Log.w("" + e); }
-            return Task.Factory.ContinueWhenAny(pings.ToArray(), (quickerPing) => { return quickerPing.Result; });
+            if (ApplicationV2.platform.IsAnyOf(RuntimePlatform.Android, RuntimePlatform.OSXPlayer)) {
+                return base.GetCurrentPing(domainToPing, timeoutInMs);
+            }
+            return GetCurrentPingViaUnity(domainToPing, timeoutInMs);
         }
 
-        private Task<long> PingViaUnity(string domainToPing, int timeoutInMs) {
+        private Task<long> GetCurrentPingViaUnity(string domainToPing, int timeoutInMs) {
             var p = new UnityEngine.Ping(domainToPing);
             return MainThread.instance.StartCoroutineAsTask<long>(UnityPingCoroutine(p, timeoutInMs), () => {
                 if (p.isDone) { return p.time; } else { return -1; }
