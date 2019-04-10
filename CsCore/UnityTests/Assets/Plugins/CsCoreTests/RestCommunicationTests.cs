@@ -3,8 +3,6 @@ using NUnit.Framework;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -94,6 +92,7 @@ namespace com.csutil.tests.http {
             var pingInMs = pingTask.Result;
             Assert.AreNotEqual(-1, pingInMs);
             Assert.True(0 < pingInMs && pingInMs < 500, "pingInMs=" + pingInMs);
+            Log.d("pingInMs took " + pingInMs + "ms");
         }
 
         [UnityTest]

@@ -13,7 +13,7 @@ namespace com.csutil.http {
             return new UriRestRequest(uri).Send(method);
         }
 
-        public Task<long> GetCurrentPing(string domainToPing = "8.8.8.8", int timeoutInMs = 500) {
+        public virtual Task<long> GetCurrentPing(string domainToPing = "8.8.8.8", int timeoutInMs = 500) {
             Task<PingReply> pingTask = new Ping().SendPingAsync(domainToPing, timeoutInMs);
             AssertV2.IsNotNull(pingTask, "ping");
             return pingTask.ContinueWith(finishedPingTask => {
