@@ -19,6 +19,8 @@ namespace com.csutil {
                  return RuntimePlatform.OSXPlayer;
 #elif UNITY_STANDALONE_WIN
                  return RuntimePlatform.WindowsPlayer;
+#elif UNITY_WEBGL
+                return RuntimePlatform.WebGLPlayer;
 #elif UNITY_EDITOR
                 Log.e("Running in editor so " + Application.platform + " will be returned instead of the correct target platform");
 #endif
