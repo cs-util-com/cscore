@@ -33,6 +33,7 @@ public class DemoScreen1 : MonoBehaviour {
     }
 
     private IEnumerator TestCurrentPing(string ipOrUrl) {
+        Log.d("Will ping now ipOrUrl=" + ipOrUrl);
         var pingTask = RestFactory.instance.GetCurrentPing(ipOrUrl);
         yield return pingTask.AsCoroutine();
         links.Get<Text>("PingOutput").text = "Current Ping: " + pingTask.Result + "ms";

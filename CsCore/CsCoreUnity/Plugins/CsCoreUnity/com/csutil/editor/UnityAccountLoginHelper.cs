@@ -1,4 +1,5 @@
-﻿using System;
+﻿using com.csutil.http;
+using System;
 using System.IO;
 using System.Reflection;
 using UnityEditor;
@@ -21,10 +22,13 @@ namespace com.csutil.editor {
             LoginDetails loginDetails = GetFile().LoadAsEncyptedJson(jsonEncrKey, () => {
                 return new LoginDetails() { email = GetUserEmail(unityConnect) };
             });
-            // If the user is not logged in or the password is not entered show the input UI:
-            if (!IsUserLoggedIn(unityConnect) || loginDetails.pw.IsNullOrEmpty()) {
-                ShowLoginDetailsWindow(loginDetails, () => GetFile().SaveAsEncryptedJson(loginDetails, jsonEncrKey));
-            }
+
+            RestFactory.instance.CheckInetConnection(() => {
+                // If the user is not logged in or the password is not entered show the input UI:
+                if (!IsUserLoggedIn(unityConnect) || loginDetails.pw.IsNullOrEmpty()) {
+                    ShowLoginDetailsWindow(loginDetails, () => GetFile().SaveAsEncryptedJson(loginDetails, jsonEncrKey));
+                }
+            });
         }
 
         private static FileInfo GetFile() { return EnvironmentV2.instance.GetAppDataFolder().GetChildDir("UnitySettings").GetChild("ualhs"); }

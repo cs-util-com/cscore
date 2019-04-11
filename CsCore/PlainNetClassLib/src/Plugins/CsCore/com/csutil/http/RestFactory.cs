@@ -22,6 +22,12 @@ namespace com.csutil.http {
                 return pingReply.RoundtripTime;
             }); // return ping in MS
         }
+        
+        public void CheckInetConnection(Action hasInet, Action noInet = null, string ip = "8.8.8.8", int timeoutMs = 500) {
+            GetCurrentPing(ip, timeoutMs).ContinueWith(pingTask => {
+                if (pingTask.Result > 0) { hasInet.InvokeIfNotNull(); } else { noInet.InvokeIfNotNull(); }
+            });
+        }
 
     }
 
