@@ -36,10 +36,11 @@ namespace com.csutil {
         }
 
         /// <summary> Returns true if the GameObject is null because it was destroyed </summary>
-        public static bool IsDestroyed(this GameObject self) {
-            // == operator overloaded by gameObject but reference still exists
-            return self == null && !ReferenceEquals(self, null);
-        }
+        // == operator overloaded by gameObject but reference still exists:
+        public static bool IsDestroyed(this GameObject self) { return self == null && !ReferenceEquals(self, null); }
+
+        /// <summary> Returns true if the Component is null because it was destroyed </summary>
+        public static bool IsDestroyed(this Component self) { return self == null && !ReferenceEquals(self, null); }
 
         public static bool Destroy(this GameObject self, bool destroyNextFrame = false) {
             if (self == null) { return false; }

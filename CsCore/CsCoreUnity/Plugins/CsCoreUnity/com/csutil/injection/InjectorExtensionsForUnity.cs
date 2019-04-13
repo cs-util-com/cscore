@@ -1,8 +1,4 @@
 ﻿using com.csutil.injection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using UnityEngine;
 
 namespace com.csutil {
@@ -14,8 +10,9 @@ namespace com.csutil {
         public static T GetOrAddComponentSingleton<T>(this Injector self, object caller, string singletonsGoName = DEFAULT_SINGLETON_NAME) where T : Component {
             T x = self.Get<T>(caller, true);
             if (x == null) {
+                var overrideExisting = x.IsDestroyed();  // override if there is an existing destroyed comp.
                 x = GetOrAddComponentSingleton<T>(true, singletonsGoName);
-                self.SetSingleton<T>(x);
+                self.SetSingleton<T>(x, overrideExisting); 
             }
             return x;
         }
