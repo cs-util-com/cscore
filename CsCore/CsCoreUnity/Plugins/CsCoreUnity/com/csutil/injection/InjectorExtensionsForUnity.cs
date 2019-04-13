@@ -12,15 +12,15 @@ namespace com.csutil {
         private const string DEFAULT_SINGLETON_NAME = "Singletons";
 
         public static T GetOrAddComponentSingleton<T>(this Injector self, object caller, string singletonsGoName = DEFAULT_SINGLETON_NAME) where T : Component {
-            var x = self.Get<T>(caller, true);
+            T x = self.Get<T>(caller, true);
             if (x == null) {
-                x = GetComponentSingleton<T>(true, singletonsGoName);
-                self.SetSingleton(x);
+                x = GetOrAddComponentSingleton<T>(true, singletonsGoName);
+                self.SetSingleton<T>(x);
             }
             return x;
         }
 
-        public static T GetComponentSingleton<T>(bool createIfNull, string singletonsGoName = DEFAULT_SINGLETON_NAME) where T : Component {
+        public static T GetOrAddComponentSingleton<T>(bool createIfNull, string singletonsGoName = DEFAULT_SINGLETON_NAME) where T : Component {
             var singletonsGo = GetOrAddGameObject(singletonsGoName);
             if (createIfNull) { return singletonsGo.GetOrAddChild("" + typeof(T)).GetOrAddComponent<T>(); }
             var t = singletonsGo.transform.Find("" + typeof(T));

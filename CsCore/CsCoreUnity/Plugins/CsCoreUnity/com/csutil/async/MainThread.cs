@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using UnityEngine;
 
@@ -23,8 +20,11 @@ namespace com.csutil {
 
         private void Awake() {
             Log.d("Now initializing MainThread helper");
-            AssertV2.IsTrue(mainThreadRef == null || mainThreadRef == Thread.CurrentThread, "MainThread already set to " + mainThreadRef);
             mainThreadRef = Thread.CurrentThread;
+        }
+
+        private void OnEnable() {
+            if (mainThreadRef != Thread.CurrentThread) { mainThreadRef = Thread.CurrentThread; }
             stopWatch = Stopwatch.StartNew();
         }
 
@@ -46,7 +46,14 @@ namespace com.csutil {
 
         public static void Invoke(Action a) { instance.ExecuteOnMainThread(a); }
 
-        public void ExecuteOnMainThread(Action a) { actionsForMainThread.Enqueue(a); }
+        public void ExecuteOnMainThread(Action a) {
+            if (!Application.isPlaying) {
+                Log.w("ExecuteOnMainThread: Application not playing, action will be instantly executed now");
+                a();
+            } else {
+                actionsForMainThread.Enqueue(a);
+            }
+        }
 
     }
 

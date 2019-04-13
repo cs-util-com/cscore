@@ -17,12 +17,12 @@ namespace com.csutil {
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         static void Setup() {
             SystemConsoleToUnityLogRedirector.Setup();
-            var initMainThread = MainThread.instance; // Called to init main thread
             SetupDefaultSingletonsIfNeeded();
             EventBus.instance.Publish(UNITY_SETUP_DONE);
         }
 
         public static void SetupDefaultSingletonsIfNeeded() {
+            var initMainThread = MainThread.instance; // Called to init main thread
             var caller = new object();
             Log.instance = IoC.inject.GetOrAddSingleton<ILog>(caller, () => new LogToUnityDebugLog());
             IoC.inject.GetOrAddSingleton<EnvironmentV2>(caller, () => new EnvironmentV2Unity());
