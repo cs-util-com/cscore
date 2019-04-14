@@ -16,16 +16,24 @@ namespace com.csutil {
 
         public long maxAllowedTaskDurationInMsPerFrame = 33;
         private Stopwatch stopWatch;
+        private bool WasInitializedWhilePlaying { get { return stopWatch != null; } }
         private ConcurrentQueue<Action> actionsForMainThread = new ConcurrentQueue<Action>();
 
         private void Awake() {
-            Log.d("Now initializing MainThread helper");
+            UnityEngine.Debug.Log("MainThread_" + this.GetHashCode() + ".Awake while Application.isPlaying=" + Application.isPlaying, gameObject);
+            if (mainThreadRef != null) { throw Log.e("There is already a MainThread"); }
             mainThreadRef = Thread.CurrentThread;
         }
 
         private void OnEnable() {
+            UnityEngine.Debug.Log("MainThread_" + this.GetHashCode() + ".OnEnable while Application.isPlaying=" + Application.isPlaying, gameObject);
             if (mainThreadRef != Thread.CurrentThread) { mainThreadRef = Thread.CurrentThread; }
             stopWatch = Stopwatch.StartNew();
+        }
+
+        private void OnDestroy() {
+            UnityEngine.Debug.Log("MainThread_" + this.GetHashCode() + ".OnDestroy while Application.isPlaying=" + Application.isPlaying, gameObject);
+            mainThreadRef = null;
         }
 
         private void Update() {
@@ -47,11 +55,14 @@ namespace com.csutil {
         public static void Invoke(Action a) { instance.ExecuteOnMainThread(a); }
 
         public void ExecuteOnMainThread(Action a) {
-            if (!Application.isPlaying) {
+            AssertV2.IsNotNull(mainThreadRef, "mainThreadRef");
+            if (WasInitializedWhilePlaying) {
+                actionsForMainThread.Enqueue(a);
+            } else if (!Application.isPlaying) {
                 Log.w("ExecuteOnMainThread: Application not playing, action will be instantly executed now");
                 a();
             } else {
-                actionsForMainThread.Enqueue(a);
+                throw Log.e("MainThread not initialized via MainThread.instance");
             }
         }
 

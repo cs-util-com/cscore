@@ -11,18 +11,30 @@ namespace com.csutil {
         public const string UNITY_SETUP_DONE = "Unity setup now done";
 
         static UnitySetup() { // This method is only executed only once at the very beginning 
-            Debug.Log("com.csutil.UnitySetup initializing..");
+            Debug.Log("com.csutil.UnitySetup static constructor called..");
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        static void Setup() {
+        static void BeforeSceneLoad() {
+            Debug.Log("BeforeSceneLoad");
             SystemConsoleToUnityLogRedirector.Setup();
+            try { DestroyExistingMainThreadIfNeeded(); } catch (Exception e) { Debug.LogError(e); }
+        }
+
+        private static void DestroyExistingMainThreadIfNeeded() {
+            var mt = IoC.inject.Get<MainThread>(null, false);
+            if (mt != null) { mt.gameObject.Destroy(); }
+        }
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        static void AfterSceneLoad() {
+            Debug.Log("AfterSceneLoad");
             SetupDefaultSingletonsIfNeeded();
             EventBus.instance.Publish(UNITY_SETUP_DONE);
         }
 
         public static void SetupDefaultSingletonsIfNeeded() {
-            var initMainThread = MainThread.instance; // Called to init main thread
+            MainThread.instance.enabled = true; // Called to init main thread if not yet done by other logic
             var caller = new object();
             Log.instance = IoC.inject.GetOrAddSingleton<ILog>(caller, () => new LogToUnityDebugLog());
             IoC.inject.GetOrAddSingleton<EnvironmentV2>(caller, () => new EnvironmentV2Unity());

@@ -69,6 +69,15 @@ namespace com.csutil.tests.threading {
             Assert.AreEqual("B", go.name);
         }
 
+        [UnityTest]
+        public IEnumerator TestMainThread2() {
+            Assert.IsTrue(MainThread.instance.enabled);
+            MainThread.Invoke(() => {
+                Log.w("MainThread.Invoke called now");
+                Assert.IsTrue(Application.isPlaying);
+            });
+            yield return null;
+        }
 
     }
 

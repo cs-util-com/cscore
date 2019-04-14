@@ -39,7 +39,7 @@ namespace com.csutil {
         }
 
         private void OnDestroy() {
-            Log.d("Checking " + monitoredTasks.Count + " tasks, if they need to be stopped");
+            Log.d("TaskRunner.OnDestroy: Checking " + monitoredTasks.Count + " tasks, if they need to be stopped");
             while (!monitoredTasks.IsEmpty) {
                 MonitoredTask t; if (monitoredTasks.TryDequeue(out t)) {
                     try { t.cancelTask(); } catch (Exception e) { Log.e(e); }
