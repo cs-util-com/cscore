@@ -25,7 +25,7 @@ namespace com.csutil.http {
 
         private Task<long> GetCurrentPingViaUnity(string ipOrUrl, int timeoutInMs) {
             var p = new UnityEngine.Ping(ipOrUrl);
-            return MainThread.instance.StartCoroutineAsTask<long>(UnityPingCoroutine(p, timeoutInMs), () => {
+            return WebRequestRunner.GetInstance(this).StartCoroutineAsTask<long>(UnityPingCoroutine(p, timeoutInMs), () => {
                 if (p.isDone) { return p.time; } else { return -1; }
             });
         }

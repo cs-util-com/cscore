@@ -17,8 +17,7 @@ namespace com.csutil.http {
 
         public Task<T> GetResult<T>(Action<T> onResult = null) {
             var response = new Response<T>();
-            var mono = IoC.inject.GetOrAddComponentSingleton<WebRequestRunner>(this);
-            return mono.StartCoroutineAsTask(prepareRequest(response), () => response.getResult());
+            return WebRequestRunner.GetInstance(this).StartCoroutineAsTask(prepareRequest(response), () => response.getResult());
         }
 
         private IEnumerator prepareRequest<T>(Response<T> response) {

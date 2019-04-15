@@ -1,21 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace com.csutil.http {
 
     public class WebRequestRunner : MonoBehaviour {
 
-        private void OnEnable() {
+        public static WebRequestRunner GetInstance(object caller) { return IoC.inject.GetOrAddComponentSingleton<WebRequestRunner>(caller); }
 
-        }
+        private void OnEnable() { }
 
-        private void OnDisable() {
-
-        }
+        private void OnDisable() { }
 
     }
 
