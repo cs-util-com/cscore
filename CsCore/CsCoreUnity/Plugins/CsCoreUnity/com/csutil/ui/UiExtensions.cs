@@ -1,11 +1,7 @@
 ﻿using com.csutil.ui;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.UI;
 
 namespace com.csutil {
@@ -45,10 +41,30 @@ namespace com.csutil {
 
         public static void AddOnValueChangedAction(this Toggle self, Func<bool, bool> onValueChanged) {
             if (onValueChanged != null) {
-                self.onValueChanged.AddListener((newCheckedState) => {
+                var oldIsOn = self.isOn;
+                self.onValueChanged.AddListener((newIsOn) => {
+                    if (oldIsOn == newIsOn) { return; }
                     EventBus.instance.Publish(UiEvents.TOGGLE_CHANGED, self);
-                    var changeAllowed = onValueChanged(newCheckedState);
-                    if (!changeAllowed) { self.isOn = !newCheckedState; } // Undo the change
+                    if (!onValueChanged(newIsOn)) { self.isOn = oldIsOn; } else { oldIsOn = newIsOn; }
+                });
+            }
+        }
+
+        public static void SetOnValueChangedAction(this InputField self, Func<string, bool> onValueChanged) {
+            if (self.onValueChanged != null && self.onValueChanged.GetPersistentEventCount() > 0) {
+                Log.w("Overriding old onValueChanged listener for input field " + self, self.gameObject);
+            }
+            self.onValueChanged = new InputField.OnChangeEvent(); // clear previous onValueChanged listeners
+            AddOnValueChangedAction(self, onValueChanged);
+        }
+
+        public static void AddOnValueChangedAction(this InputField self, Func<string, bool> onValueChanged) {
+            if (onValueChanged != null) {
+                var oldText = self.text;
+                self.onValueChanged.AddListener((newText) => {
+                    if (newText == oldText) { return; }
+                    EventBus.instance.Publish(UiEvents.INPUTFIELD_CHANGED, self);
+                    if (!onValueChanged(newText)) { self.text = oldText; } else { oldText = newText; }
                 });
             }
         }
