@@ -508,7 +508,8 @@ The cscore project has some components that are only usable in Unity projects. T
 
 First delete the full CsCoreNet3_5Compat folder:
 ![Step 1](https://i.imgur.com/d8QfXG8.png)
-The delete the now missing reference from the other assembly definition files:
+
+Then delete the now missing reference from the other assembly definition files:
 ![Step 2](https://i.imgur.com/VQIu9hS.png)
 
 ### Download the Unity package here:
