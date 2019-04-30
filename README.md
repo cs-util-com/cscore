@@ -504,6 +504,10 @@ cscore can be used in **Unity** projects but also in pure **C#/.net** projects (
 
 The cscore project has some components that are only usable in Unity projects. The provided Unity package below includes all these components.
 
+### Download the Unity package here:
+* From the [Asset Store (https://assetstore.unity.com/packages/tools/integration/cscore-138254)](https://assetstore.unity.com/packages/tools/integration/cscore-138254) 
+* From the [/CsCore/UnityPackages folder](https://github.com/cs-util-com/cscore/raw/master/CsCore/UnityPackages/) 
+
 **Important:** If you use `.net 4` or later do not import the `CsCoreNet3.5Compat` folder in the Unity package, it contains only classes that are already available in `.net 4`
 
 First delete the full CsCoreNet3_5Compat folder:
@@ -511,10 +515,6 @@ First delete the full CsCoreNet3_5Compat folder:
 
 Then delete the now missing reference from the other assembly definition files:
 ![Step 2](https://i.imgur.com/VQIu9hS.png)
-
-### Download the Unity package here:
-* From the [Asset Store (https://assetstore.unity.com/packages/tools/integration/cscore-138254)](https://assetstore.unity.com/packages/tools/integration/cscore-138254) 
-* From the [/CsCore/UnityPackages folder](https://github.com/cs-util-com/cscore/raw/master/CsCore/UnityPackages/) 
 
 
 ## Install via NuGet (For pure C#/.net projects)
