@@ -61,7 +61,7 @@ namespace com.csutil.tests.async {
 
         IEnumerator TaskWhichWillBeCancelled() {
             Assert.IsFalse(MainThread.isMainThread);
-            for (int i = 0; i < int.MaxValue; i++) { Thread.Sleep(50000); }
+            for (int i = 0; i < int.MaxValue; i++) { Thread.Sleep(20000); }
             yield break;
         }
 
