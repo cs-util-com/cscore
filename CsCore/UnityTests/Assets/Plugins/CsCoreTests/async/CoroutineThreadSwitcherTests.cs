@@ -31,10 +31,11 @@ namespace com.csutil.tests.async {
             yield return new WaitForSeconds(1.0f); // WaitForSeconds on background
 
             Assert.IsTrue(t.ElapsedMilliseconds > 3000, "t=" + t.ElapsedMilliseconds);
+            Log.MethodDone(t);
         }
 
         IEnumerator MyNormalCoroutine1(MonoBehaviour x) {
-            Log.MethodEntered();
+            var t = Log.MethodEntered();
             AsyncTask task;
             x.StartCoroutineInBgThread(MyBackgroundCoroutine1(), out task);
             yield return x.StartCoroutine(task.Wait());
@@ -44,13 +45,14 @@ namespace com.csutil.tests.async {
             yield return new WaitForSeconds(1.0f);
             task.Cancel();
             Assert.AreEqual(TaskState.Cancelled, task.State);
+            Log.MethodDone(t);
         }
 
         IEnumerator MyNeverEndingBackgroundCoroutine1() {
-            Log.MethodEntered();
+            var t = Log.MethodEntered();
             Assert.IsFalse(MainThread.isMainThread);
             for (int i = 0; i < int.MaxValue; i++) { Thread.Sleep(10000); Log.d("TaskWhichWillBeCancelled Loop"); }
-            yield break;
+            yield return null;
         }
 
     }
