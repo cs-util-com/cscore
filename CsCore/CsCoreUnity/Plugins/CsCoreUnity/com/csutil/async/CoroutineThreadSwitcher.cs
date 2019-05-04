@@ -168,15 +168,11 @@ namespace com.csutil {
 
         // background thread launcher;
         private void MoveNextAsync() {
-            ThreadPool.QueueUserWorkItem(
-                new WaitCallback(BackgroundRunner));
+            ThreadPool.QueueUserWorkItem(new WaitCallback(BackgroundRunner));
         }
 
-        // background thread function;
-        private void BackgroundRunner(object state) {
-            // just run the sync version on background thread;
-            MoveNextUnity();
-        }
+        // background thread function - just run the sync version on background thread
+        private void BackgroundRunner(object state) { MoveNextUnity(); }
 
         // run next iteration on main thread;
         private void MoveNextUnity() {

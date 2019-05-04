@@ -11,57 +11,45 @@ namespace com.csutil.tests.async {
 
         [UnityTest]
         public IEnumerator TestRunTaskInBackground() {
+            var myMono = new GameObject().GetOrAddComponent<MyExampleMono1>();
 
-
-            var go = new GameObject();
-            MonoBehaviour x = go.GetOrAddComponent<MyExampleMono1>();
-            Assert.IsNotNull(x);
-
-            x.StartCoroutineInBgThread(MyAsyncTask());
-            yield return x.StartCoroutine(OtherExampleTasks(x));
-
+            myMono.StartCoroutineInBgThread(MyBackgroundCoroutine1());
+            yield return myMono.StartCoroutine(MyNormalCoroutine1(myMono));
         }
 
-        IEnumerator MyAsyncTask() {
+        IEnumerator MyBackgroundCoroutine1() {
+            var t = Log.MethodEntered();
+
             Assert.IsFalse(MainThread.isMainThread);
-            Thread.Sleep(3000); // Won't block the main thread
+            Thread.Sleep(2000); // Won't block the main thread
 
             yield return ThreadSwitcher.ToMainThread;
             Assert.IsTrue(MainThread.isMainThread);
 
             yield return ThreadSwitcher.ToBackgroundThread;
             Assert.IsFalse(MainThread.isMainThread);
+            yield return new WaitForSeconds(1.0f); // WaitForSeconds on background
+
+            Assert.IsTrue(t.ElapsedMilliseconds > 3000, "t=" + t.ElapsedMilliseconds);
         }
 
-        IEnumerator OtherExampleTasks(MonoBehaviour x) {
+        IEnumerator MyNormalCoroutine1(MonoBehaviour x) {
+            Log.MethodEntered();
             AsyncTask task;
-            Assert.IsTrue(MainThread.isMainThread);
-            x.StartCoroutineInBgThread(BlockingTask(), out task);
+            x.StartCoroutineInBgThread(MyBackgroundCoroutine1(), out task);
             yield return x.StartCoroutine(task.Wait());
             Assert.AreEqual(TaskState.Done, task.State);
 
-            x.StartCoroutineInBgThread(TaskWhichWillBeCancelled(), out task);
-            yield return new WaitForSeconds(2.0f);
+            x.StartCoroutineInBgThread(MyNeverEndingBackgroundCoroutine1(), out task);
+            yield return new WaitForSeconds(1.0f);
             task.Cancel();
             Assert.AreEqual(TaskState.Cancelled, task.State);
-
         }
 
-        IEnumerator BlockingTask() {
+        IEnumerator MyNeverEndingBackgroundCoroutine1() {
+            Log.MethodEntered();
             Assert.IsFalse(MainThread.isMainThread);
-            Thread.Sleep(2000);
-
-            yield return ThreadSwitcher.ToMainThread;
-            yield return new WaitForSeconds(0.1f);
-            Thread.Sleep(2000); // will block unity main thread
-
-            yield return ThreadSwitcher.ToBackgroundThread;
-            yield return new WaitForSeconds(2.0f); // WaitForSeconds on background
-        }
-
-        IEnumerator TaskWhichWillBeCancelled() {
-            Assert.IsFalse(MainThread.isMainThread);
-            for (int i = 0; i < int.MaxValue; i++) { Thread.Sleep(20000); }
+            for (int i = 0; i < int.MaxValue; i++) { Thread.Sleep(10000); Log.d("TaskWhichWillBeCancelled Loop"); }
             yield break;
         }
 
