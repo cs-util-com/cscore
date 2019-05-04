@@ -508,14 +508,8 @@ The cscore project has some components that are only usable in Unity projects. T
 * From the [Asset Store (https://assetstore.unity.com/packages/tools/integration/cscore-138254)](https://assetstore.unity.com/packages/tools/integration/cscore-138254) 
 * From the [/CsCore/UnityPackages folder](https://github.com/cs-util-com/cscore/raw/master/CsCore/UnityPackages/) 
 
-**Important:** If you use `.net 4` or later do not import the `CsCoreNet3.5Compat` folder in the Unity package, it contains only classes that are already available in `.net 4`
-
-First delete the full CsCoreNet3_5Compat folder:
-![Step 1](https://i.imgur.com/d8QfXG8.png)
-
-Then delete the now missing reference from the other assembly definition files:
-![Step 2](https://i.imgur.com/VQIu9hS.png)
-
+**Important:** If you use `.net 3.5` you will need to extract the ZIP file in the `CsCoreNet3.5Compat` folder, it contains the classes that are missing for `.net 3.5`:
+![Step 1](https://i.imgur.com/1DyQ4q1.png)
 
 ## Install via NuGet (For pure C#/.net projects)
 
