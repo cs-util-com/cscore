@@ -511,6 +511,10 @@ The cscore project has some components that are only usable in Unity projects. T
 **Important:** If you use `.net 3.5` you will need to extract the ZIP file in the `CsCoreNet3.5Compat` folder, it contains the classes that are missing for `.net 3.5`:
 ![Step 1](https://i.imgur.com/1DyQ4q1.png)
 
+### Optional experimental Unity features
+
+Some of the included features are disabled by default via the `CSCORE_EXPERIMENTAL` compile time define, to enable these features, go to _Player Settings_ -> _Other Settings_ -> _Scripting Define Symbols_ and add `CSCORE_EXPERIMENTAL` there. See the notes about [Scripting Define Symbols in the Unity Docs](https://docs.unity3d.com/Manual/PlatformDependentCompilation.html) for more details how this works. 
+
 ## Install via NuGet (For pure C#/.net projects)
 
 The NuGet package from [nuget.org/packages/com.csutil.cscore](https://www.nuget.org/packages/com.csutil.cscore) can be installed in [multiple ways](https://docs.microsoft.com/en-us/nuget/consume-packages/ways-to-install-a-package), for example via the dotnet CLI:

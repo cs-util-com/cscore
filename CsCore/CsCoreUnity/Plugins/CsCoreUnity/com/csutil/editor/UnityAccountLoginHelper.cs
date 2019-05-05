@@ -7,6 +7,8 @@ using UnityEngine;
 
 namespace com.csutil.editor {
 
+#if CSCORE_EXPERIMENTAL
+
     class UnityAccountLoginHelper : AssetPostprocessor {
 
         private class LoginDetails { public string email = ""; public string pw = ""; }
@@ -59,5 +61,7 @@ namespace com.csutil.editor {
         private static T GetProp<T>(object o, string propName) { return (T)o.GetType().GetProperty(propName).GetValue(o, null); }
 
     }
+
+#endif
 
 }
