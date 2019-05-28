@@ -25,11 +25,11 @@ namespace com.csutil.tests {
             MyStates currentState = MyStates.MyState1;
 
             // It is possible to listen to state machine transitions:
-            StateMachine.SubscribeToAllTransitions(new object(), (MyStates oldState, MyStates newState) => {
+            StateMachine.SubscribeToAllTransitions<MyStates>(new object(), (machine, oldState, newState) => {
                 Log.d("Transitioned from " + oldState + " to " + newState);
             });
             // And its possible to listen only to specific transitions:
-            StateMachine.SubscribeToTransition(new object(), MyStates.MyState1, MyStates.MyState2, () => {
+            StateMachine.SubscribeToTransition(new object(), MyStates.MyState1, MyStates.MyState2, delegate {
                 Log.d("Transitioned from 1 => 2");
             });
 
@@ -98,17 +98,21 @@ namespace com.csutil.tests {
             var listenerForSpecificTransitionTriggered = false;
             var listenerForExitingState1Triggered = false;
             var listenerForEnteringState2Triggered = false;
-            StateMachine.SubscribeToAllTransitions(new object(), (MyStates oldState, MyStates newState) => {
+            StateMachine.SubscribeToAllTransitions<MyStates>(new object(), (passedMachine, oldState, newState) => {
                 listenerForAllTransitionsTriggered = true;
+                Assert.Equal(stateMachine, passedMachine);
             });
-            StateMachine.SubscribeToTransition(new object(), MyStates.MyState1, MyStates.MyState2, () => {
+            StateMachine.SubscribeToTransition(new object(), MyStates.MyState1, MyStates.MyState2, (passedMachine) => {
                 listenerForSpecificTransitionTriggered = true;
+                Assert.Equal(stateMachine, passedMachine);
             });
-            StateMachine.SubscribeToStateExited(new object(), MyStates.MyState1, () => {
+            StateMachine.SubscribeToStateExited(new object(), MyStates.MyState1, (passedMachine) => {
                 listenerForExitingState1Triggered = true;
+                Assert.Equal(stateMachine, passedMachine);
             });
-            StateMachine.SubscribeToStateEntered(new object(), MyStates.MyState2, () => {
+            StateMachine.SubscribeToStateEntered(new object(), MyStates.MyState2, (passedMachine) => {
                 listenerForEnteringState2Triggered = true;
+                Assert.Equal(stateMachine, passedMachine);
             });
 
             currentState = stateMachine.TransitionTo(currentState, MyStates.MyState2);

@@ -16,26 +16,26 @@ namespace com.csutil {
             } else if (!allowedTransitions[currentState].Contains(newState)) {
                 throw Log.e(currentState + " -> " + newState + " blocked, transition not allowed!");
             }
-            EventBus.instance.Publish(TRANSITION_EVENT + (typeof(T)), currentState, newState);
+            EventBus.instance.Publish(TRANSITION_EVENT + (typeof(T)), allowedTransitions, currentState, newState);
             return newState;
         }
 
-        public static void SubscribeToAllTransitions<T>(object subscriber, Action<T, T> onTransition) {
+        public static void SubscribeToAllTransitions<T>(object subscriber, Action<Dictionary<T, HashSet<T>>, T, T> onTransition) {
             EventBus.instance.Subscribe(subscriber, TRANSITION_EVENT + (typeof(T)), onTransition);
         }
 
-        public static void SubscribeToTransition<T>(object subscriber, T oldState, T newState, Action onTransition) {
-            SubscribeToAllTransitions<T>(subscriber, (old, newS) => {
-                if (old.Equals(oldState) && newS.Equals(newState)) { onTransition(); }
+        public static void SubscribeToTransition<T>(object subscriber, T oldState, T newState, Action<Dictionary<T, HashSet<T>>> onTransition) {
+            SubscribeToAllTransitions<T>(subscriber, (sm, old, newS) => {
+                if (old.Equals(oldState) && newS.Equals(newState)) { onTransition(sm); }
             });
         }
 
-        public static void SubscribeToStateEntered<T>(object subscriber, T enteredState, Action onTransition) {
-            SubscribeToAllTransitions<T>(subscriber, (_, s) => { if (s.Equals(enteredState)) { onTransition(); } });
+        public static void SubscribeToStateEntered<T>(object subscriber, T enteredState, Action<Dictionary<T, HashSet<T>>> onTransition) {
+            SubscribeToAllTransitions<T>(subscriber, (sm, _, s) => { if (s.Equals(enteredState)) { onTransition(sm); } });
         }
 
-        public static void SubscribeToStateExited<T>(object subscriber, T exitedState, Action onTransition) {
-            SubscribeToAllTransitions<T>(subscriber, (s, _) => { if (s.Equals(exitedState)) { onTransition(); } });
+        public static void SubscribeToStateExited<T>(object subscriber, T exitedState, Action<Dictionary<T, HashSet<T>>> onTransition) {
+            SubscribeToAllTransitions<T>(subscriber, (sm, s, _) => { if (s.Equals(exitedState)) { onTransition(sm); } });
         }
 
     }
