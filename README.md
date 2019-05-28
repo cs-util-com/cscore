@@ -15,6 +15,8 @@ See the [examples](#-usage--examples) below to get a quick overview of all libra
 
 
 ### Pure C# Components
+The aim of the cscore package is to stay is slim/minimal as possible while including the feature and functionality typical projects would benefit from.
+
 * [Log](#logging) - A minimalistic logging wrapper + [AssertV2](#assertv2) to add saveguards anywhere in your logic
 * [EventBus](#The-EventBus) - Publish and subscribe to global events from anywhere in your code. Sends **1 million events in under 3 seconds** with minimal memory footprint!
 * [Injection Logic](#Injection-Logic) - A simple inversion of control pattern that does not rely on magic. Relies on the EventBus system, so its super fast as well!
