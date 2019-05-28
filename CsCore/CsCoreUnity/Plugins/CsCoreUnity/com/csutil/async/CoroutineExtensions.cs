@@ -22,14 +22,19 @@ namespace com.csutil {
         public static Coroutine ExecuteRepeated(this MonoBehaviour self, Func<bool> task,
             float delayInSecBetweenIterations, float delayInSecBeforeFirstExecution = 0, float repetitions = -1) {
             if (!self.isActiveAndEnabled) { throw new Exception("ExecuteRepeated called on inactive mono"); }
-            return self.StartCoroutine(ExecuteRepeated(task,
-                delayInSecBetweenIterations, delayInSecBeforeFirstExecution, repetitions));
+            return self.StartCoroutine(ExecuteRepeated(task, self, delayInSecBetweenIterations, delayInSecBeforeFirstExecution, repetitions));
         }
 
-        private static IEnumerator ExecuteRepeated(Func<bool> task, float repeatDelay, float firstDelay = 0, float rep = -1) {
+        private static IEnumerator ExecuteRepeated(Func<bool> task, MonoBehaviour mono, float repeatDelay, float firstDelay = 0, float rep = -1) {
             if (firstDelay > 0) { yield return new WaitForSeconds(firstDelay); }
             var waitTask = new WaitForSeconds(repeatDelay);
-            while (rep != 0 && run(task)) { rep--; yield return waitTask; }
+            while (rep != 0) {
+                if (mono.enabled) { // pause the repeating task while the parent mono is disabled
+                    if (!run(task)) { break; }
+                    rep--;
+                }
+                yield return waitTask;
+            }
         }
 
         private static bool run(Func<bool> t) { try { return t(); } catch (Exception e) { Log.e(e); } return false; }
