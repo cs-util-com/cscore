@@ -8,8 +8,6 @@ namespace com.csutil {
 
     public static class EventHandlerExtensions {
 
-        private static readonly object threadLock = new object();
-
         /// <summary> 
         /// This will create an action where the first call is executed and the last call is executed but 
         /// every call in between that is below the passed millisecond threshold is ignored
@@ -17,6 +15,7 @@ namespace com.csutil {
         public static EventHandler<T> AsThrottledDebounce<T>(this EventHandler<T> self, double delayInMs) {
             bool currentlyThrottling = false;
             bool needsFinalCall = false;
+            object threadLock = new object();
             return (sender, eventArgs) => {
                 lock (threadLock) {
                     if (currentlyThrottling) { needsFinalCall = true; return; }
