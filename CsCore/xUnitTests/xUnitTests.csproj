@@ -23,4 +23,10 @@
     <ProjectReference Include="..\PlainNetClassLib\PlainNetClassLib.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="LiteDB">
+      <HintPath>..\PlainNetClassLib\src\Plugins\CsCore\libs\LiteDB\LiteDB_v4.1.4.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

@@ -26,4 +26,10 @@
     <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="LiteDB">
+      <HintPath>src\Plugins\CsCore\libs\LiteDB\LiteDB_v4.1.4.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  
 </Project>
