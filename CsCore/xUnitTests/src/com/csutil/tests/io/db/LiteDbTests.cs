@@ -8,7 +8,7 @@ namespace com.csutil.tests.io.db {
 
     public class LiteDbTests {
 
-        public class Customer : HasId {
+        private class User : HasId {
             public string id { get; set; }
             public string name { get; set; }
             public int age { get; set; }
@@ -18,19 +18,18 @@ namespace com.csutil.tests.io.db {
         [Fact]
         void ExampleUsage1() {
 
-            var dbFile = EnvironmentV2.instance.GetAppDataFolder().GetChildDir("tests.io.db").GetChild("ExampleUsage1.db");
+            string testId = Guid.NewGuid().ToString();
+
+            var dbFile = EnvironmentV2.instance.GetAppDataFolder().GetChildDir("tests.io.db").GetChild("TestDB_" + testId);
             dbFile.ParentDir().CreateV2();
             dbFile.DeleteV2(); // for the test ensure that the db file does not yet exist
 
             // Open database (or create if doesn't exist)
             using (var db = new LiteDatabase(dbFile.FullPath())) {
-                // Get customer collection
-                var customers = db.GetCollection<Customer>("customers");
+                
+                var users = db.GetCollection<User>("users");
 
-                string testId = Guid.NewGuid().ToString();
-
-                // Create your new customer instance
-                var customer = new Customer {
+                var user1 = new User {
                     id = testId,
                     name = "John Doe",
                     age = 39
@@ -38,22 +37,23 @@ namespace com.csutil.tests.io.db {
 
                 // Create unique index in Name field
                 // https://github.com/mbdavid/LiteDB/wiki/Indexes#ensureindex
-                customers.EnsureIndex(x => x.name, true);
+                users.EnsureIndex(x => x.name, true);
 
-                customers.Insert(customer);
+                users.Insert(user1);
 
-                customer.name = "Joana Doe";
-                customers.Update(customer);
-                Assert.Equal("Joana Doe", customers.FindById(testId).name);
+                user1.name = "Joana Doe";
+                users.Update(user1);
+                Assert.Equal("Joana Doe", users.FindById(testId).name);
 
-                customer.name = "Joana Doe 2";
-                customers.Upsert(customer); // insert or update if already found
-                Assert.Equal("Joana Doe 2", customers.FindById(testId).name);
+                user1.name = "Joana Doe 2";
+                users.Upsert(user1); // insert or update if already found
+                Assert.Equal("Joana Doe 2", users.FindById(testId).name);
 
                 // Use LINQ to query documents (with no index)
-                var results = customers.Find(x => x.age > 20);
-                Assert.Single(results);
-                Assert.Equal("Joana Doe 2", results.First().name);
+                var queryResults = users.Find(x => x.age > 20);
+                Assert.Single(queryResults);
+                Assert.Equal("Joana Doe 2", queryResults.First().name);
+
             }
             Assert.True(dbFile.IsNotNullAndExists());
         }
