@@ -77,8 +77,7 @@ namespace com.csutil {
                 var methodString = method.ReflectedType.Name + "." + method.Name;
                 var paramsString = includeParams ? method.GetParameters().ToStringV2(x => "" + x, "", "") : "..";
                 return methodString + "(" + paramsString + ")";
-            }
-            catch (Exception e) { Console.WriteLine("" + e); return ""; }
+            } catch (Exception e) { Console.WriteLine("" + e); return ""; }
         }
 
         internal static object[] AddTo(this StackFrame stackFrame, object[] args) {

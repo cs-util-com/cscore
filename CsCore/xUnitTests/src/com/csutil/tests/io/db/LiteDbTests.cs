@@ -22,7 +22,6 @@ namespace com.csutil.tests.io.db {
 
             var dbFile = EnvironmentV2.instance.GetAppDataFolder().GetChildDir("tests.io.db").GetChild("TestDB_" + testId);
             dbFile.ParentDir().CreateV2();
-            dbFile.DeleteV2(); // for the test ensure that the db file does not yet exist
 
             // Open database (or create if doesn't exist)
             using (var db = new LiteDatabase(dbFile.FullPath())) {
@@ -56,6 +55,7 @@ namespace com.csutil.tests.io.db {
 
             }
             Assert.True(dbFile.IsNotNullAndExists());
+            dbFile.DeleteV2(); // cleanup after the test
         }
 
     }
