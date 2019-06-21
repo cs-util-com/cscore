@@ -9,7 +9,7 @@ using Xunit;
 
 namespace com.csutil.tests.io.db {
 
-    public class LiteDbPerformanceTests {
+    public class LiteDbPerformanceTest1 {
 
         private class Elem : HasId {
             public string id { get; set; }
@@ -21,7 +21,7 @@ namespace com.csutil.tests.io.db {
         [Fact]
         async void PerformanceTest1() {
             AssertV2.throwExeptionIfAssertionFails = true;
-            
+
             var dataTree = NewTreeLayer("1", 1000, () => NewTreeLayer("2", 2, () => NewTreeLayer("3", 4, () => NewTreeLayer("4", 1))));
 
             var dbFile = EnvironmentV2.instance.GetAppDataFolder().GetChildDir("tests.io.db").GetChild("PerformanceTestDB_" + Guid.NewGuid().ToString());
@@ -54,7 +54,7 @@ namespace com.csutil.tests.io.db {
                 elements.Insert(elem);
             }));
             await Task.WhenAll(insertTasks);
-            Log.MethodDone(insertTimer, 500);
+            Log.MethodDone(insertTimer, 600);
         }
 
         private List<Elem> NewTreeLayer(string layerName, int nodeCount, Func<List<Elem>> CreateChildren = null) {
