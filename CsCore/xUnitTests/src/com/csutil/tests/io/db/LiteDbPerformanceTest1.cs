@@ -11,6 +11,8 @@ namespace com.csutil.tests.io.db {
 
     public class LiteDbPerformanceTest1 {
 
+        public LiteDbPerformanceTest1(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
+
         private class Elem : HasId {
             public string id { get; set; }
             public string name { get; internal set; }
