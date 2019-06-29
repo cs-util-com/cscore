@@ -3,6 +3,8 @@ using System.Collections.Generic;
 
 namespace com.csutil {
 
+    public delegate Reducer<IN> Transducer<IN, OUT>(Reducer<OUT> reducer);
+
     public delegate object Reducer<IN>(object result, IN elem);
 
     /// <summary> 
@@ -18,7 +20,7 @@ namespace com.csutil {
         /// Make a function that takes a reducer and returns a new reducer that 
         /// filters out some items so that the original reducer never sees them.
         /// </summary> 
-        public static Func<Reducer<IN>, Reducer<IN>> NewFilter<IN>(Func<IN, bool> filter) {
+        public static Transducer<IN, IN> NewFilter<IN>(Func<IN, bool> filter) {
             return (nextReducer) => (accumulator, elem) => filter(elem) ? nextReducer(accumulator, elem) : accumulator;
         }
 
@@ -26,7 +28,7 @@ namespace com.csutil {
         /// Make a function that takes a reducer and returns a new reducer that 
         /// transforms every time before the original reducer gets to see it.
         /// </summary> 
-        public static Func<Reducer<OUT>, Reducer<IN>> NewMapper<IN, OUT>(Func<IN, OUT> mapper) {
+        public static Transducer<IN, OUT> NewMapper<IN, OUT>(Func<IN, OUT> mapper) {
             return (nextReducer) => (accumulator, elem) => nextReducer(accumulator, mapper(elem));
         }
 
@@ -38,12 +40,10 @@ namespace com.csutil {
             });
         }
 
-        public static Reducer<IN> WithFinalListReducer<OUT, IN>(this Func<Reducer<OUT>, Reducer<IN>> self) {
+        public static Reducer<IN> WithFinalListReducer<OUT, IN>(this Transducer<IN, OUT> self) {
             return self((accumulator, x) => {
-                if (accumulator is List<OUT> list) { list.Add(x); } else {
-                    throw Log.e("When .WithFinalListReducer() is used the accumulator must be of type List<" + typeof(OUT) + "> but was " + accumulator.GetType());
-                }
-                return accumulator;
+                if (accumulator is List<OUT> list) { list.Add(x); return accumulator; }
+                throw Log.e("When .WithFinalListReducer() is used the accumulator must be of type List<" + typeof(OUT) + "> but was " + accumulator.GetType());
             });
         }
 
