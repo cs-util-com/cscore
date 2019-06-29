@@ -3,6 +3,8 @@ using System.Collections.Generic;
 
 namespace com.csutil {
 
+    public delegate A Reducer<B, A>(A x, B t);
+
     /// <summary> 
     /// A transducer takes a Reducer and transforms it, so: transducer = Reducer -> Reducer
     /// Related sources:
@@ -12,13 +14,11 @@ namespace com.csutil {
     /// </summary> 
     public static class Transducers {
 
-        public delegate A Reducer<B, A>(A x, B t);
-
         /// <summary> 
         /// Make a function that takes a reducer and returns a new reducer that 
         /// filters out some items so that the original reducer never sees them.
         /// </summary> 
-        public static Func<Reducer<T, R>, Reducer<T, R>> NewFilter<T, R>(Func<T, bool> filter) {
+        public static Func<Reducer<IN, _>, Reducer<IN, _>> NewFilter<IN, _>(Func<IN, bool> filter) {
             return (nextReducer) => {
                 return (accumulator, currentItem) => {
                     return filter(currentItem) ? nextReducer(accumulator, currentItem) : accumulator;
@@ -30,7 +30,7 @@ namespace com.csutil {
         /// Make a function that takes a reducer and returns a new reducer that 
         /// transforms every time before the original reducer gets to see it.
         /// </summary> 
-        public static Func<Reducer<R, R>, Reducer<T, R>> NewMapper<T, R>(Func<T, R> mapper) {
+        public static Func<Reducer<OUT, _>, Reducer<IN, _>> NewMapper<IN, OUT, _>(Func<IN, OUT> mapper) {
             return (nextReducer) => {
                 return (accumulator, currentItem) => {
                     return nextReducer(accumulator, mapper(currentItem));
@@ -38,9 +38,12 @@ namespace com.csutil {
             };
         }
 
+        public static OUT Reduce<IN, OUT>(this Reducer<IN, OUT> self, OUT seed, IEnumerable<IN> elements) {
+            return elements.Reduce(seed, (result, elem) => self(result, elem));
+        }
 
-        public static R Reduce<T, R>(this Reducer<T, R> self, IEnumerable<T> list, R seed) {
-            return list.Reduce(seed, (result, elem) => self(result, elem));
+        public static Reducer<_, List<IN>> NewMapperToList<IN, _>(this Func<Reducer<IN, List<IN>>, Reducer<_, List<IN>>> self) {
+            return self((all, x) => { all.Add(x); return all; });
         }
 
     }
