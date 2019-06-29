@@ -17,12 +17,19 @@ namespace com.csutil.json {
             return r;
         }
 
-        public T Read<T>(StreamReader jsonString) {
-            var r = (T)reader.Deserialize(jsonString, typeof(T));
-            this.AssertThatJsonWasFullyParsedIntoFields(debugWriter, jsonString.ReadToEnd(), r);
+        public T Read<T>(StreamReader streamReader) {
+            var r = (T)reader.Deserialize(streamReader, typeof(T));
+            (this).AssertThatJsonWasFullyParsedIntoFields(debugWriter, ReadFullString(streamReader), r);
             return r;
         }
 
+        private static string ReadFullString(StreamReader streamReader) {
+            streamReader.DiscardBufferedData();
+            streamReader.BaseStream.Position = 0;
+            var fullString = streamReader.ReadToEnd();
+            AssertV2.IsFalse(fullString.IsNullOrEmpty(), "The string loaded from the streamReader was null or emtpy");
+            return fullString;
+        }
     }
 
 }
