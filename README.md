@@ -216,6 +216,43 @@ More usage examples can be found in the [HelperMethodTests.cs](https://github.co
 
 
 
+## Transducers
+Transducers allow to do similar things as the functional concepts like ``Filter``, ``Map`` and ``Reduce``. The main idea of transducers is to make this functional style as efficient as possible, iterating through the target structure only once and bulding a pipeline still of the same easy to understand functional building blocks. 
+
+A first example that uses only ``Filter`` will give a better idea how this looks like:
+
+```cs
+List<int> testData = new List<int>() { 1, 2, 3, 4, 5, 6, 7, 8 };
+
+var filter1 = Transducers.NewFilter<int>(x => x > 4);
+var filter2 = Transducers.NewFilter<int>(x => x % 2 != 0);
+
+Reducer<int> createdReducer = filter1(filter2.WithFinalListReducer());
+
+List<int> result = createdReducer.Reduce(seed: new List<int>(), elements: testData);
+Assert.Equal(2, result.Count()); // 6 and 8 will be left
+Assert.Equal(5, result.First());
+Assert.Equal(7, result.Last());
+```
+
+A more complex example that uses ``Filter``, ``Map`` and ``Reduce``:
+```cs
+List<int> testData = new List<int>() { 1, 2, 3, 4, 5, 6, 7, 8 };
+
+Transducer<int, int> filter1 = Transducers.NewFilter<int>(x => x > 4);
+Transducer<int, int> filter2 = Transducers.NewFilter<int>(x => x % 2 != 0);
+Transducer<int, float> mapper = Transducers.NewMapper<int, float>(x => x / 2f);
+Reducer<float> sumReducer = (total, x) => (float)total + x;
+
+Reducer<int> createdReducer = filter1(filter2(mapper(sumReducer)));
+
+float result = createdReducer.Reduce(seed: 0f, elements: testData);
+Assert.Equal(6, result); // 5/2 + 7/2 == 6
+```
+More examples can be found in the [TransducerTests.cs](https://github.com/cs-util-com/cscore/blob/master/CsCore/xUnitTests/src/com/csutil/tests/datastructures/TransducerTests.cs). The syntax is still work in progress and I am happy for any suggestions how to improve this. And there are some great [related sources](https://jrsinclair.com/articles/2019/magical-mystical-js-transducers/) you can read to learn more about Transducers.
+
+
+
 ## JSON Parsing 
 - The `JsonWriter` and `JsonReader` interfaces are an abstraction that should be flexiable enough to be used for most usecases. 
 - The underlying implementation can easily be swapped if needed and the default implementation uses [Json.NET](https://github.com/JamesNK/Newtonsoft.Json).
