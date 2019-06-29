@@ -4,7 +4,10 @@ using System.Collections.Generic;
 namespace com.csutil {
 
     /// <summary> 
+    /// A transducer takes a Reducer and transforms it, so: transducer = Reducer -> Reducer
     /// Related sources:
+    /// - https://medium.com/javascript-scene/transducers-efficient-data-processing-pipelines-in-javascript-7985330fe73d
+    /// - http://raganwald.com/2017/04/30/transducers.html
     /// - https://jrsinclair.com/articles/2019/magical-mystical-js-transducers/
     /// </summary> 
     public static class Transducers {
@@ -17,8 +20,8 @@ namespace com.csutil {
         /// </summary> 
         public static Func<Reducer<T, R>, Reducer<T, R>> NewFilter<T, R>(Func<T, bool> filter) {
             return (nextReducer) => {
-                return (acc, item) => {
-                    return filter(item) ? nextReducer(acc, item) : acc;
+                return (accumulator, currentItem) => {
+                    return filter(currentItem) ? nextReducer(accumulator, currentItem) : accumulator;
                 };
             };
         }
@@ -29,8 +32,8 @@ namespace com.csutil {
         /// </summary> 
         public static Func<Reducer<R, R>, Reducer<T, R>> NewMapper<T, R>(Func<T, R> mapper) {
             return (nextReducer) => {
-                return (acc, item) => {
-                    return nextReducer(acc, mapper(item));
+                return (accumulator, currentItem) => {
+                    return nextReducer(accumulator, mapper(currentItem));
                 };
             };
         }
