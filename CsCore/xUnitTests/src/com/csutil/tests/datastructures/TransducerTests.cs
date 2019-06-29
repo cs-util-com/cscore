@@ -23,11 +23,12 @@ namespace com.csutil.tests {
         [Fact]
         public void Transducer_Example1() {
 
-            var filter1 = Transducers.NewFilter<MyClass1, int>(x => x != null);
-            var filter2 = Transducers.NewFilter<MyClass1, int>(x => x.someInt > 1);
-            var mapper = Transducers.NewMapper<MyClass1, int, int>(x => x.someInt);
+            var filter1 = Transducers.NewFilter<MyClass1>(x => x != null);
+            var filter2 = Transducers.NewFilter<MyClass1>(x => x.someInt > 1);
+            var mapper = Transducers.NewMapper<MyClass1, int>(x => x.someInt);
+            Reducer<int> finalSumReducer = (total, x) => (int)total + x;
             // Create the reducer by composing the transducers:
-            Reducer<MyClass1, int> allInOneReducer = filter1(filter2(mapper((total, x) => total + x)));
+            Reducer<MyClass1> allInOneReducer = filter1(filter2(mapper(finalSumReducer)));
 
             List<MyClass1> testData = newExampleList();
             var sum = allInOneReducer.Reduce(0, testData);
@@ -38,14 +39,28 @@ namespace com.csutil.tests {
         [Fact]
         public void Transducer_Example2() {
 
-            var filter = Transducers.NewFilter<MyClass1, List<int>>(x => x != null);
-            var mapper = Transducers.NewMapper<MyClass1, int, List<int>>(x => x.someInt);
-            Reducer<MyClass1, List<int>> allInOneReducer = filter(mapper.NewMapperToList());
+            var filter = Transducers.NewFilter<MyClass1>(x => x != null);
+            var mapper = Transducers.NewMapper<MyClass1, int>(x => x.someInt);
+            Reducer<MyClass1> allInOneReducer = filter(mapper.WithFinalListReducer());
 
             List<MyClass1> testData = newExampleList();
             var resultingList = allInOneReducer.Reduce(new List<int>(), testData);
 
             Assert.Equal(4, resultingList.Count());
+
+        }
+
+        [Fact]
+        public void Transducer_Example3() {
+
+            var filter1 = Transducers.NewFilter<MyClass1>(x => x != null);
+            var filter2 = Transducers.NewFilter<MyClass1>(x => x.someInt > 1);
+            Reducer<MyClass1> allInOneReducer = filter1(filter2.WithFinalListReducer());
+
+            List<MyClass1> testData = newExampleList();
+            var resultingList = allInOneReducer.Reduce(new List<MyClass1>(), testData);
+
+            Assert.Equal(3, resultingList.Count());
 
         }
 
