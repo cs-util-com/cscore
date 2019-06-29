@@ -25,7 +25,7 @@ namespace com.csutil {
         }
 
         public static DirectoryInfo CreateV2(this DirectoryInfo self) {
-            if (!self.Exists) { self.Create(); self.Refresh(); }
+            if (!self.ExistsV2()) { self.Create(); self.Refresh(); }
             return self;
         }
 
@@ -50,7 +50,12 @@ namespace com.csutil {
         public static string FullPath(this FileInfo self) { return self.FullName; }
 
         public static bool IsNotNullAndExists(this FileSystemInfo self) {
-            if (self == null) { return false; } else { return self.Exists; }
+            if (self == null) { return false; } else { return self.ExistsV2(); }
+        }
+
+        public static bool ExistsV2(this FileSystemInfo self) {
+            self.Refresh();
+            return self.Exists;
         }
 
         public static DirectoryInfo ParentDir(this FileInfo self) {
@@ -70,10 +75,10 @@ namespace com.csutil {
         }
 
         private static bool DeleteV2(FileSystemInfo self, Action deleteAction) {
-            if (self != null && self.Exists) {
+            if (self != null && self.ExistsV2()) {
                 deleteAction();
                 self.Refresh();
-                AssertV2.IsFalse(self.Exists, "Still exists: " + self.FullName);
+                AssertV2.IsFalse(self.ExistsV2(), "Still exists: " + self.FullName);
                 return true;
             }
             return false;
@@ -147,8 +152,7 @@ namespace com.csutil {
 
         /// <summary> This method helps with decrypting the string before parsing it as a json object </summary>
         public static T LoadAsEncyptedJson<T>(this FileInfo self, string jsonEncrKey, Func<T> getDefaultValue) {
-            try { return JsonReader.GetReader().Read<T>(self.LoadAs<string>().Decrypt(jsonEncrKey)); }
-            catch (Exception e) { Log.w("" + e); return getDefaultValue(); }
+            try { return JsonReader.GetReader().Read<T>(self.LoadAs<string>().Decrypt(jsonEncrKey)); } catch (Exception e) { Log.w("" + e); return getDefaultValue(); }
         }
 
         public static void SaveAsEncryptedJson<T>(this FileInfo self, T objectToSave, string jsonEncrKey) {

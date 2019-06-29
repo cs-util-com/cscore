@@ -26,4 +26,9 @@
     <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
   </ItemGroup>
 
+  <!-- https://www.nuget.org/packages/LiteDB/ -->
+  <ItemGroup>
+    <PackageReference Include="LiteDB" Version="4.1.4" />
+  </ItemGroup>
+  
 </Project>
