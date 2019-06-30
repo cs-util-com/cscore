@@ -14,6 +14,10 @@ namespace com.csutil {
             return self.Aggregate(func);
         }
 
+        public static R Reduce<T, R>(this IEnumerable<T> self, R seed, Func<R, T, R> func) {
+            return self.Aggregate<T, R>(seed, func);
+        }
+
         public static IEnumerable<T> Filter<T>(this IEnumerable<T> self, Func<T, bool> predicate) {
             return self.Where(predicate);
         }
