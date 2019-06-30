@@ -5,7 +5,7 @@ namespace com.csutil {
 
     public delegate Reducer<IN> Transducer<IN, OUT>(Reducer<OUT> reducer);
 
-    public delegate object Reducer<IN>(object result, IN elem);
+    public delegate object Reducer<IN>(object accumulator, IN elem);
 
     /// <summary> 
     /// A transducer takes a Reducer and transforms it, so: transducer = Reducer -> Reducer
@@ -40,11 +40,18 @@ namespace com.csutil {
             });
         }
 
-        public static Reducer<IN> WithFinalListReducer<OUT, IN>(this Transducer<IN, OUT> self) {
-            return self((accumulator, x) => {
-                if (accumulator is List<OUT> list) { list.Add(x); return accumulator; }
-                throw Log.e("When .WithFinalListReducer() is used the accumulator must be of type List<" + typeof(OUT) + "> but was " + accumulator.GetType());
+        public static Transducer<T, T> Compose<T>(params Transducer<T, T>[] transducers) {
+            return r => { for (int i = transducers.Length - 1; i >= 0; i--) { r = transducers[i](r); } return r; };
+        }
+
+        public static List<T> FilterToList<T>(this IEnumerable<T> elements, Transducer<T, T> transducer) { return elements.MapToList(transducer); }
+
+
+        public static List<OUT> MapToList<IN, OUT>(this IEnumerable<IN> elements, Transducer<IN, OUT> transducer) {
+            Reducer<IN> reducer = transducer((accumulator, elem) => {
+                (accumulator as List<OUT>).Add(elem); return accumulator;
             });
+            return reducer.Reduce(new List<OUT>(), elements);
         }
 
     }

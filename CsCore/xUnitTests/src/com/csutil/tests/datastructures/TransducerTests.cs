@@ -13,14 +13,18 @@ namespace com.csutil.tests {
 
             var filter1 = Transducers.NewFilter<int>(x => x > 4);
             var filter2 = Transducers.NewFilter<int>(x => x % 2 != 0);
-
-            Reducer<int> createdReducer = filter1(filter2.WithFinalListReducer());
-
-            List<int> result = createdReducer.Reduce(seed: new List<int>(), elements: testData);
-            Assert.Equal(2, result.Count()); // 6 and 8 will be left
-            Assert.Equal(5, result.First());
-            Assert.Equal(7, result.Last());
-
+            {
+                List<int> result = testData.MapToList(Transducers.Compose(filter1, filter2));
+                Assert.Equal(2, result.Count()); // 6 and 8 will be left
+                Assert.Equal(5, result.First());
+                Assert.Equal(7, result.Last());
+            }
+            { // without Transducers.Compose the filters have to be chained manually:
+                List<int> result = testData.FilterToList(x => (filter1(filter2(x))));
+                Assert.Equal(2, result.Count()); // 6 and 8 will be left
+                Assert.Equal(5, result.First());
+                Assert.Equal(7, result.Last());
+            }
         }
 
         [Fact]
@@ -34,7 +38,6 @@ namespace com.csutil.tests {
             Reducer<float> sumReducer = (total, x) => (float)total + x;
 
             Reducer<int> createdReducer = filter1(filter2(mapper(sumReducer)));
-
             float result = createdReducer.Reduce(seed: 0f, elements: testData);
             Assert.Equal(6, result); // 5/2 + 7/2 == 6
 
@@ -43,13 +46,12 @@ namespace com.csutil.tests {
         [Fact]
         public void Transducer_Filter_Example2() {
 
+            List<MyClass1> testData = newExampleList();
+
             var filter1 = Transducers.NewFilter<MyClass1>(x => x != null);
             var filter2 = Transducers.NewFilter<MyClass1>(x => x.someInt > 1);
-            Reducer<MyClass1> createdReducer = filter1(filter2.WithFinalListReducer());
 
-            List<MyClass1> testData = newExampleList();
-            var resultingList = createdReducer.Reduce(new List<MyClass1>(), testData);
-
+            List<MyClass1> resultingList = testData.FilterToList(x => filter1(filter2(x)));
             Assert.Equal(3, resultingList.Count());
 
         }
@@ -57,19 +59,20 @@ namespace com.csutil.tests {
         [Fact]
         public void Transducer_FilterMap_Example() {
 
+            List<MyClass1> testData = newExampleList();
+
             var filter = Transducers.NewFilter<MyClass1>(x => x != null);
             var mapper = Transducers.NewMapper<MyClass1, int>(x => x.someInt);
-            Reducer<MyClass1> createdReducer = filter(mapper.WithFinalListReducer());
 
-            List<MyClass1> testData = newExampleList();
-            var resultingList = createdReducer.Reduce(new List<int>(), testData);
-
+            List<int> resultingList = testData.MapToList<MyClass1, int>(x => filter(mapper(x)));
             Assert.Equal(4, resultingList.Count());
 
         }
 
         [Fact]
         public void Transducer_FilterMapReduce_Example2() {
+
+            List<MyClass1> testData = newExampleList();
 
             Transducer<MyClass1, MyClass1> filter1 = Transducers.NewFilter<MyClass1>(x => x != null);
             Transducer<MyClass1, MyClass1> filter2 = Transducers.NewFilter<MyClass1>(x => x.someInt > 1);
@@ -78,8 +81,6 @@ namespace com.csutil.tests {
 
             // Create the reducer by composing the transducers:
             Reducer<MyClass1> createdReducer = filter1(filter2(mapper(sumReducer)));
-
-            List<MyClass1> testData = newExampleList();
             var sum = createdReducer.Reduce(0, testData);
             Assert.Equal(6, sum);
 
