@@ -24,6 +24,7 @@ The aim of the cscore package is to stay is slim/minimal as possible while inclu
 * [REST Extensions](#REST-Extensions) - Extensions to simplify sending REST requests in as few lines as possible without limiting flexibility
 * [Directory & File Extensions](#directory--file-extensions) - To simplify handling files, folders and persisting data
 * Common String extension methods demonstrated in StringExtensionTests.cs
+* [Functional extensions](#IEnumerable-Extensions) and [Transducers](#Transducers) to allow functional data mapping (filter, map, reduce, ..)
 * Many other helpful extension methods best demonstrated in HelperMethodTests.cs
 
 
