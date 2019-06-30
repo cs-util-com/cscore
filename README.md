@@ -226,13 +226,18 @@ List<int> testData = new List<int>() { 1, 2, 3, 4, 5, 6, 7, 8 };
 
 var filter1 = Transducers.NewFilter<int>(x => x > 4);
 var filter2 = Transducers.NewFilter<int>(x => x % 2 != 0);
-
-Reducer<int> createdReducer = filter1(filter2.WithFinalListReducer());
-
-List<int> result = createdReducer.Reduce(seed: new List<int>(), elements: testData);
-Assert.Equal(2, result.Count()); // 6 and 8 will be left
-Assert.Equal(5, result.First());
-Assert.Equal(7, result.Last());
+{
+    List<int> result = testData.FilterToList(Transducers.Compose(filter1, filter2));
+    Assert.Equal(2, result.Count()); // 6 and 8 will be left
+    Assert.Equal(5, result.First());
+    Assert.Equal(7, result.Last());
+}
+{ // without Transducers.Compose the filters have to be chained manually:
+    List<int> result = testData.FilterToList(x => (filter1(filter2(x))));
+    Assert.Equal(2, result.Count()); // 6 and 8 will be left
+    Assert.Equal(5, result.First());
+    Assert.Equal(7, result.Last());
+}
 ```
 
 A more complex example that uses ``Filter``, ``Map`` and ``Reduce``:
@@ -245,7 +250,6 @@ Transducer<int, float> mapper = Transducers.NewMapper<int, float>(x => x / 2f);
 Reducer<float> sumReducer = (total, x) => (float)total + x;
 
 Reducer<int> createdReducer = filter1(filter2(mapper(sumReducer)));
-
 float result = createdReducer.Reduce(seed: 0f, elements: testData);
 Assert.Equal(6, result); // 5/2 + 7/2 == 6
 ```

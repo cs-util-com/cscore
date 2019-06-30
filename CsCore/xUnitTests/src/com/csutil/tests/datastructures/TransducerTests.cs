@@ -14,7 +14,7 @@ namespace com.csutil.tests {
             var filter1 = Transducers.NewFilter<int>(x => x > 4);
             var filter2 = Transducers.NewFilter<int>(x => x % 2 != 0);
             {
-                List<int> result = testData.MapToList(Transducers.Compose(filter1, filter2));
+                List<int> result = testData.FilterToList(Transducers.Compose(filter1, filter2));
                 Assert.Equal(2, result.Count()); // 6 and 8 will be left
                 Assert.Equal(5, result.First());
                 Assert.Equal(7, result.Last());
