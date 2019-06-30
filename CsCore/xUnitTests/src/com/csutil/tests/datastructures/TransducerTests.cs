@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
@@ -35,10 +36,9 @@ namespace com.csutil.tests {
             Transducer<int, int> filter1 = Transducers.NewFilter<int>(x => x > 4);
             Transducer<int, int> filter2 = Transducers.NewFilter<int>(x => x % 2 != 0);
             Transducer<int, float> mapper = Transducers.NewMapper<int, float>(x => x / 2f);
-            Reducer<float> sumReducer = (total, x) => (float)total + x;
+            Func<float, float, float> sumReducer = (total, x) => total + x;
 
-            Reducer<int> createdReducer = filter1(filter2(mapper(sumReducer)));
-            float result = createdReducer.Reduce(seed: 0f, elements: testData);
+            float result = testData.ReduceTo(x => filter1(filter2(mapper(x))), sumReducer, seed: 0);
             Assert.Equal(6, result); // 5/2 + 7/2 == 6
 
         }
@@ -77,11 +77,10 @@ namespace com.csutil.tests {
             Transducer<MyClass1, MyClass1> filter1 = Transducers.NewFilter<MyClass1>(x => x != null);
             Transducer<MyClass1, MyClass1> filter2 = Transducers.NewFilter<MyClass1>(x => x.someInt > 1);
             Transducer<MyClass1, int> mapper = Transducers.NewMapper<MyClass1, int>(x => x.someInt);
-            Reducer<int> sumReducer = (total, x) => (int)total + x;
+            Func<int, int, int> sumReducer = (total, x) => total + x;
 
             // Create the reducer by composing the transducers:
-            Reducer<MyClass1> createdReducer = filter1(filter2(mapper(sumReducer)));
-            var sum = createdReducer.Reduce(0, testData);
+            var sum = testData.ReduceTo(x => filter1(filter2(mapper(x))), sumReducer, seed: 0);
             Assert.Equal(6, sum);
 
         }

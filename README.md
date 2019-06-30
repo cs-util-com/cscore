@@ -242,16 +242,16 @@ var filter2 = Transducers.NewFilter<int>(x => x % 2 != 0);
 
 A more complex example that uses ``Filter``, ``Map`` and ``Reduce``:
 ```cs
-List<int> testData = new List<int>() { 1, 2, 3, 4, 5, 6, 7, 8 };
+List<MyClass1> testData = newExampleList();
 
-Transducer<int, int> filter1 = Transducers.NewFilter<int>(x => x > 4);
-Transducer<int, int> filter2 = Transducers.NewFilter<int>(x => x % 2 != 0);
-Transducer<int, float> mapper = Transducers.NewMapper<int, float>(x => x / 2f);
-Reducer<float> sumReducer = (total, x) => (float)total + x;
+Transducer<MyClass1, MyClass1> filter1 = Transducers.NewFilter<MyClass1>(x => x != null);
+Transducer<MyClass1, MyClass1> filter2 = Transducers.NewFilter<MyClass1>(x => x.someInt > 1);
+Transducer<MyClass1, int> mapper = Transducers.NewMapper<MyClass1, int>(x => x.someInt);
+Func<int, int, int> sumReducer = (total, x) => total + x;
 
-Reducer<int> createdReducer = filter1(filter2(mapper(sumReducer)));
-float result = createdReducer.Reduce(seed: 0f, elements: testData);
-Assert.Equal(6, result); // 5/2 + 7/2 == 6
+// Create the reducer by composing the transducers:
+var sum = testData.ReduceTo(x => filter1(filter2(mapper(x))), sumReducer, seed: 0);
+Assert.Equal(6, sum);
 ```
 More examples can be found in the [TransducerTests.cs](https://github.com/cs-util-com/cscore/blob/master/CsCore/xUnitTests/src/com/csutil/tests/datastructures/TransducerTests.cs). The syntax is still work in progress and I am happy for any suggestions how to improve this. And there are some great [related sources](https://jrsinclair.com/articles/2019/magical-mystical-js-transducers/) you can read to learn more about Transducers.
 

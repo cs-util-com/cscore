@@ -54,6 +54,10 @@ namespace com.csutil {
             return reducer.Reduce(new List<OUT>(), elements);
         }
 
+        public static OUT ReduceTo<IN, OUT>(this IEnumerable<IN> elements, Transducer<IN, OUT> transducer, Func<OUT, OUT, OUT> reduce, OUT seed) {
+            return transducer((accumulator, elem) => reduce((OUT)accumulator, elem)).Reduce(seed, elements);
+        }
+
     }
 
 }
