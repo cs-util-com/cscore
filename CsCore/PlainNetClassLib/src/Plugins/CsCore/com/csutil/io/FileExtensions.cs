@@ -135,7 +135,7 @@ namespace com.csutil {
                 using (StreamReader s = new StreamReader(readStream)) {
                     if (typeof(T) == typeof(string)) { return (T)(object)s.ReadToEnd(); }
                     { // If a subscriber reacts to LoadAs return its response:
-                        var results = EventBus.instance.Publish("LoadAs" + typeof(T), self);
+                        var results = EventBus.instance.NewPublishIEnumerable("LoadAs" + typeof(T), self);
                         var result = results.Filter(x => x is T).FirstOrDefault();
                         if (result != null) { return (T)result; }
                     } // Otherwise use the default json reader approach:

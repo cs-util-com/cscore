@@ -2,6 +2,7 @@ using com.csutil.eventbus;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace com.csutil.injection {
     public class Injector {
@@ -16,15 +17,11 @@ namespace com.csutil.injection {
         }
 
         public T Get<T>(object caller, bool createIfNull = true) {
-            IEnumerable<T> results = GetAll<T>(caller, createIfNull);
-            if (results.Count() > 2) { Log.w("Multiple injectors set for " + GetEventKey<T>()); }
-            return results.FirstOrDefault();
+            return GetAll<T>(caller, createIfNull).FirstOrDefault();
         }
 
         public IEnumerable<T> GetAll<T>(object caller, bool createIfNull = true) {
-            var results = usedEventBus.Publish(GetEventKey<T>(), caller, createIfNull).Filter(x => x is T).Cast<T>();
-            // if (results.IsNullOrEmpty()) { Log.d("No inject results for " + GetEventKey<T>()); }
-            return results;
+            return usedEventBus.NewPublishIEnumerable(GetEventKey<T>(), caller, createIfNull).Filter(x => x is T).Cast<T>();
         }
 
         private string GetEventKey<T>() { return "InjectReq:" + typeof(T); }
@@ -47,6 +44,18 @@ namespace com.csutil.injection {
         }
 
         public bool UnregisterInjector<T>(object injector) { return usedEventBus.Unsubscribe(injector, GetEventKey<T>()); }
+
+        /// <summary> sets up a temporary context in which injecting the defined Type returns the set myContextInstance </summary>
+        public void DoWithTempContext<T>(T myContextInstance, Action runWithTemporaryContext) {
+            var injector = new object();
+            var threadOfContextCreation = Thread.CurrentThread;
+            RegisterInjector<T>(injector, (requester, createIfNull) => {
+                if (Thread.CurrentThread == threadOfContextCreation) { return myContextInstance; }
+                return default(T);
+            });
+            runWithTemporaryContext();
+            UnregisterInjector<T>(injector);
+        }
 
     }
 }
