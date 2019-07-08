@@ -15,13 +15,6 @@ namespace com.csutil.tests.io.db {
 
         public LiteDbPerformanceTest1(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
-        private class Elem : HasId {
-            public string id { get; set; }
-            public string name { get; set; }
-            public List<Elem> children { get; set; }
-            public string GetId() { return id; }
-        }
-
         [Fact]
         async void PerformanceTest1() {
             AssertV2.throwExeptionIfAssertionFails = true;
@@ -47,9 +40,9 @@ namespace com.csutil.tests.io.db {
             Assert.False(dbFile.ExistsV2());
         }
 
-        private static async Task ReadFromDb(List<Elem> dataTree, LiteDatabase db) {
+        private static async Task ReadFromDb(List<TreeElem> dataTree, LiteDatabase db) {
             var readTimer = Log.MethodEntered();
-            var elements = db.GetCollection<Elem>("elements");
+            var elements = db.GetCollection<TreeElem>("elements");
             await ParallelExec(dataTree, (elem) => {
                 var found = elements.FindById(elem.id);
                 Assert.Equal(elem.name, found.name);
@@ -57,9 +50,9 @@ namespace com.csutil.tests.io.db {
             Log.MethodDone(readTimer, 200);
         }
 
-        private static async Task InsertIntoDb(List<Elem> dataTree, LiteDatabase db) {
+        private static async Task InsertIntoDb(List<TreeElem> dataTree, LiteDatabase db) {
             var insertTimer = Log.MethodEntered();
-            var elements = db.GetCollection<Elem>("elements");
+            var elements = db.GetCollection<TreeElem>("elements");
             await ParallelExec(dataTree, (elem) => {
                 elements.Insert(elem);
             });
@@ -70,7 +63,7 @@ namespace com.csutil.tests.io.db {
             return Task.WhenAll(data.Map(elem => Task.Run(() => actionPerElement(elem))));
         }
 
-        private static async Task WriteFiles(List<Elem> dataTree, DirectoryInfo testFolder) {
+        private static async Task WriteFiles(List<TreeElem> dataTree, DirectoryInfo testFolder) {
             var insertTimer = Log.MethodEntered();
             await ParallelExec(dataTree, (elem) => {
                 GetFileForElem(testFolder, elem).SaveAsJson(elem);
@@ -78,29 +71,36 @@ namespace com.csutil.tests.io.db {
             Log.MethodDone(insertTimer, 600);
         }
 
-        private static async Task ReadFiles(List<Elem> dataTree, DirectoryInfo testFolder) {
+        private static async Task ReadFiles(List<TreeElem> dataTree, DirectoryInfo testFolder) {
             var readTimer = Log.MethodEntered();
             var reader = JsonReader.GetReader();
             await ParallelExec(dataTree, (elem) => {
-                var found = GetFileForElem(testFolder, elem).LoadAs<Elem>();
+                var found = GetFileForElem(testFolder, elem).LoadAs<TreeElem>();
                 Assert.Equal(elem.name, found.name);
             });
             Log.MethodDone(readTimer, 1000);
         }
 
-        private static FileInfo GetFileForElem(DirectoryInfo testFolder, Elem elem) {
+        private static FileInfo GetFileForElem(DirectoryInfo testFolder, TreeElem elem) {
             Assert.False(elem.id.IsNullOrEmpty());
             return testFolder.GetChild(elem.id + ".elem");
         }
 
-        private List<Elem> NewTreeLayer(string layerName, int nodeCount, Func<List<Elem>> CreateChildren = null) {
-            var l = new List<Elem>();
+        private class TreeElem : HasId {
+            public string id { get; set; }
+            public string name { get; set; }
+            public List<TreeElem> children { get; set; }
+            public string GetId() { return id; }
+        }
+
+        private List<TreeElem> NewTreeLayer(string layerName, int nodeCount, Func<List<TreeElem>> CreateChildren = null) {
+            var l = new List<TreeElem>();
             for (int i = 1; i <= nodeCount; i++) { l.Add(NewTreeElem("Layer " + layerName + " - Node " + i, CreateChildren)); }
             return l;
         }
 
-        private Elem NewTreeElem(string nodeName, Func<List<Elem>> CreateChildren = null) {
-            return new Elem { id = Guid.NewGuid().ToString(), name = nodeName, children = CreateChildren?.Invoke() };
+        private TreeElem NewTreeElem(string nodeName, Func<List<TreeElem>> CreateChildren = null) {
+            return new TreeElem { id = Guid.NewGuid().ToString(), name = nodeName, children = CreateChildren?.Invoke() };
         }
     }
 
