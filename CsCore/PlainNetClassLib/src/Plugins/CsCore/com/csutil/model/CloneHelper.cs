@@ -56,5 +56,7 @@ namespace com.csutil.model {
             }
         }
 
+        public static T ShallowCopyViaClone<T>(this T original) where T : ICloneable { return (T)original.Clone(); }
+
     }
 }

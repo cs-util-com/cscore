@@ -10,9 +10,10 @@ namespace com.csutil.tests.model {
 
         public CloneTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
-        private class MyClass1 {
+        private class MyClass1 : ICloneable {
             public string name;
             public MyClass1 child;
+            public object Clone() { return this.MemberwiseClone(); }
         }
 
         [Fact]
@@ -20,14 +21,17 @@ namespace com.csutil.tests.model {
 
             MyClass1 original = new MyClass1() { name = "1", child = new MyClass1() { name = "2" } };
 
-            MyClass1 copy = original.DeepCopyViaJsonString();
+            MyClass1 copy = original.DeepCopyViaJson();
             Assert.Equal(original.child.name, copy.child.name);
-
-            // Modify the original, changing the original will not change the copy
-            original.child.name = "Some new name..";
-
-            // Check that the change was only done in the original and not the copy:
+            // Modify the copy, changing the copy will not change the original:
+            copy.child.name = "Some new name..";
+            // Check that the change was only done in the copy and not the original:
             Assert.NotEqual(original.child.name, copy.child.name);
+
+            // Objects that impl. IClonable can also ShallowCopy (will call .Clone internally):
+            MyClass1 shallowCopy = original.ShallowCopyViaClone();
+            Assert.NotSame(original, shallowCopy);
+            Assert.Same(original.child, shallowCopy.child);
 
         }
 
@@ -48,7 +52,6 @@ namespace com.csutil.tests.model {
             Assert.NotNull(copy.name);
             Assert.Equal(original.children.First().children.First().children.First().name, copy.children.First().children.First().children.First().name);
         }
-
 
         private static TreeElem DeepCopySerializable(TreeElem dataTree) {
             var t = Log.MethodEntered();
