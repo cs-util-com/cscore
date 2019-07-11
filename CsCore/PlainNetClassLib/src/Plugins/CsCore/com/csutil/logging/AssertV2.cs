@@ -19,8 +19,7 @@ namespace com.csutil {
         }
 
         public static void Throws<T>(Action actionThatShouldThrowAnException) where T : Exception {
-            try { actionThatShouldThrowAnException(); }
-            catch (Exception e) {
+            try { actionThatShouldThrowAnException(); } catch (Exception e) {
                 if (e.GetType().IsCastableTo(typeof(T))) { return; } // its the expected exception
                 throw; // its an unexpected exception, so rethrow it
             }
@@ -79,7 +78,7 @@ namespace com.csutil {
             Assert(!expected.SequenceEqual(actual), msg2, args);
         }
 
-        public static Stopwatch TrackTiming() { return Stopwatch.StartNew(); }
+        public static StopwatchV2 TrackTiming() { return new StopwatchV2().StartV2(); }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         public static void AssertUnderXms(this Stopwatch self, int maxTimeInMs, params object[] args) {
