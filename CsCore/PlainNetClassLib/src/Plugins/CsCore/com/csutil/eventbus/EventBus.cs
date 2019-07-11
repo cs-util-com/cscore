@@ -8,7 +8,10 @@ namespace com.csutil {
 
     public class EventBus : IEventBus {
 
-        static EventBus() { Log.d("EventBus used the first time.."); }
+        static EventBus() {
+            // Log.d("EventBus used the first time..");
+        }
+
         public static IEventBus instance = new EventBus();
 
         public ConcurrentQueue<string> eventHistory { get; set; }
