@@ -21,7 +21,7 @@ namespace com.csutil.tests.io.db {
 
             var dataTree = NewTreeLayer("1", 1000, () => NewTreeLayer("2", 2, () => NewTreeLayer("3", 4, () => NewTreeLayer("4", 1))));
 
-            var testFolder = EnvironmentV2.instance.GetAppDataFolder().GetChildDir("tests.io.db").CreateV2();
+            var testFolder = EnvironmentV2.instance.GetOrAddTempFolder("tests.io.db").CreateV2();
             Log.d("Path=" + testFolder);
             var dbFile = testFolder.GetChild("PerformanceTestDB_" + Guid.NewGuid().ToString());
 

@@ -20,12 +20,11 @@ namespace com.csutil.tests.io.db {
 
             string testId = Guid.NewGuid().ToString();
 
-            var dbFile = EnvironmentV2.instance.GetAppDataFolder().GetChildDir("tests.io.db").GetChild("TestDB_" + testId);
-            dbFile.ParentDir().CreateV2();
+            var dbFile = EnvironmentV2.instance.GetOrAddTempFolder("tests.io.db").GetChild("TestDB_" + testId);
 
             // Open database (or create if doesn't exist)
             using (var db = new LiteDatabase(dbFile.FullPath())) {
-                
+
                 var users = db.GetCollection<User>("users");
 
                 var user1 = new User {
