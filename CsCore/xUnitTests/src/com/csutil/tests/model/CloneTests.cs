@@ -5,6 +5,7 @@ using com.csutil.model;
 using Xunit;
 
 namespace com.csutil.tests.model {
+
     public class CloneTests {
 
         public CloneTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
@@ -16,6 +17,7 @@ namespace com.csutil.tests.model {
 
         [Fact]
         public void ExampleUsage1() {
+
             MyClass1 original = new MyClass1() { name = "1", child = new MyClass1() { name = "2" } };
 
             MyClass1 copy = original.DeepCopyViaJsonString();
@@ -23,8 +25,10 @@ namespace com.csutil.tests.model {
 
             // Modify the original, changing the original will not change the copy
             original.child.name = "Some new name..";
+
             // Check that the change was only done in the original and not the copy:
             Assert.NotEqual(original.child.name, copy.child.name);
+
         }
 
         [Fact]
@@ -35,6 +39,7 @@ namespace com.csutil.tests.model {
             CompareOriginalAndClone(dataTree, DeepCopySerializable(dataTree));
             CompareOriginalAndClone(dataTree, DeepCopyViaJson(dataTree));
             CompareOriginalAndClone(dataTree, DeepCopyViaJsonString(dataTree));
+            CompareOriginalAndClone(dataTree, DeepCopyViaJsonOutString(dataTree));
             CompareOriginalAndClone(dataTree, DeepCopyViaBsonStream(dataTree));
 
         }
@@ -66,6 +71,16 @@ namespace com.csutil.tests.model {
             return copy;
         }
 
+        private static TreeElem DeepCopyViaJsonOutString(TreeElem dataTree) {
+            var t = Log.MethodEntered();
+            var copy = dataTree.DeepCopyViaJsonString(out string jsonString);
+            Log.MethodDone(t);
+            var testFile = EnvironmentV2.instance.GetOrAddTempFolder("DeepCopyViaJsonOutString").GetChild("test1.txt");
+            testFile.SaveAsText(jsonString);
+            Log.d("File " + testFile + " with size " + testFile.GetFileSizeString());
+            return copy;
+        }
+
         private static TreeElem DeepCopyViaBsonStream(TreeElem dataTree) {
             var t = Log.MethodEntered();
             var copy = dataTree.DeepCopyViaBsonStream();
@@ -92,4 +107,5 @@ namespace com.csutil.tests.model {
         }
 
     }
+
 }

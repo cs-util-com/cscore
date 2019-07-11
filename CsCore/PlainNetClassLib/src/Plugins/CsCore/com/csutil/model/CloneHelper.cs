@@ -22,10 +22,14 @@ namespace com.csutil.model {
         }
 
         public static T DeepCopyViaJsonString<T>(this T objectToDeepCopy) {
+            return DeepCopyViaJsonString(objectToDeepCopy, out string jsonString);
+        }
+
+        public static T DeepCopyViaJsonString<T>(this T objectToDeepCopy, out string jsonString) {
             // ObjectCreationHandling.Replace needed so that default constructor values not added to result
             // E.g: If in default constructor a list property is initialized, but in 'objectToDeepCopy' the field was set to null
             var deserializeSettings = new JsonSerializerSettings { ObjectCreationHandling = ObjectCreationHandling.Replace };
-            string jsonString = JsonConvert.SerializeObject(objectToDeepCopy);
+            jsonString = JsonConvert.SerializeObject(objectToDeepCopy);
             return JsonConvert.DeserializeObject<T>(jsonString, deserializeSettings);
         }
 
