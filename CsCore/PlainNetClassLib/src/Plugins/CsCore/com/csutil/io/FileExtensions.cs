@@ -164,6 +164,12 @@ namespace com.csutil {
             File.WriteAllText(self.FullPath(), text, Encoding.UTF8);
         }
 
+        public static long GetFileSize(this FileInfo self) { return self.Length; }
+
+        public static string GetFileSizeString(this FileInfo self) {
+            return ByteSizeToString.ByteSizeToReadableString(self.GetFileSize());
+        }
+
     }
 
 }
