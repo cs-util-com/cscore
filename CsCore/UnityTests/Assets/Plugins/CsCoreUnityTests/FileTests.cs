@@ -18,7 +18,7 @@ namespace com.csutil.tests.io {
         public void TestFilesWithEnumeratorPasses() {
             var dir = EnvironmentV2.instance.GetCurrentDirectory();
             Log.d("dir=" + dir.FullPath());
-            dir = EnvironmentV2.instance.GetAppDataFolder();
+            dir = EnvironmentV2.instance.GetRootAppDataFolder();
             Log.d("dir=" + dir.FullPath());
         }
 
