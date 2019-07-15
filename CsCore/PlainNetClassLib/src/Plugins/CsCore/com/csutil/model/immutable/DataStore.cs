@@ -1,6 +1,6 @@
 using System;
 
-namespace com.csutil.model.store {
+namespace com.csutil.model.immutable {
 
     /// <summary> Represents a store that encapsulates a state tree and is used to dispatch actions to update the state tree. </summary>
     /// <typeparam name="T"> The state tree type. </typeparam>
@@ -8,11 +8,11 @@ namespace com.csutil.model.store {
 
         private readonly object threadLock = new object();
         private readonly Dispatcher dispatcher;
-        private readonly Reducer<T> reducer;
+        private readonly StateReducer<T> reducer;
         private T state;
         public Action onStateChanged;
 
-        public DataStore(Reducer<T> reducer, T initialState = default(T), params Middleware<T>[] middlewares) {
+        public DataStore(StateReducer<T> reducer, T initialState = default(T), params Middleware<T>[] middlewares) {
             this.reducer = reducer;
             dispatcher = ApplyMiddlewares(middlewares);
             state = initialState;
@@ -51,6 +51,6 @@ namespace com.csutil.model.store {
     /// <summary> ts a method that is used to update the state tree. </summary>
     /// <param name="action"> The action to be applied to the state tree. </param>
     /// <returns> The updated state tree. </returns>
-    public delegate T Reducer<T>(T previousState, object action);
+    public delegate T StateReducer<T>(T previousState, object action);
 
 }

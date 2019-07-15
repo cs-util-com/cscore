@@ -12,7 +12,9 @@ namespace com.csutil {
 
         public static bool IsCastableTo<T>(this Type self) { return self.IsCastableTo(typeof(T)); }
 
-        public static bool IsCastableTo(this Type self, Type t) { return t == self || t.IsAssignableFrom(self); }
+        public static bool IsCastableTo(this Type self, params Type[] types) {
+            return types.Any(t => (t == self || t.IsAssignableFrom(self)));
+        }
 
     }
 
