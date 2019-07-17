@@ -15,26 +15,42 @@ namespace com.csutil.tests.model.immutable {
             var t = Log.MethodEntered();
 
             var data = new MyAppState1();
-            var s = new DataStore<MyAppState1>(MyReducers1.ReduceMyAppState1, data, loggingMiddleware);
+            var store = new DataStore<MyAppState1>(MyReducers1.ReduceMyAppState1, data, loggingMiddleware);
 
-            s.Dispatch(new ActionLoginUser() { newLoggedInUser = new MyUser1("Karl") });
-            Assert.NotNull(s.GetState().user);
+            // Register a few listeners that listen to a subtree of the complete state tree:
+            var firstContactWasModifiedCounter = 0;
+            store.AddStateChangeListener(state => state.user?.contacts?.First(), (firstContact) => {
+                firstContactWasModifiedCounter++;
+                Assert.True(firstContactWasModifiedCounter < 4, "counter=" + firstContactWasModifiedCounter);
+                if (firstContactWasModifiedCounter == 1) { // 1st event when the contact is added:
+                    Assert.Equal("Tim", firstContact.name);
+                } else if (firstContactWasModifiedCounter == 2) { // 2nd event when the contacts name is changed:
+                    Assert.Equal("Peter", firstContact.name);
+                } else { // 3rd event when the user is logged out at the end:
+                    Assert.Null(firstContact);
+                }
+            });
 
-            s.Dispatch(new ActionOnUser.ChangeAge() { targetUser = "Karl", newAge = 99 });
-            Assert.Equal(99, s.GetState().user.age);
+            store.Dispatch(new ActionLoginUser() { newLoggedInUser = new MyUser1("Karl") });
+            Assert.NotNull(store.GetState().user);
 
-            s.Dispatch(new ActionOnUser.AddContact() { targetUser = "Karl", newContact = new MyUser1(name: "Tim") });
-            Assert.Equal("Tim", s.GetState().user.contacts.First().name);
+            store.Dispatch(new ActionOnUser.ChangeAge() { targetUser = "Karl", newAge = 99 });
+            Assert.Equal(99, store.GetState().user.age);
+
+            store.Dispatch(new ActionOnUser.AddContact() { targetUser = "Karl", newContact = new MyUser1(name: "Tim") });
+            Assert.Equal("Tim", store.GetState().user.contacts.First().name);
+            Assert.Equal(1, firstContactWasModifiedCounter);
 
             // Change name of Tim to Peter:
-            s.Dispatch(new ActionOnUser.ChangeName() { targetUser = "Tim", newName = "Peter" });
-            Assert.Equal("Peter", s.GetState().user.contacts.First().name);
+            store.Dispatch(new ActionOnUser.ChangeName() { targetUser = "Tim", newName = "Peter" });
+            Assert.Equal("Peter", store.GetState().user.contacts.First().name);
+            Assert.Equal(2, firstContactWasModifiedCounter);
 
-            Assert.Throws<Exception>(() => { s.Dispatch(new ActionOnUser.ChangeAge() { targetUser = "Peter", newAge = 100 }); });
-            Assert.Throws<Exception>(() => { s.Dispatch(new ActionOnUser.ChangeName() { targetUser = "Peter", newName = "" }); });
+            Assert.Throws<Exception>(() => { store.Dispatch(new ActionOnUser.ChangeAge() { targetUser = "Peter", newAge = 100 }); });
+            Assert.Throws<Exception>(() => { store.Dispatch(new ActionOnUser.ChangeName() { targetUser = "Peter", newName = "" }); });
 
-            s.Dispatch(new ActionLogoutUser());
-            Assert.Null(s.GetState().user);
+            store.Dispatch(new ActionLogoutUser());
+            Assert.Null(store.GetState().user);
 
             Log.MethodDone(t);
         }

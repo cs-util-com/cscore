@@ -4,6 +4,19 @@ using System.Collections.Immutable;
 namespace com.csutil.model.immutable {
     public static class ImmutableExtensions {
 
+        public static Action AddStateChangeListener<T, S>(this DataStore<T> s, Func<T, S> getSubState, Action<S> onChanged) {
+            var oldState = getSubState(s.GetState());
+            Action newListener = () => {
+                var newState = getSubState(s.GetState());
+                if (!Object.ReferenceEquals(oldState, newState)) {
+                    onChanged(newState);
+                    oldState = newState;
+                }
+            };
+            s.onStateChanged += newListener;
+            return newListener;
+        }
+
         public static ImmutableList<T> MutateEntries<T>(this ImmutableList<T> list, object action, StateReducer<T> reducer) {
             if (list != null) {
                 list.ForEach(elem => {
