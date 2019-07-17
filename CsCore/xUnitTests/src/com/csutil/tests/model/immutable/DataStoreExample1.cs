@@ -19,7 +19,7 @@ namespace com.csutil.tests.model.immutable {
 
             // Register a few listeners that listen to a subtree of the complete state tree:
             var firstContactWasModifiedCounter = 0;
-            store.AddStateChangeListener(state => state.user?.contacts?.First(), (firstContact) => {
+            store.AddStateChangeListener(state => state.user?.contacts?.FirstOrDefault(), (firstContact) => {
                 firstContactWasModifiedCounter++;
                 Assert.True(firstContactWasModifiedCounter < 4, "counter=" + firstContactWasModifiedCounter);
                 if (firstContactWasModifiedCounter == 1) { // 1st event when the contact is added:
