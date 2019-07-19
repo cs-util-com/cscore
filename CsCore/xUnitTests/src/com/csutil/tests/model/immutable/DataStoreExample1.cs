@@ -55,12 +55,12 @@ namespace com.csutil.tests.model.immutable {
             Log.MethodDone(t);
         }
 
-        public class MyAppState1 {
+        private class MyAppState1 {
             public readonly MyUser1 user;
             public MyAppState1(MyUser1 user = null) { this.user = user; }
         }
 
-        public class MyUser1 {
+        private class MyUser1 {
             public readonly string name;
             public readonly int age;
             public readonly ImmutableList<MyUser1> contacts;
@@ -106,7 +106,7 @@ namespace com.csutil.tests.model.immutable {
 
         private static string asJson(string varName, object result) { return varName + "=" + JsonWriter.AsPrettyString(result); }
 
-        public static class MyReducers1 {
+        private static class MyReducers1 {
 
             public static MyAppState1 ReduceMyAppState1(MyAppState1 previousState, object action) {
                 bool changed = false;
