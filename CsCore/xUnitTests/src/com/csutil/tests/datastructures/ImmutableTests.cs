@@ -30,13 +30,13 @@ namespace com.csutil.tests.datastructures {
                 RunOnList("fill", l1, elemCount, l => l.Add(1));
                 Assert.Equal(elemCount, l1.Count);
                 var t1 = RunOnList("remove", l1, elemCount, (list) => { list.RemoveAt(0); });
-                Assert.Equal(0, l1.Count);
+                Assert.Empty(l1);
 
                 var l2 = ImmutableList.Create<int>();
                 RunOnImmutableList("fill", ref l2, elemCount, (list) => list.Add(1));
                 Assert.Equal(elemCount, l2.Count);
                 var t2 = RunOnImmutableList("remove", ref l2, elemCount, (list) => list.RemoveAt(0));
-                Assert.Equal(0, l2.Count);
+                Assert.Empty(l2);
                 Assert.True(t1 > t2, "t1=" + t1 + ", t2=" + t2);
             }
 

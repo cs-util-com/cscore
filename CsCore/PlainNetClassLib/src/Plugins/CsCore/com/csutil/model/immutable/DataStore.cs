@@ -2,7 +2,9 @@ using System;
 
 namespace com.csutil.model.immutable {
 
-    /// <summary> Represents a store that encapsulates a state tree and is used to dispatch actions to update the state tree. </summary>
+    /// <summary> 
+    /// Represents a store that encapsulates a state tree and is used to dispatch actions to update the state tree. 
+    /// Source mainly from https://github.com/GuillaumeSalles/redux.NET </summary>
     /// <typeparam name="T"> The state tree type. </typeparam>
     public class DataStore<T> : IDataStore<T> {
 

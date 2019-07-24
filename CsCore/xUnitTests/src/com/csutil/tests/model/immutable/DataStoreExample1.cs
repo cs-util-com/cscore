@@ -15,18 +15,18 @@ namespace com.csutil.tests.model.immutable {
             var t = Log.MethodEntered();
 
             var data = new MyAppState1();
-            var store = new DataStore<MyAppState1>(MyReducers1.ReduceMyAppState1, data, loggingMiddleware);
+            var undoable = new UndoRedoReducer<MyAppState1>();
+            var store = new DataStore<MyAppState1>(undoable.wrap(MyReducers1.ReduceMyAppState1), data, loggingMiddleware);
 
             // Register a few listeners that listen to a subtree of the complete state tree:
             var firstContactWasModifiedCounter = 0;
             store.AddStateChangeListener(state => state.user?.contacts?.FirstOrDefault(), (firstContact) => {
                 firstContactWasModifiedCounter++;
-                Assert.True(firstContactWasModifiedCounter < 4, "counter=" + firstContactWasModifiedCounter);
                 if (firstContactWasModifiedCounter == 1) { // 1st event when the contact is added:
                     Assert.Equal("Tim", firstContact.name);
                 } else if (firstContactWasModifiedCounter == 2) { // 2nd event when the contacts name is changed:
                     Assert.Equal("Peter", firstContact.name);
-                } else { // 3rd event when the user is logged out at the end:
+                } else if (firstContactWasModifiedCounter == 3) { // 3rd event when the user is logged out at the end:
                     Assert.Null(firstContact);
                 }
             });
@@ -52,7 +52,39 @@ namespace com.csutil.tests.model.immutable {
             store.Dispatch(new ActionLogoutUser());
             Assert.Null(store.GetState().user);
 
+            TestUndoAndRedo(store);
+
             Log.MethodDone(t);
+        }
+
+        private static void TestUndoAndRedo(DataStore<MyAppState1> store) {
+            // there is nothing on the redo stack first:
+            Assert.Throws<InvalidOperationException>(() => { store.Dispatch(new RedoAction()); });
+
+            Assert.Null(store.GetState().user);
+            store.Dispatch(new UndoAction()); // undo logout
+            Assert.NotNull(store.GetState().user);
+
+            store.Dispatch(new UndoAction()); // undo rename Tim => Peter
+            Assert.Equal("Tim", store.GetState().user.contacts.First().name);
+
+            store.Dispatch(new UndoAction()); // undo adding contact
+            Assert.Null(store.GetState().user.contacts);
+
+            store.Dispatch(new RedoAction()); // redo adding contact
+            var contacts = store.GetState().user.contacts;
+            Assert.Equal("Tim", contacts.First().name);
+
+            // Add a new action:
+            store.Dispatch(new ActionOnUser.AddContact() { targetUser = "Karl", newContact = new MyUser1(name: "Tim 2") });
+            Assert.Equal(2, store.GetState().user.contacts.Count);
+
+            // Again redo not possible at this point:
+            Assert.Throws<InvalidOperationException>(() => { store.Dispatch(new RedoAction()); });
+
+            store.Dispatch(new UndoAction()); // Undo adding additional 
+            Assert.Same(contacts, store.GetState().user.contacts);
+
         }
 
         private class MyAppState1 {
