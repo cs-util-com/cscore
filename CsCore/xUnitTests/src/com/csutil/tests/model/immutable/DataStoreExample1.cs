@@ -59,19 +59,19 @@ namespace com.csutil.tests.model.immutable {
 
         private static void TestUndoAndRedo(DataStore<MyAppState1> store) {
             // there is nothing on the redo stack first:
-            Assert.Throws<InvalidOperationException>(() => { store.Dispatch(new RedoAction()); });
+            Assert.Throws<InvalidOperationException>(() => { store.Dispatch(new RedoAction<MyAppState1>()); });
 
             Assert.Null(store.GetState().user);
-            store.Dispatch(new UndoAction()); // undo logout
+            store.Dispatch(new UndoAction<MyAppState1>()); // undo logout
             Assert.NotNull(store.GetState().user);
 
-            store.Dispatch(new UndoAction()); // undo rename Tim => Peter
+            store.Dispatch(new UndoAction<MyAppState1>()); // undo rename Tim => Peter
             Assert.Equal("Tim", store.GetState().user.contacts.First().name);
 
-            store.Dispatch(new UndoAction()); // undo adding contact
+            store.Dispatch(new UndoAction<MyAppState1>()); // undo adding contact
             Assert.Null(store.GetState().user.contacts);
 
-            store.Dispatch(new RedoAction()); // redo adding contact
+            store.Dispatch(new RedoAction<MyAppState1>()); // redo adding contact
             var contacts = store.GetState().user.contacts;
             Assert.Equal("Tim", contacts.First().name);
 
@@ -80,10 +80,14 @@ namespace com.csutil.tests.model.immutable {
             Assert.Equal(2, store.GetState().user.contacts.Count);
 
             // Again redo not possible at this point:
-            Assert.Throws<InvalidOperationException>(() => { store.Dispatch(new RedoAction()); });
+            Assert.Throws<InvalidOperationException>(() => { store.Dispatch(new RedoAction<MyAppState1>()); });
 
-            store.Dispatch(new UndoAction()); // Undo adding additional 
+            store.Dispatch(new UndoAction<MyAppState1>()); // Undo adding additional user
             Assert.Same(contacts, store.GetState().user.contacts);
+
+            // Using a type parameter that is not specified by the Undo Reducer does nothing:
+            store.Dispatch(new UndoAction<string>());
+            store.Dispatch(new RedoAction<string>());
 
         }
 
