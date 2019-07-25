@@ -1,6 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Threading.Tasks;
+using com.csutil.http.apis;
 using com.csutil.model.immutable;
 using Xunit;
 
@@ -11,15 +14,18 @@ namespace com.csutil.tests.model.immutable {
         public DataStoreExample1(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
         [Fact]
-        public void ExampleUsage1() {
+        public async void ExampleUsage1() {
             var t = Log.MethodEntered();
 
             var data = new MyAppState1();
             var undoable = new UndoRedoReducer<MyAppState1>();
-            var store = new DataStore<MyAppState1>(undoable.wrap(MyReducers1.ReduceMyAppState1), data, loggingMiddleware);
+            var thunk = Middlewares.NewThunkMiddleware<MyAppState1>();
+            var store = new DataStore<MyAppState1>(undoable.wrap(MyReducers1.ReduceMyAppState1), data, loggingMiddleware, thunk);
 
             // Register a few listeners that listen to a subtree of the complete state tree:
             var firstContactWasModifiedCounter = 0;
+
+            // listen to state changes of the first contact of the main user:
             store.AddStateChangeListener(state => state.user?.contacts?.FirstOrDefault(), (firstContact) => {
                 firstContactWasModifiedCounter++;
                 if (firstContactWasModifiedCounter == 1) { // 1st event when the contact is added:
@@ -53,8 +59,17 @@ namespace com.csutil.tests.model.immutable {
             Assert.Null(store.GetState().user);
 
             TestUndoAndRedo(store);
+            await TestAsyncActions(store);
 
             Log.MethodDone(t);
+        }
+
+        private static async Task TestAsyncActions(DataStore<MyAppState1> store) {
+            Assert.Null(store.GetState().currentWeather);
+            var a = store.Dispatch(NewAsyncGetWeatherAction());
+            Assert.True(a is Task, "a=" + a.GetType());
+            if (a is Task delayedTask) { await delayedTask; }
+            Assert.NotEmpty(store.GetState().currentWeather);
         }
 
         private static void TestUndoAndRedo(DataStore<MyAppState1> store) {
@@ -93,7 +108,11 @@ namespace com.csutil.tests.model.immutable {
 
         private class MyAppState1 {
             public readonly MyUser1 user;
-            public MyAppState1(MyUser1 user = null) { this.user = user; }
+            public readonly IEnumerable<string> currentWeather;
+            public MyAppState1(MyUser1 user = null, IEnumerable<string> currentWeather = null) {
+                this.user = user;
+                this.currentWeather = currentWeather;
+            }
         }
 
         private class MyUser1 {
@@ -122,6 +141,19 @@ namespace com.csutil.tests.model.immutable {
 
         }
 
+        private class ActionSetWeather { public IEnumerable<string> newWeather; }
+
+        private static Func<DataStore<MyAppState1>, Task> NewAsyncGetWeatherAction() {
+            return async (DataStore<MyAppState1> store) => {
+                var cityName = "New York";
+                var foundLocations = await MetaWeatherLocationLookup.GetLocation(cityName);
+                var report = await MetaWeatherReport.GetReport(foundLocations.First().woeid);
+                var currentWeatherConditions = report.consolidated_weather.Map(r => r.weather_state_name);
+                Log.d("currentWeatherConditions for " + cityName + ": " + currentWeatherConditions);
+                store.Dispatch(new ActionSetWeather() { newWeather = currentWeatherConditions });
+            };
+        }
+
         private Func<Dispatcher, Dispatcher> loggingMiddleware(DataStore<MyAppState1> store) {
             Log.MethodEntered("store=" + store);
             return (Dispatcher innerDispatcher) => {
@@ -146,8 +178,14 @@ namespace com.csutil.tests.model.immutable {
 
             public static MyAppState1 ReduceMyAppState1(MyAppState1 previousState, object action) {
                 bool changed = false;
+                var newWeather = previousState.currentWeather.Mutate(action, ReduceWeather, ref changed);
                 var newUser = previousState.user.Mutate(action, ReduceUser, ref changed);
-                if (changed) { return new MyAppState1(newUser); }
+                if (changed) { return new MyAppState1(newUser, newWeather); }
+                return previousState;
+            }
+
+            private static IEnumerable<string> ReduceWeather(IEnumerable<string> previousState, object action) {
+                if (action is ActionSetWeather a) { return a.newWeather; }
                 return previousState;
             }
 
