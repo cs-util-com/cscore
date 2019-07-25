@@ -70,6 +70,19 @@ namespace com.csutil.tests.model.immutable {
             Assert.True(a is Task, "a=" + a.GetType());
             if (a is Task delayedTask) { await delayedTask; }
             Assert.NotEmpty(store.GetState().currentWeather);
+
+            // Another asyn task example with an inline function:
+            store.Dispatch(new ActionLogoutUser());
+            Func<Task> asyncLoginTask = async () => {
+                // Simulate that the login would talk to a server and take some time:
+                await Task.Delay(100);
+                store.Dispatch(new ActionLoginUser() { newLoggedInUser = new MyUser1("Karl") });
+            };
+
+            Assert.Null(store.GetState().user);
+            await (store.Dispatch(asyncLoginTask) as Task);
+            Assert.NotNull(store.GetState().user);
+
         }
 
         private static void TestUndoAndRedo(DataStore<MyAppState1> store) {
