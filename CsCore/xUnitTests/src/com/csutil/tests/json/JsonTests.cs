@@ -53,9 +53,8 @@ namespace com.csutil.tests.json {
         [Fact]
         public void TestWithTypeWrapper() {
             MySubClass1 x1 = new MySubClass1() { myString = "I am s1", myComplexField2 = new MySubClass1() { myString = "A2" } };
-
-            string json = new JsonNetWriter(JsonNetSettings.typedJsonSettings).Write(x1);
-            object x2 = new JsonNetReader(JsonNetSettings.typedJsonSettings).Read<object>(json);
+            string json = TypedJsonHelper.NewTypedJsonWriter().Write(x1);
+            object x2 = TypedJsonHelper.NewTypedJsonReader().Read<object>(json);
             Assert.True(x2 is MySubClass1);
             var x3 = x2 as MySubClass1;
             Assert.Equal(x3.myString, x1.myString);
