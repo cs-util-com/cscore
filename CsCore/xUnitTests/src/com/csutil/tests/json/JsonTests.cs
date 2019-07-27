@@ -51,7 +51,9 @@ namespace com.csutil.tests.json {
         }
 
         [Fact]
-        public void TestWithTypeWrapper() {
+        public void TestWithTypedJson() {
+            // Typed json includes the C# assembly types in the json, so works only in a C# only scenario to parse the
+            // json string back into the correct C# class
             MySubClass1 x1 = new MySubClass1() { myString = "I am s1", myComplexField2 = new MySubClass1() { myString = "A2" } };
             string json = TypedJsonHelper.NewTypedJsonWriter().Write(x1);
             object x2 = TypedJsonHelper.NewTypedJsonReader().Read<object>(json);
