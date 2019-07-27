@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -11,7 +12,11 @@ namespace com.csutil.keyvaluestore {
         public async Task<T> Get<T>(string key, T defaultValue) {
             object value;
             if (store.TryGetValue(key, out value) && value is T) { return (T)value; }
-            if (fallbackStore != null) { return await fallbackStore.Get<T>(key, defaultValue); }
+            if (fallbackStore != null) {
+                var fallbackValue = await fallbackStore.Get<T>(key, defaultValue);
+                if (!ReferenceEquals(fallbackValue, defaultValue)) { InternalSet(key, fallbackValue); }
+                return fallbackValue;
+            }
             return defaultValue;
         }
 
@@ -22,13 +27,15 @@ namespace com.csutil.keyvaluestore {
         }
 
         public async Task<object> Set(string key, object obj) {
-            var oldEntry = store.AddOrReplace(key, obj);
+            var oldEntry = InternalSet(key, obj);
             if (fallbackStore != null) {
                 var fallbackOldEntry = await fallbackStore.Set(key, obj);
                 if (oldEntry == null && fallbackOldEntry != null) { oldEntry = fallbackOldEntry; }
             }
             return oldEntry;
         }
+
+        private object InternalSet(string key, object obj) { return store.AddOrReplace(key, obj); }
 
         public async Task<bool> Remove(string key) {
             var res = store.Remove(key);

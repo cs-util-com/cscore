@@ -1,3 +1,4 @@
+using System.IO;
 using System.Threading.Tasks;
 using LiteDB;
 
@@ -7,19 +8,21 @@ namespace com.csutil.keyvaluestore {
         private BsonMapper bsonMapper;
         private LiteDatabase db;
         private LiteCollection<BsonDocument> collection;
-        private string collectionName;
+        private IKeyValueStore fallbackStore;
 
-        public LiteDbKeyValueStore() {
-            collectionName = "Test1";
-            var testFolder = EnvironmentV2.instance.GetOrAddTempFolder("Test");
-            var testFile = testFolder.GetChild("LiteDbKeyValueStoreTest1.db");
+        public LiteDbKeyValueStore(FileInfo dbFile) { Init(dbFile); }
+
+        private void Init(System.IO.FileInfo dbFile, string collectionName = "Default") {
             bsonMapper = new BsonMapper();
-            db = new LiteDatabase(testFile.FullPath());
+            bsonMapper.IncludeFields = true;
+            db = new LiteDatabase(dbFile.FullPath(), bsonMapper);
             collection = db.GetCollection(collectionName);
         }
 
         public async Task<bool> ContainsKey(string key) {
-            return null != GetBson(key);
+            if (null != GetBson(key)) { return true; }
+            if (fallbackStore != null) return await fallbackStore.ContainsKey(key);
+            return false;
         }
 
         private BsonDocument GetBson(string key) { return collection.FindById(key); }
@@ -35,7 +38,7 @@ namespace com.csutil.keyvaluestore {
         }
 
         public async Task RemoveAll() {
-            db.DropCollection(collectionName);
+            db.DropCollection(collection.Name);
         }
 
         public async Task<object> Set(string key, object obj) {
@@ -50,9 +53,7 @@ namespace com.csutil.keyvaluestore {
             }
         }
 
-        public void SetFallbackStore(IKeyValueStore fallbackStore) {
-            throw new System.NotImplementedException();
-        }
+        public void SetFallbackStore(IKeyValueStore fallbackStore) { this.fallbackStore = fallbackStore; }
 
     }
 
