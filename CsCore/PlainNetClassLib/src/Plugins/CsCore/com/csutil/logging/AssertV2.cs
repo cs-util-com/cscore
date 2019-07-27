@@ -71,6 +71,13 @@ namespace com.csutil {
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
+        public static void AreEqualJson(object a, object b) {
+            var expected = JsonWriter.GetWriter().Write(a);
+            var actual = JsonWriter.GetWriter().Write(b);
+            AreEqual(expected, actual);
+        }
+
+        [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         public static void AreNotEqualLists<T>(IEnumerable<T> expected, IEnumerable<T> actual, string varName = "", params object[] args) {
             string msg1 = "Assert.AreNotEqual() FAILED: " + varName + " is same reference (expected == actual)";
             Assert(expected != actual, msg1, args);
