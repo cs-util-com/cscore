@@ -8,10 +8,18 @@ namespace com.csutil.json {
     public class JsonNetReader : IJsonReader {
 
         private IJsonWriter debugWriter = new JsonNetWriter();
-        private JsonSerializer reader = JsonSerializer.Create(JsonNetSettings.defaultSettings);
+        private JsonSerializerSettings settings;
+        private JsonSerializer reader;
+
+        public JsonNetReader() : this(JsonNetSettings.defaultSettings) { }
+
+        public JsonNetReader(JsonSerializerSettings settings) {
+            this.settings = settings;
+            this.reader = JsonSerializer.Create(settings);
+        }
 
         public T Read<T>(string jsonString) {
-            var r = JsonConvert.DeserializeObject<T>(jsonString, JsonNetSettings.defaultSettings);
+            var r = JsonConvert.DeserializeObject<T>(jsonString, settings);
             this.AssertThatJsonWasFullyParsedIntoFields(debugWriter, jsonString, r);
             if (r is JsonReaderFinished) { ((JsonReaderFinished)r).onJsonReadingFinished(jsonString); }
             return r;

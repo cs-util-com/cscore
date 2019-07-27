@@ -32,6 +32,7 @@ namespace com.csutil.tests.json {
             public string myString;
             public string myString2;
             public MySubClass1 myComplexField { get; set; }
+            public MyClass2 myComplexField2 { get; set; }
         }
 
         private class MySubClass2_WithNoDefaultConstructor : MyClass2 {
@@ -47,6 +48,18 @@ namespace com.csutil.tests.json {
             var jsonString = JsonWriter.GetWriter().Write(x1 as MyClass2);
             var x2 = JsonReader.GetReader().Read<MySubClass2_WithNoDefaultConstructor>(jsonString);
             Assert.Equal(x1.myString, x2.myString);
+        }
+
+        [Fact]
+        public void TestWithTypeWrapper() {
+            MySubClass1 x1 = new MySubClass1() { myString = "I am s1", myComplexField2 = new MySubClass1() { myString = "A2" } };
+
+            string json = new JsonNetWriter(JsonNetSettings.typedJsonSettings).Write(x1);
+            object x2 = new JsonNetReader(JsonNetSettings.typedJsonSettings).Read<object>(json);
+            Assert.True(x2 is MySubClass1);
+            var x3 = x2 as MySubClass1;
+            Assert.Equal(x3.myString, x1.myString);
+            Assert.Equal((x3.myComplexField2 as MySubClass1).myString, (x1.myComplexField2 as MySubClass1).myString);
         }
 
     }
