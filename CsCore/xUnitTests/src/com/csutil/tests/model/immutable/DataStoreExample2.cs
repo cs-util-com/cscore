@@ -9,12 +9,12 @@ using Xunit;
 
 namespace com.csutil.tests.model.immutable {
 
-    public class DataStoreExample1 {
+    public class DataStoreExample2 {
 
-        public DataStoreExample1(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
+        public DataStoreExample2(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
         [Fact]
-        public async void ExampleUsage1() {
+        public async void ExampleUsage2() {
             var t = Log.MethodEntered();
 
             var data = new MyAppState1();
