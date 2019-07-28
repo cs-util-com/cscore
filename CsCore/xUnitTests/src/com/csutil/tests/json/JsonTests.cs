@@ -9,6 +9,8 @@ namespace com.csutil.tests.json {
 
     public class JsonTests {
 
+        public JsonTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
+
         class MyClass1 {
             public string myString;
             public string myString2 { get; set; }
