@@ -10,12 +10,12 @@ namespace com.csutil.logging {
 
         public void LogDebug(string msg, params object[] args) {
             PrintDebugMessage("> " + msg + Log.ToArgsStr(args, ArgToString) + LB
-                + "  at " + Log.CallingMethodStr(args) + LB + LB);
+                + "  * at " + Log.CallingMethodStr(args) + LB + LB);
         }
 
         public void LogWarning(string warning, params object[] args) {
             PrintWarningMessage("> WARNING: " + warning + Log.ToArgsStr(args, ArgToString) + LB
-                + "  at " + Log.CallingMethodStr(args) + LB + LB);
+                + "  * at " + Log.CallingMethodStr(args) + LB + LB);
         }
 
         public Exception LogError(string error, params object[] args) {
@@ -30,7 +30,7 @@ namespace com.csutil.logging {
 
         private void PrintErrorString(string e, object[] args) {
             PrintErrorMessage(e + Log.ToArgsStr(args, ArgToString) + LB
-                + "    at " + Log.CallingMethodStr(args) + LB + LB);
+                + "    * at " + Log.CallingMethodStr(args, count: 4) + LB + LB);
         }
 
         protected abstract void PrintDebugMessage(string debugLogMsg, params object[] args);
@@ -44,6 +44,7 @@ namespace com.csutil.logging {
 
         protected virtual string ArgToString(object arg) {
             if (arg is StackFrame) { return null; }
+            if (arg is StackTrace) { return null; }
             return "" + arg;
         }
 

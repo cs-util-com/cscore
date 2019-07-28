@@ -13,28 +13,35 @@ namespace com.csutil {
 
         [Conditional("DEBUG"), Conditional("ENFORCE_FULL_LOGGING")]
         public static void d(string msg, params object[] args) {
-            instance.LogDebug(msg, args);
+            instance.LogDebug(msg, ArgsPlusStackFrameIfNeeded(args));
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_FULL_LOGGING")]
         public static void w(string warning, params object[] args) {
-            instance.LogWarning(warning, args);
+            instance.LogWarning(warning, ArgsPlusStackTraceIfNeeded(args));
         }
 
         public static Exception e(string error, params object[] args) {
-            if (!IsTraceIncludedIn(args)) { args = new StackTrace(1, true).AddTo(args); }
-            return instance.LogError(error, args);
+            return instance.LogError(error, ArgsPlusStackTraceIfNeeded(args));
         }
 
         private static bool IsTraceIncludedIn(object[] args) { return args.Get<StackFrame>() != null || args.Get<StackTrace>() != null; }
 
         public static Exception e(Exception e, params object[] args) {
-            return instance.LogExeption(e, args);
+            return instance.LogExeption(e, ArgsPlusStackTraceIfNeeded(args));
+        }
+
+        private static object[] ArgsPlusStackFrameIfNeeded(object[] args, int skipFrames = 2) {
+            return IsTraceIncludedIn(args) ? args : new StackFrame(skipFrames, true).AddTo(args);
+        }
+
+        private static object[] ArgsPlusStackTraceIfNeeded(object[] args, int skipFrames = 2) {
+            return IsTraceIncludedIn(args) ? args : new StackTrace(skipFrames, true).AddTo(args);
         }
 
         public static string CallingMethodStr(object[] args = null, int offset = 3, int count = 3) {
             var frame = args.Get<StackFrame>(); if (frame != null) { return frame.ToStringV2(); }
-            var trace = args.Get<StackTrace>(); if (trace != null) { return trace.ToStringV2(offset, count); }
+            var trace = args.Get<StackTrace>(); if (trace != null) { return trace.ToStringV2(count: count); }
             return new StackTrace(true).ToStringV2(offset, count);
         }
 

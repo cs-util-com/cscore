@@ -10,6 +10,8 @@ namespace com.csutil.tests {
 
     public class LogTests {
 
+        public LogTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
+
         [Fact]
         public void TestBasicLogOutputExamples() {
             Log.d("I'm a log message");
