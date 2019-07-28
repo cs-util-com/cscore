@@ -9,9 +9,9 @@ namespace com.csutil.io {
 
     class EnvironmentV2Unity : EnvironmentV2 {
 
-        public override DirectoryInfo GetTempFolder() {
+        public override DirectoryInfo GetRootTempFolder() {
             var d = new DirectoryInfo(Application.temporaryCachePath);
-            AssertV2.AreEqual(base.GetTempFolder().FullPath(), d.FullPath()); // TODO test this
+            AssertV2.AreEqual(base.GetRootTempFolder().FullPath(), d.FullPath()); // TODO test this
             return d;
         }
 

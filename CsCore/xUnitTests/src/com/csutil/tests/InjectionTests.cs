@@ -1,4 +1,7 @@
 using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using com.csutil.injection;
 using Xunit;
 
@@ -161,6 +164,27 @@ namespace com.csutil.tests {
         }
 
         [Fact]
+        public void TestMultipleInjectors2() {
+            var IoC_inject = GetInjectorForTest();
+            IoC_inject.RegisterInjector<MyClass1>(new object(), (caller, createIfNull) => {
+                return new MySubClass1();
+            });
+            var secondInjectorWasUsed = false;
+            IoC_inject.RegisterInjector<MyClass1>(new object(), (caller, createIfNull) => {
+                secondInjectorWasUsed = true;
+                return new MySubClass2();
+            });
+            Assert.NotNull(IoC_inject.Get<MyClass1>(this));
+            Assert.True(IoC_inject.Get<MyClass1>(this) is MySubClass1);
+            Assert.False(secondInjectorWasUsed);
+            var bothResults = IoC_inject.GetAll<MyClass1>(this);
+            Assert.True(bothResults.First() is MySubClass1);
+            Assert.False(secondInjectorWasUsed); // before accessing .Last the injection was not yet triggered
+            Assert.True(bothResults.Last() is MySubClass2);
+            Assert.True(secondInjectorWasUsed); // after accessing .Last the injection was triggered
+        }
+
+        [Fact]
         public void TestRemoveAllInjectors() {
             var IoC_inject = GetInjectorForTest();
 
@@ -174,6 +198,35 @@ namespace com.csutil.tests {
         private class MyClass1 { }
         private class MySubClass1 : MyClass1 { }
         private class MySubClass2 : MyClass1 { }
+        private class MyUserClass1 { }
+
+        [Fact]
+        public void TestTemporaryContext2() {
+            var IoC_inject = GetInjectorForTest();
+            Assert.Null(IoC_inject.Get<MyClass1>(this));
+            for (int i = 0; i < 100; i++) {
+                Task.Run(() => {
+                    var myContextInstance1 = new MyClass1();
+                    IoC_inject.DoWithTempContext<MyClass1>(myContextInstance1, () => {
+                        Assert.Equal(myContextInstance1, IoC_inject.Get<MyClass1>(this));
+                    });
+                    // when the temporary context is gone requesting an injection returns null again:
+                    Assert.Null(IoC_inject.Get<MyClass1>(this));
+
+                    var myContextInstance2 = new MyClass1();
+                    var testUser = new MyUserClass1();
+                    IoC_inject.DoWithTempContext<MyClass1>(myContextInstance2, () => {
+                        IoC_inject.DoWithTempContext<MyUserClass1>(testUser, () => {
+                            Assert.Equal(myContextInstance2, IoC_inject.Get<MyClass1>(this));
+                            Assert.Equal(testUser, IoC_inject.Get<MyUserClass1>(this));
+                        });
+                    });
+                    // when the temporary context is gone requesting an injection returns null again:
+                    Assert.Null(IoC_inject.Get<MyClass1>(this));
+                    Assert.Null(IoC_inject.Get<MyUserClass1>(this));
+                });
+            }
+        }
 
     }
 }

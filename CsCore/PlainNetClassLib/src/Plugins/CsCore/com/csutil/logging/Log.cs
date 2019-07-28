@@ -13,43 +13,62 @@ namespace com.csutil {
 
         [Conditional("DEBUG"), Conditional("ENFORCE_FULL_LOGGING")]
         public static void d(string msg, params object[] args) {
-            instance.LogDebug(msg, args);
+            instance.LogDebug(msg, ArgsPlusStackFrameIfNeeded(args));
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_FULL_LOGGING")]
         public static void w(string warning, params object[] args) {
-            instance.LogWarning(warning, args);
+            instance.LogWarning(warning, ArgsPlusStackTraceIfNeeded(args));
         }
 
         public static Exception e(string error, params object[] args) {
-            return instance.LogError(error, args);
+            return instance.LogError(error, ArgsPlusStackTraceIfNeeded(args));
         }
 
+        private static bool IsTraceIncludedIn(object[] args) { return args.Get<StackFrame>() != null || args.Get<StackTrace>() != null; }
+
         public static Exception e(Exception e, params object[] args) {
-            return instance.LogExeption(e, args);
+            return instance.LogExeption(e, ArgsPlusStackTraceIfNeeded(args));
+        }
+
+        private static object[] ArgsPlusStackFrameIfNeeded(object[] args, int skipFrames = 2) {
+            return IsTraceIncludedIn(args) ? args : new StackFrame(skipFrames, true).AddTo(args);
+        }
+
+        private static object[] ArgsPlusStackTraceIfNeeded(object[] args, int skipFrames = 2) {
+            return IsTraceIncludedIn(args) ? args : new StackTrace(skipFrames, true).AddTo(args);
         }
 
         public static string CallingMethodStr(object[] args = null, int offset = 3, int count = 3) {
             var frame = args.Get<StackFrame>(); if (frame != null) { return frame.ToStringV2(); }
-            var trace = args.Get<StackTrace>(); if (trace != null) { return trace.ToStringV2(); }
+            var trace = args.Get<StackTrace>(); if (trace != null) { return trace.ToStringV2(count: count); }
             return new StackTrace(true).ToStringV2(offset, count);
         }
 
         private static T Get<T>(this object[] args) { return args != null ? (T)args.FirstOrDefault(x => x is T) : default(T); }
 
-        public static Stopwatch MethodEntered(params object[] args) {
+        public static StopwatchV2 MethodEntered(params object[] args) {
 #if DEBUG
             var t = new StackFrame(1, true);
-            Log.d(" --> " + t.GetMethodName(false), t.AddTo(args));
+            var methodName = t.GetMethodName(false);
+            Log.d(" --> " + methodName, t.AddTo(args));
 #endif
-            return AssertV2.TrackTiming();
+            return AssertV2.TrackTiming(methodName);
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_FULL_LOGGING")]
         public static void MethodDone(Stopwatch timing, int maxAllowedTimeInMs = -1) {
-            timing.Stop();
+            var timingV2 = timing as StopwatchV2;
+            string methodName = null;
+            if (timingV2 != null) {
+                timingV2.StopV2();
+                methodName = timingV2.methodName;
+            } else { timing.Stop(); }
             var t = new StackFrame(1, true);
-            Log.d("    <-- " + t.GetMethodName(false) + " finished after " + timing.ElapsedMilliseconds + " ms", t.AddTo(null));
+            if (methodName.IsNullOrEmpty()) { methodName = t.GetMethodName(false); }
+            var text = "    <-- " + methodName + " finished after " + timing.ElapsedMilliseconds + " ms";
+            if (timingV2 != null) { text += ", " + timingV2.GetAllocatedMemBetweenStartAndStop(); }
+            Log.d(text, t.AddTo(null));
             if (maxAllowedTimeInMs > 0) { timing.AssertUnderXms(maxAllowedTimeInMs); }
         }
 
@@ -80,8 +99,11 @@ namespace com.csutil {
             } catch (Exception e) { Console.WriteLine("" + e); return ""; }
         }
 
-        internal static object[] AddTo(this StackFrame stackFrame, object[] args) {
-            var a = new object[1] { stackFrame };
+        internal static object[] AddTo(this StackFrame self, object[] args) { return Add(args, self); }
+        internal static object[] AddTo(this StackTrace self, object[] args) { return Add(args, self); }
+
+        private static object[] Add(object[] args, Object obj) {
+            var a = new object[1] { obj };
             if (args == null) { return a; } else { return args.Concat(a).ToArray(); }
         }
 

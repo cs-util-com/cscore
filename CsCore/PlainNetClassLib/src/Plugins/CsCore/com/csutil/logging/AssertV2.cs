@@ -19,8 +19,7 @@ namespace com.csutil {
         }
 
         public static void Throws<T>(Action actionThatShouldThrowAnException) where T : Exception {
-            try { actionThatShouldThrowAnException(); }
-            catch (Exception e) {
+            try { actionThatShouldThrowAnException(); } catch (Exception e) {
                 if (e.GetType().IsCastableTo(typeof(T))) { return; } // its the expected exception
                 throw; // its an unexpected exception, so rethrow it
             }
@@ -72,6 +71,13 @@ namespace com.csutil {
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
+        public static void AreEqualJson(object a, object b) {
+            var expected = JsonWriter.GetWriter().Write(a);
+            var actual = JsonWriter.GetWriter().Write(b);
+            AreEqual(expected, actual);
+        }
+
+        [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         public static void AreNotEqualLists<T>(IEnumerable<T> expected, IEnumerable<T> actual, string varName = "", params object[] args) {
             string msg1 = "Assert.AreNotEqual() FAILED: " + varName + " is same reference (expected == actual)";
             Assert(expected != actual, msg1, args);
@@ -79,7 +85,7 @@ namespace com.csutil {
             Assert(!expected.SequenceEqual(actual), msg2, args);
         }
 
-        public static Stopwatch TrackTiming() { return Stopwatch.StartNew(); }
+        public static StopwatchV2 TrackTiming(string methodName = null) { return new StopwatchV2(methodName).StartV2(); }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         public static void AssertUnderXms(this Stopwatch self, int maxTimeInMs, params object[] args) {

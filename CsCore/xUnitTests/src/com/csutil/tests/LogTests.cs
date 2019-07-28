@@ -10,6 +10,8 @@ namespace com.csutil.tests {
 
     public class LogTests {
 
+        public LogTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
+
         [Fact]
         public void TestBasicLogOutputExamples() {
             Log.d("I'm a log message");
@@ -96,7 +98,7 @@ namespace com.csutil.tests {
 
         [Fact]
         public void TestLoggingToFile() {
-            var targetFileToLogInto = EnvironmentV2.instance.GetTempFolder("TestLoggingToFile").GetChild("log.txt");
+            var targetFileToLogInto = EnvironmentV2.instance.GetOrAddTempFolder("TestLoggingToFile").GetChild("log.txt");
             targetFileToLogInto.DeleteV2();
 
             ILog fileLogger = new LogToFile(targetFileToLogInto);
@@ -112,7 +114,7 @@ namespace com.csutil.tests {
 
         [Fact]
         public void TestLoggingToMultipleLoggers() {
-            var targetFileToLogInto = EnvironmentV2.instance.GetTempFolder("TestLoggingToMultipleLoggers").GetChild("log.txt");
+            var targetFileToLogInto = EnvironmentV2.instance.GetOrAddTempFolder("TestLoggingToMultipleLoggers").GetChild("log.txt");
             targetFileToLogInto.DeleteV2();
             var multiLogger = new LogToMultipleLoggers();
             multiLogger.loggers.Add(new LogToConsole());

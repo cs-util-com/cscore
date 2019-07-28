@@ -8,7 +8,10 @@ namespace com.csutil {
 
     public class EventBus : IEventBus {
 
-        static EventBus() { Log.d("EventBus used the first time.."); }
+        static EventBus() {
+            // Log.d("EventBus used the first time..");
+        }
+
         public static IEventBus instance = new EventBus();
 
         public ConcurrentQueue<string> eventHistory { get; set; }
@@ -40,23 +43,25 @@ namespace com.csutil {
         }
 
         public List<object> Publish(string eventName, params object[] args) {
+            return NewPublishIEnumerable(eventName, args).ToList();
+        }
+
+        public IEnumerable<object> NewPublishIEnumerable(string eventName, params object[] args) {
             lock (threadLock) {
-                var results = new List<object>();
+                eventHistory.Enqueue(eventName);
                 ConcurrentDictionary<object, Delegate> dictForEventName;
                 map.TryGetValue(eventName, out dictForEventName);
                 if (!dictForEventName.IsNullOrEmpty()) {
                     var subscribers = dictForEventName.Values;
-                    foreach (var subscriber in subscribers) {
+                    return subscribers.Map(subscriber => {
                         try {
                             object result;
-                            if (subscriber.DynamicInvokeV2(args, out result)) { results.Add(result); }
+                            if (subscriber.DynamicInvokeV2(args, out result)) { return result; }
                         } catch (Exception e) { Log.e(e); }
-                    }
-                } else {
-                    // Log.d("No subscribers registered for event: " + eventName);
+                        return null;
+                    });
                 }
-                eventHistory.Enqueue(eventName);
-                return results;
+                return new List<object>();
             }
         }
 

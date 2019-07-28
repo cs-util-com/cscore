@@ -11,16 +11,16 @@ namespace com.csutil {
             return new DirectoryInfo(Directory.GetCurrentDirectory());
         }
 
-        public virtual DirectoryInfo GetAppDataFolder() {
+        public virtual DirectoryInfo GetRootAppDataFolder() {
             return GetSpecialFolder(Environment.SpecialFolder.ApplicationData);
         }
 
-        public virtual DirectoryInfo GetTempFolder() {
+        public virtual DirectoryInfo GetRootTempFolder() {
             return new DirectoryInfo(Path.GetTempPath());
         }
 
-        public virtual DirectoryInfo GetTempFolder(string tempSubfolderName) {
-            return GetTempFolder().CreateSubdirectory(tempSubfolderName);
+        public virtual DirectoryInfo GetOrAddTempFolder(string tempSubfolderName) {
+            return GetRootTempFolder().GetChildDir(tempSubfolderName).CreateV2();
         }
 
         public virtual DirectoryInfo GetSpecialFolder(Environment.SpecialFolder specialFolder) {

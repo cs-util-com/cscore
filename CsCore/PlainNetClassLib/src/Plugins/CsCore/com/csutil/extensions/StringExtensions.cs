@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
 namespace com.csutil {
@@ -57,6 +58,28 @@ namespace com.csutil {
             try { return Regex.IsMatch(self, regexToMatch); } catch (ArgumentException e) {
                 throw new ArgumentException("Invalid pattern: " + regexToMatch, e);
             }
+        }
+
+    }
+
+    public static class ByteSizeToString {
+
+        private static readonly KeyValuePair<long, string>[] thresholds ={
+            new KeyValuePair<long, string>(1, " Byte"),
+            new KeyValuePair<long, string>(2, " Bytes"),
+            new KeyValuePair<long, string>(1024, " KB"),
+            new KeyValuePair<long, string>(1048576, " MB"), // Note: 1024 ^ 2 = 1026 (xor operator)
+            new KeyValuePair<long, string>(1073741824, " GB")
+        };
+
+        public static string ByteSizeToReadableString(long value) {
+            if (value == 0) { return "0 Bytes"; }
+            for (int t = thresholds.Length - 1; t > 0; t--) {
+                if (value >= thresholds[t].Key) {
+                    return ((double)value / thresholds[t].Key).ToString("0.00") + thresholds[t].Value;
+                }
+            }
+            return "-" + ByteSizeToReadableString(-value); // negative bytes (common case optimised to the end of this routine)
         }
 
     }

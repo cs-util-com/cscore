@@ -135,7 +135,7 @@ namespace com.csutil {
                 using (StreamReader s = new StreamReader(readStream)) {
                     if (typeof(T) == typeof(string)) { return (T)(object)s.ReadToEnd(); }
                     { // If a subscriber reacts to LoadAs return its response:
-                        var results = EventBus.instance.Publish("LoadAs" + typeof(T), self);
+                        var results = EventBus.instance.NewPublishIEnumerable("LoadAs" + typeof(T), self);
                         var result = results.Filter(x => x is T).FirstOrDefault();
                         if (result != null) { return (T)result; }
                     } // Otherwise use the default json reader approach:
@@ -162,6 +162,12 @@ namespace com.csutil {
         public static void SaveAsText(this FileInfo self, string text) {
             self.ParentDir().Create();
             File.WriteAllText(self.FullPath(), text, Encoding.UTF8);
+        }
+
+        public static long GetFileSize(this FileInfo self) { return self.Length; }
+
+        public static string GetFileSizeString(this FileInfo self) {
+            return ByteSizeToString.ByteSizeToReadableString(self.GetFileSize());
         }
 
     }

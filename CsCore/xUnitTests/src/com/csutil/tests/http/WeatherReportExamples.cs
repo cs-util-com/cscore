@@ -7,6 +7,8 @@ using Xunit;
 namespace com.csutil.tests.http {
     public class WeatherReportExamples {
 
+        public WeatherReportExamples(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
+
         [Fact]
         public async void MetaWeatherComExample1() {
 
@@ -19,6 +21,7 @@ namespace com.csutil.tests.http {
             Assert.False(cityLookupResult.IsNullOrEmpty(), "Did not find any location for city=" + yourCity);
             int whereOnEarthIDOfYourCity = cityLookupResult.First().woeid;
             var report = await MetaWeatherReport.GetReport(whereOnEarthIDOfYourCity);
+            Log.d("Full weather report: " + JsonWriter.AsPrettyString(report));
             var currentWeather = report.consolidated_weather.Map(r => r.weather_state_name);
             Log.d("The weather today in " + yourCity + " is: " + currentWeather.ToStringV2());
 
