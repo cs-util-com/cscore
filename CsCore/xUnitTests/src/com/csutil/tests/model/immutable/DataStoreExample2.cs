@@ -55,9 +55,8 @@ namespace com.csutil.tests.model.immutable {
         private static void TestNormalDispatchOfActions(IDataStore<MyAppState1> store) {
             var t = Log.MethodEntered();
 
-            // Register a few listeners that listen to a subtree of the complete state tree:
+            // Register a listener that listens to a subtree of the complete state tree:
             var firstContactWasModifiedCounter = 0;
-
             // Listen to state changes of the first contact of the main user:
             store.AddStateChangeListener(state => state.user?.contacts?.FirstOrDefault(), (firstContact) => {
                 firstContactWasModifiedCounter++;
