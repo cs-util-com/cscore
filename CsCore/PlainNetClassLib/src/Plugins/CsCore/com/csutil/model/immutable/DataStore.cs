@@ -12,12 +12,14 @@ namespace com.csutil.model.immutable {
         private readonly Dispatcher dispatcher;
         private readonly StateReducer<T> reducer;
         private T state;
+        public string storeName;
+
         public Action onStateChanged { get; set; }
 
         public DataStore(StateReducer<T> reducer, T initialState = default(T), params Middleware<T>[] middlewares) {
+            this.state = initialState;
             this.reducer = reducer;
             dispatcher = ApplyMiddlewares(middlewares);
-            state = initialState;
         }
 
         private Dispatcher ApplyMiddlewares(params Middleware<T>[] middlewares) {
@@ -38,6 +40,11 @@ namespace com.csutil.model.immutable {
         /// <summary> Gets the current state tree. </summary>
         /// <returns>  The current state tree. </returns>
         public T GetState() { return state; }
+
+        public override string ToString() {
+            if (storeName != null) { return storeName; }
+            return base.ToString();
+        }
 
     }
 

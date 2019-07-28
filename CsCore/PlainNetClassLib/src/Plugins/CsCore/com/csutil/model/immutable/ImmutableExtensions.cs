@@ -55,6 +55,6 @@ namespace com.csutil.model.immutable {
     /// <summary> Represents a method that is used as middleware. </summary>
     /// <typeparam name="T">  The state tree type. </typeparam>
     /// <returns> A function that, when called with a <see cref="Dispatcher" />, returns a new <see cref="Dispatcher" /> that wraps the first one. </returns>
-    public delegate Func<Dispatcher, Dispatcher> Middleware<T>(DataStore<T> store);
+    public delegate Func<Dispatcher, Dispatcher> Middleware<T>(IDataStore<T> store);
 
 }

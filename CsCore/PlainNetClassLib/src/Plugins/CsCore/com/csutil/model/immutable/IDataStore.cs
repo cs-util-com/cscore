@@ -8,6 +8,8 @@ namespace com.csutil.model.immutable {
 
         T GetState();
 
+        object Dispatch(object action);
+
     }
 
 }

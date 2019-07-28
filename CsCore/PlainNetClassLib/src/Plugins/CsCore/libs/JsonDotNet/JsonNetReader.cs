@@ -7,15 +7,17 @@ namespace com.csutil.json {
 
     public class JsonNetReader : IJsonReader {
 
-        private IJsonWriter debugWriter = new JsonNetWriter();
+        private IJsonWriter debugWriter;
         private JsonSerializerSettings settings;
         private JsonSerializer reader;
 
         public JsonNetReader() : this(JsonNetSettings.defaultSettings) { }
+        public JsonNetReader(JsonSerializerSettings settings) : this(settings, new JsonNetWriter(settings)) { }
 
-        public JsonNetReader(JsonSerializerSettings settings) {
+        public JsonNetReader(JsonSerializerSettings settings, JsonNetWriter debugWriter) {
             this.settings = settings;
             this.reader = JsonSerializer.Create(settings);
+            this.debugWriter = debugWriter;
         }
 
         public T Read<T>(string jsonString) {

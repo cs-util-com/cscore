@@ -20,7 +20,12 @@ namespace com.csutil.tests.model.immutable {
             var data = new MyAppState1();
             var undoable = new UndoRedoReducer<MyAppState1>();
             var thunk = Middlewares.NewThunkMiddleware<MyAppState1>();
-            var store = new DataStore<MyAppState1>(undoable.wrap(MyReducers1.ReduceMyAppState1), data, loggingMiddleware, thunk);
+            var recorder = new ReplayRecorder<MyAppState1>();
+            var logging = Middlewares.NewLoggingMiddleware<MyAppState1>();
+            var recMiddleware = recorder.CreateMiddleware();
+            var undoReducer = undoable.wrap(MyReducers1.ReduceMyAppState1);
+            var store = new DataStore<MyAppState1>(undoReducer, data, logging, thunk, recMiddleware);
+            store.storeName = "Store 1";
 
             // Register a few listeners that listen to a subtree of the complete state tree:
             var firstContactWasModifiedCounter = 0;
@@ -61,31 +66,12 @@ namespace com.csutil.tests.model.immutable {
             TestUndoAndRedo(store);
             await TestAsyncActions(store);
 
+            await TestReplayRecorder(recorder, store);
+
             Log.MethodDone(t);
         }
 
-        private static async Task TestAsyncActions(DataStore<MyAppState1> store) {
-            Assert.Null(store.GetState().currentWeather);
-            var a = store.Dispatch(NewAsyncGetWeatherAction());
-            Assert.True(a is Task, "a=" + a.GetType());
-            if (a is Task delayedTask) { await delayedTask; }
-            Assert.NotEmpty(store.GetState().currentWeather);
-
-            // Another asyn task example with an inline function:
-            store.Dispatch(new ActionLogoutUser());
-            Func<Task> asyncLoginTask = async () => {
-                // Simulate that the login would talk to a server and take some time:
-                await Task.Delay(100);
-                store.Dispatch(new ActionLoginUser() { newLoggedInUser = new MyUser1("Karl") });
-            };
-
-            Assert.Null(store.GetState().user);
-            await (store.Dispatch(asyncLoginTask) as Task);
-            Assert.NotNull(store.GetState().user);
-
-        }
-
-        private static void TestUndoAndRedo(DataStore<MyAppState1> store) {
+        private static void TestUndoAndRedo(IDataStore<MyAppState1> store) {
             // there is nothing on the redo stack first:
             Assert.Throws<InvalidOperationException>(() => { store.Dispatch(new RedoAction<MyAppState1>()); });
 
@@ -119,10 +105,57 @@ namespace com.csutil.tests.model.immutable {
 
         }
 
+        private static async Task TestAsyncActions(IDataStore<MyAppState1> store) {
+            Assert.Null(store.GetState().currentWeather);
+            var a = store.Dispatch(NewAsyncGetWeatherAction());
+            Assert.True(a is Task, "a=" + a.GetType());
+            if (a is Task delayedTask) { await delayedTask; }
+            Assert.NotEmpty(store.GetState().currentWeather);
+
+            // Another asyn task example with an inline function:
+            store.Dispatch(new ActionLogoutUser());
+            Func<Task> asyncLoginTask = async () => {
+                // Simulate that the login would talk to a server and take some time:
+                await Task.Delay(100);
+                store.Dispatch(new ActionLoginUser() { newLoggedInUser = new MyUser1("Karl") });
+            };
+
+            Assert.Null(store.GetState().user);
+            await (store.Dispatch(asyncLoginTask) as Task);
+            Assert.NotNull(store.GetState().user);
+        }
+
+        private async Task TestReplayRecorder(ReplayRecorder<MyAppState1> recorder, IDataStore<MyAppState1> store) {
+            var finalState = store.GetState();
+            recorder.ResetStore();
+            Assert.Null(store.GetState().user);
+            Assert.Null(store.GetState().currentWeather);
+            await recorder.ReplayStore();
+            Assert.NotEqual(0, recorder.recordedActionsCount);
+            AssertEqualJson(finalState, store.GetState());
+            await TestReplayRecorderOnNewStore(recorder, finalState);
+        }
+
+        private async Task TestReplayRecorderOnNewStore(ReplayRecorder<MyAppState1> recorder, MyAppState1 finalStateOfFirstStore) {
+            var data2 = new MyAppState1();
+            var logging = Middlewares.NewLoggingMiddleware<MyAppState1>();
+            var recMiddleware = recorder.CreateMiddleware();
+            var store2 = new DataStore<MyAppState1>(MyReducers1.ReduceMyAppState1, data2, logging, recMiddleware);
+            store2.storeName = "Store 2";
+            await recorder.ReplayStore();
+            AssertEqualJson(finalStateOfFirstStore, store2.GetState());
+        }
+
+        private void AssertEqualJson<T>(T a, T b) {
+            var expected = JsonWriter.GetWriter().Write(a);
+            var actual = JsonWriter.GetWriter().Write(b);
+            Assert.Equal(expected, actual);
+        }
+
         private class MyAppState1 {
             public readonly MyUser1 user;
-            public readonly IEnumerable<string> currentWeather;
-            public MyAppState1(MyUser1 user = null, IEnumerable<string> currentWeather = null) {
+            public readonly List<string> currentWeather;
+            public MyAppState1(MyUser1 user = null, List<string> currentWeather = null) {
                 this.user = user;
                 this.currentWeather = currentWeather;
             }
@@ -154,50 +187,31 @@ namespace com.csutil.tests.model.immutable {
 
         }
 
-        private class ActionSetWeather { public IEnumerable<string> newWeather; }
+        private class ActionSetWeather { public List<string> newWeather; }
 
-        private static Func<DataStore<MyAppState1>, Task> NewAsyncGetWeatherAction() {
-            return async (DataStore<MyAppState1> store) => {
+        private static Func<IDataStore<MyAppState1>, Task> NewAsyncGetWeatherAction() {
+            return async (IDataStore<MyAppState1> store) => {
                 var cityName = "New York";
                 var foundLocations = await MetaWeatherLocationLookup.GetLocation(cityName);
                 var report = await MetaWeatherReport.GetReport(foundLocations.First().woeid);
                 var currentWeatherConditions = report.consolidated_weather.Map(r => r.weather_state_name);
                 Log.d("currentWeatherConditions for " + cityName + ": " + currentWeatherConditions);
-                store.Dispatch(new ActionSetWeather() { newWeather = currentWeatherConditions });
+                store.Dispatch(new ActionSetWeather() { newWeather = currentWeatherConditions.ToList() });
             };
         }
-
-        private Func<Dispatcher, Dispatcher> loggingMiddleware(DataStore<MyAppState1> store) {
-            Log.MethodEntered("store=" + store);
-            return (Dispatcher innerDispatcher) => {
-                Dispatcher loggingDispatcher = (action) => {
-                    var previousState = store.GetState();
-                    var returnedAction = innerDispatcher(action);
-                    var newState = store.GetState();
-                    if (Object.Equals(previousState, newState)) {
-                        Log.e("The action  " + action + " was not handled by any of the reducers!");
-                    } else {
-                        Log.d(asJson("previousState", previousState), asJson("" + action.GetType(), action), asJson("newState", newState));
-                    }
-                    return returnedAction;
-                };
-                return loggingDispatcher;
-            };
-        }
-
-        private static string asJson(string varName, object result) { return varName + "=" + JsonWriter.AsPrettyString(result); }
 
         private static class MyReducers1 {
 
             public static MyAppState1 ReduceMyAppState1(MyAppState1 previousState, object action) {
                 bool changed = false;
+                if (action is ResetStoreAction) { return new MyAppState1(); }
                 var newWeather = previousState.currentWeather.Mutate(action, ReduceWeather, ref changed);
                 var newUser = previousState.user.Mutate(action, ReduceUser, ref changed);
                 if (changed) { return new MyAppState1(newUser, newWeather); }
                 return previousState;
             }
 
-            private static IEnumerable<string> ReduceWeather(IEnumerable<string> previousState, object action) {
+            private static List<string> ReduceWeather(List<string> previousState, object action) {
                 if (action is ActionSetWeather a) { return a.newWeather; }
                 return previousState;
             }

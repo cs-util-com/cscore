@@ -34,13 +34,15 @@ namespace com.csutil.tests.io {
         }
 
         private static async Task TestIKeyValueStoreImplementation(IKeyValueStore store) {
-            string myKey1 = "mykey1";
-            var myValue1 = "myvalue1";
-            string myKey2 = "mykey2";
-            var myValue2 = "myvalue2";
+            string myKey1 = "myKey1";
+            var myValue1 = "myValue1";
+            string myKey2 = "myKey2";
+            var myValue2 = "myValue2";
+            var myFallbackValue1 = "myFallbackValue1";
 
             // test Set and Get of values:
             Assert.False(await store.ContainsKey(myKey1));
+            Assert.Equal(myFallbackValue1, await store.Get(myKey1, myFallbackValue1));
             await store.Set(myKey1, myValue1);
             Assert.Equal(myValue1, await store.Get<string>(myKey1, null));
             Assert.True(await store.ContainsKey(myKey1));

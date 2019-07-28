@@ -22,8 +22,11 @@ namespace com.csutil {
         }
 
         public static Exception e(string error, params object[] args) {
+            if (!IsTraceIncludedIn(args)) { args = new StackTrace(1, true).AddTo(args); }
             return instance.LogError(error, args);
         }
+
+        private static bool IsTraceIncludedIn(object[] args) { return args.Get<StackFrame>() != null || args.Get<StackTrace>() != null; }
 
         public static Exception e(Exception e, params object[] args) {
             return instance.LogExeption(e, args);
@@ -31,7 +34,7 @@ namespace com.csutil {
 
         public static string CallingMethodStr(object[] args = null, int offset = 3, int count = 3) {
             var frame = args.Get<StackFrame>(); if (frame != null) { return frame.ToStringV2(); }
-            var trace = args.Get<StackTrace>(); if (trace != null) { return trace.ToStringV2(); }
+            var trace = args.Get<StackTrace>(); if (trace != null) { return trace.ToStringV2(offset, count); }
             return new StackTrace(true).ToStringV2(offset, count);
         }
 
@@ -83,8 +86,11 @@ namespace com.csutil {
             } catch (Exception e) { Console.WriteLine("" + e); return ""; }
         }
 
-        internal static object[] AddTo(this StackFrame stackFrame, object[] args) {
-            var a = new object[1] { stackFrame };
+        internal static object[] AddTo(this StackFrame self, object[] args) { return Add(args, self); }
+        internal static object[] AddTo(this StackTrace self, object[] args) { return Add(args, self); }
+
+        private static object[] Add(object[] args, Object obj) {
+            var a = new object[1] { obj };
             if (args == null) { return a; } else { return args.Concat(a).ToArray(); }
         }
 
