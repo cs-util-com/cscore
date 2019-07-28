@@ -9,6 +9,12 @@ using Xunit;
 
 namespace com.csutil.tests.model.immutable {
 
+    /// <summary> 
+    /// This is a more complex redux datastore example that uses features like: 
+    /// - UNDO/REDO by using a higher order reducer around the normal main reducer
+    /// - A thunk middleware to enable dispatching async actions
+    /// - A recorder middleware to record and replay all actions of a store
+    /// </summary>
     public class DataStoreExample2 {
 
         public DataStoreExample2(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
@@ -17,20 +23,42 @@ namespace com.csutil.tests.model.immutable {
         public async void ExampleUsage2() {
             var t = Log.MethodEntered();
 
-            var data = new MyAppState1();
-            var thunk = Middlewares.NewThunkMiddleware<MyAppState1>();
+            // Add a thunk middleware to allow dispatching async actions:
+            var thunkMiddleware = Middlewares.NewThunkMiddleware<MyAppState1>();
+
+            // aDD A logging middleware to log all dispatched actions:
+            var loggingMiddleware = Middlewares.NewLoggingMiddleware<MyAppState1>();
+
+            // Add a recorder middleware to enable hot reload by replaying previously recorded actions:
             var recorder = new ReplayRecorder<MyAppState1>();
-            var logging = Middlewares.NewLoggingMiddleware<MyAppState1>();
             var recMiddleware = recorder.CreateMiddleware();
+
             var undoable = new UndoRedoReducer<MyAppState1>();
+            // To allow undo redo on the full store wrap the main reducer with the undo reducer:
             var undoReducer = undoable.wrap(MyReducers1.ReduceMyAppState1);
-            var store = new DataStore<MyAppState1>(undoReducer, data, logging, thunk, recMiddleware);
+
+            var data = new MyAppState1(); // the initial immutable state
+            var store = new DataStore<MyAppState1>(undoReducer, data, loggingMiddleware, thunkMiddleware, recMiddleware);
             store.storeName = "Store 1";
+
+            TestNormalDispatchOfActions(store);
+
+            TestUndoAndRedo(store);
+
+            await TestAsyncActions(store);
+
+            await TestReplayRecorder(recorder, store);
+
+            Log.MethodDone(t);
+        }
+
+        private static void TestNormalDispatchOfActions(IDataStore<MyAppState1> store) {
+            var t = Log.MethodEntered();
 
             // Register a few listeners that listen to a subtree of the complete state tree:
             var firstContactWasModifiedCounter = 0;
 
-            // listen to state changes of the first contact of the main user:
+            // Listen to state changes of the first contact of the main user:
             store.AddStateChangeListener(state => state.user?.contacts?.FirstOrDefault(), (firstContact) => {
                 firstContactWasModifiedCounter++;
                 if (firstContactWasModifiedCounter == 1) { // 1st event when the contact is added:
@@ -57,101 +85,128 @@ namespace com.csutil.tests.model.immutable {
             Assert.Equal("Peter", store.GetState().user.contacts.First().name);
             Assert.Equal(2, firstContactWasModifiedCounter);
 
+            // Test that the reducers throw errors for invalid actions being dispatched (max age is 99 and name must not be emtpy):
             Assert.Throws<Exception>(() => { store.Dispatch(new ActionOnUser.ChangeAge() { targetUser = "Peter", newAge = 100 }); });
             Assert.Throws<Exception>(() => { store.Dispatch(new ActionOnUser.ChangeName() { targetUser = "Peter", newName = "" }); });
 
             store.Dispatch(new ActionLogoutUser());
             Assert.Null(store.GetState().user);
 
-            TestUndoAndRedo(store);
-            await TestAsyncActions(store);
-
-            await TestReplayRecorder(recorder, store);
-
             Log.MethodDone(t);
         }
 
         private static void TestUndoAndRedo(IDataStore<MyAppState1> store) {
-            // there is nothing on the redo stack first:
+            var t = Log.MethodEntered();
+
+            // There is nothing on the redo stack first:
             Assert.Throws<InvalidOperationException>(() => { store.Dispatch(new RedoAction<MyAppState1>()); });
 
             Assert.Null(store.GetState().user);
             store.Dispatch(new UndoAction<MyAppState1>()); // undo logout
-            Assert.NotNull(store.GetState().user);
+            Assert.NotNull(store.GetState().user); // User logged in again in the store
 
-            store.Dispatch(new UndoAction<MyAppState1>()); // undo rename Tim => Peter
+            Assert.Equal("Peter", store.GetState().user.contacts.First().name);
+            store.Dispatch(new UndoAction<MyAppState1>()); // undo that Tim was renamed to Peter
             Assert.Equal("Tim", store.GetState().user.contacts.First().name);
 
-            store.Dispatch(new UndoAction<MyAppState1>()); // undo adding contact
-            Assert.Null(store.GetState().user.contacts);
+            store.Dispatch(new UndoAction<MyAppState1>()); // undo adding first contact
+            Assert.Null(store.GetState().user.contacts); // Now the contacts are emtpy
 
-            store.Dispatch(new RedoAction<MyAppState1>()); // redo adding contact
-            var contacts = store.GetState().user.contacts;
+            store.Dispatch(new RedoAction<MyAppState1>()); // redo adding first contact
+            var contacts = store.GetState().user.contacts; // Now the contacts contain 1 user again
             Assert.Equal("Tim", contacts.First().name);
 
             // Add a new action:
             store.Dispatch(new ActionOnUser.AddContact() { targetUser = "Karl", newContact = new MyUser1(name: "Tim 2") });
             Assert.Equal(2, store.GetState().user.contacts.Count);
 
-            // Again redo not possible at this point:
+            // Again redo not possible at this point because the redo stack was cleared when a new action was dispatched:
             Assert.Throws<InvalidOperationException>(() => { store.Dispatch(new RedoAction<MyAppState1>()); });
 
             store.Dispatch(new UndoAction<MyAppState1>()); // Undo adding additional user
             Assert.Same(contacts, store.GetState().user.contacts);
 
             // Using a type parameter that is not specified by the Undo Reducer does nothing:
-            store.Dispatch(new UndoAction<string>());
-            store.Dispatch(new RedoAction<string>());
+            store.Dispatch(new UndoAction<string>()); // Does nothing to the state
+            store.Dispatch(new RedoAction<string>()); // Does nothing to the state
 
+            Log.MethodDone(t);
         }
 
         private static async Task TestAsyncActions(IDataStore<MyAppState1> store) {
+            var t = Log.MethodEntered();
+
             Assert.Null(store.GetState().currentWeather);
+            // Create an async action and dispatch it so that it is executed by the thunk middleware:
             var a = store.Dispatch(NewAsyncGetWeatherAction());
             Assert.True(a is Task, "a=" + a.GetType());
             if (a is Task delayedTask) { await delayedTask; }
             Assert.NotEmpty(store.GetState().currentWeather);
 
-            // Another asyn task example with an inline function:
             store.Dispatch(new ActionLogoutUser());
+            Assert.Null(store.GetState().user);
+
+            // Another asyn task example with an inline lambda function:
             Func<Task> asyncLoginTask = async () => {
-                // Simulate that the login would talk to a server and take some time:
-                await Task.Delay(100);
+                await Task.Delay(100); // Simulate that the login would talk to a server and take some time
+                // Here the user would be logged into the server and returned to the client to store it:
                 store.Dispatch(new ActionLoginUser() { newLoggedInUser = new MyUser1("Karl") });
             };
-
-            Assert.Null(store.GetState().user);
+            // Since the async action uses Func<Task> the returned object can be awaited on:
             await (store.Dispatch(asyncLoginTask) as Task);
             Assert.NotNull(store.GetState().user);
+
+            Log.MethodDone(t);
         }
 
         private async Task TestReplayRecorder(ReplayRecorder<MyAppState1> recorder, IDataStore<MyAppState1> store) {
+            var t = Log.MethodEntered();
+
+            // First remember the final state of the store:
             var finalState = store.GetState();
+            // Then reset the store so that it is in its initial state again:
             recorder.ResetStore();
             Assert.Null(store.GetState().user);
             Assert.Null(store.GetState().currentWeather);
+
+            // Calling ReplayStore will replay all actions stored by the recorder so that the final state is restored:
             await recorder.ReplayStore();
             Assert.NotEqual(0, recorder.recordedActionsCount);
             AssertEqualJson(finalState, store.GetState());
+
+            // The recorder middleware can also replay the actions into a second store:
             await TestReplayRecorderOnNewStore(recorder, finalState);
+
+            Log.MethodDone(t);
         }
 
         private async Task TestReplayRecorderOnNewStore(ReplayRecorder<MyAppState1> recorder, MyAppState1 finalStateOfFirstStore) {
-            var data2 = new MyAppState1();
-            var logging = Middlewares.NewLoggingMiddleware<MyAppState1>();
+            var t = Log.MethodEntered();
+
+            // Connect the recorder to the new store:
             var recMiddleware = recorder.CreateMiddleware();
             var undoable = new UndoRedoReducer<MyAppState1>();
+            var logging = Middlewares.NewLoggingMiddleware<MyAppState1>();
+
+            var data2 = new MyAppState1();
             var store2 = new DataStore<MyAppState1>(undoable.wrap(MyReducers1.ReduceMyAppState1), data2, logging, recMiddleware);
             store2.storeName = "Store 2";
+
+            // Replaying the recorder will now fill the second store with the same actions:
             await recorder.ReplayStore();
             AssertEqualJson(finalStateOfFirstStore, store2.GetState());
+
+            Log.MethodDone(t);
         }
 
-        private void AssertEqualJson<T>(T a, T b) {
+        private void AssertEqualJson<T>(T a, T b) { // Compare 2 objects based on their json
             var expected = JsonWriter.GetWriter().Write(a);
+            Assert.False(expected.IsNullOrEmpty());
             var actual = JsonWriter.GetWriter().Write(b);
             Assert.Equal(expected, actual);
         }
+
+        #region example datamodel
 
         private class MyAppState1 {
             public readonly MyUser1 user;
@@ -174,6 +229,10 @@ namespace com.csutil.tests.model.immutable {
             }
         }
 
+        #endregion // of example datamodel
+
+        #region example actions
+
         private class ActionLogoutUser { }
 
         private class ActionLoginUser { public MyUser1 newLoggedInUser; }
@@ -191,6 +250,7 @@ namespace com.csutil.tests.model.immutable {
         private class ActionSetWeather { public List<string> newWeather; }
 
         private static Func<IDataStore<MyAppState1>, Task> NewAsyncGetWeatherAction() {
+            // The created method is executed by the thunk middlewhere when its dispatched in a store:
             return async (IDataStore<MyAppState1> store) => {
                 var cityName = "New York";
                 var foundLocations = await MetaWeatherLocationLookup.GetLocation(cityName);
@@ -201,8 +261,11 @@ namespace com.csutil.tests.model.immutable {
             };
         }
 
-        private static class MyReducers1 {
+        #endregion // of example actions
 
+        private static class MyReducers1 { // The reducers to modify the immutable datamodel:
+
+            // The most outer reducer is public to be passed into the store:
             public static MyAppState1 ReduceMyAppState1(MyAppState1 previousState, object action) {
                 bool changed = false;
                 if (action is ResetStoreAction) { return new MyAppState1(); }
@@ -262,4 +325,5 @@ namespace com.csutil.tests.model.immutable {
         }
 
     }
+
 }
