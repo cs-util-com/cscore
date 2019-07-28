@@ -18,11 +18,11 @@ namespace com.csutil.tests.model.immutable {
             var t = Log.MethodEntered();
 
             var data = new MyAppState1();
-            var undoable = new UndoRedoReducer<MyAppState1>();
             var thunk = Middlewares.NewThunkMiddleware<MyAppState1>();
             var recorder = new ReplayRecorder<MyAppState1>();
             var logging = Middlewares.NewLoggingMiddleware<MyAppState1>();
             var recMiddleware = recorder.CreateMiddleware();
+            var undoable = new UndoRedoReducer<MyAppState1>();
             var undoReducer = undoable.wrap(MyReducers1.ReduceMyAppState1);
             var store = new DataStore<MyAppState1>(undoReducer, data, logging, thunk, recMiddleware);
             store.storeName = "Store 1";
@@ -140,7 +140,8 @@ namespace com.csutil.tests.model.immutable {
             var data2 = new MyAppState1();
             var logging = Middlewares.NewLoggingMiddleware<MyAppState1>();
             var recMiddleware = recorder.CreateMiddleware();
-            var store2 = new DataStore<MyAppState1>(MyReducers1.ReduceMyAppState1, data2, logging, recMiddleware);
+            var undoable = new UndoRedoReducer<MyAppState1>();
+            var store2 = new DataStore<MyAppState1>(undoable.wrap(MyReducers1.ReduceMyAppState1), data2, logging, recMiddleware);
             store2.storeName = "Store 2";
             await recorder.ReplayStore();
             AssertEqualJson(finalStateOfFirstStore, store2.GetState());
