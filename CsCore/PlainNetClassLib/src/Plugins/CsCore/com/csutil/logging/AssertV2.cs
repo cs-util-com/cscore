@@ -85,7 +85,7 @@ namespace com.csutil {
             Assert(!expected.SequenceEqual(actual), msg2, args);
         }
 
-        public static StopwatchV2 TrackTiming() { return new StopwatchV2().StartV2(); }
+        public static StopwatchV2 TrackTiming(string methodName = null) { return new StopwatchV2(methodName).StartV2(); }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         public static void AssertUnderXms(this Stopwatch self, int maxTimeInMs, params object[] args) {

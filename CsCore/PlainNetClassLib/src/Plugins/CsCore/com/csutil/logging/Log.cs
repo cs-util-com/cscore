@@ -50,17 +50,23 @@ namespace com.csutil {
         public static StopwatchV2 MethodEntered(params object[] args) {
 #if DEBUG
             var t = new StackFrame(1, true);
-            Log.d(" --> " + t.GetMethodName(false), t.AddTo(args));
+            var methodName = t.GetMethodName(false);
+            Log.d(" --> " + methodName, t.AddTo(args));
 #endif
-            return AssertV2.TrackTiming();
+            return AssertV2.TrackTiming(methodName);
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_FULL_LOGGING")]
         public static void MethodDone(Stopwatch timing, int maxAllowedTimeInMs = -1) {
             var timingV2 = timing as StopwatchV2;
-            if (timingV2 != null) { timingV2.StopV2(); } else { timing.Stop(); }
+            string methodName = null;
+            if (timingV2 != null) {
+                timingV2.StopV2();
+                methodName = timingV2.methodName;
+            } else { timing.Stop(); }
             var t = new StackFrame(1, true);
-            var text = "    <-- " + t.GetMethodName(false) + " finished after " + timing.ElapsedMilliseconds + " ms";
+            if (methodName.IsNullOrEmpty()) { methodName = t.GetMethodName(false); }
+            var text = "    <-- " + methodName + " finished after " + timing.ElapsedMilliseconds + " ms";
             if (timingV2 != null) { text += ", " + timingV2.GetAllocatedMemBetweenStartAndStop(); }
             Log.d(text, t.AddTo(null));
             if (maxAllowedTimeInMs > 0) { timing.AssertUnderXms(maxAllowedTimeInMs); }

@@ -8,6 +8,10 @@ namespace com.csutil {
         private long managedMemoryAtStop;
         private long memoryAtStart;
         private long memoryAtStop;
+        public string methodName;
+
+        public StopwatchV2(string methodName = null) { this.methodName = methodName; }
+
         public long allocatedManagedMemBetweenStartAndStop { get { return managedMemoryAtStop - managedMemoryAtStart; } }
         public long allocatedMemBetweenStartAndStop { get { return memoryAtStop - memoryAtStart; } }
 
