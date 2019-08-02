@@ -14,7 +14,9 @@ namespace com.csutil.keyvaluestore {
             if (store.TryGetValue(key, out value)) { return (T)value; }
             if (fallbackStore != null) {
                 var fallbackValue = await fallbackStore.Get<T>(key, defaultValue);
-                if (!ReferenceEquals(fallbackValue, defaultValue)) { InternalSet(key, fallbackValue); }
+                if (!ReferenceEquals(fallbackValue, defaultValue)) {
+                    InternalSet(key, fallbackValue);
+                }
                 return fallbackValue;
             }
             return defaultValue;

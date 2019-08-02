@@ -25,7 +25,7 @@ namespace com.csutil.keyvaluestore {
 
         public async Task<bool> ContainsKey(string key) {
             if (null != GetBson(key)) { return true; }
-            if (fallbackStore != null) return await fallbackStore.ContainsKey(key);
+            if (fallbackStore != null) { return await fallbackStore.ContainsKey(key); }
             return false;
         }
 
@@ -34,6 +34,13 @@ namespace com.csutil.keyvaluestore {
         public async Task<T> Get<T>(string key, T defaultValue) {
             var bson = GetBson(key);
             if (bson != null) { return (T)InternalGet(bson, typeof(T)); }
+            if (fallbackStore != null) {
+                var fallbackValue = await fallbackStore.Get<T>(key, defaultValue);
+                if (!ReferenceEquals(fallbackValue, defaultValue)) {
+                    InternalSet(key, fallbackValue);
+                }
+                return fallbackValue;
+            }
             return defaultValue;
         }
 
@@ -44,11 +51,27 @@ namespace com.csutil.keyvaluestore {
             return bsonMapper.ToObject(targetType, bson);
         }
 
-        public async Task<bool> Remove(string key) { return collection.Delete(key); }
+        public async Task<bool> Remove(string key) {
+            var res = collection.Delete(key);
+            if (fallbackStore != null) { res &= await fallbackStore.Remove(key); }
+            return res;
+        }
 
-        public async Task RemoveAll() { db.DropCollection(collection.Name); }
+        public async Task RemoveAll() {
+            db.DropCollection(collection.Name);
+            if (fallbackStore != null) { await fallbackStore.RemoveAll(); }
+        }
 
         public async Task<object> Set(string key, object obj) {
+            var oldEntry = InternalSet(key, obj);
+            if (fallbackStore != null) {
+                var fallbackOldEntry = await fallbackStore.Set(key, obj);
+                if (oldEntry == null && fallbackOldEntry != null) { oldEntry = fallbackOldEntry; }
+            }
+            return oldEntry;
+        }
+
+        private object InternalSet(string key, object obj) {
             var objType = obj.GetType();
             if (IsPrimitive(objType)) { obj = new PrimitiveWrapper() { obj = obj }; }
             var oldBson = GetBson(key);
