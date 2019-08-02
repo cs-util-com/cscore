@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace com.csutil.keyvaluestore {
@@ -9,6 +10,7 @@ namespace com.csutil.keyvaluestore {
         Task<bool> Remove(string key);
         Task RemoveAll();
         void SetFallbackStore(IKeyValueStore fallbackStore);
+        Task<IEnumerable<string>> GetAllKeys();
     }
 
 }

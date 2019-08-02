@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace com.csutil.keyvaluestore {
@@ -51,6 +52,15 @@ namespace com.csutil.keyvaluestore {
         }
 
         public void SetFallbackStore(IKeyValueStore fallbackStore) { this.fallbackStore = fallbackStore; }
+
+        public async Task<IEnumerable<string>> GetAllKeys() {
+            IEnumerable<string> result = store.Keys;
+            if (fallbackStore != null) {
+                var filteredFallbackKeys = (await fallbackStore.GetAllKeys()).Filter(e => !result.Contains(e));
+                result = result.Concat(filteredFallbackKeys);
+            }
+            return result;
+        }
 
     }
 }

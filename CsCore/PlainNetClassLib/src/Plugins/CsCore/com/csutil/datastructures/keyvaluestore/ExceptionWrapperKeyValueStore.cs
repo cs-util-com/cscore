@@ -48,5 +48,9 @@ namespace com.csutil.keyvaluestore {
             return await WrapWithTry(() => { return wrappedStore.Set(key, obj); }, null);
         }
 
+        public async Task<IEnumerable<string>> GetAllKeys() {
+            return await WrapWithTry<IEnumerable<string>>(() => { return wrappedStore.GetAllKeys(); }, null);
+        }
+
     }
 }

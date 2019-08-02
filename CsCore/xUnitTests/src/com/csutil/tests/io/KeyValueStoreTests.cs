@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using com.csutil.keyvaluestore;
 using Xunit;
@@ -84,6 +85,10 @@ namespace com.csutil.tests.io {
             Assert.False(await store.ContainsKey(myKey2));
             await store.Set(myKey2, myValue2);
             Assert.True(await store.ContainsKey(myKey2));
+
+            var keys = await store.GetAllKeys();
+            Assert.Equal(2, keys.Count());
+
             await store.Remove(myKey2);
             Assert.False(await store.ContainsKey(myKey2));
 

@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using LiteDB;
 
@@ -89,6 +91,21 @@ namespace com.csutil.keyvaluestore {
         private static bool IsPrimitive(System.Type t) { return t.IsPrimitive || t == typeof(string); }
 
         public void SetFallbackStore(IKeyValueStore fallbackStore) { this.fallbackStore = fallbackStore; }
+
+        public async Task<IEnumerable<string>> GetAllKeys() {
+            IEnumerable<string> result = collection.FindAll().Map(x => GetKeyFromBsonDoc(x));
+            if (fallbackStore != null) {
+                var filteredFallbackKeys = (await fallbackStore.GetAllKeys()).Filter(e => !result.Contains(e));
+                result = result.Concat(filteredFallbackKeys);
+            }
+            return result;
+        }
+
+        private static string GetKeyFromBsonDoc(BsonDocument x) {
+            var key = x.Keys.First();
+            AssertV2.AreEqual("_id", key);
+            return key;
+        }
 
     }
 
