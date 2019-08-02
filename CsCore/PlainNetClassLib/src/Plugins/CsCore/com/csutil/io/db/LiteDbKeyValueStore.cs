@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Threading.Tasks;
 using LiteDB;
@@ -5,6 +6,9 @@ using LiteDB;
 namespace com.csutil.keyvaluestore {
 
     public class LiteDbKeyValueStore : IKeyValueStore {
+
+        private class PrimitiveWrapper { public object obj; }
+
         private BsonMapper bsonMapper;
         private LiteDatabase db;
         private LiteCollection<BsonDocument> collection;
@@ -29,29 +33,37 @@ namespace com.csutil.keyvaluestore {
 
         public async Task<T> Get<T>(string key, T defaultValue) {
             var bson = GetBson(key);
-            if (bson != null) { return (T)bsonMapper.ToObject(typeof(T), bson); }
+            if (bson != null) { return (T)InternalGet(bson, typeof(T)); }
             return defaultValue;
         }
 
-        public async Task<bool> Remove(string key) {
-            return collection.Delete(key);
+        private object InternalGet(BsonDocument bson, Type targetType) {
+            if (IsPrimitive(targetType)) { // unwrap the primitive:
+                return bsonMapper.ToObject<PrimitiveWrapper>(bson).obj;
+            }
+            return bsonMapper.ToObject(targetType, bson);
         }
 
-        public async Task RemoveAll() {
-            db.DropCollection(collection.Name);
-        }
+        public async Task<bool> Remove(string key) { return collection.Delete(key); }
+
+        public async Task RemoveAll() { db.DropCollection(collection.Name); }
 
         public async Task<object> Set(string key, object obj) {
-            var oldVal = GetBson(key);
+            var objType = obj.GetType();
+            if (IsPrimitive(objType)) { obj = new PrimitiveWrapper() { obj = obj }; }
+            var oldBson = GetBson(key);
             var newVal = bsonMapper.ToDocument(obj);
-            if (oldVal == null) {
+            if (oldBson == null) {
                 collection.Insert(key, newVal);
                 return null;
             } else {
+                var oldVal = InternalGet(oldBson, objType);
                 collection.Update(key, newVal);
-                return bsonMapper.ToObject(obj.GetType(), oldVal);
+                return oldVal;
             }
         }
+
+        private static bool IsPrimitive(System.Type t) { return t.IsPrimitive || t == typeof(string); }
 
         public void SetFallbackStore(IKeyValueStore fallbackStore) { this.fallbackStore = fallbackStore; }
 

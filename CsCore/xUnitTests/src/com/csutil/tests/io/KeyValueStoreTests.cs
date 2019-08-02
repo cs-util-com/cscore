@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using com.csutil.keyvaluestore;
 using Xunit;
@@ -11,26 +13,52 @@ namespace com.csutil.tests.io {
             AssertV2.throwExeptionIfAssertionFails = true;
         }
 
+        private class MyClass1 {
+            public string myString1 { get; set; }
+            public string myString2;
+        }
+
         [Fact]
-        public async void ExampleUsage1() {
-            var dbFile = EnvironmentV2.instance.GetOrAddTempFolder("KeyValueStoreTests").GetChild("ExampleUsage1");
-            dbFile.DeleteV2();
-            IKeyValueStore s = new LiteDbKeyValueStore(dbFile);
-            var key1 = "test123";
-            var x1 = new MyClass1() { myString1 = "Abc", myString2 = "Abc2" };
-            await s.Remove(key1);
-            await s.Set(key1, x1);
-            var x2 = await s.Get<MyClass1>(key1, null);
+        public void ExampleUsage1() {
+            IKeyValueStore store = new InMemoryKeyValueStore();
+            string myKey1 = "myKey1";
+            MyClass1 x1 = new MyClass1() { myString1 = "Abc", myString2 = "Abc2" };
+            store.Set(myKey1, x1);
+            MyClass1 x2 = store.Get<MyClass1>(myKey1, defaultValue: null).Result;
             Assert.Equal(x1.myString1, x2.myString1);
             Assert.Equal(x1.myString2, x2.myString2);
+        }
+
+        [Fact]
+        public async void ExampleUsage2() {
+            var storeFile = EnvironmentV2.instance.GetOrAddTempFolder("KeyValueStoreTests").GetChild("ExampleUsage2");
+            storeFile.DeleteV2(); // Cleanup before tests if the test file exists
+            string myKey1 = "test123";
+            MyClass1 x1 = new MyClass1() { myString1 = "Abc", myString2 = "Abc2" };
+            {   // Create a fast memory store and combine it with a LiteDB store that is persisted to disk:
+                IKeyValueStore store = new InMemoryKeyValueStore().WithFallbackStore(new LiteDbKeyValueStore(storeFile));
+                await store.Set(myKey1, x1);
+                MyClass1 x2 = await store.Get<MyClass1>(myKey1, null);
+                Assert.Equal(x1.myString1, x2.myString1);
+                Assert.Equal(x1.myString2, x2.myString2);
+            }
+            { // Create a second store and check that the changes were persisted:
+                IKeyValueStore store2 = new LiteDbKeyValueStore(storeFile);
+                Assert.True(await store2.ContainsKey(myKey1));
+                MyClass1 x2 = await store2.Get<MyClass1>(myKey1, null);
+                Assert.Equal(x1.myString1, x2.myString1);
+                Assert.Equal(x1.myString2, x2.myString2);
+                await store2.Remove(myKey1);
+                Assert.False(await store2.ContainsKey(myKey1));
+            }
         }
 
         [Fact]
         public async void TestAllIKeyValueStoreImplementations() {
             var dbFile = EnvironmentV2.instance.GetOrAddTempFolder("KeyValueStoreTests").GetChild("TestAllIKeyValueStoreImplementations");
             dbFile.DeleteV2();
-            await TestIKeyValueStoreImplementation(new LiteDbKeyValueStore(dbFile));
             await TestIKeyValueStoreImplementation(new InMemoryKeyValueStore());
+            await TestIKeyValueStoreImplementation(new LiteDbKeyValueStore(dbFile));
         }
 
         private static async Task TestIKeyValueStoreImplementation(IKeyValueStore store) {
@@ -65,10 +93,21 @@ namespace com.csutil.tests.io {
             Assert.False(await store.ContainsKey(myKey1));
         }
 
-        private class MyClass1 {
-            public string myString1 { get; set; }
-            public string myString2;
+        [Fact]
+        public async void TestExceptionCatching() {
+
+            var kvstore = new InMemoryKeyValueStore();
+            await kvstore.Set("1", 1);
+            await Assert.ThrowsAsync<InvalidCastException>(() => kvstore.Get<string>("1", "myDefaultValue"));
+
+            var kvstore2 = new ExceptionWrapperKeyValueStore(kvstore, new HashSet<Type>());
+            string x = await kvstore2.Get<string>("1", "myDefaultValue");
+            Assert.Equal("myDefaultValue", x);
+            kvstore2.errorTypeBlackList.Add(typeof(InvalidCastException));
+            await Assert.ThrowsAsync<InvalidCastException>(() => kvstore.Get<string>("1", "myDefaultValue"));
+
         }
+
     }
 
 }
