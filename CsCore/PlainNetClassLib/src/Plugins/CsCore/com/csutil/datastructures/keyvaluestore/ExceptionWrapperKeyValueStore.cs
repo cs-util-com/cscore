@@ -6,6 +6,7 @@ namespace com.csutil.keyvaluestore {
     public class ExceptionWrapperKeyValueStore : IKeyValueStore {
         private IKeyValueStore wrappedStore;
         public HashSet<Type> errorTypeBlackList;
+        public Action<Exception> onError = (e) => { Log.e(e); };
 
         private static HashSet<Type> NewDefaultErrorSet() { return new HashSet<Type>() { typeof(InvalidCastException) }; }
 
@@ -19,7 +20,9 @@ namespace com.csutil.keyvaluestore {
         public void SetFallbackStore(IKeyValueStore fallbackStore) { wrappedStore = fallbackStore; }
 
         private async Task<T> WrapWithTry<T>(Func<Task<T>> f, T defaultValue) {
-            try { return await f(); } catch (Exception e) { if (IsOnBlackList(e)) { throw e; } }
+            try { return await f(); } catch (Exception e) {
+                if (IsOnBlackList(e)) { throw e; } else { onError.InvokeIfNotNull(e); }
+            }
             return defaultValue;
         }
 

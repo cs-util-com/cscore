@@ -95,7 +95,6 @@ namespace com.csutil.tests.io {
 
         [Fact]
         public async void TestExceptionCatching() {
-
             var kvstore = new InMemoryKeyValueStore();
             await kvstore.Set("1", 1);
             await Assert.ThrowsAsync<InvalidCastException>(() => kvstore.Get<string>("1", "myDefaultValue"));
@@ -105,7 +104,6 @@ namespace com.csutil.tests.io {
             Assert.Equal("myDefaultValue", x);
             kvstore2.errorTypeBlackList.Add(typeof(InvalidCastException));
             await Assert.ThrowsAsync<InvalidCastException>(() => kvstore.Get<string>("1", "myDefaultValue"));
-
         }
 
     }
