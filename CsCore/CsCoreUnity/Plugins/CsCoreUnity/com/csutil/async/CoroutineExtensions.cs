@@ -11,8 +11,15 @@ namespace com.csutil {
     public static class CoroutineExtensions {
 
         public static IEnumerator AsCoroutine(this Task self, float waitInterval = 0.02f) {
+            Action<Exception> defaultOnErrorAction = (e) => { throw e; };
+            yield return AsCoroutine(self, defaultOnErrorAction, waitInterval);
+        }
+
+        public static IEnumerator AsCoroutine(this Task self, Action<Exception> onError, float waitInterval = 0.02f) {
             var waitIntervalBeforeNextCheck = new WaitForSeconds(waitInterval);
             while (!self.IsCompleted) { yield return waitIntervalBeforeNextCheck; }
+            if (self.IsFaulted) { onError.InvokeIfNotNull(self.Exception); }
+            yield return null;
         }
 
         public static IEnumerator AsCoroutine(this TaskRunner.MonitoredTask self, float waitInterval = 0.02f) {

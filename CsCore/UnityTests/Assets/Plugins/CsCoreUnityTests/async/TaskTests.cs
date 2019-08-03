@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,26 +24,30 @@ namespace com.csutil.tests.threading {
             var task1 = TaskRunner.instance.RunInBackground((cancelRequest) => {
                 for (int i = 0; i < 5; i++) {
                     cancelRequest.ThrowIfCancellationRequested();
-                    Thread.Sleep(1000);
+                    Thread.Sleep(200);
                     Log.d("Task 1: Step " + i);
                 }
                 Log.d("Task is done now");
-                throw new Exception("Now the task will fault");
+                throw new MyException1("Now the task will fault");
             }, scheduler).task;
 
             var task2 = TaskRunner.instance.RunInBackground((cancelRequest) => {
                 for (int i = 0; i < 5; i++) {
                     cancelRequest.ThrowIfCancellationRequested();
-                    Thread.Sleep(1000);
+                    Thread.Sleep(200);
                     Log.d("Task 2: Step " + i);
                 }
                 Log.d("Task 2 is done now");
             }, scheduler).task;
 
-            yield return task1.AsCoroutine();
+            var errorWasThrown = false;
+            yield return task1.AsCoroutine((e) => {
+                errorWasThrown = true;
+            });
             Assert.IsTrue(task1.IsCompleted);
+            Assert.IsTrue(errorWasThrown);
             Assert.IsTrue(task1.IsFaulted);
-            Log.d("Task 1 error was: " + task1.Exception);
+            Assert.IsTrue(task1.Exception.GetBaseException() is MyException1);
 
             yield return task2.AsCoroutine();
             Assert.IsTrue(task2.IsCompleted);
@@ -76,6 +81,8 @@ namespace com.csutil.tests.threading {
             yield return null;
         }
 
+        [Serializable]
+        private class MyException1 : Exception { public MyException1(string message) : base(message) { } }
     }
 
 }
