@@ -59,6 +59,8 @@ namespace com.csutil.io {
         }
 
         public Task<IEnumerable<string>> GetAllKeys() {
+            // If possible pass the request directly through to the fallback store:
+            if (fallbackStore != null) { return fallbackStore.GetAllKeys(); }
             throw new NotSupportedException("PlayerPrefs does not support GetAllKeys()");
         }
 
