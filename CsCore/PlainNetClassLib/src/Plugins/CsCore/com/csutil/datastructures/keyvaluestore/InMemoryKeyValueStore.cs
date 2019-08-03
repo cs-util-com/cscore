@@ -8,7 +8,7 @@ namespace com.csutil.keyvaluestore {
     public class InMemoryKeyValueStore : IKeyValueStore {
 
         private Dictionary<string, object> store = new Dictionary<string, object>();
-        private IKeyValueStore fallbackStore;
+        public IKeyValueStore fallbackStore { get; set; }
 
         public async Task<T> Get<T>(string key, T defaultValue) {
             object value;
@@ -51,13 +51,14 @@ namespace com.csutil.keyvaluestore {
             if (fallbackStore != null) { await fallbackStore.RemoveAll(); }
         }
 
-        public void SetFallbackStore(IKeyValueStore fallbackStore) { this.fallbackStore = fallbackStore; }
-
         public async Task<IEnumerable<string>> GetAllKeys() {
             IEnumerable<string> result = store.Keys;
             if (fallbackStore != null) {
-                var filteredFallbackKeys = (await fallbackStore.GetAllKeys()).Filter(e => !result.Contains(e));
-                result = result.Concat(filteredFallbackKeys);
+                var fallbackResult = await fallbackStore.GetAllKeys();
+                if (fallbackResult != null) {
+                    var filteredFallbackKeys = (fallbackResult).Filter(e => !result.Contains(e));
+                    result = result.Concat(filteredFallbackKeys);
+                }
             }
             return result;
         }

@@ -14,7 +14,8 @@ namespace com.csutil.keyvaluestore {
         private BsonMapper bsonMapper;
         private LiteDatabase db;
         private LiteCollection<BsonDocument> collection;
-        private IKeyValueStore fallbackStore;
+
+        public IKeyValueStore fallbackStore { get; set; }
 
         public LiteDbKeyValueStore(FileInfo dbFile) { Init(dbFile); }
 
@@ -89,8 +90,6 @@ namespace com.csutil.keyvaluestore {
         }
 
         private static bool IsPrimitive(System.Type t) { return t.IsPrimitive || t == typeof(string); }
-
-        public void SetFallbackStore(IKeyValueStore fallbackStore) { this.fallbackStore = fallbackStore; }
 
         public async Task<IEnumerable<string>> GetAllKeys() {
             IEnumerable<string> result = collection.FindAll().Map(x => GetKeyFromBsonDoc(x));

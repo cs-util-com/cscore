@@ -9,7 +9,7 @@ namespace com.csutil.keyvaluestore {
         Task<object> Set(string key, object obj);
         Task<bool> Remove(string key);
         Task RemoveAll();
-        void SetFallbackStore(IKeyValueStore fallbackStore);
+        IKeyValueStore fallbackStore { get; set; }
         Task<IEnumerable<string>> GetAllKeys();
     }
 

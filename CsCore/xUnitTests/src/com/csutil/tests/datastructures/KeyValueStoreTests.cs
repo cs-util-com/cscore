@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using com.csutil.keyvaluestore;
 using Xunit;
 
-namespace com.csutil.tests.io {
+namespace com.csutil.tests.keyvaluestore {
 
     public class KeyValueStoreTests {
 

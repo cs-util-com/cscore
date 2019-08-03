@@ -3,21 +3,28 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace com.csutil.keyvaluestore {
+
     public class ExceptionWrapperKeyValueStore : IKeyValueStore {
-        private IKeyValueStore wrappedStore;
+
         public HashSet<Type> errorTypeBlackList;
         public Action<Exception> onError = (e) => { Log.e(e); };
+        private IKeyValueStore wrappedStore;
+        public IKeyValueStore fallbackStore {
+            get { return wrappedStore; }
+            set {
+                if (value == null) { throw new ArgumentNullException("The target store cant be null"); }
+                wrappedStore = value;
+            }
+        }
 
         private static HashSet<Type> NewDefaultErrorSet() { return new HashSet<Type>() { typeof(InvalidCastException) }; }
 
         public ExceptionWrapperKeyValueStore(IKeyValueStore wrappedStore) : this(wrappedStore, NewDefaultErrorSet()) { }
 
         public ExceptionWrapperKeyValueStore(IKeyValueStore wrappedStore, HashSet<Type> errorTypeBlackList) {
-            SetFallbackStore(wrappedStore);
+            fallbackStore = wrappedStore;
             this.errorTypeBlackList = errorTypeBlackList;
         }
-
-        public void SetFallbackStore(IKeyValueStore fallbackStore) { wrappedStore = fallbackStore; }
 
         private async Task<T> WrapWithTry<T>(Func<Task<T>> f, T defaultValue) {
             try { return await f(); } catch (Exception e) {
@@ -53,4 +60,5 @@ namespace com.csutil.keyvaluestore {
         }
 
     }
+
 }
