@@ -17,6 +17,8 @@ namespace com.csutil.keyvaluestore {
 
         public IKeyValueStore fallbackStore { get; set; }
 
+        private static bool IsPrimitiveType(System.Type t) { return t.IsPrimitive || t == typeof(string); }
+
         public LiteDbKeyValueStore(FileInfo dbFile) { Init(dbFile); }
 
         private void Init(System.IO.FileInfo dbFile, string collectionName = "Default") {
@@ -26,12 +28,6 @@ namespace com.csutil.keyvaluestore {
             collection = db.GetCollection(collectionName);
         }
 
-        public async Task<bool> ContainsKey(string key) {
-            if (null != GetBson(key)) { return true; }
-            if (fallbackStore != null) { return await fallbackStore.ContainsKey(key); }
-            return false;
-        }
-
         private BsonDocument GetBson(string key) { return collection.FindById(key); }
 
         public async Task<T> Get<T>(string key, T defaultValue) {
@@ -39,30 +35,17 @@ namespace com.csutil.keyvaluestore {
             if (bson != null) { return (T)InternalGet(bson, typeof(T)); }
             if (fallbackStore != null) {
                 var fallbackValue = await fallbackStore.Get<T>(key, defaultValue);
-                if (!ReferenceEquals(fallbackValue, defaultValue)) {
-                    InternalSet(key, fallbackValue);
-                }
+                if (!Equals(fallbackValue, defaultValue)) { InternalSet(key, fallbackValue); }
                 return fallbackValue;
             }
             return defaultValue;
         }
 
         private object InternalGet(BsonDocument bson, Type targetType) {
-            if (IsPrimitive(targetType)) { // unwrap the primitive:
+            if (IsPrimitiveType(targetType)) { // unwrap the primitive:
                 return bsonMapper.ToObject<PrimitiveWrapper>(bson).obj;
             }
             return bsonMapper.ToObject(targetType, bson);
-        }
-
-        public async Task<bool> Remove(string key) {
-            var res = collection.Delete(key);
-            if (fallbackStore != null) { res &= await fallbackStore.Remove(key); }
-            return res;
-        }
-
-        public async Task RemoveAll() {
-            db.DropCollection(collection.Name);
-            if (fallbackStore != null) { await fallbackStore.RemoveAll(); }
         }
 
         public async Task<object> Set(string key, object obj) {
@@ -76,7 +59,7 @@ namespace com.csutil.keyvaluestore {
 
         private object InternalSet(string key, object obj) {
             var objType = obj.GetType();
-            if (IsPrimitive(objType)) { obj = new PrimitiveWrapper() { obj = obj }; }
+            if (IsPrimitiveType(objType)) { obj = new PrimitiveWrapper() { obj = obj }; }
             var oldBson = GetBson(key);
             var newVal = bsonMapper.ToDocument(obj);
             if (oldBson == null) {
@@ -89,13 +72,31 @@ namespace com.csutil.keyvaluestore {
             }
         }
 
-        private static bool IsPrimitive(System.Type t) { return t.IsPrimitive || t == typeof(string); }
+        public async Task<bool> Remove(string key) {
+            var res = collection.Delete(key);
+            if (fallbackStore != null) { res &= await fallbackStore.Remove(key); }
+            return res;
+        }
+
+        public async Task RemoveAll() {
+            db.DropCollection(collection.Name);
+            if (fallbackStore != null) { await fallbackStore.RemoveAll(); }
+        }
+
+        public async Task<bool> ContainsKey(string key) {
+            if (null != GetBson(key)) { return true; }
+            if (fallbackStore != null) { return await fallbackStore.ContainsKey(key); }
+            return false;
+        }
 
         public async Task<IEnumerable<string>> GetAllKeys() {
             IEnumerable<string> result = collection.FindAll().Map(x => GetKeyFromBsonDoc(x));
             if (fallbackStore != null) {
-                var filteredFallbackKeys = (await fallbackStore.GetAllKeys()).Filter(e => !result.Contains(e));
-                result = result.Concat(filteredFallbackKeys);
+                var fallbackStoreKeys = await fallbackStore.GetAllKeys();
+                if (fallbackStore != null) {
+                    var filteredFallbackKeys = fallbackStoreKeys.Filter(e => !result.Contains(e));
+                    result = result.Concat(filteredFallbackKeys);
+                }
             }
             return result;
         }

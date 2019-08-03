@@ -15,24 +15,16 @@ namespace com.csutil.keyvaluestore {
             if (store.TryGetValue(key, out value)) { return (T)value; }
             if (fallbackStore != null) {
                 var fallbackValue = await fallbackStore.Get<T>(key, defaultValue);
-                if (!ReferenceEquals(fallbackValue, defaultValue)) {
-                    InternalSet(key, fallbackValue);
-                }
+                if (!Equals(fallbackValue, defaultValue)) { InternalSet(key, fallbackValue); }
                 return fallbackValue;
             }
             return defaultValue;
         }
 
-        public async Task<bool> ContainsKey(string key) {
-            if (store.ContainsKey(key)) { return true; }
-            if (fallbackStore != null) { return await fallbackStore.ContainsKey(key); }
-            return false;
-        }
-
-        public async Task<object> Set(string key, object obj) {
-            var oldEntry = InternalSet(key, obj);
+        public async Task<object> Set(string key, object value) {
+            var oldEntry = InternalSet(key, value);
             if (fallbackStore != null) {
-                var fallbackOldEntry = await fallbackStore.Set(key, obj);
+                var fallbackOldEntry = await fallbackStore.Set(key, value);
                 if (oldEntry == null && fallbackOldEntry != null) { oldEntry = fallbackOldEntry; }
             }
             return oldEntry;
@@ -49,6 +41,12 @@ namespace com.csutil.keyvaluestore {
         public async Task RemoveAll() {
             store.Clear();
             if (fallbackStore != null) { await fallbackStore.RemoveAll(); }
+        }
+
+        public async Task<bool> ContainsKey(string key) {
+            if (store.ContainsKey(key)) { return true; }
+            if (fallbackStore != null) { return await fallbackStore.ContainsKey(key); }
+            return false;
         }
 
         public async Task<IEnumerable<string>> GetAllKeys() {

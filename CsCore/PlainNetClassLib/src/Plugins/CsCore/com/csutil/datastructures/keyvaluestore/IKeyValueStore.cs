@@ -4,13 +4,13 @@ using System.Threading.Tasks;
 namespace com.csutil.keyvaluestore {
 
     public interface IKeyValueStore {
-        Task<bool> ContainsKey(string key);
         Task<T> Get<T>(string key, T defaultValue);
-        Task<object> Set(string key, object obj);
+        Task<object> Set(string key, object value);
         Task<bool> Remove(string key);
         Task RemoveAll();
-        IKeyValueStore fallbackStore { get; set; }
+        Task<bool> ContainsKey(string key);
         Task<IEnumerable<string>> GetAllKeys();
+        IKeyValueStore fallbackStore { get; set; }
     }
 
 }

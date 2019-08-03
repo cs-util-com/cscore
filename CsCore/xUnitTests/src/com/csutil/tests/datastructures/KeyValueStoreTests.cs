@@ -60,8 +60,11 @@ namespace com.csutil.tests.keyvaluestore {
             dbFile.DeleteV2();
             await TestIKeyValueStoreImplementation(new InMemoryKeyValueStore());
             await TestIKeyValueStoreImplementation(new LiteDbKeyValueStore(dbFile));
+            await TestIKeyValueStoreImplementation(new ExceptionWrapperKeyValueStore(new InMemoryKeyValueStore()));
+            await TestIKeyValueStoreImplementation(new MockDekayKeyValueStore().WithFallbackStore(new InMemoryKeyValueStore()));
         }
 
+        /// <summary> Runs typical requests on the passed store </summary>
         private static async Task TestIKeyValueStoreImplementation(IKeyValueStore store) {
             string myKey1 = "myKey1";
             var myValue1 = "myValue1";
@@ -100,15 +103,59 @@ namespace com.csutil.tests.keyvaluestore {
 
         [Fact]
         public async void TestExceptionCatching() {
-            var kvstore = new InMemoryKeyValueStore();
-            await kvstore.Set("1", 1);
-            await Assert.ThrowsAsync<InvalidCastException>(() => kvstore.Get<string>("1", "myDefaultValue"));
+            var myKey1 = "key1";
+            int myValue1 = 1;
+            string myDefaultString = "myDefaultValue";
 
-            var kvstore2 = new ExceptionWrapperKeyValueStore(kvstore, new HashSet<Type>());
-            string x = await kvstore2.Get<string>("1", "myDefaultValue");
-            Assert.Equal("myDefaultValue", x);
-            kvstore2.errorTypeBlackList.Add(typeof(InvalidCastException));
-            await Assert.ThrowsAsync<InvalidCastException>(() => kvstore.Get<string>("1", "myDefaultValue"));
+            var innerStore = new InMemoryKeyValueStore();
+            var exHandlerStore = new ExceptionWrapperKeyValueStore(innerStore, new HashSet<Type>());
+
+            await innerStore.Set(myKey1, myValue1);
+            // Cause an InvalidCastException:
+            await Assert.ThrowsAsync<InvalidCastException>(() => innerStore.Get<string>(myKey1, myDefaultString));
+            // Cause an InvalidCastException which is then catched and instead the default is returned:
+            string x = await exHandlerStore.Get<string>(myKey1, myDefaultString);
+            Assert.Equal(myDefaultString, x);
+
+            // Add the InvalidCastException to the list of errors that should not be ignored:
+            exHandlerStore.errorTypeBlackList.Add(typeof(InvalidCastException));
+            // Now the same Get request passes the InvalidCastException on:
+            await Assert.ThrowsAsync<InvalidCastException>(() => exHandlerStore.Get<string>(myKey1, myDefaultString));
+        }
+
+        [Fact]
+        public async void TestStoreWithDelay() {
+            // Simulates the DB on the server:
+            var innerStore = new InMemoryKeyValueStore();
+            // Simulates the connection to the server:
+            var simulatedDelayStore = new MockDekayKeyValueStore().WithFallbackStore(innerStore);
+            // Handles connection problems to the server:
+            var exWrapperStore = new ExceptionWrapperKeyValueStore(simulatedDelayStore);
+            // Represents the local cache in case the server cant be reached:
+            var outerStore = new InMemoryKeyValueStore().WithFallbackStore(exWrapperStore);
+
+            var key1 = "key1";
+            var value1 = "value1";
+            var key2 = "key2";
+            var value2 = "value2";
+            {
+                var delayedSetTask = outerStore.Set(key1, value1);
+                Assert.Equal(value1, await outerStore.Get(key1, "")); // The outer store already has the update
+                Assert.NotEqual(value1, await innerStore.Get(key1, "")); // The inner store did not get the update yet
+                // After waiting for set to fully finish the inner store has the update too:
+                await delayedSetTask;
+                Assert.Equal(value1, await innerStore.Get(key1, ""));
+            }
+            simulatedDelayStore.throwTimeoutError = true;
+            var simulatedErrorCatched = false;
+            exWrapperStore.onError = (Exception e) => { simulatedErrorCatched = true; };
+            {
+                await outerStore.Set(key2, value2); // This will cause a timeout error in the "delayed" store
+                Assert.True(simulatedErrorCatched);
+                Assert.Contains(key2, await outerStore.GetAllKeys()); // In the outer store the value was set
+                Assert.False(await innerStore.ContainsKey(key2)); // The inner store never got the update
+                Assert.Null(await exWrapperStore.GetAllKeys()); // Will throw another error and return null
+            }
         }
 
     }

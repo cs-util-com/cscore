@@ -33,14 +33,14 @@ namespace com.csutil.keyvaluestore {
             return defaultValue;
         }
 
-        public async Task<bool> ContainsKey(string key) {
-            return await WrapWithTry(() => { return wrappedStore.ContainsKey(key); }, false);
-        }
-
         private bool IsOnBlackList(Exception e) { return errorTypeBlackList.Contains(e.GetType()); }
 
         public async Task<T> Get<T>(string key, T defaultValue) {
             return await WrapWithTry<T>(() => { return wrappedStore.Get<T>(key, defaultValue); }, defaultValue);
+        }
+
+        public async Task<object> Set(string key, object obj) {
+            return await WrapWithTry(() => { return wrappedStore.Set(key, obj); }, null);
         }
 
         public async Task<bool> Remove(string key) {
@@ -51,8 +51,8 @@ namespace com.csutil.keyvaluestore {
             try { return wrappedStore.RemoveAll(); } catch (Exception e) { return Task.FromException(e); }
         }
 
-        public async Task<object> Set(string key, object obj) {
-            return await WrapWithTry(() => { return wrappedStore.Set(key, obj); }, null);
+        public async Task<bool> ContainsKey(string key) {
+            return await WrapWithTry(() => { return wrappedStore.ContainsKey(key); }, false);
         }
 
         public async Task<IEnumerable<string>> GetAllKeys() {
