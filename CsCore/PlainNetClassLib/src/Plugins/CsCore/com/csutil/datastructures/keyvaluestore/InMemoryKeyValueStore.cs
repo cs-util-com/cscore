@@ -13,24 +13,15 @@ namespace com.csutil.keyvaluestore {
         public async Task<T> Get<T>(string key, T defaultValue) {
             object value;
             if (store.TryGetValue(key, out value)) { return (T)value; }
-            if (fallbackStore != null) {
-                var fallbackValue = await fallbackStore.Get<T>(key, defaultValue);
-                if (!Equals(fallbackValue, defaultValue)) { InternalSet(key, fallbackValue); }
-                return fallbackValue;
-            }
-            return defaultValue;
+            return await fallbackStore.Get(key, defaultValue, (res) => InternalSet(key, res));
         }
 
         public async Task<object> Set(string key, object value) {
-            var oldEntry = InternalSet(key, value);
-            if (fallbackStore != null) {
-                var fallbackOldEntry = await fallbackStore.Set(key, value);
-                if (oldEntry == null && fallbackOldEntry != null) { oldEntry = fallbackOldEntry; }
-            }
-            return oldEntry;
+            var oldValue = InternalSet(key, value);
+            return await fallbackStore.Set(key, value, oldValue);
         }
 
-        private object InternalSet(string key, object obj) { return store.AddOrReplace(key, obj); }
+        private object InternalSet(string key, object value) { return store.AddOrReplace(key, value); }
 
         public async Task<bool> Remove(string key) {
             var res = store.Remove(key);
@@ -49,17 +40,7 @@ namespace com.csutil.keyvaluestore {
             return false;
         }
 
-        public async Task<IEnumerable<string>> GetAllKeys() {
-            IEnumerable<string> result = store.Keys;
-            if (fallbackStore != null) {
-                var fallbackResult = await fallbackStore.GetAllKeys();
-                if (fallbackResult != null) {
-                    var filteredFallbackKeys = (fallbackResult).Filter(e => !result.Contains(e));
-                    result = result.Concat(filteredFallbackKeys);
-                }
-            }
-            return result;
-        }
+        public async Task<IEnumerable<string>> GetAllKeys() { return await fallbackStore.ConcatAllKeys(store.Keys); }
 
     }
 }

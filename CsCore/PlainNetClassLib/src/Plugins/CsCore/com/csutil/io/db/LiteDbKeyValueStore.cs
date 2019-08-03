@@ -9,7 +9,7 @@ namespace com.csutil.keyvaluestore {
 
     public class LiteDbKeyValueStore : IKeyValueStore {
 
-        private class PrimitiveWrapper { public object obj; }
+        private class PrimitiveWrapper { public object val; }
 
         private BsonMapper bsonMapper;
         private LiteDatabase db;
@@ -17,11 +17,11 @@ namespace com.csutil.keyvaluestore {
 
         public IKeyValueStore fallbackStore { get; set; }
 
-        private static bool IsPrimitiveType(System.Type t) { return t.IsPrimitive || t == typeof(string); }
+        private static bool IsPrimitiveType(Type t) { return t.IsPrimitive || t == typeof(string); }
 
         public LiteDbKeyValueStore(FileInfo dbFile) { Init(dbFile); }
 
-        private void Init(System.IO.FileInfo dbFile, string collectionName = "Default") {
+        private void Init(FileInfo dbFile, string collectionName = "Default") {
             bsonMapper = new BsonMapper();
             bsonMapper.IncludeFields = true;
             db = new LiteDatabase(dbFile.FullPath(), bsonMapper);
@@ -33,35 +33,26 @@ namespace com.csutil.keyvaluestore {
         public async Task<T> Get<T>(string key, T defaultValue) {
             var bson = GetBson(key);
             if (bson != null) { return (T)InternalGet(bson, typeof(T)); }
-            if (fallbackStore != null) {
-                var fallbackValue = await fallbackStore.Get<T>(key, defaultValue);
-                if (!Equals(fallbackValue, defaultValue)) { InternalSet(key, fallbackValue); }
-                return fallbackValue;
-            }
-            return defaultValue;
+            return await fallbackStore.Get(key, defaultValue, (fallbackValue) => InternalSet(key, fallbackValue));
         }
 
         private object InternalGet(BsonDocument bson, Type targetType) {
             if (IsPrimitiveType(targetType)) { // unwrap the primitive:
-                return bsonMapper.ToObject<PrimitiveWrapper>(bson).obj;
+                return bsonMapper.ToObject<PrimitiveWrapper>(bson).val;
             }
             return bsonMapper.ToObject(targetType, bson);
         }
 
-        public async Task<object> Set(string key, object obj) {
-            var oldEntry = InternalSet(key, obj);
-            if (fallbackStore != null) {
-                var fallbackOldEntry = await fallbackStore.Set(key, obj);
-                if (oldEntry == null && fallbackOldEntry != null) { oldEntry = fallbackOldEntry; }
-            }
-            return oldEntry;
+        public async Task<object> Set(string key, object value) {
+            var oldValue = InternalSet(key, value);
+            return await fallbackStore.Set(key, value, oldValue);
         }
 
-        private object InternalSet(string key, object obj) {
-            var objType = obj.GetType();
-            if (IsPrimitiveType(objType)) { obj = new PrimitiveWrapper() { obj = obj }; }
+        private object InternalSet(string key, object value) {
+            var objType = value.GetType();
+            if (IsPrimitiveType(objType)) { value = new PrimitiveWrapper() { val = value }; }
             var oldBson = GetBson(key);
-            var newVal = bsonMapper.ToDocument(obj);
+            var newVal = bsonMapper.ToDocument(value);
             if (oldBson == null) {
                 collection.Insert(key, newVal);
                 return null;
@@ -91,14 +82,7 @@ namespace com.csutil.keyvaluestore {
 
         public async Task<IEnumerable<string>> GetAllKeys() {
             IEnumerable<string> result = collection.FindAll().Map(x => GetKeyFromBsonDoc(x));
-            if (fallbackStore != null) {
-                var fallbackStoreKeys = await fallbackStore.GetAllKeys();
-                if (fallbackStore != null) {
-                    var filteredFallbackKeys = fallbackStoreKeys.Filter(e => !result.Contains(e));
-                    result = result.Concat(filteredFallbackKeys);
-                }
-            }
-            return result;
+            return await fallbackStore.ConcatAllKeys(result);
         }
 
         private static string GetKeyFromBsonDoc(BsonDocument x) {
