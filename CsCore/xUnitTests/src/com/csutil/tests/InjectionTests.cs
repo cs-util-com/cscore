@@ -175,6 +175,7 @@ namespace com.csutil.tests {
                 return new MySubClass2();
             });
             Assert.NotNull(IoC_inject.Get<MyClass1>(this));
+            Assert.False(secondInjectorWasUsed);
             Assert.True(IoC_inject.Get<MyClass1>(this) is MySubClass1);
             Assert.False(secondInjectorWasUsed);
             var bothResults = IoC_inject.GetAll<MyClass1>(this);
