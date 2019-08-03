@@ -13,7 +13,18 @@ namespace com.csutil.tests.io {
     public class PlayerPrefsV2Tests {
 
         [Test]
-        public void ExampleUsage() {
+        public void ExampleUsage1() {
+            string key1 = "key1";
+            string value1 = "value1";
+
+            var store = PlayerPrefsV2.instance;
+            store.Set(key1, value1);
+            string x = store.Get(key1, "defaultValue1").Result;
+            Assert.AreEqual(value1, x);
+        }
+
+        [Test]
+        public void ExampleUsage2() {
 
             // PlayerPrefsV2.SetBool and PlayerPrefsV2.GetBool example:
             bool myBool = true;
@@ -123,10 +134,7 @@ namespace com.csutil.tests.io {
             var myFallback1 = "myFallback1";
 
             var innerStore = new ExceptionWrapperKeyValueStore(new PlayerPrefsStore());
-
-            // Cleanup prefs from previous tests:
-            await innerStore.Remove(myKey1);
-
+            await innerStore.Remove(myKey1); // Cleanup prefs from previous tests
             var outerStore = new InMemoryKeyValueStore().WithFallbackStore(innerStore);
 
             var task = TaskRunner.instance.RunInBackground(async (cancel) => {
