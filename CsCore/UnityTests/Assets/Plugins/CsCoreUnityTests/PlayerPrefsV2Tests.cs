@@ -1,8 +1,12 @@
-﻿using NUnit.Framework;
+﻿using com.csutil.io;
+using com.csutil.keyvaluestore;
+using NUnit.Framework;
 using System;
-using System.Collections.Generic;
+using System.Collections;
 using System.Linq;
-using System.Text;
+using System.Threading.Tasks;
+using UnityEngine;
+using UnityEngine.TestTools;
 
 namespace com.csutil.tests.io {
 
@@ -67,6 +71,46 @@ namespace com.csutil.tests.io {
             Assert.AreEqual(myObj.myString, PlayerPrefsV2.GetObject<MyClass1>(key, null).myString);
             Assert.AreEqual(myObj.myInt, PlayerPrefsV2.GetObject<MyClass1>(key, null).myInt);
             PlayerPrefsV2.DeleteKey(key);
+        }
+
+        [UnityTest]
+        public IEnumerator TestPlayerPrefsAsKeyValueStore() {
+            var testTask = TestIKeyValueStoreImplementation(new PlayerPrefsStore());
+            yield return testTask.AsCoroutine();
+        }
+
+        /// <summary> Runs typical requests on the passed store </summary>
+        private static async Task TestIKeyValueStoreImplementation(IKeyValueStore store) {
+            string myKey1 = "myKey1";
+            var myValue1 = "myValue1";
+            string myKey2 = "myKey2";
+            var myValue2 = "myValue2";
+            var myFallbackValue1 = "myFallbackValue1";
+
+            // Cleanup before actual test starts:
+            await store.Remove(myKey1);
+            await store.Remove(myKey2);
+
+            // test Set and Get of values:
+            Assert.False(await store.ContainsKey(myKey1));
+            Assert.AreEqual(myFallbackValue1, await store.Get(myKey1, myFallbackValue1));
+            await store.Set(myKey1, myValue1);
+            Assert.AreEqual(myValue1, await store.Get<string>(myKey1, null));
+            Assert.True(await store.ContainsKey(myKey1));
+
+            // Test replacing values:
+            var oldVal = await store.Set(myKey1, myValue2);
+            Assert.AreEqual(myValue1, oldVal);
+            Assert.AreEqual(myValue2, await store.Get<string>(myKey1, null));
+
+            // Test add and remove of a second key:
+            Assert.False(await store.ContainsKey(myKey2));
+            await store.Set(myKey2, myValue2);
+            Assert.True(await store.ContainsKey(myKey2));
+
+            await store.Remove(myKey2);
+            Assert.False(await store.ContainsKey(myKey2));
+
         }
 
     }
