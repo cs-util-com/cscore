@@ -75,8 +75,7 @@ namespace com.csutil.tests.io {
 
         [UnityTest]
         public IEnumerator TestPlayerPrefsAsKeyValueStore() {
-            var testTask = TestIKeyValueStoreImplementation(new PlayerPrefsStore());
-            yield return testTask.AsCoroutine();
+            yield return TestIKeyValueStoreImplementation(new PlayerPrefsStore()).AsCoroutine();
         }
 
         /// <summary> Runs typical requests on the passed store </summary>
@@ -113,6 +112,52 @@ namespace com.csutil.tests.io {
 
         }
 
+        [UnityTest]
+        public IEnumerator TestPlayerPrefsFromBackgroundThread() {
+            yield return TestPlayerPrefsFromBackgroundThreadTasks().AsCoroutine();
+        }
+
+        private async Task TestPlayerPrefsFromBackgroundThreadTasks() {
+            var myKey1 = "myKey1";
+            var myVal1 = "myVal1";
+            var myFallback1 = "myFallback1";
+
+            var innerStore = new ExceptionWrapperKeyValueStore(new PlayerPrefsStore());
+
+            // Cleanup prefs from previous tests:
+            await innerStore.Remove(myKey1);
+
+            var outerStore = new InMemoryKeyValueStore().WithFallbackStore(innerStore);
+
+            var task = TaskRunner.instance.RunInBackground(async (cancel) => {
+                cancel.ThrowIfCancellationRequested();
+                Assert.IsFalse(MainThread.isMainThread);
+
+                var innerStoreThrewAnError = false;
+                // Set and Get from a background thread will throw an exception in the innerStore
+                innerStore.onError = (e) => { innerStoreThrewAnError = true; };
+                // So only the outerStore will be updated when calling Set and Get from the background:
+                await outerStore.Set(myKey1, myVal1);
+                Assert.IsTrue(innerStoreThrewAnError);
+                var x = await outerStore.Get(myKey1, myFallback1);
+                // The value returned by Get was cached in the outer store so it will be correct:
+                Assert.AreEqual(myVal1, x);
+                // Check that the Set request never reached the real pref. store:
+                Assert.AreEqual(myFallback1, await innerStore.Get(myKey1, myFallback1));
+            }).task;
+            await task;
+            Assert.IsNull(task.Exception);
+
+            Assert.IsTrue(MainThread.isMainThread);
+            // There should not be any errors when working on the main thread so 
+            // throw any errors that happen in the inner store:
+            innerStore.onError = (e) => { throw e; };
+            // In the main thread Set and Get will not throw errors:
+            await outerStore.Set(myKey1, myVal1);
+            Assert.AreEqual(myVal1, await outerStore.Get(myKey1, myFallback1));
+            // Check that the Set request never reached the real pref. store:
+            Assert.AreEqual(myVal1, await innerStore.Get(myKey1, myFallback1));
+        }
     }
 
 }

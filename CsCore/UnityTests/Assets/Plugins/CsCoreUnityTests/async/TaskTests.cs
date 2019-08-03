@@ -21,20 +21,23 @@ namespace com.csutil.tests.threading {
             // since both tasks share the same scheduler task 2 will wait for task 1
             var scheduler = new QueuedTaskScheduler(1);
 
-            var task1 = TaskRunner.instance.RunInBackground((cancelRequest) => {
+            var task1ReacedItsLoopEnd = false;
+            var task1 = TaskRunner.instance.RunInBackground(async (cancelRequest) => {
                 for (int i = 0; i < 5; i++) {
                     cancelRequest.ThrowIfCancellationRequested();
-                    Thread.Sleep(200);
+                    await Task.Delay(200);
                     Log.d("Task 1: Step " + i);
                 }
                 Log.d("Task is done now");
+                task1ReacedItsLoopEnd = true;
                 throw new MyException1("Now the task will fault");
             }, scheduler).task;
 
-            var task2 = TaskRunner.instance.RunInBackground((cancelRequest) => {
+            var task2 = TaskRunner.instance.RunInBackground(async (cancelRequest) => {
+                Assert.IsTrue(task1ReacedItsLoopEnd);
                 for (int i = 0; i < 5; i++) {
                     cancelRequest.ThrowIfCancellationRequested();
-                    Thread.Sleep(200);
+                    await Task.Delay(200);
                     Log.d("Task 2: Step " + i);
                 }
                 Log.d("Task 2 is done now");
@@ -57,12 +60,13 @@ namespace com.csutil.tests.threading {
         [UnityTest]
         public IEnumerator TestMainThread() {
             GameObject go = null;
-            var task = TaskRunner.instance.RunInBackground(delegate {
+            var task = TaskRunner.instance.RunInBackground(async (cancel) => {
+                cancel.ThrowIfCancellationRequested();
                 // Test that its not be possible to create a GO in a background thread:
                 AssertV2.Throws<Exception>(() => { go = new GameObject(name: "A"); });
                 // Test that on MainThread the gameobject can be created:
                 MainThread.Invoke(() => { go = new GameObject(name: "B"); });
-                Thread.Sleep(1000); // wait for main thread action to execute
+                await Task.Delay(1000); // wait for main thread action to execute
                 Assert.IsTrue(go != null);
                 // Assert.AreEqual("B", go.name); // go.name not allowed in background thread
                 Log.d("Background thread now done");

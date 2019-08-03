@@ -36,7 +36,8 @@ namespace com.csutil.keyvaluestore {
                 var storeOldValue = await self.Set(key, newValue);
                 if (storeOldValue != null) {
                     if (storeOldValue != oldValue) {
-                        AssertV2.IsTrue(storeOldValue.Equals(oldValue), "oldValue != store.oldValue, store value newer?");
+                        AssertV2.IsTrue(storeOldValue.Equals(oldValue), "oldValue != store.oldValue, store value newer?"
+                            + "\n storeOldValue=" + storeOldValue + "\n oldValue=" + oldValue);
                     }
                     if (oldValue == null) { oldValue = storeOldValue; }
                 }
