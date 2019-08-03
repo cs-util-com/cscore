@@ -18,33 +18,23 @@ namespace com.csutil.tests.threading {
         [UnityTest]
         public IEnumerator TestRunTaskInBackground() {
 
-            // since both tasks share the same scheduler task 2 will wait for task 1
-            var scheduler = new QueuedTaskScheduler(1);
-
-            var task1ReacedItsLoopEnd = false;
+            var task1WasStarted = false;
+            var task1ReachedItsLoopEnd = false;
             var task1 = TaskRunner.instance.RunInBackground(async (cancelRequest) => {
+                task1WasStarted = true;
+                Log.d("Task 1 started");
                 for (int i = 0; i < 5; i++) {
                     cancelRequest.ThrowIfCancellationRequested();
                     await Task.Delay(200);
                     Log.d("Task 1: Step " + i);
                 }
-                Log.d("Task is done now");
-                task1ReacedItsLoopEnd = true;
+                Log.d("Task 1 loop done, will throw error now..");
+                task1ReachedItsLoopEnd = true;
                 throw new MyException1("Now the task will fault");
-            }, scheduler).task;
-
-            var task2 = TaskRunner.instance.RunInBackground(async (cancelRequest) => {
-                Assert.IsTrue(task1ReacedItsLoopEnd);
-                for (int i = 0; i < 5; i++) {
-                    cancelRequest.ThrowIfCancellationRequested();
-                    await Task.Delay(200);
-                    Log.d("Task 2: Step " + i);
-                }
-                Log.d("Task 2 is done now");
-            }, scheduler).task;
-
+            }).task;
             var errorWasThrown = false;
             yield return task1.AsCoroutine((e) => {
+                Assert.IsTrue(e.GetBaseException() is MyException1, "e=" + e.GetBaseException().GetType());
                 errorWasThrown = true;
             });
             Assert.IsTrue(task1.IsCompleted);
@@ -52,6 +42,18 @@ namespace com.csutil.tests.threading {
             Assert.IsTrue(task1.IsFaulted);
             Assert.IsTrue(task1.Exception.GetBaseException() is MyException1);
 
+            var task2 = TaskRunner.instance.RunInBackground(async (cancelRequest) => {
+                Log.d("Task 2 started");
+                await Task.Delay(10);
+                Assert.IsTrue(task1WasStarted);
+                Assert.IsTrue(task1ReachedItsLoopEnd);
+                for (int i = 0; i < 5; i++) {
+                    cancelRequest.ThrowIfCancellationRequested();
+                    await Task.Delay(200);
+                    Log.d("Task 2: Step " + i);
+                }
+                Log.d("Task 2 is done now");
+            }).task;
             yield return task2.AsCoroutine();
             Assert.IsTrue(task2.IsCompleted);
             Assert.IsFalse(task2.IsFaulted);

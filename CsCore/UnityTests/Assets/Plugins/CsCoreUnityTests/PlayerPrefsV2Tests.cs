@@ -146,6 +146,7 @@ namespace com.csutil.tests.io {
                 Assert.AreEqual(myFallback1, await innerStore.Get(myKey1, myFallback1));
             }).task;
             await task;
+            Assert.IsTrue(task.IsCompleted);
             Assert.IsNull(task.Exception);
 
             Assert.IsTrue(MainThread.isMainThread);
