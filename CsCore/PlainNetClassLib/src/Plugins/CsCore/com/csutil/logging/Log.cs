@@ -53,8 +53,9 @@ namespace com.csutil {
             var methodName = t.GetMethodName(false);
             Log.d(" --> " + methodName, t.AddTo(args));
             return AssertV2.TrackTiming(methodName);
-#endif
+#else
             return AssertV2.TrackTiming();
+#endif
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_FULL_LOGGING")]

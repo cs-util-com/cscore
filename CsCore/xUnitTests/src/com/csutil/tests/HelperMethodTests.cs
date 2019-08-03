@@ -125,6 +125,7 @@ namespace com.csutil.tests {
                 Assert.NotEqual(dateTime1, dateTime3);
             });
             AssertV2.ThrowExeptionIfAssertionFails(false, () => {
+                if (AssertV2.throwExeptionIfAssertionFails) { return; } // Abort test if the flag is not correct
                 var dateTime1 = DateTimeParser.NewDateTimeFromUnixTimestamp(-2);
                 var dateTime2 = DateTimeParser.NewDateTimeFromUnixTimestamp(2);
                 Assert.True(dateTime1.IsBefore(dateTime2));

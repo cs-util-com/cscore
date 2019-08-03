@@ -47,7 +47,7 @@ namespace com.csutil.tests.io.db {
                 var found = elements.FindById(elem.id);
                 Assert.Equal(elem.name, found.name);
             });
-            Log.MethodDone(readTimer, 200);
+            Log.MethodDone(readTimer, 400);
         }
 
         private static async Task InsertIntoDb(List<TreeElem> dataTree, LiteDatabase db) {
@@ -56,7 +56,7 @@ namespace com.csutil.tests.io.db {
             await ParallelExec(dataTree, (elem) => {
                 elements.Insert(elem);
             });
-            Log.MethodDone(insertTimer, 700);
+            Log.MethodDone(insertTimer, 3000);
         }
 
         private static Task ParallelExec<T>(IEnumerable<T> data, Action<T> actionPerElement) {
@@ -68,7 +68,7 @@ namespace com.csutil.tests.io.db {
             await ParallelExec(dataTree, (elem) => {
                 GetFileForElem(testFolder, elem).SaveAsJson(elem);
             });
-            Log.MethodDone(insertTimer, 600);
+            Log.MethodDone(insertTimer, 3000);
         }
 
         private static async Task ReadFiles(List<TreeElem> dataTree, DirectoryInfo testFolder) {
@@ -78,7 +78,7 @@ namespace com.csutil.tests.io.db {
                 var found = GetFileForElem(testFolder, elem).LoadAs<TreeElem>();
                 Assert.Equal(elem.name, found.name);
             });
-            Log.MethodDone(readTimer, 1000);
+            Log.MethodDone(readTimer, 3000);
         }
 
         private static FileInfo GetFileForElem(DirectoryInfo testFolder, TreeElem elem) {

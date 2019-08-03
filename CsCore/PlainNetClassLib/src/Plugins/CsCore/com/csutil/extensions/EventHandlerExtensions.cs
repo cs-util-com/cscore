@@ -24,7 +24,9 @@ namespace com.csutil {
                 }
                 Task.Delay(TimeSpan.FromMilliseconds(delayInMs)).ContinueWith(_ => {
                     lock (threadLock) {
-                        if (needsFinalCall) { self(sender, eventArgs); }
+                        if (needsFinalCall) {
+                            try { self(sender, eventArgs); } catch (System.Exception e) { Log.e(e); }
+                        }
                         currentlyThrottling = false;
                         needsFinalCall = false;
                     }
