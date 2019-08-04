@@ -32,14 +32,14 @@ namespace com.csutil.injection {
 
         public bool RemoveAllInjectorsFor<T>() {
             var eventName = GetEventKey<T>();
-            var subscribers = usedEventBus.GetSubscribersFor(eventName);
+            var subscribers = usedEventBus.GetSubscribersFor(eventName).ToList();
             if (subscribers.IsNullOrEmpty()) {
                 Log.w("Could not remove subscribers because there were none found for '" + eventName + "'");
                 return false;
             }
             var r = true;
             foreach (var subscriber in subscribers) { r = usedEventBus.Unsubscribe(subscriber, eventName) & r; }
-            Log.d("Removed " + subscribers.Count + " subscribers for " + typeof(T));
+            Log.d("Removed " + subscribers.Count() + " subscribers for " + typeof(T));
             return r;
         }
 

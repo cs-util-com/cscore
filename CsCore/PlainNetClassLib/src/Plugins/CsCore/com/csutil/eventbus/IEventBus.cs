@@ -12,7 +12,7 @@ namespace com.csutil.eventbus {
 
         void Subscribe(object subscriber, string eventName, Delegate callback);
 
-        ICollection<object> GetSubscribersFor(string eventName);
+        IEnumerable<object> GetSubscribersFor(string eventName);
 
         bool Unsubscribe(object subscriber, string eventName);
         bool UnsubscribeAll(object subscriber);

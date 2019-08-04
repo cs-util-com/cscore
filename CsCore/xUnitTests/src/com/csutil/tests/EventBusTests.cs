@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Xunit;
 
 namespace com.csutil.tests {
@@ -82,7 +83,7 @@ namespace com.csutil.tests {
                 Assert.Equal(val2ToSend, val2);
             });
             var subs = EventBus_instance.GetSubscribersFor(eventName);
-            Assert.True(subs.Contains(subscriber));
+            Assert.Contains(subscriber, subs);
 
             var r = EventBus_instance.Publish(eventName, val1ToSend, val2ToSend);
             Assert.Single(r);
