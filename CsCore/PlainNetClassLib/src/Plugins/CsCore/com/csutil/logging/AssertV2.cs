@@ -20,7 +20,7 @@ namespace com.csutil {
 
         public static void Throws<T>(Action actionThatShouldThrowAnException) where T : Exception {
             try { actionThatShouldThrowAnException(); } catch (Exception e) {
-                if (e.GetType().IsCastableTo(typeof(T))) { return; } // its the expected exception
+                if (e is T) { return; } // its the expected exception
                 throw; // its an unexpected exception, so rethrow it
             }
             throw new ThrowsException("No exception of type " + typeof(T) + " was thrown!");

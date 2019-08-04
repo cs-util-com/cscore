@@ -24,7 +24,7 @@ namespace com.csutil.injection {
             return usedEventBus.NewPublishIEnumerable(GetEventKey<T>(), caller, createIfNull).Filter(x => x is T).Cast<T>();
         }
 
-        private string GetEventKey<T>() { return "InjectReq:" + typeof(T); }
+        public string GetEventKey<T>() { return "InjectReq:" + typeof(T); }
 
         public bool HasInjectorRegistered<T>() {
             return !usedEventBus.GetSubscribersFor(GetEventKey<T>()).IsNullOrEmpty();
@@ -32,14 +32,14 @@ namespace com.csutil.injection {
 
         public bool RemoveAllInjectorsFor<T>() {
             var eventName = GetEventKey<T>();
-            var subscribers = usedEventBus.GetSubscribersFor(eventName);
+            var subscribers = usedEventBus.GetSubscribersFor(eventName).ToList();
             if (subscribers.IsNullOrEmpty()) {
                 Log.w("Could not remove subscribers because there were none found for '" + eventName + "'");
                 return false;
             }
             var r = true;
             foreach (var subscriber in subscribers) { r = usedEventBus.Unsubscribe(subscriber, eventName) & r; }
-            Log.d("Removed " + subscribers.Count + " subscribers for " + typeof(T));
+            Log.d("Removed " + subscribers.Count() + " subscribers for " + typeof(T));
             return r;
         }
 

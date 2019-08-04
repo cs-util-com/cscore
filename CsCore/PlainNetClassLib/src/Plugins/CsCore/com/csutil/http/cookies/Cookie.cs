@@ -57,8 +57,8 @@ namespace com.csutil.http.cookies {
         private void ParseTimestamp(string timestampString) {
             try {
                 expirationDate = DateTimeParser.ParseV2(timestampString);
-                if (expirationDate.ToUnixTimestamp() <= 0) {
-                    if (expirationDate.ToUnixTimestamp() < 0) {
+                if (expirationDate.ToUnixTimestampUtc() <= 0) {
+                    if (expirationDate.ToUnixTimestampUtc() < 0) {
                         Log.e("cookie[" + ToString() + "]: will reject received expirationDate, dateString=" + timestampString);
                     }
                     expirationDate = DateTime.MaxValue;

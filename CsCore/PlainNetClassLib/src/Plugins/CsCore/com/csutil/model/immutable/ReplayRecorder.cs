@@ -26,13 +26,13 @@ namespace com.csutil.model.immutable {
                             var dispatcherResult = innerDispatcher(action);
                             RecordEntry(action, dispatcherResult);
                             return dispatcherResult;
-                        } catch (Exception e) { RecordEntry(action, null, e); throw e; }
+                        } catch (Exception e) { RecordEntry(action, null, e.Message); throw e; }
                     };
                 };
             };
         }
 
-        private void RecordEntry(object action, object dispatcherResult, Exception exception = null) {
+        private void RecordEntry(object action, object dispatcherResult, string exception = null) {
             if (!isRecording) { return; }
             if (action is ResetStoreAction) { throw Log.e("The recorded actions will include a ResetStoreAction"); }
             try {
@@ -92,7 +92,9 @@ namespace com.csutil.model.immutable {
         }
 
         private void CompareErrors(Entry oldEntry, Exception newError) {
-            AssertV2.AreEqual("" + oldEntry.e, "" + newError);
+            if (oldEntry.e != newError.Message) {
+                Log.e(new Exception("Old error differed: " + oldEntry.e, newError));
+            }
         }
 
         private class Entry {

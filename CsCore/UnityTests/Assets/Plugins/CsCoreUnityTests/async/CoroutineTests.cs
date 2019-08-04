@@ -159,15 +159,14 @@ namespace com.csutil.tests {
         public IEnumerator TestCoroutinesAsTasks() {
             MonoBehaviour myMonoBehaviour = CreateSomeMonoBehaviour();
             var someData = new MyDataClass1() { myString = "Not started yet" };
-            var coroutineTask = myMonoBehaviour.StartCoroutineAsTask(MyCoroutine1(someData), () => someData.myString);
+            var coroutineTask = myMonoBehaviour.StartCoroutineAsTask(MyCoroutine1(someData));
 
             while (!coroutineTask.IsCompleted) {
                 Log.d("Waiting for task to finish..");
                 Assert.AreEqual("Started", someData.myString);
                 yield return new WaitForSeconds(0.05f);
             }
-            var result = coroutineTask.Result;
-            Assert.AreEqual("Finished", result);
+            Assert.AreEqual("Finished", someData.myString);
         }
 
         private IEnumerator MyCoroutine1(MyDataClass1 someData) {

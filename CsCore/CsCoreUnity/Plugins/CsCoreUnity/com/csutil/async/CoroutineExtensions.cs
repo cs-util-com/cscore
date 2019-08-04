@@ -11,11 +11,23 @@ namespace com.csutil {
     public static class CoroutineExtensions {
 
         public static IEnumerator AsCoroutine(this Task self, float waitInterval = 0.02f) {
+            Action<Exception> defaultOnErrorAction = (e) => { throw e; };
+            yield return AsCoroutine(self, defaultOnErrorAction, waitInterval);
+        }
+
+        public static IEnumerator AsCoroutine(this Task self, Action<Exception> onError, float waitInterval = 0.02f) {
             var waitIntervalBeforeNextCheck = new WaitForSeconds(waitInterval);
+            AssertV2.IsTrue(self.Status != TaskStatus.WaitingToRun, "Task is WaitingToRun");
             while (!self.IsCompleted) { yield return waitIntervalBeforeNextCheck; }
+            if (self.IsFaulted) { onError.InvokeIfNotNull(self.Exception); }
+            yield return null;
         }
 
         public static IEnumerator AsCoroutine(this TaskRunner.MonitoredTask self, float waitInterval = 0.02f) {
+            return self.task.AsCoroutine(waitInterval);
+        }
+
+        public static IEnumerator AsCoroutine<T>(this TaskRunner.MonitoredTask<T> self, float waitInterval = 0.02f) {
             return self.task.AsCoroutine(waitInterval);
         }
 
@@ -71,15 +83,20 @@ namespace com.csutil {
             foreach (var c in self) { yield return c; }
         }
 
+        public static Task StartCoroutineAsTask(this MonoBehaviour self, IEnumerator routine) {
+            return StartCoroutineAsTask(self, routine, () => true);
+        }
+
         public static Task<T> StartCoroutineAsTask<T>(this MonoBehaviour self, IEnumerator routine, Func<T> onRoutineDone) {
             var tcs = new TaskCompletionSource<T>();
-            self.StartCoroutine(wrapperRoutine(routine, () => {
+            self.StartCoroutine(WrapRoutine(routine, () => {
                 try { tcs.TrySetResult(onRoutineDone()); }
                 catch (Exception e) { tcs.TrySetException(e); }
             }));
             return tcs.Task;
         }
-        private static IEnumerator wrapperRoutine(IEnumerator coroutineToWrap, Action onRoutineDone) {
+
+        private static IEnumerator WrapRoutine(IEnumerator coroutineToWrap, Action onRoutineDone) {
             yield return coroutineToWrap;
             onRoutineDone();
         }

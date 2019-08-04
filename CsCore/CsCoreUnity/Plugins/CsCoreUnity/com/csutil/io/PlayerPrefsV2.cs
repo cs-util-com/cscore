@@ -1,4 +1,6 @@
 ﻿using com.csutil.encryption;
+using com.csutil.io;
+using com.csutil.keyvaluestore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,6 +10,19 @@ using UnityEngine;
 namespace com.csutil {
 
     public class PlayerPrefsV2 : PlayerPrefs {
+
+        public static IKeyValueStore instance {
+            get { return IoC.inject.GetOrAddSingleton(new object(), () => newDefaultSettingsPipeline()); }
+        }
+
+        /// <summary> 
+        /// THe default store uses a Dictionary for memory caching and an exception layer to catch
+        /// and errors that might happen e.g. when the PlayerPrefs are accessed from a background task
+        /// </summary>
+        private static IKeyValueStore newDefaultSettingsPipeline() {
+            var wrappedPlayerPrefs = new ExceptionWrapperKeyValueStore(new PlayerPrefsStore());
+            return new InMemoryKeyValueStore().WithFallbackStore(wrappedPlayerPrefs);
+        }
 
         public static void SetBool(string key, bool value) {
             SetInt(key, BoolToInt(value));

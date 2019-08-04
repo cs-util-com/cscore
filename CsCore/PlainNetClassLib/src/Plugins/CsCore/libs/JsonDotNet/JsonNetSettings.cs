@@ -15,8 +15,8 @@ namespace com.csutil.json {
         }
 
         private static JsonSerializerSettings NewTypedJsonSettings() {
-            var settings = JsonNetSettings.NewDefaultSettings();
-            settings.TypeNameHandling = Newtonsoft.Json.TypeNameHandling.Auto;
+            var settings = NewDefaultSettings();
+            settings.TypeNameHandling = TypeNameHandling.Auto;
             return settings;
         }
 

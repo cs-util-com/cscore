@@ -39,17 +39,17 @@ namespace com.csutil {
             return self.ToUniversalTime().ToString("yyyy-MM-dd_HH.mm");
         }
 
-        public static long ToUnixTimestamp(this DateTime self) {
-            var zero = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
+        public static long ToUnixTimestampUtc(this DateTime self) {
+            var zero = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
             return Convert.ToInt64(Math.Truncate((self.ToUniversalTime().Subtract(zero)).TotalMilliseconds));
         }
 
         public static bool IsBefore(this DateTime self, DateTime other) {
-            return self.ToUnixTimestamp() < other.ToUnixTimestamp();
+            return self.ToUnixTimestampUtc() < other.ToUnixTimestampUtc();
         }
 
         public static bool IsAfter(this DateTime self, DateTime other) {
-            return self.ToUnixTimestamp() > other.ToUnixTimestamp();
+            return self.ToUnixTimestampUtc() > other.ToUnixTimestampUtc();
         }
 
     }

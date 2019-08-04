@@ -45,7 +45,7 @@ namespace com.csutil.http.cookies {
 
         public bool SetCookie(Cookie cookie, bool saveToCookieFile = true) {
             lock (cookieJarLock) {
-                if (cookie.expirationDate.ToUnixTimestamp() <= 0) { }
+                if (cookie.expirationDate.ToUnixTimestampUtc() <= 0) { }
                 bool receivedCookieExpired = cookie.expirationDate.IsBefore(DateTime.Now);
                 if (cookies.ContainsKey(cookie.name)) {
                     for (int index = 0; index < cookies[cookie.name].Count; ++index) {
@@ -111,7 +111,7 @@ namespace com.csutil.http.cookies {
             for (int index = 0; index < cookies[name].Count; ++index) {
                 Cookie cookie = cookies[name][index];
                 if (cookie.Matches(accessInfo)) {
-                    AssertV2.IsTrue(cookie.expirationDate.ToUnixTimestamp() > 0, "cookie.expirationDate.toUnixTimestamp()=" + cookie.expirationDate.ToUnixTimestamp());
+                    AssertV2.IsTrue(cookie.expirationDate.ToUnixTimestampUtc() > 0, "cookie.expirationDate.toUnixTimestamp()=" + cookie.expirationDate.ToUnixTimestampUtc());
                     if (cookie.expirationDate.IsAfter(DateTime.Now)) {
                         return cookie;
                     } else {

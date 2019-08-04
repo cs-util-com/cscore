@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.TestTools;
 
@@ -103,9 +104,10 @@ namespace com.csutil.tests.eventbus {
                 Assert.IsTrue(MainThread.isMainThread);
                 counter++;
             });
-            yield return TaskRunner.instance.RunInBackground((cancel) => {
+            yield return TaskRunner.instance.RunInBackground(async (cancel) => {
                 EventBus.instance.Publish(eventName);
                 Assert.AreEqual(1, counter);
+                await Task.CompletedTask;
             }).AsCoroutine();
             yield return new WaitForSeconds(0.1f);
             Assert.AreEqual(2, counter);

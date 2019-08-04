@@ -19,8 +19,8 @@ namespace com.csutil {
         /// <summary> sync subscribing and publishing to not happen at the same time </summary>
         private object threadLock = new object();
 
-        private readonly ConcurrentDictionary<string, ConcurrentDictionary<object, Delegate>> map =
-            new ConcurrentDictionary<string, ConcurrentDictionary<object, Delegate>>();
+        private readonly ConcurrentDictionary<string, List<KeyValuePair<object, Delegate>>> map =
+            new ConcurrentDictionary<string, List<KeyValuePair<object, Delegate>>>();
 
         public EventBus() {
             eventHistory = new ConcurrentQueue<string>();
@@ -28,18 +28,35 @@ namespace com.csutil {
 
         public void Subscribe(object subscriber, string eventName, Delegate callback) {
             lock (threadLock) {
-                var replacedDelegate = GetOrAdd(eventName).AddOrReplace(subscriber, callback);
+                var replacedDelegate = AddOrReplace(GetOrAdd(eventName), subscriber, callback);
                 if (replacedDelegate != null) { Log.w("Existing subscriber was replaced for event=" + eventName); }
             }
         }
 
-        private ConcurrentDictionary<object, Delegate> GetOrAdd(string eventName) {
-            return map.GetOrAdd(eventName, (_) => { return new ConcurrentDictionary<object, Delegate>(); });
+        private Delegate AddOrReplace(List<KeyValuePair<object, Delegate>> self, object subscriber, Delegate callback) {
+            var i = self.FindIndex(x => x.Key == subscriber);
+            var newEntry = new KeyValuePair<object, Delegate>(subscriber, callback);
+            if (i >= 0) {
+                var oldEntry = self[i];
+                self[i] = newEntry;
+                return oldEntry.Value;
+            } else {
+                self.Add(newEntry);
+                return null;
+            }
         }
 
-        public ICollection<object> GetSubscribersFor(string eventName) {
+        private List<KeyValuePair<object, Delegate>> GetOrAdd(string eventName) {
+            return map.GetOrAdd(eventName, (_) => { return new List<KeyValuePair<object, Delegate>>(); });
+        }
+
+        public IEnumerable<object> GetSubscribersFor(string eventName) {
             var subscribers = map.GetValue(eventName, null);
-            return subscribers == null ? new List<object>() : subscribers.Keys;
+            if (subscribers != null) {
+                var m = subscribers.Map(x => x.Key);
+                return m;
+            }
+            return new List<object>();
         }
 
         public List<object> Publish(string eventName, params object[] args) {
@@ -49,14 +66,14 @@ namespace com.csutil {
         public IEnumerable<object> NewPublishIEnumerable(string eventName, params object[] args) {
             lock (threadLock) {
                 eventHistory.Enqueue(eventName);
-                ConcurrentDictionary<object, Delegate> dictForEventName;
+                List<KeyValuePair<object, Delegate>> dictForEventName;
                 map.TryGetValue(eventName, out dictForEventName);
                 if (!dictForEventName.IsNullOrEmpty()) {
-                    var subscribers = dictForEventName.Values;
-                    return subscribers.Map(subscriber => {
+                    var subscriberDelegates = dictForEventName.Map(x => x.Value);
+                    return subscriberDelegates.Map(subscriberDelegate => {
                         try {
                             object result;
-                            if (subscriber.DynamicInvokeV2(args, out result)) { return result; }
+                            if (subscriberDelegate.DynamicInvokeV2(args, out result)) { return result; }
                         } catch (Exception e) { Log.e(e); }
                         return null;
                     });
@@ -67,9 +84,9 @@ namespace com.csutil {
 
         public bool Unsubscribe(object subscriber, string eventName) {
             if (!map.ContainsKey(eventName)) { return false; }
-            Delegate _;
-            if (map[eventName].TryRemove(subscriber, out _)) {
-                if (map[eventName].IsEmpty) return TryRemove(map, eventName);
+            KeyValuePair<object, Delegate> elemToRemove = map[eventName].FirstOrDefault(x => x.Key == subscriber);
+            if (map[eventName].Remove(elemToRemove)) {
+                if (map[eventName].IsNullOrEmpty()) return TryRemove(map, eventName);
                 return true;
             }
             Log.w("Could not unsubscribe subscriber=" + subscriber + " from event '" + eventName + "'");
@@ -77,14 +94,14 @@ namespace com.csutil {
         }
 
         public bool UnsubscribeAll(object subscriber) {
-            var registeredEvents = map.Filter(x => x.Value.ContainsKey(subscriber));
+            var registeredEvents = map.Filter(x => x.Value.Exists(y => y.Key == subscriber));
             var removedCallbacks = new List<Delegate>();
             foreach (var eventMaps in registeredEvents) {
                 var eventName = eventMaps.Key;
                 var subscribersForEventName = eventMaps.Value;
-                Delegate removedCallback;
-                if (subscribersForEventName.TryRemove(subscriber, out removedCallback)) {
-                    removedCallbacks.Add(removedCallback);
+                var entryToRemove = subscribersForEventName.First(x => x.Key == subscriber);
+                if (subscribersForEventName.Remove(entryToRemove)) {
+                    removedCallbacks.Add(entryToRemove.Value);
                 }
                 if (subscribersForEventName.IsNullOrEmpty()) { TryRemove(map, eventName); }
             }

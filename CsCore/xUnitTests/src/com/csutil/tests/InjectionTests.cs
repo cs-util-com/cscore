@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,6 +10,8 @@ using Xunit;
 namespace com.csutil.tests {
 
     public class InjectionTests {
+
+        public InjectionTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
         /// <summary> 
         /// The global static injector IoC.inject should not be used since the test
@@ -166,15 +170,23 @@ namespace com.csutil.tests {
         [Fact]
         public void TestMultipleInjectors2() {
             var IoC_inject = GetInjectorForTest();
+
+            Assert.False(IoC_inject.HasInjectorRegistered<MyClass1>());
             IoC_inject.RegisterInjector<MyClass1>(new object(), (caller, createIfNull) => {
+                Log.d("Injector with MySubClass1 was called");
                 return new MySubClass1();
             });
+            Assert.True(IoC_inject.HasInjectorRegistered<MyClass1>());
+
             var secondInjectorWasUsed = false;
             IoC_inject.RegisterInjector<MyClass1>(new object(), (caller, createIfNull) => {
+                Log.d("Injector with MySubClass2 was called");
                 secondInjectorWasUsed = true;
                 return new MySubClass2();
             });
+            Assert.False(secondInjectorWasUsed);
             Assert.NotNull(IoC_inject.Get<MyClass1>(this));
+            Assert.False(secondInjectorWasUsed);
             Assert.True(IoC_inject.Get<MyClass1>(this) is MySubClass1);
             Assert.False(secondInjectorWasUsed);
             var bothResults = IoC_inject.GetAll<MyClass1>(this);
