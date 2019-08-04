@@ -30,7 +30,7 @@ namespace com.csutil.tests.async {
             throttledAction(this, "bad");
             throttledAction(this, "good");
             Assert.Equal(3, counter);
-            await Task.Delay(100);
+            await Task.Delay(1000);
             Assert.Equal(4, counter);
         }
 

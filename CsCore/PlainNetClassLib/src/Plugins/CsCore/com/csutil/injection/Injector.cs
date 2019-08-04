@@ -24,7 +24,7 @@ namespace com.csutil.injection {
             return usedEventBus.NewPublishIEnumerable(GetEventKey<T>(), caller, createIfNull).Filter(x => x is T).Cast<T>();
         }
 
-        private string GetEventKey<T>() { return "InjectReq:" + typeof(T); }
+        public string GetEventKey<T>() { return "InjectReq:" + typeof(T); }
 
         public bool HasInjectorRegistered<T>() {
             return !usedEventBus.GetSubscribersFor(GetEventKey<T>()).IsNullOrEmpty();

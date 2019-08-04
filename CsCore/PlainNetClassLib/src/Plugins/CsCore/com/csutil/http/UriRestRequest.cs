@@ -16,7 +16,7 @@ namespace com.csutil.http {
 
         public UriRestRequest(Uri uri) { this.uri = uri; }
 
-        public Task<T> GetResult<T>(Action<T> successCallback) {
+        public async Task<T> GetResult<T>(Action<T> successCallback) {
             Task<string> readResultTask = null;
             T result = default(T); // Init in case the request fails
             handleResult = (self, resp) => {
@@ -25,29 +25,25 @@ namespace com.csutil.http {
                     successCallback.InvokeIfNotNull(result);
                 }
             };
-            return sendTask.ContinueWith<T>((_) => {
-                if (readResultTask != null) { readResultTask.Wait(); }
-                if (sendTask.Status != TaskStatus.RanToCompletion) {
-                    Log.e("Web-request failed, returned result will be null");
-                }
-                return result;
-            });
+            await sendTask;
+            if (readResultTask != null) { readResultTask.Wait(); }
+            if (sendTask.Status != TaskStatus.RanToCompletion) {
+                Log.e("Web-request failed, returned result will be null");
+            }
+            return result;
         }
 
         private T ParseResultStringInto<T>(string result) { return jsonReader.Read<T>(result); }
 
         public RestRequest Send(HttpMethod method) {
-            sendTask = new Task(() => {
-                Thread.Sleep(5); // wait 5ms so that the created RestRequest can be modified before its sent
+            sendTask = Task.Run(async () => {
+                await Task.Delay(5); // wait 5ms so that the created RestRequest can be modified before its sent
                 using (var c = new HttpClient()) {
                     AddRequestHeaders(c, requestHeaders);
-                    using (var asyncRestRequest = c.SendAsync(new HttpRequestMessage(method, uri))) {
-                        asyncRestRequest.Wait(); //helps so that other thread can set handleResult in time
-                        handleResult.InvokeIfNotNull(this, asyncRestRequest.Result); // calling resp.Result blocks the thread
-                    }
+                    var asyncRestRequest = await c.SendAsync(new HttpRequestMessage(method, uri));
+                    handleResult.InvokeIfNotNull(this, asyncRestRequest);
                 }
             });
-            sendTask.Start();
             return this;
         }
 

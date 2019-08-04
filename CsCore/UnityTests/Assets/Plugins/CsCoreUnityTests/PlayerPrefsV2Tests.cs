@@ -20,6 +20,7 @@ namespace com.csutil.tests.io {
             var store = PlayerPrefsV2.instance;
             store.Set(key1, value1);
             string x = store.Get(key1, "defaultValue1").Result;
+            store.Remove(key1); // cleanup
             Assert.AreEqual(value1, x);
         }
 
