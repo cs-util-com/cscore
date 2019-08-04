@@ -23,7 +23,7 @@ namespace com.csutil.tests.async {
             throttledAction(this, "bad");
             throttledAction(this, "good");
             Assert.Equal(1, counter);
-            await Task.Delay(50);
+            await Task.Delay(200);
             Assert.Equal(2, counter);
 
             throttledAction(this, "good");
@@ -49,7 +49,7 @@ namespace com.csutil.tests.async {
                 tasks.Add(Task.Run(() => { throttledAction(this, myIntParam); }));
             }
             await Task.WhenAll(tasks.ToArray());
-            await Task.Delay(100);
+            await Task.Delay(1000);
             Assert.Equal(2, counter);
 
         }
