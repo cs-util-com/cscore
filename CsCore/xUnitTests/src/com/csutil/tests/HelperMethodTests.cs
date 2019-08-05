@@ -165,6 +165,47 @@ namespace com.csutil.tests {
                 Assert.True(a.InvokeIfNotNull("", 123, true));
                 Assert.True(wasCalled);
             }
+
+        }
+
+        [Fact]
+        public void TestDynamicInvokeV2() {
+            var wasCalled = false;
+            Action<string, int> a = (s, i) => { wasCalled = true; };
+            {
+                object result;
+                object[] inputArguments = new object[] { "a", 1 };
+                Assert.True(a.DynamicInvokeV2(inputArguments, out result, true));
+                Assert.True(wasCalled);
+                wasCalled = false;
+            }
+            { // Passing to many parameters will result in the parameters being ignored:
+                object result;
+                object[] inputArguments = new object[] { "a", 1, "b" };
+                Assert.True(a.DynamicInvokeV2(inputArguments, out result, true));
+                Assert.True(wasCalled);
+                wasCalled = false;
+            }
+            { // Test that false is returned when throwIfNotEnoughParams is false:
+                object result;
+                object[] inputArguments = new object[] { "a" };
+                Assert.False(a.DynamicInvokeV2(inputArguments, out result, throwIfNotEnoughParams: false));
+                Assert.False(wasCalled);
+            }
+            { // Test that error is thrown when throwIfNotEnoughParams is true:
+                object result;
+                object[] inputArguments = new object[] { "a" };
+                Assert.Throws<ArgumentException>(() => {
+                    a.DynamicInvokeV2(inputArguments, out result, throwIfNotEnoughParams: true);
+                });
+            }
+            { // Test that error is thrown when incorrect parameter types are used:
+                object result;
+                object[] inputArguments = new object[] { "a", "b" };
+                Assert.Throws<ArgumentException>(() => {
+                    a.DynamicInvokeV2(inputArguments, out result, throwIfNotEnoughParams: true);
+                });
+            }
         }
 
         [Fact]
