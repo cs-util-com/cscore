@@ -197,7 +197,7 @@ namespace com.csutil.tests.keyvaluestore {
             var fallback1 = "fallback1";
 
             var s1 = new InMemoryKeyValueStore();
-            var s2 = NewLiteDbStoreForTesting("TestCachingValuesFromFallbackStores").WithFallbackStore(s1);
+            var s2 = NewLiteDbStoreForTesting("TestReplaceAndRemove").WithFallbackStore(s1);
             var s3 = new InMemoryKeyValueStore().WithFallbackStore(s2);
 
             await s1.Set(key1, value1);

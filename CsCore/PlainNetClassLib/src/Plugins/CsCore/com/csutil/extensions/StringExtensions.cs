@@ -24,7 +24,9 @@ namespace com.csutil {
             var lengthUntilEndStarts = self.LastIndexOf(end);
             if (lengthUntilEndStarts < 0) { return self.Substring(startIndex); }
             var lengthOfEnd = (includeEnd ? end.Length : 0);
-            return self.Substring(startIndex, lengthUntilEndStarts + lengthOfEnd - startIndex);
+            var length = lengthUntilEndStarts + lengthOfEnd - startIndex;
+            if (length < 0) { return self.Substring(startIndex); }
+            return self.Substring(startIndex, length);
         }
 
         public static string SubstringAfter(this string self, string startAfter, bool startFromBack = false) {

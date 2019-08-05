@@ -25,6 +25,7 @@ namespace com.csutil.tests.random {
 
             var randomName = random.NextRandomName();
             Log.d("The generated random name is: " + randomName);
+            for (int i = 0; i < 1000; i++) { random.NextRandomName(); }
 
             // random.NextDouble() with a range from lowerBound to upperBound:
             double randomDouble = random.NextDouble(lowerBound: -100, upperBound: 100);
