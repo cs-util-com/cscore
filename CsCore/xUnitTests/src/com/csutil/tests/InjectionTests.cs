@@ -240,5 +240,19 @@ namespace com.csutil.tests {
             }
         }
 
+        [Fact]
+        public void TestOverrideOldSubscriber() {
+
+            Injector injector = GetInjectorForTest();
+            var injectionHandler = new object();
+            // Register an injector that will be replaced by a second one:
+            injector.RegisterInjector<MyClass1>(injectionHandler, (caller, createIfNull) => { throw Log.e("Should be replaced"); });
+            // Replace it:
+            MySubClass1 myClass1Singleton = new MySubClass1();
+            injector.RegisterInjector<MyClass1>(injectionHandler, (caller, createIfNull) => myClass1Singleton);
+            Assert.Same(myClass1Singleton, injector.Get<MyClass1>(this));
+
+        }
+
     }
 }

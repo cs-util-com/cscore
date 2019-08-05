@@ -6,6 +6,9 @@ namespace com.csutil.tests {
 
     public class EventBusTests {
 
+        public EventBusTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
+
+
         [Fact]
         public void ExampleUsage1() {
 
@@ -92,17 +95,37 @@ namespace com.csutil.tests {
         [Fact]
         public void TestSubscribeUnsubscribe() {
             EventBus EventBus_instance = GetEventBusForTesting();
-            var eventName = "TestEvent1";
+            var eventName1 = "TestEvent1";
+            var eventName2 = "TestEvent2";
             var val1ToSend = "Test 123";
 
-            var subscriber = new object();
-            Assert.Empty(EventBus_instance.Publish(eventName, val1ToSend));
-            EventBus_instance.Subscribe<string>(subscriber, eventName, (receivedVal) => {
+            var subscriber1 = new object();
+            var subscriber2 = new object();
+
+            Assert.Empty(EventBus_instance.Publish(eventName1, val1ToSend));
+            EventBus_instance.Subscribe<string>(subscriber1, eventName1, (receivedVal) => {
                 Assert.Equal(val1ToSend, receivedVal);
             });
-            Assert.Single(EventBus_instance.Publish(eventName, val1ToSend));
-            Assert.True(EventBus_instance.UnsubscribeAll(subscriber));
-            Assert.False(EventBus_instance.UnsubscribeAll(subscriber));
+            Assert.Single(EventBus_instance.Publish(eventName1, val1ToSend));
+            Assert.True(EventBus_instance.UnsubscribeAll(subscriber1));
+            Assert.False(EventBus_instance.UnsubscribeAll(subscriber1));
+
+            EventBus_instance.Subscribe<string>(subscriber1, eventName1, (receivedVal) => { });
+            EventBus_instance.Subscribe<string>(subscriber1, eventName2, (receivedVal) => { });
+            Assert.True(EventBus_instance.Unsubscribe(subscriber1, eventName1));
+            Assert.False(EventBus_instance.Unsubscribe(subscriber1, eventName1)); // Second unsubscribe will return false
+
+            // register a second listener for eventName2:
+            var event2ReceivedBy2ndSubscr = false;
+            EventBus_instance.Subscribe(subscriber2, eventName2, () => { event2ReceivedBy2ndSubscr = true; });
+            Assert.True(EventBus_instance.UnsubscribeAll(subscriber1));
+            var remainingSubscribers = EventBus_instance.GetSubscribersFor(eventName2);
+            Assert.Single(remainingSubscribers);
+            Assert.Same(subscriber2, remainingSubscribers.First());
+
+            EventBus_instance.Publish(eventName2);
+            Assert.True(event2ReceivedBy2ndSubscr);
+
         }
 
         [Fact]
