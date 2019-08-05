@@ -21,11 +21,11 @@ namespace com.csutil {
 
         public static object DynamicInvokeV2(this Delegate self, params object[] passedParams) {
             object result;
-            DynamicInvokeV2(self, passedParams, out result);
+            DynamicInvokeV2(self, passedParams, out result, true);
             return result;
         }
 
-        public static bool DynamicInvokeV2(this Delegate self, object[] passedParams, out object result) {
+        public static bool DynamicInvokeV2(this Delegate self, object[] passedParams, out object result, bool throwIfNotEnoughParams) {
             var methodParams = self.Method.GetParameters();
             if (methodParams.Length == passedParams.Length) {
                 result = (self.DynamicInvoke(passedParams));
@@ -35,7 +35,8 @@ namespace com.csutil {
                 result = (self.DynamicInvoke(subset));
                 return true;
             } else {
-                Log.w("Listener skipped because not enough parameters passed: " + self);
+                var error = "Not enough parameters passed: " + self;
+                if (throwIfNotEnoughParams) { throw new ArgumentException(error); } else { Log.w("Listener skipped: " + error); }
             }
             result = null;
             return false;
