@@ -49,19 +49,23 @@ namespace com.csutil.tests.keyvaluestore {
                 MyClass1 x2 = await store2.Get<MyClass1>(myKey1, null);
                 Assert.Equal(x1.myString1, x2.myString1);
                 Assert.Equal(x1.myString2, x2.myString2);
-                await store2.Remove(myKey1);
+                Assert.True(await store2.Remove(myKey1));
                 Assert.False(await store2.ContainsKey(myKey1));
             }
         }
 
         [Fact]
         public async void TestAllIKeyValueStoreImplementations() {
-            var dbFile = EnvironmentV2.instance.GetOrAddTempFolder("KeyValueStoreTests").GetChild("TestAllIKeyValueStoreImplementations");
-            dbFile.DeleteV2();
             await TestIKeyValueStoreImplementation(new InMemoryKeyValueStore());
-            await TestIKeyValueStoreImplementation(new LiteDbKeyValueStore(dbFile));
+            await TestIKeyValueStoreImplementation(NewLiteDbStoreForTesting("TestAllIKeyValueStoreImplementations"));
             await TestIKeyValueStoreImplementation(new ExceptionWrapperKeyValueStore(new InMemoryKeyValueStore()));
             await TestIKeyValueStoreImplementation(new MockDekayKeyValueStore().WithFallbackStore(new InMemoryKeyValueStore()));
+        }
+
+        private static LiteDbKeyValueStore NewLiteDbStoreForTesting(string storeFileName) {
+            var dbFile = EnvironmentV2.instance.GetOrAddTempFolder("KeyValueStoreTests").GetChild(storeFileName);
+            dbFile.DeleteV2();
+            return new LiteDbKeyValueStore(dbFile);
         }
 
         /// <summary> Runs typical requests on the passed store </summary>
@@ -92,7 +96,7 @@ namespace com.csutil.tests.keyvaluestore {
             var keys = await store.GetAllKeys();
             Assert.Equal(2, keys.Count());
 
-            await store.Remove(myKey2);
+            Assert.True(await store.Remove(myKey2));
             Assert.False(await store.ContainsKey(myKey2));
 
             // Test RemoveAll:
@@ -138,6 +142,7 @@ namespace com.csutil.tests.keyvaluestore {
             var value1 = "value1";
             var key2 = "key2";
             var value2 = "value2";
+
             {
                 var delayedSetTask = outerStore.Set(key1, value1);
                 Assert.Equal(value1, await outerStore.Get(key1, "")); // The outer store already has the update
@@ -146,16 +151,70 @@ namespace com.csutil.tests.keyvaluestore {
                 await delayedSetTask;
                 Assert.Equal(value1, await innerStore.Get(key1, ""));
             }
+
             simulatedDelayStore.throwTimeoutError = true;
             var simulatedErrorCatched = false;
             exWrapperStore.onError = (Exception e) => { simulatedErrorCatched = true; };
+
             {
                 await outerStore.Set(key2, value2); // This will cause a timeout error in the "delayed" store
                 Assert.True(simulatedErrorCatched);
                 Assert.Contains(key2, await outerStore.GetAllKeys()); // In the outer store the value was set
                 Assert.False(await innerStore.ContainsKey(key2)); // The inner store never got the update
+                Assert.False(await exWrapperStore.ContainsKey(key2)); // The exc. wrapper returns false if an error is thrown
                 Assert.Null(await exWrapperStore.GetAllKeys()); // Will throw another error and return null
             }
+        }
+
+        [Fact]
+        public async void TestCachingValuesFromFallbackStores() {
+
+            var key1 = "key1";
+            var value1 = "value1";
+            var fallback1 = "fallback1";
+
+            var s1 = new InMemoryKeyValueStore();
+            var s2 = NewLiteDbStoreForTesting("TestCachingValuesFromFallbackStores").WithFallbackStore(s1);
+            var s3 = new InMemoryKeyValueStore().WithFallbackStore(s2);
+
+            await s1.Set(key1, value1);
+            // s3 will ask s2 which will ask s1 so the value will be returned correctly:
+            Assert.Equal(value1, await s3.Get(key1, fallback1));
+
+            // Now the value should also be cached in the other stores, so s1 is not needed anymore:
+            s2.fallbackStore = null;
+            s3.fallbackStore = null;
+            Assert.Equal(value1, await s2.Get(key1, fallback1));
+            Assert.Equal(value1, await s3.Get(key1, fallback1));
+
+        }
+
+        [Fact]
+        public async void TestReplaceAndRemove() {
+
+            var key1 = "key1";
+            var value1 = "value1";
+            var fallback1 = "fallback1";
+
+            var s1 = new InMemoryKeyValueStore();
+            var s2 = NewLiteDbStoreForTesting("TestCachingValuesFromFallbackStores").WithFallbackStore(s1);
+            var s3 = new InMemoryKeyValueStore().WithFallbackStore(s2);
+
+            await s1.Set(key1, value1);
+            // Test that replace with same value via s3 returns the old value (which is also value1):
+            Assert.Equal(value1, await s3.Set(key1, value1));
+            // s3 will ask s2 which will ask s1 so the value will be returned correctly:
+            Assert.Equal(value1, await s3.Get(key1, fallback1));
+            Assert.Single(await s3.GetAllKeys());
+
+            Assert.True(await s3.Remove(key1));
+            // Setting it again will return null since it was removed from all stores: 
+            Assert.Null(await s3.Set(key1, value1));
+            Assert.True(await s1.Remove(key1)); // Remove it only from s1
+            Assert.Equal(value1, await s3.Get(key1, fallback1)); // Still cached in s3 and s2
+            // s1 had the key already removed, so the combined remove result will be false:
+            Assert.False(await s3.Remove(key1));
+
         }
 
     }
