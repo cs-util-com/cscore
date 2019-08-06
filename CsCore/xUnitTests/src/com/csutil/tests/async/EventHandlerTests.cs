@@ -23,14 +23,14 @@ namespace com.csutil.tests.async {
             throttledAction(this, "bad");
             throttledAction(this, "good");
             Assert.Equal(1, counter);
-            await Task.Delay(400);
+            for (int i = 0; i < 20; i++) { await Task.Delay(100); if (counter >= 2) { break; } }
             Assert.Equal(2, counter);
 
             throttledAction(this, "good");
             throttledAction(this, "bad");
             throttledAction(this, "good");
             Assert.Equal(3, counter);
-            await Task.Delay(1000);
+            for (int i = 0; i < 20; i++) { await Task.Delay(100); if (counter >= 4) { break; } }
             Assert.Equal(4, counter);
         }
 
