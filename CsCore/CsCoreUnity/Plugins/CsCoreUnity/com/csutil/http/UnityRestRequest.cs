@@ -15,7 +15,7 @@ namespace com.csutil.http {
 
         public UnityRestRequest(UnityWebRequest request) { this.request = request; }
 
-        public Task<T> GetResult<T>(Action<T> onResult = null) {
+        public Task<T> GetResult<T>() {
             var response = new Response<T>();
             return WebRequestRunner.GetInstance(this).StartCoroutineAsTask(prepareRequest(response), () => response.getResult());
         }
@@ -29,6 +29,12 @@ namespace com.csutil.http {
         public RestRequest WithRequestHeaders(Headers requestHeaders) {
             this.requestHeaders = requestHeaders;
             return this;
+        }
+
+        public async Task<Headers> GetResultHeaders() {
+            if (request.isModifiable) { throw new Exception("Request was not send yet, can't get result headers"); }
+            while (request.isDone || request.isHttpError || request.isNetworkError) { await Task.Delay(5); }
+            return request.GetResponseHeadersV2();
         }
 
     }

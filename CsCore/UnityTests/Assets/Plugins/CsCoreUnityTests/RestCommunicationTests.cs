@@ -21,11 +21,6 @@ namespace com.csutil.tests.http {
             HttpBinGetResp response = requestTask.Result;
             Log.d("Your IP is " + response.origin);
 
-            // Alternatively the asynchronous callback in GetResult can be used:
-            UnityWebRequest.Get("https://httpbin.org/get").SendV2().GetResult<HttpBinGetResp>((result) => {
-                Log.d("Your IP is " + response.origin);
-            });
-
         }
 
         [UnityTest]
@@ -103,9 +98,7 @@ namespace com.csutil.tests.http {
         }
 
         private IEnumerator AssertGetResult(RestRequest get) {
-            var runningTask = get.GetResult<HttpBinGetResp>(x => {
-                Log.d("Your IP is " + x.origin);
-            });
+            var runningTask = get.GetResult<HttpBinGetResp>();
             while (!runningTask.IsCompleted) {
                 Log.d("AssertGetResult: Waiting..");
                 yield return new WaitForSeconds(0.1f);
