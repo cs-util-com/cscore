@@ -107,25 +107,32 @@ namespace com.csutil.tests {
 
             // Set an injector1 for MyClass1:
             MyClass1 ref1 = IoC_inject.GetOrAddSingleton<MyClass1>(injector, () => new MySubClass1());
-            Assert.Same(ref1, IoC_inject.Get<MyClass1>(null));
-            Assert.Equal(typeof(MySubClass1), IoC_inject.Get<MyClass1>(null).GetType());
+            Assert.Same(ref1, IoC_inject.Get<MyClass1>(this));
+            Assert.Equal(typeof(MySubClass1), IoC_inject.Get<MyClass1>(this).GetType());
 
             // Try to register an additional injector for the same class which should fail:
             Assert.Throws<Singleton.MultipleProvidersException>(() => {
                 IoC_inject.SetSingleton<MyClass1>(new MySubClass2());
             });
             // The first provider is still active and provides the same singleton instance as before:
-            Assert.Equal(typeof(MySubClass1), IoC_inject.Get<MyClass1>(null).GetType());
+            Assert.Equal(typeof(MySubClass1), IoC_inject.Get<MyClass1>(this).GetType());
 
             // Remove the initial singleton to replace it with a new one:
             Assert.True(IoC_inject.UnregisterInjector<MyClass1>(injector));
+            // Test that GetOrAddSingleton is not allowed to return null as an instance:
+            Assert.Throws<ArgumentNullException>(() => { IoC_inject.GetOrAddSingleton<MyClass1>(injector, () => null); });
+            // Register an injector that instantly creates a MySubClass2 instance:
             MyClass1 ref2 = IoC_inject.GetOrAddSingleton<MyClass1>(injector, () => new MySubClass2());
-            Assert.Equal(typeof(MySubClass2), IoC_inject.Get<MyClass1>(null).GetType());
+            Assert.Equal(typeof(MySubClass2), IoC_inject.Get<MyClass1>(this).GetType());
             Assert.NotEqual(ref1, ref2);
+
+            // Override the current singleton:
+            IoC_inject.SetSingleton<MyClass1>(injector, new MySubClass1(), overrideExisting: true);
+            Assert.Equal(typeof(MySubClass1), IoC_inject.Get<MyClass1>(this).GetType());
 
             // Check that the initial injector1 was overwritten by injector2:
             Assert.True(IoC_inject.UnregisterInjector<MyClass1>(injector));
-            Assert.Null(IoC_inject.Get<MyClass1>(null));
+            Assert.Null(IoC_inject.Get<MyClass1>(this));
         }
 
         [Fact]
@@ -213,13 +220,15 @@ namespace com.csutil.tests {
         private class MyUserClass1 { }
 
         [Fact]
-        public void TestTemporaryContext2() {
+        public void TestTemporaryContext1() {
             var IoC_inject = GetInjectorForTest();
             Assert.Null(IoC_inject.Get<MyClass1>(this));
             for (int i = 0; i < 100; i++) {
                 Task.Run(() => {
                     var myContextInstance1 = new MyClass1();
-                    IoC_inject.DoWithTempContext<MyClass1>(myContextInstance1, () => {
+                    IoC_inject.DoWithTempContext<MyClass1>(myContextInstance1, async () => {
+                        Assert.Equal(myContextInstance1, IoC_inject.Get<MyClass1>(this));
+                        await Task.Run(() => { Assert.Equal(null, IoC_inject.Get<MyClass1>(this)); });
                         Assert.Equal(myContextInstance1, IoC_inject.Get<MyClass1>(this));
                     });
                     // when the temporary context is gone requesting an injection returns null again:
