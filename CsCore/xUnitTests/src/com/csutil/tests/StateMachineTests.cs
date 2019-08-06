@@ -123,6 +123,51 @@ namespace com.csutil.tests {
 
         }
 
+        [Fact]
+        public static void StateMachine_TransitionEventTests2() {
+
+            var stateMachine = new Dictionary<MyStates, HashSet<MyStates>>();
+            stateMachine.AddToValues(MyStates.MyState1, MyStates.MyState1);
+            stateMachine.AddToValues(MyStates.MyState1, MyStates.MyState2);
+            stateMachine.AddToValues(MyStates.MyState2, MyStates.MyState2);
+            stateMachine.AddToValues(MyStates.MyState2, MyStates.MyState1);
+            MyStates currentState = MyStates.MyState1;
+
+            var state1To1Counter = 0;
+            StateMachine.SubscribeToTransition<MyStates>(new object(), MyStates.MyState1, MyStates.MyState1, delegate { state1To1Counter++; });
+            var state1To2Counter = 0;
+            StateMachine.SubscribeToTransition<MyStates>(new object(), MyStates.MyState1, MyStates.MyState2, delegate { state1To2Counter++; });
+            var state2To2Counter = 0;
+            StateMachine.SubscribeToTransition<MyStates>(new object(), MyStates.MyState2, MyStates.MyState2, delegate { state2To2Counter++; });
+            var state2To1Counter = 0;
+            StateMachine.SubscribeToTransition<MyStates>(new object(), MyStates.MyState2, MyStates.MyState1, delegate { state2To1Counter++; });
+            { // Transition from 1 => 1 => 2 => 2 => 1 :
+                currentState = Transition_1_2_2_1(stateMachine, currentState);
+                var c = 1; // All listeners should have counted one time:
+                Assert.Equal(c, state1To1Counter);
+                Assert.Equal(c, state1To2Counter);
+                Assert.Equal(c, state2To2Counter);
+                Assert.Equal(c, state2To1Counter);
+            }
+            { // AGAIN Transition from 1 => 1 => 2 => 2 => 1 :
+                currentState = Transition_1_2_2_1(stateMachine, currentState);
+                var c = 2; // All listeners should have counted AGAIN one time:
+                Assert.Equal(c, state1To1Counter);
+                Assert.Equal(c, state1To2Counter);
+                Assert.Equal(c, state2To2Counter);
+                Assert.Equal(c, state2To1Counter);
+            }
+
+        }
+
+        private static MyStates Transition_1_2_2_1(Dictionary<MyStates, HashSet<MyStates>> stateMachine, MyStates currentState) {
+            currentState = stateMachine.TransitionTo(currentState, MyStates.MyState1);
+            currentState = stateMachine.TransitionTo(currentState, MyStates.MyState2);
+            currentState = stateMachine.TransitionTo(currentState, MyStates.MyState2);
+            currentState = stateMachine.TransitionTo(currentState, MyStates.MyState1);
+            return currentState;
+        }
+
     }
 
 }

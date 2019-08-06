@@ -13,6 +13,7 @@ namespace com.csutil.http {
         public IJsonReader jsonReader = JsonReader.GetReader();
         private Task sendTask;
         private Headers requestHeaders;
+        private HttpResponseMessage response;
 
         public UriRestRequest(Uri uri) { this.uri = uri; }
 
@@ -20,6 +21,7 @@ namespace com.csutil.http {
             Task<string> readResultTask = null;
             T result = default(T); // Init in case the request fails
             handleResult = (self, resp) => {
+                this.response = resp;
                 using (readResultTask = resp.Content.ReadAsStringAsync()) {
                     result = ParseResultStringInto<T>(readResultTask.Result);
                     successCallback.InvokeIfNotNull(result);
@@ -39,7 +41,7 @@ namespace com.csutil.http {
             sendTask = Task.Run(async () => {
                 await Task.Delay(5); // wait 5ms so that the created RestRequest can be modified before its sent
                 using (var c = new HttpClient()) {
-                    AddRequestHeaders(c, requestHeaders);
+                    c.AddRequestHeaders(requestHeaders);
                     var asyncRestRequest = await c.SendAsync(new HttpRequestMessage(method, uri));
                     handleResult.InvokeIfNotNull(this, asyncRestRequest);
                 }
@@ -49,17 +51,7 @@ namespace com.csutil.http {
 
         public void Dispose() { sendTask.Dispose(); }
 
-        private static bool AddRequestHeaders(HttpClient self, Headers requestHeadersToAdd) {
-            if (requestHeadersToAdd.IsNullOrEmpty()) { return false; }
-            bool r = true;
-            foreach (var h in requestHeadersToAdd) {
-                if (!self.DefaultRequestHeaders.TryAddWithoutValidation(h.Key, h.Value)) {
-                    Log.e("Could not add header to request: " + h);
-                    r = false;
-                }
-            }
-            return r;
-        }
+
 
         public RestRequest WithRequestHeaders(Headers requestHeaders) { this.requestHeaders = requestHeaders; return this; }
 
