@@ -226,9 +226,7 @@ namespace com.csutil.tests {
             for (int i = 0; i < 100; i++) {
                 Task.Run(() => {
                     var myContextInstance1 = new MyClass1();
-                    IoC_inject.DoWithTempContext<MyClass1>(myContextInstance1, async () => {
-                        Assert.Equal(myContextInstance1, IoC_inject.Get<MyClass1>(this));
-                        await Task.Run(() => { Assert.Equal(null, IoC_inject.Get<MyClass1>(this)); });
+                    IoC_inject.DoWithTempContext<MyClass1>(myContextInstance1, () => {
                         Assert.Equal(myContextInstance1, IoC_inject.Get<MyClass1>(this));
                     });
                     // when the temporary context is gone requesting an injection returns null again:
