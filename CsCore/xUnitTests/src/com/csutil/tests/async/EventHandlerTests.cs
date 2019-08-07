@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using com.csutil.async;
 using Xunit;
 
 namespace com.csutil.tests.async {
@@ -59,7 +60,7 @@ namespace com.csutil.tests.async {
         [Fact]
         public async void ExponentialBackoffExample1() {
             Stopwatch timer = Stopwatch.StartNew();
-            var finalTimingResult = await TryWithExponentialBackoff<long>(async () => {
+            var finalTimingResult = await TaskHelper.TryWithExponentialBackoff<long>(async () => {
                 await Task.Delay(5);
                 Log.d("Task exec at " + timer.ElapsedMilliseconds);
                 // In the first second of the test simulate errors:
@@ -72,38 +73,21 @@ namespace com.csutil.tests.async {
         [Fact]
         public async void ExponentialBackoffExample2() {
             Stopwatch timer = Stopwatch.StartNew();
-            var result = await TryWithExponentialBackoff<long>(async () => {
-                await Task.Delay(5);
-                // In the first second of the test simulate errors:
-                if (timer.ElapsedMilliseconds < 1000) { throw new TimeoutException("e.g. some network error"); }
-                return timer.ElapsedMilliseconds;
-            }, (e) => { // Errors could be logged or based on the type rethrown:
-                Assert.IsType<TimeoutException>(e);
+            await Assert.ThrowsAsync<OperationCanceledException>(async () => {
+
+                // Try 5 times to execute to run someTaskThatFailsEveryTime:
+                await TaskHelper.TryWithExponentialBackoff(SomeTaskThatFailsEveryTime, (e) => {
+                    Assert.IsType<TimeoutException>(e); // Errors could be logged or based on the type rethrown
+                }, maxNrOfRetries: 5, maxDelayInMs: 200); // The exponential backoff will not be larger then 200ms
+
             });
-            Assert.True(1000 < result && result < 2000, "result=" + result);
+            var finalTimingResult = timer.ElapsedMilliseconds;
+            Assert.True(finalTimingResult < 500, "finalTimingResult=" + finalTimingResult);
         }
 
-        private static async Task<T> TryWithExponentialBackoff<T>(Func<Task<T>> getTask, Action<Exception> onError = null) {
-            int maxNrOfRetries = -1;
-            int maxDelayInMs = -1;
-            int initialExponent = 1;
-            int retryCount = initialExponent;
-            Stopwatch timer = Stopwatch.StartNew();
-            do {
-                timer.Restart();
-                try {
-                    Task<T> task = getTask();
-                    var result = await task;
-                    if (task.IsCompletedSuccessfully) { return result; }
-                } catch (Exception e) { onError.InvokeIfNotNull(e); }
-                retryCount++;
-                int delay = (int)(Math.Pow(2, retryCount) - timer.ElapsedMilliseconds);
-                if (delay > maxDelayInMs && maxDelayInMs > 0) { delay = maxDelayInMs; }
-                if (delay > 0) { await Task.Delay(delay); }
-                if (retryCount > maxNrOfRetries && maxNrOfRetries > 0) {
-                    throw new Exception("No success after " + retryCount + " retries");
-                }
-            } while (true);
+        private async Task SomeTaskThatFailsEveryTime() {
+            await Task.Delay(5);
+            throw new TimeoutException("e.g. some network error");
         }
 
     }
