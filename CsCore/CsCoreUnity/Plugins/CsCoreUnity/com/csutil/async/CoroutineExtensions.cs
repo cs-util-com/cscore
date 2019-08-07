@@ -42,14 +42,14 @@ namespace com.csutil {
             var waitTask = new WaitForSeconds(repeatDelay);
             while (rep != 0) {
                 if (mono.enabled) { // pause the repeating task while the parent mono is disabled
-                    if (!run(task)) { break; }
+                    if (!Run(task)) { break; }
                     rep--;
                 }
                 yield return waitTask;
             }
         }
 
-        private static bool run(Func<bool> t) { try { return t(); } catch (Exception e) { Log.e(e); } return false; }
+        private static bool Run(Func<bool> t) { try { return t(); } catch (Exception e) { Log.e(e); } return false; }
 
         public static Coroutine ExecuteDelayed(this MonoBehaviour self, Action task, float delayInSecBeforeExecution = 0f) {
             if (!self.isActiveAndEnabled) { throw new Exception("ExecuteDelayed called on inactive mono"); }

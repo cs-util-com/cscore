@@ -4,7 +4,11 @@ using com.csutil.keyvaluestore;
 using com.csutil.json;
 
 namespace com.csutil.model.immutable {
+
+    public class ResetStoreAction { }
+
     public class ReplayRecorder<T> {
+
         private IDataStore<T> targetStore;
         private IJsonReader jsonReader = TypedJsonHelper.NewTypedJsonReader();
         private IJsonWriter jsonWriter = TypedJsonHelper.NewTypedJsonWriter();
@@ -45,12 +49,15 @@ namespace com.csutil.model.immutable {
         private string GetId(int i) { return "" + i; }
 
         public void ResetStore() {
+            if (targetStore == null) { throw new NullReferenceException("Not connected to any store yet, use CreateMiddleware()"); }
             var oldIsRecordingValue = isRecording;
             isRecording = false; // Dont record the ResetStoreAction
             var oldState = targetStore.GetState();
             targetStore.Dispatch(new ResetStoreAction());
             var newState = targetStore.GetState();
-            if (Object.Equals(oldState, newState)) { throw new Exception("The store does not implement the ResetStoreAction"); }
+            if (recordedActionsCount > 0 && Object.Equals(oldState, newState)) {
+                throw new Exception("The store does not implement the ResetStoreAction");
+            }
             isRecording = oldIsRecordingValue;
         }
 
@@ -65,7 +72,7 @@ namespace com.csutil.model.immutable {
 
         public async Task ReplayStore(int delayBetweenStepsInMs, int nrOfActionsToReplay) {
             if (nrOfActionsToReplay > recordedActionsCount) {
-                throw Log.e("nrOfActionsToReplay=" + nrOfActionsToReplay + " > recordedActionsCount=" + recordedActionsCount);
+                throw new ArgumentException("nrOfActionsToReplay=" + nrOfActionsToReplay + " > recordedActionsCount=" + recordedActionsCount);
             }
             ResetStore();
             var oldRecordingValue = isRecording;
@@ -75,10 +82,8 @@ namespace com.csutil.model.immutable {
                     if (delayBetweenStepsInMs > 0) { await Task.Delay(delayBetweenStepsInMs); }
                     await DispatchRecordedEntry(i);
                 }
-            } catch (System.Exception e) {
-                isRecording = oldRecordingValue;
-                throw e;
-            }
+            } catch (System.Exception e) { throw e; }
+            isRecording = oldRecordingValue;
         }
 
         private async Task DispatchRecordedEntry(int entryNr) {
@@ -103,6 +108,5 @@ namespace com.csutil.model.immutable {
         }
 
     }
-    public class ResetStoreAction { }
 
 }
