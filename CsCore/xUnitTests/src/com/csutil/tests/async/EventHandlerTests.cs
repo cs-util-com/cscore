@@ -7,7 +7,9 @@ using com.csutil.async;
 using Xunit;
 
 namespace com.csutil.tests.async {
+
     public class EventHandlerTests {
+
 
         public EventHandlerTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
@@ -91,4 +93,5 @@ namespace com.csutil.tests.async {
         }
 
     }
+
 }

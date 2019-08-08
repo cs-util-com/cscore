@@ -7,7 +7,7 @@ namespace com.csutil.async {
     public class TaskHelper {
 
         public static async Task TryWithExponentialBackoff(Func<Task> taskToTry,
-                        Action<Exception> onError = null, int maxNrOfRetries = -1, int maxDelayInMs = -1, int initialExponent = 1) {
+                        Action<Exception> onError = null, int maxNrOfRetries = -1, int maxDelayInMs = -1, int initialExponent = 0) {
 
             await TryWithExponentialBackoff<bool>(async () => {
                 await taskToTry();
@@ -17,7 +17,7 @@ namespace com.csutil.async {
         }
 
         public static async Task<T> TryWithExponentialBackoff<T>(Func<Task<T>> taskToTry,
-                        Action<Exception> onError = null, int maxNrOfRetries = -1, int maxDelayInMs = -1, int initialExponent = 1) {
+                        Action<Exception> onError = null, int maxNrOfRetries = -1, int maxDelayInMs = -1, int initialExponent = 0) {
 
             int retryCount = initialExponent;
             Stopwatch timer = Stopwatch.StartNew();
@@ -32,7 +32,7 @@ namespace com.csutil.async {
                 int delay = (int)(Math.Pow(2, retryCount) - timer.ElapsedMilliseconds);
                 if (delay > maxDelayInMs && maxDelayInMs > 0) { delay = maxDelayInMs; }
                 if (delay > 0) { await Task.Delay(delay); }
-                if (retryCount > maxNrOfRetries && maxNrOfRetries > 0) {
+                if (retryCount >= maxNrOfRetries && maxNrOfRetries > 0) {
                     throw new OperationCanceledException("No success after " + retryCount + " retries");
                 }
             } while (true);

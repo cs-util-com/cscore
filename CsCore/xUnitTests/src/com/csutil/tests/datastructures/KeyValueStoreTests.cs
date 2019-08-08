@@ -55,6 +55,43 @@ namespace com.csutil.tests.keyvaluestore {
         }
 
         [Fact]
+        public async void ExampleUsage3() {
+
+            // Simulate the DB on the server
+            var simulatedDb = new InMemoryKeyValueStore();
+            // Simulate the connection (with a delay) to the server:
+            var simulatedRemoteConnection = new MockDekayKeyValueStore().WithFallbackStore(simulatedDb);
+
+            // The connection to the server is wrapped by a automatic retry for failing requests:
+            var requestRetry = new RetryKeyValueStore(simulatedRemoteConnection, maxNrOfRetries: 5);
+            // Any errors in the inner layers like connection errors, DB errors are catched by default:
+            var errorHandler = new ExceptionWrapperKeyValueStore(requestRetry);
+            // The outer store is a local in memory cache and the main point of contact:
+            var outerStore = new InMemoryKeyValueStore().WithFallbackStore(errorHandler);
+
+            var key1 = "key1";
+            var value1 = "value1";
+            var fallback1 = "fallback1";
+            await outerStore.Set(key1, value1);
+            Assert.Equal(value1, await outerStore.Get(key1, fallback1));
+            Assert.Equal(value1, await simulatedDb.Get(key1, fallback1));
+
+            // Simmulate connection problems to the remote DB:
+            simulatedRemoteConnection.throwTimeoutError = true;
+
+            var key2 = "key2";
+            var value2 = "value2";
+            var fallback2 = "fallback2";
+            // Awaiting a set will take some time since there will be 5 retries:
+            await outerStore.Set(key2, value2);
+            // The outer store has the set value cached:
+            Assert.Equal(value2, await outerStore.Get(key2, fallback2));
+            // But the request never reached the simulated DB:
+            Assert.False(await simulatedDb.ContainsKey(key2));
+
+        }
+
+        [Fact]
         public async void TestAllIKeyValueStoreImplementations() {
             await TestIKeyValueStoreImplementation(new InMemoryKeyValueStore());
             await TestIKeyValueStoreImplementation(NewLiteDbStoreForTesting("TestAllIKeyValueStoreImplementations"));
@@ -214,6 +251,54 @@ namespace com.csutil.tests.keyvaluestore {
             Assert.Equal(value1, await s3.Get(key1, fallback1)); // Still cached in s3 and s2
             // s1 had the key already removed, so the combined remove result will be false:
             Assert.False(await s3.Remove(key1));
+
+        }
+
+        [Fact]
+        public async void TestDelayStoreWithExponentialBackoffRetry() {
+
+            // Simulates the DB on the server:
+            var innerStore = new InMemoryKeyValueStore();
+            // Simulates the connection to the server:
+            var simulatedRemoteConnection = new MockDekayKeyValueStore().WithFallbackStore(innerStore);
+            var requestRetry = new RetryKeyValueStore(simulatedRemoteConnection, maxNrOfRetries: 5);
+            var outerStore = new InMemoryKeyValueStore().WithFallbackStore(requestRetry);
+
+            var key1 = "key1";
+            var value1 = "value1";
+            var key2 = "key2";
+            var value2 = "value2";
+            var fallback2 = "fallback2";
+
+            {
+                var delayedSetTask = outerStore.Set(key1, value1);
+                Assert.Equal(value1, await outerStore.Get(key1, "")); // The outer store already has the update
+                Assert.NotEqual(value1, await innerStore.Get(key1, "")); // The inner store did not get the update yet
+                // After waiting for set to fully finish the inner store has the update too:
+                await delayedSetTask;
+                Assert.Equal(value1, await innerStore.Get(key1, ""));
+            }
+
+            // Now simulate that the remote DB/server never can be reached:
+            simulatedRemoteConnection.throwTimeoutError = true;
+
+            {
+                var timeoutErrorCounter = 0;
+                // In the retry listen to any error if the wrapped store:
+                requestRetry.onError = (e) => {
+                    Assert.IsType<TimeoutException>(e); // thrown by the simulatedRemoteConnection
+                    timeoutErrorCounter++;
+                };
+
+                var delayedSetTask = outerStore.Set(key2, value2);
+                Assert.Equal(value2, await outerStore.Get(key2, fallback2)); // In the outer store the value was set
+                Assert.False(await innerStore.ContainsKey(key2)); // The inner store never got the update
+
+                // The delayedSetTask was canceled after 5 retries: 
+                await Assert.ThrowsAsync<OperationCanceledException>(async () => await delayedSetTask);
+                // There will be 5 TimeoutException in the simulatedRemoteConnection:
+                Assert.Equal(requestRetry.maxNrOfRetries, timeoutErrorCounter);
+            }
 
         }
 
