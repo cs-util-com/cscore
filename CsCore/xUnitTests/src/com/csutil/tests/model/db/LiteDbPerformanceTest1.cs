@@ -5,11 +5,11 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using com.csutil.io.db;
+using com.csutil.model;
 using LiteDB;
 using Xunit;
 
-namespace com.csutil.tests.io.db {
+namespace com.csutil.tests.model {
 
     public class LiteDbPerformanceTest1 {
 

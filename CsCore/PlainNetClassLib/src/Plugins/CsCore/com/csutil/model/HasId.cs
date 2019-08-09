@@ -1,4 +1,4 @@
-namespace com.csutil.io.db {
+namespace com.csutil.model {
     public interface HasId {
         string GetId();
     }

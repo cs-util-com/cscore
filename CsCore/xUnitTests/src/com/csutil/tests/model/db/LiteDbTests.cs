@@ -1,10 +1,10 @@
 using System;
 using System.Linq;
-using com.csutil.io.db;
+using com.csutil.model;
 using LiteDB;
 using Xunit;
 
-namespace com.csutil.tests.io.db {
+namespace com.csutil.tests.model {
 
     public class LiteDbTests {
 
