@@ -71,15 +71,12 @@ namespace com.csutil.tests.ui {
             public InputField NameInputField() { return links.Get<InputField>("Name"); }
 
             public IEnumerator Unload() {
-                if (links != null) {
-                    links.Clear();
-                    links = null;
-                }
+                if (links != null) { links.Clear(); }
+                links = null;
                 yield return null;
             }
 
         }
-
 
     }
 

@@ -29,6 +29,7 @@ namespace com.csutil.tests.ui {
             var links = ui.GetLinkMap();
             AssertV2.AreEqual(currentUser.userName, links.Get<InputField>("Name").text, "userName");
         }
+
     }
 
 }
