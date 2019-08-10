@@ -20,11 +20,11 @@ namespace com.csutil.tests.ui {
             links.Get<Button>("UserDetailsButton").SetOnClickAction(ShowUserUi);
         }
 
-        private void ShowUserUi(GameObject buttonGo) {
+        private async void ShowUserUi(GameObject buttonGo) {
             GameObject ui = gameObject.GetViewStack().ShowView(gameObject, "MyUserUi1");
 
             ExampleUi1.MyUserUi presenter = new ExampleUi1.MyUserUi();
-            presenter.LoadModelIntoView(currentUser, ui);
+            await presenter.LoadModelIntoView(currentUser, ui);
 
             var links = ui.GetLinkMap();
             AssertV2.AreEqual(currentUser.userName, links.Get<InputField>("Name").text, "userName");
