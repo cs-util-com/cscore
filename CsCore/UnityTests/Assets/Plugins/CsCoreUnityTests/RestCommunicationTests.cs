@@ -3,6 +3,7 @@ using NUnit.Framework;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -81,12 +82,23 @@ namespace com.csutil.tests.http {
         }
 
         [UnityTest]
-        public IEnumerator TestGetCurrentPing() {
+        public IEnumerator TestGetCurrentPingViaUnityPing() {
+            var ip = "8.8.8.8";
+            var timeoutInMs = 1000;
+            var ping = new UnityEngine.Ping(ip);
+            var timer = Stopwatch.StartNew();
+            while (!ping.isDone && timer.ElapsedMilliseconds < timeoutInMs) { yield return new WaitForSeconds(0.01f); }
+            Assert.IsTrue(ping.isDone);
+            Assert.IsTrue(ping.time >= 0);
+        }
+
+        [UnityTest]
+        public IEnumerator TestGetCurrentPingViaRestFactory() {
             Task<long> pingTask = RestFactory.instance.GetCurrentPing();
             yield return pingTask.AsCoroutine();
             var pingInMs = pingTask.Result;
             Assert.AreNotEqual(-1, pingInMs);
-            Assert.True(0 < pingInMs && pingInMs < 500, "pingInMs=" + pingInMs);
+            Assert.True(0 <= pingInMs && pingInMs < 500, "pingInMs=" + pingInMs);
             Log.d("pingInMs took " + pingInMs + "ms");
         }
 

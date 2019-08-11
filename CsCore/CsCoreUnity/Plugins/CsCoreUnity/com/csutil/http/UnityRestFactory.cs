@@ -16,7 +16,7 @@ namespace com.csutil.http {
         }
 
         public override Task<long> GetCurrentPing(string ipOrUrl = "8.8.8.8", int timeoutInMs = 500) {
-            if (ApplicationV2.platform.IsAnyOf(RuntimePlatform.Android, RuntimePlatform.OSXPlayer)) {
+            if (ApplicationV2.platform.IsAnyOf(RuntimePlatform.Android, RuntimePlatform.OSXPlayer, RuntimePlatform.WindowsPlayer)) {
                 // For Android and MacOs the Unity.Ping seems to not work for all types of ips and urls
                 return base.GetCurrentPing(ipOrUrl, timeoutInMs);
             }
