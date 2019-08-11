@@ -14,8 +14,6 @@ namespace com.csutil.ui {
 
         Task OnLoad(T model);
 
-        Task OnUnload();
-
     }
 
     public static class PresenterExtensions {
@@ -24,7 +22,6 @@ namespace com.csutil.ui {
         /// <returns> A task that can be awaited on, that returns the fully setup presenter </returns>
         public static async Task<Presenter<T>> LoadModelIntoView<T>(this Presenter<T> self, T model) {
             AssertV2.IsNotNull(self.targetView, "presenter.targetView");
-            await self.OnUnload();
             await self.OnLoad(model);
             return self;
         }

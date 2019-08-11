@@ -13,30 +13,34 @@ using UnityEngine.UI;
 
 namespace com.csutil.tests.ui {
 
-    class ExampleUiTest3 {
+    class ExampleUiTest3 : MonoBehaviour {
 
+        private IEnumerator Start() {
+            yield return ExampleUsage3();
+        }
 
         [UnityTest]
         public IEnumerator ExampleUsage3() {
 
             // Create an immutable datastore that will contain the data model in this example:
-            IDataStore<MyDataModel3> store = new DataStore<MyDataModel3>(MainReducer, new MyDataModel3());
+            var log = Middlewares.NewLoggingMiddleware<MyDataModel3>();
+            IDataStore<MyDataModel3> store = new DataStore<MyDataModel3>(MainReducer, new MyDataModel3(), log);
             IoC.inject.SetSingleton(store);
 
             // Create a presenter that connectes the model with the view (the Unity UI):
-            var presenter = new MyUserUi3();
+            var currentUserPresenter = new MyUserUi3();
             // Set the target view by loading it from a prefab and setting the root GO:
-            presenter.targetView = ResourcesV2.LoadPrefab("MyUserUi1");
+            currentUserPresenter.targetView = ResourcesV2.LoadPrefab("MyUserUi1");
             // Connect the model changes with the presenter:
-            presenter.ListenToStoreUpdates(store, state => state.currentUser);
+            currentUserPresenter.ListenToStoreUpdates(store, state => state.currentUser);
 
             // Dispatch a first setUser action to update the UI:
             store.Dispatch(new ActionSetNewUser() { newUser = new MyUser3("Carl", 99) });
             // Delay needed since the UI update simulates a delay too:
-            yield return new WaitForSeconds(0.1f); 
+            yield return new WaitForSeconds(0.1f);
             // Check that the UI was automatically updated:
-            Assert.AreEqual("Carl", presenter.NameUi().text);
-            Assert.AreEqual("99", presenter.AgeUi().text);
+            Assert.AreEqual("Carl", currentUserPresenter.NameUi().text);
+            Assert.AreEqual("99", currentUserPresenter.AgeUi().text);
 
             // Simulate that the user changed the model via the UI:
             store.Dispatch(new ActionUpdateUser() {
@@ -44,10 +48,10 @@ namespace com.csutil.tests.ui {
                 newValues = new MyUser3("Paul", 0)
             });
             // Delay needed since the UI update simulates a delay too:
-            yield return new WaitForSeconds(0.1f); 
+            yield return new WaitForSeconds(0.1f);
             // Check that the UI was automatically updated:
-            Assert.AreEqual("Paul", presenter.NameUi().text);
-            Assert.AreEqual("0", presenter.AgeUi().text);
+            Assert.AreEqual("Paul", currentUserPresenter.NameUi().text);
+            Assert.AreEqual("0", currentUserPresenter.AgeUi().text);
 
         }
 
@@ -83,8 +87,6 @@ namespace com.csutil.tests.ui {
 
             public InputField NameUi() { return links.Get<InputField>("Name"); }
             public InputField AgeUi() { return links.Get<InputField>("Age"); }
-
-            public async Task OnUnload() { }
 
         }
 

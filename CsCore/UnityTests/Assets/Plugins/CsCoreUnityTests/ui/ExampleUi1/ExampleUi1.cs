@@ -72,11 +72,6 @@ namespace com.csutil.tests.ui {
             public InputField AgeInputField() { return links.Get<InputField>("Age"); }
             public InputField NameInputField() { return links.Get<InputField>("Name"); }
 
-            public async Task OnUnload() {
-                if (links != null) { links.Clear(); }
-                links = null;
-            }
-
         }
 
     }
