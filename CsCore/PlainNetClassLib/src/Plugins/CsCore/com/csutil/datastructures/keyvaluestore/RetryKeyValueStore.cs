@@ -12,6 +12,11 @@ namespace com.csutil.keyvaluestore {
         public int maxNrOfRetries;
         public int maxDelayInMs = -1;
         public int initialExponent = 0;
+
+        /// <summary> 
+        /// Every time the retry store catches an error and retries the error is send here e.g. for 
+        /// logging or re-throwing (to cancel retries on certain errors) 
+        /// </summary>
         public Action<Exception> onError;
 
         public RetryKeyValueStore(IKeyValueStore wrappedStore, int maxNrOfRetries) {
