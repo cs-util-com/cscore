@@ -84,7 +84,7 @@ namespace com.csutil.tests.async {
 
             });
             var finalTimingResult = timer.ElapsedMilliseconds;
-            Assert.True(finalTimingResult < 1000, "finalTimingResult=" + finalTimingResult);
+            Assert.True(finalTimingResult < 2000, "finalTimingResult=" + finalTimingResult);
         }
 
         private async Task SomeTaskThatFailsEveryTime() {
