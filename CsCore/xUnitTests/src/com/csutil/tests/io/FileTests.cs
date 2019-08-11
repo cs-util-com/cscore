@@ -64,22 +64,24 @@ namespace com.csutil.tests {
             Assert.Equal(dir1.FullPath(), alsoDir1.FullPath());
 
             // Test deleting and creating Dir 1:
-            dir1.DeleteV2();
+            dir1.DeleteV2(); // Make sure dir does not yet exist from previous tests
             Assert.False(dir1.IsNotNullAndExists());
             Assert.False(dir1.Exists);
             Assert.True(dir1.CreateV2().Exists);
             Assert.True(dir1.IsNotNullAndExists());
             dir1.Create(); // Should do nothing and not throw an exception
 
+            var nameOfChildDir1 = "ChildDir 1";
+            var nameOfTestFile1InChildDir1 = "Test file 1";
             // Test creating sub dirs and files:
-            var subDir = dir1.CreateSubdirectory("ChildDir 1");
-            SaveAndLoadTextToFile(subDir.GetChild("Test file 1"), textToSave: "Test 123");
+            var subDir = dir1.CreateSubdirectory(nameOfChildDir1);
+            SaveAndLoadTextToFile(subDir.GetChild(nameOfTestFile1InChildDir1), textToSave: "Test 123");
             SaveAndLoadTextToFile(subDir.GetChild("Test file 2.txt"), textToSave: "Test 123");
 
             { // Test moving folders:
                 var oldPath = dir1.FullPath();
                 var dir2 = rootDir.GetChildDir("TestDir 2");
-                dir2.DeleteV2();
+                dir2.DeleteV2(); // Make sure dir does not yet exist from previous tests
                 dir1.MoveToV2(dir2);
                 Assert.True(dir2.IsNotNullAndExists());
                 Assert.Equal(dir2.FullPath(), dir1.FullPath());
@@ -103,7 +105,25 @@ namespace com.csutil.tests {
                 Assert.True(dir4.IsNotNullAndExists(), "dir=" + dir4.FullPath());
                 Assert.NotEqual(dir4.FullPath(), dir1.FullPath());
                 Assert.True(new DirectoryInfo(oldPath).Exists);
-                dir4.DeleteV2(); // Cleanup after test
+
+                // Check that the files were really copied from dir1 to dir4:
+                var dir4ChildDir1 = dir4.GetChildDir(nameOfChildDir1);
+                var testFile1InDir1ChildDir4 = dir4ChildDir1.GetChild(nameOfTestFile1InChildDir1);
+                Assert.True(testFile1InDir1ChildDir4.IsNotNullAndExists());
+                var newTextInTestFile1 = "Some new text for txt file in dir4";
+                testFile1InDir1ChildDir4.SaveAsText(newTextInTestFile1);
+
+                // A second copyTo now that dir4 exists should throw an exception:
+                Assert.Throws<ArgumentException>(() => { dir1.CopyTo(dir4, replaceExisting: false); });
+                // Replacing only works when replaceExisting is set to true:
+                dir1.CopyTo(dir4, replaceExisting: true);
+                // The path to the testFile1 should still exist after copy:
+                Assert.True(testFile1InDir1ChildDir4.IsNotNullAndExists());
+                // The text should not be newTextInTestFile1 anymore after its replaced by the original again:
+                Assert.NotEqual(newTextInTestFile1, testFile1InDir1ChildDir4.LoadAs<string>());
+
+                Assert.True(dir4.DeleteV2()); // Delete dir4 again
+                Assert.False(dir4.DeleteV2()); // dir4 now does not exist anymore so false is returned
             }
             { // Test renaming folders:
                 var newName = "TestDir 5";

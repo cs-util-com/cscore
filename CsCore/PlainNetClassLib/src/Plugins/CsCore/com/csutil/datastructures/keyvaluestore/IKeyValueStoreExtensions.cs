@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 namespace com.csutil.keyvaluestore {
+
     public static class IKeyValueStoreExtensions {
 
         public static T WithFallbackStore<T>(this T self, IKeyValueStore fallbackStore) where T : IKeyValueStore {
@@ -35,15 +36,16 @@ namespace com.csutil.keyvaluestore {
             if (self != null) {
                 var storeOldValue = await self.Set(key, newValue);
                 if (storeOldValue != null) {
+                    if (oldValue == null) { oldValue = storeOldValue; }
                     if (storeOldValue != oldValue) {
                         AssertV2.IsTrue(storeOldValue.Equals(oldValue), "oldValue != store.oldValue, store value newer?"
                             + "\n storeOldValue=" + storeOldValue + "\n oldValue=" + oldValue);
                     }
-                    if (oldValue == null) { oldValue = storeOldValue; }
                 }
             }
             return oldValue;
         }
 
     }
+
 }

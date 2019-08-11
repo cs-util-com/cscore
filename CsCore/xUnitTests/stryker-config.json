@@ -1,7 +1,13 @@
 {
 	"stryker-config": {
-		"reporters": ["All"],
+		"reporters": [
+			"All"
+		],
 		"log-file": true,
-		"timeout-ms":15000
+		"max-concurrent-test-runners": 1,
+		"timeout-ms": 15000,
+		"excluded-mutations": [
+			"string"
+		]
 	}
 }

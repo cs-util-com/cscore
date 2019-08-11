@@ -1,6 +1,5 @@
 using System;
 using System.Diagnostics;
-using com.csutil.io;
 
 namespace com.csutil {
     public class StopwatchV2 : Stopwatch {

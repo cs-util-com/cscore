@@ -7,11 +7,17 @@ using System.Text;
 
 namespace com.csutil.http {
 
-    public class Headers : IEnumerable<KeyValuePair<string, string>> {
+    public class Headers : IEnumerable<KeyValuePair<string, IEnumerable<string>>> {
 
-        private Dictionary<string, string> headers = new Dictionary<string, string>();
+        private Dictionary<string, IEnumerable<string>> headers = new Dictionary<string, IEnumerable<string>>();
 
-        public Headers(Dictionary<string, string> headers) { foreach (var e in headers) { this.headers.Add(e.Key.ToLower(), e.Value); } }
+        public Headers(IEnumerable<KeyValuePair<string, string>> headers) {
+            foreach (var e in headers) { this.headers.Add(e.Key.ToLower(), new string[] { e.Value }); }
+        }
+
+        public Headers(IEnumerable<KeyValuePair<string, IEnumerable<string>>> headers) {
+            foreach (var e in headers) { this.headers.Add(e.Key.ToLower(), e.Value); }
+        }
 
         public string GetFileNameOnServer() {
             var name = ExtractFileName(GetHeaderValue("content-disposition", null));
@@ -42,14 +48,20 @@ namespace com.csutil.http {
                 string v = GetHeaderValue("last-modified", null);
                 if (v == null) { return fallbackValue; }
                 return DateTimeParser.NewDateTimeFromUnixTimestamp(long.Parse(v));
-            }
-            catch (Exception) {
+            } catch (Exception) {
                 return fallbackValue;
             }
         }
 
+        public IEnumerable<string> GetHeaderValues(string headerName) {
+            return headers.GetValue(headerName.ToLower(), null);
+        }
+
         public string GetHeaderValue(string headerName, string fallbackValue) {
-            return headers.GetValue(headerName.ToLower(), fallbackValue);
+            var headerValues = GetHeaderValues(headerName);
+            if (headerValues == null) { return fallbackValue; }
+            AssertV2.AreEqual(1, headerValues.Count());
+            return headerValues.First();
         }
 
         private static string ExtractFileName(string headerWithFilename) {
@@ -74,7 +86,7 @@ namespace com.csutil.http {
 
         public string GetContentMimeType(string fallbackValue) { return GetHeaderValue("Content-Type", fallbackValue); }
 
-        public IEnumerator<KeyValuePair<string, string>> GetEnumerator() { return headers.GetEnumerator(); }
+        public IEnumerator<KeyValuePair<string, IEnumerable<string>>> GetEnumerator() { return headers.GetEnumerator(); }
 
         IEnumerator IEnumerable.GetEnumerator() { return headers.GetEnumerator(); }
     }

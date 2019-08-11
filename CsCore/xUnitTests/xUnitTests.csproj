@@ -12,13 +12,6 @@
     <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.1" />
   </ItemGroup>
 
-  <!-- Mutation testing via https://github.com/stryker-mutator/stryker-net -->
-  <ItemGroup>
-      <!-- NuGet package: https://www.nuget.org/packages/StrykerMutator.DotNetCoreCli/ -->
-      <DotNetCliToolReference Include="StrykerMutator.DotNetCoreCli" Version="0.8.3" />
-      <PackageReference Include="StrykerMutator.DotNetCoreCli" Version="0.8.3" />
-  </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\PlainNetClassLib\PlainNetClassLib.csproj" />
   </ItemGroup>

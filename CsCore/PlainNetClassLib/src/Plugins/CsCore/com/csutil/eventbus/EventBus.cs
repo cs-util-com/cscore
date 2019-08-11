@@ -16,6 +16,9 @@ namespace com.csutil {
 
         public ConcurrentQueue<string> eventHistory { get; set; }
 
+        /// <summary> If true all erros during publish are not only logged but rethrown. Will be true in DEBUG mode </summary>
+        public bool throwPublishErrors = false;
+
         /// <summary> sync subscribing and publishing to not happen at the same time </summary>
         private object threadLock = new object();
 
@@ -24,6 +27,9 @@ namespace com.csutil {
 
         public EventBus() {
             eventHistory = new ConcurrentQueue<string>();
+#if DEBUG // In debug mode throw all publish errors:
+            throwPublishErrors = true;
+#endif
         }
 
         public void Subscribe(object subscriber, string eventName, Delegate callback) {
@@ -73,8 +79,8 @@ namespace com.csutil {
                     return subscriberDelegates.Map(subscriberDelegate => {
                         try {
                             object result;
-                            if (subscriberDelegate.DynamicInvokeV2(args, out result)) { return result; }
-                        } catch (Exception e) { Log.e(e); }
+                            if (subscriberDelegate.DynamicInvokeV2(args, out result, throwPublishErrors)) { return result; }
+                        } catch (Exception e) { if (throwPublishErrors) { throw e; } else { Log.e(e); } }
                         return null;
                     });
                 }

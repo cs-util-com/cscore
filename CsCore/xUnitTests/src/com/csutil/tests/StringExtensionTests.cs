@@ -26,6 +26,9 @@ namespace com.csutil.tests {
             Assert.Equal("bc", myString.Substring(1, "d", includeEnd: true));
             Assert.Equal("bc", myString.Substring(1, "c", includeEnd: true));
             Assert.Equal("ab", myString.Substring("c", includeEnd: false));
+            Assert.Equal("bc", myString.Substring(1, "abc", includeEnd: true));
+            Assert.Equal("bc", myString.Substring(1, "abc", includeEnd: false));
+            Assert.Equal("bc", myString.Substring(1, "d", includeEnd: false));
 
             // myString.SubstringAfter(..) examples:
             myString = "[{a}]-[{b}]";
@@ -62,6 +65,10 @@ namespace com.csutil.tests {
             Assert.True("anna123".IsRegexMatch(RegexTemplates.USERNAME));
             Assert.True("aa@bb.com".IsRegexMatch(RegexTemplates.EMAIL_ADDRESS));
             Assert.False("a@a@bb.com".IsRegexMatch(RegexTemplates.EMAIL_ADDRESS));
+
+            string nullString = null;
+            Assert.False("x".IsRegexMatch(nullString));
+            Assert.False(nullString.IsRegexMatch("x"));
 
         }
 

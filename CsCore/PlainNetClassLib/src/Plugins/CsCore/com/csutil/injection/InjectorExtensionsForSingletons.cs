@@ -39,7 +39,7 @@ namespace com.csutil {
                 if (singleton != null) { return singleton; }
                 singleton = createSingletonInstance();
                 if (ReferenceEquals(null, singleton) || "null".Equals("" + singleton)) {
-                    throw new Exception("Could not instantiate " + typeof(T));
+                    throw new ArgumentNullException("The created singleton instance was null for type " + typeof(T));
                 }
                 return self.SetSingleton(caller, singleton);
             }

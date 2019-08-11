@@ -1,9 +1,14 @@
 using System;
 using System.Collections.Immutable;
+using System.Threading.Tasks;
 
 namespace com.csutil.model.immutable {
 
     public static class ImmutableExtensions {
+
+        public static Action AddStateChangeListener<T, S>(this IDataStore<T> s, Func<T, S> getSubState, Func<S, Task> onChanged) {
+            return AddStateChangeListener(s, getSubState, (subState) => { onChanged(subState); });
+        }
 
         public static Action AddStateChangeListener<T, S>(this IDataStore<T> s, Func<T, S> getSubState, Action<S> onChanged) {
             var oldState = getSubState(s.GetState());

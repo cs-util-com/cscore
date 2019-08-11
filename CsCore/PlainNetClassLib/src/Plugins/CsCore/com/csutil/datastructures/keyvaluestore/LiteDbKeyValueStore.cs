@@ -81,14 +81,14 @@ namespace com.csutil.keyvaluestore {
         }
 
         public async Task<IEnumerable<string>> GetAllKeys() {
-            IEnumerable<string> result = collection.FindAll().Map(x => GetKeyFromBsonDoc(x));
+            var result = collection.FindAll().Map(x => GetKeyFromBsonDoc(x));
             return await fallbackStore.ConcatAllKeys(result);
         }
 
         private static string GetKeyFromBsonDoc(BsonDocument x) {
             var key = x.Keys.First();
             AssertV2.AreEqual("_id", key);
-            return key;
+            return x[key].AsString;
         }
 
     }

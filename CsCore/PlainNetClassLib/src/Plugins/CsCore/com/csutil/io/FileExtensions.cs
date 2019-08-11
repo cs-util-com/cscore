@@ -115,7 +115,9 @@ namespace com.csutil {
         }
 
         public static void CopyTo(this DirectoryInfo self, DirectoryInfo target, bool replaceExisting = false) {
-            if (!replaceExisting && target.IsNotNullAndExists()) { throw Log.e("Cant copy to existing folder " + target); }
+            if (!replaceExisting && target.IsNotNullAndExists()) {
+                throw new ArgumentException("Cant copy to existing folder " + target);
+            }
             var sourcePath = self.FullPath();
             var targetPath = target.FullPath();
             // From https://stackoverflow.com/a/3822913/165106
@@ -125,7 +127,7 @@ namespace com.csutil {
             }
             //Copy all the files & Replaces any files with the same name
             foreach (string newPath in Directory.GetFiles(sourcePath, "*", SearchOption.AllDirectories)) {
-                File.Copy(newPath, newPath.Replace(sourcePath, targetPath), true);
+                File.Copy(newPath, newPath.Replace(sourcePath, targetPath), overwrite: true);
             }
             target.Refresh();
         }

@@ -1,11 +1,17 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using com.csutil.async;
 using Xunit;
 
 namespace com.csutil.tests.async {
+
     public class EventHandlerTests {
+
+
+        public EventHandlerTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
         [Fact]
         public async void ThrottledDebounceTest1() {
@@ -23,14 +29,14 @@ namespace com.csutil.tests.async {
             throttledAction(this, "bad");
             throttledAction(this, "good");
             Assert.Equal(1, counter);
-            await Task.Delay(50);
+            for (int i = 0; i < 20; i++) { await Task.Delay(100); if (counter >= 2) { break; } }
             Assert.Equal(2, counter);
 
             throttledAction(this, "good");
             throttledAction(this, "bad");
             throttledAction(this, "good");
             Assert.Equal(3, counter);
-            await Task.Delay(1000);
+            for (int i = 0; i < 20; i++) { await Task.Delay(100); if (counter >= 4) { break; } }
             Assert.Equal(4, counter);
         }
 
@@ -49,10 +55,43 @@ namespace com.csutil.tests.async {
                 tasks.Add(Task.Run(() => { throttledAction(this, myIntParam); }));
             }
             await Task.WhenAll(tasks.ToArray());
-            await Task.Delay(100);
+            await Task.Delay(1000);
             Assert.Equal(2, counter);
+        }
 
+        [Fact]
+        public async void ExponentialBackoffExample1() {
+            Stopwatch timer = Stopwatch.StartNew();
+            var finalTimingResult = await TaskHelper.TryWithExponentialBackoff<long>(async () => {
+                await Task.Delay(5);
+                Log.d("Task exec at " + timer.ElapsedMilliseconds);
+                // In the first second of the test simulate errors:
+                if (timer.ElapsedMilliseconds < 1000) { throw new TimeoutException("e.g. some network error"); }
+                return timer.ElapsedMilliseconds;
+            });
+            Assert.True(1000 < finalTimingResult && finalTimingResult < 2000, "finalTimingResult=" + finalTimingResult);
+        }
+
+        [Fact]
+        public async void ExponentialBackoffExample2() {
+            Stopwatch timer = Stopwatch.StartNew();
+            await Assert.ThrowsAsync<OperationCanceledException>(async () => {
+
+                // Try 5 times to execute to run someTaskThatFailsEveryTime:
+                await TaskHelper.TryWithExponentialBackoff(SomeTaskThatFailsEveryTime, (e) => {
+                    Assert.IsType<TimeoutException>(e); // Errors could be logged or based on the type rethrown
+                }, maxNrOfRetries: 5, maxDelayInMs: 200); // The exponential backoff will not be larger then 200ms
+
+            });
+            var finalTimingResult = timer.ElapsedMilliseconds;
+            Assert.True(finalTimingResult < 2000, "finalTimingResult=" + finalTimingResult);
+        }
+
+        private async Task SomeTaskThatFailsEveryTime() {
+            await Task.Delay(5);
+            throw new TimeoutException("e.g. some network error");
         }
 
     }
+
 }

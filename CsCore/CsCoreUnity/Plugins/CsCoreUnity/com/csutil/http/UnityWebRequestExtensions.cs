@@ -101,7 +101,12 @@ namespace com.csutil {
         }
 
         public static UnityWebRequest SetRequestHeaders(this UnityWebRequest self, Headers headersToAdd) {
-            if (!headersToAdd.IsNullOrEmpty()) { foreach (var h in headersToAdd) { self.SetRequestHeader(h.Key, h.Value); } }
+            if (!headersToAdd.IsNullOrEmpty()) {
+                foreach (var h in headersToAdd) {
+                    AssertV2.AreEqual(1, h.Value.Count());
+                    self.SetRequestHeader(h.Key, h.Value.First());
+                }
+            }
             return self;
         }
 

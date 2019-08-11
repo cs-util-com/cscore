@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 
 namespace com.csutil {
+
     public static class StateMachine {
 
         private const string TRANSITION_EVENT = "StateMachineTransition_";
@@ -39,4 +40,5 @@ namespace com.csutil {
         }
 
     }
+
 }

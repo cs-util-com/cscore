@@ -10,6 +10,8 @@ namespace com.csutil.tests.http {
 
     public class RestTests {
 
+        public RestTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
+
         [Fact]
         public async void ExampleUsage1() {
             RestRequest request = new Uri("https://httpbin.org/get").SendGET();
@@ -25,11 +27,10 @@ namespace com.csutil.tests.http {
 
         [Fact]
         public async void TestSendGET1() {
-            await new Uri("https://httpbin.org/get").SendGET().GetResult<HttpBinGetResp>((x) => {
-                Assert.NotNull(x);
-                Log.d("Your external IP is " + x.origin);
-                Assert.NotNull(x.origin);
-            });
+            var x = await new Uri("https://httpbin.org/get").SendGET().GetResult<HttpBinGetResp>();
+            Assert.NotNull(x);
+            Log.d("Your external IP is " + x.origin);
+            Assert.NotNull(x.origin);
         }
 
         [Fact]
@@ -42,6 +43,8 @@ namespace com.csutil.tests.http {
         public async void TestRestFactory1() {
             RestRequest request = RestFactory.instance.SendRequest(new Uri("https://httpbin.org/get"), HttpMethod.Get);
             await ValidateResponse(request);
+            var resultHeaders = await request.GetResultHeaders();
+            Assert.NotEqual(0, resultHeaders.Count());
         }
 
         private static async Task ValidateResponse(RestRequest request) {
@@ -67,7 +70,12 @@ namespace com.csutil.tests.http {
         public static async void TestGetCurrentPing() {
             var pingInMs = await RestFactory.instance.GetCurrentPing();
             Assert.NotEqual(-1, pingInMs);
-            Assert.True(0 < pingInMs && pingInMs < 500, "pingInMs=" + pingInMs);
+            Assert.True(0 <= pingInMs && pingInMs < 500, "pingInMs=" + pingInMs);
+
+            var hasInet = false;
+            var hasNoInet = false;
+            await RestFactory.instance.CheckInetConnection(() => { hasInet = true; }, () => { hasNoInet = true; });
+            Assert.True(hasInet || hasNoInet); // Any of the 2 callbacks was triggered
         }
 
     }
