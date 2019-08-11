@@ -1,8 +1,7 @@
 {
     "name": "CsCoreUnity",
     "references": [
-        "CsCore",
-        "CsCoreNet3.5Compat"
+        "CsCore"
     ],
     "optionalUnityReferences": [],
     "includePlatforms": [],
