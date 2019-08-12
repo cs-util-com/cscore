@@ -1,0 +1,17 @@
+{
+    "readme": "see https://www.strathweb.com/2017/01/c-code-formatting-settings-in-vs-code-and-omnisharp/",
+    "FormattingOptions": {
+        "NewLinesForBracesInTypes": false,
+        "NewLinesForBracesInMethods": false,
+        "NewLinesForBracesInProperties": false,
+        "NewLinesForBracesInAccessors": false,
+        "NewLinesForBracesInAnonymousMethods": false,
+        "NewLinesForBracesInControlBlocks": false,
+        "NewLinesForBracesInAnonymousTypes": false,
+        "NewLinesForBracesInObjectCollectionArrayInitializers": false,
+        "NewLinesForBracesInLambdaExpressionBody": false,
+        "NewLineForElse": false,
+        "NewLineForCatch": false,
+        "NewLineForFinally": false
+    }
+}
