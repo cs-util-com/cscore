@@ -1,9 +1,12 @@
+using com.csutil;
 using System;
 
-namespace com.csutil {
-    public class MyClass1 {
+namespace com.AaaaaRenameMeAaaaa {
+
+    public class AaaaaRenameMeAaaaa_ExampleClass1 {
+
         public string name;
-        public MyClass1(string name) { this.name = name; }
+        public AaaaaRenameMeAaaaa_ExampleClass1(string name) { this.name = name; }
 
         public bool isTrue() {
             object x = "'I am x'";
@@ -14,5 +17,7 @@ namespace com.csutil {
             Log.d("Test");
             return false;
         }
+
     }
+
 }

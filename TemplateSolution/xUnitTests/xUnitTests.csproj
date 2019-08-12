@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\PlainNetClassLib\PlainNetClasses.csproj" />
+    <ProjectReference Include="..\PlainNetClassLib\AaaaaRenameMeAaaaa_PlainNetClasses.csproj" />
   </ItemGroup>
 
 </Project>
