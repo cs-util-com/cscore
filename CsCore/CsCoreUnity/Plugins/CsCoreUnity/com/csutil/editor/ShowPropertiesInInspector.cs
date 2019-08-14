@@ -9,8 +9,8 @@ namespace com.csutil.editor {
 
     /// <summary> 
     /// A custom inspector that automatically shows all public properties in the inspector 
-    /// If the compile constant DISABLE_CSUTIL_PROPERTY_MAGIC is set to true a property must have
-    /// the [ShowInInspector] annotation to show in the Unity inspector
+    /// If the compile constant ENABLE_CSUTIL_PROPERTY_MAGIC is NOT set to true manually
+    /// a property must have the [ShowInInspector] annotation to show in the Unity inspector
     /// </summary>
     internal class ShowPropertiesInInspector {
         // Initial idea from http://wiki.unity3d.com/index.php/Expose_properties_in_inspector
@@ -24,7 +24,7 @@ namespace com.csutil.editor {
                 var type = SerializedPropertyType.Integer;
                 if (GetPropertyType(property, out type)) {
                     if (HasAttribute<HideInInspector>(property)) { continue; }
-#if DISABLE_CSUTIL_PROPERTY_MAGIC
+#if !ENABLE_CSUTIL_PROPERTY_MAGIC
                     if (!HasAttribute<ShowInInspectorAttribute>(property)) { continue; }
 #endif
                     propertyInspectorUis.Add(new ShowPropertiesInInspector(obj, property, type));
@@ -113,7 +113,8 @@ namespace com.csutil.editor {
         private void DrawInInspector(GUILayoutOption[] o) {
             EditorGUILayout.BeginHorizontal(o);
             GUI.enabled = PropertyHasASetter();
-            DrawEditorLayoutUi(o);
+            try { DrawEditorLayoutUi(o); }
+            catch (Exception e) { Log.w("Draw error for property " + propertyName + ": " + e); }
             GUI.enabled = true;
             EditorGUILayout.EndHorizontal();
         }
@@ -121,37 +122,39 @@ namespace com.csutil.editor {
         private void DrawEditorLayoutUi(GUILayoutOption[] o) {
             switch (propertyType) {
                 case SerializedPropertyType.Integer:
-                    SetValue(EditorGUILayout.IntField(propertyName, (int)GetValue(), o));
+                    SetValue(EditorGUILayout.IntField(GetLabelForProp(), (int)GetValue(), o));
                     break;
                 case SerializedPropertyType.Float:
-                    SetValue(EditorGUILayout.FloatField(propertyName, (float)GetValue(), o));
+                    SetValue(EditorGUILayout.FloatField(GetLabelForProp(), (float)GetValue(), o));
                     break;
                 case SerializedPropertyType.Boolean:
-                    SetValue(EditorGUILayout.Toggle(propertyName, (bool)GetValue(), o));
+                    SetValue(EditorGUILayout.Toggle(GetLabelForProp(), (bool)GetValue(), o));
                     break;
                 case SerializedPropertyType.String:
-                    SetValue(EditorGUILayout.TextField(propertyName, (String)GetValue(), o));
+                    SetValue(EditorGUILayout.TextField(GetLabelForProp(), (String)GetValue(), o));
                     break;
                 case SerializedPropertyType.Vector2:
-                    SetValue(EditorGUILayout.Vector2Field(propertyName, (Vector2)GetValue(), o));
+                    SetValue(EditorGUILayout.Vector2Field(GetLabelForProp(), (Vector2)GetValue(), o));
                     break;
                 case SerializedPropertyType.Vector3:
-                    SetValue(EditorGUILayout.Vector3Field(propertyName, (Vector3)GetValue(), o));
+                    SetValue(EditorGUILayout.Vector3Field(GetLabelForProp(), (Vector3)GetValue(), o));
                     break;
                 case SerializedPropertyType.Enum:
-                    SetValue(EditorGUILayout.EnumPopup(propertyName, (Enum)GetValue(), o));
+                    SetValue(EditorGUILayout.EnumPopup(GetLabelForProp(), (Enum)GetValue(), o));
                     break;
                 case SerializedPropertyType.ObjectReference:
                     var v = GetValue() as UnityEngine.Object;
-                    try { 
-                        SetValue(EditorGUILayout.ObjectField(propertyName, v, GetPropertyType(), true, o));
-                    } catch { }
+                    try {
+                        SetValue(EditorGUILayout.ObjectField(GetLabelForProp(), v, GetPropertyType(), true, o));
+                    }
+                    catch { }
                     break;
                 default:
                     break;
             }
         }
 
+        private string GetLabelForProp() { return "Prop.:" + propertyName; }
     }
 
 }
