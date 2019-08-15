@@ -22,6 +22,11 @@ namespace com.csutil {
             return self.Where(predicate);
         }
 
+        public static void ForEach<T>(this IEnumerable<T> self, Action<T> predicate) {
+            AssertV2.IsNotNull(self, "IEnumerable<" + typeof(T) + ">");
+            foreach (var item in self) { predicate(item); }
+        }
+
         public static bool IsNullOrEmpty<T>(this IEnumerable<T> self) { return self == null || !self.Any(); }
 
         public static string ToStringV2(this IEnumerable<string> args, string bracket1 = "[", string bracket2 = "]") {
