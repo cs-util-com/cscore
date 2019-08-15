@@ -27,7 +27,7 @@ namespace com.csutil.ui {
         }
 
         public static void ListenToStoreUpdates<T, S>(this Presenter<S> self, IDataStore<T> store, Func<T, S> getSubState) {
-            store.AddStateChangeListener(getSubState, (newValue) => { return self.LoadModelIntoView(newValue); });
+            store.AddAsyncStateChangeListener(getSubState, (newValue) => { return self.LoadModelIntoView(newValue); });
         }
 
     }
