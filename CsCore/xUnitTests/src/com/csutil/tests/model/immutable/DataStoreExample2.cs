@@ -287,22 +287,18 @@ namespace com.csutil.tests.model.immutable {
                     var isTargetUser = a.IsTargetUser(user);
                     var name = user.name.Mutate(isTargetUser, a, ReduceUserName, ref userChanged);
                     var age = user.age.Mutate(isTargetUser, a, ReduceUserAge, ref userChanged);
-                    var contacts = ReduceContacts(user, isTargetUser, a, ref userChanged);
+                    var contacts = user.MutateField(user.contacts, a, ReduceContacts, ref userChanged);
                     if (userChanged) { return new MyUser1(name, age, contacts); }
                 }
                 return user; // None of the fields changed, old user can be returned
             }
 
-            private static ImmutableList<MyUser1> ReduceContacts(MyUser1 user, bool isTargetUser, ActionOnUser action, ref bool changed) {
-                if (isTargetUser && action is ActionOnUser.AddContact a) {
-                    changed = true;
-                    return user.contacts.AddOrCreate(a.newContact);
+            private static ImmutableList<MyUser1> ReduceContacts(MyUser1 user, ImmutableList<MyUser1> contacts, object action) {
+                contacts = contacts.MutateEntries(action, ReduceUser);
+                if (action is ActionOnUser.AddContact a && a.IsTargetUser(user)) {
+                    return ImmutableExtensions.AddOrCreate<MyUser1>(contacts, (MyUser1)a.newContact);
                 }
-                return user.contacts.Mutate(action, ReduceEachContact, ref changed);
-            }
-
-            private static ImmutableList<MyUser1> ReduceEachContact(ImmutableList<MyUser1> previousState, object action) {
-                return previousState.MutateEntries(action, ReduceUser);
+                return contacts;
             }
 
             private static string ReduceUserName(string oldName, object action) {

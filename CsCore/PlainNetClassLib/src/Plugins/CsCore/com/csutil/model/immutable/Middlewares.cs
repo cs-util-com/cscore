@@ -21,6 +21,7 @@ namespace com.csutil.model.immutable {
                 Log.MethodEntered("store=" + store);
                 return (Dispatcher innerDispatcher) => {
                     Dispatcher loggingDispatcher = (action) => {
+                        if (action is IsValid v) { AssertV2.IsTrue(v.IsValid(), "Action invalid"); }
                         T previousState = store.GetState();
                         var returnedAction = innerDispatcher(action);
                         T newState = store.GetState();
