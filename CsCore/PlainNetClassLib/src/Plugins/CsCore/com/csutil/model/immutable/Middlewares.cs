@@ -1,4 +1,6 @@
 using System;
+using JsonDiffPatchDotNet;
+using Newtonsoft.Json.Linq;
 
 namespace com.csutil.model.immutable {
     public class Middlewares {
@@ -21,20 +23,27 @@ namespace com.csutil.model.immutable {
                 Log.MethodEntered("store=" + store);
                 return (Dispatcher innerDispatcher) => {
                     Dispatcher loggingDispatcher = (action) => {
-                        if (action is IsValid v) { AssertV2.IsTrue(v.IsValid(), "Action invalid"); }
+                        if (action is IsValid v && !v.IsValid()) {
+                            Log.e("Invalid action: " + asJson(action.GetType().Name, action));
+                        }
                         T previousState = store.GetState();
                         var returnedAction = innerDispatcher(action);
                         T newState = store.GetState();
                         if (Object.Equals(previousState, newState)) {
                             Log.w("The action  " + action + " was not handled by any of the reducers! Store=" + store);
                         } else {
-                            Log.d(asJson("previousState", previousState), asJson("" + action.GetType(), action), asJson("newState", newState));
+                            ShowChanges(action, previousState, newState);
                         }
                         return returnedAction;
                     };
                     return loggingDispatcher;
                 };
             };
+        }
+
+        private static void ShowChanges<T>(object action, T previousState, T newState) {
+            var diff = new JsonDiffPatch().Diff(JToken.FromObject(previousState), JToken.FromObject(newState));
+            Log.d(asJson("" + action.GetType().Name, action), asJson("previousState -> newState diff", diff));
         }
 
         private static string asJson(string varName, object result) { return varName + "=" + JsonWriter.AsPrettyString(result); }
