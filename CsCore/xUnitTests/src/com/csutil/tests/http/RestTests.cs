@@ -44,7 +44,7 @@ namespace com.csutil.tests.http {
             RestRequest request = RestFactory.instance.SendRequest(new Uri("https://httpbin.org/get"), HttpMethod.Get);
             await ValidateResponse(request);
             var resultHeaders = await request.GetResultHeaders();
-            Assert.NotEqual(0, resultHeaders.Count());
+            Assert.NotEmpty(resultHeaders);
         }
 
         private static async Task ValidateResponse(RestRequest request) {

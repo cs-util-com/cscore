@@ -1,16 +1,20 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using com.csutil.datastructures;
 using com.csutil.encryption;
 using com.csutil.model;
 using com.csutil.random;
+using DiffMatchPatch;
 using Xunit;
 
 namespace com.csutil.tests {
 
     public class StringExtensionTests {
+
+        public StringExtensionTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
         [Fact]
         public void StringExtension_Examples() {
@@ -92,6 +96,30 @@ namespace com.csutil.tests {
             Assert.Throws<CryptographicException>(() => {
                 Assert.NotEqual(myString, myEncryptedString.Decrypt("124"));
             });
+
+        }
+
+        [Fact]
+        public void StringDiffMatchPatch_Examples() {
+
+            var originalText = "Hi, im a very long text";
+            var editedText_1 = "Hi, i'm a very long text!";
+            var editedText_2 = "Hi, im not such a long text";
+            var expectedText = "Hi, i'm not such a long text!";
+
+            var merge = MergeText.Merge(originalText, editedText_1, editedText_2);
+            Assert.Equal(expectedText, merge.mergeResult);
+            foreach (var patch in merge.patches) { Assert.True(patch.Value); } // All patches were successful
+
+            // diff_match_patch can also provide a detailed difference analysis:
+            diff_match_patch dmp = new diff_match_patch();
+            List<Diff> diff = dmp.diff_main(originalText, editedText_1);
+            // The first section until the ' was unchanged:
+            Assert.Equal("Hi, i", diff.First().text);
+            Assert.Equal(Operation.EQUAL, diff.First().operation);
+            // The last change was the insert of a !:
+            Assert.Equal("!", diff.Last().text);
+            Assert.Equal(Operation.INSERT, diff.Last().operation);
 
         }
 

@@ -42,6 +42,10 @@ namespace com.csutil {
             return r;
         }
 
+        public static Dictionary<K, V> ToDictionary<K, V>(this IEnumerable<K> keys, IEnumerable<V> values) {
+            return keys.Zip(values, (key, value) => new KeyValuePair<K, V>(key, value)).ToDictionary(p => p.Key, p => p.Value);
+        }
+
     }
 
 }
