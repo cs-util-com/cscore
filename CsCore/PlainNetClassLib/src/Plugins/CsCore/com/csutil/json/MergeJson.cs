@@ -21,7 +21,7 @@ namespace com.csutil {
             res.mergeOf2Into1 = self.Patch(res.variant1, res.patch2);
             res.patch1 = self.Diff(res.original, res.variant1);
             res.mergeOf1Into2 = self.Patch(res.variant2, res.patch1);
-            if (!res.mergeOf2Into1.Equals(res.mergeOf1Into2)) {
+            if (!JToken.DeepEquals(res.mergeOf2Into1, res.mergeOf1Into2)) {
                 res.conflicts = self.Diff(res.mergeOf1Into2, res.mergeOf2Into1);
             }
             return res;
@@ -35,33 +35,52 @@ namespace com.csutil {
             internal JToken mergeOf2Into1;
             internal JToken patch1;
             internal JToken mergeOf1Into2;
-            internal JToken conflicts;
+            public JToken conflicts;
 
-            public T result { get { return mergeOf2Into1.ToObject<T>(); } }
+            public T GetResult() { return mergeOf2Into1.ToObject<T>(); }
 
             public bool hasMergeConflict { get { return !conflicts.IsNullOrEmpty(); } }
 
-            public IEnumerable<MergeConflict> mergeConflicts {
-                get { return conflicts.Map<JToken, MergeConflict>(ParseIntoConflict); }
+            public IEnumerable<MergeConflict> GetParsedMergeConflicts() {
+                return conflicts.Map<JToken, MergeConflict>(ParseIntoConflict);
             }
 
-            private MergeConflict ParseIntoConflict(JToken t) {
-                var res = new MergeConflict() { };
-                var prop = t as JProperty;
+            private MergeConflict ParseIntoConflict(JToken token) {
+                if (token is JProperty prop) { return ToMergeConflict(prop); }
+                throw Log.e("Unhandled type " + token.GetType() + ":\n" + JsonWriter.AsPrettyString(token));
+            }
+
+            public static MergeConflict ToMergeConflict(JProperty prop) {
+                var res = new MergeConflict();
                 res.fieldName = prop.Name;
-                var oldAndNewValue = prop.Value as JArray;
-                AssertV2.AreEqual(2, oldAndNewValue.Count);
-                res.oldValue = oldAndNewValue[0];
-                res.newValue = oldAndNewValue[1];
+                if (prop.Value is JObject o) {
+                    var properties = o.Properties();
+                    if (IsArray(properties.First())) {
+                        res.specialType = MergeConflict.SPECIAL_TYPE_ARRAY;
+                        properties = properties.Skip(1);
+                    }
+                    res.conflicts = properties.Map(ToMergeConflict);
+                } else if (prop.Value is JArray oldAndNewValue) {
+                    AssertV2.AreEqual(2, oldAndNewValue.Count);
+                    res.oldValue = oldAndNewValue[0];
+                    res.newValue = oldAndNewValue[1];
+                } else {
+                    throw Log.e("Unhandled type " + prop.Value.GetType() + ":\n" + JsonWriter.AsPrettyString(prop.Value));
+                }
                 return res;
             }
+
+            private static bool IsArray(JProperty p) { return Equals("_t", p.Name) && p.Value is JValue v && Equals("a", v.Value); }
 
         }
 
         public class MergeConflict {
+            internal const string SPECIAL_TYPE_ARRAY = "array";
             public string fieldName;
+            public IEnumerable<MergeConflict> conflicts;
             public JToken oldValue;
             public JToken newValue;
+            public string specialType;
         }
 
     }

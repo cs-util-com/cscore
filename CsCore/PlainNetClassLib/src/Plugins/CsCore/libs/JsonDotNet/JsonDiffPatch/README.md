@@ -122,7 +122,7 @@ var output = jdp.Diff(left, right);
     "0": [
       "bike"
     ],
-    "_t": "a",
+    "_t": "a",    // indicates this node is an array (not an object)
     "_1": [
       "",
       1,
