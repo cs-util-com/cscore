@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using UnityEditor;
+using UnityEngine;
 
 namespace com.csutil.editor {
 
@@ -6,19 +7,22 @@ namespace com.csutil.editor {
 
         private const string DIR = "Window/CsUtil/";
 
-        [UnityEditor.MenuItem(DIR + "Open MaterialUi Icon Overview")]
-        static void OpenMaterialUiIconOverview() { Application.OpenURL("https://shanfan.github.io/material-icons-cheatsheet/"); }
+        [MenuItem(DIR + "Fonts/Open MaterialUi Icon Overview")]
+        static void OpenMaterialIcons() { Application.OpenURL("https://shanfan.github.io/material-icons-cheatsheet/"); }
 
-        [UnityEditor.MenuItem(DIR + "CsCore/Open GitHub page (Documentation)")]
+        [MenuItem(DIR + "Fonts/Open FontAwesome Icon Overview")]
+        static void OpenFontAwesomeIcons() { Application.OpenURL("https://fontawesome.com/cheatsheet"); }
+
+        [MenuItem(DIR + "CsCore/Open GitHub page (Documentation)")]
         static void CsCoreGithubPage() { Application.OpenURL("https://github.com/cs-util-com/cscore"); }
 
-        [UnityEditor.MenuItem(DIR + "CsCore/Report a problem")]
+        [MenuItem(DIR + "CsCore/Report a problem")]
         static void ReportCsCoreProblem() { Application.OpenURL("https://github.com/cs-util-com/cscore/issues"); }
 
-        [UnityEditor.MenuItem(DIR + "Show Asset Store packages")]
+        [MenuItem(DIR + "Show Asset Store packages")]
         static void ShowAssetStore() { Application.OpenURL("https://assetstore.unity.com/publishers/40989"); }
 
-        [UnityEditor.MenuItem("CONTEXT/RectTransform/Set Anchors Around Object")]
+        [MenuItem("CONTEXT/RectTransform/Set Anchors Around Object")]
         static void SetAnchorsAroundObject(UnityEditor.MenuCommand command) {
             SetAnchorsAroundObject(command.context as RectTransform);
         }
@@ -34,16 +38,22 @@ namespace com.csutil.editor {
             t.pivot = new Vector2(0.5f, 0.5f);
         }
 
-        [UnityEditor.MenuItem(DIR + "Editor Colors/Set PlaymodeTint to red")]
+        [MenuItem(DIR + "Editor Colors/Set Playmode-Tint to red")]
         static void SetPlayModeTintToLightRed() {
             Color lightRed = ColorUtil.HexStringToColor("#FFCDC5");
             EditorPrefsColors.SetPlaymodeTintColor(lightRed);
         }
 
-        [UnityEditor.MenuItem(DIR + "Editor Colors/Set UI canvas background to blue")]
+        [MenuItem(DIR + "Editor Colors/Set UI-Canvas-Background to blue")]
         static void SetSceneBackgroundColor() {
             Color lightBlue = ColorUtil.HexStringToColor("#93BAF4");
             EditorPrefsColors.SetSceneBackgroundColor(lightBlue);
+        }
+
+        [MenuItem(DIR + "Editor Colors/Set Main-Camera-background to yellow")]
+        static void SetMainCamBackgroundColor() {
+            var lightYellow = ColorUtil.HexStringToColor("#FEFFE4");
+            Camera.main.backgroundColor = lightYellow;
         }
 
     }
