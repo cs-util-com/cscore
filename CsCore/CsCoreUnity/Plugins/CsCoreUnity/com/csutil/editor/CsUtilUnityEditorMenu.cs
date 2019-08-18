@@ -34,6 +34,18 @@ namespace com.csutil.editor {
             t.pivot = new Vector2(0.5f, 0.5f);
         }
 
+        [UnityEditor.MenuItem(DIR + "Editor Colors/Set PlaymodeTint to red")]
+        static void SetPlayModeTintToLightRed() {
+            Color lightRed = ColorUtil.HexStringToColor("#FFCDC5");
+            EditorPrefsColors.SetPlaymodeTintColor(lightRed);
+        }
+
+        [UnityEditor.MenuItem(DIR + "Editor Colors/Set UI canvas background to blue")]
+        static void SetSceneBackgroundColor() {
+            Color lightBlue = ColorUtil.HexStringToColor("#93BAF4");
+            EditorPrefsColors.SetSceneBackgroundColor(lightBlue);
+        }
+
     }
 
 }
