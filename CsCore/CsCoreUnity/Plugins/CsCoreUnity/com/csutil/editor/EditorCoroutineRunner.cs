@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEditor;
 
 namespace com.csutil.editor {
+
     class EditorCoroutineRunner {
 
         public static void StartCoroutine(IEnumerator update, Action end = null) {
@@ -19,12 +16,13 @@ namespace com.csutil.editor {
                     }
                 }
                 catch (Exception ex) {
-                    end?.Invoke();
                     EditorApplication.update -= closureCallback;
+                    throw ex;
                 }
             };
             EditorApplication.update += closureCallback;
         }
 
     }
+
 }
