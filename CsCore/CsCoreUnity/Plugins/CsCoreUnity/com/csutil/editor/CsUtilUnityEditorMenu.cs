@@ -1,5 +1,8 @@
-﻿using UnityEditor;
+﻿using System.Collections;
+using System.IO;
+using UnityEditor;
 using UnityEngine;
+using UnityEngine.Networking;
 
 namespace com.csutil.editor {
 
@@ -54,6 +57,31 @@ namespace com.csutil.editor {
         static void SetMainCamBackgroundColor() {
             var lightYellow = ColorUtil.HexStringToColor("#FEFFE4");
             Camera.main.backgroundColor = lightYellow;
+        }
+
+        [MenuItem(DIR + "Download default Unity .gitignore")]
+        static void DownloadDefaultUnityGitIgnore() {
+            var projectFolder = EnvironmentV2.instance.GetCurrentDirectory();
+            if (!projectFolder.GetChildDir("Assets").Exists) { throw Log.e("Not the project folder: " + projectFolder); }
+            var file = projectFolder.GetChild(".gitignore");
+            if (!file.ExistsV2()) {
+                EditorCoroutineRunner.StartCoroutine(DownloadDefaultUnityGitIgnore(file));
+            } else {
+                Log.d("No need to download .gitignore, was already found: " + file);
+            }
+        }
+
+        private static IEnumerator DownloadDefaultUnityGitIgnore(FileInfo file) {
+            var request = UnityWebRequest.Get("https://raw.githubusercontent.com/github/gitignore/master/Unity.gitignore");
+            yield return request.SendWebRequest();
+            while (!request.isDone) { yield return new WaitForSeconds(0.1f); }
+            var gitignoreContent = request.GetResult<string>();
+            if (gitignoreContent.IsNullOrEmpty()) { file.SaveAsText(gitignoreContent); }
+            if (file.ExistsV2()) {
+                Log.d("Successfull downloaded gitignore into file=" + file);
+            } else {
+                Log.e("Could not donwload  gitignore into file=" + file);
+            }
         }
 
     }
