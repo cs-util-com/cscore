@@ -98,7 +98,7 @@ namespace com.csutil.editor {
                     var gitignore = symLink.Parent.GetChild(".gitignore");
                     var symLinkFolderName = "/" + symLink.NameV2();
                     if (AddLineToGitIngore(gitignore, symLinkFolderName)) {
-                        Log.d("Added entry to gitignore " + gitignore + " :\n" + symLinkFolderName);
+                        Log.d("Added entry to gitignore " + gitignore + " :\n" + symLinkFolderName + "\n");
                     }
                 }
             }
