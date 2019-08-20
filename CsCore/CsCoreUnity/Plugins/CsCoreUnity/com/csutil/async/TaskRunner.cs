@@ -11,6 +11,10 @@ using System.Collections;
 
 namespace com.csutil {
 
+    /// <summary>
+    /// If an asyn task is started manually in Unity is should be created through this TaskRunner instead of
+    /// using Task.Run or Task.Factory manually, to connect it to the scenes lifecycle. 
+    /// </summary>
     public class TaskRunner : MonoBehaviour {
 
         public static TaskRunner instance { get { return IoC.inject.GetOrAddComponentSingleton<TaskRunner>(new object()); } }
