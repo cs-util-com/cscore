@@ -7,15 +7,20 @@ using UnityEngine;
 
 namespace com.csutil.editor {
 
-#if CSCORE_EXPERIMENTAL
-
+    /// <summary>
+    /// This helper shows a login helper for the UnityEditor whenever Unity detects that the developer is not logged in. 
+    /// I found it annoying to have to enter my credentials too often but hopefully this class is not needed anymore
+    /// in future Unity versions since the short session duration felt like a bug. Because of this the class is only enabled
+    /// if you set CSCORE_EXPERIMENTAL to true in the editor define!
+    /// </summary>
     class UnityAccountLoginHelper : AssetPostprocessor {
 
         private class LoginDetails { public string email = ""; public string pw = ""; }
 
+#if CSCORE_EXPERIMENTAL // Only registered as a InitializeOnLoadMethod when the CSCORE_EXPERIMENTAL define is set
         [InitializeOnLoadMethod]
+#endif
         static void InitializeOnLoadMethod() {
-
             UnitySetup.SetupDefaultSingletonsIfNeeded();
             var unityConnect = NewUnityConnect();
 
@@ -33,7 +38,7 @@ namespace com.csutil.editor {
             });
         }
 
-        private static FileInfo GetFile() { return EnvironmentV2.instance.GetAppDataFolder().GetChildDir("UnitySettings").GetChild("ualhs"); }
+        private static FileInfo GetFile() { return EnvironmentV2.instance.GetRootAppDataFolder().GetChildDir("UnitySettings").GetChild("ualhs"); }
 
         private static void ShowLoginDetailsWindow(LoginDetails loginDetails, Action onSave) {
             EditorWindowV2.ShowUtilityWindow((EditorWindowV2 ui) => {
@@ -61,7 +66,5 @@ namespace com.csutil.editor {
         private static T GetProp<T>(object o, string propName) { return (T)o.GetType().GetProperty(propName).GetValue(o, null); }
 
     }
-
-#endif
 
 }
