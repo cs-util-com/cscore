@@ -25,7 +25,7 @@ namespace com.csutil.editor {
                 if (GetPropertyType(property, out type)) {
                     if (HasAttribute<HideInInspector>(property)) { continue; }
 #if !ENABLE_CSUTIL_PROPERTY_MAGIC
-                    if (!HasAttribute<ShowInInspectorAttribute>(property)) { continue; }
+                    if (!HasAttribute<ShowPropertyInInspector>(property)) { continue; }
 #endif
                     propertyInspectorUis.Add(new ShowPropertiesInInspector(obj, property, type));
                 }
@@ -69,7 +69,7 @@ namespace com.csutil.editor {
             if (!PropertyHasASetter()) { return; }
             propertySet.Invoke(objInstance, new System.Object[] { value });
         }
-
+        
         private bool PropertyHasASetter() { return propertySet != null; }
 
         public Type GetPropertyType() { return property.PropertyType; }
