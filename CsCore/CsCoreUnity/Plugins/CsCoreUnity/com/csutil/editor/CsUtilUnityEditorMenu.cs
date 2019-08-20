@@ -73,25 +73,8 @@ namespace com.csutil.editor {
             } else {
                 Log.d("No need to download .gitignore, was already found: " + file);
             }
-            AddAllSymlinksToGitIgnore(assetsFolder);
-        }
-
-        private static void AddAllSymlinksToGitIgnore(DirectoryInfo assetsFolder) {
-            var allSymbolicLinks = CollectSymbolicLinkedFolders(assetsFolder);
-            foreach (var symLink in allSymbolicLinks) {
-                var gitignore = symLink.Parent.GetChild(".gitignore");
-                var symLinkFolderName = "/" + symLink.NameV2();
-                if (AddLineToGitIngore(gitignore, symLinkFolderName)) {
-                    Log.d("Added entry to gitignore " + gitignore + " :\n" + symLinkFolderName);
-                }
-            }
-        }
-
-        private static bool AddLineToGitIngore(FileInfo gitignore, string symLinkFolderNameToAdd) {
-            var lines = gitignore.ExistsV2() ? File.ReadLines(gitignore.FullPath()) : new string[0];
-            var found = lines.Any(line => symLinkFolderNameToAdd.Equals(line));
-            if (!found) { File.AppendAllLines(gitignore.FullPath(), new string[2] { "", symLinkFolderNameToAdd }); }
-            return !found;
+            GitIgnoreUdater.AddAllSymlinksToGitIgnores(assetsFolder);
+            AssetFolderAnalysis.FindFolderAnomalies(assetsFolder);
         }
 
         private static IEnumerator DownloadDefaultUnityGitIgnore(FileInfo file) {
@@ -107,19 +90,51 @@ namespace com.csutil.editor {
             }
         }
 
-        private static List<DirectoryInfo> CollectSymbolicLinkedFolders(DirectoryInfo assetsFolder) {
-            var links = new List<DirectoryInfo>();
-            var normalFolders = assetsFolder.GetDirectories().Filter(dir => {
-                if (!dir.Name.IsNullOrEmpty() && IsSymbolicLink(dir)) { links.Add(dir); return false; }
-                return true;
-            }); // Then visit all normal children folders to search there too:
-            foreach (var dir in normalFolders) { links.AddRange(CollectSymbolicLinkedFolders(dir)); }
-            return links;
+        private class GitIgnoreUdater {
+
+            public static void AddAllSymlinksToGitIgnores(DirectoryInfo assetsFolder) {
+                var allSymbolicLinks = CollectSymbolicLinkedFolders(assetsFolder);
+                foreach (var symLink in allSymbolicLinks) {
+                    var gitignore = symLink.Parent.GetChild(".gitignore");
+                    var symLinkFolderName = "/" + symLink.NameV2();
+                    if (AddLineToGitIngore(gitignore, symLinkFolderName)) {
+                        Log.d("Added entry to gitignore " + gitignore + " :\n" + symLinkFolderName);
+                    }
+                }
+            }
+
+            private static List<DirectoryInfo> CollectSymbolicLinkedFolders(DirectoryInfo assetsFolder) {
+                var links = new List<DirectoryInfo>();
+                var normalFolders = assetsFolder.GetDirectories().Filter(dir => {
+                    if (!dir.Name.IsNullOrEmpty() && IsSymbolicLink(dir)) { links.Add(dir); return false; }
+                    return true;
+                }); // Then visit all normal children folders to search there too:
+                foreach (var dir in normalFolders) { links.AddRange(CollectSymbolicLinkedFolders(dir)); }
+                return links;
+            }
+
+            private static bool IsSymbolicLink(DirectoryInfo dir) {
+                return dir.Attributes.HasFlag(FileAttributes.ReparsePoint);
+            }
+
+            private static bool AddLineToGitIngore(FileInfo gitignore, string symLinkFolderNameToAdd) {
+                var lines = gitignore.ExistsV2() ? File.ReadLines(gitignore.FullPath()) : new string[0];
+                var found = lines.Any(line => symLinkFolderNameToAdd.Equals(line));
+                if (!found) { File.AppendAllLines(gitignore.FullPath(), new string[2] { "", symLinkFolderNameToAdd }); }
+                return !found;
+            }
+
         }
 
-        private static bool IsSymbolicLink(DirectoryInfo dir) {
-            return dir.Attributes.HasFlag(FileAttributes.ReparsePoint);
+        private class AssetFolderAnalysis {
+
+            public static void FindFolderAnomalies(DirectoryInfo folder) {
+                if (Equals(0, folder.GetFiles().Count())) { Log.e("Emtpy folder found: " + folder); }
+                foreach (var childDir in folder.GetDirectories()) { FindFolderAnomalies(childDir); }
+            }
+
         }
+
     }
 
 }
