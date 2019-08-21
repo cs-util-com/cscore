@@ -17,8 +17,10 @@ namespace com.csutil {
 
         public static IEnumerator AsCoroutine(this Task self, Action<Exception> onError, float waitInterval = 0.02f) {
             var waitIntervalBeforeNextCheck = new WaitForSeconds(waitInterval);
-            AssertV2.IsTrue(self.Status != TaskStatus.WaitingToRun, "Task is WaitingToRun");
-            while (!self.IsCompleted) { yield return waitIntervalBeforeNextCheck; }
+            while (!self.IsCompleted) {
+                yield return waitIntervalBeforeNextCheck;
+                AssertV2.IsTrue(self.Status != TaskStatus.WaitingToRun, "Task is WaitingToRun");
+            }
             if (self.IsFaulted) { onError.InvokeIfNotNull(self.Exception); }
             yield return null;
         }
