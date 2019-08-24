@@ -94,11 +94,15 @@ namespace com.csutil {
         /// <summary> Will return a formated string in the form of ClassName.MethodName </summary>
         public static string GetMethodName(this StackFrame self, bool includeParams = true) {
             try {
+#if UNITY_WEBGL
+                return "" + self;
+#endif
                 var method = self.GetMethod(); // analyse stack trace for class name:
                 var methodString = method.ReflectedType.Name + "." + method.Name;
                 var paramsString = includeParams ? method.GetParameters().ToStringV2(x => "" + x, "", "") : "..";
                 return methodString + "(" + paramsString + ")";
-            } catch (Exception e) { Console.WriteLine("" + e); return ""; }
+            }
+            catch (Exception e) { Console.WriteLine("" + e); return ""; }
         }
 
         internal static object[] AddTo(this StackFrame self, object[] args) { return Add(args, self); }

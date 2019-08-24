@@ -25,7 +25,7 @@ namespace com.csutil {
                 if (typeof(T) == typeof(GameObject)) { return (T)(object)self[id].gameObject; }
                 return self[id].GetComponent<T>();
             }
-            catch (KeyNotFoundException e) { throw new KeyNotFoundException("No Link found with id=" + id); }
+            catch (KeyNotFoundException) { throw new KeyNotFoundException("No Link found with id=" + id); }
         }
 
     }

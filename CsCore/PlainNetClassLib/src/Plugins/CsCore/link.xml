@@ -1,0 +1,3 @@
+<linker>
+       <assembly fullname="CsCore" preserve="all"/>
+</linker>

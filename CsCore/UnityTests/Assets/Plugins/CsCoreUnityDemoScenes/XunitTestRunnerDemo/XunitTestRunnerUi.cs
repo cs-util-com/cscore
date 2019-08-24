@@ -1,6 +1,5 @@
 ﻿using com.csutil;
 using com.csutil.testing;
-using com.csutil.tests;
 using Mopsicus.InfiniteScroll;
 using System;
 using System.Collections;
@@ -8,6 +7,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Linq;
+using com.csutil.tests;
 
 public class XunitTestRunnerUi : MonoBehaviour {
 
@@ -20,7 +20,19 @@ public class XunitTestRunnerUi : MonoBehaviour {
         var listUi = links.Get<InfiniteScroll>("HorizontalScrollView");
         listUi.OnHeight += GetHeightOfEachViewEntry;
         listUi.OnFill += FillViewWithModelEntry;
-        links.Get<Button>("StartButton").SetOnClickAction(delegate { StartCoroutine(RunAllTests(listUi)); });
+        Log.e("StartButton  1");
+        Debug.LogError("StartButton  2");
+        links.Get<Button>("StartButton").SetOnClickAction((button) => {
+            Log.e("StartButton clicked 1");
+            Debug.LogError("StartButton clicked 2");
+            try {
+                StartCoroutine(RunAllTests(listUi));
+                links.Get<Text>("ButtonText").text = "Now running " + allTests.Count + " tests..";
+            }
+            catch (Exception e) {
+                links.Get<Text>("ButtonText").text = "" + e;
+            }
+        });
     }
 
     private int GetHeightOfEachViewEntry(int index) { return defaultEntryHeight; }
@@ -46,11 +58,9 @@ public class XunitTestRunnerUi : MonoBehaviour {
     }
 
     public IEnumerator RunAllTests(InfiniteScroll listUi) {
-        var errorCollector = new LogForXunitTestRunnerInUnity();
         var allClasses = typeof(MathTests).Assembly.GetExportedTypes();
         allTests = XunitTestRunner.CollectAllTests(allClasses, delegate {
             //// setup before each test, use same error collector for all tests:
-            Log.instance = errorCollector;
         });
         AssertV2.AreNotEqual(0, allTests.Count);
         listUi.InitData(allTests.Count);

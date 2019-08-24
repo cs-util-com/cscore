@@ -2,7 +2,8 @@
     "name": "CsCoreUnityTests",
     "references": [
         "CsCore",
-        "CsCoreUnity"
+        "CsCoreUnity",
+        "CsCoreXUnitTests"
     ],
     "optionalUnityReferences": [
         "TestAssemblies"
