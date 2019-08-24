@@ -141,7 +141,6 @@ namespace com.csutil.tests {
 
             }
 
-            rootDir.DeleteV2(); // Cleanup after test
         }
 
         private static void SaveAndLoadTextToFile(FileInfo testFile, string textToSave) {
@@ -180,7 +179,7 @@ namespace com.csutil.tests {
 
         [Fact]
         public void TestFileRenameAndMove() {
-            var rootDir = CreateDirectoryForTesting("TestFileRename");
+            var rootDir = CreateDirectoryForTesting("TestFileRenameAndMove");
 
             var myFile = rootDir.GetChild("MyFile1.txt");
             SaveAndLoadTextToFile(myFile, textToSave: "Test 123");

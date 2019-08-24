@@ -14,7 +14,7 @@ namespace com.csutil.tests.async {
         public EventHandlerTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
         [Fact]
-        public async void ThrottledDebounceTest1() {
+        public async Task ThrottledDebounceTest1() {
             int counter = 0;
             EventHandler<string> action = (_, myStringParam) => {
                 Assert.NotEqual("bad", myStringParam);
@@ -41,7 +41,7 @@ namespace com.csutil.tests.async {
         }
 
         [Fact]
-        public async void ThrottledDebounceTest2() {
+        public async Task ThrottledDebounceTest2() {
             int counter = 0;
             EventHandler<int> action = (_, myIntParam) => {
                 Log.d("myIntParam=" + myIntParam);
@@ -60,7 +60,7 @@ namespace com.csutil.tests.async {
         }
 
         [Fact]
-        public async void ExponentialBackoffExample1() {
+        public async Task ExponentialBackoffExample1() {
             Stopwatch timer = Stopwatch.StartNew();
             var finalTimingResult = await TaskHelper.TryWithExponentialBackoff<long>(async () => {
                 await Task.Delay(5);
@@ -69,11 +69,11 @@ namespace com.csutil.tests.async {
                 if (timer.ElapsedMilliseconds < 1000) { throw new TimeoutException("e.g. some network error"); }
                 return timer.ElapsedMilliseconds;
             });
-            Assert.True(1000 < finalTimingResult && finalTimingResult < 2000, "finalTimingResult=" + finalTimingResult);
+            Assert.True(1000 < finalTimingResult && finalTimingResult < 3000, "finalTimingResult=" + finalTimingResult);
         }
 
         [Fact]
-        public async void ExponentialBackoffExample2() {
+        public async Task ExponentialBackoffExample2() {
             Stopwatch timer = Stopwatch.StartNew();
             await Assert.ThrowsAsync<OperationCanceledException>(async () => {
 
@@ -84,7 +84,7 @@ namespace com.csutil.tests.async {
 
             });
             var finalTimingResult = timer.ElapsedMilliseconds;
-            Assert.True(finalTimingResult < 2000, "finalTimingResult=" + finalTimingResult);
+            Assert.True(finalTimingResult < 3000, "finalTimingResult=" + finalTimingResult);
         }
 
         private async Task SomeTaskThatFailsEveryTime() {

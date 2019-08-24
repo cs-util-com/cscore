@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using com.csutil.model.immutable;
 using Xunit;
 
@@ -9,7 +10,7 @@ namespace com.csutil.tests.model.immutable {
         public MoreDataStoreTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
         [Fact]
-        public async void TestReplayRecorder() {
+        public async Task TestReplayRecorder() {
 
             // Add a recorder middleware to enable hot reload by replaying previously recorded actions:
             var recorder = new ReplayRecorder<string>();

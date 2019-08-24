@@ -13,7 +13,7 @@ namespace com.csutil.tests.http {
         public RestTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
         [Fact]
-        public async void ExampleUsage1() {
+        public async Task ExampleUsage1() {
             RestRequest request = new Uri("https://httpbin.org/get").SendGET();
             // Send the request and parse the response into the HttpBinGetResp class:
             HttpBinGetResp response = await request.GetResult<HttpBinGetResp>();
@@ -26,7 +26,7 @@ namespace com.csutil.tests.http {
         }
 
         [Fact]
-        public async void TestSendGET1() {
+        public async Task TestSendGET1() {
             var x = await new Uri("https://httpbin.org/get").SendGET().GetResult<HttpBinGetResp>();
             Assert.NotNull(x);
             Log.d("Your external IP is " + x.origin);
@@ -34,13 +34,13 @@ namespace com.csutil.tests.http {
         }
 
         [Fact]
-        public async void TestSendGET2() {
+        public async Task TestSendGET2() {
             RestRequest request = new Uri("https://httpbin.org/get").SendGET();
             await ValidateResponse(request);
         }
 
         [Fact]
-        public async void TestRestFactory1() {
+        public async Task TestRestFactory1() {
             RestRequest request = RestFactory.instance.SendRequest(new Uri("https://httpbin.org/get"), HttpMethod.Get);
             await ValidateResponse(request);
             var resultHeaders = await request.GetResultHeaders();
@@ -67,7 +67,7 @@ namespace com.csutil.tests.http {
         }
 
         [Fact]
-        public static async void TestGetCurrentPing() {
+        public async Task TestGetCurrentPing() {
             var pingInMs = await RestFactory.instance.GetCurrentPing();
             Assert.NotEqual(-1, pingInMs);
             Assert.True(0 <= pingInMs && pingInMs < 500, "pingInMs=" + pingInMs);

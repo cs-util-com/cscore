@@ -18,10 +18,19 @@ namespace Xunit {
         public static void NotNull<T>(T obj) { True(null != obj, "Was null: " + typeof(T)); }
 
         public static void Equal(object objA, object objB) {
-            True(Equals(objA, objB), "NOT Equal: \n " + objA + " \n and \n " + objB);
+            True(eq(objA, objB), "NOT Equal: \n " + objA + " \n and \n " + objB);
         }
+
+        private static bool eq(object objA, object objB) {
+            if (ReferenceEquals(objA, objB)) { return true; }
+            if (objA is IComparable c1 && objB is IComparable c2) {
+                return c1.CompareTo(objB) == 0;
+            }
+            return objA == objB || Equals(objA, objB);
+        }
+
         public static void NotEqual(object objA, object objB) {
-            True(!Equals(objA, objB), "EQUAL: \n " + objA + " \n and \n " + objB);
+            True(!eq(objA, objB), "EQUAL: \n " + objA + " \n and \n " + objB);
         }
 
         public static void IsType<T>(object obj) where T : class {
@@ -29,13 +38,17 @@ namespace Xunit {
         }
 
         public static void Throws<T>(Action a) where T : Exception {
-            NotEqual(typeof(Exception), typeof(T)); // Must be subtype of Exception
-            try { a(); throw new Exception("Did not throw " + typeof(T)); } catch (T) { }
+            var notThrown = false;
+            try { a(); notThrown = true; }
+            catch (T) { }
+            if (notThrown) { throw new Exception("Did not throw " + typeof(T)); }
         }
 
         public static async Task ThrowsAsync<T>(Func<Task> a) where T : Exception {
-            NotEqual(typeof(Exception), typeof(T)); // Must be subtype of Exception
-            try { await a(); throw new Exception("Did not throw " + typeof(T)); } catch (T) { }
+            var notThrown = false;
+            try { await a(); notThrown = true; }
+            catch (T) { }
+            if (notThrown) { throw new Exception("Did not throw " + typeof(T)); }
         }
 
         public static void Same<T>(T objA, T objB) {

@@ -13,9 +13,9 @@ namespace com.csutil {
         /// </summary>
         public static T TransitionTo<T>(this Dictionary<T, HashSet<T>> allowedTransitions, T currentState, T newState) {
             if (!allowedTransitions.ContainsKey(currentState)) {
-                throw Log.e(currentState + " -> " + newState + " blocked, " + currentState + " has no allowed transitions");
+                throw new InvalidOperationException(currentState + " -> " + newState + " blocked, " + currentState + " has no allowed transitions");
             } else if (!allowedTransitions[currentState].Contains(newState)) {
-                throw Log.e(currentState + " -> " + newState + " blocked, transition not allowed!");
+                throw new InvalidOperationException(currentState + " -> " + newState + " blocked, transition not allowed!");
             }
             EventBus.instance.Publish(TRANSITION_EVENT + (typeof(T)), allowedTransitions, currentState, newState);
             return newState;

@@ -16,7 +16,7 @@ namespace com.csutil.tests.model {
         public LiteDbPerformanceTest1(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
         [Fact]
-        async void PerformanceTest1() {
+        public async Task PerformanceTest1() {
             AssertV2.throwExeptionIfAssertionFails = true;
 
             var dataTree = NewTreeLayer("1", 1000, () => NewTreeLayer("2", 2, () => NewTreeLayer("3", 4, () => NewTreeLayer("4", 1))));

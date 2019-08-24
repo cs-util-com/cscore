@@ -1,5 +1,6 @@
 using com.csutil.keyvaluestore;
 using com.csutil.model;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace com.csutil.tests.model {
@@ -13,7 +14,7 @@ namespace com.csutil.tests.model {
         }
 
         [Fact]
-        public async void TestHasIdDbConnection() {
+        public async Task TestHasIdDbConnection() {
 
             var userId1 = "123";
             MyUserClass1 user1 = new MyUserClass1() { id = userId1, name = "Some Name" };

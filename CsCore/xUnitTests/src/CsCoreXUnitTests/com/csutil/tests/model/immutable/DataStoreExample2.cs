@@ -20,7 +20,7 @@ namespace com.csutil.tests.model.immutable {
         public DataStoreExample2(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
         [Fact]
-        public async void ExampleUsage2() {
+        public async Task ExampleUsage2() {
             var t = Log.MethodEntered();
 
             // Add a thunk middleware to allow dispatching async actions:

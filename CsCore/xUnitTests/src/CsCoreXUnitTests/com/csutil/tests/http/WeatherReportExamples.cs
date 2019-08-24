@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Linq;
+using System.Threading.Tasks;
 using com.csutil.http.apis;
 using com.csutil.http.apis.iplookup;
 using Xunit;
@@ -10,7 +11,7 @@ namespace com.csutil.tests.http {
         public WeatherReportExamples(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
         [Fact]
-        public async void MetaWeatherComExample1() {
+        public async Task MetaWeatherComExample1() {
 
             var ipLookupResult = await IpApiCom.GetResponse();
             string yourCity = ipLookupResult.city;
@@ -45,7 +46,7 @@ namespace com.csutil.tests.http {
         }
 
         [Fact]
-        public async void MetaWeatherComTest1() {
+        public async Task MetaWeatherComTest1() {
 
             var berlinName = "Berlin";
             float berlinLatitude = 52.50f;

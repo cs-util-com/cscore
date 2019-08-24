@@ -11,7 +11,7 @@ namespace com.csutil.tests {
 
     public class StateMachineTests {
 
-        private enum MyStates { MyState1, MyState2, MyState3 }
+        public enum MyStates { MyState1, MyState2, MyState3 }
 
         [Fact]
         public static void StateMachine_ExampleUsage1() {
@@ -38,7 +38,7 @@ namespace com.csutil.tests {
             Assert.Equal(MyStates.MyState2, currentState);
 
             // Invalid transitions throw exceptions (current state is 2):
-            Assert.Throws<Exception>(() => {
+            Assert.Throws<InvalidOperationException>(() => {
                 currentState = stateMachine.TransitionTo(currentState, MyStates.MyState1);
             });
 
@@ -55,7 +55,7 @@ namespace com.csutil.tests {
             Assert.Equal(MyStates.MyState2, myStateMachine.currentState);
 
             // Invalid transitions throw exceptions (current state is 2):
-            Assert.Throws<Exception>(() => { myStateMachine.SwitchToFirstState(); });
+            Assert.Throws<InvalidOperationException>(() => { myStateMachine.SwitchToFirstState(); });
 
         }
 

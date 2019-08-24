@@ -31,7 +31,7 @@ namespace com.csutil.tests.keyvaluestore {
         }
 
         [Fact]
-        public async void ExampleUsage2() {
+        public async Task ExampleUsage2() {
             var storeFile = EnvironmentV2.instance.GetOrAddTempFolder("KeyValueStoreTests").GetChild("ExampleUsage2");
             storeFile.DeleteV2(); // Cleanup before tests if the test file exists
             string myKey1 = "test123";
@@ -55,7 +55,7 @@ namespace com.csutil.tests.keyvaluestore {
         }
 
         [Fact]
-        public async void ExampleUsage3() {
+        public async Task ExampleUsage3() {
 
             // Simulate the DB on the server
             var simulatedDb = new InMemoryKeyValueStore();
@@ -92,7 +92,7 @@ namespace com.csutil.tests.keyvaluestore {
         }
 
         [Fact]
-        public async void TestAllIKeyValueStoreImplementations() {
+        public async Task TestAllIKeyValueStoreImplementations() {
             await TestIKeyValueStoreImplementation(new InMemoryKeyValueStore());
             await TestIKeyValueStoreImplementation(NewLiteDbStoreForTesting("TestAllIKeyValueStoreImplementations"));
             await TestIKeyValueStoreImplementation(new ExceptionWrapperKeyValueStore(new InMemoryKeyValueStore()));
@@ -143,7 +143,7 @@ namespace com.csutil.tests.keyvaluestore {
         }
 
         [Fact]
-        public async void TestExceptionCatching() {
+        public async Task TestExceptionCatching() {
             var myKey1 = "key1";
             int myValue1 = 1;
             string myDefaultString = "myDefaultValue";
@@ -165,7 +165,7 @@ namespace com.csutil.tests.keyvaluestore {
         }
 
         [Fact]
-        public async void TestStoreWithDelay() {
+        public async Task TestStoreWithDelay() {
             // Simulates the DB on the server:
             var innerStore = new InMemoryKeyValueStore();
             // Simulates the connection to the server:
@@ -204,7 +204,7 @@ namespace com.csutil.tests.keyvaluestore {
         }
 
         [Fact]
-        public async void TestCachingValuesFromFallbackStores() {
+        public async Task TestCachingValuesFromFallbackStores() {
 
             var key1 = "key1";
             var value1 = "value1";
@@ -227,7 +227,7 @@ namespace com.csutil.tests.keyvaluestore {
         }
 
         [Fact]
-        public async void TestReplaceAndRemove() {
+        public async Task TestReplaceAndRemove() {
 
             var key1 = "key1";
             var value1 = "value1";
@@ -255,7 +255,7 @@ namespace com.csutil.tests.keyvaluestore {
         }
 
         [Fact]
-        public async void TestDelayStoreWithExponentialBackoffRetry() {
+        public async Task TestDelayStoreWithExponentialBackoffRetry() {
 
             // Simulates the DB on the server:
             var innerStore = new InMemoryKeyValueStore();

@@ -23,20 +23,14 @@ namespace com.csutil.editor {
             foreach (PropertyInfo property in readableProps) {
                 var type = SerializedPropertyType.Integer;
                 if (GetPropertyType(property, out type)) {
-                    if (HasAttribute<HideInInspector>(property)) { continue; }
+                    if (property.HasAttribute<HideInInspector>(true)) { continue; }
 #if !ENABLE_CSUTIL_PROPERTY_MAGIC
-                    if (!HasAttribute<ShowPropertyInInspector>(property)) { continue; }
+                    if (!property.HasAttribute<ShowPropertyInInspector>()) { continue; }
 #endif
                     propertyInspectorUis.Add(new ShowPropertiesInInspector(obj, property, type));
                 }
             }
             return propertyInspectorUis.ToArray();
-        }
-
-        private static bool HasAttribute<T>(MemberInfo self) {
-            var attributesOfPropertyField = self.GetCustomAttributes(true);
-            foreach (var attr in attributesOfPropertyField) { if (attr.GetType() == typeof(T)) { return true; } }
-            return false;
         }
 
         internal static void DrawInInspector(ShowPropertiesInInspector[] properties) {
