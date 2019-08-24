@@ -25,14 +25,14 @@ namespace com.csutil.tests {
         }
 
         private IEnumerator RunTestsInClass(Type classToTest) {
-            var runningTests = XunitTestRunner.CreateExecutionIterator(classToTest, delegate {
+            var allTests = XunitTestRunner.GetIteratorOverAllTests(classToTest, delegate {
                 // setup before each test
                 Log.instance = new LogForXunitTestRunnerInUnity();
             });
-            foreach (var runningTest in runningTests) { yield return LogTest(runningTest); }
+            foreach (var test in allTests) { yield return StartTest(test); }
         }
 
-        private IEnumerator LogTest(XunitTestRunner.Test runningTest) {
+        private IEnumerator StartTest(XunitTestRunner.Test runningTest) {
             var t = Log.MethodEntered("Now running test " + runningTest);
             yield return new WaitForSeconds(0.1f);
             runningTest.StartTest();

@@ -13,7 +13,7 @@ public class XunitTestRunnerUi : MonoBehaviour {
 
     public int defaultEntryHeight = 80;
     public int timeoutInMs = 30000;
-    private List<XunitTestRunner.Test> startedTests = new List<XunitTestRunner.Test>();
+    private List<XunitTestRunner.Test> allTests;
 
     private void OnEnable() {
         var links = gameObject.GetLinkMap();
@@ -28,10 +28,13 @@ public class XunitTestRunnerUi : MonoBehaviour {
     }
 
     private void OnFill(int pos, GameObject view) {
-        var test = startedTests[pos];
+        var test = allTests[pos];
         var links = view.GetLinkMap();
         links.Get<Text>("Name").text = test.methodToTest.ToStringV2();
-        if (test.testTask.IsFaulted) {
+        if (test.testTask == null) {
+            links.Get<Text>("Status").text = "Not started yet";
+            links.Get<Image>("StatusColor").color = Color.white;
+        } else if (test.testTask.IsFaulted) {
             links.Get<Text>("Status").text = "Error: " + test.reportedError;
             links.Get<Image>("StatusColor").color = Color.red;
             Log.e("" + test.reportedError);
@@ -47,39 +50,21 @@ public class XunitTestRunnerUi : MonoBehaviour {
     public IEnumerator RunAllTests(InfiniteScroll listUi) {
         var errorCollector = new LogForXunitTestRunnerInUnity();
         var allClasses = typeof(MathTests).Assembly.GetExportedTypes();
-        foreach (var classToTest in allClasses) {
+        allTests = XunitTestRunner.CollectAllTests(allClasses, delegate {
+            //// setup before each test, use same error collector for all tests:
+            Log.instance = errorCollector;
+        });
+        AssertV2.AreNotEqual(0, allTests.Count);
+        listUi.InitData(allTests.Count);
+        foreach (var startedTest in allTests) {
+            startedTest.StartTest();
             yield return new WaitForEndOfFrame();
-            var testIterator = XunitTestRunner.CreateExecutionIterator(classToTest, delegate {
-                //// setup before each test, use same error collector for all tests:
-                Log.instance = errorCollector;
-            });
-            foreach (var startedTest in testIterator) {
-                // The test now started:
-                startedTests.Add(startedTest);
-
-                try {
-                    if (startedTests.Count == 1) {
-                        listUi.InitData(1);
-                    } else {
-                        // Trigger add next test to UI:
-                        listUi.ApplyDataTo(startedTests.Count - 1, startedTests.Count, InfiniteScroll.Direction.Bottom);
-                    }
-                }
-                catch (Exception e) { Log.w("" + e); }
-
-                yield return new WaitForEndOfFrame();
-                var t = Log.MethodEntered("Now running test " + startedTest);
-                startedTest.StartTest();
-                yield return startedTest.testTask.AsCoroutine((e) => { Debug.LogError(e); }, timeoutInMs);
-                Log.MethodDone(t);
-                yield return new WaitForEndOfFrame();
-
-                listUi.UpdateVisible();
-            }
+            listUi.UpdateVisible();
+            yield return startedTest.testTask.AsCoroutine((e) => { Debug.LogError(e); }, timeoutInMs);
+            yield return new WaitForEndOfFrame();
+            listUi.UpdateVisible();
         }
-
-        AssertV2.AreEqual(0, startedTests.Filter(t => t.testTask.IsFaulted).Count());
-
+        AssertV2.AreEqual(0, allTests.Filter(t => t.testTask.IsFaulted).Count());
     }
 
 }

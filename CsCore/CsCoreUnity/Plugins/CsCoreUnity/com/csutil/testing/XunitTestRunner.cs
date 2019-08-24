@@ -35,13 +35,22 @@ namespace com.csutil.testing {
 
         }
 
-        public static IEnumerable<Test> CreateExecutionIterator(Type classToTest, Action<Test> onTestStarted) {
-            IEnumerable<MethodInfo> methodsToTest = GetMethodsToTest(classToTest);
-            return methodsToTest.Map(methodToTest => {
+        public static List<Test> CollectAllTests(IEnumerable<Type> classesToTest, Action<Test> onTestStarted) {
+            var allTests = new List<Test>();
+            foreach (var classToTest in classesToTest) {
+                allTests.AddRange(GetIteratorOverAllTests(classToTest, onTestStarted));
+            }
+            return allTests;
+        }
+
+        public static IEnumerable<Test> GetIteratorOverAllTests(Type classToTest, Action<Test> onTestStarted) {
+            return GetMethodsToTest(classToTest).Map((methodToTest) => {
                 var test = new Test(CreateInstance(classToTest), methodToTest);
-                ResetStaticInstances();
-                onTestStarted(test);
-                test.StartTest = () => { test.testTask = RunTestOnMethod(test); };
+                test.StartTest = () => {
+                    ResetStaticInstances();
+                    onTestStarted(test);
+                    test.testTask = RunTestOnMethod(test);
+                };
                 return test;
             });
         }
