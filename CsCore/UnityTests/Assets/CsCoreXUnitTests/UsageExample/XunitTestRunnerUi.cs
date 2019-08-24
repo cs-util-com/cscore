@@ -69,6 +69,7 @@ public class XunitTestRunnerUi : MonoBehaviour {
 
                 yield return new WaitForEndOfFrame();
                 var t = Log.MethodEntered("Now running test " + startedTest);
+                startedTest.StartTest();
                 yield return startedTest.testTask.AsCoroutine((e) => { Debug.LogError(e); }, timeoutInMs);
                 Log.MethodDone(t);
                 yield return new WaitForEndOfFrame();

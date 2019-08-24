@@ -17,6 +17,7 @@ namespace com.csutil.testing {
             public object classInstance;
             public MethodInfo methodToTest;
             public Task testTask;
+            public Action StartTest;
             public object invokeResult;
             public ExceptionDispatchInfo reportedError;
 
@@ -40,7 +41,7 @@ namespace com.csutil.testing {
                 var test = new Test(CreateInstance(classToTest), methodToTest);
                 ResetStaticInstances();
                 onTestStarted(test);
-                test.testTask = RunTestOnMethod(test);
+                test.StartTest = () => { test.testTask = RunTestOnMethod(test); };
                 return test;
             });
         }
