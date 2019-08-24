@@ -18,13 +18,13 @@ namespace com.csutil.tests {
             // Execute a task after a defined time:
             myMonoBehaviour.ExecuteDelayed(() => {
                 Log.d("I am executed after 0.6 seconds");
-            }, delayInSecBeforeExecution: 0.6f);
+            }, delayInMsBeforeExecution: 600);
 
             // Execute a task multiple times:
             myMonoBehaviour.ExecuteRepeated(() => {
                 Log.d("I am executed every 0.3 seconds until I return false");
                 return true;
-            }, delayInSecBetweenIterations: 0.3f, delayInSecBeforeFirstExecution: .2f);
+            }, delayInMsBetweenIterations: 300, delayInMsBeforeFirstExecution: 200);
 
             yield return null;
         }
@@ -37,7 +37,7 @@ namespace com.csutil.tests {
                 MonoBehaviour myMonoBehaviour = CreateSomeMonoBehaviour();
                 myMonoBehaviour.ExecuteDelayed(() => {
                     counter++;
-                }, delayInSecBeforeExecution: 0.6f);
+                }, delayInMsBeforeExecution: 600);
             }
             { // while the delayed task is running check over time if the counter increases:
                 yield return new WaitForSeconds(.5f);
@@ -48,6 +48,10 @@ namespace com.csutil.tests {
                 Assert.AreEqual(1, counter);
             }
 
+            int firstDelayInMs = 100;
+            var x = firstDelayInMs / 1000f;
+            Assert.IsTrue(x > 0);
+            Assert.AreEqual(0.1f, x);
         }
 
         [UnityTest]
@@ -59,7 +63,7 @@ namespace com.csutil.tests {
                 myMonoBehaviour.ExecuteRepeated(() => {
                     counter++;
                     return counter < 3; // stop repeated execution once 3 is reached
-                }, delayInSecBetweenIterations: 0.3f, delayInSecBeforeFirstExecution: .2f);
+                }, delayInMsBetweenIterations: 300, delayInMsBeforeFirstExecution: 200);
             }
             { // while the repeated task is running check over time if the counter increases:
                 yield return new WaitForSeconds(0.1f);
@@ -84,7 +88,7 @@ namespace com.csutil.tests {
                 myMonoBehaviour.ExecuteRepeated(() => {
                     counter++;
                     return true; // the function will never tell the loop to stop
-                }, delayInSecBetweenIterations: 0.1f, repetitions: 3); // stop repeated execution once 3 is reached
+                }, delayInMsBetweenIterations: 100, repetitions: 3); // stop repeated execution once 3 is reached
                 Assert.AreEqual(1, counter); // no delayInSecBeforeFirstExecution is set to task will instantly be executed
             }
             { // while the repeated task is running check over time if the counter increases:

@@ -12,10 +12,12 @@ namespace com.csutil.tests {
     public class XunitTestRunnerTests {
 
         [UnityTest]
-        public IEnumerator ExampleUsage1() {
+        public IEnumerator RunXunitTest_DataStoreExample2() {
+            yield return RunTestsInClass(typeof(DataStoreExample2));
+        }
 
-            //yield return RunTestsInClass(typeof(DataStoreExample2));
-
+        //[UnityTest]
+        public IEnumerator RunAllXunitTest() {
             var allClasses = typeof(MathTests).Assembly.GetExportedTypes();
             foreach (var classToTest in allClasses) {
                 yield return RunTestsInClass(classToTest);
@@ -23,7 +25,10 @@ namespace com.csutil.tests {
         }
 
         private IEnumerator RunTestsInClass(Type classToTest) {
-            var runningTests = XunitTestRunner.RunTestsOnClass(classToTest);
+            var runningTests = XunitTestRunner.CreateExecutionIterator(classToTest, delegate {
+                // setup before each test
+                Log.instance = new LogForXunitTestRunnerInUnity();
+            });
             foreach (var runningTest in runningTests) { yield return LogTest(runningTest); }
         }
 
@@ -32,7 +37,7 @@ namespace com.csutil.tests {
             yield return new WaitForSeconds(0.1f);
             yield return runningTest.testTask.AsCoroutine((e) => { Debug.LogWarning(e); }, timeoutInMs: 60000);
             Log.MethodDone(t);
-            if (runningTest.testFailed) {
+            if (runningTest.testTask.IsFaulted) {
                 Debug.LogWarning("Error in test " + runningTest);
                 yield return new WaitForSeconds(0.1f);
                 Log.w("" + runningTest, runningTest.reportedError.SourceException);

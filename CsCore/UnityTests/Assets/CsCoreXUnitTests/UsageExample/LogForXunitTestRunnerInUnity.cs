@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace com.csutil.testing {
 
-    class LogForXunitTestRunnerInUnity : LogToUnityDebugLog {
+    public class LogForXunitTestRunnerInUnity : LogToUnityDebugLog {
 
         public List<KeyValuePair<string, object[]>> collectedErrors = new List<KeyValuePair<string, object[]>>();
 

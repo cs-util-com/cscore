@@ -21,8 +21,11 @@ namespace com.csutil {
         }
 
         public static T Get<T>(this Dictionary<string, Link> self, string id) {
-            if (typeof(T) == typeof(GameObject)) { return (T)(object)self[id].gameObject; }
-            return self[id].GetComponent<T>();
+            try {
+                if (typeof(T) == typeof(GameObject)) { return (T)(object)self[id].gameObject; }
+                return self[id].GetComponent<T>();
+            }
+            catch (KeyNotFoundException e) { throw new KeyNotFoundException("No Link found with id=" + id); }
         }
 
     }

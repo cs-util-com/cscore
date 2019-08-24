@@ -17,7 +17,7 @@ namespace com.csutil {
         }
 
         public static IEnumerator AsCoroutine(this Task self, Action<Exception> onError, int timeoutInMs = -1, int waitIntervalInMs = 20) {
-            var waitIntervalBeforeNextCheck = new WaitForSeconds(waitIntervalInMs);
+            var waitIntervalBeforeNextCheck = new WaitForSeconds(waitIntervalInMs / 1000f);
             Stopwatch timer = timeoutInMs > 0 ? Stopwatch.StartNew() : null;
             while (!self.IsCompleted) {
                 yield return waitIntervalBeforeNextCheck;
@@ -40,14 +40,14 @@ namespace com.csutil {
         }
 
         public static Coroutine ExecuteRepeated(this MonoBehaviour self, Func<bool> task,
-            float delayInSecBetweenIterations, float delayInSecBeforeFirstExecution = 0, float repetitions = -1) {
+            int delayInMsBetweenIterations, int delayInMsBeforeFirstExecution = 0, float repetitions = -1) {
             if (!self.isActiveAndEnabled) { throw new Exception("ExecuteRepeated called on inactive mono"); }
-            return self.StartCoroutine(ExecuteRepeated(task, self, delayInSecBetweenIterations, delayInSecBeforeFirstExecution, repetitions));
+            return self.StartCoroutine(ExecuteRepeated(task, self, delayInMsBetweenIterations, delayInMsBeforeFirstExecution, repetitions));
         }
 
-        private static IEnumerator ExecuteRepeated(Func<bool> task, MonoBehaviour mono, float repeatDelay, float firstDelay = 0, float rep = -1) {
-            if (firstDelay > 0) { yield return new WaitForSeconds(firstDelay); }
-            var waitTask = new WaitForSeconds(repeatDelay);
+        private static IEnumerator ExecuteRepeated(Func<bool> task, MonoBehaviour mono, int repeatDelayInMs, int firstDelayInMs = 0, float rep = -1) {
+            if (firstDelayInMs > 0) { yield return new WaitForSeconds(firstDelayInMs / 1000f); }
+            var waitTask = new WaitForSeconds(repeatDelayInMs / 1000f);
             while (rep != 0) {
                 if (mono.enabled) { // pause the repeating task while the parent mono is disabled
                     if (!Run(task)) { break; }
@@ -59,13 +59,13 @@ namespace com.csutil {
 
         private static bool Run(Func<bool> t) { try { return t(); } catch (Exception e) { Log.e(e); } return false; }
 
-        public static Coroutine ExecuteDelayed(this MonoBehaviour self, Action task, float delayInSecBeforeExecution = 0f) {
+        public static Coroutine ExecuteDelayed(this MonoBehaviour self, Action task, int delayInMsBeforeExecution = 0) {
             if (!self.isActiveAndEnabled) { throw new Exception("ExecuteDelayed called on inactive mono"); }
-            return self.StartCoroutine(ExecuteDelayed(task, delayInSecBeforeExecution));
+            return self.StartCoroutine(ExecuteDelayed(task, delayInMsBeforeExecution));
         }
 
-        private static IEnumerator ExecuteDelayed(Action task, float d1) {
-            if (d1 > 0) { yield return new WaitForSeconds(d1); } else { yield return new WaitForEndOfFrame(); }
+        private static IEnumerator ExecuteDelayed(Action task, int delayMs) {
+            if (delayMs > 0) { yield return new WaitForSeconds(delayMs / 1000f); } else { yield return new WaitForEndOfFrame(); }
             try { task(); } catch (Exception e) { Log.e(e); }
         }
 

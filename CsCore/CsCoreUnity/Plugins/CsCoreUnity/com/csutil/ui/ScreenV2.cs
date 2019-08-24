@@ -24,7 +24,7 @@ namespace com.csutil {
 
         private void OnEnable() {
             saveScreenSize(); // force initial init
-            this.ExecuteRepeated(checkIfWindowSizeChanged, delayInSecBetweenIterations: 1);
+            this.ExecuteRepeated(checkIfWindowSizeChanged, delayInMsBetweenIterations: 100);
         }
 
         private bool checkIfWindowSizeChanged() {

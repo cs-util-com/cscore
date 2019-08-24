@@ -19,8 +19,6 @@ namespace com.csutil.testing {
             public Task testTask;
             public object invokeResult;
             public ExceptionDispatchInfo reportedError;
-            public bool testFailed = true;
-            public bool testFinished = false;
 
             public Test(object classInstance, MethodInfo methodToTest) {
                 this.classInstance = classInstance;
@@ -36,27 +34,26 @@ namespace com.csutil.testing {
 
         }
 
-        public static IEnumerable<Test> RunTestsOnClass(Type classToTest) {
+        public static IEnumerable<Test> CreateExecutionIterator(Type classToTest, Action<Test> onTestStarted) {
             IEnumerable<MethodInfo> methodsToTest = GetMethodsToTest(classToTest);
             return methodsToTest.Map(methodToTest => {
-                var res = new Test(CreateInstance(classToTest), methodToTest);
-                res.testTask = RunTestOnMethod(res);
-                return res;
+                var test = new Test(CreateInstance(classToTest), methodToTest);
+                ResetStaticInstances();
+                onTestStarted(test);
+                test.testTask = RunTestOnMethod(test);
+                return test;
             });
         }
 
-        public static async Task RunTestOnMethod(Test res) {
+        private static async Task RunTestOnMethod(Test res) {
             await Task.Delay(5);
-            ResetStaticInstances();
-            //if (!StaticFieldsSetCorrecty()) { ResetStaticInstances(); }
+            AssertIsUnityLog();
             try {
                 res.invokeResult = res.methodToTest.Invoke(res.classInstance, null);
                 if (res.invokeResult is Task t) {
                     while (!t.IsCompleted) { await Task.Delay(5); }
                     if (t.IsFaulted) { SetError(res, t.Exception); return; }
                 }
-                res.testFailed = false;
-                res.testFinished = true;
             }
             catch (Exception e) { SetError(res, e.InnerException); }
         }
@@ -69,7 +66,6 @@ namespace com.csutil.testing {
             EventBus.instance = new EventBus();
             IoC.inject = new injection.Injector();
             UnitySetup.SetupDefaultSingletonsIfNeeded();
-            Log.instance = new LogForXunitTestRunnerInUnity();
         }
 
         private static void AssertIsUnityLog() {
