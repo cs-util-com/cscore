@@ -16,22 +16,20 @@ using Xunit.Abstractions;
 namespace com.csutil.tests {
 
     /// <summary> Tests the Assert class and other reimplemented Xunit classes </summary>
-    public class xUnitRunnerTests {
+    public class XunitTestRunnerTests {
 
         [UnityTest]
         public IEnumerator ExampleUsage1() {
             XunitTestRunner x = new XunitTestRunner();
             var classToTest = typeof(MathTests);
             var tests = XunitTestRunner.RunTestsOnClass(classToTest);
-            Assert.AreEqual(2, tests.Count());
             foreach (var test in tests) {
                 yield return test.AsCoroutine();
                 if (test.Result.testFailed) {
-                    Log.e(test.Result.reportedError.SourceException);
-                    Assert.Fail("" + test.Result);
+                    Log.e("" + test.Result, test.Result.reportedError.SourceException);
+                    Assert.Fail("" + test.Result.reportedError.SourceException);
                 }
             }
-            Assert.Fail("End of test");
         }
 
     }

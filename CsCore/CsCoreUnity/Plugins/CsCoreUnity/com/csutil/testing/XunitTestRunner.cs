@@ -27,7 +27,7 @@ namespace com.csutil.testing {
             }
 
             public override string ToString() {
-                var res = "" + methodToTest + ": ";
+                var res = methodToTest.ToStringV2() + ": ";
                 res = (invokeResult != null) ? res + invokeResult : res;
                 res = (reportedError != null) ? res + reportedError.SourceException.Message : res;
                 return res;
@@ -49,14 +49,19 @@ namespace com.csutil.testing {
             var res = new TestResult(classInstance, methodToTest);
             try {
                 res.invokeResult = methodToTest.Invoke(classInstance, null);
-                if (res.invokeResult is Task t) { await t; }
+                if (res.invokeResult is Task t) {
+                    while (!t.IsCompleted) { await Task.Delay(5); }
+                    if (t.IsFaulted) { SetError(res, t.Exception); return res; }
+                }
                 res.testFailed = false;
                 res.testFinished = true;
             }
-            catch (TargetInvocationException e) {
-                res.reportedError = ExceptionDispatchInfo.Capture(e.InnerException);
-            }
+            catch (Exception e) { SetError(res, e.InnerException); }
             return res;
+        }
+
+        private static void SetError(TestResult res, Exception e2) {
+            res.reportedError = ExceptionDispatchInfo.Capture(e2);
         }
 
         private static void ResetStaticInstances() {

@@ -6,10 +6,15 @@ using System.Threading.Tasks;
 
 namespace Xunit {
 
+    public class AssertException : Exception {
+        public AssertException() { }
+        public AssertException(string message) : base(message) { }
+    }
+
     public class Assert {
 
         public static void True(bool b, string msg = null) {
-            if (!b) { throw (msg != null) ? new Exception(msg) : new Exception(); }
+            if (!b) { throw (msg != null) ? new AssertException(msg) : new AssertException(); }
         }
 
         public static void False(bool b, string msg = null) { True(!b, msg); }
@@ -41,14 +46,14 @@ namespace Xunit {
             var notThrown = false;
             try { a(); notThrown = true; }
             catch (T) { }
-            if (notThrown) { throw new Exception("Did not throw " + typeof(T)); }
+            if (notThrown) { throw new AssertException("Did not throw " + typeof(T)); }
         }
 
         public static async Task ThrowsAsync<T>(Func<Task> a) where T : Exception {
             var notThrown = false;
             try { await a(); notThrown = true; }
             catch (T) { }
-            if (notThrown) { throw new Exception("Did not throw " + typeof(T)); }
+            if (notThrown) { throw new AssertException("Did not throw " + typeof(T)); }
         }
 
         public static void Same<T>(T objA, T objB) {
@@ -69,7 +74,7 @@ namespace Xunit {
 
         public static void Contains(object obj, IEnumerable e) {
             foreach (var i in e) { if (Equals(obj, i)) { return; } }
-            throw new Exception("Not found in " + e + ":" + obj);
+            throw new AssertException("Not found in " + e + ":" + obj);
         }
 
     }

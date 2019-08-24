@@ -18,5 +18,7 @@ namespace com.csutil {
             return self.GetCustomAttributes(typeof(T), inherit).Any();
         }
 
+        public static string ToStringV2(this MemberInfo m) { return m.DeclaringType.Name + "." + m.Name; }
+
     }
 }

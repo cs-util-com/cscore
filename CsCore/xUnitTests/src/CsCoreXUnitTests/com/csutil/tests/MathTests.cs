@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace com.csutil.tests {
@@ -13,11 +14,11 @@ namespace com.csutil.tests {
             float average = 0;
 
             average = AddValue(someNumbers, 4, average);
-            Assert.Equal(4, average);
+            Assert.Equal(4f, average);
             average = AddValue(someNumbers, 6, average);
-            Assert.Equal(5, average);
+            Assert.Equal(5f, average);
             average = AddValue(someNumbers, 8, average);
-            Assert.Equal(6, average);
+            Assert.Equal(6f, average);
 
         }
 
