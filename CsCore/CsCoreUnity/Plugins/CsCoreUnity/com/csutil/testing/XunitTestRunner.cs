@@ -57,7 +57,6 @@ namespace com.csutil.testing {
 
         private static async Task RunTestOnMethod(Test res) {
             await Task.Delay(5);
-            AssertIsUnityLog();
             try {
                 res.invokeResult = res.methodToTest.Invoke(res.classInstance, null);
                 if (res.invokeResult is Task t) {
@@ -77,12 +76,6 @@ namespace com.csutil.testing {
             IoC.inject = new injection.Injector();
             UnitySetup.SetupDefaultSingletonsIfNeeded();
         }
-
-        private static void AssertIsUnityLog() {
-            Assert.True(StaticFieldsSetCorrecty(), "Log.instance=" + Log.instance.GetType());
-        }
-
-        private static bool StaticFieldsSetCorrecty() { return Log.instance is LogToUnityDebugLog; }
 
         private static IEnumerable<MethodInfo> GetMethodsToTest(Type classToTest) {
             var f = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;

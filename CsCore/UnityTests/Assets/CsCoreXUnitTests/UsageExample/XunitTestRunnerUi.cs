@@ -18,16 +18,14 @@ public class XunitTestRunnerUi : MonoBehaviour {
     private void OnEnable() {
         var links = gameObject.GetLinkMap();
         var listUi = links.Get<InfiniteScroll>("HorizontalScrollView");
-        listUi.OnHeight += OnHeight;
-        listUi.OnFill += OnFill;
+        listUi.OnHeight += GetHeightOfEachViewEntry;
+        listUi.OnFill += FillViewWithModelEntry;
         links.Get<Button>("StartButton").SetOnClickAction(delegate { StartCoroutine(RunAllTests(listUi)); });
     }
 
-    private int OnHeight(int index) {
-        return defaultEntryHeight;
-    }
+    private int GetHeightOfEachViewEntry(int index) { return defaultEntryHeight; }
 
-    private void OnFill(int pos, GameObject view) {
+    private void FillViewWithModelEntry(int pos, GameObject view) {
         var test = allTests[pos];
         var links = view.GetLinkMap();
         links.Get<Text>("Name").text = test.methodToTest.ToStringV2();
@@ -56,11 +54,11 @@ public class XunitTestRunnerUi : MonoBehaviour {
         });
         AssertV2.AreNotEqual(0, allTests.Count);
         listUi.InitData(allTests.Count);
-        foreach (var startedTest in allTests) {
-            startedTest.StartTest();
+        foreach (var test in allTests) {
+            test.StartTest();
             yield return new WaitForEndOfFrame();
             listUi.UpdateVisible();
-            yield return startedTest.testTask.AsCoroutine((e) => { Debug.LogError(e); }, timeoutInMs);
+            yield return test.testTask.AsCoroutine((e) => { Debug.LogError(e); }, timeoutInMs);
             yield return new WaitForEndOfFrame();
             listUi.UpdateVisible();
         }
