@@ -68,6 +68,7 @@ namespace com.csutil.testing {
             EventBus.instance = new EventBus();
             IoC.inject = new injection.Injector();
             UnitySetup.SetupDefaultSingletonsIfNeeded();
+            Log.instance = new LogForXunitTestRunnerInUnity();
         }
 
         private static void AssertIsUnityLog() {

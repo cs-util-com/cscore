@@ -21,13 +21,17 @@ namespace com.csutil.tests {
         [UnityTest]
         public IEnumerator ExampleUsage1() {
             XunitTestRunner x = new XunitTestRunner();
-            var classToTest = typeof(MathTests);
-            var tests = XunitTestRunner.RunTestsOnClass(classToTest);
-            foreach (var test in tests) {
-                yield return test.AsCoroutine();
-                if (test.Result.testFailed) {
-                    Log.e("" + test.Result, test.Result.reportedError.SourceException);
-                    Assert.Fail("" + test.Result.reportedError.SourceException);
+            var allClasses = typeof(MathTests).Assembly.GetExportedTypes();
+            foreach (var classToTest in allClasses) {
+                var tests = XunitTestRunner.RunTestsOnClass(classToTest);
+                foreach (var test in tests) {
+                    yield return test.AsCoroutine();
+                    if (test.Result.testFailed) {
+                        Log.w("" + test.Result, test.Result.reportedError.SourceException);
+                        Debug.LogError(test.Result.reportedError.SourceException);
+                        yield return new WaitForSeconds(0.1f);
+                        Assert.Fail("" + test.Result.reportedError.SourceException);
+                    }
                 }
             }
         }

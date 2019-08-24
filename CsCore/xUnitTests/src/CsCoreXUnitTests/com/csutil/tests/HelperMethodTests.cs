@@ -219,7 +219,7 @@ namespace com.csutil.tests {
         private static Task CreateAndRunATaskThatFails() {
             Task myFailedTask = null;
             Assert.Throws<AggregateException>(() => {
-                myFailedTask = Task.Run(() => { throw Log.e("Some error"); });
+                myFailedTask = Task.Run(() => { throw new Exception("Some error"); });
                 myFailedTask.Wait();
             });
             Assert.NotNull(myFailedTask);

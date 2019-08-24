@@ -22,6 +22,18 @@ namespace Xunit {
         public static void Null<T>(T obj) { True(null == obj, "Was NOT null: " + obj); }
         public static void NotNull<T>(T obj) { True(null != obj, "Was null: " + typeof(T)); }
 
+        public static void Equal(double objA, double objB) {
+            True(objA == objB, "Doubles NOT Equal: " + objA + " != " + objB);
+        }
+
+        public static void Equal(decimal objA, decimal objB) {
+            True(objA == objB, "Numbers NOT Equal: " + objA + " != " + objB);
+        }
+
+        public static void Equal(int objA, int objB) {
+            True(objA == objB, "Ints NOT Equal: " + objA + " != " + objB);
+        }
+
         public static void Equal(object objA, object objB) {
             True(eq(objA, objB), "NOT Equal: \n " + objA + " \n and \n " + objB);
         }

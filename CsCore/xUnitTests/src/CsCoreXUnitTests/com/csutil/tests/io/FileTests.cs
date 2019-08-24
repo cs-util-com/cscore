@@ -133,12 +133,6 @@ namespace com.csutil.tests {
                 Assert.False(new DirectoryInfo(oldPath).Exists);
                 Assert.True(dir1.Exists);
                 Assert.Equal(newName, dir1.NameV2());
-
-                // DirectoryInfo.Name does not correctly update after renaming, 
-                // Thats why DirectoryInfo.name must return an incorrect value:
-                Assert.NotEqual(newName, dir1.Name);
-                // TODO is DirectoryInfo.Name broken for all .net versions?
-
             }
 
         }

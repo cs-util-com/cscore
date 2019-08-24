@@ -10,7 +10,7 @@ namespace com.csutil {
     public static class TaskExtensions {
 
         public static void ThrowIfException(this Task self) {
-            if (self.Exception != null) { throw Log.e(self.Exception); }
+            if (self.Exception != null) { throw self.Exception; }
         }
 
     }
