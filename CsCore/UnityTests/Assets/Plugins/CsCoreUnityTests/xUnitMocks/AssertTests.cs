@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using UnityEngine.TestTools;
 using Xunit;
 
 namespace com.csutil.tests {
 
-    /// <summary> Tests the Assert class and other reimplemented Xunit classes </summary>
-    public class xUnitRunnerTests {
+    public class AssertTests {
 
         private void Throws(Action a) {
             var noException = false;
@@ -27,6 +24,7 @@ namespace com.csutil.tests {
             Throws(() => { Assert.Null(""); });
             Throws(() => { Assert.NotNull<string>(null); });
 
+            Assert.Equal(4, 4);
             Throws(() => { Assert.Equal(3, 1 + 1); });
             Throws(() => { Assert.NotEqual(2, 1 + 1); });
 
@@ -70,7 +68,7 @@ namespace com.csutil.tests {
             yield return Task.Run(TestThrowsAsyncPart2).AsCoroutine();
         }
 
-        private async void TestThrowsAsyncPart2() {
+        private async Task TestThrowsAsyncPart2() {
             try {
                 await Assert.ThrowsAsync<FormatException>(async () => {
                     await Task.Delay(10);
