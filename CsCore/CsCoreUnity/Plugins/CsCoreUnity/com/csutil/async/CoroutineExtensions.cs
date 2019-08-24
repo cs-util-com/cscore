@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,27 +11,32 @@ namespace com.csutil {
 
     public static class CoroutineExtensions {
 
-        public static IEnumerator AsCoroutine(this Task self, float waitInterval = 0.02f) {
+        public static IEnumerator AsCoroutine(this Task self, int timeoutInMs = -1, int waitIntervalInMs = 20) {
             Action<Exception> defaultOnErrorAction = (e) => { throw e; };
-            yield return AsCoroutine(self, defaultOnErrorAction, waitInterval);
+            yield return AsCoroutine(self, defaultOnErrorAction, timeoutInMs, waitIntervalInMs);
         }
 
-        public static IEnumerator AsCoroutine(this Task self, Action<Exception> onError, float waitInterval = 0.02f) {
-            var waitIntervalBeforeNextCheck = new WaitForSeconds(waitInterval);
+        public static IEnumerator AsCoroutine(this Task self, Action<Exception> onError, int timeoutInMs = -1, int waitIntervalInMs = 20) {
+            var waitIntervalBeforeNextCheck = new WaitForSeconds(waitIntervalInMs);
+            Stopwatch timer = timeoutInMs > 0 ? Stopwatch.StartNew() : null;
             while (!self.IsCompleted) {
                 yield return waitIntervalBeforeNextCheck;
                 AssertV2.IsTrue(self.Status != TaskStatus.WaitingToRun, "Task is WaitingToRun");
+                if (timer != null && timeoutInMs < timer.ElapsedMilliseconds) {
+                    onError(new TimeoutException("Task timeout after " + timer.ElapsedMilliseconds + "ms"));
+                    break;
+                }
             }
             if (self.IsFaulted) { onError.InvokeIfNotNull(self.Exception); }
             yield return null;
         }
 
-        public static IEnumerator AsCoroutine(this TaskRunner.MonitoredTask self, float waitInterval = 0.02f) {
-            return self.task.AsCoroutine(waitInterval);
+        public static IEnumerator AsCoroutine(this TaskRunner.MonitoredTask self, int timeoutInMs = -1, int waitIntervalInMs = 20) {
+            return self.task.AsCoroutine(timeoutInMs, waitIntervalInMs);
         }
 
-        public static IEnumerator AsCoroutine<T>(this TaskRunner.MonitoredTask<T> self, float waitInterval = 0.02f) {
-            return self.task.AsCoroutine(waitInterval);
+        public static IEnumerator AsCoroutine<T>(this TaskRunner.MonitoredTask<T> self, int timeoutInMs = -1, int waitIntervalInMs = 20) {
+            return self.task.AsCoroutine(timeoutInMs, waitIntervalInMs);
         }
 
         public static Coroutine ExecuteRepeated(this MonoBehaviour self, Func<bool> task,

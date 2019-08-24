@@ -35,19 +35,17 @@ namespace Xunit {
         }
 
         public static void Equal(object objA, object objB) {
-            True(eq(objA, objB), "NOT Equal: \n " + objA + " \n and \n " + objB);
+            True(Eq(objA, objB), "NOT Equal: \n " + objA + " \n and \n " + objB);
         }
 
-        private static bool eq(object objA, object objB) {
+        private static bool Eq(object objA, object objB) {
             if (ReferenceEquals(objA, objB)) { return true; }
-            if (objA is IComparable c1 && objB is IComparable c2) {
-                return c1.CompareTo(objB) == 0;
-            }
+            if (objA is IComparable c1 && objB is IComparable c2) { return c1.CompareTo(c2) == 0; }
             return objA == objB || Equals(objA, objB);
         }
 
         public static void NotEqual(object objA, object objB) {
-            True(!eq(objA, objB), "EQUAL: \n " + objA + " \n and \n " + objB);
+            True(!Eq(objA, objB), "EQUAL: \n " + objA + " \n and \n " + objB);
         }
 
         public static void IsType<T>(object obj) where T : class {
@@ -85,8 +83,14 @@ namespace Xunit {
         public static void NotEmpty<T>(IEnumerable<T> e) { NotEqual(0, e.Count()); }
 
         public static void Contains(object obj, IEnumerable e) {
-            foreach (var i in e) { if (Equals(obj, i)) { return; } }
+            foreach (var i in e) { if (Eq(obj, i)) { return; } }
             throw new AssertException("Not found in " + e + ":" + obj);
+        }
+
+        public static void Contains(string subString, string fullString) {
+            if (!fullString.Contains(subString)) {
+                throw new AssertException("'" + subString + "' not substring of '" + fullString + "'");
+            }
         }
 
     }

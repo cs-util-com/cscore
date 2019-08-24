@@ -38,7 +38,7 @@ namespace com.csutil.tests.model.immutable {
             var undoReducer = undoable.wrap(MyReducers1.ReduceMyAppState1);
 
             var data = new MyAppState1(); // the initial immutable state
-            var store = new DataStore<MyAppState1>(undoReducer, data, loggingMiddleware, thunkMiddleware, recMiddleware);
+            var store = new DataStore<MyAppState1>(undoReducer, data, loggingMiddleware, recMiddleware, thunkMiddleware);
             store.storeName = "Store 1";
 
             TestNormalDispatchOfActions(store);

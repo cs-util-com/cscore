@@ -9,10 +9,12 @@ namespace com.csutil.io {
 
     class EnvironmentV2Unity : EnvironmentV2 {
 
+        /// <summary>
+        /// Base impl. would return C:\Users\User123\AppData\Local\Temp\ 
+        /// Unity impl. will return C:\Users\User123\AppData\Local\Temp\DefaultCompany\UnityTestsA\
+        /// </summary>
         public override DirectoryInfo GetRootTempFolder() {
-            var d = new DirectoryInfo(Application.temporaryCachePath);
-            AssertV2.AreEqual(base.GetRootTempFolder().FullPath(), d.FullPath()); // TODO test this
-            return d;
+            return new DirectoryInfo(Application.temporaryCachePath);
         }
 
     }

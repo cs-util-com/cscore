@@ -12,16 +12,17 @@ namespace com.csutil.testing {
 
     public class XunitTestRunner {
 
-        public class TestResult {
+        public class Test {
 
             public object classInstance;
             public MethodInfo methodToTest;
+            public Task testTask;
             public object invokeResult;
             public ExceptionDispatchInfo reportedError;
             public bool testFailed = true;
             public bool testFinished = false;
 
-            public TestResult(object classInstance, MethodInfo methodToTest) {
+            public Test(object classInstance, MethodInfo methodToTest) {
                 this.classInstance = classInstance;
                 this.methodToTest = methodToTest;
             }
@@ -35,32 +36,32 @@ namespace com.csutil.testing {
 
         }
 
-        public static IEnumerable<Task<TestResult>> RunTestsOnClass(Type classToTest) {
+        public static IEnumerable<Test> RunTestsOnClass(Type classToTest) {
             IEnumerable<MethodInfo> methodsToTest = GetMethodsToTest(classToTest);
-            Assert.NotEmpty(methodsToTest);
-            return methodsToTest.Map(async methodToTest => {
-                return await RunTestOnMethod(CreateInstance(classToTest), methodToTest);
+            return methodsToTest.Map(methodToTest => {
+                var res = new Test(CreateInstance(classToTest), methodToTest);
+                res.testTask = RunTestOnMethod(res);
+                return res;
             });
         }
 
-        public static async Task<TestResult> RunTestOnMethod(object classInstance, MethodInfo methodToTest) {
+        public static async Task RunTestOnMethod(Test res) {
+            await Task.Delay(5);
             ResetStaticInstances();
             //if (!StaticFieldsSetCorrecty()) { ResetStaticInstances(); }
-            var res = new TestResult(classInstance, methodToTest);
             try {
-                res.invokeResult = methodToTest.Invoke(classInstance, null);
+                res.invokeResult = res.methodToTest.Invoke(res.classInstance, null);
                 if (res.invokeResult is Task t) {
                     while (!t.IsCompleted) { await Task.Delay(5); }
-                    if (t.IsFaulted) { SetError(res, t.Exception); return res; }
+                    if (t.IsFaulted) { SetError(res, t.Exception); return; }
                 }
                 res.testFailed = false;
                 res.testFinished = true;
             }
             catch (Exception e) { SetError(res, e.InnerException); }
-            return res;
         }
 
-        private static void SetError(TestResult res, Exception e2) {
+        private static void SetError(Test res, Exception e2) {
             res.reportedError = ExceptionDispatchInfo.Capture(e2);
         }
 

@@ -1,17 +1,10 @@
 ﻿using com.csutil.logging;
 using com.csutil.testing;
-using NUnit.Framework;
+using com.csutil.tests.model.immutable;
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.ExceptionServices;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.TestTools;
-using Xunit.Abstractions;
 
 namespace com.csutil.tests {
 
@@ -20,22 +13,34 @@ namespace com.csutil.tests {
 
         [UnityTest]
         public IEnumerator ExampleUsage1() {
-            XunitTestRunner x = new XunitTestRunner();
+
+            //yield return RunTestsInClass(typeof(DataStoreExample2));
+
             var allClasses = typeof(MathTests).Assembly.GetExportedTypes();
             foreach (var classToTest in allClasses) {
-                var tests = XunitTestRunner.RunTestsOnClass(classToTest);
-                foreach (var test in tests) {
-                    yield return test.AsCoroutine();
-                    if (test.Result.testFailed) {
-                        Log.w("" + test.Result, test.Result.reportedError.SourceException);
-                        Debug.LogError(test.Result.reportedError.SourceException);
-                        yield return new WaitForSeconds(0.1f);
-                        Assert.Fail("" + test.Result.reportedError.SourceException);
-                    }
-                }
+                yield return RunTestsInClass(classToTest);
             }
         }
 
+        private IEnumerator RunTestsInClass(Type classToTest) {
+            var runningTests = XunitTestRunner.RunTestsOnClass(classToTest);
+            foreach (var runningTest in runningTests) { yield return LogTest(runningTest); }
+        }
+
+        private IEnumerator LogTest(XunitTestRunner.Test runningTest) {
+            var t = Log.MethodEntered("Now running test " + runningTest);
+            yield return new WaitForSeconds(0.1f);
+            yield return runningTest.testTask.AsCoroutine((e) => { Debug.LogWarning(e); }, timeoutInMs: 60000);
+            Log.MethodDone(t);
+            if (runningTest.testFailed) {
+                Debug.LogWarning("Error in test " + runningTest);
+                yield return new WaitForSeconds(0.1f);
+                Log.w("" + runningTest, runningTest.reportedError.SourceException);
+                Debug.LogError(runningTest.reportedError.SourceException);
+                yield return new WaitForSeconds(0.1f);
+                runningTest.reportedError.Throw();
+            }
+        }
     }
 
 }

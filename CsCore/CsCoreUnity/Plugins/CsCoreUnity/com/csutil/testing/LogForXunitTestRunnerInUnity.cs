@@ -15,6 +15,10 @@ namespace com.csutil.testing {
             collectedErrors.Add(new KeyValuePair<string, object[]>(errorMsg, args));
         }
 
+        protected override void PrintException(Exception e, object[] args) {
+            collectedErrors.Add(new KeyValuePair<string, object[]>("" + e, args));
+        }
+
     }
 
 }

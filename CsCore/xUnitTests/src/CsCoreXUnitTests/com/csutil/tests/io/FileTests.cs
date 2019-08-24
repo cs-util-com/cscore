@@ -134,7 +134,7 @@ namespace com.csutil.tests {
                 Assert.True(dir1.Exists);
                 Assert.Equal(newName, dir1.NameV2());
             }
-
+            rootDir.DeleteV2();
         }
 
         private static void SaveAndLoadTextToFile(FileInfo testFile, string textToSave) {

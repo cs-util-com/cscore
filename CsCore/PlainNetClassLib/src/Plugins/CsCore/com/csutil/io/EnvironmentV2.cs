@@ -15,6 +15,7 @@ namespace com.csutil {
             return GetSpecialFolder(Environment.SpecialFolder.ApplicationData);
         }
 
+        /// <summary> On Windows e.g. C:\Users\User123\AppData\Local\Temp\ </summary>
         public virtual DirectoryInfo GetRootTempFolder() {
             return new DirectoryInfo(Path.GetTempPath());
         }
