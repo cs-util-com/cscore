@@ -29,6 +29,8 @@ namespace com.csutil {
             using (var p = Process.GetCurrentProcess()) { memoryAtStart = p.PrivateMemorySize64; }
         }
 
+        public static StopwatchV2 StartNewV2(string methodName) { return new StopwatchV2(methodName).StartV2(); }
+
         public void StopV2() {
             Stop();
             CaptureMemoryAtStop();

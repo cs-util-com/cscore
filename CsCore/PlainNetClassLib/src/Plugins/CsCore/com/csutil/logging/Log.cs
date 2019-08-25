@@ -95,7 +95,7 @@ namespace com.csutil {
         public static string GetMethodName(this StackFrame self, bool includeParams = true) {
             try {
 #if UNITY_WEBGL
-                return "" + self;
+                return "Method <<" + self + ">>";
 #endif
                 var method = self.GetMethod(); // analyse stack trace for class name:
                 var methodString = method.ReflectedType.Name + "." + method.Name;

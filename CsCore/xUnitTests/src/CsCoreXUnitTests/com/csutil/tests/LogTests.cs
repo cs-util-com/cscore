@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using com.csutil.logging;
 using Xunit;
 
@@ -22,15 +23,38 @@ namespace com.csutil.tests {
         }
 
         [Fact]
-        public void TestLoggingMethodStartAndEnd() {
-            SomeExampleMethod1("I am a string", 123);
+        public void TestLoggingMethodStartOnly() {
+            Stopwatch s = Log.MethodEntered("abc", 123);
+            // ...
+            s.AssertUnderXms(5);
+        }
+
+        [Fact]
+        public void TestLoggingMethodEndOnly() {
+            Stopwatch s = Stopwatch.StartNew();
+            // ...
+            Log.MethodDone(s);
+        }
+
+        [Fact]
+        public void TestLoggingMethodEndOnly2() {
+            var s = StopwatchV2.StartNewV2("TestLoggingMethodEndOnly2");
+            // ...
+            Log.MethodDone(s);
+        }
+
+        [Fact]
+        public async Task TestLoggingMethodStartAndEnd() {
+            await SomeExampleMethod1("I am a string", 123);
         }
 
         // Logging when I method is entered and left:
-        private void SomeExampleMethod1(string s, int i) {
+        private async Task SomeExampleMethod1(string s, int i) {
             Stopwatch timing = Log.MethodEntered("s=" + s, "i=" + i);
             { // .. here would be some method logic ..
-                Thread.Sleep(1);
+                Log.d("Will now work for 5 ms");
+                await TaskV2.Delay(5);
+                Log.d("worked for 5 ms");
             } // .. as the last line in the tracked method add:
             Log.MethodDone(timing, maxAllowedTimeInMs: 200);
         }
