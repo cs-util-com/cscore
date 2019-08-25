@@ -60,7 +60,7 @@ namespace com.csutil.tests.model {
         }
 
         private static Task ParallelExec<T>(IEnumerable<T> data, Action<T> actionPerElement) {
-            return Task.WhenAll(data.Map(elem => Task.Run(() => actionPerElement(elem))));
+            return Task.WhenAll(data.Map(elem => TaskV2.Run(() => actionPerElement(elem))));
         }
 
         private static async Task WriteFiles(List<TreeElem> dataTree, DirectoryInfo testFolder) {

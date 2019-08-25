@@ -65,7 +65,7 @@ namespace com.csutil.tests {
                 await TaskV2.Delay(10);
                 throw new FormatException();
             }).AsCoroutine();
-            yield return Task.Run(TestThrowsAsyncPart2).AsCoroutine();
+            yield return TaskV2.Run(TestThrowsAsyncPart2).AsCoroutine();
         }
 
         private async Task TestThrowsAsyncPart2() {

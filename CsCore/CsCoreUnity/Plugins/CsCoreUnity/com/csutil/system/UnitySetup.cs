@@ -40,7 +40,9 @@ namespace com.csutil {
             Log.instance = IoC.inject.GetOrAddSingleton<ILog>(caller, () => new LogToUnityDebugLog());
             IoC.inject.GetOrAddSingleton<EnvironmentV2>(caller, () => new EnvironmentV2Unity());
             IoC.inject.GetOrAddSingleton<RestFactory>(caller, () => new UnityRestFactory());
-            IoC.inject.GetOrAddSingleton<TaskV2>(caller, () => new TaskV2Unity());
+#if UNITY_WEBGL
+            IoC.inject.GetOrAddSingleton<TaskV2>(caller, () => new TaskV2WebGL());
+#endif
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]

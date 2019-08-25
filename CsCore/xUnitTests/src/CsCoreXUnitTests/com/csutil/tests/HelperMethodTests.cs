@@ -209,22 +209,24 @@ namespace com.csutil.tests {
         }
 
         [Fact]
-        public void TestTaskThrowIfException() {
+        public async Task TestTaskThrowIfException() {
             Task myFailedTask = CreateAndRunATaskThatFails();
+            while (!myFailedTask.IsCompleted) { await TaskV2.Delay(5); }
             Assert.Throws<AggregateException>(() => {
                 myFailedTask.ThrowIfException(); // the task failed so this will throw
             });
         }
 
-        private static Task CreateAndRunATaskThatFails() {
+        private static async Task CreateAndRunATaskThatFails() {
             Task myFailedTask = null;
-            Assert.Throws<AggregateException>(() => {
-                myFailedTask = Task.Run(() => { throw new Exception("Some error"); });
-                myFailedTask.Wait();
+            await Assert.ThrowsAsync<AggregateException>(async () => {
+                myFailedTask = TaskV2.Run(() => { throw new Exception("Some error"); });
+                await myFailedTask;
+                Assert.True(myFailedTask.IsFaulted);
+                Assert.True(myFailedTask.IsCompleted);
             });
             Assert.NotNull(myFailedTask);
             Assert.NotNull(myFailedTask.Exception);
-            return myFailedTask;
         }
 
     }

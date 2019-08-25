@@ -52,7 +52,7 @@ namespace com.csutil.tests.async {
             var tasks = new List<Task>();
             for (int i = 0; i < 100; i++) { // Do 100 calls of the method in parallel:
                 var myIntParam = i;
-                tasks.Add(Task.Run(() => { throttledAction(this, myIntParam); }));
+                tasks.Add(TaskV2.Run(() => { throttledAction(this, myIntParam); }));
             }
             await Task.WhenAll(tasks.ToArray());
             await TaskV2.Delay(1000);

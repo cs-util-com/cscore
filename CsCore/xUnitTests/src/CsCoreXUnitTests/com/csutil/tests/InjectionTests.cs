@@ -224,7 +224,7 @@ namespace com.csutil.tests {
             var IoC_inject = GetInjectorForTest();
             Assert.Null(IoC_inject.Get<MyClass1>(this));
             for (int i = 0; i < 100; i++) {
-                Task.Run(() => {
+                TaskV2.Run(() => {
                     var myContextInstance1 = new MyClass1();
                     IoC_inject.DoWithTempContext<MyClass1>(myContextInstance1, () => {
                         Assert.Equal(myContextInstance1, IoC_inject.Get<MyClass1>(this));
