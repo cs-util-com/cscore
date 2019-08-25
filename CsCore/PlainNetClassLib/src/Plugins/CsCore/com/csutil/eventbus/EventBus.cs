@@ -75,7 +75,7 @@ namespace com.csutil {
                 List<KeyValuePair<object, Delegate>> dictForEventName;
                 map.TryGetValue(eventName, out dictForEventName);
                 if (!dictForEventName.IsNullOrEmpty()) {
-                    var subscriberDelegates = dictForEventName.Map(x => x.Value);
+                    var subscriberDelegates = dictForEventName.Map(x => x.Value).ToList();
                     return subscriberDelegates.Map(subscriberDelegate => {
                         try {
                             object result;

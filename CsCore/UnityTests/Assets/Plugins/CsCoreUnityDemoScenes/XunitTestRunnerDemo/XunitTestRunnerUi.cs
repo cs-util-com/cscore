@@ -11,14 +11,16 @@ using com.csutil.tests;
 
 public class XunitTestRunnerUi : MonoBehaviour {
 
-    public int defaultEntryHeight = 110;
+    public int defaultEntryHeight = 160;
     public int timeoutInMs = 30000;
-    public bool stopOnFirstError = false;
+    public bool autoRunAllTests = false;
+
     private List<XunitTestRunner.Test> allTests;
+    private InfiniteScroll listUi;
 
     private void OnEnable() {
         var links = gameObject.GetLinkMap();
-        var listUi = links.Get<InfiniteScroll>("HorizontalScrollView");
+        listUi = links.Get<InfiniteScroll>("HorizontalScrollView");
         listUi.OnHeight += GetHeightOfEachViewEntry;
         listUi.OnFill += FillViewWithModelEntry;
         links.Get<Button>("StartButton").SetOnClickAction((button) => {
@@ -32,20 +34,23 @@ public class XunitTestRunnerUi : MonoBehaviour {
     private void FillViewWithModelEntry(int pos, GameObject view) {
         var test = allTests[pos];
         var links = view.GetLinkMap();
+        links.Get<Button>("EntryBackground").SetOnClickAction(delegate {
+            MainThread.instance.StartCoroutine(RunTest(test, listUi));
+        });
         links.Get<Text>("Name").text = test.methodToTest.ToStringV2();
         if (test.testTask == null) {
             links.Get<Text>("Status").text = "Not started yet";
-            links.Get<Image>("StatusColor").color = Color.white;
+            links.Get<Image>("EntryBackground").color = Color.white;
         } else if (test.testTask.IsFaulted) {
             var error = test.testTask.Exception;
             links.Get<Text>("Status").text = "Error: " + error;
-            links.Get<Image>("StatusColor").color = Color.red;
+            links.Get<Image>("EntryBackground").color = Color.red;
         } else if (test.testTask.IsCompleted) {
             links.Get<Text>("Status").text = "Passed";
-            links.Get<Image>("StatusColor").color = Color.green;
+            links.Get<Image>("EntryBackground").color = Color.green;
         } else {
             links.Get<Text>("Status").text = "Running..";
-            links.Get<Image>("StatusColor").color = Color.blue;
+            links.Get<Image>("EntryBackground").color = Color.blue;
         }
     }
 
@@ -56,18 +61,18 @@ public class XunitTestRunnerUi : MonoBehaviour {
         });
         AssertV2.AreNotEqual(0, allTests.Count);
         listUi.InitData(allTests.Count);
-        foreach (var test in allTests) {
-            test.StartTest();
-            yield return new WaitForEndOfFrame();
-            listUi.UpdateVisible();
-            yield return test.testTask.AsCoroutine((e) => { Debug.LogError(e); }, timeoutInMs);
-            yield return new WaitForEndOfFrame();
-            if (stopOnFirstError && test.testTask.IsFaulted && test.reportedError != null) {
-                test.reportedError.Throw();
-            }
-            listUi.UpdateVisible();
+        if (autoRunAllTests) {
+            foreach (var test in allTests) { yield return RunTest(test, listUi); }
+            AssertV2.AreEqual(0, allTests.Filter(t => t.testTask.IsFaulted).Count());
         }
-        AssertV2.AreEqual(0, allTests.Filter(t => t.testTask.IsFaulted).Count());
     }
 
+    private IEnumerator RunTest(XunitTestRunner.Test test, InfiniteScroll listUi) {
+        test.StartTest();
+        yield return new WaitForEndOfFrame();
+        listUi.UpdateVisible();
+        yield return test.testTask.AsCoroutine((e) => { Debug.LogError(e); }, timeoutInMs);
+        yield return new WaitForEndOfFrame();
+        listUi.UpdateVisible();
+    }
 }
