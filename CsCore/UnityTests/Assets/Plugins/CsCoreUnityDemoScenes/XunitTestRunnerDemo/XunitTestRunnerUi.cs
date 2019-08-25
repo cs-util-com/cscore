@@ -23,9 +23,19 @@ public class XunitTestRunnerUi : MonoBehaviour {
         listUi = links.Get<InfiniteScroll>("HorizontalScrollView");
         listUi.OnHeight += GetHeightOfEachViewEntry;
         listUi.OnFill += FillViewWithModelEntry;
+        var autoRunToggle = links.Get<Toggle>("AutoRunToggle");
+        autoRunToggle.isOn = autoRunAllTests;
+        autoRunToggle.SetOnValueChangedAction(isChecked => {
+            autoRunAllTests = isChecked;
+            return true;
+        });
         links.Get<Button>("StartButton").SetOnClickAction((button) => {
             StartCoroutine(RunAllTests(listUi));
-            links.Get<Text>("ButtonText").text = "Now running " + allTests.Count + " tests..";
+            if (autoRunAllTests) {
+                links.Get<Text>("ButtonText").text = "Now running " + allTests.Count + " tests..";
+            } else {
+                links.Get<Text>("ButtonText").text = "Found " + allTests.Count + " tests (click one to run it)";
+            }
         });
     }
 

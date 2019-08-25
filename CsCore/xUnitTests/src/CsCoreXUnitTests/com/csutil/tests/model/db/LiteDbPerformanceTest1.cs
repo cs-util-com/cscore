@@ -47,7 +47,7 @@ namespace com.csutil.tests.model {
                 var found = elements.FindById(elem.id);
                 Assert.Equal(elem.name, found.name);
             });
-            Log.MethodDone(readTimer, 400);
+            Log.MethodDone(readTimer, 800);
         }
 
         private static async Task InsertIntoDb(List<TreeElem> dataTree, LiteDatabase db) {
