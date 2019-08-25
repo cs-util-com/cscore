@@ -1,4 +1,5 @@
-﻿using com.csutil.http;
+﻿using com.csutil.async;
+using com.csutil.http;
 using com.csutil.io;
 using com.csutil.logging;
 using System;
@@ -39,6 +40,7 @@ namespace com.csutil {
             Log.instance = IoC.inject.GetOrAddSingleton<ILog>(caller, () => new LogToUnityDebugLog());
             IoC.inject.GetOrAddSingleton<EnvironmentV2>(caller, () => new EnvironmentV2Unity());
             IoC.inject.GetOrAddSingleton<RestFactory>(caller, () => new UnityRestFactory());
+            IoC.inject.GetOrAddSingleton<TaskV2>(caller, () => new TaskV2Unity());
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]

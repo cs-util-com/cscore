@@ -18,11 +18,6 @@ namespace com.csutil.tests.async {
             AssertNoAsyncVoidMethods(typeof(EventBus).Assembly); // check in  library 
         }
 
-        private async Task MyExampleAsyncVoidMethod1() {
-            // Test changing this method to "public async void MyExampleAsyncVoidMethod1() {..."
-            await Task.Delay(10);
-        }
-
         private static void AssertNoAsyncVoidMethods(Assembly assembly) {
             var messages = GetAsyncVoidMethods(assembly)
                 .Select(method => string.Format("'{0}.{1}' is an async void method.", method.DeclaringType.Name, method.Name))

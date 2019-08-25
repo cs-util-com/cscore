@@ -66,8 +66,8 @@ namespace com.csutil.tests.json {
             var parsedConflicts = merge.GetParsedMergeConflicts();
             var firstConflict = parsedConflicts.First();
             Assert.Equal("myString", firstConflict.fieldName);
-            Assert.Equal("abcd", firstConflict.oldValue);
-            Assert.Equal("123", firstConflict.newValue);
+            Assert.Equal("abcd", "" + firstConflict.oldValue);
+            Assert.Equal("123", "" + firstConflict.newValue);
 
             //Log.d("merge2.conflicts=" + JsonWriter.AsPrettyString(merge2.conflicts));
             //Log.d("parsedConflicts=" + JsonWriter.AsPrettyString(parsedConflicts));

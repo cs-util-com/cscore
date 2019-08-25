@@ -73,7 +73,7 @@ namespace com.csutil.tests.ui {
             private Dictionary<string, Link> links;
 
             public async Task OnLoad(MyUser3 model) {
-                await Task.Delay(10); // Simulate a 10ms delay in the UI update
+                await TaskV2.Delay(10); // Simulate a 10ms delay in the UI update
                 links = targetView.GetLinkMap();
                 NameUi().text = model.name;
                 AgeUi().text = "" + model.age;

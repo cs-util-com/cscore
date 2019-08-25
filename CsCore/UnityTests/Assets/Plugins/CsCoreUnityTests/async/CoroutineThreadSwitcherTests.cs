@@ -17,7 +17,7 @@ namespace com.csutil.tests.async {
             var backgroundTask1IsDone = false;
             yield return TaskRunner.instance.RunInBackground(async (c) => {
                 Assert.IsFalse(MainThread.isMainThread);
-                await Task.Delay(100);
+                await TaskV2.Delay(100);
                 backgroundTask1IsDone = true;
             }).AsCoroutine();
 
@@ -26,7 +26,7 @@ namespace com.csutil.tests.async {
 
             var backgroundTask2 = TaskRunner.instance.RunInBackground(async (c) => {
                 Assert.IsFalse(MainThread.isMainThread);
-                await Task.Delay(100);
+                await TaskV2.Delay(100);
                 c.ThrowIfCancellationRequested();
                 return "some result";
             });
@@ -46,7 +46,7 @@ namespace com.csutil.tests.async {
             var task1 = TaskRunner.instance.RunInBackground(async (c) => {
                 Assert.IsFalse(MainThread.isMainThread);
                 for (int i = 0; i < int.MaxValue; i++) {
-                    await Task.Delay(10);
+                    await TaskV2.Delay(10);
                     counter++;
                     c.ThrowIfCancellationRequested();
                 }

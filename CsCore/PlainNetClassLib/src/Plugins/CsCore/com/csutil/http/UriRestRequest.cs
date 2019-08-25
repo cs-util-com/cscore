@@ -27,7 +27,7 @@ namespace com.csutil.http {
 
         public async Task<HttpResponseMessage> SendAsync(HttpMethod method) {
             client = new HttpClient();
-            await Task.Delay(5); // Wait so that the created RestRequest can be modified before its sent
+            await TaskV2.Delay(5); // Wait so that the created RestRequest can be modified before its sent
             client.AddRequestHeaders(requestHeaders);
             request = client.SendAsync(new HttpRequestMessage(method, uri));
             return await request;

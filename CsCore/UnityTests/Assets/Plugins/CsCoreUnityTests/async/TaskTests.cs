@@ -25,7 +25,7 @@ namespace com.csutil.tests.threading {
                 Log.d("Task 1 started");
                 for (int i = 0; i < 5; i++) {
                     cancelRequest.ThrowIfCancellationRequested();
-                    await Task.Delay(200);
+                    await TaskV2.Delay(200);
                     Log.d("Task 1: Step " + i);
                 }
                 Log.d("Task 1 loop done, will throw error now..");
@@ -44,12 +44,12 @@ namespace com.csutil.tests.threading {
 
             var task2 = TaskRunner.instance.RunInBackground(async (cancelRequest) => {
                 Log.d("Task 2 started");
-                await Task.Delay(10);
+                await TaskV2.Delay(10);
                 Assert.IsTrue(task1WasStarted);
                 Assert.IsTrue(task1ReachedItsLoopEnd);
                 for (int i = 0; i < 5; i++) {
                     cancelRequest.ThrowIfCancellationRequested();
-                    await Task.Delay(200);
+                    await TaskV2.Delay(200);
                     Log.d("Task 2: Step " + i);
                 }
                 Log.d("Task 2 is done now");
@@ -68,7 +68,7 @@ namespace com.csutil.tests.threading {
                 AssertV2.Throws<Exception>(() => { go = new GameObject(name: "A"); });
                 // Test that on MainThread the gameobject can be created:
                 MainThread.Invoke(() => { go = new GameObject(name: "B"); });
-                await Task.Delay(1000); // wait for main thread action to execute
+                await TaskV2.Delay(1000); // wait for main thread action to execute
                 Assert.IsTrue(go != null);
                 // Assert.AreEqual("B", go.name); // go.name not allowed in background thread
                 Log.d("Background thread now done");

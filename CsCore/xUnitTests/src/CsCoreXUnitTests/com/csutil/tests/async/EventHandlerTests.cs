@@ -29,14 +29,14 @@ namespace com.csutil.tests.async {
             throttledAction(this, "bad");
             throttledAction(this, "good");
             Assert.Equal(1, counter);
-            for (int i = 0; i < 20; i++) { await Task.Delay(100); if (counter >= 2) { break; } }
+            for (int i = 0; i < 20; i++) { await TaskV2.Delay(100); if (counter >= 2) { break; } }
             Assert.Equal(2, counter);
 
             throttledAction(this, "good");
             throttledAction(this, "bad");
             throttledAction(this, "good");
             Assert.Equal(3, counter);
-            for (int i = 0; i < 20; i++) { await Task.Delay(100); if (counter >= 4) { break; } }
+            for (int i = 0; i < 20; i++) { await TaskV2.Delay(100); if (counter >= 4) { break; } }
             Assert.Equal(4, counter);
         }
 
@@ -55,7 +55,7 @@ namespace com.csutil.tests.async {
                 tasks.Add(Task.Run(() => { throttledAction(this, myIntParam); }));
             }
             await Task.WhenAll(tasks.ToArray());
-            await Task.Delay(1000);
+            await TaskV2.Delay(1000);
             Assert.Equal(2, counter);
         }
 
@@ -63,7 +63,7 @@ namespace com.csutil.tests.async {
         public async Task ExponentialBackoffExample1() {
             Stopwatch timer = Stopwatch.StartNew();
             var finalTimingResult = await TaskHelper.TryWithExponentialBackoff<long>(async () => {
-                await Task.Delay(5);
+                await TaskV2.Delay(5);
                 Log.d("Task exec at " + timer.ElapsedMilliseconds);
                 // In the first second of the test simulate errors:
                 if (timer.ElapsedMilliseconds < 1000) { throw new TimeoutException("e.g. some network error"); }
@@ -88,7 +88,7 @@ namespace com.csutil.tests.async {
         }
 
         private async Task SomeTaskThatFailsEveryTime() {
-            await Task.Delay(5);
+            await TaskV2.Delay(5);
             throw new TimeoutException("e.g. some network error");
         }
 

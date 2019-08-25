@@ -31,7 +31,7 @@ namespace com.csutil.async {
                 retryCount++;
                 int delay = (int)(Math.Pow(2, retryCount) - timer.ElapsedMilliseconds);
                 if (delay > maxDelayInMs && maxDelayInMs > 0) { delay = maxDelayInMs; }
-                if (delay > 0) { await Task.Delay(delay); }
+                if (delay > 0) { await TaskV2.Delay(delay); }
                 if (retryCount >= maxNrOfRetries && maxNrOfRetries > 0) {
                     throw new OperationCanceledException("No success after " + retryCount + " retries");
                 }

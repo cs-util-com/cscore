@@ -12,7 +12,7 @@ namespace com.csutil.tests.keyvaluestore {
         public bool throwTimeoutError = false;
 
         private async Task SimulateDelay() {
-            await Task.Delay(delay);
+            await TaskV2.Delay(delay);
             if (throwTimeoutError) { throw new TimeoutException("Simulated error"); }
         }
 

@@ -147,7 +147,7 @@ namespace com.csutil.tests.model.immutable {
 
             // Another asyn task example with an inline lambda function:
             Func<Task> asyncLoginTask = async () => {
-                await Task.Delay(100); // Simulate that the login would talk to a server and take some time
+                await TaskV2.Delay(100); // Simulate that the login would talk to a server and take some time
                 // Here the user would be logged into the server and returned to the client to store it:
                 store.Dispatch(new ActionLoginUser() { newLoggedInUser = new MyUser1("Karl") });
             };

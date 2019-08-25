@@ -22,7 +22,7 @@ namespace com.csutil {
                     currentlyThrottling = true;
                     self(sender, eventArgs);
                 }
-                Task.Delay(TimeSpan.FromMilliseconds(delayInMs)).ContinueWith(_ => {
+                TaskV2.Delay(TimeSpan.FromMilliseconds(delayInMs)).ContinueWith(_ => {
                     lock (threadLock) {
                         if (needsFinalCall) {
                             try { self(sender, eventArgs); } catch (System.Exception e) { Log.e(e); }

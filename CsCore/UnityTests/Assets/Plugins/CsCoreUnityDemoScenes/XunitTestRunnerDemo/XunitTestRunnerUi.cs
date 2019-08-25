@@ -11,8 +11,9 @@ using com.csutil.tests;
 
 public class XunitTestRunnerUi : MonoBehaviour {
 
-    public int defaultEntryHeight = 80;
+    public int defaultEntryHeight = 110;
     public int timeoutInMs = 30000;
+    public bool stopOnFirstError = false;
     private List<XunitTestRunner.Test> allTests;
 
     private void OnEnable() {
@@ -20,18 +21,9 @@ public class XunitTestRunnerUi : MonoBehaviour {
         var listUi = links.Get<InfiniteScroll>("HorizontalScrollView");
         listUi.OnHeight += GetHeightOfEachViewEntry;
         listUi.OnFill += FillViewWithModelEntry;
-        Log.e("StartButton  1");
-        Debug.LogError("StartButton  2");
         links.Get<Button>("StartButton").SetOnClickAction((button) => {
-            Log.e("StartButton clicked 1");
-            Debug.LogError("StartButton clicked 2");
-            try {
-                StartCoroutine(RunAllTests(listUi));
-                links.Get<Text>("ButtonText").text = "Now running " + allTests.Count + " tests..";
-            }
-            catch (Exception e) {
-                links.Get<Text>("ButtonText").text = "" + e;
-            }
+            StartCoroutine(RunAllTests(listUi));
+            links.Get<Text>("ButtonText").text = "Now running " + allTests.Count + " tests..";
         });
     }
 
@@ -45,9 +37,9 @@ public class XunitTestRunnerUi : MonoBehaviour {
             links.Get<Text>("Status").text = "Not started yet";
             links.Get<Image>("StatusColor").color = Color.white;
         } else if (test.testTask.IsFaulted) {
-            links.Get<Text>("Status").text = "Error: " + test.reportedError;
+            var error = test.testTask.Exception;
+            links.Get<Text>("Status").text = "Error: " + error;
             links.Get<Image>("StatusColor").color = Color.red;
-            Log.e("" + test.reportedError);
         } else if (test.testTask.IsCompleted) {
             links.Get<Text>("Status").text = "Passed";
             links.Get<Image>("StatusColor").color = Color.green;
@@ -70,6 +62,9 @@ public class XunitTestRunnerUi : MonoBehaviour {
             listUi.UpdateVisible();
             yield return test.testTask.AsCoroutine((e) => { Debug.LogError(e); }, timeoutInMs);
             yield return new WaitForEndOfFrame();
+            if (stopOnFirstError && test.testTask.IsFaulted && test.reportedError != null) {
+                test.reportedError.Throw();
+            }
             listUi.UpdateVisible();
         }
         AssertV2.AreEqual(0, allTests.Filter(t => t.testTask.IsFaulted).Count());

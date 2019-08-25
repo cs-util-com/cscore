@@ -81,7 +81,7 @@ namespace com.csutil.model.immutable {
             var oldRecordingValue = isRecording;
             isRecording = false;
             for (int i = 0; i < nrOfActionsToReplay; i++) {
-                if (delayBetweenStepsInMs > 0) { await Task.Delay(delayBetweenStepsInMs); }
+                if (delayBetweenStepsInMs > 0) { await TaskV2.Delay(delayBetweenStepsInMs); }
                 await DispatchRecordedEntry(i);
             }
             isRecording = oldRecordingValue;

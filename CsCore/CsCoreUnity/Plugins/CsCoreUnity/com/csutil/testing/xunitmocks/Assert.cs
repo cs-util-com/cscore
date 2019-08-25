@@ -22,26 +22,24 @@ namespace Xunit {
         public static void Null<T>(T obj) { True(null == obj, "Was NOT null: " + obj); }
         public static void NotNull<T>(T obj) { True(null != obj, "Was null: " + typeof(T)); }
 
-        public static void Equal(double objA, double objB) {
-            True(objA == objB, "Doubles NOT Equal: " + objA + " != " + objB);
-        }
-
-        public static void Equal(decimal objA, decimal objB) {
-            True(objA == objB, "Numbers NOT Equal: " + objA + " != " + objB);
-        }
-
-        public static void Equal(int objA, int objB) {
-            True(objA == objB, "Ints NOT Equal: " + objA + " != " + objB);
-        }
-
         public static void Equal(object objA, object objB) {
             True(Eq(objA, objB), "NOT Equal: \n " + objA + " \n and \n " + objB);
         }
 
+        public static void Equal<T>(IEnumerable<T> objA, IEnumerable<T> objB) {
+            True(objA.SequenceEqual(objB), "IEnumerables NOT Equal: \n " + objA + " \n and \n " + objB);
+        }
+
         private static bool Eq(object objA, object objB) {
             if (ReferenceEquals(objA, objB)) { return true; }
+            if (IsNumber(objA) && IsNumber(objB)) { return Convert.ToDouble(objA) == Convert.ToDouble(objB); }
             if (objA is IComparable c1 && objB is IComparable c2) { return c1.CompareTo(c2) == 0; }
             return objA == objB || Equals(objA, objB);
+        }
+
+        public static bool IsNumber(object v) {
+            return v is sbyte || v is byte || v is short || v is ushort || v is int || v is uint
+                      || v is long || v is ulong || v is float || v is double || v is decimal;
         }
 
         public static void NotEqual(object objA, object objB) {

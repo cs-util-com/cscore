@@ -55,7 +55,7 @@ namespace com.csutil.tests.ui {
             Dictionary<string, Link> links;
 
             public async Task OnLoad(MyUserModel userToShow) {
-                await Task.Delay(5); // Simulate a delay
+                await TaskV2.Delay(5); // Simulate a delay
                 links = targetView.GetLinkMap();
                 NameInputField().text = userToShow.userName;
                 AgeInputField().text = "" + userToShow.userAge;

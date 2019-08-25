@@ -62,7 +62,7 @@ namespace com.csutil.tests {
         [UnityTest]
         public IEnumerator TestThrowsAsyncPart1() {
             yield return Assert.ThrowsAsync<FormatException>(async () => {
-                await Task.Delay(10);
+                await TaskV2.Delay(10);
                 throw new FormatException();
             }).AsCoroutine();
             yield return Task.Run(TestThrowsAsyncPart2).AsCoroutine();
@@ -71,7 +71,7 @@ namespace com.csutil.tests {
         private async Task TestThrowsAsyncPart2() {
             try {
                 await Assert.ThrowsAsync<FormatException>(async () => {
-                    await Task.Delay(10);
+                    await TaskV2.Delay(10);
                     throw new NullReferenceException("abc");
                 });
                 throw Log.e("Assert.ThrowsAsync did not rethrow the NullReferenceException");

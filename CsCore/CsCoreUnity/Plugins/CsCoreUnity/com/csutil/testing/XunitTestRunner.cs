@@ -55,16 +55,16 @@ namespace com.csutil.testing {
             });
         }
 
-        private static async Task RunTestOnMethod(Test res) {
-            await Task.Delay(5);
+        private static Task RunTestOnMethod(Test res) {
             try {
                 res.invokeResult = res.methodToTest.Invoke(res.classInstance, null);
-                if (res.invokeResult is Task t) {
-                    while (!t.IsCompleted) { await Task.Delay(5); }
-                    if (t.IsFaulted) { SetError(res, t.Exception); return; }
-                }
+                if (res.invokeResult is Task t) { return t; }
+                return Task.FromResult<object>(res.invokeResult);
             }
-            catch (Exception e) { SetError(res, e.InnerException); }
+            catch (Exception e) {
+                SetError(res, e.InnerException);
+                return Task.FromException(e);
+            }
         }
 
         private static void SetError(Test res, Exception e2) {
