@@ -27,7 +27,9 @@ namespace com.csutil.json {
                     // do not do the validation for Dictionary<string, object> or generic lists to avoid stack overflow
                     var errorText = "Did not fully parse json=<<((  " + input + "  ))>>";
                     var args = new StackFrame(3, true).AddTo(null);
+#if !UNITY_WEBGL
                     AssertV2.IsTrue(JsonCouldBeFullyParsed(jsonReader, jsonWriter, result, input), errorText, args);
+#endif
                 }
             } catch (Exception e) { Log.e(e); }
         }

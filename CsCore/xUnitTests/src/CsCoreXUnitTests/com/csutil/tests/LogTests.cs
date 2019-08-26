@@ -90,7 +90,9 @@ namespace com.csutil.tests {
                 AssertV2.Throws<Exception>(() => { AssertV2.AreNotEqual(1, 1); });
 
                 var stopWatch = AssertV2.TrackTiming();
-                Thread.Sleep(10);
+                var res = 1f;
+                for (float i = 1; i < 500000; i++) { res = i / res + i; }
+                Assert.NotEqual(0, res);
                 stopWatch.Stop();
                 AssertV2.Throws<Exception>(() => { stopWatch.AssertUnderXms(1); }); // This should always fail
 

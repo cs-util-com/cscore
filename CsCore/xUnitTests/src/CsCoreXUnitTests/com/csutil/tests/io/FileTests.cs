@@ -13,8 +13,9 @@ namespace com.csutil.tests {
 
         [Fact]
         public void ExampleUsage1() {
+
             // Get a directory to work in:
-            DirectoryInfo myDirectory = EnvironmentV2.instance.GetOrAddTempFolder("ExampleUsage1");
+            DirectoryInfo myDirectory = EnvironmentV2.instance.GetOrAddTempFolder("ExampleUsage1Dir");
             Log.d("The directory path is: " + myDirectory.FullPath());
 
             // Get a non-existing child directory
