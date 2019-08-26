@@ -17,6 +17,14 @@ namespace com.csutil.io {
             return new DirectoryInfo(Application.temporaryCachePath);
         }
 
+        public override DirectoryInfo GetRootAppDataFolder() {
+            return new DirectoryInfo(Application.persistentDataPath);
+        }
+
+        public override DirectoryInfo GetCurrentDirectory() {
+            return new DirectoryInfo(Application.dataPath);
+        }
+
     }
 
 }

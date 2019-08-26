@@ -99,7 +99,7 @@ namespace com.csutil {
             var tcs = new TaskCompletionSource<T>();
             self.StartCoroutine(routine.WithErrorCatch((e) => {
                 if (e != null) { tcs.TrySetException(e); return; }
-                try { tcs.TrySetResult(onRoutineDone()); }
+                try { tcs.SetResult(onRoutineDone()); }
                 catch (Exception onDoneError) { tcs.TrySetException(onDoneError); }
             }));
             return tcs.Task;

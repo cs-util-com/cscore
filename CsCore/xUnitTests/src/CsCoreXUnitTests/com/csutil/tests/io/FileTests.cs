@@ -13,9 +13,6 @@ namespace com.csutil.tests {
 
         [Fact]
         public void ExampleUsage1() {
-            // First cleanup existing test folder if they already exist:
-            EnvironmentV2.instance.GetOrAddTempFolder("ExampleUsage1").DeleteV2();
-
             // Get a directory to work in:
             DirectoryInfo myDirectory = EnvironmentV2.instance.GetOrAddTempFolder("ExampleUsage1");
             Log.d("The directory path is: " + myDirectory.FullPath());
@@ -35,23 +32,44 @@ namespace com.csutil.tests {
             // Saving and loading from files:
             string someTextToStoreInTheFile = "Some text to store in the file";
             file1.SaveAsText(someTextToStoreInTheFile);
-            string loadedText = file1.LoadAs<string>(); // loading JSON would work as well
+            string loadedText = file1.LoadAs<string>(); // Loading JSON would work as well
             Assert.Equal(someTextToStoreInTheFile, loadedText);
 
             // Deleting directories:
-            Assert.True(childDir.DeleteV2()); // (Deleting non-existing directories would returns false)
-            // Check that the directory no longer exists:
-            Assert.False(childDir.IsNotNullAndExists());
+            Assert.True(myDirectory.DeleteV2()); // Deleting non-existing dir would return false
+            // Check that the file in the deleted dir no longer exists:
+            Assert.False(file1.IsNotNullAndExists());
 
         }
 
         [Fact]
+        public void TestDelete() {
+            // Create a dir with 2 files and a subdir:
+            DirectoryInfo dir1 = CreateDirectoryForTesting("ExampleDelete");
+            var subDir1 = dir1.GetChildDir("MyExampleSubDirectory1").CreateV2();
+            var f1 = dir1.GetChild("MyFile1.txt");
+            f1.SaveAsText("Some text 1");
+            var f2 = subDir1.GetChild("MyFile2.txt");
+            f2.SaveAsText("Some text 2");
+
+            // Now delete the dir that contains the files and the subdir:
+            Assert.True(dir1.DeleteV2());
+            Assert.False(f1.ExistsV2(), "f1=" + f1);
+            Assert.False(f2.ExistsV2(), "f2=" + f2);
+            Assert.False(dir1.ExistsV2(), "dir1=" + subDir1);
+            Assert.False(subDir1.ExistsV2(), "subDir1=" + subDir1);
+
+            Assert.False(subDir1.IsNotNullAndExists(), "IsNotNullAndExists subDir1=" + subDir1);
+        }
+
+        [Fact]
         public void TestIsNotNullAndExists() {
-            DirectoryInfo appDataDir = null;
-            Assert.False(appDataDir.IsNotNullAndExists());
-            appDataDir = EnvironmentV2.instance.GetRootAppDataFolder();
-            Log.d("appDataDir=" + appDataDir.FullPath());
-            Assert.True(appDataDir.IsNotNullAndExists());
+            DirectoryInfo dir = null;
+            Assert.False(dir.IsNotNullAndExists(), "null.IsNotNullAndExists was true");
+            Assert.True(EnvironmentV2.instance.GetRootTempFolder().IsNotNullAndExists(),
+                "RootTempFolder did not exist:" + EnvironmentV2.instance.GetRootTempFolder());
+            Assert.True(EnvironmentV2.instance.GetRootAppDataFolder().IsNotNullAndExists(),
+                "RootAppDataFolder did not exist:" + EnvironmentV2.instance.GetRootAppDataFolder());
         }
 
         [Fact]
@@ -65,11 +83,11 @@ namespace com.csutil.tests {
 
             // Test deleting and creating Dir 1:
             dir1.DeleteV2(); // Make sure dir does not yet exist from previous tests
-            Assert.False(dir1.IsNotNullAndExists());
-            Assert.False(dir1.Exists);
-            Assert.True(dir1.CreateV2().Exists);
-            Assert.True(dir1.IsNotNullAndExists());
-            dir1.Create(); // Should do nothing and not throw an exception
+            Assert.False(dir1.IsNotNullAndExists(), "dir1.IsNotNullAndExists");
+            Assert.False(dir1.Exists, "dir1.Exists");
+            Assert.True(dir1.CreateV2().Exists, "dir1.CreateV2().Exists");
+            Assert.True(dir1.IsNotNullAndExists(), "dir1.IsNotNullAndExists");
+            dir1.CreateV2(); // Should do nothing and not throw an exception
 
             var nameOfChildDir1 = "ChildDir 1";
             var nameOfTestFile1InChildDir1 = "Test file 1";
@@ -83,9 +101,9 @@ namespace com.csutil.tests {
                 var dir2 = rootDir.GetChildDir("TestDir 2");
                 dir2.DeleteV2(); // Make sure dir does not yet exist from previous tests
                 dir1.MoveToV2(dir2);
-                Assert.True(dir2.IsNotNullAndExists());
+                Assert.True(dir2.IsNotNullAndExists(), "dir2.IsNotNullAndExists");
                 Assert.Equal(dir2.FullPath(), dir1.FullPath());
-                Assert.False(new DirectoryInfo(oldPath).Exists);
+                Assert.False(new DirectoryInfo(oldPath).Exists, "oldDir2.Exists");
             }
             { // Test that moving to existing folders fails:
                 var dir3 = rootDir.GetChildDir("TestDir 3").CreateV2();
@@ -95,21 +113,21 @@ namespace com.csutil.tests {
                     dir1.MoveToV2(dir3); // This should fail since dir3 already exists
                 });
                 Assert.NotEqual(dir3.FullPath(), dir1.FullPath());
-                dir3.Delete(); // Cleanup after test
+                dir3.DeleteV2(); // Cleanup after test
             }
             { // Test copying folders:
                 var oldPath = dir1.FullPath();
                 var dir4 = rootDir.GetChildDir("TestDir 4");
                 dir4.DeleteV2(); // Make sure dir does not yet exist from previous tests
                 dir1.CopyTo(dir4);
-                Assert.True(dir4.IsNotNullAndExists(), "dir=" + dir4.FullPath());
+                Assert.True(dir4.IsNotNullAndExists(), "dir4.IsNotNullAndExists");
                 Assert.NotEqual(dir4.FullPath(), dir1.FullPath());
-                Assert.True(new DirectoryInfo(oldPath).Exists);
+                Assert.True(new DirectoryInfo(oldPath).Exists, "oldDir4.Exists");
 
                 // Check that the files were really copied from dir1 to dir4:
                 var dir4ChildDir1 = dir4.GetChildDir(nameOfChildDir1);
                 var testFile1InDir1ChildDir4 = dir4ChildDir1.GetChild(nameOfTestFile1InChildDir1);
-                Assert.True(testFile1InDir1ChildDir4.IsNotNullAndExists());
+                Assert.True(testFile1InDir1ChildDir4.IsNotNullAndExists(), "tf1d4 not found");
                 var newTextInTestFile1 = "Some new text for txt file in dir4";
                 testFile1InDir1ChildDir4.SaveAsText(newTextInTestFile1);
 
@@ -118,20 +136,20 @@ namespace com.csutil.tests {
                 // Replacing only works when replaceExisting is set to true:
                 dir1.CopyTo(dir4, replaceExisting: true);
                 // The path to the testFile1 should still exist after copy:
-                Assert.True(testFile1InDir1ChildDir4.IsNotNullAndExists());
+                Assert.True(testFile1InDir1ChildDir4.IsNotNullAndExists(), "old tf1d4 not found");
                 // The text should not be newTextInTestFile1 anymore after its replaced by the original again:
                 Assert.NotEqual(newTextInTestFile1, testFile1InDir1ChildDir4.LoadAs<string>());
 
-                Assert.True(dir4.DeleteV2()); // Delete dir4 again
-                Assert.False(dir4.DeleteV2()); // dir4 now does not exist anymore so false is returned
+                Assert.True(dir4.DeleteV2(), "dir4.Delete"); // Delete dir4 again
+                Assert.False(dir4.DeleteV2(), "dir4.Del"); // dir4 now does not exist anymore so false is returned
             }
             { // Test renaming folders:
                 var newName = "TestDir 5";
                 rootDir.GetChildDir(newName).DeleteV2();
                 var oldPath = dir1.FullPath();
                 dir1.Rename(newName);
-                Assert.False(new DirectoryInfo(oldPath).Exists);
-                Assert.True(dir1.Exists);
+                Assert.False(new DirectoryInfo(oldPath).Exists, "oldDir1.Exists");
+                Assert.True(dir1.Exists, "dir1.Exists after rename");
                 Assert.Equal(newName, dir1.NameV2());
             }
             rootDir.DeleteV2();
@@ -164,7 +182,7 @@ namespace com.csutil.tests {
         }
 
         private static DirectoryInfo CreateDirectoryForTesting(string name) {
-            var rootDir = EnvironmentV2.instance.GetCurrentDirectory().CreateSubdirectory(name);
+            var rootDir = EnvironmentV2.instance.GetOrAddTempFolder(name);
             rootDir.DeleteV2(); // ensure that the test folder does not yet exist
             rootDir.CreateV2();
             Assert.True(rootDir.IsNotNullAndExists());

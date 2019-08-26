@@ -20,16 +20,16 @@ namespace com.csutil.json {
             this.debugWriter = debugWriter;
         }
 
-        public T Read<T>(string jsonString) {
-            var r = JsonConvert.DeserializeObject<T>(jsonString, settings);
+        public object ReadAsType(string jsonString, Type targetType) {
+            var r = JsonConvert.DeserializeObject(jsonString, targetType, settings);
             this.AssertThatJsonWasFullyParsedIntoFields(debugWriter, jsonString, r);
             if (r is JsonReaderFinished) { ((JsonReaderFinished)r).onJsonReadingFinished(jsonString); }
             return r;
         }
 
-        public T Read<T>(StreamReader streamReader) {
-            var r = (T)reader.Deserialize(streamReader, typeof(T));
-            (this).AssertThatJsonWasFullyParsedIntoFields(debugWriter, ReadFullString(streamReader), r);
+        public object ReadAsType(StreamReader streamReader, Type targetType) {
+            var r = reader.Deserialize(streamReader, targetType);
+            this.AssertThatJsonWasFullyParsedIntoFields(debugWriter, ReadFullString(streamReader), r);
             return r;
         }
 
@@ -40,6 +40,7 @@ namespace com.csutil.json {
             AssertV2.IsFalse(fullString.IsNullOrEmpty(), "The string loaded from the streamReader was null or emtpy");
             return fullString;
         }
+
     }
 
 }

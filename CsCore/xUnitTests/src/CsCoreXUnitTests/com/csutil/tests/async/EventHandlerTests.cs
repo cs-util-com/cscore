@@ -19,7 +19,6 @@ namespace com.csutil.tests.async {
             EventHandler<string> action = (_, myStringParam) => {
                 Assert.NotEqual("bad", myStringParam);
                 Interlocked.Increment(ref counter);
-
             };
             var throttledAction = action.AsThrottledDebounce(delayInMs: 5);
 
@@ -28,15 +27,15 @@ namespace com.csutil.tests.async {
             throttledAction(this, "bad");
             throttledAction(this, "bad");
             throttledAction(this, "good");
-            Assert.Equal(1, counter);
             for (int i = 0; i < 20; i++) { await TaskV2.Delay(100); if (counter >= 2) { break; } }
             Assert.Equal(2, counter);
 
             throttledAction(this, "good");
             throttledAction(this, "bad");
             throttledAction(this, "good");
-            Assert.Equal(3, counter);
             for (int i = 0; i < 20; i++) { await TaskV2.Delay(100); if (counter >= 4) { break; } }
+            Assert.Equal(4, counter);
+            await TaskV2.Delay(100);
             Assert.Equal(4, counter);
         }
 
@@ -55,7 +54,9 @@ namespace com.csutil.tests.async {
                 tasks.Add(TaskV2.Run(() => { throttledAction(this, myIntParam); }));
             }
             await Task.WhenAll(tasks.ToArray());
-            await TaskV2.Delay(1000);
+            for (int i = 0; i < 20; i++) { await TaskV2.Delay(100); if (counter >= 2) { break; } }
+            Assert.Equal(2, counter);
+            await TaskV2.Delay(100);
             Assert.Equal(2, counter);
         }
 

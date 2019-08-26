@@ -132,16 +132,18 @@ namespace com.csutil {
             target.Refresh();
         }
 
-        public static T LoadAs<T>(this FileInfo self) {
+        public static T LoadAs<T>(this FileInfo self) { return (T)LoadAs(self, typeof(T)); }
+
+        public static object LoadAs(this FileInfo self, Type t) {
             using (FileStream readStream = File.Open(self.FullPath(), FileMode.Open, FileAccess.Read, FileShare.ReadWrite)) {
                 using (StreamReader s = new StreamReader(readStream)) {
-                    if (typeof(T) == typeof(string)) { return (T)(object)s.ReadToEnd(); }
+                    if (t == typeof(string)) { return s.ReadToEnd(); }
                     { // If a subscriber reacts to LoadAs return its response:
-                        var results = EventBus.instance.NewPublishIEnumerable("LoadAs" + typeof(T), self);
-                        var result = results.Filter(x => x is T).FirstOrDefault();
-                        if (result != null) { return (T)result; }
+                        var results = EventBus.instance.NewPublishIEnumerable("LoadAs" + t, self);
+                        var result = results.Filter(x => t.IsInstanceOfType(x)).FirstOrDefault();
+                        if (result != null) { return result; }
                     } // Otherwise use the default json reader approach:
-                    return JsonReader.GetReader().Read<T>(s);
+                    return JsonReader.GetReader().ReadAsType(s, t);
                 }
             }
         }
@@ -162,7 +164,7 @@ namespace com.csutil {
         }
 
         public static void SaveAsText(this FileInfo self, string text) {
-            self.ParentDir().Create();
+            self.ParentDir().CreateV2();
             File.WriteAllText(self.FullPath(), text, Encoding.UTF8);
         }
 

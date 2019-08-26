@@ -56,7 +56,7 @@ namespace com.csutil.tests {
                 await TaskV2.Delay(5);
                 Log.d("worked for 5 ms");
             } // .. as the last line in the tracked method add:
-            Log.MethodDone(timing, maxAllowedTimeInMs: 200);
+            Log.MethodDone(timing, maxAllowedTimeInMs: 1000);
         }
 
         [Fact]

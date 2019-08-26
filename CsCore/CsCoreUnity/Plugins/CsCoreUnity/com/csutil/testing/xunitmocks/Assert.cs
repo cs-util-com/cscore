@@ -1,4 +1,5 @@
-﻿using System;
+﻿using com.csutil;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,13 +23,16 @@ namespace Xunit {
         public static void Null<T>(T obj) { True(null == obj, "Was NOT null: " + obj); }
         public static void NotNull<T>(T obj) { True(null != obj, "Was null: " + typeof(T)); }
 
-        public static void Equal(object objA, object objB) {
-            True(Eq(objA, objB), "NOT Equal: \n " + objA + " \n and \n " + objB);
+        public static void Equal(object exp, object actual) {
+            True(Eq(exp, actual), "NOT Equal: Expected\n " + exp + " \n but was \n " + actual);
         }
 
-        public static void Equal<T>(IEnumerable<T> objA, IEnumerable<T> objB) {
-            True(objA.SequenceEqual(objB), "IEnumerables NOT Equal: \n " + objA + " \n and \n " + objB);
+        public static void Equal<T>(IEnumerable<T> exp, IEnumerable<T> actual) {
+            True(exp.SequenceEqual(actual), "IEnumerables NOT Equal: Expected\n "
+                + AsString(exp) + " \n but was \n " + AsString(actual));
         }
+
+        private static string AsString<T>(IEnumerable<T> e) { return e.ToStringV2(x => "" + x); }
 
         private static bool Eq(object objA, object objB) {
             if (ReferenceEquals(objA, objB)) { return true; }

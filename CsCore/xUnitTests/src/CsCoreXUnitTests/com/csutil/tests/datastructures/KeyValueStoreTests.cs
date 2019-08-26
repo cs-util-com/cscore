@@ -32,19 +32,19 @@ namespace com.csutil.tests.keyvaluestore {
 
         [Fact]
         public async Task ExampleUsage2() {
-            var storeFile = EnvironmentV2.instance.GetOrAddTempFolder("KeyValueStoreTests").GetChild("ExampleUsage2");
-            storeFile.DeleteV2(); // Cleanup before tests if the test file exists
+            var storeDir = EnvironmentV2.instance.GetOrAddTempFolder("KeyValueStoreTests").GetChildDir("ExampleUsage2Dir");
+            storeDir.DeleteV2(); // Cleanup before tests if the test file exists
             string myKey1 = "test123";
             MyClass1 x1 = new MyClass1() { myString1 = "Abc", myString2 = "Abc2" };
             {   // Create a fast memory store and combine it with a LiteDB store that is persisted to disk:
-                IKeyValueStore store = new InMemoryKeyValueStore().WithFallbackStore(new LiteDbKeyValueStore(storeFile));
+                IKeyValueStore store = new InMemoryKeyValueStore().WithFallbackStore(new FileBasedKeyValueStore(storeDir));
                 await store.Set(myKey1, x1);
                 MyClass1 x2 = await store.Get<MyClass1>(myKey1, null);
                 Assert.Equal(x1.myString1, x2.myString1);
                 Assert.Equal(x1.myString2, x2.myString2);
             }
             { // Create a second store and check that the changes were persisted:
-                IKeyValueStore store2 = new LiteDbKeyValueStore(storeFile);
+                IKeyValueStore store2 = new FileBasedKeyValueStore(storeDir);
                 Assert.True(await store2.ContainsKey(myKey1));
                 MyClass1 x2 = await store2.Get<MyClass1>(myKey1, null);
                 Assert.Equal(x1.myString1, x2.myString1);
@@ -94,9 +94,20 @@ namespace com.csutil.tests.keyvaluestore {
         [Fact]
         public async Task TestAllIKeyValueStoreImplementations() {
             await TestIKeyValueStoreImplementation(new InMemoryKeyValueStore());
-            await TestIKeyValueStoreImplementation(NewLiteDbStoreForTesting("TestAllIKeyValueStoreImplementations"));
             await TestIKeyValueStoreImplementation(new ExceptionWrapperKeyValueStore(new InMemoryKeyValueStore()));
             await TestIKeyValueStoreImplementation(new MockDekayKeyValueStore().WithFallbackStore(new InMemoryKeyValueStore()));
+            await TestIKeyValueStoreImplementation(NewFileBasedKeyValueStore("TestAllIKeyValueStoreImplementations_FileDB"));
+        }
+
+        [Fact]
+        public async Task TestDiteDBKeyValueStoreImplementation() {
+            await TestIKeyValueStoreImplementation(NewLiteDbStoreForTesting("TestAllIKeyValueStoreImplementations_LiteDB"));
+        }
+
+        private static FileBasedKeyValueStore NewFileBasedKeyValueStore(string storeFolderName) {
+            var dbFolder = EnvironmentV2.instance.GetOrAddTempFolder("KeyValueStoreTests").GetChildDir(storeFolderName);
+            dbFolder.DeleteV2();
+            return new FileBasedKeyValueStore(dbFolder);
         }
 
         private static LiteDbKeyValueStore NewLiteDbStoreForTesting(string storeFileName) {
