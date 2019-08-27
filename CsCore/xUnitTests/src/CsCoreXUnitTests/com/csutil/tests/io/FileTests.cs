@@ -102,9 +102,11 @@ namespace com.csutil.tests {
                 var dir2 = rootDir.GetChildDir("TestDir 2");
                 dir2.DeleteV2(); // Make sure dir does not yet exist from previous tests
                 dir1.MoveToV2(dir2);
-                Assert.True(dir2.IsNotNullAndExists(), "dir2.IsNotNullAndExists");
                 Assert.Equal(dir2.FullPath(), dir1.FullPath());
                 Assert.False(new DirectoryInfo(oldPath).Exists, "oldDir2.Exists");
+                Assert.True(dir1.ExistsV2(), "dir1.ExistsV2");
+                Assert.True(dir2.ExistsV2(), "dir2.ExistsV2");
+                Assert.True(dir2.IsNotNullAndExists(), "dir2.IsNotNullAndExists");
             }
             { // Test that moving to existing folders fails:
                 var dir3 = rootDir.GetChildDir("TestDir 3").CreateV2();
