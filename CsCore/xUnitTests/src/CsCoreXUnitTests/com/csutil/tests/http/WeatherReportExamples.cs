@@ -29,23 +29,6 @@ namespace com.csutil.tests.http {
         }
 
         [Fact]
-        public void MetaWeatherComExample2() {
-
-            // Same as MetaWeatherComExample1 just without the async await syntax:
-            IpApiCom.GetResponse().ContinueWith(ipLookupResult => {
-                string yourCity = ipLookupResult.Result.city;
-                MetaWeatherLocationLookup.GetLocation(yourCity).ContinueWith(cityLookupResult => {
-                    int whereOnEarthIDOfYourCity = cityLookupResult.Result.First().woeid;
-                    MetaWeatherReport.GetReport(whereOnEarthIDOfYourCity).ContinueWith(report => {
-                        var currentWeather = report.Result.consolidated_weather.Map(r => r.weather_state_name);
-                        Log.d("The weather today in " + yourCity + " is: " + currentWeather.ToStringV2());
-                    });
-                });
-            });
-
-        }
-
-        [Fact]
         public async Task MetaWeatherComTest1() {
 
             var berlinName = "Berlin";
