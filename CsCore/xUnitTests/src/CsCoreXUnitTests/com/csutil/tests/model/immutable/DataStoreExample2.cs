@@ -251,13 +251,20 @@ namespace com.csutil.tests.model.immutable {
         private static Func<IDataStore<MyAppState1>, Task> NewAsyncGetWeatherAction() {
             // The created method is executed by the thunk middlewhere when its dispatched in a store:
             return async (IDataStore<MyAppState1> store) => {
-                var cityName = "New York";
-                var foundLocations = await MetaWeatherLocationLookup.GetLocation(cityName);
-                var report = await MetaWeatherReport.GetReport(foundLocations.First().woeid);
-                var currentWeatherConditions = report.consolidated_weather.Map(r => r.weather_state_name);
-                Log.d("currentWeatherConditions for " + cityName + ": " + currentWeatherConditions);
-                store.Dispatch(new ActionSetWeather() { newWeather = currentWeatherConditions.ToList() });
+                var loadedWeather = await DownloadWeatherFor("New York");
+                store.Dispatch(new ActionSetWeather() { newWeather = loadedWeather });
             };
+        }
+
+        private static async Task<List<string>> DownloadWeatherFor(string cityName) {
+            var foundLocations = await MetaWeatherLocationLookup.GetLocation(cityName);
+            if (foundLocations == null) { // Assume test currently has no internet so simulate:
+                return new List<string>() { "Rain", "Cloudy" };
+            }
+            var report = await MetaWeatherReport.GetReport(foundLocations.First().woeid);
+            var currentWeatherConditions = report.consolidated_weather.Map(r => r.weather_state_name);
+            Log.d("currentWeatherConditions for " + cityName + ": " + currentWeatherConditions);
+            return currentWeatherConditions.ToList();
         }
 
         #endregion // of example actions

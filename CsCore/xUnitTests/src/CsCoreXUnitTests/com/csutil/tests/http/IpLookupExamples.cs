@@ -33,14 +33,6 @@ namespace com.csutil.tests.http {
         }
 
         [Fact]
-        public async Task GeoBytesComExample() {
-            GeoBytesCom.Response response = await GeoBytesCom.GetResponse();
-            Log.d("Your IP is " + response.geobytesipaddress);
-            Log.d("In your country people pay in " + response.geobytescurrency);
-            Assert.NotEmpty(response.geobytesipaddress);
-        }
-
-        [Fact]
         public async Task ExtremeIpLookupComExample() {
             ExtremeIpLookupCom.Response response = await ExtremeIpLookupCom.GetResponse();
             Log.d("Your IP is " + response.query);

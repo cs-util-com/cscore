@@ -18,7 +18,7 @@ namespace com.csutil {
             object threadLock = new object();
             return async (sender, eventArgs) => {
                 lock (threadLock) {
-                    if (currentlyThrottling) { d("2"); needsFinalCall = true; return; }
+                    if (currentlyThrottling) { needsFinalCall = true; return; }
                     currentlyThrottling = true;
                     self(sender, eventArgs);
                 }

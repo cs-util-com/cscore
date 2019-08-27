@@ -74,7 +74,7 @@ namespace com.csutil.tests {
         }
 
         [Fact]
-        public void TestDirectoryMethods() {
+        public async Task TestDirectoryMethods() {
             var rootDir = CreateDirectoryForTesting("TestDirectoryMethods");
 
             // Test FullPath:
@@ -101,12 +101,21 @@ namespace com.csutil.tests {
                 var oldPath = dir1.FullPath();
                 var dir2 = rootDir.GetChildDir("TestDir 2");
                 dir2.DeleteV2(); // Make sure dir does not yet exist from previous tests
-                dir1.MoveToV2(dir2);
+                await TaskV2.Delay(20);
+                Assert.False(dir2.ExistsV2(), "before MOVE: dir2.ExistsV2");
+
+                var moveToWorked = dir1.MoveToV2(dir2);
+                await TaskV2.Delay(20);
+
+                // After move first test that the new dir is now there:
+                Assert.True(dir2.ExistsV2(), "after MOVE: dir2.ExistsV2");
+                Assert.True(dir2.IsNotNullAndExists(), "dafter MOVE: ir2.IsNotNullAndExists");
                 Assert.Equal(dir2.FullPath(), dir1.FullPath());
+                Assert.True(new DirectoryInfo(dir1.FullPath()).Exists, "new DirectoryInfo(dir1) not found");
+                Assert.True(dir1.ExistsV2(), "after MOVE: dir1.ExistsV2");
+
+                Assert.True(moveToWorked, "dir1.MoveToV2(dir2) failed");
                 Assert.False(new DirectoryInfo(oldPath).Exists, "oldDir2.Exists");
-                Assert.True(dir1.ExistsV2(), "dir1.ExistsV2");
-                Assert.True(dir2.ExistsV2(), "dir2.ExistsV2");
-                Assert.True(dir2.IsNotNullAndExists(), "dir2.IsNotNullAndExists");
             }
             { // Test that moving to existing folders fails:
                 var dir3 = rootDir.GetChildDir("TestDir 3").CreateV2();
@@ -122,7 +131,8 @@ namespace com.csutil.tests {
                 var oldPath = dir1.FullPath();
                 var dir4 = rootDir.GetChildDir("TestDir 4");
                 dir4.DeleteV2(); // Make sure dir does not yet exist from previous tests
-                dir1.CopyTo(dir4);
+                Assert.True(dir1.CopyTo(dir4), "dir1.CopyTo(dir4) failed");
+                await TaskV2.Delay(20);
                 Assert.True(dir4.IsNotNullAndExists(), "dir4.IsNotNullAndExists");
                 Assert.NotEqual(dir4.FullPath(), dir1.FullPath());
                 Assert.True(new DirectoryInfo(oldPath).Exists, "oldDir4.Exists");
@@ -137,7 +147,7 @@ namespace com.csutil.tests {
                 // A second copyTo now that dir4 exists should throw an exception:
                 Assert.Throws<ArgumentException>(() => { dir1.CopyTo(dir4, replaceExisting: false); });
                 // Replacing only works when replaceExisting is set to true:
-                dir1.CopyTo(dir4, replaceExisting: true);
+                Assert.True(dir1.CopyTo(dir4, replaceExisting: true), "dir1.CopyTo(dir4, replaceExisting true) failed");
                 // The path to the testFile1 should still exist after copy:
                 Assert.True(testFile1InDir1ChildDir4.IsNotNullAndExists(), "old tf1d4 not found");
                 // The text should not be newTextInTestFile1 anymore after its replaced by the original again:
@@ -150,7 +160,7 @@ namespace com.csutil.tests {
                 var newName = "TestDir 5";
                 rootDir.GetChildDir(newName).DeleteV2();
                 var oldPath = dir1.FullPath();
-                dir1.Rename(newName);
+                Assert.True(dir1.Rename(newName), "dir1.Rename(newName) failed");
                 Assert.False(new DirectoryInfo(oldPath).Exists, "oldDir1.Exists");
                 Assert.True(dir1.Exists, "dir1.Exists after rename");
                 Assert.Equal(newName, dir1.NameV2());

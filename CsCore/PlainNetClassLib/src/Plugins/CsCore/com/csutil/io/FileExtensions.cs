@@ -71,7 +71,19 @@ namespace com.csutil {
         }
 
         public static bool DeleteV2(this DirectoryInfo self, bool deleteAlsoIfNotEmpty = true) {
-            return DeleteV2(self, () => { self.Delete(deleteAlsoIfNotEmpty); });
+            return DeleteV2(self, () => {
+                if (deleteAlsoIfNotEmpty) { // Recursively delete all children first:
+                    foreach (var subDir in self.GetDirectories()) { subDir.DeleteV2(deleteAlsoIfNotEmpty); }
+                    foreach (var file in self.GetFiles()) { file.DeleteV2(); }
+                    self.Refresh();
+                    AssertV2.IsTrue(self.IsEmtpy(), "Dir was not empty after recursive cleanup!");
+                }
+                self.Delete(deleteAlsoIfNotEmpty);
+            });
+        }
+
+        public static bool IsEmtpy(this DirectoryInfo self) {
+            return !Directory.EnumerateFileSystemEntries(self.FullName).Any();
         }
 
         private static bool DeleteV2(FileSystemInfo self, Action deleteAction) {
@@ -84,37 +96,50 @@ namespace com.csutil {
             return false;
         }
 
-        public static void Rename(this FileInfo self, string newName) {
+        public static bool Rename(this FileInfo self, string newName) {
             self.MoveTo(self.ParentDir().GetChild(newName).FullPath());
+            return self.ExistsV2();
         }
 
-        public static void MoveToV2(this FileInfo self, DirectoryInfo target) {
+        public static bool MoveToV2(this FileInfo self, DirectoryInfo target) {
             self.MoveTo(target.FullPath() + self.Name);
-            self.Refresh();
             target.Refresh();
+            return self.ExistsV2();
         }
 
         public static bool OpenInExternalApp(this FileSystemInfo self) {
             try {
                 System.Diagnostics.Process.Start(@self.FullName);
                 return true;
-            } catch (System.Exception e) { Log.e(e); }
+            }
+            catch (System.Exception e) { Log.e(e); }
             return false;
         }
 
-        public static void MoveToV2(this DirectoryInfo self, DirectoryInfo target) {
+        public static bool MoveToV2(this DirectoryInfo self, DirectoryInfo target) {
             self.MoveTo(target.FullPath());
-            self.Refresh();
-            target.Refresh();
+            if (!target.ExistsV2()) {
+                Log.w("Normal MoveTo did not work, will copy and delete instead");
+                self.MoveViaCopyAndDelete(target);
+            }
+            return self.ExistsV2();
         }
 
-        public static void Rename(this DirectoryInfo self, string newName) {
+        public static bool MoveViaCopyAndDelete(this DirectoryInfo self, DirectoryInfo target) {
+            if (self.CopyTo(target)) {
+                self.DeleteV2();
+                return !self.ExistsV2();
+            }
+            return false;
+        }
+
+        public static bool Rename(this DirectoryInfo self, string newName) {
             var target = self.Parent.GetChildDir(newName);
             AssertV2.IsFalse(target.IsNotNullAndExists(), "Already exists: target=" + target.FullPath());
-            self.MoveToV2(target);
+            return self.MoveToV2(target);
         }
 
-        public static void CopyTo(this DirectoryInfo self, DirectoryInfo target, bool replaceExisting = false) {
+        public static bool CopyTo(this DirectoryInfo self, DirectoryInfo target, bool replaceExisting = false) {
             if (!replaceExisting && target.IsNotNullAndExists()) {
                 throw new ArgumentException("Cant copy to existing folder " + target);
             }
@@ -129,7 +154,7 @@ namespace com.csutil {
             foreach (string newPath in Directory.GetFiles(sourcePath, "*", SearchOption.AllDirectories)) {
                 File.Copy(newPath, newPath.Replace(sourcePath, targetPath), overwrite: true);
             }
-            target.Refresh();
+            return target.ExistsV2();
         }
 
         public static T LoadAs<T>(this FileInfo self) { return (T)LoadAs(self, typeof(T)); }
