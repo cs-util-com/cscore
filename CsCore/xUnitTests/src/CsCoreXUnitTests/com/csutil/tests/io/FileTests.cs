@@ -74,7 +74,34 @@ namespace com.csutil.tests {
         }
 
         [Fact]
+        public void TestFileAndDirIteration() {
+            AssertV2.throwExeptionIfAssertionFails = true;
+            var rootDir = CreateDirectoryForTesting("TestFileAndDirIteration");
+            TestIterationInFolder(rootDir);
+            TestIterationInFolder(rootDir.GetChildDir("Dir3").CreateV2());
+            TestIterationInFolder(rootDir.GetChildDir("Dir3").GetChildDir("Dir3").CreateV2());
+        }
+
+        private static void TestIterationInFolder(DirectoryInfo rootDir) {
+            rootDir.CreateSubdirectory("Dir1");
+            rootDir.GetChildDir("Dir2").CreateV2();
+            Assert.True(rootDir.GetChildDir("Dir1").ExistsV2());
+            Assert.True(rootDir.GetChildDir("Dir2").IsNotNullAndExists());
+
+            SaveAndLoadTextToFile(rootDir.GetChild("File1.txt"), textToSave: "Test 123");
+            Assert.True(rootDir.GetChild("File1.txt").ExistsV2());
+            Assert.True(rootDir.GetChild("File1.txt").IsNotNullAndExists());
+
+            Assert.Equal(2, rootDir.GetDirectories().Count());
+            Assert.Equal(1, rootDir.GetFiles().Count());
+            Assert.Equal(2, rootDir.EnumerateDirectories().Count());
+            Assert.Equal(1, rootDir.EnumerateFiles().Count());
+            Assert.Equal(3, rootDir.EnumerateFileSystemInfos().Count());
+        }
+
+        [Fact]
         public async Task TestDirectoryMethods() {
+            AssertV2.throwExeptionIfAssertionFails = true;
             var rootDir = CreateDirectoryForTesting("TestDirectoryMethods");
 
             // Test FullPath:
@@ -105,7 +132,7 @@ namespace com.csutil.tests {
                 Assert.False(dir2.ExistsV2(), "before MOVE: dir2.ExistsV2");
 
                 var moveToWorked = dir1.MoveToV2(dir2);
-                await TaskV2.Delay(20);
+                await TaskV2.Delay(100);
 
                 // After move first test that the new dir is now there:
                 Assert.True(dir2.ExistsV2(), "after MOVE: dir2.ExistsV2");
@@ -116,6 +143,15 @@ namespace com.csutil.tests {
 
                 Assert.True(moveToWorked, "dir1.MoveToV2(dir2) failed");
                 Assert.False(new DirectoryInfo(oldPath).Exists, "oldDir2.Exists");
+
+                var subDirs = dir2.GetDirectories();
+                Assert.NotEmpty(subDirs);
+                var movedChildDir = dir2.GetChildDir(nameOfChildDir1);
+                Assert.True(movedChildDir.ExistsV2(),
+                    "!movedChildDir.ExistsV2, all childDirs=" + subDirs.ToStringV2(sd => "" + sd));
+                Assert.NotEmpty(movedChildDir.EnumerateFiles());
+                var movedTestFile1 = movedChildDir.GetChild(nameOfTestFile1InChildDir1);
+                Assert.True(movedTestFile1.ExistsV2(), "movedTestFile1.ExistsV2");
             }
             { // Test that moving to existing folders fails:
                 var dir3 = rootDir.GetChildDir("TestDir 3").CreateV2();
