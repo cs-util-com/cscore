@@ -20,7 +20,6 @@ namespace com.csutil {
             if (lastOverhead < 0) { // The wait was shorter then requested:
                 await Delay(-lastOverhead); // wait the additional difference
             }
-            Log.d("lastOverhead=" + lastOverhead);
         }
 
         public static Task Delay(TimeSpan t) { return Delay((int)t.TotalMilliseconds); }
