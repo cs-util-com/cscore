@@ -102,7 +102,8 @@ namespace com.csutil.tests {
         [Fact]
         public async Task TestDirectoryMethods() {
             AssertV2.throwExeptionIfAssertionFails = true;
-            var rootDir = CreateDirectoryForTesting("TestDirectoryMethods");
+            var rnd = Guid.NewGuid();
+            var rootDir = CreateDirectoryForTesting("DirMethodsTest_" + rnd);
 
             // Test FullPath:
             var dir1 = rootDir.GetChildDir("TestDir 1");
@@ -167,6 +168,7 @@ namespace com.csutil.tests {
                 var oldPath = dir1.FullPath();
                 var dir4 = rootDir.GetChildDir("TestDir 4");
                 dir4.DeleteV2(); // Make sure dir does not yet exist from previous tests
+                Assert.NotEmpty(dir1.EnumerateFileSystemInfos());
                 Assert.True(dir1.CopyTo(dir4), "dir1.CopyTo(dir4) failed");
                 await TaskV2.Delay(20);
                 Assert.True(dir4.IsNotNullAndExists(), "dir4.IsNotNullAndExists");
@@ -196,12 +198,17 @@ namespace com.csutil.tests {
                 var newName = "TestDir 5";
                 rootDir.GetChildDir(newName).DeleteV2();
                 var oldPath = dir1.FullPath();
+                Assert.True(dir1.Exists, "dir1.Exists false BEFORE rename");
                 Assert.True(dir1.Rename(newName), "dir1.Rename(newName) failed");
-                Assert.False(new DirectoryInfo(oldPath).Exists, "oldDir1.Exists");
-                Assert.True(dir1.Exists, "dir1.Exists after rename");
                 Assert.Equal(newName, dir1.NameV2());
+                Assert.True(dir1.Exists, "dir1.Exists false AFTER rename");
+                if (new DirectoryInfo(oldPath).Exists) {
+                    var e = Log.e("WebGL renamed via copy but could not delete the original dir=" + oldPath);
+                    if (!EnvironmentV2.isWebGL) { throw e; }
+                }
             }
-            rootDir.DeleteV2();
+            try { rootDir.DeleteV2(); }
+            catch (Exception e) { Log.e("COuld not cleanup the rootDir as the final step", e); }
         }
 
         private static void SaveAndLoadTextToFile(FileInfo testFile, string textToSave) {

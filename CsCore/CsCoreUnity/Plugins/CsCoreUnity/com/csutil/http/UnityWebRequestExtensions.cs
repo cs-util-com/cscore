@@ -110,7 +110,9 @@ namespace com.csutil {
             return self;
         }
 
-        public static Headers GetResponseHeadersV2(this UnityWebRequest self) { return new Headers(self.GetResponseHeaders()); }
+        public static Headers GetResponseHeadersV2(this UnityWebRequest self) {
+            return new Headers(self.GetResponseHeaders());
+        }
 
     }
 

@@ -43,6 +43,7 @@ namespace com.csutil.tests.http {
         public async Task TestRestFactory1() {
             RestRequest request = RestFactory.instance.SendRequest(new Uri("https://httpbin.org/get"), HttpMethod.Get);
             await ValidateResponse(request);
+            Log.d("Will now call await request.GetResultHeaders..");
             var resultHeaders = await request.GetResultHeaders();
             Assert.NotEmpty(resultHeaders);
         }
