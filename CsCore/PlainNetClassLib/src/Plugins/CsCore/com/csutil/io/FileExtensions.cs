@@ -67,20 +67,27 @@ namespace com.csutil {
         }
 
         public static bool DeleteV2(this FileSystemInfo self) {
-            return DeleteV2(self, () => { self.Delete(); });
+            return DeleteV2(self, () => { self.Delete(); return true; });
         }
 
         public static bool DeleteV2(this DirectoryInfo self, bool deleteAlsoIfNotEmpty = true) {
             return DeleteV2(self, () => {
                 if (deleteAlsoIfNotEmpty) { // Recursively delete all children first:
-                    if (self.IsEmtpy()) { Log.d("Deleting emtpy dir " + self); } else {
+                    if (!self.IsEmtpy()) {
                         foreach (var subDir in self.GetDirectories()) { subDir.DeleteV2(deleteAlsoIfNotEmpty); }
                         foreach (var file in self.GetFiles()) { file.DeleteV2(); }
-                        self.Refresh();
-                        AssertV2.IsTrue(self.IsEmtpy(), "Dir was not empty after recursive cleanup!");
                     }
                 }
-                self.Delete(deleteAlsoIfNotEmpty);
+                self.Refresh();
+
+                var test = new DirectoryInfo(self.FullName + "/");
+                if (test.ExistsV2()) {
+                    AssertV2.IsTrue(test.IsEmtpy(), "!!! was not emtpy: " + test.FullName);
+                }
+
+                if (!self.IsEmtpy()) { throw new IOException("Cant delete non-emtpy dir: " + self.FullName); }
+                try { self.Delete(); return true; } catch (Exception e) { Log.e(e); }
+                return false;
             });
         }
 
@@ -88,12 +95,12 @@ namespace com.csutil {
             try { return !self.EnumerateFileSystemInfos().Any(); } catch (System.Exception) { return true; }
         }
 
-        private static bool DeleteV2(FileSystemInfo self, Action deleteAction) {
+        private static bool DeleteV2(FileSystemInfo self, Func<bool> deleteAction) {
             if (self != null && self.ExistsV2()) {
-                deleteAction();
+                var res = deleteAction();
                 self.Refresh();
-                AssertV2.IsFalse(self.ExistsV2(), "Still exists: " + self.FullName);
-                return true;
+                AssertV2.IsFalse(!res || self.ExistsV2(), "Still exists: " + self.FullName);
+                return res;
             }
             return false;
         }
@@ -113,8 +120,7 @@ namespace com.csutil {
             try {
                 System.Diagnostics.Process.Start(@self.FullName);
                 return true;
-            }
-            catch (System.Exception e) { Log.e(e); }
+            } catch (System.Exception e) { Log.e(e); }
             return false;
         }
 
@@ -128,26 +134,34 @@ namespace com.csutil {
             }
             source.MoveTo(target.FullPath());
             source.Refresh();
-            if (EnvironmentV2.isWebGL) { EmulateMoveViaCopyDelete(originalPath, tempCopyId, target); }
+            if (EnvironmentV2.isWebGL) {
+                if (!target.ExistsV2()) {
+                    EmulateMoveViaCopyDelete(originalPath, tempCopyId, target);
+                } else {
+                    Log.e("WebGL TempCopy solution was not needed!");
+                }
+            }
             return target.ExistsV2();
         }
 
         /// <summary> Needed in WebGL because .MoveTo does not correctly move the files to
         /// the new target directory but instead only removes the original dir </summary>
-        private static void EmulateMoveViaCopyDelete(string source, string tempDir, DirectoryInfo target) {
-            if (!target.ExistsV2()) {
-                var t = EnvironmentV2.instance.GetOrAddTempFolder("TmpCopies").GetChildDir(tempDir);
-                if (t.CopyTo(target)) {
-                    t.DeleteV2();
-                    var originalDir = new DirectoryInfo(source);
-                    try { if (originalDir.ExistsV2()) { originalDir.DeleteV2(); } }
-                    catch (Exception e) { Log.e("Cleanup err of original dir: " + originalDir, e); }
-                } else {
-                    Log.e("Could not move tempCopy=" + t + " into target=" + target);
-                }
+        private static void EmulateMoveViaCopyDelete(string source, string tempDirPath, DirectoryInfo target) {
+            var tempDir = EnvironmentV2.instance.GetOrAddTempFolder("TmpCopies").GetChildDir(tempDirPath);
+            if (tempDir.IsEmtpy()) {
+                target.CreateV2();
+                CleanupAfterEmulatedMove(source, tempDir);
+            } else if (tempDir.CopyTo(target)) {
+                CleanupAfterEmulatedMove(source, tempDir);
             } else {
-                Log.e("WebGL TempCopy solution was not needed!");
+                Log.e("Could not move tempDir=" + tempDir + " into target=" + target);
             }
+        }
+
+        private static void CleanupAfterEmulatedMove(string source, DirectoryInfo tempDir) {
+            tempDir.DeleteV2();
+            var originalDir = new DirectoryInfo(source);
+            try { if (originalDir.ExistsV2()) { originalDir.DeleteV2(); } } catch (Exception e) { Log.e("Cleanup err of original dir: " + originalDir, e); }
         }
 
         private static void AssertNotIdentical(DirectoryInfo source, DirectoryInfo target) {

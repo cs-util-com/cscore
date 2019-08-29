@@ -33,10 +33,10 @@ namespace com.csutil.http {
 
         public async Task<Headers> GetResultHeaders() {
             if (request.isModifiable) { throw new Exception("Request was not send yet, can't get result headers"); }
-            while (!request.isDone || !request.isHttpError || !request.isNetworkError) { await TaskV2.Delay(5); }
+            while (!request.isDone && !request.isHttpError && !request.isNetworkError) { await TaskV2.Delay(5); }
             return request.GetResponseHeadersV2();
         }
-        
+
     }
 
 }
