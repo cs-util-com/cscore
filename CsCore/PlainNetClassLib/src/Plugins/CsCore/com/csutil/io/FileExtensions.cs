@@ -79,13 +79,7 @@ namespace com.csutil {
                     }
                 }
                 self.Refresh();
-
-                var test = new DirectoryInfo(self.FullName + "/");
-                if (test.ExistsV2()) {
-                    AssertV2.IsTrue(test.IsEmtpy(), "!!! was not emtpy: " + test.FullName);
-                }
-
-                if (!self.IsEmtpy()) { throw new IOException("Cant delete non-emtpy dir: " + self.FullName); }
+                if (!self.IsEmtpy()) { throw new IOException("Cant delete non-emtpy dir: " + self.FullPath()); }
                 try { self.Delete(); return true; } catch (Exception e) { Log.e(e); }
                 return false;
             });
@@ -127,7 +121,7 @@ namespace com.csutil {
         public static bool MoveToV2(this DirectoryInfo source, DirectoryInfo target) {
             AssertNotIdentical(source, target);
             var tempCopyId = "" + Guid.NewGuid();
-            var originalPath = source.FullName;
+            var originalPath = source.FullPath();
             if (EnvironmentV2.isWebGL) {
                 // In WebGL .MoveTo does not work correctly so copy+delete is tried instead:
                 source.CopyTo(EnvironmentV2.instance.GetOrAddTempFolder("TmpCopies").GetChildDir(tempCopyId));
@@ -165,7 +159,7 @@ namespace com.csutil {
         }
 
         private static void AssertNotIdentical(DirectoryInfo source, DirectoryInfo target) {
-            if (Equals(source.FullName, target.FullName)) {
+            if (Equals(source.FullPath(), target.FullPath())) {
                 throw new OperationCanceledException("Identical source & target: " + source);
             }
         }
@@ -182,11 +176,11 @@ namespace com.csutil {
                 throw new ArgumentException("Cant copy to existing folder " + target);
             }
             foreach (var subDir in source.EnumerateDirectories()) {
-                CopyTo(subDir, target.GetChildDir(subDir.Name), replaceExisting);
+                CopyTo(subDir, target.GetChildDir(subDir.NameV2()), replaceExisting);
             }
             foreach (var file in source.EnumerateFiles()) {
                 target.CreateV2();
-                var createdFile = file.CopyTo(target.GetChild(file.Name).FullName, replaceExisting);
+                var createdFile = file.CopyTo(target.GetChild(file.Name).FullPath(), replaceExisting);
                 AssertV2.IsTrue(createdFile.ExistsV2(), "!createdFile.Exists: " + createdFile);
             }
             return target.ExistsV2();

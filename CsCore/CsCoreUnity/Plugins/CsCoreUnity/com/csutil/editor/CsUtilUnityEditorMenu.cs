@@ -106,7 +106,7 @@ namespace com.csutil.editor {
             private static List<DirectoryInfo> CollectSymbolicLinkedFolders(DirectoryInfo assetsFolder) {
                 var links = new List<DirectoryInfo>();
                 var normalFolders = assetsFolder.GetDirectories().Filter(dir => {
-                    if (!dir.Name.IsNullOrEmpty() && IsSymbolicLink(dir)) { links.Add(dir); return false; }
+                    if (!dir.NameV2().IsNullOrEmpty() && IsSymbolicLink(dir)) { links.Add(dir); return false; }
                     return true;
                 }); // Then visit all normal children folders to search there too:
                 foreach (var dir in normalFolders) { links.AddRange(CollectSymbolicLinkedFolders(dir)); }

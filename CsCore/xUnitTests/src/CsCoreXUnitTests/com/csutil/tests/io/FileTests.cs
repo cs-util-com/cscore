@@ -36,7 +36,7 @@ namespace com.csutil.tests {
 
             // Rename the directory:
             childDir.Rename("MyExampleSubDirectory2");
-            Assert.Equal("MyExampleSubDirectory2", childDir.Name);
+            Assert.Equal("MyExampleSubDirectory2", childDir.NameV2());
             Assert.Equal(1, childDir.EnumerateFiles().Count());
 
         }
@@ -76,6 +76,7 @@ namespace com.csutil.tests {
 
             // Rename the directory:
             childDir.Rename("MyExampleSubDirectory2");
+            Assert.Equal("MyExampleSubDirectory2", childDir.NameV2());
         }
 
         [Fact]
@@ -170,8 +171,8 @@ namespace com.csutil.tests {
             }
             { // Test that moving to existing folders fails:
                 var dir3 = rootDir.GetChildDir("TestDir 3").CreateV2();
-                Assert.Equal("TestDir 3", dir3.Name);
-                dir3 = rootDir.CreateSubdirectory(dir3.Name);
+                Assert.Equal("TestDir 3", dir3.NameV2());
+                dir3 = rootDir.CreateSubdirectory(dir3.NameV2());
                 AssertV2.Throws<Exception>(() => {
                     dir1.MoveToV2(dir3); // This should fail since dir3 already exists
                 });
