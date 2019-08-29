@@ -37,6 +37,15 @@ namespace com.csutil {
 
         private static void saveScreenSize() { _h = Screen.height; _w = Screen.width; }
 
+        public static Rect GetScreenRect() {
+            var screen = new Rect();
+            screen.xMin = 0;
+            screen.xMax = ScreenV2.width;
+            screen.yMin = 0;
+            screen.yMax = ScreenV2.height;
+            return screen;
+        }
+
     }
 
 }
