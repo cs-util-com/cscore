@@ -5,9 +5,9 @@ using Xunit;
 
 namespace com.csutil.tests.datastructures {
 
-    public class ImmutableTests {
+    public class ImmutableListTests {
 
-        public ImmutableTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
+        public ImmutableListTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
         [Fact]
         public void ExampleUsage1() {
@@ -17,14 +17,14 @@ namespace com.csutil.tests.datastructures {
                 var t1 = RunOnList("add", elemCount, (list) => { list.Add(1); });
                 var t2 = RunOnImmutableList("add", elemCount, (list) => list.Add(1));
                 var timeDiff = Math.Abs(t1 - t2);
-                Assert.True(timeDiff < 100, "t1=" + t1 + ", t2=" + t2 + ", timeDiff=" + timeDiff);
+                Assert.True(timeDiff < 200, "add t1=" + t1 + ", t2=" + t2 + ", timeDiff=" + timeDiff);
             }
             {
                 var elemCount = 100000;
                 var t1 = RunOnList("insert", elemCount, (list) => { list.Insert(0, 1); });
                 var t2 = RunOnImmutableList("insert", elemCount, (list) => list.Insert(0, 1));
                 var timeDiff = Math.Abs(t1 - t2);
-                Assert.True(timeDiff < 100, "t1=" + t1 + ", t2=" + t2 + ", timeDiff=" + timeDiff);
+                Assert.True(timeDiff < 600, "insert t1=" + t1 + ", t2=" + t2 + ", timeDiff=" + timeDiff);
             }
             {
                 var elemCount = 100000;
@@ -40,7 +40,7 @@ namespace com.csutil.tests.datastructures {
                 var t2 = RunOnImmutableList("remove", ref l2, elemCount, (list) => list.RemoveAt(0));
                 Assert.Empty(l2);
                 var timeDiff = Math.Abs(t1 - t2);
-                Assert.True(timeDiff < 100, "t1=" + t1 + ", t2=" + t2 + ", timeDiff=" + timeDiff);
+                Assert.True(timeDiff < 500, "remove t1=" + t1 + ", t2=" + t2 + ", timeDiff=" + timeDiff);
             }
 
         }
