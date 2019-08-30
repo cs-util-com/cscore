@@ -26,7 +26,7 @@ namespace com.csutil.tests {
         public void TestLoggingMethodStartOnly() {
             Stopwatch s = Log.MethodEntered("abc", 123);
             // ...
-            s.AssertUnderXms(5);
+            s.AssertUnderXms(10);
         }
 
         [Fact]
@@ -56,7 +56,7 @@ namespace com.csutil.tests {
                 await TaskV2.Delay(5);
                 Log.d("worked for 5 ms");
             } // .. as the last line in the tracked method add:
-            Log.MethodDone(timing, maxAllowedTimeInMs: 1000);
+            Log.MethodDone(timing, maxAllowedTimeInMs: 5000);
         }
 
         [Fact]
@@ -98,8 +98,8 @@ namespace com.csutil.tests {
                 stopWatch.Stop();
                 AssertV2.Throws<Exception>(() => { stopWatch.AssertUnderXms(1); }); // This should always fail
 
-                stopWatch.AssertUnderXms(50);
-                AssertV2.IsTrue(stopWatch.IsUnderXms(50), "More time was needed than expected!");
+                stopWatch.AssertUnderXms(200);
+                AssertV2.IsTrue(stopWatch.IsUnderXms(200), "More time was needed than expected!");
             });
 
         }
