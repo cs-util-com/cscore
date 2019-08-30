@@ -73,8 +73,10 @@ namespace com.csutil.tests {
                 });
 
                 var s1 = "a";
+                AssertV2.throwExeptionIfAssertionFails = true;
                 AssertV2.AreEqual(s1, s1);
-
+                AssertV2.IsTrue(ReferenceEquals(s1, s1), "ReferenceEquals for same string failed");
+                AssertV2.IsTrue(Equals(s1, s1), "Equals for same string failed");
                 AssertV2.IsTrue(AssertV2.throwExeptionIfAssertionFails, "AssertV2.throwExeptionIfAssertionFails");
                 AssertV2.Throws<Exception>(() => { AssertV2.AreNotEqual(s1, s1, "s1"); });
 
