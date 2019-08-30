@@ -51,7 +51,7 @@ namespace com.csutil.tests.async {
                     c.ThrowIfCancellationRequested();
                 }
             });
-            yield return new WaitForSeconds(0.2f);
+            yield return new WaitForSeconds(0.5f);
             task1.cancelTask();
             yield return task1.AsCoroutine();
             Assert.IsTrue(task1.task.IsCanceled);

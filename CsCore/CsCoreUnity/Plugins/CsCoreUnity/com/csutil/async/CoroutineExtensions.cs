@@ -97,12 +97,16 @@ namespace com.csutil {
 
         public static Task<T> StartCoroutineAsTask<T>(this MonoBehaviour self, IEnumerator routine, Func<T> onRoutineDone) {
             var tcs = new TaskCompletionSource<T>();
+            self.StartCoroutineAsTask(tcs, routine, onRoutineDone);
+            return tcs.Task;
+        }
+
+        public static void StartCoroutineAsTask<T>(this MonoBehaviour self, TaskCompletionSource<T> tcs, IEnumerator routine, Func<T> onRoutineDone) {
             self.StartCoroutine(routine.WithErrorCatch((e) => {
                 if (e != null) { tcs.TrySetException(e); return; }
                 try { tcs.SetResult(onRoutineDone()); }
                 catch (Exception onDoneError) { tcs.TrySetException(onDoneError); }
             }));
-            return tcs.Task;
         }
 
         public static IEnumerator WithErrorCatch(this IEnumerator coroutineToWrap, Action<Exception> onRoutineDone) {

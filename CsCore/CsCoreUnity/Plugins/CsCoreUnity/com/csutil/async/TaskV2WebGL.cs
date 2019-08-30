@@ -11,13 +11,13 @@ namespace com.csutil.async {
     class TaskV2WebGL : TaskV2 {
 
         protected override Task DelayTask(int millisecondsDelay) {
-            return MainThread.instance.StartCoroutineAsTask(DelayCoroutine(millisecondsDelay));
+            return StartCoroutineAsTask(DelayCoroutine(millisecondsDelay));
         }
 
         private IEnumerator DelayCoroutine(int ms) { yield return new WaitForSeconds(ms / 1000f); }
 
         protected override Task RunTask(Action action) {
-            return MainThread.instance.StartCoroutineAsTask(RunCoroutine(action));
+            return StartCoroutineAsTask(RunCoroutine(action));
         }
 
         private IEnumerator RunCoroutine(Action action) {
@@ -26,7 +26,13 @@ namespace com.csutil.async {
         }
 
         protected override Task RunTask(Func<Task> asyncAction) {
-            return MainThread.instance.StartCoroutineAsTask(RunCoroutine(asyncAction));
+            return StartCoroutineAsTask(RunCoroutine(asyncAction));
+        }
+
+        private static Task StartCoroutineAsTask(IEnumerator iEnum) {
+            var tcs = new TaskCompletionSource<bool>();
+            MainThread.Invoke(() => { MainThread.instance.StartCoroutineAsTask(tcs, iEnum, () => true); });
+            return tcs.Task;
         }
 
         private IEnumerator RunCoroutine(Func<Task> action) {

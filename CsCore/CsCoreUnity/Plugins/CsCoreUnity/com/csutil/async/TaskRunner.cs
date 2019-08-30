@@ -26,9 +26,8 @@ namespace com.csutil {
         }
 
         public MonitoredTask RunInBackground(Func<CancellationToken, Task> asyncAction, TaskScheduler scheduler, TaskCreationOptions o = TaskCreationOptions.None) {
-            ThrowIfWebGL();
             var cancelToken = new CancellationTokenSource();
-            Task task = Task.Factory.StartNew(() => asyncAction(cancelToken.Token),
+            Task task = TaskFactoryStartNew(() => asyncAction(cancelToken.Token),
                 cancelToken.Token, o, scheduler).Unwrap();
             var mt = new MonitoredTask() { task = task, cancelTask = () => { cancelToken.Cancel(); } };
             return AddToMonitoredTasks(mt, cancelToken);
@@ -39,12 +38,16 @@ namespace com.csutil {
         }
 
         public MonitoredTask<T> RunInBackground<T>(Func<CancellationToken, Task<T>> asyncFunction, TaskScheduler scheduler, TaskCreationOptions o = TaskCreationOptions.None) {
-            ThrowIfWebGL();
             var cancelToken = new CancellationTokenSource();
-            Task<T> task = Task.Factory.StartNew(() => asyncFunction(cancelToken.Token),
+            Task<T> task = TaskFactoryStartNew(() => asyncFunction(cancelToken.Token),
                 cancelToken.Token, o, scheduler).Unwrap();
             var mt = new MonitoredTask<T>() { task = task, cancelTask = () => { cancelToken.Cancel(); } };
             return AddToMonitoredTasks(mt, cancelToken);
+        }
+
+        private Task<T> TaskFactoryStartNew<T>(Func<T> p, CancellationToken token, TaskCreationOptions o, TaskScheduler scheduler) {
+            ThrowIfWebGL();
+            return Task.Factory.StartNew(p, token, o, scheduler);
         }
 
         private void ThrowIfWebGL() {
