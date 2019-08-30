@@ -11,7 +11,9 @@ namespace com.csutil.json {
     internal class JsonConverterHandlingMissingFields : JsonConverter {
 
         // This converter should only handle classes that implement the HandleAdditionalJsonFields interface:
-        public override bool CanConvert(Type objectType) { return objectType.IsCastableTo<HandleAdditionalJsonFields>(); }
+        public override bool CanConvert(Type objectType) {
+            return objectType.IsCastableTo<HandleAdditionalJsonFields>();
+        }
 
         public override object ReadJson(Newtonsoft.Json.JsonReader reader, Type targetObjectType, object targetObjectToFill, JsonSerializer serializer) {
             targetObjectToFill = targetObjectToFill ?? Activator.CreateInstance(targetObjectType, true);

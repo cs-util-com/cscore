@@ -68,15 +68,16 @@ namespace Xunit {
             if (notThrown) { throw new AssertException("Did not throw " + typeof(T)); }
         }
 
-        public static void Same<T>(T objA, T objB) {
-            True(ReferenceEquals(objA, objB));
+        public static void Same<T>(T expected, T actual) {
+            True(ReferenceEquals(expected, actual));
         }
+
         public static void NotSame<T>(T objA, T objB) {
             True(!ReferenceEquals(objA, objB));
         }
 
-        public static void InRange<T>(T obj, T min, T max) where T : IComparable {
-            True(min.CompareTo(obj) <= 0 && obj.CompareTo(max) <= 0);
+        public static void InRange<T>(T actual, T min, T max) where T : IComparable {
+            True(min.CompareTo(actual) <= 0 && actual.CompareTo(max) <= 0, "actual=" + actual + " not in range [" + min + " .. " + max + "]");
         }
 
         public static void Single<T>(IEnumerable<T> e) { Equal(1, e.Count()); }

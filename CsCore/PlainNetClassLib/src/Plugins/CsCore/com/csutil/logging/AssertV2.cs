@@ -62,11 +62,11 @@ namespace com.csutil {
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         public static void AreNotEqual<T>(IEquatable<T> expected, IEquatable<T> actual, string varName = "", params object[] args) {
-            var isEqualRef = ReferenceEquals(expected, actual);
-            Assert(!isEqualRef, "Assert.AreNotEqual() FAILED: " + varName + " is same reference (expected " + expected + " == actual " + actual + " )", args);
-            if (!isEqualRef) {
+            var isNotSameRef = !ReferenceEquals(expected, actual);
+            Assert(isNotSameRef, "Assert.AreNotEqual() FAILED: " + varName + " is same reference (expected " + expected + " == actual " + actual + " )", args);
+            if (isNotSameRef) {
                 var errorMsg = "Assert.AreNotEqual() FAILED: expected " + varName + "= " + expected + " IS equal to actual " + varName + "= " + actual;
-                Assert(!expected.Equals(actual), errorMsg, args);
+                Assert(!Equals(expected, actual), errorMsg, args);
             }
         }
 

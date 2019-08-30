@@ -7,6 +7,15 @@ namespace com.csutil {
 
         public static EnvironmentV2 instance { get { return IoC.inject.GetOrAddSingleton<EnvironmentV2>(new object()); } }
 
+        public static bool isWebGL {
+            get {
+#if UNITY_WEBGL
+                return true;
+#endif
+                return false;
+            }
+        }
+
         public virtual DirectoryInfo GetCurrentDirectory() {
             return new DirectoryInfo(Directory.GetCurrentDirectory());
         }

@@ -26,6 +26,7 @@ namespace com.csutil {
         }
 
         public MonitoredTask RunInBackground(Func<CancellationToken, Task> asyncAction, TaskScheduler scheduler, TaskCreationOptions o = TaskCreationOptions.None) {
+            ThrowIfWebGL();
             var cancelToken = new CancellationTokenSource();
             Task task = Task.Factory.StartNew(() => asyncAction(cancelToken.Token),
                 cancelToken.Token, o, scheduler).Unwrap();
@@ -38,11 +39,16 @@ namespace com.csutil {
         }
 
         public MonitoredTask<T> RunInBackground<T>(Func<CancellationToken, Task<T>> asyncFunction, TaskScheduler scheduler, TaskCreationOptions o = TaskCreationOptions.None) {
+            ThrowIfWebGL();
             var cancelToken = new CancellationTokenSource();
             Task<T> task = Task.Factory.StartNew(() => asyncFunction(cancelToken.Token),
                 cancelToken.Token, o, scheduler).Unwrap();
             var mt = new MonitoredTask<T>() { task = task, cancelTask = () => { cancelToken.Cancel(); } };
             return AddToMonitoredTasks(mt, cancelToken);
+        }
+
+        private void ThrowIfWebGL() {
+            if (EnvironmentV2.isWebGL) { throw Log.e("WebGL cant handle Task.Factory.StartNew!"); }
         }
 
         public T AddToMonitoredTasks<T>(T task, CancellationTokenSource c) where T : InteruptableTask {

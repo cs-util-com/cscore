@@ -73,8 +73,10 @@ namespace com.csutil.tests {
                 });
 
                 var s1 = "a";
+                AssertV2.throwExeptionIfAssertionFails = true;
                 AssertV2.AreEqual(s1, s1);
-
+                AssertV2.IsTrue(ReferenceEquals(s1, s1), "ReferenceEquals for same string failed");
+                AssertV2.IsTrue(Equals(s1, s1), "Equals for same string failed");
                 AssertV2.IsTrue(AssertV2.throwExeptionIfAssertionFails, "AssertV2.throwExeptionIfAssertionFails");
                 AssertV2.Throws<Exception>(() => { AssertV2.AreNotEqual(s1, s1, "s1"); });
 
@@ -90,7 +92,9 @@ namespace com.csutil.tests {
                 AssertV2.Throws<Exception>(() => { AssertV2.AreNotEqual(1, 1); });
 
                 var stopWatch = AssertV2.TrackTiming();
-                Thread.Sleep(10);
+                var res = 1f;
+                for (float i = 1; i < 500000; i++) { res = i / res + i; }
+                Assert.NotEqual(0, res);
                 stopWatch.Stop();
                 AssertV2.Throws<Exception>(() => { stopWatch.AssertUnderXms(1); }); // This should always fail
 

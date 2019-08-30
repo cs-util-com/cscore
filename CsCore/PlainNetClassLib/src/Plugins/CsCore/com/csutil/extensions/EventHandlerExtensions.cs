@@ -16,21 +16,20 @@ namespace com.csutil {
             bool currentlyThrottling = false;
             bool needsFinalCall = false;
             object threadLock = new object();
-            return (sender, eventArgs) => {
+            return async (sender, eventArgs) => {
                 lock (threadLock) {
                     if (currentlyThrottling) { needsFinalCall = true; return; }
                     currentlyThrottling = true;
                     self(sender, eventArgs);
                 }
-                TaskV2.Delay(TimeSpan.FromMilliseconds(delayInMs)).ContinueWith(_ => {
-                    lock (threadLock) {
-                        if (needsFinalCall) {
-                            try { self(sender, eventArgs); } catch (Exception e) { Log.e(e); }
-                        }
-                        currentlyThrottling = false;
-                        needsFinalCall = false;
+                await TaskV2.Delay(TimeSpan.FromMilliseconds(delayInMs));
+                lock (threadLock) {
+                    if (needsFinalCall) {
+                        try { self(sender, eventArgs); } catch (Exception e) { Log.e(e); }
                     }
-                });
+                    currentlyThrottling = false;
+                    needsFinalCall = false;
+                }
             };
         }
 

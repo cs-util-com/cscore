@@ -67,31 +67,47 @@ namespace com.csutil {
         }
 
         public static bool DeleteV2(this FileSystemInfo self) {
-            return DeleteV2(self, () => { self.Delete(); });
+            return DeleteV2(self, () => { self.Delete(); return true; });
         }
 
         public static bool DeleteV2(this DirectoryInfo self, bool deleteAlsoIfNotEmpty = true) {
-            return DeleteV2(self, () => { self.Delete(deleteAlsoIfNotEmpty); });
+            return DeleteV2(self, () => {
+                if (deleteAlsoIfNotEmpty) { // Recursively delete all children first:
+                    if (!self.IsEmtpy()) {
+                        foreach (var subDir in self.GetDirectories()) { subDir.DeleteV2(deleteAlsoIfNotEmpty); }
+                        foreach (var file in self.GetFiles()) { file.DeleteV2(); }
+                    }
+                }
+                self.Refresh();
+                if (!self.IsEmtpy()) { throw new IOException("Cant delete non-emtpy dir: " + self.FullPath()); }
+                try { self.Delete(); return true; } catch (Exception e) { Log.e(e); }
+                return false;
+            });
         }
 
-        private static bool DeleteV2(FileSystemInfo self, Action deleteAction) {
+        public static bool IsEmtpy(this DirectoryInfo self) { // TODO use old method to avoid exceptions?
+            try { return !self.EnumerateFileSystemInfos().Any(); } catch (System.Exception) { return true; }
+        }
+
+        private static bool DeleteV2(FileSystemInfo self, Func<bool> deleteAction) {
             if (self != null && self.ExistsV2()) {
-                deleteAction();
+                var res = deleteAction();
                 self.Refresh();
-                AssertV2.IsFalse(self.ExistsV2(), "Still exists: " + self.FullName);
-                return true;
+                AssertV2.IsFalse(!res || self.ExistsV2(), "Still exists: " + self.FullName);
+                return res;
             }
             return false;
         }
 
-        public static void Rename(this FileInfo self, string newName) {
+        public static bool Rename(this FileInfo self, string newName) {
             self.MoveTo(self.ParentDir().GetChild(newName).FullPath());
+            return self.ExistsV2();
         }
 
-        public static void MoveToV2(this FileInfo self, DirectoryInfo target) {
+        public static bool MoveToV2(this FileInfo self, DirectoryInfo target) {
             self.MoveTo(target.FullPath() + self.Name);
-            self.Refresh();
             target.Refresh();
+            return self.ExistsV2();
         }
 
         public static bool OpenInExternalApp(this FileSystemInfo self) {
@@ -102,34 +118,72 @@ namespace com.csutil {
             return false;
         }
 
-        public static void MoveToV2(this DirectoryInfo self, DirectoryInfo target) {
-            self.MoveTo(target.FullPath());
-            self.Refresh();
-            target.Refresh();
+        public static bool MoveToV2(this DirectoryInfo source, DirectoryInfo target) {
+            AssertNotIdentical(source, target);
+            var tempCopyId = "" + Guid.NewGuid();
+            var originalPath = source.FullPath();
+            if (EnvironmentV2.isWebGL) {
+                // In WebGL .MoveTo does not work correctly so copy+delete is tried instead:
+                source.CopyTo(EnvironmentV2.instance.GetOrAddTempFolder("TmpCopies").GetChildDir(tempCopyId));
+            }
+            source.MoveTo(target.FullPath());
+            source.Refresh();
+            if (EnvironmentV2.isWebGL) {
+                if (!target.ExistsV2()) {
+                    EmulateMoveViaCopyDelete(originalPath, tempCopyId, target);
+                } else {
+                    Log.e("WebGL TempCopy solution was not needed!");
+                }
+            }
+            return target.ExistsV2();
         }
 
-        public static void Rename(this DirectoryInfo self, string newName) {
+        /// <summary> Needed in WebGL because .MoveTo does not correctly move the files to
+        /// the new target directory but instead only removes the original dir </summary>
+        private static void EmulateMoveViaCopyDelete(string source, string tempDirPath, DirectoryInfo target) {
+            var tempDir = EnvironmentV2.instance.GetOrAddTempFolder("TmpCopies").GetChildDir(tempDirPath);
+            if (tempDir.IsEmtpy()) {
+                target.CreateV2();
+                CleanupAfterEmulatedMove(source, tempDir);
+            } else if (tempDir.CopyTo(target)) {
+                CleanupAfterEmulatedMove(source, tempDir);
+            } else {
+                Log.e("Could not move tempDir=" + tempDir + " into target=" + target);
+            }
+        }
+
+        private static void CleanupAfterEmulatedMove(string source, DirectoryInfo tempDir) {
+            tempDir.DeleteV2();
+            var originalDir = new DirectoryInfo(source);
+            try { if (originalDir.ExistsV2()) { originalDir.DeleteV2(); } } catch (Exception e) { Log.e("Cleanup err of original dir: " + originalDir, e); }
+        }
+
+        private static void AssertNotIdentical(DirectoryInfo source, DirectoryInfo target) {
+            if (Equals(source.FullPath(), target.FullPath())) {
+                throw new OperationCanceledException("Identical source & target: " + source);
+            }
+        }
+
+        public static bool Rename(this DirectoryInfo self, string newName) {
             var target = self.Parent.GetChildDir(newName);
             AssertV2.IsFalse(target.IsNotNullAndExists(), "Already exists: target=" + target.FullPath());
-            self.MoveToV2(target);
+            return self.MoveToV2(target);
         }
 
-        public static void CopyTo(this DirectoryInfo self, DirectoryInfo target, bool replaceExisting = false) {
+        public static bool CopyTo(this DirectoryInfo source, DirectoryInfo target, bool replaceExisting = false) {
+            AssertNotIdentical(source, target);
             if (!replaceExisting && target.IsNotNullAndExists()) {
                 throw new ArgumentException("Cant copy to existing folder " + target);
             }
-            var sourcePath = self.FullPath();
-            var targetPath = target.FullPath();
-            // From https://stackoverflow.com/a/3822913/165106
-            // Create all empty directories
-            foreach (string dirPath in Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories)) {
-                Directory.CreateDirectory(dirPath.Replace(sourcePath, targetPath));
+            foreach (var subDir in source.EnumerateDirectories()) {
+                CopyTo(subDir, target.GetChildDir(subDir.NameV2()), replaceExisting);
             }
-            //Copy all the files & Replaces any files with the same name
-            foreach (string newPath in Directory.GetFiles(sourcePath, "*", SearchOption.AllDirectories)) {
-                File.Copy(newPath, newPath.Replace(sourcePath, targetPath), overwrite: true);
+            foreach (var file in source.EnumerateFiles()) {
+                target.CreateV2();
+                var createdFile = file.CopyTo(target.GetChild(file.Name).FullPath(), replaceExisting);
+                AssertV2.IsTrue(createdFile.ExistsV2(), "!createdFile.Exists: " + createdFile);
             }
-            target.Refresh();
+            return target.ExistsV2();
         }
 
         public static T LoadAs<T>(this FileInfo self) {

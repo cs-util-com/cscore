@@ -10,55 +10,7 @@ namespace com.csutil.tests.async {
 
     public class EventHandlerTests {
 
-
         public EventHandlerTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
-
-        [Fact]
-        public async Task ThrottledDebounceTest1() {
-            int counter = 0;
-            EventHandler<string> action = (_, myStringParam) => {
-                Assert.NotEqual("bad", myStringParam);
-                Interlocked.Increment(ref counter);
-            };
-            var throttledAction = action.AsThrottledDebounce(delayInMs: 5);
-
-            throttledAction(this, "good");
-            throttledAction(this, "bad");
-            throttledAction(this, "bad");
-            throttledAction(this, "bad");
-            throttledAction(this, "good");
-            for (int i = 0; i < 20; i++) { await TaskV2.Delay(100); if (counter >= 2) { break; } }
-            Assert.Equal(2, counter);
-
-            throttledAction(this, "good");
-            throttledAction(this, "bad");
-            throttledAction(this, "good");
-            for (int i = 0; i < 20; i++) { await TaskV2.Delay(100); if (counter >= 4) { break; } }
-            Assert.Equal(4, counter);
-            await TaskV2.Delay(100);
-            Assert.Equal(4, counter);
-        }
-
-        [Fact]
-        public async Task ThrottledDebounceTest2() {
-            int counter = 0;
-            EventHandler<int> action = (_, myIntParam) => {
-                Log.d("myIntParam=" + myIntParam);
-                Interlocked.Increment(ref counter);
-            };
-            var throttledAction = action.AsThrottledDebounce(delayInMs: 5);
-
-            var tasks = new List<Task>();
-            for (int i = 0; i < 100; i++) { // Do 100 calls of the method in parallel:
-                var myIntParam = i;
-                tasks.Add(TaskV2.Run(() => { throttledAction(this, myIntParam); }));
-            }
-            await Task.WhenAll(tasks.ToArray());
-            for (int i = 0; i < 20; i++) { await TaskV2.Delay(100); if (counter >= 2) { break; } }
-            Assert.Equal(2, counter);
-            await TaskV2.Delay(100);
-            Assert.Equal(2, counter);
-        }
 
         [Fact]
         public async Task ExponentialBackoffExample1() {
@@ -91,6 +43,70 @@ namespace com.csutil.tests.async {
         private async Task SomeTaskThatFailsEveryTime() {
             await TaskV2.Delay(5);
             throw new TimeoutException("e.g. some network error");
+        }
+
+        [Fact]
+        public async Task TestTaskV2Delay() {
+            var t1 = Stopwatch.StartNew();
+            var t2 = StopwatchV2.StartNewV2("TestTaskV2Delay");
+            var min = 0;
+            for (int i = 0; i < 10; i++) {
+                min += 100;
+                await TaskV2.Delay(100);
+                Assert.InRange(t1.ElapsedMilliseconds, min, min + 100);
+                Assert.InRange(t2.ElapsedMilliseconds, min, min + 100);
+            }
+        }
+
+        [Fact]
+        public async Task TestThrottledDebounce1() {
+            int counter = 0;
+            EventHandler<string> action = (_, myStringParam) => {
+                Assert.NotEqual("bad", myStringParam);
+                Log.d("action callback with old counter=" + counter);
+                Interlocked.Increment(ref counter);
+                Log.d("... new counter=" + counter);
+            };
+            var throttledAction = action.AsThrottledDebounce(delayInMs: 5);
+
+            throttledAction(this, "good");
+            throttledAction(this, "bad");
+            throttledAction(this, "bad");
+            throttledAction(this, "bad");
+            throttledAction(this, "good");
+            for (int i = 0; i < 30; i++) { await TaskV2.Delay(100); if (counter >= 2) { break; } }
+            Assert.Equal(2, counter);
+
+            throttledAction(this, "good");
+            throttledAction(this, "bad");
+            throttledAction(this, "good");
+            for (int i = 0; i < 30; i++) { await TaskV2.Delay(100); if (counter >= 4) { break; } }
+            await TaskV2.Delay(100);
+            Assert.Equal(4, counter);
+            await TaskV2.Delay(100);
+            Assert.Equal(4, counter);
+
+        }
+
+        [Fact]
+        public async Task TestThrottledDebounce2() {
+            int counter = 0;
+            EventHandler<int> action = (_, myIntParam) => {
+                Log.d("myIntParam=" + myIntParam);
+                Interlocked.Increment(ref counter);
+            };
+            var throttledAction = action.AsThrottledDebounce(delayInMs: 5);
+
+            var tasks = new List<Task>();
+            for (int i = 0; i < 100; i++) { // Do 100 calls of the method in parallel:
+                var myIntParam = i;
+                tasks.Add(TaskV2.Run(() => { throttledAction(this, myIntParam); }));
+            }
+            await Task.WhenAll(tasks.ToArray());
+            for (int i = 0; i < 20; i++) { await TaskV2.Delay(100); if (counter >= 2) { break; } }
+            Assert.Equal(2, counter);
+            await TaskV2.Delay(100);
+            Assert.Equal(2, counter);
         }
 
     }

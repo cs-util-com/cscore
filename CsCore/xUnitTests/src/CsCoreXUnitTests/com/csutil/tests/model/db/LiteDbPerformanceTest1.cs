@@ -68,7 +68,7 @@ namespace com.csutil.tests.model {
             await ParallelExec(dataTree, (elem) => {
                 GetFileForElem(testFolder, elem).SaveAsJson(elem);
             });
-            Log.MethodDone(insertTimer, 4000);
+            Log.MethodDone(insertTimer, 7000);
         }
 
         private static async Task ReadFiles(List<TreeElem> dataTree, DirectoryInfo testFolder) {
