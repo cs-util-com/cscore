@@ -9,14 +9,14 @@ namespace com.csutil {
     public static class EventHandlerExtensions {
 
         /// <summary> 
-        /// This will create an action where the first call is executed and the last call is executed but 
+        /// This will create an EventHandler where the first call is executed and the last call is executed but 
         /// every call in between that is below the passed millisecond threshold is ignored
         /// </summary>
         public static EventHandler<T> AsThrottledDebounce<T>(this EventHandler<T> self, double delayInMs) {
             bool currentlyThrottling = false;
             bool needsFinalCall = false;
             object threadLock = new object();
-            return async (sender, eventArgs) => {
+            Func<object, T, Task> asyncEventHandler = async (sender, eventArgs) => {
                 lock (threadLock) {
                     if (currentlyThrottling) { needsFinalCall = true; return; }
                     currentlyThrottling = true;
@@ -31,6 +31,7 @@ namespace com.csutil {
                     needsFinalCall = false;
                 }
             };
+            return (sender, eventArgs) => { asyncEventHandler(sender, eventArgs); };
         }
 
     }

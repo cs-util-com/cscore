@@ -51,7 +51,7 @@ namespace com.csutil.tests.async {
             var t2 = StopwatchV2.StartNewV2("TestTaskV2Delay");
             var min = 0;
             var delayInMs = 100;
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < 5; i++) {
                 min += delayInMs;
                 await TaskV2.Delay(delayInMs);
                 Assert.InRange(t1.ElapsedMilliseconds, min * 0.5f, (min + delayInMs) * 3f);
