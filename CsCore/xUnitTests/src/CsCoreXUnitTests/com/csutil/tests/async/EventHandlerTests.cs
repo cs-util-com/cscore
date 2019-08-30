@@ -54,8 +54,8 @@ namespace com.csutil.tests.async {
             for (int i = 0; i < 5; i++) {
                 min += delayInMs;
                 await TaskV2.Delay(delayInMs);
-                Assert.InRange(t1.ElapsedMilliseconds, min * 0.5f, (min + delayInMs) * 3f);
-                Assert.InRange(t2.ElapsedMilliseconds, min * 0.5f, (min + delayInMs) * 3f);
+                Assert.InRange(t1.ElapsedMilliseconds, min * 0.1f, (min + delayInMs) * 3f);
+                Assert.InRange(t2.ElapsedMilliseconds, min * 0.1f, (min + delayInMs) * 3f);
             }
         }
 
