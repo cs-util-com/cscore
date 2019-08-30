@@ -26,7 +26,9 @@ namespace com.csutil {
             GC.WaitForPendingFinalizers();
             GC.Collect();
             managedMemoryAtStart = GC.GetTotalMemory(true);
-            using (var p = Process.GetCurrentProcess()) { memoryAtStart = p.PrivateMemorySize64; }
+            if (!EnvironmentV2.isWebGL) {
+                using (var p = Process.GetCurrentProcess()) { memoryAtStart = p.PrivateMemorySize64; }
+            }
         }
 
         public static StopwatchV2 StartNewV2(string methodName) { return new StopwatchV2(methodName).StartV2(); }

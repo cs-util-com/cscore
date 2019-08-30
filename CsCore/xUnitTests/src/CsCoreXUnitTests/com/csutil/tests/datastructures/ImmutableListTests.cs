@@ -17,7 +17,7 @@ namespace com.csutil.tests.datastructures {
                 var t1 = RunOnList("add", elemCount, (list) => { list.Add(1); });
                 var t2 = RunOnImmutableList("add", elemCount, (list) => list.Add(1));
                 var timeDiff = Math.Abs(t1 - t2);
-                Assert.True(timeDiff < 1000, "add t1=" + t1 + ", t2=" + t2 + ", timeDiff=" + timeDiff);
+                Assert.True(timeDiff < 2000, "add t1=" + t1 + ", t2=" + t2 + ", timeDiff=" + timeDiff);
             }
             {
                 var elemCount = 100000;
