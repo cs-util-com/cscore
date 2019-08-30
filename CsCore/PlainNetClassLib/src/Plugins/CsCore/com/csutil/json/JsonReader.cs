@@ -10,19 +10,12 @@ namespace com.csutil {
     public interface IJsonReader {
         object ReadAsType(string jsonString, Type targetType);
         object ReadAsType(StreamReader streamReader, Type targetType);
+        T Read<T>(string jsonString);
+        T Read<T>(StreamReader jsonString);
     }
 
     public interface JsonReaderFinished {
         void onJsonReadingFinished(string originalRawJson);
-    }
-
-    public static class IJsonReaderExtensions {
-        public static T Read<T>(this IJsonReader self, StreamReader jsonString) {
-            return (T)self.ReadAsType(jsonString, typeof(T));
-        }
-        public static T Read<T>(this IJsonReader self, string jsonString) {
-            return (T)self.ReadAsType(jsonString, typeof(T));
-        }
     }
 
     public static class JsonReader {
