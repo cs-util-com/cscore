@@ -21,7 +21,7 @@ namespace com.csutil.tests.model.immutable {
 
         [Fact]
         public async Task ExampleUsage2() {
-            var t = Log.MethodEntered();
+            var t = Log.MethodEntered("DataStoreExample2.ExampleUsage2");
 
             // Add a thunk middleware to allow dispatching async actions:
             var thunkMiddleware = Middlewares.NewThunkMiddleware<MyAppState1>();
@@ -53,7 +53,7 @@ namespace com.csutil.tests.model.immutable {
         }
 
         private static void TestNormalDispatchOfActions(IDataStore<MyAppState1> store) {
-            var t = Log.MethodEntered();
+            var t = Log.MethodEntered("TestNormalDispatchOfActions");
 
             // Register a listener that listens to a subtree of the complete state tree:
             var firstContactWasModifiedCounter = 0;
@@ -95,7 +95,7 @@ namespace com.csutil.tests.model.immutable {
         }
 
         private static void TestUndoAndRedo(IDataStore<MyAppState1> store) {
-            var t = Log.MethodEntered();
+            var t = Log.MethodEntered("TestUndoAndRedo");
 
             // There is nothing on the redo stack first:
             Assert.Throws<InvalidOperationException>(() => { store.Dispatch(new RedoAction<MyAppState1>()); });
@@ -133,7 +133,7 @@ namespace com.csutil.tests.model.immutable {
         }
 
         private static async Task TestAsyncActions(IDataStore<MyAppState1> store) {
-            var t = Log.MethodEntered();
+            var t = Log.MethodEntered("TestAsyncActions");
 
             Assert.Null(store.GetState().currentWeather);
             // Create an async action and dispatch it so that it is executed by the thunk middleware:
@@ -159,7 +159,7 @@ namespace com.csutil.tests.model.immutable {
         }
 
         private async Task TestReplayRecorder(ReplayRecorder<MyAppState1> recorder, IDataStore<MyAppState1> store) {
-            var t = Log.MethodEntered();
+            var t = Log.MethodEntered("TestReplayRecorder");
 
             // First remember the final state of the store:
             var finalState = store.GetState();
@@ -180,7 +180,7 @@ namespace com.csutil.tests.model.immutable {
         }
 
         private async Task TestReplayRecorderOnNewStore(ReplayRecorder<MyAppState1> recorder, MyAppState1 finalStateOfFirstStore) {
-            var t = Log.MethodEntered();
+            var t = Log.MethodEntered("TestReplayRecorderOnNewStore");
 
             // Connect the recorder to the new store:
             var recMiddleware = recorder.CreateMiddleware();

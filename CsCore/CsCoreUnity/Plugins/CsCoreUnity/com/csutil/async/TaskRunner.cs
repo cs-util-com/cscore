@@ -46,12 +46,8 @@ namespace com.csutil {
         }
 
         private Task<T> TaskFactoryStartNew<T>(Func<T> p, CancellationToken token, TaskCreationOptions o, TaskScheduler scheduler) {
-            ThrowIfWebGL();
-            return Task.Factory.StartNew(p, token, o, scheduler);
-        }
-
-        private void ThrowIfWebGL() {
             if (EnvironmentV2.isWebGL) { throw Log.e("WebGL cant handle Task.Factory.StartNew!"); }
+            return Task.Factory.StartNew(p, token, o, scheduler);
         }
 
         public T AddToMonitoredTasks<T>(T task, CancellationTokenSource c) where T : InteruptableTask {

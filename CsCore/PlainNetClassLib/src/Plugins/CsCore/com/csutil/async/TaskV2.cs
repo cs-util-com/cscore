@@ -38,6 +38,12 @@ namespace com.csutil {
 
         protected virtual Task RunTask(Func<Task> asyncAction) { return Task.Run(asyncAction); }
 
+        public static Task<T> Run<T>(Func<Task<T>> asyncAction) {
+            return IoC.inject.GetOrAddSingleton<TaskV2>(null).RunTask(asyncAction);
+        }
+
+        protected virtual Task<T> RunTask<T>(Func<Task<T>> asyncAction) { return Task.Run(asyncAction); }
+
     }
 
 }

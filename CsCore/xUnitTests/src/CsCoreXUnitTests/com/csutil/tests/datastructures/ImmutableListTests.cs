@@ -15,14 +15,14 @@ namespace com.csutil.tests.datastructures {
             {
                 var elemCount = 100000;
                 var t1 = RunOnList("add", elemCount, (list) => { list.Add(1); });
-                var t2 = RunOnImmutableList("add", elemCount, (list) => list.Add(1));
+                var t2 = RunOnImmutableList("ExampleUsage1.add", elemCount, (list) => list.Add(1));
                 var timeDiff = Math.Abs(t1 - t2);
                 Assert.True(timeDiff < 2000, "add t1=" + t1 + ", t2=" + t2 + ", timeDiff=" + timeDiff);
             }
             {
                 var elemCount = 100000;
                 var t1 = RunOnList("insert", elemCount, (list) => { list.Insert(0, 1); });
-                var t2 = RunOnImmutableList("insert", elemCount, (list) => list.Insert(0, 1));
+                var t2 = RunOnImmutableList("ExampleUsage1.insert", elemCount, (list) => list.Insert(0, 1));
                 var timeDiff = Math.Abs(t1 - t2);
                 Assert.True(timeDiff < 3000, "insert t1=" + t1 + ", t2=" + t2 + ", timeDiff=" + timeDiff);
             }
@@ -31,13 +31,13 @@ namespace com.csutil.tests.datastructures {
                 List<int> l1 = new List<int>();
                 RunOnList("fill", l1, elemCount, l => l.Add(1));
                 Assert.Equal(elemCount, l1.Count);
-                var t1 = RunOnList("remove", l1, elemCount, (list) => { list.RemoveAt(0); });
+                var t1 = RunOnList("ExampleUsage1.remove", l1, elemCount, (list) => { list.RemoveAt(0); });
                 Assert.Empty(l1);
 
                 var l2 = ImmutableList.Create<int>();
                 RunOnImmutableList("fill", ref l2, elemCount, (list) => list.Add(1));
                 Assert.Equal(elemCount, l2.Count);
-                var t2 = RunOnImmutableList("remove", ref l2, elemCount, (list) => list.RemoveAt(0));
+                var t2 = RunOnImmutableList("ExampleUsage1.remove", ref l2, elemCount, (list) => list.RemoveAt(0));
                 Assert.Empty(l2);
                 var timeDiff = Math.Abs(t1 - t2);
                 Assert.True(timeDiff < 4000, "remove t1=" + t1 + ", t2=" + t2 + ", timeDiff=" + timeDiff);

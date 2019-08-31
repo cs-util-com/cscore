@@ -47,15 +47,18 @@ namespace com.csutil {
 
         private static T Get<T>(this object[] args) { return args != null ? (T)args.FirstOrDefault(x => x is T) : default(T); }
 
-        public static StopwatchV2 MethodEntered(params object[] args) {
+        public static StopwatchV2 MethodEntered(string methodName, params object[] args) {
+            if (methodName.IsNullOrEmpty()) {
 #if DEBUG
-            var t = new StackFrame(1, true);
-            var methodName = t.GetMethodName(false);
-            Log.d(" --> " + methodName, t.AddTo(args));
-            return AssertV2.TrackTiming(methodName);
-#else
-            return AssertV2.TrackTiming();
+                var t = new StackFrame(1, true);
+                methodName = t.GetMethodName(false);
+                args = t.AddTo(args);
 #endif
+            } else {
+                EventBus.instance.Publish("MethodEntered", methodName, args);
+            }
+            Log.d(" --> " + methodName, args);
+            return AssertV2.TrackTiming(methodName);
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_FULL_LOGGING")]
@@ -94,7 +97,7 @@ namespace com.csutil {
         /// <summary> Will return a formated string in the form of ClassName.MethodName </summary>
         public static string GetMethodName(this StackFrame self, bool includeParams = true) {
             try {
-                if (EnvironmentV2.isWebGL) { return "Method <<" + self + ">>"; }
+                if (EnvironmentV2.isWebGL) { return "" + self; }
                 var method = self.GetMethod(); // analyse stack trace for class name:
                 var methodString = method.ReflectedType.Name + "." + method.Name;
                 var paramsString = includeParams ? method.GetParameters().ToStringV2(x => "" + x, "", "") : "..";

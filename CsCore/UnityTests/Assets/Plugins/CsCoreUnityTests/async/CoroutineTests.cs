@@ -129,13 +129,13 @@ namespace com.csutil.tests {
         }
 
         private IEnumerator MyCoroutineA() {
-            var t = Log.MethodEntered();
+            var t = Log.MethodEntered("MyCoroutineA");
             yield return new WaitForSeconds(4f);
             Log.MethodDone(t);
         }
 
         private IEnumerator MyCoroutineB(float duration) {
-            var t = Log.MethodEntered("duration=" + duration);
+            var t = Log.MethodEntered("MyCoroutineB", "duration =" + duration);
             yield return new WaitForSeconds(duration);
             Log.MethodDone(t);
         }

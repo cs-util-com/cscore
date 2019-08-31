@@ -14,7 +14,7 @@ namespace com.csutil.tests.model.immutable {
 
         [Fact]
         public void ExampleUsage1() {
-            var t = Log.MethodEntered();
+            var t = Log.MethodEntered("DataStoreExample1.ExampleUsage1");
 
             var data = new MyAppState1(); // the initial immutable state
             var store = new DataStore<MyAppState1>(MyReducers1.ReduceMyAppState1, data);

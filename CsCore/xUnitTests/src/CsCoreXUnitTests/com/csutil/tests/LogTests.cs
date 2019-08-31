@@ -24,7 +24,7 @@ namespace com.csutil.tests {
 
         [Fact]
         public void TestLoggingMethodStartOnly() {
-            Stopwatch s = Log.MethodEntered("abc", 123);
+            Stopwatch s = Log.MethodEntered("TestLoggingMethodStartOnly", "abc", 123);
             // ...
             s.AssertUnderXms(20);
         }
@@ -50,7 +50,7 @@ namespace com.csutil.tests {
 
         // Logging when I method is entered and left:
         private async Task SomeExampleMethod1(string s, int i) {
-            Stopwatch timing = Log.MethodEntered("s=" + s, "i=" + i);
+            Stopwatch timing = Log.MethodEntered("SomeExampleMethod1", "s =" + s, "i=" + i);
             { // .. here would be some method logic ..
                 Log.d("Will now work for 5 ms");
                 await TaskV2.Delay(5);
@@ -116,8 +116,9 @@ namespace com.csutil.tests {
                     }); // ..so the AssertV2.Throws should fail
                     Log.e("This line should never be reached since AssertV2.Throws should fail!");
                     throw new Exception("AssertV2.Throws did not fail correctly!");
-                } catch (AssertV2.ThrowsException) { // Only catch it if its a ThrowsException
-                                                     // AssertV2.Throws failed correctly and threw an ThrowsException error
+                }
+                catch (AssertV2.ThrowsException) { // Only catch it if its a ThrowsException
+                                                   // AssertV2.Throws failed correctly and threw an ThrowsException error
                     Log.d("ThrowsException was expected and arrived correctly");
                 }
 

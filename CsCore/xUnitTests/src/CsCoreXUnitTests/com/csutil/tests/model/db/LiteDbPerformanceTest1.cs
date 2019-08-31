@@ -41,7 +41,7 @@ namespace com.csutil.tests.model {
         }
 
         private static async Task ReadFromDb(List<TreeElem> dataTree, LiteDatabase db) {
-            var readTimer = Log.MethodEntered();
+            var readTimer = Log.MethodEntered("LiteDbPerformanceTest1.ReadFromDb");
             var elements = db.GetCollection<TreeElem>("elements");
             await ParallelExec(dataTree, (elem) => {
                 var found = elements.FindById(elem.id);
@@ -51,7 +51,7 @@ namespace com.csutil.tests.model {
         }
 
         private static async Task InsertIntoDb(List<TreeElem> dataTree, LiteDatabase db) {
-            var insertTimer = Log.MethodEntered();
+            var insertTimer = Log.MethodEntered("LiteDbPerformanceTest1.InsertIntoDb");
             var elements = db.GetCollection<TreeElem>("elements");
             await ParallelExec(dataTree, (elem) => {
                 elements.Insert(elem);
@@ -64,7 +64,7 @@ namespace com.csutil.tests.model {
         }
 
         private static async Task WriteFiles(List<TreeElem> dataTree, DirectoryInfo testFolder) {
-            var insertTimer = Log.MethodEntered();
+            var insertTimer = Log.MethodEntered("LiteDbPerformanceTest1.WriteFiles");
             await ParallelExec(dataTree, (elem) => {
                 GetFileForElem(testFolder, elem).SaveAsJson(elem);
             });
@@ -72,7 +72,7 @@ namespace com.csutil.tests.model {
         }
 
         private static async Task ReadFiles(List<TreeElem> dataTree, DirectoryInfo testFolder) {
-            var readTimer = Log.MethodEntered();
+            var readTimer = Log.MethodEntered("LiteDbPerformanceTest1.ReadFiles");
             var reader = JsonReader.GetReader();
             await ParallelExec(dataTree, (elem) => {
                 var found = GetFileForElem(testFolder, elem).LoadAs<TreeElem>();

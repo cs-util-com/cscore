@@ -12,7 +12,7 @@ namespace com.csutil.tests.async {
 
         [UnityTest]
         public IEnumerator TestMixingBackgroundAndMainThread() {
-            var timing = Log.MethodEntered();
+            var timing = Log.MethodEntered("TestMixingBackgroundAndMainThread");
 
             var backgroundTask1IsDone = false;
             yield return TaskRunner.instance.RunInBackground(async (c) => {
@@ -40,7 +40,7 @@ namespace com.csutil.tests.async {
 
         [UnityTest]
         public IEnumerator TestTaskCancel() {
-            var timing = Log.MethodEntered();
+            var timing = Log.MethodEntered("TestTaskCancel");
 
             var counter = 0;
             var task1 = TaskRunner.instance.RunInBackground(async (c) => {

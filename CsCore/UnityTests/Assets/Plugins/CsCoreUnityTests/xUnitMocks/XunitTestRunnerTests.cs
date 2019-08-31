@@ -33,7 +33,7 @@ namespace com.csutil.tests {
         }
 
         private IEnumerator StartTest(XunitTestRunner.Test runningTest) {
-            var t = Log.MethodEntered("Now running test " + runningTest);
+            var t = Log.MethodEntered("XunitTestRunnerTests.StartTest", "Now running test " + runningTest);
             yield return new WaitForSeconds(0.1f);
             runningTest.StartTest();
             yield return runningTest.testTask.AsCoroutine((e) => { Debug.LogWarning(e); }, timeoutInMs: 60000);

@@ -20,25 +20,20 @@ namespace com.csutil.async {
             return StartCoroutineAsTask(RunCoroutine(action));
         }
 
-        private IEnumerator RunCoroutine(Action action) {
-            yield return new WaitForEndOfFrame();
-            action();
-        }
-
-        protected override Task RunTask(Func<Task> asyncAction) {
-            return StartCoroutineAsTask(RunCoroutine(asyncAction));
-        }
-
         private static Task StartCoroutineAsTask(IEnumerator iEnum) {
             var tcs = new TaskCompletionSource<bool>();
             MainThread.Invoke(() => { MainThread.instance.StartCoroutineAsTask(tcs, iEnum, () => true); });
             return tcs.Task;
         }
 
-        private IEnumerator RunCoroutine(Func<Task> action) {
+        private IEnumerator RunCoroutine(Action action) {
             yield return new WaitForEndOfFrame();
-            yield return action().AsCoroutine();
+            action();
         }
+
+        protected override Task RunTask(Func<Task> asyncAction) { return asyncAction(); }
+
+        protected override Task<T> RunTask<T>(Func<Task<T>> asyncAction) { return asyncAction(); }
 
     }
 

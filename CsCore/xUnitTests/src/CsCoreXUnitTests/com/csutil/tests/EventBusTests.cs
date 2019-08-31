@@ -193,7 +193,7 @@ namespace com.csutil.tests {
                 receivedEventsCounter++;
             });
 
-            var timing = Log.MethodEntered();
+            var timing = Log.MethodEntered("EventBusTests.TestPerformance1");
             var nrOfEventsSendOut = 1000000;
             for (int i = 0; i < nrOfEventsSendOut; i++) {
                 eventBus.Publish(eventName);

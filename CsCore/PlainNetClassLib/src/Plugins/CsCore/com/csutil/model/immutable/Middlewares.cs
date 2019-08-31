@@ -20,7 +20,7 @@ namespace com.csutil.model.immutable {
 
         public static Middleware<T> NewLoggingMiddleware<T>() {
             return (store) => {
-                Log.MethodEntered("store=" + store);
+                Log.MethodEntered("NewLoggingMiddleware", "store =" + store);
                 return (Dispatcher innerDispatcher) => {
                     Dispatcher loggingDispatcher = (action) => {
                         if (action is IsValid v && !v.IsValid()) {

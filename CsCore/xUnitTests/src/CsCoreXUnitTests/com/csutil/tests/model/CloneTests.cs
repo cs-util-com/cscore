@@ -54,28 +54,28 @@ namespace com.csutil.tests.model {
         }
 
         private static TreeElem DeepCopySerializable(TreeElem dataTree) {
-            var t = Log.MethodEntered();
+            var t = Log.MethodEntered("DeepCopySerializable");
             var copy = dataTree.DeepCopySerializable();
             Log.MethodDone(t);
             return copy;
         }
 
         private static TreeElem DeepCopyViaJson(TreeElem dataTree) {
-            var t = Log.MethodEntered();
+            var t = Log.MethodEntered("DeepCopyViaJson");
             var copy = dataTree.DeepCopyViaJson();
             Log.MethodDone(t);
             return copy;
         }
 
         private static TreeElem DeepCopyViaJsonString(TreeElem dataTree) {
-            var t = Log.MethodEntered();
+            var t = Log.MethodEntered("DeepCopyViaJsonString");
             var copy = dataTree.DeepCopyViaJsonString();
             Log.MethodDone(t);
             return copy;
         }
 
         private static TreeElem DeepCopyViaJsonOutString(TreeElem dataTree) {
-            var t = Log.MethodEntered();
+            var t = Log.MethodEntered("DeepCopyViaJsonOutString");
             var copy = dataTree.DeepCopyViaJsonString(out string jsonString);
             Log.MethodDone(t);
             var testFile = EnvironmentV2.instance.GetOrAddTempFolder("DeepCopyViaJsonOutString").GetChild("test1.txt");
@@ -85,7 +85,7 @@ namespace com.csutil.tests.model {
         }
 
         private static TreeElem DeepCopyViaBsonStream(TreeElem dataTree) {
-            var t = Log.MethodEntered();
+            var t = Log.MethodEntered("DeepCopyViaBsonStream");
             var copy = dataTree.DeepCopyViaBsonStream();
             Log.MethodDone(t);
             return copy;
