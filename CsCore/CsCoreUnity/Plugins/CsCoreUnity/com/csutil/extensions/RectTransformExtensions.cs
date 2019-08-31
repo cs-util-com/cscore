@@ -50,6 +50,10 @@ namespace com.csutil {
             return RectTransformUtility.RectangleContainsScreenPoint(self, screenPoint);
         }
 
+        public static Canvas GetRootCanvas(this RectTransform self) {
+            return self.GetComponentInParent<Canvas>().rootCanvas;
+        }
+
     }
 
 }
