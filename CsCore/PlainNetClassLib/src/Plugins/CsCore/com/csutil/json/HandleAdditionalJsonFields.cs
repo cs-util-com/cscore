@@ -4,7 +4,8 @@ namespace com.csutil.json {
 
     public interface HandleAdditionalJsonFields {
 
-        Dictionary<string, object> AdditionalJsonFields { get; set; }
+        Dictionary<string, object> GetAdditionalJsonFields();
+        void SetAdditionalJsonFields(Dictionary<string, object> additionalJsonFields);
 
     }
 }

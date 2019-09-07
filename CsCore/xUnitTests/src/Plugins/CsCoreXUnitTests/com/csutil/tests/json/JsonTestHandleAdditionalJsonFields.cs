@@ -18,7 +18,9 @@ namespace com.csutil.tests.json {
         private class MyClass2 : HandleAdditionalJsonFields {
             public string myString = "Some string";
 
-            public Dictionary<string, object> AdditionalJsonFields { get; set; }
+            private Dictionary<string, object> moreFields;
+            public Dictionary<string, object> GetAdditionalJsonFields() { return moreFields; }
+            public void SetAdditionalJsonFields(Dictionary<string, object> f) { moreFields = f; }
         }
 
         [Fact]
@@ -27,7 +29,7 @@ namespace com.csutil.tests.json {
             var x1JsonString = JsonWriter.GetWriter().Write(x1);
             var x2 = JsonReader.GetReader().Read<MyClass2>(x1JsonString);
             // myString2 and myComplexChildField are missing x2 as fields/porperties so the count of additionl json fields must be 2:
-            Assert.Equal(2, x2.AdditionalJsonFields.Count);
+            Assert.Equal(2, x2.GetAdditionalJsonFields().Count);
             Assert.Equal(x1.myString, x2.myString);
             // The json will still contain the additional fields since they are attached again during serialization:
             var x2JsonString = JsonWriter.GetWriter().Write(x2);
