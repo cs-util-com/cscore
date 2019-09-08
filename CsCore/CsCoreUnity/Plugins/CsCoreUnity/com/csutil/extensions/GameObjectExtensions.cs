@@ -44,9 +44,14 @@ namespace com.csutil {
 
         public static bool Destroy(this GameObject self, bool destroyNextFrame = false) {
             if (self == null) { return false; }
-            try { if (destroyNextFrame) { GameObject.Destroy(self); } else { GameObject.DestroyImmediate(self); } }
-            catch { return false; }
+            try { if (destroyNextFrame) { GameObject.Destroy(self); } else { GameObject.DestroyImmediate(self); } } catch { return false; }
             AssertV2.IsTrue(self.IsDestroyed(), "gameObject was not destroyed");
+            return true;
+        }
+
+        public static bool SetActiveV2(this GameObject self, bool active) {
+            if (self == null) { return false; }
+            self.SetActive(active);
             return true;
         }
 

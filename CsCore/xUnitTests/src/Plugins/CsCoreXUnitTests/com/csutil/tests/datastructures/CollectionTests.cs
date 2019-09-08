@@ -1,9 +1,12 @@
 using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 
 namespace com.csutil.tests {
 
     public class CollectionTests {
+
+        public CollectionTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
         [Fact]
         public void DictionaryExtensions_Examples() {
@@ -78,6 +81,23 @@ namespace com.csutil.tests {
             int sumOfAllInts = filteredInts.Reduce((sum, i) => sum + i); // Sum up all ints
             Assert.Equal(6, sumOfAllInts); // 1+2+3 is 6
 
+        }
+
+        [Fact]
+        public void IEnumerableTests() {
+            IEnumerable<string> l_123 = new List<string>() { "1", "2", "3" };
+            IEnumerable<string> l_ABC = new List<string>() { "A", "B", "C" };
+            {
+                var l_1ABC23 = l_123.InsertRangeV2(1, l_ABC);
+                Assert.Equal("1", l_1ABC23.First());
+                Assert.Equal("3", l_1ABC23.Last());
+                Assert.Equal(1, l_1ABC23.IndexOf("A"));
+                Assert.Equal(-1, l_1ABC23.IndexOf("D"));
+                Assert.Equal(0, l_1ABC23.IndexOf("1"));
+                Assert.Equal(5, l_1ABC23.IndexOf("3"));
+            }
+            Assert.Equal("A", l_123.InsertRangeV2(index: 0, l_ABC).First());
+            Assert.Equal("C", l_123.InsertRangeV2(index: 999, l_ABC).Last());
         }
 
     }
