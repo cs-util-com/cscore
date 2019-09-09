@@ -85,8 +85,8 @@ namespace com.csutil.tests {
 
         [Fact]
         public void IEnumerableTests() {
-            IEnumerable<string> l_123 = new List<string>() { "1", "2", "3" };
-            IEnumerable<string> l_ABC = new List<string>() { "A", "B", "C" };
+            var l_123 = new List<string>() { "1", "2", "3" };
+            var l_ABC = new List<string>() { "A", "B", "C" };
             {
                 var l_1ABC23 = l_123.InsertRangeV2(1, l_ABC);
                 Assert.Equal("1", l_1ABC23.First());
@@ -95,6 +95,10 @@ namespace com.csutil.tests {
                 Assert.Equal(-1, l_1ABC23.IndexOf("D"));
                 Assert.Equal(0, l_1ABC23.IndexOf("1"));
                 Assert.Equal(5, l_1ABC23.IndexOf("3"));
+
+                var normalInsertRangeList = new List<string>() { "1", "2", "3" };
+                normalInsertRangeList.InsertRange(1, l_ABC);
+                Assert.Equal(l_1ABC23, normalInsertRangeList);
             }
             Assert.Equal("A", l_123.InsertRangeV2(index: 0, l_ABC).First());
             Assert.Equal("C", l_123.InsertRangeV2(index: 999, l_ABC).Last());

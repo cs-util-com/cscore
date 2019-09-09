@@ -42,8 +42,11 @@ namespace com.csutil.model.immutable {
         }
 
         private static void ShowChanges<T>(object action, T previousState, T newState) {
-            var diff = new JsonDiffPatch().Diff(JToken.FromObject(previousState), JToken.FromObject(newState));
-            Log.d(asJson("" + action.GetType().Name, action), asJson("previousState -> newState diff", diff));
+            try {
+                var diff = new JsonDiffPatch().Diff(JToken.FromObject(previousState), JToken.FromObject(newState));
+                Log.d(asJson("" + action.GetType().Name, action), asJson("previousState -> newState diff", diff));
+            }
+            catch (Exception e) { Log.e(e); }
         }
 
         private static string asJson(string varName, object result) { return varName + "=" + JsonWriter.AsPrettyString(result); }
