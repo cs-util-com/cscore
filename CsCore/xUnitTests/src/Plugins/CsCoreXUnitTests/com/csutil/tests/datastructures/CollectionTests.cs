@@ -88,7 +88,7 @@ namespace com.csutil.tests {
             var l_123 = new List<string>() { "1", "2", "3" };
             var l_ABC = new List<string>() { "A", "B", "C" };
             {
-                var l_1ABC23 = l_123.InsertRangeV2(1, l_ABC);
+                var l_1ABC23 = l_123.InsertRangeViaUnion(1, l_ABC);
                 Assert.Equal("1", l_1ABC23.First());
                 Assert.Equal("3", l_1ABC23.Last());
                 Assert.Equal(1, l_1ABC23.IndexOf("A"));
@@ -100,8 +100,8 @@ namespace com.csutil.tests {
                 normalInsertRangeList.InsertRange(1, l_ABC);
                 Assert.Equal(l_1ABC23, normalInsertRangeList);
             }
-            Assert.Equal("A", l_123.InsertRangeV2(index: 0, l_ABC).First());
-            Assert.Equal("C", l_123.InsertRangeV2(index: 999, l_ABC).Last());
+            Assert.Equal("A", l_123.InsertRangeViaUnion(index: 0, l_ABC).First());
+            Assert.Equal("C", l_123.InsertRangeViaUnion(index: 999, l_ABC).Last());
         }
 
     }
