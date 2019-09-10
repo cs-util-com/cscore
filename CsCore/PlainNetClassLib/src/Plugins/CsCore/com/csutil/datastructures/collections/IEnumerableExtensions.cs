@@ -46,12 +46,6 @@ namespace com.csutil {
             return keys.Zip(values, (key, value) => new KeyValuePair<K, V>(key, value)).ToDictionary(p => p.Key, p => p.Value);
         }
 
-        public static IEnumerable<T> InsertRangeV2<T>(this IEnumerable<T> self, int index, IEnumerable<T> collection) {
-            var firstHalf = self.Take(index);
-            var secondHalf = self.Skip(index);
-            return firstHalf.Union(collection).Union(secondHalf);
-        }
-
         public static int IndexOf<T>(this IEnumerable<T> self, T elem) { return self.IndexOf(x => Equals(x, elem)); }
 
         public static int IndexOf<T>(this IEnumerable<T> self, Func<T, bool> predicate) {
