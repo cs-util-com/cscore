@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Linq;
-using com.csutil.tests;
 using ReuseScroller;
+using System.Reflection;
+using System;
 
 namespace com.csutil.testing {
 
@@ -13,9 +14,23 @@ namespace com.csutil.testing {
         private const int timeoutInMs = 30000;
 
         public bool autoRunAllTests = false;
+        public List<string> anyTypeInTargetAssembly = new List<string>() {
+            "e.g. MyNamespace.MyClass1, MyAssembly1",
+            "com.csutil.tests.MathTests, CsCoreXUnitTests"
+        };
 
         protected override void Start() {
             base.Start();
+
+            var assembliesToTest = anyTypeInTargetAssembly.Map(typeString => {
+                try { return Type.GetType(typeString).Assembly; }
+                catch (Exception) {
+                    Log.e("Could not find type for string '" + typeString + "'");
+                    return null;
+                }
+            });
+
+            // On the parent canvas level collect all links:
             var links = GetComponentInParent<Canvas>().gameObject.GetLinkMap();
             var autoRunToggle = links.Get<Toggle>("AutoRunToggle");
             autoRunToggle.isOn = autoRunAllTests;
@@ -23,16 +38,21 @@ namespace com.csutil.testing {
                 autoRunAllTests = isChecked;
                 return true;
             });
-            links.Get<Button>("StartButton").SetOnClickAction((button) => { CollectTests(links); });
+            links.Get<Button>("StartButton").SetOnClickAction((_) => {
+                CollectTests(assembliesToTest, links);
+            });
         }
 
-        private void CollectTests(Dictionary<string, Link> links) {
-            var allClasses = typeof(MathTests).Assembly.GetExportedTypes();
-            var allTests = XunitTestRunner.CollectAllTests(allClasses, delegate {
-                //// setup before each test, use same error collector for all tests
+        private void CollectTests(IEnumerable<Assembly> assembliesToTest, Dictionary<string, Link> links) {
+            var allClasses = assembliesToTest.ReduceToUnion(assembly => {
+                if (assembly == null) { return new Type[0]; } // return emtpy list
+                return assembly.GetExportedTypes();
+            });
+            var allTests = XunitTestRunner.CollectAllTests(allClasses, (test) => {
+                // callback before a test is executed
             });
             AssertV2.AreNotEqual(0, allTests.Count);
-            StartCoroutine(RunAllTests(allTests));
+            StartCoroutine(ShowAllFoundTests(allTests));
             if (autoRunAllTests) {
                 links.Get<Text>("ButtonText").text = "Now running " + allTests.Count + " tests..";
             } else {
@@ -40,7 +60,7 @@ namespace com.csutil.testing {
             }
         }
 
-        private IEnumerator RunAllTests(List<XunitTestRunner.Test> allTests) {
+        private IEnumerator ShowAllFoundTests(List<XunitTestRunner.Test> allTests) {
             this.CellData = allTests;
             if (autoRunAllTests) {
                 foreach (var test in allTests) { yield return RunTestCoroutine(test); }
@@ -48,7 +68,7 @@ namespace com.csutil.testing {
             }
         }
 
-        internal void RunTest(XunitTestRunner.Test test) { StartCoroutine(RunTestCoroutine(test)); }
+        public void RunTest(XunitTestRunner.Test test) { StartCoroutine(RunTestCoroutine(test)); }
 
         private IEnumerator RunTestCoroutine(XunitTestRunner.Test test) {
             test.StartTest();

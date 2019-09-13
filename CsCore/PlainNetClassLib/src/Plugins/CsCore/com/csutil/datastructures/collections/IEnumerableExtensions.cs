@@ -18,6 +18,18 @@ namespace com.csutil {
             return self.Aggregate<T, R>(seed, func);
         }
 
+        /// <summary> Takes an input collection of type A where each A has a collection of type B. 
+        /// Combines these collections to a single result collection of type B </summary>
+        public static IEnumerable<B> ReduceToUnion<A, B>(this IEnumerable<A> self, Func<A, IEnumerable<B>> func) {
+            return ReduceToUnion(self, new List<B>(), func);
+        }
+
+        /// <summary> Takes an input collection of type A where each A has a collection of type B. 
+        /// Combines these collections to a single result collection of type B </summary>
+        public static IEnumerable<B> ReduceToUnion<A, B>(this IEnumerable<A> self, IEnumerable<B> seed, Func<A, IEnumerable<B>> func) {
+            return self.Aggregate(seed, (r, t) => r.AddRangeViaUnion(func(t)));
+        }
+
         public static IEnumerable<T> Filter<T>(this IEnumerable<T> self, Func<T, bool> predicate) {
             return self.Where(predicate);
         }
