@@ -11,8 +11,9 @@ namespace com.csutil {
             get {
 #if UNITY_WEBGL
                 return true;
-#endif
+#else
                 return false;
+#endif
             }
         }
 
