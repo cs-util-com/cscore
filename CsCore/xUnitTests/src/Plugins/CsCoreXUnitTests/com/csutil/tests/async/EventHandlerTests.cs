@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
-using com.csutil.async;
 using Xunit;
 
 namespace com.csutil.tests.async {
@@ -15,7 +14,7 @@ namespace com.csutil.tests.async {
         [Fact]
         public async Task ExponentialBackoffExample1() {
             Stopwatch timer = Stopwatch.StartNew();
-            var finalTimingResult = await TaskHelper.TryWithExponentialBackoff<long>(async () => {
+            var finalTimingResult = await TaskV2.TryWithExponentialBackoff<long>(async () => {
                 await TaskV2.Delay(5);
                 Log.d("Task exec at " + timer.ElapsedMilliseconds);
                 // In the first second of the test simulate errors:
@@ -31,7 +30,7 @@ namespace com.csutil.tests.async {
             await Assert.ThrowsAsync<OperationCanceledException>(async () => {
 
                 // Try 5 times to execute to run someTaskThatFailsEveryTime:
-                await TaskHelper.TryWithExponentialBackoff(SomeTaskThatFailsEveryTime, (e) => {
+                await TaskV2.TryWithExponentialBackoff(SomeTaskThatFailsEveryTime, (e) => {
                     Assert.IsType<TimeoutException>(e); // Errors could be logged or based on the type rethrown
                 }, maxNrOfRetries: 5, maxDelayInMs: 200); // The exponential backoff will not be larger then 200ms
 

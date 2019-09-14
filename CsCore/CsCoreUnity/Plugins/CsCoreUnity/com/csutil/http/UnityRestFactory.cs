@@ -12,7 +12,7 @@ namespace com.csutil.http {
             if (method.ToString() == "GET") {
                 return new UnityRestRequest(UnityWebRequest.Get(uri));
             }
-            throw new NotImplementedException("Not yet implemented for http method " + method);
+            return new UnityRestRequest(new UnityWebRequest(uri, method.ToString()));
         }
 
         //public override Task<long> GetCurrentPing(string ipOrUrl = "8.8.8.8", int timeoutInMs = 500) {

@@ -39,7 +39,7 @@ namespace com.csutil.http {
         public override string ToString() {
             if (headers.IsNullOrEmpty()) { return "(Emtpy Headers object)"; }
             var s = "Headers: ((";
-            foreach (var e in headers) { s += "\n  > " + e; }
+            foreach (var e in headers) { s += "\n  > " + e.Key + " ->  " + e.Value.ToStringV2(); }
             return s + "/n))";
         }
 
@@ -48,9 +48,7 @@ namespace com.csutil.http {
                 string v = GetHeaderValue("last-modified", null);
                 if (v == null) { return fallbackValue; }
                 return DateTimeParser.NewDateTimeFromUnixTimestamp(long.Parse(v));
-            } catch (Exception) {
-                return fallbackValue;
-            }
+            } catch (Exception) { return fallbackValue; }
         }
 
         public IEnumerable<string> GetHeaderValues(string headerName) {

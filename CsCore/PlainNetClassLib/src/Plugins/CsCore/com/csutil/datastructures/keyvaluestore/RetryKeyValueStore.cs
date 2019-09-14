@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using com.csutil.async;
 
 namespace com.csutil.keyvaluestore {
 
@@ -25,7 +24,7 @@ namespace com.csutil.keyvaluestore {
         }
 
         public Task<T> Retry<T>(Func<Task<T>> taskToTry) {
-            return TaskHelper.TryWithExponentialBackoff<T>(taskToTry, onError, maxNrOfRetries, maxDelayInMs, initialExponent);
+            return TaskV2.TryWithExponentialBackoff<T>(taskToTry, onError, maxNrOfRetries, maxDelayInMs, initialExponent);
         }
 
         public Task<bool> ContainsKey(string key) { return Retry(() => fallbackStore.ContainsKey(key)); }

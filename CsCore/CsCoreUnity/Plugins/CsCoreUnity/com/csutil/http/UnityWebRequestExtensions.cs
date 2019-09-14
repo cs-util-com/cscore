@@ -29,6 +29,7 @@ namespace com.csutil {
             resp.duration = Stopwatch.StartNew();
             var timer = Stopwatch.StartNew();
             self.ApplyAllCookiesToRequest();
+            if (self.downloadHandler == null) { self.downloadHandler = resp.createDownloadHandler(); }
             resp.debugInfo = self.method + " " + self.url + " with cookies=[" + self.GetRequestHeader("Cookie") + "]";
             Log.d("Sending: " + resp);
             var req = self.SendWebRequest();
@@ -80,7 +81,12 @@ namespace com.csutil {
             if (self.isNetworkError || self.isHttpError) {
                 resp.onError(self, new Exception(self.error));
             } else {
-                try { resp.onResult.InvokeIfNotNull(self.GetResult<T>()); } catch (Exception e) { resp.onError(self, e); }
+                try {
+                    if (resp.onResult != null) { resp.onResult(self.GetResult<T>()); } else {
+                        Log.d("resp.onResult was null, resp.GetResult has to be called manually");
+                    }
+                }
+                catch (Exception e) { resp.onError(self, e); }
             }
         }
 

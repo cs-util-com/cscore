@@ -1,6 +1,7 @@
 using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using com.csutil.http;
@@ -14,8 +15,14 @@ namespace com.csutil.http {
         private Headers requestHeaders;
         private Task<HttpResponseMessage> request;
         private HttpClient client;
+        private HttpContent httpContent;
 
         public UriRestRequest(Uri uri) { this.uri = uri; }
+
+        public RestRequest WithTextContent(string textContent, Encoding encoding, string mediaType) {
+            httpContent = new StringContent(textContent, encoding, mediaType);
+            return this;
+        }
 
         public RestRequest WithRequestHeaders(Headers requestHeaders) { this.requestHeaders = requestHeaders; return this; }
 
@@ -29,7 +36,9 @@ namespace com.csutil.http {
             client = new HttpClient();
             await TaskV2.Delay(5); // Wait so that the created RestRequest can be modified before its sent
             client.AddRequestHeaders(requestHeaders);
-            request = client.SendAsync(new HttpRequestMessage(method, uri));
+            var message = new HttpRequestMessage(method, uri);
+            if (httpContent != null) { message.Content = httpContent; }
+            request = client.SendAsync(message);
             return await request;
         }
 

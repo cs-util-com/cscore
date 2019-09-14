@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -16,14 +17,20 @@ namespace com.csutil.http {
         public UnityRestRequest(UnityWebRequest request) { this.request = request; }
 
         public Task<T> GetResult<T>() {
-            var response = new Response<T>();
-            return WebRequestRunner.GetInstance(this).StartCoroutineAsTask(prepareRequest(response), () => response.getResult());
+            var resp = new Response<T>();
+            return WebRequestRunner.GetInstance(this).StartCoroutineAsTask(prepareRequest(resp), () => resp.getResult());
         }
 
         private IEnumerator prepareRequest<T>(Response<T> response) {
             yield return new WaitForSeconds(0.05f); // wait 5ms so that headers etc can be set
             request.SetRequestHeaders(requestHeaders);
             yield return request.SendWebRequestV2(response);
+        }
+
+        public RestRequest WithTextContent(string textContent, Encoding encoding, string mediaType) {
+            request.uploadHandler = new UploadHandlerRaw(encoding.GetBytes(textContent));
+            request.SetRequestHeader("content-type", mediaType);
+            return this;
         }
 
         public RestRequest WithRequestHeaders(Headers requestHeaders) {

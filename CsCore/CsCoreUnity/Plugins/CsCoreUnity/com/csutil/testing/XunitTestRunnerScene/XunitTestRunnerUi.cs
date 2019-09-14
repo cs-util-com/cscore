@@ -74,7 +74,7 @@ namespace com.csutil.testing {
             test.StartTest();
             ReloadData();
             yield return new WaitForEndOfFrame();
-            yield return test.testTask.AsCoroutine((e) => { Debug.LogError(e); }, timeoutInMs);
+            yield return test.testTask.AsCoroutine((e) => { Log.e(e); }, timeoutInMs);
             ReloadData();
             yield return new WaitForEndOfFrame();
         }
