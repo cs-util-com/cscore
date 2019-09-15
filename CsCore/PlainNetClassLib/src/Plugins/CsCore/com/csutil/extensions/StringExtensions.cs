@@ -48,12 +48,13 @@ namespace com.csutil {
 
         /// <summary>
         /// Examples: 
-        /// <para> Assert.True("abc".IsRegexMatch("a*"));               </para>
-        /// <para> Assert.True("Abc".IsRegexMatch("[A-Z][a-z][a-z]"));  </para>
-        /// <para> Assert.True("hat".IsRegexMatch("?at"));              </para>
-        /// <para> Assert.True("joe".IsRegexMatch("[!aeiou]*"));        </para>
-        /// <para> Assert.False("joe".IsRegexMatch("?at"));             </para>
-        /// <para> Assert.False("joe".IsRegexMatch("[A-Z][a-z][a-z]")); </para>
+        /// <para> Assert.True(myUrl1.IsRegexMatch(RegexTemplates.URL)); </para>
+        /// <para> Assert.True("abc".IsRegexMatch("a*"));                </para>
+        /// <para> Assert.True("Abc".IsRegexMatch("[A-Z][a-z][a-z]"));   </para>
+        /// <para> Assert.True("hat".IsRegexMatch("?at"));               </para>
+        /// <para> Assert.True("joe".IsRegexMatch("[!aeiou]*"));         </para>
+        /// <para> Assert.False("joe".IsRegexMatch("?at"));              </para>
+        /// <para> Assert.False("joe".IsRegexMatch("[A-Z][a-z][a-z]"));  </para>
         /// </summary>
         public static bool IsRegexMatch(this string self, string regexToMatch) {
             if (self == null || regexToMatch.IsNullOrEmpty()) return false;
@@ -61,7 +62,7 @@ namespace com.csutil {
                 throw new ArgumentException("Invalid pattern: " + regexToMatch, e);
             }
         }
-
+        
     }
 
     public static class ByteSizeToString {
