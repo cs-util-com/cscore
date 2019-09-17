@@ -18,8 +18,8 @@ namespace com.csutil.tests {
 
             // First define a set of allowed transitions to define the state machine:
             var stateMachine = new Dictionary<MyStates, HashSet<MyStates>>();
-            stateMachine.AddToValues(MyStates.MyState1, MyStates.MyState2);
-            stateMachine.AddToValues(MyStates.MyState2, MyStates.MyState3);
+            stateMachine.AddToValues(MyStates.MyState1, MyStates.MyState2); // 1 => 2 allowed
+            stateMachine.AddToValues(MyStates.MyState2, MyStates.MyState3); // 2 => 3 allowed
 
             // Initialize a state-machine:
             MyStates currentState = MyStates.MyState1;

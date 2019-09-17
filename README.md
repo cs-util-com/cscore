@@ -25,6 +25,10 @@ The aim of the cscore package is to stay is slim/minimal as possible while inclu
 * [Directory & File Extensions](#directory--file-extensions) - To simplify handling files, folders and persisting data
 * Common String extension methods demonstrated in StringExtensionTests.cs
 * [Functional extensions](#IEnumerable-Extensions) and [Transducers](#Transducers) to allow functional data mapping (filter, map, reduce, ..)
+* Simple [statemachines](#Statemachines) that work on your existing classes
+* An asynchronous chainable [key value store](#KeyValueStore) (get & set) that can be used for simple persistent settings but also for remote server/DB access 
+* An [immutable datastore](#immutable-datastore) (Redux syntax) that includes undo/redo, timetravel (replay recordings) and a thunk middleware (dispatching async tasks)
+* A [JsonMerger](#JsonMerger) helper to allow simple Json merging and diffing logic that helps to update an instance of a class using a [Three-way merge](https://en.wikipedia.org/wiki/Merge_(version_control)#Three-way_merge)
 * Many other helpful extension methods best demonstrated in HelperMethodTests.cs
 
 
@@ -35,6 +39,7 @@ The aim of the cscore package is to stay is slim/minimal as possible while inclu
 * [MonoBehaviour.ExecuteDelayed & MonoBehaviour.ExecuteRepeated](#monobehaviourexecutedelayed--monobehaviourexecuterepeated) - Executing asynchronous actions delayed and/or repeated
 * [UnityWebRequest.SendV2](#unitywebrequestsendv2) - UnityWebRequest extension methods
 * [PlayerPrefsV2](#playerprefsv2) - Adds `SetBool`, `SetStringEncrypted` and more, see PlayerPrefsV2Tests.cs for all examples
+* [Running xUnit tests in Unity](#Running-xUnit-tests-in-Unity) - Execute your xUnit tests in Unity even in the built application to ensure everything works as expected in the production runtime
 
 ### Status
 ![](https://img.shields.io/badge/Maintained%3F-yes-green.svg?style=flat-square)
@@ -163,7 +168,7 @@ eventBus.Unsubscribe(subscriber1, eventName);
 ```
 
 
-__Rule of thumb__: Only use an `EventBus` if you can't exactly tell who will listen to the published events. Do not use the `EventBus` to pass an event from x to y if you know exactly who x and y will be! Atificially separating 2 components that tightly belong together does not help
+__Rule of thumb__: Only use an `EventBus` if you can't exactly tell who will listen to the published events. Do not use the `EventBus` to pass an event from x to y if you know exactly who x and y will be! Artificially separating 2 components that tightly belong together does not help
 
 
 
@@ -340,6 +345,104 @@ Assert.True(childDir.DeleteV2()); // (Deleting non-existing directories would re
 Assert.False(childDir.IsNotNullAndExists());
 ```
 
+## StateMachines 
+A statemachine in it's simplest form is a current state and a set of allowed state transitions. Transitioning from state 1 to 2 can be done in a single short [method](https://github.com/cs-util-com/cscore/blob/master/CsCore/PlainNetClassLib/src/Plugins/CsCore/com/csutil/datastructures/StateMachine.cs#L14) on the set of allowed transitions. Here an example statemachine: 
+
+```cs
+ // First define a set of allowed transitions to define the state machine:
+Dictionary<MyStates, HashSet<MyStates>> stateMachine = new Dictionary<MyStates, HashSet<MyStates>>();
+stateMachine.AddToValues(MyStates.MyState1, MyStates.MyState2); // 1 => 2 allowed
+stateMachine.AddToValues(MyStates.MyState2, MyStates.MyState3); // 2 => 3 allowed
+
+// Initialize a state-machine:
+MyStates currentState = MyStates.MyState1;
+
+// It is possible to listen to state machine transitions:
+StateMachine.SubscribeToAllTransitions<MyStates>(new object(), (machine, oldState, newState) => {
+    Log.d("Transitioned from " + oldState + " to " + newState);
+});
+// And its possible to listen only to specific transitions:
+StateMachine.SubscribeToTransition(new object(), MyStates.MyState1, MyStates.MyState2, delegate {
+    Log.d("Transitioned from 1 => 2");
+});
+
+// Transition the state-machine from state 1 to 2:
+currentState = stateMachine.TransitionTo(currentState, MyStates.MyState2);
+Assert.Equal(MyStates.MyState2, currentState);
+
+// Invalid transitions throw exceptions (current state is 2):
+Assert.Throws<InvalidOperationException>(() => {
+    currentState = stateMachine.TransitionTo(currentState, MyStates.MyState1);
+});
+```
+
+More [statemachine examples can be found here](https://github.com/cs-util-com/cscore/blob/master/CsCore/xUnitTests/src/Plugins/CsCoreXUnitTests/com/csutil/tests/StateMachineTests.cs#L17).
+
+## KeyValueStore
+Provides an async chainable key value store (get & set) that can be used for simple persistent settings but also for remote server/DB access. Different store implementations are included for some common use cases:
+* InMemoryKeyValueStore - Keeps a very fast in memory dictionary for fastest possible read write
+* FileBasedKeyValueStore - Enables persisting values permanently 
+* RetryKeyValueStore - A retry layer using exponential backoff 
+* ExceptionWrapperKeyValueStore - To handle exceptions of an inner store (e.g. if a connection to a remote server throws a timeout exception this can be handled to return the cached local value instead)
+
+```cs
+IKeyValueStore store = new InMemoryKeyValueStore();
+string myKey1 = "myKey1";
+MyClass1 x1 = new MyClass1() { myString1 = "Abc", myString2 = "Abc2" };
+store.Set(myKey1, x1);
+MyClass1 x2 = store.Get<MyClass1>(myKey1, defaultValue: null).Result;
+Assert.Equal(x1.myString1, x2.myString1);
+Assert.Equal(x1.myString2, x2.myString2);
+```
+
+The KeyValueStores can be chained so that if the outer store does not find the element it will ask the next inner store. This allows to have fast stores like the ``InMemoryKeyValueStore`` on the most outer level and the slowest stores like the connection to the database on the most inner one:
+
+```cs
+string myKey1 = "test123";
+MyClass1 x1 = new MyClass1() { myString1 = "Abc", myString2 = "Abc2" };
+// Create a fast memory store and combine it with a LiteDB store that is persisted to disk:
+IKeyValueStore store = new InMemoryKeyValueStore().WithFallbackStore(new FileBasedKeyValueStore(EnvironmentV2.instance.GetOrAddTempFolder("SomeFolder123")));
+await store.Set(myKey1, x1);
+MyClass1 x2 = await store.Get<MyClass1>(myKey1, null);
+Assert.Equal(x1.myString1, x2.myString1);
+Assert.Equal(x1.myString2, x2.myString2);
+```
+
+More examples [can be found here](https://github.com/cs-util-com/cscore/blob/master/CsCore/xUnitTests/src/Plugins/CsCoreXUnitTests/com/csutil/tests/datastructures/KeyValueStoreTests.cs).
+
+## Immutable DataStore
+* It uses the Redux syntax and core principles to not reinvent a matured and well proven wheel
+* Enables undo/redo of all dispatched actions out of the box without any additional work 
+* Enables timetravel to enable recording the full userinteraction and replaying it later to get back into the same state
+* Includes a thunk middleware to dispatcht async tasks (e.g. talking to a remote server)
+
+See [this example for a first introduction](https://github.com/cs-util-com/cscore/blob/master/CsCore/xUnitTests/src/Plugins/CsCoreXUnitTests/com/csutil/tests/model/immutable/DataStoreExample1.cs#L11) including an example datamodel, example actions and some listeners that are informed when the datamodel changes.
+
+See [here for additional more complex tests](https://github.com/cs-util-com/cscore/tree/master/CsCore/xUnitTests/src/Plugins/CsCoreXUnitTests/com/csutil/tests/model/immutable):
+
+## JsonMerger
+[Json merging and diffing logic](https://github.com/cs-util-com/cscore/blob/master/CsCore/xUnitTests/src/Plugins/CsCoreXUnitTests/com/csutil/tests/json/JsonDiffAndMergeTests.cs#L14) that helps to update an instance of a class using a [Three-way merge](https://en.wikipedia.org/wiki/Merge_(version_control)#Three-way_merge). Here an example:
+
+```cs
+MyClass1 originalObj = new MyClass1() { myString = "abc", myString2 = "def" };
+
+MyClass1 copy1 = originalObj.DeepCopyViaJson();
+copy1.myString = "abcd";
+copy1.complexField = new MyClass1() { myString = "123", myString2 = "456" };
+copy1.complexField.complexList = new List<MyClass1>() { new MyClass1() { myString = "listEntry1" } };
+
+MyClass1 copy2 = originalObj.DeepCopyViaJson();
+copy2.myString2 = "defg";
+
+var merge = MergeJson.Merge(originalObj, copy1, copy2);
+Assert.False(merge.hasMergeConflict);
+
+// Parse the merged result back into a MyClass1 object:
+MyClass1 mergeResult1 = merge.GetResult();
+// The changes from both copies were merged correctly:
+Assert.Equal(copy1.myString, mergeResult1.myString);
+Assert.Equal(copy2.myString2, mergeResult1.myString2);
+```
 
 
 # Unity Component Examples
@@ -367,7 +470,6 @@ Assert.AreSame(myMono1, myMono1_ref2);
 myGo.Destroy(); // Destroy the gameobject
 Assert.IsTrue(myGo.IsDestroyed()); // Check if it was destroyed
 ```
-
 
 ## `GameObject.Subscribe` & `MonoBehaviour.Subscribe`
 
@@ -536,8 +638,21 @@ Assert.AreEqual(myObjectToSave.myInt, objLoadedAgain.myInt);
 
 ```
 
+## Running xUnit tests in Unity
 
+Initially I created this test runner to ensure that the xUnit tests I wrote for the pure C# components also were all working when running them on an actual build application, especially on platforms like WebGL this showed a few challanges with the async await Task syntax and some other edgecases. The basic idea was simple:
 
+* Use the tests a small sample applications
+* If the tests run correctly in a built application on the target platform the component can be correctly used on this platform 
+* A [test runner](https://github.com/cs-util-com/cscore/blob/master/CsCore/CsCoreUnity/Plugins/CsCoreUnity/com/csutil/testing/XunitTestRunner.cs) is needed to run the tests. In addition the xUnit classes like the Assert class [need to be implemented](https://github.com/cs-util-com/cscore/blob/master/CsCore/CsCoreUnity/Plugins/CsCoreUnity/com/csutil/testing/xunitmocks/Assert.cs) to be used in Unity
+
+The outcome works pretty well and I managed to make all tests run correctly in WebGL which I used as a platform that has a lot of very limiting restrictions like no multithreading, strict sandboxing for file logic, persistance etc
+
+1. You want your xUnit tests to stay in your pure C# project but [you can link them](https://github.com/cs-util-com/cscore/tree/master/CsCore/xUnitTests/src) into your Unity project to include them there as well
+2. The xUnit runner needs a hint in which Assembly to search for your tests, for that it needs a fully qualified type name of any of the classes in the tests. 
+3. Select the [XunitTestRunnerUi](https://github.com/cs-util-com/cscore/blob/master/CsCore/CsCoreUnity/Plugins/CsCoreUnity/com/csutil/testing/XunitTestRunnerScene/XunitTestRunnerUi.cs) component in the [XunitTestRunnerScene.unity](https://github.com/cs-util-com/cscore/tree/master/CsCore/CsCoreUnity/Plugins/CsCoreUnity/com/csutil/testing/XunitTestRunnerScene) to [set this fully qualified type name](https://github.com/cs-util-com/cscore/blob/master/CsCore/CsCoreUnity/Plugins/CsCoreUnity/com/csutil/testing/XunitTestRunnerScene/XunitTestRunnerUi.cs#L17) (for example "`MyNamespace.MyClass1, MyAssembly1`"). This name it will use to start searching for all xUnit tests in your Assembly.
+
+Additionally in your nUnit tests you can also use the xUnitTestRunner, e.g. if you want writing all your unit tests with xUnit and use the nUnit tests only to trigger them. See the [XunitTestRunnerTests.cs](https://github.com/cs-util-com/cscore/blob/master/CsCore/UnityTests/Assets/Plugins/CsCoreUnityTests/xUnitMocks/XunitTestRunnerTests.cs#L12) to understand how to use the xUnitTestRunner via code.
 
 
 # 📦 Getting started
