@@ -36,16 +36,16 @@ namespace com.csutil {
 
         public static bool IsNullOrEmpty<T>(this IEnumerable<T> self) { return self == null || !self.Any(); }
 
-        public static string ToStringV2(this IEnumerable<string> args, string bracket1 = "[", string bracket2 = "]") {
-            return args.ToStringV2<string>(x => x, bracket1, bracket2);
+        public static string ToStringV2(this IEnumerable<string> args, string bracket1 = "[", string bracket2 = "]", string separator = ", ") {
+            return args.ToStringV2<string>(x => x, bracket1, bracket2, separator);
         }
 
-        public static string ToStringV2<T>(this IEnumerable<T> args, Func<T, string> toString, string bracket1 = "[", string bracket2 = "]") {
+        public static string ToStringV2<T>(this IEnumerable<T> args, Func<T, string> toString, string bracket1 = "[", string bracket2 = "]", string separator = ", ") {
             if (args == null) { return "null"; }
             if (args.IsNullOrEmpty()) { return bracket1 + bracket2; }
             var filteredResultStrings = args.Map(x => "" + toString(x)).Filter(x => !x.IsNullOrEmpty());
             if (filteredResultStrings.IsNullOrEmpty()) { return bracket1 + bracket2; }
-            return bracket1 + filteredResultStrings.Reduce((x, y) => x + ", " + y) + bracket2;
+            return bracket1 + filteredResultStrings.Reduce((x, y) => x + separator + y) + bracket2;
         }
 
         public static HashSet<TSource> ToHashSet<TSource>(this IEnumerable<TSource> source) {
