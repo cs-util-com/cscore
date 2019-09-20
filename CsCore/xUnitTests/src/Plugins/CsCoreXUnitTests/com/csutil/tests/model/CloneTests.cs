@@ -35,6 +35,25 @@ namespace com.csutil.tests.model {
 
         }
 
+        private class MyClass2 {
+            public string name;
+            public MyClass2 child;
+        }
+
+        [Fact]
+        public void ExampleUsage2() {
+
+            MyClass2 originalClass2 = new MyClass2() { name = "1", child = new MyClass2() { name = "2" } };
+
+            MyClass1 mappedClass1 = originalClass2.MapViaJsonInto<MyClass1>();
+            Assert.Equal(originalClass2.child.name, mappedClass1.child.name);
+            // Modify the copy, changing the copy will not change the original:
+            mappedClass1.child.name = "Some new name..";
+            // Check that the change was only done in the copy and not the original:
+            Assert.NotEqual(originalClass2.child.name, mappedClass1.child.name);
+
+        }
+
         [Fact]
         public void PerformanceTest1() {
 
@@ -55,7 +74,7 @@ namespace com.csutil.tests.model {
 
         private static TreeElem DeepCopySerializable(TreeElem dataTree) {
             var t = Log.MethodEntered("DeepCopySerializable");
-            var copy = dataTree.DeepCopySerializable();
+            var copy = CloneHelper.DeepCopySerializable(dataTree);
             Log.MethodDone(t);
             return copy;
         }
@@ -69,14 +88,14 @@ namespace com.csutil.tests.model {
 
         private static TreeElem DeepCopyViaJsonString(TreeElem dataTree) {
             var t = Log.MethodEntered("DeepCopyViaJsonString");
-            var copy = dataTree.DeepCopyViaJsonString();
+            var copy = CloneHelper.DeepCopyViaJsonString(dataTree);
             Log.MethodDone(t);
             return copy;
         }
 
         private static TreeElem DeepCopyViaJsonOutString(TreeElem dataTree) {
             var t = Log.MethodEntered("DeepCopyViaJsonOutString");
-            var copy = dataTree.DeepCopyViaJsonString(out string jsonString);
+            var copy = CloneHelper.DeepCopyViaJsonString(dataTree, out string jsonString);
             Log.MethodDone(t);
             var testFile = EnvironmentV2.instance.GetOrAddTempFolder("DeepCopyViaJsonOutString").GetChild("test1.txt");
             testFile.SaveAsText(jsonString);
@@ -86,7 +105,7 @@ namespace com.csutil.tests.model {
 
         private static TreeElem DeepCopyViaBsonStream(TreeElem dataTree) {
             var t = Log.MethodEntered("DeepCopyViaBsonStream");
-            var copy = dataTree.DeepCopyViaBsonStream();
+            var copy = CloneHelper.DeepCopyViaBsonStream(dataTree);
             Log.MethodDone(t);
             return copy;
         }

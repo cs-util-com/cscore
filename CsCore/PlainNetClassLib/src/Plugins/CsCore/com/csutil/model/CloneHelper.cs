@@ -9,7 +9,10 @@ using Newtonsoft.Json.Bson;
 namespace com.csutil.model {
     public static class CloneHelper {
 
-        public static T DeepCopyViaJson<T>(this T objectToDeepCopy) {
+        public static T DeepCopyViaJson<T>(this T objectToDeepCopy) { return MapViaJsonInto<T>(objectToDeepCopy); }
+
+        /// <summary> Takes an object ob type 1 and maps all its field into a type 2 using a deep copy of its JSON </summary>
+        public static T MapViaJsonInto<T>(this object objectToDeepCopy) {
             using (var stream = new MemoryStream()) {
                 using (var writer = new StreamWriter(stream, encoding: Encoding.UTF8, bufferSize: 1024, leaveOpen: true)) {
                     var serializer = JsonSerializer.Create(new JsonSerializerSettings { ObjectCreationHandling = ObjectCreationHandling.Replace });
@@ -21,20 +24,20 @@ namespace com.csutil.model {
             }
         }
 
-        public static T DeepCopyViaJsonString<T>(this T objectToDeepCopy) {
+        public static T DeepCopyViaJsonString<T>(T objectToDeepCopy) {
             return DeepCopyViaJsonString(objectToDeepCopy, out string jsonString);
         }
 
         // E.g: If in default constructor a list property is initialized, but in 'objectToDeepCopy' the field was set to null
         private static JsonSerializerSettings deserializeSettings = new JsonSerializerSettings { ObjectCreationHandling = ObjectCreationHandling.Replace };
 
-        public static T DeepCopyViaJsonString<T>(this T objectToDeepCopy, out string jsonString) {
+        public static T DeepCopyViaJsonString<T>(T objectToDeepCopy, out string jsonString) {
             // ObjectCreationHandling.Replace needed so that default constructor values not added to result
             jsonString = JsonConvert.SerializeObject(objectToDeepCopy);
             return JsonConvert.DeserializeObject<T>(jsonString, deserializeSettings);
         }
 
-        public static T DeepCopyViaBsonStream<T>(this T objectToDeepCopy) {
+        public static T DeepCopyViaBsonStream<T>(T objectToDeepCopy) {
             using (var stream = new MemoryStream()) {
                 using (var writer = new BsonWriter(stream)) {
                     var serializer = JsonSerializer.Create(new JsonSerializerSettings { ObjectCreationHandling = ObjectCreationHandling.Replace });
@@ -46,7 +49,7 @@ namespace com.csutil.model {
             }
         }
 
-        public static T DeepCopySerializable<T>(this T objectToDeepCopy) {
+        public static T DeepCopySerializable<T>(T objectToDeepCopy) {
             if (!typeof(T).IsSerializable) { throw new ArgumentException("The passed objectToDeepCopy must be serializable"); }
             var formatter = new BinaryFormatter();
             var stream = new MemoryStream();
