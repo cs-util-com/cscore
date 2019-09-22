@@ -20,7 +20,7 @@ namespace com.csutil.tests.json {
 
             // First the test produces a state myState1:
             MyClass1 myState1 = new MyClass1() {
-                myName = "abcd",
+                myName = "abc",
                 myChildren = new MyClass1[] {
                     new MyClass1() {  myName = "def" }
                 }
