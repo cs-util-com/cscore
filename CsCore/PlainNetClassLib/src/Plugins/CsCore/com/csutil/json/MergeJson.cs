@@ -27,6 +27,8 @@ namespace com.csutil {
             return res;
         }
 
+        public static JToken GetDiff<T>(T a, T b) { return new JsonDiffPatch().Diff(JToken.FromObject(a), JToken.FromObject(b)); }
+
         public class Result<T> {
             internal JToken original;
             internal JToken variant1;
