@@ -100,8 +100,8 @@ namespace com.csutil.tests {
                 normalInsertRangeList.InsertRange(1, l_ABC);
                 Assert.Equal(l_1ABC23, normalInsertRangeList);
             }
-            Assert.Equal("A", l_123.InsertRangeViaUnion(index: 0, l_ABC).First());
-            Assert.Equal("C", l_123.InsertRangeViaUnion(index: 999, l_ABC).Last());
+            Assert.Equal("A", l_123.InsertRangeViaUnion(index: 0, items: l_ABC).First());
+            Assert.Equal("C", l_123.InsertRangeViaUnion(index: 999, items: l_ABC).Last());
         }
 
     }
