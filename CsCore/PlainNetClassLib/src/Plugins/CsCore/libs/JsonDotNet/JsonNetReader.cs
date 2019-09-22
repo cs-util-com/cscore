@@ -42,7 +42,7 @@ namespace com.csutil.json {
 
         public T Read<T>(StreamReader streamReader) {
             var r = (T)reader.Deserialize(streamReader, typeof(T));
-            (this).AssertThatJsonWasFullyParsedIntoFields(debugWriter, ReadFullString(streamReader), r);
+            //(this).AssertThatJsonWasFullyParsedIntoFields(debugWriter, ReadFullString(streamReader), r);
             return r;
         }
 

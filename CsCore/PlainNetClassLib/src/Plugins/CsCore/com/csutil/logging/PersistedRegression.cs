@@ -8,13 +8,16 @@ using Newtonsoft.Json.Linq;
 
 namespace com.csutil {
 
+    /// <summary> Can be used to persist a state to allow asserting it will not change.  </summary>
     public class PersistedRegression {
+
+        private const string DEFAULT_FOLDER_NAME = "RegressionTesting";
 
         public IKeyValueStore regressionStore;
 
         public PersistedRegression(IKeyValueStore regressionFiles = null) {
             if (regressionFiles == null) {
-                var regressionTestFolder = EnvironmentV2.instance.GetCurrentDirectory().GetChildDir("RegressionTesting");
+                var regressionTestFolder = EnvironmentV2.instance.GetCurrentDirectory().GetChildDir(DEFAULT_FOLDER_NAME);
                 regressionFiles = new FileBasedKeyValueStore(regressionTestFolder);
             }
             this.regressionStore = regressionFiles;
@@ -37,11 +40,11 @@ namespace com.csutil {
             await regressionStore.Set(id, JsonWriter.GetWriter().Write(objectsToCheck));
         }
 
-        public Task AssertDiff(string id, params object[] objectsToCheck) {
-            return AssertDiff(id, p => true, objectsToCheck);
+        public Task AssertState(string id, params object[] objectsToCheck) {
+            return AssertState(id, p => true, objectsToCheck);
         }
 
-        public async Task AssertDiff(string id, Func<JToken, bool> filterAcceptableDiffs, params object[] objectsToCheck) {
+        public async Task AssertState(string id, Func<JToken, bool> filterAcceptableDiffs, params object[] objectsToCheck) {
             JToken diffToExpectedState = await VerifyState(id, objectsToCheck);
             if (!diffToExpectedState.IsNullOrEmpty()) {
                 var foundProblems = GetFilteredDiff(diffToExpectedState, filterAcceptableDiffs);
