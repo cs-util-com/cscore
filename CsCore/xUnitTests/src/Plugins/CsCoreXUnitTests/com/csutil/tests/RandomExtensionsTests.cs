@@ -7,6 +7,8 @@ namespace com.csutil.tests.random {
 
     public class RandomExtensionsTests {
 
+        public RandomExtensionsTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
+
         [Fact]
         public void RandomExtensions_Examples() {
 
@@ -41,6 +43,7 @@ namespace com.csutil.tests.random {
         public void RandomExtensions_MoreTests() {
 
             var random = new Random();
+            Assert.False(random.NextFloat() == random.NextFloat() && random.NextFloat() == random.NextFloat());
 
             { // Test with MinValue and MaxValue:
                 float f = random.NextFloat(float.MinValue, float.MaxValue);
@@ -97,14 +100,14 @@ namespace com.csutil.tests.random {
                 if (x > max) { max = x; }
                 results.Add(x);
             }
-            Assert.True(isNormallyDistributed(results));
+            Assert.True(IsUniformlyDistributed(results));
             var reachedUpperBound = 100d * (1d - (upperBound - max) / (upperBound - lowerBound));
             var reachedLowerBound = 100d * (1d - (min - lowerBound) / (upperBound - lowerBound));
             Assert.True(reachedLowerBound > 98 && reachedUpperBound > 98, "min%=" + reachedLowerBound + ", max%=" + reachedUpperBound);
             Assert.True(reachedLowerBound <= 100 && reachedUpperBound <= 100, "min%=" + reachedLowerBound + ", max%=" + reachedUpperBound);
         }
 
-        private static bool isNormallyDistributed(List<float> results) {
+        private static bool IsUniformlyDistributed(List<float> results) {
             return true; // TODO
         }
 
