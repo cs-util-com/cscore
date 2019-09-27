@@ -12,7 +12,7 @@ namespace com.csutil.keyvaluestore {
         public IKeyValueStore fallbackStore { get; set; }
 
         private class PrimitiveWrapper { public object val; }
-        private static bool IsPrimitiveType(Type t) { return t.IsPrimitive || t == typeof(string); }
+        private static bool IsPrimitiveType(Type t) { return t.IsPrimitive; }
 
         public FileBasedKeyValueStore(DirectoryInfo folderForAllFiles) { this.folderForAllFiles = folderForAllFiles; }
 
@@ -27,7 +27,7 @@ namespace com.csutil.keyvaluestore {
             return fileForKey.LoadAs(type);
         }
 
-        private FileInfo GetFile(string key) { return folderForAllFiles.GetChild(key); }
+        public FileInfo GetFile(string key) { return folderForAllFiles.GetChild(key); }
 
         public async Task<object> Set(string key, object value) {
             var oldValue = InternalSet(key, value);
@@ -39,7 +39,11 @@ namespace com.csutil.keyvaluestore {
             if (IsPrimitiveType(objType)) { value = new PrimitiveWrapper() { val = value }; }
             var file = GetFile(key);
             var oldVal = file.IsNotNullAndExists() ? InternalGet(file, objType) : null;
-            file.SaveAsText(JsonWriter.GetWriter().Write(value));
+            if (objType == typeof(string)) {
+                file.SaveAsText((string)value);
+            } else {
+                file.SaveAsText(JsonWriter.GetWriter().Write(value));
+            }
             return oldVal;
         }
 

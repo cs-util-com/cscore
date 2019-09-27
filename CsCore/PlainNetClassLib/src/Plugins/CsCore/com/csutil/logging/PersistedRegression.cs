@@ -15,12 +15,12 @@ namespace com.csutil {
 
         public IKeyValueStore regressionStore;
 
-        public PersistedRegression(IKeyValueStore regressionFiles = null) {
-            if (regressionFiles == null) {
+        public PersistedRegression(IKeyValueStore regressionStore = null) {
+            if (regressionStore == null) {
                 var regressionTestFolder = EnvironmentV2.instance.GetCurrentDirectory().GetChildDir(DEFAULT_FOLDER_NAME);
-                regressionFiles = new FileBasedKeyValueStore(regressionTestFolder);
+                regressionStore = new FileBasedKeyValueStore(regressionTestFolder);
             }
-            this.regressionStore = regressionFiles;
+            this.regressionStore = regressionStore;
         }
 
         public async Task<JToken> VerifyState(string id, params object[] objectsToCheck) {
@@ -37,7 +37,8 @@ namespace com.csutil {
         }
 
         private async Task SaveToRegressionStore(string id, object[] objectsToCheck) {
-            await regressionStore.Set(id, JsonWriter.GetWriter().Write(objectsToCheck));
+            var jToken = JToken.Parse(JsonWriter.GetWriter().Write(objectsToCheck));
+            await regressionStore.Set(id, jToken.ToPrettyString());
         }
 
         public Task AssertState(string id, params object[] objectsToCheck) {
@@ -49,7 +50,7 @@ namespace com.csutil {
             if (!diffToExpectedState.IsNullOrEmpty()) {
                 var foundProblems = GetFilteredDiff(diffToExpectedState, filterAcceptableDiffs);
                 if (!foundProblems.IsNullOrEmpty()) {
-                    var problemReport = foundProblems.ToStringV2(p => p.AsPrettyString());
+                    var problemReport = foundProblems.ToStringV2(p => p.ToPrettyString());
                     throw new Exception("Diff found in regression test: " + problemReport);
                 } else { // All diffs were accepted, so override the old regression state:
                     await SaveToRegressionStore(id, objectsToCheck);

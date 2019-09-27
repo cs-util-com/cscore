@@ -16,10 +16,10 @@ namespace com.csutil {
 
         public static string AsPrettyString(object o) {
             var jToken = Newtonsoft.Json.Linq.JToken.Parse(JsonWriter.GetWriter().Write(o));
-            return AsPrettyString(jToken);
+            return jToken.ToPrettyString();
         }
 
-        public static string AsPrettyString(this Newtonsoft.Json.Linq.JToken jToken) {
+        public static string ToPrettyString(this Newtonsoft.Json.Linq.JToken jToken) {
             return jToken.ToString(Newtonsoft.Json.Formatting.Indented);
         }
 
