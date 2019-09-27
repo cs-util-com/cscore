@@ -1,6 +1,7 @@
 # ☄️ The cscore Library
 
-`cscore` is a lightweight library providing commonly used helpers & patterns for your C# projects like events, injection logic, logging and much more (examples below). It can be used in both pure **C#** and **Unity** projects. 
+`cscore` is a lightweight library providing commonly used helpers & patterns for your C# projects like events, injection logic, logging and much more (examples below). It can be used in both pure **C#** and **Unity** projects.
+All components are loosly coupled so that components can be used individually when needed without deep knowledge about the full cscore library required. 
 
 [**Website**](https://www.csutil.com/projects/cscore) 
 **•**
