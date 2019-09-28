@@ -1,0 +1,10 @@
+﻿[
+  {
+    "myName": "abc",
+    "myChildren": [
+      {
+        "myName": "def"
+      }
+    ]
+  }
+]

@@ -17,6 +17,7 @@ namespace com.csutil {
             }
         }
 
+        /// <summary> The folder of the binary (or dll that is executed) </summary>
         public virtual DirectoryInfo GetCurrentDirectory() {
             return new DirectoryInfo(Directory.GetCurrentDirectory());
         }

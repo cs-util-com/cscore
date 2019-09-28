@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using com.csutil.keyvaluestore;
@@ -16,11 +17,20 @@ namespace com.csutil {
         public IKeyValueStore regressionStore;
 
         public PersistedRegression(IKeyValueStore regressionStore = null) {
-            if (regressionStore == null) {
-                var regressionTestFolder = EnvironmentV2.instance.GetCurrentDirectory().GetChildDir(DEFAULT_FOLDER_NAME);
-                regressionStore = new FileBasedKeyValueStore(regressionTestFolder);
-            }
+            if (regressionStore == null) { regressionStore = new FileBasedKeyValueStore(GetProjDir()); }
             this.regressionStore = regressionStore;
+        }
+
+        private static DirectoryInfo GetProjDir() {
+            var binDir = EnvironmentV2.instance.GetCurrentDirectory();
+            var projDir = SearchForVersionedParent(binDir);
+            if (projDir == null) { projDir = binDir; }
+            return projDir.GetChildDir(DEFAULT_FOLDER_NAME);
+        }
+
+        private static DirectoryInfo SearchForVersionedParent(DirectoryInfo f) {
+            if (f == null || f.GetChild(".gitignore").ExistsV2()) { return f; }
+            return SearchForVersionedParent(f.Parent);
         }
 
         public async Task<JToken> VerifyState(string id, params object[] objectsToCheck) {
@@ -52,8 +62,6 @@ namespace com.csutil {
                 if (!foundProblems.IsNullOrEmpty()) {
                     var problemReport = foundProblems.ToStringV2(p => p.ToPrettyString());
                     throw new Exception("Diff found in regression test: " + problemReport);
-                } else { // All diffs were accepted, so override the old regression state:
-                    await SaveToRegressionStore(id, objectsToCheck);
                 }
             }
         }
