@@ -37,7 +37,7 @@ namespace com.csutil.tests {
             // Rename the directory:
             childDir.Rename("MyExampleSubDirectory2");
             Assert.Equal("MyExampleSubDirectory2", childDir.NameV2());
-            Assert.Equal(1, childDir.EnumerateFiles().Count());
+            Assert.Single(childDir.EnumerateFiles());
 
         }
 
@@ -109,9 +109,9 @@ namespace com.csutil.tests {
             Assert.True(rootDir.GetChild("File1.txt").IsNotNullAndExists());
 
             Assert.Equal(2, rootDir.GetDirectories().Count());
-            Assert.Equal(1, rootDir.GetFiles().Count());
+            Assert.Single(rootDir.GetFiles());
             Assert.Equal(2, rootDir.EnumerateDirectories().Count());
-            Assert.Equal(1, rootDir.EnumerateFiles().Count());
+            Assert.Single(rootDir.EnumerateFiles());
             Assert.Equal(3, rootDir.EnumerateFileSystemInfos().Count());
         }
 
