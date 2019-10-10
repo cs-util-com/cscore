@@ -112,7 +112,7 @@ Through this abstraction it becomes easy to later switch to more complex logging
 ```cs
 AssertV2.IsTrue(1 + 1 == 3, "This assertion will fail");
 ```
-See [here](https://github.com/cs-util-com/cscore/blob/master/CsCore/xUnitTests/src/com/csutil/tests/LogTests.cs#L35) for more examples.
+See [here](https://github.com/cs-util-com/cscore/blob/master/CsCore/xUnitTests/src/Plugins/CsCoreXUnitTests/com/csutil/tests/LogTests.cs#L63) for more examples.
 
 ### Log.MethodEntered & Log.MethodDone
 
