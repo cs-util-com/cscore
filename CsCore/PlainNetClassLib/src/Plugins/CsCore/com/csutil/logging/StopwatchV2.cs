@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace com.csutil {
     public class StopwatchV2 : Stopwatch {
@@ -9,7 +10,7 @@ namespace com.csutil {
         private long memoryAtStop;
         public string methodName;
 
-        public StopwatchV2(string methodName = null) { this.methodName = methodName; }
+        public StopwatchV2([CallerMemberName]string methodName = null) { this.methodName = methodName; }
 
         public long allocatedManagedMemBetweenStartAndStop { get { return managedMemoryAtStop - managedMemoryAtStart; } }
         public long allocatedMemBetweenStartAndStop { get { return memoryAtStop - memoryAtStart; } }
@@ -31,7 +32,9 @@ namespace com.csutil {
             }
         }
 
-        public static StopwatchV2 StartNewV2(string methodName) { return new StopwatchV2(methodName).StartV2(); }
+        public static StopwatchV2 StartNewV2([CallerMemberName]string methodName = null) {
+            return new StopwatchV2(methodName).StartV2();
+        }
 
         public void StopV2() {
             Stop();
