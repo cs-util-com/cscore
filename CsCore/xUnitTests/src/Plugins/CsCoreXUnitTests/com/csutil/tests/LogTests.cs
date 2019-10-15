@@ -26,7 +26,7 @@ namespace com.csutil.tests {
         public void TestLoggingMethodStartOnly() {
             Stopwatch s = Log.MethodEntered("TestLoggingMethodStartOnly", "abc", 123);
             // ...
-            s.AssertUnderXms(20);
+            s.AssertUnderXms(30);
         }
 
         [Fact]
@@ -93,9 +93,8 @@ namespace com.csutil.tests {
                     }); // ..so the AssertV2.Throws should fail
                     Log.e("This line should never be reached since AssertV2.Throws should fail!");
                     throw new Exception("AssertV2.Throws did not fail correctly!");
-                }
-                catch (AssertV2.ThrowsException) { // Only catch it if its a ThrowsException
-                                                   // AssertV2.Throws failed correctly and threw an ThrowsException error
+                } catch (AssertV2.ThrowsException) { // Only catch it if its a ThrowsException
+                    // AssertV2.Throws failed correctly and threw an ThrowsException error
                     Log.d("ThrowsException was expected and arrived correctly");
                 }
 
