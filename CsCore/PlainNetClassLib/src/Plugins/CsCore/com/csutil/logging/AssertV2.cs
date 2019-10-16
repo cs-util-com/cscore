@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace com.csutil {
     public static class AssertV2 {
@@ -85,7 +86,7 @@ namespace com.csutil {
             Assert(!expected.SequenceEqual(actual), msg2, args);
         }
 
-        public static StopwatchV2 TrackTiming(string methodName = null) { return new StopwatchV2(methodName).StartV2(); }
+        public static StopwatchV2 TrackTiming([CallerMemberName] string methodName = null) { return new StopwatchV2(methodName).StartV2(); }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         public static void AssertUnderXms(this Stopwatch self, int maxTimeInMs, params object[] args) {

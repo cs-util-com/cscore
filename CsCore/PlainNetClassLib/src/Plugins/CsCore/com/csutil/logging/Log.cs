@@ -48,27 +48,22 @@ namespace com.csutil {
 
         private static T Get<T>(this object[] args) { return args != null ? (T)args.FirstOrDefault(x => x is T) : default(T); }
 
-        public static StopwatchV2 MethodEntered(string methodName, params object[] args) {
-            if (methodName.IsNullOrEmpty()) {
+        public static StopwatchV2 MethodEntered([CallerMemberName] string methodName = null, params object[] args) {
 #if DEBUG
-                var t = new StackFrame(1, true);
-                methodName = t.GetMethodName(false);
-                args = t.AddTo(args);
+            args = new StackFrame(1, true).AddTo(args);
 #endif
-            } else {
-                EventBus.instance.Publish("MethodEntered", methodName, args);
-            }
             Log.d(" --> " + methodName, args);
+            if (!methodName.IsNullOrEmpty()) { AppFlow.TrackEvent(AppFlow.catMethod, methodName, args); }
             return AssertV2.TrackTiming(methodName);
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_FULL_LOGGING")]
         public static void MethodDone(Stopwatch timing, int maxAllowedTimeInMs = -1,
-                    [CallerMemberName] string callerName = null,
+                    [CallerMemberName] string sourceMemberName = null,
                     [CallerFilePath] string sourceFilePath = null,
                     [CallerLineNumber] int sourceLineNumber = 0) {
             var timingV2 = timing as StopwatchV2;
-            string methodName = callerName;
+            string methodName = sourceMemberName;
             if (timingV2 != null) {
                 timingV2.StopV2();
                 methodName = timingV2.methodName;

@@ -60,6 +60,20 @@ namespace com.csutil.tests {
         }
 
         [Fact]
+        public void TestAppFlowTracking() {
+            AppFlow.instance = new MyAppFlowTracker1();
+            Log.MethodEntered(); // This will internally notify the AppFlow instance
+            Assert.True((AppFlow.instance as MyAppFlowTracker1).wasCalledByTestAppFlowTrackingTest);
+        }
+
+        private class MyAppFlowTracker1 : IAppFlow {
+            public bool wasCalledByTestAppFlowTrackingTest = false;
+            public void TrackEvent(string category, string action, object[] args) {
+                if ("TestAppFlowTracking" == action) { wasCalledByTestAppFlowTrackingTest = true; }
+            }
+        }
+
+        [Fact]
         public void TestAssertV2Methods() {
 
             AssertV2.ThrowExeptionIfAssertionFails(() => {
