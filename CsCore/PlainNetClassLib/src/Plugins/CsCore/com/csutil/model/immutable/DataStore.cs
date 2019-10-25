@@ -4,7 +4,8 @@ namespace com.csutil.model.immutable {
 
     /// <summary> 
     /// Represents a store that encapsulates a state tree and is used to dispatch actions to update the state tree. 
-    /// Source mainly from https://github.com/GuillaumeSalles/redux.NET </summary>
+    /// The store follows the main conventions and syntax of the Redux store and it can be used in combination
+    /// with the provided middlewares for logging, async actions undo/redo etc. </summary>
     /// <typeparam name="T"> The state tree type. </typeparam>
     public class DataStore<T> : IDataStore<T> {
 
