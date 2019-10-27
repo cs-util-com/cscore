@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using com.csutil.json;
@@ -9,7 +7,12 @@ using Xunit;
 
 namespace com.csutil.tests.model.immutable {
 
-    /// <summary> This is a simple redux datastore example that mutates an immutable datamodel using actions that are dispatched to the datastore </summary>
+    /// <summary> 
+    /// This is a simple redux datastore example that mutates an immutable datamodel using actions that 
+    /// are dispatched to the datastore. Related articles about server outbox & offline flows: 
+    //  - https://hackernoon.com/introducing-redux-offline-offline-first-architecture-for-progressive-web-applications-and-react-68c5167ecfe0
+    //  - https://medium.com/@ianovenden/adding-offline-support-to-redux-ac8eb8873035
+    /// </summary>
     public class DataStoreExample3 {
 
         public DataStoreExample3(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
@@ -24,12 +27,11 @@ namespace com.csutil.tests.model.immutable {
             // aDD A logging middleware to log all dispatched actions:
             var loggingMiddleware = Middlewares.NewLoggingMiddleware<MyAppState1>();
 
-
-            var offline = new ServerOutboxHandler<MyAppState1>();
+            var serverOutboxHandler = new ServerOutboxHandler<MyAppState1>();
             // To allow undo redo on the full store wrap the main reducer with the undo reducer:
-            var offlineReducer = offline.Wrap(MyReducers1.ReduceMyAppState1);
-            var data = new MyAppState1(); // the initial immutable state
-            var store = new DataStore<MyAppState1>(offlineReducer, data, loggingMiddleware, thunkMiddleware);
+            var outboxReducer = serverOutboxHandler.Wrap(MyReducers1.ReduceMyAppState1);
+            var initialState = new MyAppState1(); // the initial immutable state
+            var store = new DataStore<MyAppState1>(outboxReducer, initialState, loggingMiddleware, thunkMiddleware);
             IoC.inject.SetSingleton(store);
             store.storeName = "Store 3";
 
@@ -52,9 +54,9 @@ namespace com.csutil.tests.model.immutable {
             }
 
             Assert.Equal(2, store.GetState().serverOutbox.serverActions.Count);
-            await store.SyncWithServer();
+            await store.SyncWithServer(store.GetState().serverOutbox.serverActions.First());
             Assert.Single(store.GetState().serverOutbox.serverActions);
-            await store.SyncWithServer();
+            await store.SyncWithServer(store.GetState().serverOutbox.serverActions.First());
             Assert.Empty(store.GetState().serverOutbox.serverActions);
             Assert.True(store.GetState().user.emailConfirmed);
 
@@ -85,13 +87,10 @@ namespace com.csutil.tests.model.immutable {
 
                 // Simulate persisiting the store to disk and back into memory:
                 string persistedStateJson = TypedJsonHelper.NewTypedJsonWriter().Write(store.GetState());
-                // var jsonFile = EnvironmentV2.instance.GetOrAddTempFolder("ImmutableDataStoreExample3").GetChild("store.json");
-                // jsonFile.SaveAsText(persistedStateJson);
-                // Log.e("jsonFile=" + jsonFile);
 
                 store.Destroy(); // Destroy the old store before loading the state again into an new store
                 var data2 = TypedJsonHelper.NewTypedJsonReader().Read<MyAppState1>(persistedStateJson);
-                var store2 = new DataStore<MyAppState1>(offlineReducer, data2, loggingMiddleware, thunkMiddleware);
+                var store2 = new DataStore<MyAppState1>(outboxReducer, data2, loggingMiddleware, thunkMiddleware);
                 IoC.inject.SetSingleton(store2, overrideExisting: true);
                 store2.storeName = "Store 3 (2)";
 
@@ -99,9 +98,10 @@ namespace com.csutil.tests.model.immutable {
                 Assert.False(store2.GetState().user.emailConfirmed);
                 Assert.Equal("a6@b.com", store2.GetState().user.email);
 
-                // Sync the pending server tasks:
-                await store2.SyncWithServer();
-                await store2.SyncWithServer();
+                // Sync the pending server tasks one after another:
+                foreach (var serverAction in store2.GetState().serverOutbox.serverActions) {
+                    await store2.SyncWithServer(serverAction);
+                }
                 Assert.True(store2.GetState().user.emailConfirmed);
                 Assert.NotNull(store2.GetState().serverOutbox);
                 Assert.Empty(store2.GetState().serverOutbox.serverActions);

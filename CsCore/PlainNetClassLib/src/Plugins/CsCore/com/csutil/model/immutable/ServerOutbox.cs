@@ -5,9 +5,6 @@ using System.Threading.Tasks;
 
 namespace com.csutil.model.immutable {
 
-    // TODO compare to images:
-    // - https://hackernoon.com/introducing-redux-offline-offline-first-architecture-for-progressive-web-applications-and-react-68c5167ecfe0
-    // - https://medium.com/@ianovenden/adding-offline-support-to-redux-ac8eb8873035
     public class ServerOutboxHandler<T> where T : HasServerOutbox {
 
         public StateReducer<T> Wrap(StateReducer<T> wrappedReducer) {
@@ -35,12 +32,6 @@ namespace com.csutil.model.immutable {
     }
 
     public static class ServerOutboxSyncExtensions {
-
-        [Obsolete("TODO fix signature")]
-        public static async Task SyncWithServer<T>(this IDataStore<T> self) where T : HasServerOutbox {
-            var outbox = self.GetState().serverOutbox;
-            var result = await self.SyncWithServer(outbox.serverActions.First());
-        }
 
         public static async Task<ServerActionResult> SyncWithServer<T>(this IDataStore<T> self,
                             ServerAction pendingServerAction, int maxRetries = 25, int retryCounter = 0) where T : HasServerOutbox {
