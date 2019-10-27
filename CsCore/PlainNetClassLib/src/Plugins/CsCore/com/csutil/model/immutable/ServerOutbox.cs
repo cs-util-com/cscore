@@ -15,10 +15,10 @@ namespace com.csutil.model.immutable {
                 var newPresent = wrappedReducer(present, action);
                 if (action is ServerAction sa) {
                     var serverActions = MutateServerActions(present, sa);
-                    newPresent.serverOutbox = new ServerOutbox(serverActions);
+                    newPresent.serverOutbox = new ServerOutbox() { serverActions = serverActions };
                 } else if (action is RemoveServerAction fa) {
                     var serverActions = present.serverOutbox.serverActions.Remove(fa.finishedServerAction);
-                    newPresent.serverOutbox = new ServerOutbox(serverActions);
+                    newPresent.serverOutbox = new ServerOutbox() { serverActions = serverActions };
                 } else {
                     newPresent.serverOutbox = present.serverOutbox;
                 }
@@ -76,10 +76,7 @@ namespace com.csutil.model.immutable {
         ServerOutbox serverOutbox { get; set; }
     }
 
-    public class ServerOutbox {
-        public readonly ImmutableList<ServerAction> serverActions;
-        internal ServerOutbox(ImmutableList<ServerAction> serverActions) { this.serverActions = serverActions; }
-    }
+    public class ServerOutbox { public ImmutableList<ServerAction> serverActions; }
 
     public enum ServerActionResult {
         /// <summary> Used when the the server processed the action successfully </summary>

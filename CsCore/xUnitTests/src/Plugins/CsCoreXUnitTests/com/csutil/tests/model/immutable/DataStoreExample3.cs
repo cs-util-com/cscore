@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
+using com.csutil.json;
 using com.csutil.model.immutable;
 using Xunit;
 
@@ -72,8 +73,8 @@ namespace com.csutil.tests.model.immutable {
                 store.Dispatch(a);
                 await store.SyncWithServer(a);
                 Assert.Empty(store.GetState().serverOutbox.serverActions);
-                Assert.False(store.GetState().user.emailConfirmed);
                 Assert.Equal("a4@b.com", store.GetState().user.email);
+                Assert.True(store.GetState().user.emailConfirmed);
             }
             { // Test persisting and restoring the full store and continue with the pending server requests:
                 store.Dispatch(new ActionOnUser.ChangeEmail() { targetEmail = "a4@b.com", newEmail = "a5@b.com" });
@@ -82,20 +83,35 @@ namespace com.csutil.tests.model.immutable {
                 Assert.False(store.GetState().user.emailConfirmed);
                 Assert.Equal("a6@b.com", store.GetState().user.email);
 
-                // TODO
-                // Persist to disk
-                // Reload from disk
-                // Sync to server
+                // Simulate persisiting the store to disk and back into memory:
+                string persistedStateJson = TypedJsonHelper.NewTypedJsonWriter().Write(store.GetState());
+                // var jsonFile = EnvironmentV2.instance.GetOrAddTempFolder("ImmutableDataStoreExample3").GetChild("store.json");
+                // jsonFile.SaveAsText(persistedStateJson);
+                // Log.e("jsonFile=" + jsonFile);
 
+                store.Destroy(); // Destroy the old store before loading the state again into an new store
+                var data2 = TypedJsonHelper.NewTypedJsonReader().Read<MyAppState1>(persistedStateJson);
+                var store2 = new DataStore<MyAppState1>(offlineReducer, data2, loggingMiddleware, thunkMiddleware);
+                IoC.inject.SetSingleton(store2, overrideExisting: true);
+                store2.storeName = "Store 3 (2)";
+
+                Assert.Equal(2, store2.GetState().serverOutbox.serverActions.Count);
+                Assert.False(store2.GetState().user.emailConfirmed);
+                Assert.Equal("a6@b.com", store2.GetState().user.email);
+
+                // Sync the pending server tasks:
+                await store2.SyncWithServer();
+                await store2.SyncWithServer();
+                Assert.True(store2.GetState().user.emailConfirmed);
+                Assert.NotNull(store2.GetState().serverOutbox);
+                Assert.Empty(store2.GetState().serverOutbox.serverActions);
             }
-
 
         }
 
         private class MyAppState1 : HasServerOutbox {
             public readonly MyUser1 user;
             public ServerOutbox serverOutbox { get; set; }
-
             public MyAppState1(MyUser1 user = null) { this.user = user; }
 
         }
@@ -150,6 +166,15 @@ namespace com.csutil.tests.model.immutable {
                     Log.MethodEntered("reasonForRollback=" + reasonForRollback);
                     // Here the server probably has to be asked for the old email to rollback to and 
                     // then a local update would have to be done
+                    if (this.newEmail == "a5@b.com") { // See testflow above
+                        var emailOnServer = "a4@b.com"; // Received from the server
+                        var store = IoC.inject.Get<DataStore<MyAppState1>>(this);
+                        store.Dispatch(new ActionOnUser.RollbackLocalUser() {
+                            targetEmail = newEmail,
+                            emailOnServer = emailOnServer,
+                            isEmailConfirmed = true
+                        });
+                    }
                     return Task.FromResult(true);
                 }
 
@@ -157,6 +182,10 @@ namespace com.csutil.tests.model.immutable {
 
             public class EmailConfirmed : ActionOnUser { public bool isEmailConfirmed; }
 
+            public class RollbackLocalUser : ActionOnUser {
+                public string emailOnServer;
+                public bool isEmailConfirmed;
+            }
         }
 
         #endregion // of example actions
@@ -186,12 +215,14 @@ namespace com.csutil.tests.model.immutable {
 
             private static string ReduceUserEmail(string oldEmail, object action) {
                 if (action is ActionOnUser.ChangeEmail a) { return a.newEmail; }
+                if (action is ActionOnUser.RollbackLocalUser r) { return r.emailOnServer; }
                 return oldEmail;
             }
 
             private static bool ReduceEmailConfirmed(bool emailConfirmed, object action) {
                 if (action is ActionOnUser.ChangeEmail) { return false; }
                 if (action is ActionOnUser.EmailConfirmed a2) { return a2.isEmailConfirmed; }
+                if (action is ActionOnUser.RollbackLocalUser r) { return r.isEmailConfirmed; }
                 return emailConfirmed;
             }
 

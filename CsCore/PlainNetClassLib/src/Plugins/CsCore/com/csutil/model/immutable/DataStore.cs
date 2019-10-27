@@ -13,8 +13,8 @@ namespace com.csutil.model.immutable {
         private readonly Dispatcher dispatcher;
         private readonly StateReducer<T> reducer;
         private T state;
-        public string storeName;
 
+        public string storeName;
         public Action onStateChanged { get; set; }
 
         public DataStore(StateReducer<T> reducer, T initialState = default(T), params Middleware<T>[] middlewares) {
@@ -45,6 +45,12 @@ namespace com.csutil.model.immutable {
         public override string ToString() {
             if (storeName != null) { return storeName; }
             return base.ToString();
+        }
+
+        public void Destroy() {
+            state = default(T);
+            onStateChanged = null;
+            storeName = "DESTROYED " + storeName;
         }
 
     }
