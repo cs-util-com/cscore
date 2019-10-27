@@ -419,7 +419,7 @@ More examples [can be found here](https://github.com/cs-util-com/cscore/blob/mas
 
 See [this example for a first introduction](https://github.com/cs-util-com/cscore/blob/master/CsCore/xUnitTests/src/Plugins/CsCoreXUnitTests/com/csutil/tests/model/immutable/DataStoreExample1.cs#L11) including an example datamodel, example actions and some listeners that are informed when the datamodel changes.
 
-See [here for additional more complex tests](https://github.com/cs-util-com/cscore/tree/master/CsCore/xUnitTests/src/Plugins/CsCoreXUnitTests/com/csutil/tests/model/immutable):
+See [here for additional more complex examples](https://github.com/cs-util-com/cscore/tree/master/CsCore/xUnitTests/src/Plugins/CsCoreXUnitTests/com/csutil/tests/model/immutable) which include the other features like undo/redo, middlewares and server synchronization. 
 
 ## JsonMerger
 [Json merging and diffing logic](https://github.com/cs-util-com/cscore/blob/master/CsCore/xUnitTests/src/Plugins/CsCoreXUnitTests/com/csutil/tests/json/JsonDiffAndMergeTests.cs#L14) that helps to update an instance of a class using a [Three-way merge](https://en.wikipedia.org/wiki/Merge_(version_control)#Three-way_merge). Here an example:
