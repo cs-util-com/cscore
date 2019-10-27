@@ -16,7 +16,7 @@ namespace com.csutil.model.immutable {
                 if (action is ServerAction sa) {
                     var serverActions = MutateServerActions(present, sa);
                     newPresent.serverOutbox = new ServerOutbox(serverActions);
-                } else if (action is RemoveFinishedServerAction fa) {
+                } else if (action is RemoveServerAction fa) {
                     var serverActions = present.serverOutbox.serverActions.Remove(fa.finishedServerAction);
                     newPresent.serverOutbox = new ServerOutbox(serverActions);
                 } else {
@@ -28,6 +28,7 @@ namespace com.csutil.model.immutable {
 
         private ImmutableList<ServerAction> MutateServerActions(T store, ServerAction a) {
             if (store.serverOutbox == null) { return ImmutableList.Create<ServerAction>(a); }
+            AssertV2.IsFalse(store.serverOutbox.serverActions.Contains(a), "Action " + a + " already in the action list!");
             return store.serverOutbox.serverActions.Add(a);
         }
 
@@ -38,26 +39,34 @@ namespace com.csutil.model.immutable {
         [Obsolete("TODO fix signature")]
         public static async Task SyncWithServer<T>(this IDataStore<T> self) where T : HasServerOutbox {
             var outbox = self.GetState().serverOutbox;
-            await self.SyncWithServer(outbox.serverActions.First());
+            var result = await self.SyncWithServer(outbox.serverActions.First());
         }
 
         public static async Task<ServerActionResult> SyncWithServer<T>(this IDataStore<T> self,
-                    ServerAction pendingServerAction, int maxRetries = 25, int retryCounter = 0) where T : HasServerOutbox {
+                            ServerAction pendingServerAction, int maxRetries = 25, int retryCounter = 0) where T : HasServerOutbox {
+            var result = await pendingServerAction.SyncWithServer(maxRetries, retryCounter);
+            self.Dispatch(new RemoveServerAction { finishedServerAction = pendingServerAction, finishResult = result });
+            return result;
+        }
+
+        /// <summary> After calling this the store has to be manually informed with a RemoveServerAction that the action can be removed! </summary>
+        public static async Task<ServerActionResult> SyncWithServer(this ServerAction self, int maxRetries = 25, int retryCounter = 0) {
             var result = ServerActionResult.FAIL;
-            try { result = await pendingServerAction.SendToServer(); } catch (System.Exception e) { Log.e(e); }
-            if (result == ServerActionResult.RETRY && maxRetries > 0) {
+            try { result = await self.SendToServer(); } catch (System.Exception e) { Log.e(e); }
+            if (result == ServerActionResult.RETRY && retryCounter < maxRetries) {
                 var delayInMs = Math.Pow(2, retryCounter);  // Delay via exponential backoff before next retry
                 await TaskV2.Delay((int)delayInMs);
-                return await SyncWithServer(self, pendingServerAction, maxRetries - 1, retryCounter + 1);
+                return await self.SyncWithServer(maxRetries, retryCounter + 1);
             }
-            if (result == ServerActionResult.RETRY || result == ServerActionResult.FAIL) { await pendingServerAction.RollbackLocalChanges(result); }
-            self.Dispatch(new RemoveFinishedServerAction { finishedServerAction = pendingServerAction, finishResult = result });
+            if (result == ServerActionResult.RETRY || result == ServerActionResult.FAIL) {
+                await self.RollbackLocalChanges(result);
+            }
             return result;
         }
 
     }
 
-    public class RemoveFinishedServerAction {
+    public class RemoveServerAction {
         public ServerAction finishedServerAction;
         public ServerActionResult finishResult;
     }
@@ -75,9 +84,9 @@ namespace com.csutil.model.immutable {
     public enum ServerActionResult {
         /// <summary> Used when the the server processed the action successfully </summary>
         SUCCESS,
-        /// <summary> Used when the server could not be reached or had a 5xx error </summary>
+        /// <summary> Used when the action fails temporary, e.g. the server could not be reached or had a 5xx error </summary>
         RETRY,
-        /// <summary> Used when the server returned a 4xx error so the action will never succeed </summary>
+        /// <summary> Used when the action fails permanently, e.g the server returned a 4xx error </summary>
         FAIL,
     }
 

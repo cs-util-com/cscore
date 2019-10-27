@@ -62,15 +62,30 @@ namespace com.csutil.tests.model.immutable {
                 store.Dispatch(a);
                 Assert.Single(store.GetState().serverOutbox.serverActions);
                 Assert.False(store.GetState().user.emailConfirmed);
-                await store.SyncWithServer();
+                await store.SyncWithServer(a);
                 Assert.Empty(store.GetState().serverOutbox.serverActions);
                 Assert.Equal(2, a.sentToServerCounter);
                 Assert.True(store.GetState().user.emailConfirmed);
             }
             { // Simulate the server rejecting an email change:
-
+                var a = new ActionOnUser.ChangeEmail() { targetEmail = "a4@b.com", newEmail = "a5@b.com", simulateError = true };
+                store.Dispatch(a);
+                await store.SyncWithServer(a);
+                Assert.Empty(store.GetState().serverOutbox.serverActions);
+                Assert.False(store.GetState().user.emailConfirmed);
+                Assert.Equal("a4@b.com", store.GetState().user.email);
             }
             { // Test persisting and restoring the full store and continue with the pending server requests:
+                store.Dispatch(new ActionOnUser.ChangeEmail() { targetEmail = "a4@b.com", newEmail = "a5@b.com" });
+                store.Dispatch(new ActionOnUser.ChangeEmail() { targetEmail = "a5@b.com", newEmail = "a6@b.com" });
+                Assert.Equal(2, store.GetState().serverOutbox.serverActions.Count);
+                Assert.False(store.GetState().user.emailConfirmed);
+                Assert.Equal("a6@b.com", store.GetState().user.email);
+
+                // TODO
+                // Persist to disk
+                // Reload from disk
+                // Sync to server
 
             }
 
