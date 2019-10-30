@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 224148824849993928}
   - component: {fileID: 222836933906217876}
   m_Layer: 5
-  m_Name: MsgContainer4
+  m_Name: ToastContainer1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -314,7 +314,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 114847490355800342}
   m_HandleRect: {fileID: 224765575833331038}
   m_Direction: 2
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -427,10 +427,10 @@ RectTransform:
   m_Father: {fileID: 224241647089548558}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 396, y: 347}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 182, y: 0}
+  m_SizeDelta: {x: 32, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &114807199485910828
 MonoBehaviour:
