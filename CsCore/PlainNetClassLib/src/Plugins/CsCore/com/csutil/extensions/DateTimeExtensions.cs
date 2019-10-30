@@ -34,9 +34,15 @@ namespace com.csutil {
     }
 
     public static class DateTimeExtensions {
+
         /// <summary> sortable, short, hard to read wrong, can be used in pathes. read also https://stackoverflow.com/a/15952652/165106 </summary>
         public static string ToReadableString(this DateTime self) {
             return self.ToUniversalTime().ToString("yyyy-MM-dd_HH.mm");
+        }
+
+        /// <summary> e.g. 2019-10-27T13:35:47Z (see https://en.wikipedia.org/wiki/ISO_8601 for details) </summary>
+        public static string ToReadableString_ISO8601(this DateTime dateTime) {
+            return dateTime.ToString("yyyy-MM-ddTHH:mm:ssZ");
         }
 
         public static long ToUnixTimestampUtc(this DateTime self) {

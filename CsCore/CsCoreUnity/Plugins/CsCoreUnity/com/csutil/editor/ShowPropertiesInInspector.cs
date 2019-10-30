@@ -17,6 +17,9 @@ namespace com.csutil.editor {
 
         internal static ShowPropertiesInInspector[] GetPropertiesToDraw(System.Object obj) {
             if (obj == null) { return null; }
+            // Skip all UnityEngine classes:
+            if (obj.GetType().Namespace.StartsWith("UnityEngine")) { return null; }
+
             var readableProps = obj.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).Where(p => p.CanRead);
 
             var propertyInspectorUis = new List<ShowPropertiesInInspector>();

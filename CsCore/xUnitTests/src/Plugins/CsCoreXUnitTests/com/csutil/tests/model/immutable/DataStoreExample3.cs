@@ -46,6 +46,7 @@ namespace com.csutil.tests.model.immutable {
                 var a = new ActionOnUser.ChangeEmail() { targetEmail = "a1@b.com", newEmail = "a2@b.com" };
                 store.Dispatch(a);
                 Assert.Equal(a, store.GetState().serverOutbox.serverActions.First());
+                Assert.False(store.GetState().user.emailConfirmed);
             }
             { // Change the email a second time:
                 var a = new ActionOnUser.ChangeEmail() { targetEmail = "a2@b.com", newEmail = "a3@b.com" };
