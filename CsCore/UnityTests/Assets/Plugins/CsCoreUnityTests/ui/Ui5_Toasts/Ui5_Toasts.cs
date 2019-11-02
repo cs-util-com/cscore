@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using NUnit.Framework;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.TestTools;
 
@@ -15,8 +16,10 @@ namespace com.csutil.tests.ui {
             yield return new WaitForSeconds(1);
             Toast.Show("Some toast 2");
             yield return new WaitForSeconds(1);
-            Toast.Show("Some toast 3", "Lorem ipsum 3", 1000);
+            var toast3 = Toast.Show("Some toast 3", "Lorem ipsum 3", 1000);
+            Assert.IsFalse(toast3.IsDestroyed());
             yield return new WaitForSeconds(2);
+            Assert.IsTrue(toast3.IsDestroyed());
         }
     }
 
