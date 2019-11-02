@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace com.csutil.tests.ui {
 
-    public class ExampleUi2_OptionsScreen : MonoBehaviour {
+    public class Ui2_OptionsScreen : MonoBehaviour {
 
         private const string TOGGLE1 = "Toggle (1)";
         private const string TOGGLE2 = "Toggle (2)";

@@ -12,10 +12,12 @@ using UnityEngine.UI;
 
 namespace com.csutil.tests.ui {
 
-    public class ExampleUi1 {
+    public class Ui1_Presenters : MonoBehaviour { IEnumerator Start() { yield return new Ui1_PresenterTests().ExampleUsage(); } }
+
+    public class Ui1_PresenterTests {
 
         [UnityTest]
-        public IEnumerator ExampleUsage1() {
+        public IEnumerator ExampleUsage() {
 
             MyUserUi userUiPresenter = new MyUserUi();
             userUiPresenter.targetView = ResourcesV2.LoadPrefab("MyUserUi1");

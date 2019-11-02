@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace com.csutil.tests.ui {
 
-    public class ExampleUi2_MainScreen : MonoBehaviour {
+    public class Ui2_MainScreen : MonoBehaviour {
 
-        public ExampleUi1.MyUserModel currentUser = new ExampleUi1.MyUserModel() { userName = "Carl" };
+        public Ui1_PresenterTests.MyUserModel currentUser = new Ui1_PresenterTests.MyUserModel() { userName = "Carl" };
 
         void Start() {
             var links = gameObject.GetLinkMap();
@@ -22,7 +22,7 @@ namespace com.csutil.tests.ui {
         }
 
         private async void ShowUserUi(GameObject buttonGo) {
-            ExampleUi1.MyUserUi presenter = new ExampleUi1.MyUserUi();
+            Ui1_PresenterTests.MyUserUi presenter = new Ui1_PresenterTests.MyUserUi();
             GameObject ui = gameObject.GetViewStack().ShowView(gameObject, "MyUserUi1");
             presenter.targetView = ui;
             await presenter.LoadModelIntoView(currentUser);

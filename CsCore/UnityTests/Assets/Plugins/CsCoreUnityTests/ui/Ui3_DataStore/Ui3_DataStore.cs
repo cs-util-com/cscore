@@ -14,11 +14,11 @@ using UnityEngine.UI;
 namespace com.csutil.tests.ui {
 
     // The MonoBehaviour can be used for manual tests by attaching it to a scene
-    class ExampleUi3 : MonoBehaviour {
-        private IEnumerator Start() { yield return new ExampleUi3Test().ExampleUsage3(); }
+    class Ui3_DataStore : MonoBehaviour {
+        private IEnumerator Start() { yield return new Ui3_DataStoreTest().ExampleUsage3(); }
     }
 
-    class ExampleUi3Test { // The automated unit test
+    class Ui3_DataStoreTest { // The automated unit test
 
         [UnityTest]
         public IEnumerator ExampleUsage3() {
