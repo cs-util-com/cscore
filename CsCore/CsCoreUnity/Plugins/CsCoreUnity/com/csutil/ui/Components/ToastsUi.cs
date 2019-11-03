@@ -19,7 +19,7 @@ namespace com.csutil.tests.ui {
 
         private static ToastsUi InitToastsUi() {
             var targetCanvas = CanvasFinder.GetOrAddRootCanvas().gameObject;
-            var toastContainer = targetCanvas.AddChild(ResourcesV2.LoadPrefab("Toasts/ToastContainer1"));
+            var toastContainer = targetCanvas.AddChild(ResourcesV2.LoadPrefab("Messages/ToastContainer1"));
             return toastContainer.GetOrAddComponent<ToastsUi>();
         }
 
@@ -31,7 +31,7 @@ namespace com.csutil.tests.ui {
         private void OnEnable() { toastsContainer = gameObject.GetLinkMap().Get<GameObject>("MessageContainer"); }
 
         public GameObject Show(string toastCaption, string toastMessage, int displayDurationInMs) {
-            var newToast = ResourcesV2.LoadPrefab("Toasts/Toast");
+            var newToast = ResourcesV2.LoadPrefab("Messages/Toast");
             var toastUiElems = newToast.GetLinkMap();
             InitText(toastUiElems, "Caption", toastCaption);
             InitText(toastUiElems, "Message", toastMessage);

@@ -8,8 +8,8 @@ namespace com.csutil {
 
     public static class LinkingExtensions {
 
-        public static Dictionary<string, Link> GetLinkMap(this GameObject self) {
-            var linkArray = self.GetComponentsInChildren<Link>(true);
+        public static Dictionary<string, Link> GetLinkMap(this GameObject self, bool includeInactive = true) {
+            var linkArray = self.GetComponentsInChildren<Link>(includeInactive);
             var linkMap = new Dictionary<string, Link>();
             foreach (var link in linkArray) {
                 if (linkMap.ContainsKey(link.id)) { throw Log.e("Multiple links with same id=" + link.id, link.gameObject); }
