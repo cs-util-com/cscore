@@ -1,6 +1,4 @@
-﻿using NUnit.Framework;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.TestTools;
 
@@ -12,7 +10,7 @@ namespace com.csutil.tests.ui {
     class Ui7_SnackbarTests {
         [UnityTest]
         public IEnumerator ExampleUsage() {
-            Snackbar.Show("Snackbar 1", delegate {
+            Snackbar.Show("Snackbar 1", "Click me!", delegate {
                 Toast.Show("Snackbar 1 button clicked");
             });
             yield return new WaitForSeconds(1);

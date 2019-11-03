@@ -11,11 +11,11 @@ namespace com.csutil.tests.ui {
         public const int DEFAULT_DURATION_IN_MS = 5000;
 
         public static GameObject Show(string snackbarMsg, int displayDurationInMs = DEFAULT_DURATION_IN_MS) {
-            return IoC.inject.GetOrAddSingleton<SnackbarsUi>(null, InitSnackbarsUi).Show(snackbarMsg, null, displayDurationInMs);
+            return IoC.inject.GetOrAddSingleton<SnackbarsUi>(null, InitSnackbarsUi).Show(snackbarMsg, null, null, displayDurationInMs);
         }
 
-        public static GameObject Show(string msg, Action<GameObject> onClick, int displayDurationInMs = DEFAULT_DURATION_IN_MS) {
-            return IoC.inject.GetOrAddSingleton<SnackbarsUi>(null, InitSnackbarsUi).Show(msg, onClick, displayDurationInMs);
+        public static GameObject Show(string msg, string buttonMsg, Action<GameObject> onClick, int displayDurationInMs = DEFAULT_DURATION_IN_MS) {
+            return IoC.inject.GetOrAddSingleton<SnackbarsUi>(null, InitSnackbarsUi).Show(msg, buttonMsg, onClick, displayDurationInMs);
         }
 
         private static SnackbarsUi InitSnackbarsUi() {
@@ -31,12 +31,16 @@ namespace com.csutil.tests.ui {
         private GameObject snackbarsContainer;
         private void OnEnable() { snackbarsContainer = gameObject.GetLinkMap().Get<GameObject>("MessageContainer"); }
 
-        public GameObject Show(string snackbarMsg, Action<GameObject> snackbarAction, int displayDurationInMs) {
+        public GameObject Show(string snackbarMsg, string buttonMsg, Action<GameObject> snackbarAction, int displayDurationInMs) {
             var newSnackbar = ResourcesV2.LoadPrefab("Messages/Snackbar");
-            var snackbarUiElems = newSnackbar.GetLinkMap();
-            snackbarUiElems.Get<Text>("Message").text = snackbarMsg;
-            var btn = snackbarUiElems.Get<Button>("SnackbarButton");
-            if (snackbarAction != null) { btn.SetOnClickAction(snackbarAction); } else { btn.gameObject.Destroy(); }
+            var map = newSnackbar.GetLinkMap();
+            map.Get<Text>("Message").text = snackbarMsg;
+            if (snackbarAction != null && !buttonMsg.IsNullOrEmpty()) {
+                map.Get<Text>("SnackbarButton").text = buttonMsg;
+                map.Get<Button>("SnackbarButton").SetOnClickAction(snackbarAction);
+            } else {
+                map.Get<GameObject>("SnackbarButton").Destroy();
+            }
             newSnackbar.GetComponent<MonoBehaviour>().ExecuteDelayed(() => newSnackbar.Destroy(), displayDurationInMs);
             snackbarsContainer.AddChild(newSnackbar);
             return newSnackbar;
