@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace com.csutil.tests.ui {
+namespace com.csutil.ui {
 
     public static class Snackbar {
 
