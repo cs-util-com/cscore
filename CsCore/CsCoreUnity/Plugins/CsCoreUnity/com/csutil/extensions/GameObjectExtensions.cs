@@ -29,6 +29,15 @@ namespace com.csutil {
             return existingComp == null ? self.AddComponent<T>() : existingComp;
         }
 
+        /// <summary> Searches recursively upwards in all parents until a comp of type T is found </summary>
+        public static T GetComponentInParents<T>(this GameObject gameObject) where T : Component {
+            var comp = gameObject.GetComponent<T>();
+            if (comp != null) { return comp; }
+            var parent = gameObject.GetParent();
+            if (parent != null && parent != gameObject) { return parent.GetComponentInParents<T>(); }
+            return null;
+        }
+
         /// <summary> Returns the parent GameObject or null if top scene level is reached </summary>
         public static GameObject GetParent(this GameObject child) {
             if (child == null || child.transform.parent == null) { return null; }

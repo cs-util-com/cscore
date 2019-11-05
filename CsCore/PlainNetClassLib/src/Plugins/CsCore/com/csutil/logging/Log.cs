@@ -82,6 +82,17 @@ namespace com.csutil {
             return " : [[" + s + "]]";
         }
 
+        public static void AddLoggerToLogInstances(ILog loggerToAdd) {
+            if (Log.instance is LogToMultipleLoggers existingInstance) {
+                existingInstance.loggers.Add(loggerToAdd);
+            } else {
+                var newInstance = new LogToMultipleLoggers();
+                newInstance.loggers.Add(Log.instance);
+                newInstance.loggers.Add(loggerToAdd);
+                Log.instance = newInstance;
+            }
+        }
+
     }
 
     public static class LogExtensions {

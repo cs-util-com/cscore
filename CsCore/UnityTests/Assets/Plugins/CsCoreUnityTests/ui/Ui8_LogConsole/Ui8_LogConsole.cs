@@ -14,8 +14,11 @@ namespace com.csutil.tests.ui {
     class Ui8_LogConsoleTests {
         [UnityTest]
         public IEnumerator ExampleUsage() {
+
+            LogConsole.RegisterForAllLogEvents(this);
+
             for (int i = 0; i < 20; i++) {
-                LogConsole.Log("Log event " + i);
+                LogConsole.GetLogConsole(this).AddToLog(LogEntry.d("Log event " + i));
                 yield return new WaitForSeconds(0.5f);
             }
         }
