@@ -1,6 +1,8 @@
 ﻿using com.csutil.ui;
 using ReuseScroller;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -37,20 +39,55 @@ namespace com.csutil.logging {
 
     public class LogConsoleUi : BaseController<LogEntry> {
 
+        private List<LogEntry> allData = new List<LogEntry>();
+        private Func<LogEntry, bool> filter = (x) => true;
+
+        private Dictionary<string, Link> map;
+        private InputField SearchInputField() { return map.Get<InputField>("Search"); }
+        private Toggle ToggleShowDebugs() { return map.Get<Toggle>("ToggleShowDebugs"); }
+        private Toggle ToggleShowWarngs() { return map.Get<Toggle>("ToggleShowWarnings"); }
+        private Toggle ToggleShowErrors() { return map.Get<Toggle>("ToggleShowErrors"); }
+
         protected override void Start() {
-            var map = gameObject.GetComponentInParents<Canvas>().gameObject.GetLinkMap();
+            map = gameObject.GetComponentInParents<Canvas>().gameObject.GetLinkMap();
             map.Get<Button>("BtnClear").SetOnClickAction(delegate {
-                Log.d("BtnClear");
+                allData.Clear(); CellData.Clear(); ReloadData();
             });
-            map.Get<Button>("BtnShowErrorsOnly").SetOnClickAction(delegate {
-                Log.d("BtnShowErrorsOnly");
-            });
-            map.Get<Button>("BtnHideLog").SetOnClickAction(delegate {
-                Log.d("BtnHideLog");
-            });
+            map.Get<Button>("BtnHideLog").SetOnClickAction(delegate { gameObject.SetActive(!gameObject.activeSelf); });
+            ToggleShowDebugs().SetOnValueChangedAction(delegate { UpdateFilter(NewFilter()); return true; });
+            ToggleShowWarngs().SetOnValueChangedAction(delegate { UpdateFilter(NewFilter()); return true; });
+            ToggleShowErrors().SetOnValueChangedAction(delegate { UpdateFilter(NewFilter()); return true; });
+            SearchInputField().SetOnValueChangedAction(delegate { UpdateFilter(NewFilter()); return true; });
         }
 
-        public void AddToLog(LogEntry logMessage) { CellData.Add(logMessage); ReloadData(); }
+        private Func<LogEntry, bool> NewFilter() {
+            bool d = ToggleShowDebugs().isOn;
+            bool w = ToggleShowWarngs().isOn;
+            bool e = ToggleShowErrors().isOn;
+            string s = SearchInputField().text.ToLower();
+            return (logEntry) => {
+                if (!d && logEntry.type == "d") { return false; }
+                if (!w && logEntry.type == "w") { return false; }
+                if (!e && logEntry.type == "e") { return false; }
+                if (!s.IsNullOrEmpty() && !logEntry.message.ToLower().Contains(s)) { return false; }
+                return true;
+            };
+        }
+
+        private void UpdateFilter(Func<LogEntry, bool> newFilter) {
+            filter = newFilter;
+            CellData = allData.Filter(filter).ToList();
+            ReloadData();
+        }
+
+        public void AddToLog(LogEntry logMessage) {
+            allData.Add(logMessage);
+            if (filter(logMessage)) {
+                CellData.Add(logMessage);
+                ReloadData();
+            }
+        }
+
     }
 
     public class LogEntry {
@@ -67,10 +104,11 @@ namespace com.csutil.logging {
         public string message;
         public Color color;
         public string icon;
+        public string type;
 
-        public static LogEntry d(string d) { return new LogEntry() { message = d, color = COLOR_GRAY, icon = ICON_D }; }
-        public static LogEntry w(string w) { return new LogEntry() { message = w, color = COLOR_YELLOW, icon = ICON_W }; }
-        public static LogEntry e(string e) { return new LogEntry() { message = e, color = COLOR_RED, icon = ICON_E }; }
+        public static LogEntry d(string d) { return new LogEntry() { message = d, color = COLOR_GRAY, icon = ICON_D, type = "d" }; }
+        public static LogEntry w(string w) { return new LogEntry() { message = w, color = COLOR_YELLOW, icon = ICON_W, type = "w" }; }
+        public static LogEntry e(string e) { return new LogEntry() { message = e, color = COLOR_RED, icon = ICON_E, type = "e" }; }
 
     }
 
