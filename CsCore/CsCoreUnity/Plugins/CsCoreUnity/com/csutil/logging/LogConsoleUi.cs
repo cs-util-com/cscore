@@ -53,7 +53,12 @@ namespace com.csutil.logging {
             map.Get<Button>("BtnClear").SetOnClickAction(delegate {
                 allData.Clear(); CellData.Clear(); ReloadData();
             });
-            map.Get<Button>("BtnHideLog").SetOnClickAction(delegate { gameObject.SetActive(!gameObject.activeSelf); });
+            map.Get<Button>("BtnHideLog").SetOnClickAction(delegate {
+                var nowActive = !gameObject.activeSelf;
+                gameObject.SetActive(nowActive);
+                map.Get<CanvasGroup>("MenuButtons").interactable = nowActive;
+                map.Get<CanvasGroup>("MenuButtons").blocksRaycasts = nowActive;
+            });
             ToggleShowDebugs().SetOnValueChangedAction(delegate { UpdateFilter(NewFilter()); return true; });
             ToggleShowWarngs().SetOnValueChangedAction(delegate { UpdateFilter(NewFilter()); return true; });
             ToggleShowErrors().SetOnValueChangedAction(delegate { UpdateFilter(NewFilter()); return true; });
