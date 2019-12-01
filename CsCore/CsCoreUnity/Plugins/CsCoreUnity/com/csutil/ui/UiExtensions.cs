@@ -1,6 +1,7 @@
 ﻿using com.csutil.ui;
 using System;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,23 +13,29 @@ namespace com.csutil {
             return gameObject.GetComponentInParent<ViewStack>();
         }
 
-        public static void SetOnClickAction(this Button self, Action<GameObject> onClickAction) {
+        public static Task SetOnClickAction(this Button self, Action<GameObject> onClickAction) {
             if (self.onClick != null && self.onClick.GetPersistentEventCount() > 0) {
                 Log.w("Overriding existing onClick action in " + self, self.gameObject);
             }
             self.onClick = new Button.ButtonClickedEvent(); // clear previous onClick listeners
-            self.AddOnClickAction(onClickAction);
+            return self.AddOnClickAction(onClickAction);
         }
 
-        public static void AddOnClickAction(this Button self, Action<GameObject> onClickAction) {
-            if (onClickAction != null) {
+        public static Task AddOnClickAction(this Button self, Action<GameObject> onClickAction) {
+            return AddOnClickFunc(self, (go) => { onClickAction(go); return true; });
+        }
+
+        public static Task<T> AddOnClickFunc<T>(this Button self, Func<GameObject, T> onClickFunc) {
+            var tcs = new TaskCompletionSource<T>();
+            if (onClickFunc != null) {
                 var originTrace = new StackTrace();
                 self.onClick.AddListener(() => {
                     EventBus.instance.Publish(UiEvents.BUTTON_CLICKED, self);
-                    try { onClickAction(self.gameObject); }
-                    catch (Exception e) { Log.e(e + " at " + originTrace); }
+                    try { tcs.TrySetResult(onClickFunc(self.gameObject)); }
+                    catch (Exception e) { Log.e(e + " at " + originTrace); tcs.TrySetException(e); }
                 });
             }
+            return tcs.Task;
         }
 
         public static void SetOnValueChangedAction(this Toggle self, Func<bool, bool> onValueChanged) {

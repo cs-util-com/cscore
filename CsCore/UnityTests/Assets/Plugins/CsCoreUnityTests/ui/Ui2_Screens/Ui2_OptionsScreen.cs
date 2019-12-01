@@ -19,7 +19,7 @@ namespace com.csutil.tests.ui {
             toggle1().isOn = PlayerPrefsV2.GetBool(TOGGLE1, false);
             toggle2().isOn = PlayerPrefsV2.GetBool(TOGGLE2, false);
             toggle3().isOn = PlayerPrefsV2.GetBool(TOGGLE3, false);
-            links.Get<Button>("SaveButton").SetOnClickAction(delegate {
+            links.Get<Button>("ConfirmButton").SetOnClickAction(delegate {
                 PlayerPrefsV2.SetBool(TOGGLE1, toggle1().isOn);
                 PlayerPrefsV2.SetBool(TOGGLE2, toggle2().isOn);
                 PlayerPrefsV2.SetBool(TOGGLE3, toggle3().isOn);
