@@ -38,7 +38,7 @@ namespace com.csutil.tests.ui {
             // Dispatch a first setUser action to update the UI:
             store.Dispatch(new ActionSetNewUser() { newUser = new MyUser3("Carl", 99) });
             // Delay needed since the UI update simulates a delay too:
-            yield return new WaitForSeconds(0.1f);
+            yield return new WaitForSeconds(0.5f);
             // Check that the UI was automatically updated:
             Assert.AreEqual("Carl", currentUserPresenter.NameUi().text);
             Assert.AreEqual("99", currentUserPresenter.AgeUi().text);

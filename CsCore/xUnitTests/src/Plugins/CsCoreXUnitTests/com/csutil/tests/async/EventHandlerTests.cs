@@ -103,7 +103,7 @@ namespace com.csutil.tests.async {
                 tasks.Add(TaskV2.Run(() => { throttledAction(this, myIntParam); }));
             }
             await Task.WhenAll(tasks.ToArray());
-            for (int i = 0; i < 20; i++) { await TaskV2.Delay(100); if (counter >= 2) { break; } }
+            for (int i = 0; i < 20; i++) { await TaskV2.Delay(5); if (counter >= 2) { break; } }
             Assert.Equal(2, counter);
             await TaskV2.Delay(100);
             Assert.Equal(2, counter);

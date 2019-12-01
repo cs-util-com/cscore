@@ -26,7 +26,7 @@ namespace com.csutil.tests {
         public void TestLoggingMethodStartOnly() {
             Stopwatch s = Log.MethodEntered("TestLoggingMethodStartOnly", "abc", 123);
             // ...
-            s.AssertUnderXms(40);
+            s.AssertUnderXms(80);
         }
 
         [Fact]

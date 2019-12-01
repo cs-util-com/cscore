@@ -32,7 +32,7 @@ namespace com.csutil.tests.ui {
                 dialogUi.GetComponent<MonoBehaviour>().ExecuteDelayed(() => {
                     Log.d("Now simulating the user clicking on the confirm button");
                     dialogUi.GetLinkMap().Get<Button>("ConfirmButton").onClick.Invoke();
-                }, delayInMsBeforeExecution: 1);
+                }, delayInMsBeforeExecution: 500);
             }
 
             Assert.IsFalse(dialog.data.dialogWasConfirmed, "Dialog was already confirmed!");
