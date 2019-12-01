@@ -9,12 +9,15 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
+using com.csutil;
 
 namespace com.csutil.tests.ui {
 
-    public class Ui9_AwaitDialog : MonoBehaviour { IEnumerator Start() { yield return new Ui9_AwaitDialogTests().ExampleUsage(); } }
+    public class Ui9_AwaitDialog : MonoBehaviour { IEnumerator Start() { yield return new Ui9_AwaitDialogTests() { simulateUserInput = false }.ExampleUsage(); } }
 
     public class Ui9_AwaitDialogTests {
+
+        public bool simulateUserInput = true;
 
         [UnityTest]
         public IEnumerator ExampleUsage() {
@@ -26,9 +29,16 @@ namespace com.csutil.tests.ui {
             userUiPresenter.targetView = dialogUi;
 
             var dialogData = new MyDialog1Data() { caption = "I am a dialog", message = "Some shorter text as a dialog message..." };
-            yield return userUiPresenter.LoadModelIntoView(dialogData).AsCoroutine();
 
-            Log.d("dialogData.dialogWasConfirmed=" + dialogData.dialogWasConfirmed);
+            if (simulateUserInput) {
+                dialogUi.GetComponent<MonoBehaviour>().ExecuteDelayed(() => {
+                    dialogUi.GetLinkMap().Get<Button>("ConfirmButton").onClick.Invoke();
+                }, delayInMsBeforeExecution: 1);
+            }
+
+            Assert.IsFalse(dialogData.dialogWasConfirmed, "Dialog was already confirmed!");
+            yield return userUiPresenter.LoadModelIntoView(dialogData).AsCoroutine();
+            Assert.IsTrue(dialogData.dialogWasConfirmed, "Dialog was not confirmed!");
 
         }
 
@@ -37,8 +47,6 @@ namespace com.csutil.tests.ui {
             public string caption;
             public string message;
             internal bool dialogWasConfirmed = false;
-
-            public override string ToString() { return JsonWriter.GetWriter().Write(this); }
         }
 
         public class MyDialog1Presenter : Presenter<MyDialog1Data> {
@@ -49,15 +57,10 @@ namespace com.csutil.tests.ui {
                 var links = targetView.GetLinkMap();
                 links.Get<Text>("Caption").text = dialogData.caption;
                 links.Get<Text>("Message").text = dialogData.message;
-                var cancelTask = links.Get<Button>("CancelButton").SetOnClickAction(delegate {
-                    dialogData.dialogWasConfirmed = false;
-                    targetView.Destroy();
-                });
-                var confirmTask = links.Get<Button>("ConfirmButton").SetOnClickAction(delegate {
-                    dialogData.dialogWasConfirmed = true;
-                    targetView.Destroy();
-                });
+                var cancelTask = links.Get<Button>("CancelButton").SetOnClickAction(delegate { dialogData.dialogWasConfirmed = false; });
+                var confirmTask = links.Get<Button>("ConfirmButton").SetOnClickAction(delegate { dialogData.dialogWasConfirmed = true; });
                 await Task.WhenAny(cancelTask, confirmTask);
+                targetView.Destroy();
                 Log.d("dialogWasConfirmed=" + dialogData.dialogWasConfirmed);
             }
 
