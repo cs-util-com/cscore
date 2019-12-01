@@ -33,6 +33,11 @@ namespace com.csutil {
         public string caption;
         public string message;
         public bool dialogWasConfirmed = false;
+
+        public ConfirmCancelDialog(string caption, string message) {
+            this.caption = caption;
+            this.message = message;
+        }
     }
 
     public class ConfirmCancelDialogPresenter : Presenter<ConfirmCancelDialog> {

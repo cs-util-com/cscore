@@ -22,10 +22,11 @@ namespace com.csutil.tests.ui {
         [UnityTest]
         public IEnumerator ExampleUsage() {
 
-            var dialog = new Dialog<ConfirmCancelDialog>(new ConfirmCancelDialog() { caption = "I am a dialog", message = "Some shorter text as a dialog message..." });
-            GameObject dialogUi = dialog.LoadDialogPrefab(new ConfirmCancelDialogPresenter(), "Dialogs/DefaultDialog1");
+            var dialog = new Dialog<ConfirmCancelDialog>(new ConfirmCancelDialog(caption: "I am a dialog", message: "I can be awaited in the " +
+                "code, the async or coroutine can wait for the user to make a decision (select cancel or confirm) before the code continues!"));
+            GameObject dialogUi = dialog.LoadDialogPrefab(new ConfirmCancelDialogPresenter(), dialogPrefabName: "Dialogs/DefaultDialog1");
             CanvasFinder.GetOrAddRootCanvas().gameObject.AddChild(dialogUi); // Add dialog UI in a canvas
-            Task waitForDialogTask = dialog.ShowDialogAsync();
+            Task waitForUserInputInDialogTask = dialog.ShowDialogAsync();
 
             if (simulateUserInput) {
                 dialogUi.GetComponent<MonoBehaviour>().ExecuteDelayed(() => {
@@ -35,7 +36,7 @@ namespace com.csutil.tests.ui {
             }
 
             Assert.IsFalse(dialog.data.dialogWasConfirmed, "Dialog was already confirmed!");
-            yield return waitForDialogTask.AsCoroutine();
+            yield return waitForUserInputInDialogTask.AsCoroutine(); // Wait until user clicks cancel or confirm
             Assert.IsTrue(dialog.data.dialogWasConfirmed, "Dialog was not confirmed!");
 
         }
