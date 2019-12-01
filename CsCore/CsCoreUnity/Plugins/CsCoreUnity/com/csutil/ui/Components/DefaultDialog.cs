@@ -9,34 +9,37 @@ using UnityEngine.UI;
 
 namespace com.csutil {
 
-    public class DefaultDialog {
+    public class Dialog<T> {
 
-        public string prefabName = "Dialogs/DefaultDialog1";
-        public DefaultDialogPresenter presenter;
+        private Presenter<T> presenter;
+        public T data;
+        public Dialog(T dialogData) { this.data = dialogData; }
 
-        public string caption;
-        public string message;
-        public bool dialogWasConfirmed = false;
-
-        public GameObject CreateDialogPrefab() {
-            presenter = new DefaultDialogPresenter();
-            presenter.targetView = ResourcesV2.LoadPrefab(prefabName);
+        public GameObject LoadDialogPrefab(Presenter<T> dialogPresenter, string dialogPrefabName) {
+            presenter = dialogPresenter;
+            presenter.targetView = ResourcesV2.LoadPrefab(dialogPrefabName);
             return presenter.targetView;
         }
 
         // Show the data in the dialog and get back the task that can be awaited (will finish when the user made a decision):
         public Task ShowDialogAsync() {
             if (presenter == null) { throw Log.e("dialog.CreateDialogPrefab() has to be called first"); }
-            return presenter.LoadModelIntoView(this);
+            return presenter.LoadModelIntoView(data);
         }
 
     }
 
-    public class DefaultDialogPresenter : Presenter<DefaultDialog> {
+    public class ConfirmCancelDialog {
+        public string caption;
+        public string message;
+        public bool dialogWasConfirmed = false;
+    }
+
+    public class ConfirmCancelDialogPresenter : Presenter<ConfirmCancelDialog> {
 
         public GameObject targetView { get; set; }
 
-        public async Task OnLoad(DefaultDialog dialogData) {
+        public async Task OnLoad(ConfirmCancelDialog dialogData) {
             // Setup the dialog UI (& fill it with the data):
             var links = targetView.GetLinkMap();
             links.Get<Text>("Caption").text = dialogData.caption;

@@ -22,9 +22,9 @@ namespace com.csutil.tests.ui {
         [UnityTest]
         public IEnumerator ExampleUsage() {
 
-            DefaultDialog dialog = new DefaultDialog() { caption = "I am a dialog", message = "Some shorter text as a dialog message..." };
-            GameObject dialogUi = dialog.CreateDialogPrefab();
-            CanvasFinder.GetOrAddRootCanvas().gameObject.AddChild(dialogUi); // Show dialog UI in a canvas
+            var dialog = new Dialog<ConfirmCancelDialog>(new ConfirmCancelDialog() { caption = "I am a dialog", message = "Some shorter text as a dialog message..." });
+            GameObject dialogUi = dialog.LoadDialogPrefab(new ConfirmCancelDialogPresenter(), "Dialogs/DefaultDialog1");
+            CanvasFinder.GetOrAddRootCanvas().gameObject.AddChild(dialogUi); // Add dialog UI in a canvas
             Task waitForDialogTask = dialog.ShowDialogAsync();
 
             if (simulateUserInput) {
@@ -34,9 +34,9 @@ namespace com.csutil.tests.ui {
                 }, delayInMsBeforeExecution: 1);
             }
 
-            Assert.IsFalse(dialog.dialogWasConfirmed, "Dialog was already confirmed!");
+            Assert.IsFalse(dialog.data.dialogWasConfirmed, "Dialog was already confirmed!");
             yield return waitForDialogTask.AsCoroutine();
-            Assert.IsTrue(dialog.dialogWasConfirmed, "Dialog was not confirmed!");
+            Assert.IsTrue(dialog.data.dialogWasConfirmed, "Dialog was not confirmed!");
 
         }
 
