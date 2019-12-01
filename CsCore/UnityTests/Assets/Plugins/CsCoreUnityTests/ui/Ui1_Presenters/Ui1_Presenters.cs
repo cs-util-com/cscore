@@ -61,7 +61,7 @@ namespace com.csutil.tests.ui {
                 links = targetView.GetLinkMap();
                 NameInputField().text = userToShow.userName;
                 AgeInputField().text = "" + userToShow.userAge;
-                links.Get<Button>("Save").SetOnClickAction(delegate { SaveViewIntoModel(userToShow); });
+                var saveTask = links.Get<Button>("Save").SetOnClickAction(delegate { SaveViewIntoModel(userToShow); });
             }
 
             private void SaveViewIntoModel(MyUserModel userToShow) {

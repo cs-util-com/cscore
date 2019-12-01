@@ -77,7 +77,7 @@ namespace com.csutil.tests.ui {
                 links = targetView.GetLinkMap();
                 NameUi().text = model.name;
                 AgeUi().text = "" + model.age;
-                links.Get<Button>("Save").SetOnClickAction(delegate { UpdateUser(model); });
+                await links.Get<Button>("Save").SetOnClickAction(delegate { UpdateUser(model); });
             }
 
             public void UpdateUser(MyUser3 targetUser) {
