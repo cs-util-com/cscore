@@ -129,7 +129,7 @@ MonoBehaviour:
   ShapeProperties:
     FillColor:
       serializedVersion: 2
-      rgba: 4294967295
+      rgba: 4294506744
     DrawFill: 1
     DrawFillShadow: 1
     DrawOutline: 0
