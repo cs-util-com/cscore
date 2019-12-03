@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 3621383781264517863}
   - component: {fileID: 586932480979696524}
   - component: {fileID: 1393461139489519904}
+  - component: {fileID: 6928010300718020943}
   m_Layer: 5
   m_Name: DefaultButton
   m_TagString: Untagged
@@ -185,6 +186,26 @@ MonoBehaviour:
   AntiAliasingProperties:
     AntiAliasing: 0
   Sprite: {fileID: 0}
+--- !u!114 &6928010300718020943
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1030888160160964491}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IgnoreLayout: 0
+  m_MinWidth: -1
+  m_MinHeight: 32
+  m_PreferredWidth: -1
+  m_PreferredHeight: -1
+  m_FlexibleWidth: -1
+  m_FlexibleHeight: -1
+  m_LayoutPriority: 1
 --- !u!1 &8121252338202999859
 GameObject:
   m_ObjectHideFlags: 0
