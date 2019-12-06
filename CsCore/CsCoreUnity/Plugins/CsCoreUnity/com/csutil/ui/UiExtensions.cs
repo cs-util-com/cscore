@@ -31,8 +31,7 @@ namespace com.csutil {
                 var originTrace = new StackTrace();
                 self.onClick.AddListener(() => {
                     EventBus.instance.Publish(UiEvents.BUTTON_CLICKED, self);
-                    try { tcs.TrySetResult(onClickFunc(self.gameObject)); }
-                    catch (Exception e) { Log.e(e + " at " + originTrace); tcs.TrySetException(e); }
+                    try { tcs.TrySetResult(onClickFunc(self.gameObject)); } catch (Exception e) { Log.e(e + " at " + originTrace); tcs.TrySetException(e); }
                 });
             }
             return tcs.Task;
@@ -51,8 +50,12 @@ namespace com.csutil {
                 var oldIsOn = self.isOn;
                 self.onValueChanged.AddListener((newIsOn) => {
                     if (oldIsOn == newIsOn) { return; }
-                    EventBus.instance.Publish(UiEvents.TOGGLE_CHANGED, self);
-                    if (!onValueChanged(newIsOn)) { self.isOn = oldIsOn; } else { oldIsOn = newIsOn; }
+                    if (!onValueChanged(newIsOn)) { // Change was rejected, revert UI:
+                        self.isOn = oldIsOn;
+                    } else { // Change was accepted:
+                        oldIsOn = newIsOn;
+                        EventBus.instance.Publish(UiEvents.TOGGLE_CHANGED, self, newIsOn);
+                    }
                 });
             }
         }
@@ -70,8 +73,12 @@ namespace com.csutil {
                 var oldText = self.text;
                 self.onValueChanged.AddListener((newText) => {
                     if (newText == oldText) { return; }
-                    EventBus.instance.Publish(UiEvents.INPUTFIELD_CHANGED, self);
-                    if (!onValueChanged(newText)) { self.text = oldText; } else { oldText = newText; }
+                    if (!onValueChanged(newText)) {
+                        self.text = oldText;
+                    } else {
+                        oldText = newText;
+                        EventBus.instance.Publish(UiEvents.INPUTFIELD_CHANGED, self, newText);
+                    }
                 });
             }
         }
@@ -79,6 +86,36 @@ namespace com.csutil {
         public static void SelectV2(this InputField self) {
             self.Select();
             self.ActivateInputField();
+        }
+
+    }
+
+    public static class AppFlowUiExtensions {
+
+        public static void ActivateViewStackTracking(this IAppFlow self) {
+            EventBus.instance.Subscribe(self, UiEvents.SHOW_VIEW, (GameObject view) => {
+                self.TrackEvent(AppFlow.catView, UiEvents.SHOW_VIEW + "_" + view, view);
+            });
+            EventBus.instance.Subscribe(self, UiEvents.SWITCH_BACK_TO_LAST_VIEW, (string currentViewName, GameObject lastView) => {
+                self.TrackEvent(AppFlow.catView, UiEvents.SWITCH_BACK_TO_LAST_VIEW + "_" + currentViewName + "->" + lastView, lastView);
+            });
+            EventBus.instance.Subscribe(self, UiEvents.SWITCH_TO_NEXT_VIEW, (GameObject currentView, GameObject nextView) => {
+                self.TrackEvent(AppFlow.catView, UiEvents.SWITCH_TO_NEXT_VIEW + "_" + currentView + "->" + nextView, currentView, nextView);
+            });
+        }
+
+        public static void ActivateUiEventTracking(this IAppFlow self) {
+            EventBus.instance.Subscribe(self, UiEvents.BUTTON_CLICKED, (GameObject button) => {
+                self.TrackEvent(AppFlow.catUi, UiEvents.BUTTON_CLICKED + "_" + button, button);
+            });
+            EventBus.instance.Subscribe(self, UiEvents.TOGGLE_CHANGED, (GameObject toggle, bool isChecked) => {
+                self.TrackEvent(AppFlow.catUi, UiEvents.TOGGLE_CHANGED + "_" + toggle + "_" + isChecked, toggle, isChecked);
+            });
+            Action<GameObject, string> aa = (GameObject input, string newText) => {
+                self.TrackEvent(AppFlow.catUi, UiEvents.INPUTFIELD_CHANGED + "_" + input + "_" + newText, input, newText);
+            };
+            // TODO UiEvents.INPUTFIELD_CHANGED would produce too many events?
+            // EventBus.instance.Subscribe(self, UiEvents.INPUTFIELD_CHANGED, aa);
         }
 
     }

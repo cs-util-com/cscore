@@ -22,7 +22,9 @@ namespace com.csutil.ui {
         /// <returns> A task that can be awaited on, that returns the fully setup presenter </returns>
         public static async Task<T> LoadModelIntoView<T>(this Presenter<T> self, T model) {
             AssertV2.IsNotNull(self.targetView, "presenter.targetView");
+            AppFlow.TrackEvent(AppFlow.catPresenter, "Load-start:" + self + "_" + model, self, model);
             await self.OnLoad(model);
+            AppFlow.TrackEvent(AppFlow.catPresenter, "Load-done:" + self + "_" + model, self, model);
             return model;
         }
 

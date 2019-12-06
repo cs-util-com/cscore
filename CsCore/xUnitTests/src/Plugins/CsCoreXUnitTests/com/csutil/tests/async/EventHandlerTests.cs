@@ -14,7 +14,7 @@ namespace com.csutil.tests.async {
         [Fact]
         public async Task ExponentialBackoffExample1() {
             Stopwatch timer = Stopwatch.StartNew();
-            var finalTimingResult = await TaskV2.TryWithExponentialBackoff<long>(async () => {
+            long finalTimingResult = await TaskV2.TryWithExponentialBackoff<long>(async () => {
                 await TaskV2.Delay(5);
                 Log.d("Task exec at " + timer.ElapsedMilliseconds);
                 // In the first second of the test simulate errors:

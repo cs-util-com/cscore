@@ -9,10 +9,10 @@ namespace com.csutil.ui {
         }
 
         public GameObject ShowView(GameObject gameObject, GameObject newView, bool hideCurrentView = true) {
-            var v = AddView(newView);
-            EventBus.instance.Publish(UiEvents.SHOW_VIEW, v);
+            var view = AddView(newView);
+            EventBus.instance.Publish(UiEvents.SHOW_VIEW, view);
             if (hideCurrentView) { GetRootFor(gameObject).SetActive(false); }
-            return v;
+            return view;
         }
 
         private GameObject AddView(GameObject newView) { return gameObject.AddChild(newView); }
@@ -24,7 +24,7 @@ namespace com.csutil.ui {
             if (currentIndex > 0) {
                 var lastView = transform.GetChild(currentIndex - 1).gameObject;
                 lastView.SetActive(true);
-                EventBus.instance.Publish(UiEvents.SWITCH_BACK_TO_LAST_VIEW, lastView);
+                EventBus.instance.Publish(UiEvents.SWITCH_BACK_TO_LAST_VIEW, "" + currentView, lastView);
             }
             if (currentIndex == 0 && !destroyFinalView) { return false; }
             return currentView.Destroy();
@@ -37,7 +37,7 @@ namespace com.csutil.ui {
             if (currentIndex < transform.childCount - 1) {
                 var nextView = transform.GetChild(currentIndex + 1).gameObject;
                 nextView.SetActive(true);
-                EventBus.instance.Publish(UiEvents.SWITCH_TO_NEXT_VIEW, nextView);
+                EventBus.instance.Publish(UiEvents.SWITCH_TO_NEXT_VIEW, currentView, nextView);
             }
             if (hideCurrentView) { currentView.SetActive(false); }
             return true;

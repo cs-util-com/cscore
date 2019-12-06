@@ -89,12 +89,12 @@ namespace com.csutil.tests.ui {
         [Test]
         public void TestLinkMaps() {
             bool prefabLoadedEventReceived = false;
-            EventBus.instance.Subscribe(new object(), IoEvents.PREFAB_LOADED, () => { prefabLoadedEventReceived = true; });
+            EventBus.instance.Subscribe(new object(), AppFlow.catPrefab, () => { prefabLoadedEventReceived = true; });
             GameObject prefab = ResourcesV2.LoadPrefab("ExamplePrefab1.prefab");
             Assert.IsTrue(prefabLoadedEventReceived);
 
             bool linkMapCreationEventReceived = false;
-            EventBus.instance.Subscribe(new object(), LinkingEvents.LINK_MAP_CREATED, () => { linkMapCreationEventReceived = true; });
+            EventBus.instance.Subscribe(new object(), AppFlow.catLinked, () => { linkMapCreationEventReceived = true; });
             var links = prefab.GetLinkMap();
             Assert.IsTrue(linkMapCreationEventReceived);
 
