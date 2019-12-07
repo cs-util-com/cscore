@@ -7,9 +7,9 @@ namespace com.csutil.ui {
 
     public static class UiEvents {
 
-        public const string INPUTFIELD_CHANGED = "InputField changed";
-        public const string TOGGLE_CHANGED = "Toggle changed";
-        public const string BUTTON_CLICKED = "Button clicked";
+        public const string INPUTFIELD_CHANGED = "InputFieldChanged";
+        public const string TOGGLE_CHANGED = "ToggleChanged";
+        public const string BUTTON_CLICKED = "ButtonClick";
 
         public const string SHOW_VIEW = "ShowView";
         public const string SWITCH_BACK_TO_LAST_VIEW = "SwitchBackToLastView";

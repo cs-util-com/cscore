@@ -30,6 +30,7 @@ namespace com.csutil {
     }
 
     public class ConfirmCancelDialog {
+
         public string caption;
         public string message;
         public bool dialogWasConfirmed = false;
@@ -38,6 +39,14 @@ namespace com.csutil {
             this.caption = caption;
             this.message = message;
         }
+
+        public static Task<ConfirmCancelDialog> Show(string caption, string message) {
+            var dialog = new Dialog<ConfirmCancelDialog>(new ConfirmCancelDialog(caption, message));
+            GameObject dialogUi = dialog.LoadDialogPrefab(new ConfirmCancelDialogPresenter(), dialogPrefabName: "Dialogs/DefaultDialog1");
+            CanvasFinder.GetOrAddRootCanvas().gameObject.AddChild(dialogUi); // Add dialog UI in a canvas
+            return dialog.ShowDialogAsync();
+        }
+
     }
 
     public class ConfirmCancelDialogPresenter : Presenter<ConfirmCancelDialog> {

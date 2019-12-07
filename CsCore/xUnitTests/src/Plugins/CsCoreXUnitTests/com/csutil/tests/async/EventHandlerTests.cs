@@ -110,6 +110,40 @@ namespace com.csutil.tests.async {
         }
 
         [Fact]
+        public async Task TestThrottledDebounce3() {
+            int counter = 0;
+            bool myStringParamWasBad = false;
+            EventHandler<string> action = (_, myStringParam) => {
+                Log.d("action callback with old counter=" + counter);
+                Interlocked.Increment(ref counter);
+                Log.d("... new counter=" + counter);
+                if (myStringParam == "bad") { myStringParamWasBad = true; }
+            };
+            var t = 250;
+            var throttledAction = action.AsThrottledDebounce(delayInMs: t * 2, skipFirstEvent: true);
+            throttledAction(this, "bad");
+            await TaskV2.Delay(t);
+            Assert.Equal(0, counter);
+            Assert.False(myStringParamWasBad);
+            throttledAction(this, "bad");
+            await TaskV2.Delay(t);
+            Assert.Equal(0, counter);
+            Assert.False(myStringParamWasBad);
+            throttledAction(this, "bad");
+            await TaskV2.Delay(t);
+            Assert.Equal(0, counter);
+            Assert.False(myStringParamWasBad);
+            throttledAction(this, "bad");
+            await TaskV2.Delay(t);
+            Assert.Equal(0, counter);
+            Assert.False(myStringParamWasBad);
+            throttledAction(this, "good");
+            await TaskV2.Delay(t * 4);
+            Assert.Equal(1, counter);
+            Assert.False(myStringParamWasBad);
+        }
+
+        [Fact]
         public async Task TestTaskV2() {
 
             Log.d("Now testing TaskV2.Run");

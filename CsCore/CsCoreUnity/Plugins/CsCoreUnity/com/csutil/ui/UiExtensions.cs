@@ -83,6 +83,15 @@ namespace com.csutil {
             }
         }
 
+        public static void AddOnValueChangedActionThrottled(this InputField self, Action<string> onValueChanged, double delayInMs = 2000) {
+            EventHandler<string> action = (input, newText) => { onValueChanged(newText); };
+            var throttledAction = action.AsThrottledDebounce(delayInMs, skipFirstEvent: true);
+            self.AddOnValueChangedAction((newText) => {
+                throttledAction(self, newText);
+                return true;
+            });
+        }
+
         public static void SelectV2(this InputField self) {
             self.Select();
             self.ActivateInputField();
@@ -107,12 +116,12 @@ namespace com.csutil {
         public static void ActivateUiEventTracking(this IAppFlow self) {
 
             // Button UI tracking:
-            EventBus.instance.Subscribe(self, UiEvents.BUTTON_CLICKED, (GameObject button) => {
+            EventBus.instance.Subscribe(self, UiEvents.BUTTON_CLICKED, (Button button) => {
                 self.TrackEvent(AppFlow.catUi, UiEvents.BUTTON_CLICKED + "_" + button, button);
             });
 
             // Toggle UI tracking:
-            EventBus.instance.Subscribe(self, UiEvents.TOGGLE_CHANGED, (GameObject toggle, bool isChecked) => {
+            EventBus.instance.Subscribe(self, UiEvents.TOGGLE_CHANGED, (Toggle toggle, bool isChecked) => {
                 self.TrackEvent(AppFlow.catUi, UiEvents.TOGGLE_CHANGED + "_" + toggle + "_" + isChecked, toggle, isChecked);
             });
 
@@ -120,8 +129,8 @@ namespace com.csutil {
             EventHandler<string> action = (input, newText) => {
                 self.TrackEvent(AppFlow.catUi, UiEvents.INPUTFIELD_CHANGED + "_" + input + "_" + newText, input, newText);
             };
-            var delayedAction = action.AsThrottledDebounce(delayInMs: 2000);
-            EventBus.instance.Subscribe(self, UiEvents.INPUTFIELD_CHANGED, (GameObject input, string newText) => {
+            var delayedAction = action.AsThrottledDebounce(delayInMs: 2000, skipFirstEvent: true);
+            EventBus.instance.Subscribe(self, UiEvents.INPUTFIELD_CHANGED, (InputField input, string newText) => {
                 delayedAction(input, newText);
             });
         }

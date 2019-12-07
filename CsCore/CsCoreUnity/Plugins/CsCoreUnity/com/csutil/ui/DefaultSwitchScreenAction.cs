@@ -40,8 +40,10 @@ namespace com.csutil.ui.elements {
 
         private bool TrySwitchScreen() {
             switch (switchDirection) {
-                case SwitchDirection.backwards: return gameObject.GetViewStack().SwitchBackToLastView(gameObject, destroyViewStackWhenLastScreenReached);
-                case SwitchDirection.forwards: return gameObject.GetViewStack().SwitchToNextView(gameObject, hideCurrentScreen);
+                case SwitchDirection.backwards:
+                    return gameObject.GetViewStack().SwitchBackToLastView(gameObject, destroyViewStackWhenLastScreenReached);
+                case SwitchDirection.forwards:
+                    return gameObject.GetViewStack().SwitchToNextView(gameObject, hideCurrentScreen);
                 case SwitchDirection.loadNextScreenViaPrefab:
                     return gameObject.GetViewStack().ShowView(gameObject, nextScreenPrefabName, hideCurrentScreen) != null;
                 default: return false;
