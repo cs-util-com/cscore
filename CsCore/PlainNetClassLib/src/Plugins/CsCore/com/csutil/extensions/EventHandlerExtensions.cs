@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,23 +14,25 @@ namespace com.csutil {
         /// every call in between that is below the passed millisecond threshold is ignored
         /// </summary>
         public static EventHandler<T> AsThrottledDebounce<T>(this EventHandler<T> self, double delayInMs, bool skipFirstEvent = false) {
-            bool currentlyThrottling = false;
-            bool needsFinalCall = false;
             object threadLock = new object();
             T latestEventArgs;
+            Stopwatch s = Stopwatch.StartNew();
+            bool triggerFirstEvent = !skipFirstEvent;
             Func<object, T, Task> asyncEventHandler = async (sender, eventArgs) => {
                 lock (threadLock) {
                     latestEventArgs = eventArgs;
-                    if (currentlyThrottling) { needsFinalCall = true; return; }
-                    currentlyThrottling = true;
-                    if (!skipFirstEvent) { self(sender, latestEventArgs); } else { needsFinalCall = true; }
-                }
-                await TaskV2.Delay(TimeSpan.FromMilliseconds(delayInMs));
-                lock (threadLock) {
-                    if (needsFinalCall) {
+                    s.Restart();
+                    if (triggerFirstEvent) {
+                        triggerFirstEvent = false;
                         try { self(sender, latestEventArgs); } catch (Exception e) { Log.e(e); }
-                        currentlyThrottling = false;
-                        needsFinalCall = false;
+                    }
+                }
+                await TaskV2.Delay(TimeSpan.FromMilliseconds(delayInMs * 1.1f));
+                lock (threadLock) {
+                    if (s.ElapsedMilliseconds >= delayInMs) {
+                        s.Restart();
+                        try { self(sender, latestEventArgs); } catch (Exception e) { Log.e(e); }
+                        if (!skipFirstEvent) { triggerFirstEvent = true; }
                     }
                 }
             };
