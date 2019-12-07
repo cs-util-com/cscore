@@ -18,6 +18,19 @@ namespace com.csutil.model.immutable {
             };
         }
 
+        /// <summary> This middleware will automatically log all dispatched actions to the store to the AppFlow logic to track them there </summary>
+        public static Middleware<T> NewAppFlowTrackerMiddleware<T>(object extraArgument = null) {
+            return (IDataStore<T> store) => {
+                return (Dispatcher innerDispatcher) => {
+                    Dispatcher outerDispatcher = (action) => {
+                        AppFlow.TrackEvent(AppFlow.catMutation, "" + action, action);
+                        return innerDispatcher(action);
+                    };
+                    return outerDispatcher;
+                };
+            };
+        }
+
         public static Middleware<T> NewLoggingMiddleware<T>() {
             return (store) => {
                 Log.MethodEntered("NewLoggingMiddleware", "store =" + store);

@@ -105,17 +105,25 @@ namespace com.csutil {
         }
 
         public static void ActivateUiEventTracking(this IAppFlow self) {
+
+            // Button UI tracking:
             EventBus.instance.Subscribe(self, UiEvents.BUTTON_CLICKED, (GameObject button) => {
                 self.TrackEvent(AppFlow.catUi, UiEvents.BUTTON_CLICKED + "_" + button, button);
             });
+
+            // Toggle UI tracking:
             EventBus.instance.Subscribe(self, UiEvents.TOGGLE_CHANGED, (GameObject toggle, bool isChecked) => {
                 self.TrackEvent(AppFlow.catUi, UiEvents.TOGGLE_CHANGED + "_" + toggle + "_" + isChecked, toggle, isChecked);
             });
-            Action<GameObject, string> aa = (GameObject input, string newText) => {
+
+            // InputField UI tracking:
+            EventHandler<string> action = (input, newText) => {
                 self.TrackEvent(AppFlow.catUi, UiEvents.INPUTFIELD_CHANGED + "_" + input + "_" + newText, input, newText);
             };
-            // TODO UiEvents.INPUTFIELD_CHANGED would produce too many events?
-            // EventBus.instance.Subscribe(self, UiEvents.INPUTFIELD_CHANGED, aa);
+            var delayedAction = action.AsThrottledDebounce(delayInMs: 2000);
+            EventBus.instance.Subscribe(self, UiEvents.INPUTFIELD_CHANGED, (GameObject input, string newText) => {
+                delayedAction(input, newText);
+            });
         }
 
     }
