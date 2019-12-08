@@ -42,7 +42,7 @@ namespace com.csutil.tests.ui {
             Assert.IsTrue(view2.activeInHierarchy);
 
             // Now test SwitchBackToLastView plus the events the view stack sends out:
-            EventBus.instance.Subscribe(this, UiEvents.SWITCH_BACK_TO_LAST_VIEW, (GameObject lastView) => {
+            EventBus.instance.Subscribe(this, UiEvents.SWITCH_BACK_TO_LAST_VIEW, (string currentViewName, GameObject lastView) => {
                 Assert.AreSame(view2, lastView);
                 EventBus.instance.Unsubscribe(this, UiEvents.SWITCH_BACK_TO_LAST_VIEW);
             });

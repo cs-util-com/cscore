@@ -20,6 +20,8 @@ namespace com.csutil.ui.elements {
         public bool destroyViewStackWhenLastScreenReached = false;
         /// <summary> If false the current active screen will not be hidden and the new one shown on top </summary>
         public bool hideCurrentScreen = true;
+        /// <summary> If true the current view on the stack will be set to inactive instead of destroying it </summary>
+        public bool hideNotDestroyCurrentViewWhenGoingBackwards = false;
 
         private void Start() {
             var b = GetComponent<Button>();
@@ -41,7 +43,7 @@ namespace com.csutil.ui.elements {
         private bool TrySwitchScreen() {
             switch (switchDirection) {
                 case SwitchDirection.backwards:
-                    return gameObject.GetViewStack().SwitchBackToLastView(gameObject, destroyViewStackWhenLastScreenReached);
+                    return gameObject.GetViewStack().SwitchBackToLastView(gameObject, destroyViewStackWhenLastScreenReached, hideNotDestroyCurrentViewWhenGoingBackwards);
                 case SwitchDirection.forwards:
                     return gameObject.GetViewStack().SwitchToNextView(gameObject, hideCurrentScreen);
                 case SwitchDirection.loadNextScreenViaPrefab:

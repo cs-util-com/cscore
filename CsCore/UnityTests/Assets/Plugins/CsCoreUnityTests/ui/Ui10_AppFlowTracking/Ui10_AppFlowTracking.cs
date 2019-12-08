@@ -43,41 +43,48 @@ namespace com.csutil.tests.ui {
         public IEnumerator ExampleUsage() {
             setupImmutableDatastore();
 
-            GetStore().Dispatch(new ActionSetBool1() { newB = true });
-            GetStore().Dispatch(new ActionSetString1 { newS = "abc" });
-
-            Assert.AreEqual("abc", GetStore().GetState().string1);
-            Assert.AreEqual(true, GetStore().GetState().bool1);
+            var store = MyDataModel.GetStore();
+            Assert.NotNull(store);
+            store.Dispatch(new ActionSetBool1() { newB = true });
+            store.Dispatch(new ActionSetString1 { newS = "abc" });
+            Assert.AreEqual("abc", store.GetState().subSection1.string1);
+            Assert.AreEqual(true, store.GetState().subSection1.bool1);
 
             if (presenter != null) {
-                yield return presenter.LoadModelIntoView(GetStore().GetState()).AsCoroutine();
+                yield return presenter.LoadModelIntoView(store.GetState().subSection1).AsCoroutine();
             }
 
             yield return null;
         }
 
-        private IDataStore<MyDataModel> GetStore() { return IoC.inject.Get<IDataStore<MyDataModel>>(this); }
-
         private void setupImmutableDatastore() {
             Log.MethodEntered();
             var log = Middlewares.NewAppFlowTrackerMiddleware<MyDataModel>();
-            IDataStore<MyDataModel> store = new DataStore<MyDataModel>(MainReducer, new MyDataModel(string1: "", bool1: false), log);
-            IoC.inject.SetSingleton(store);
+            var store = new DataStore<MyDataModel>(MainReducer, new MyDataModel(new MyDataModel.SubSection1(string1: "", bool1: false)), log);
+            IoC.inject.SetSingleton<IDataStore<MyDataModel>>(store);
         }
 
         public class MyDataModel {
-            public readonly bool bool1;
-            public readonly string string1;
-            public MyDataModel(string string1, bool bool1) {
-                this.string1 = string1;
-                this.bool1 = bool1;
+
+            public static IDataStore<MyDataModel> GetStore() { return IoC.inject.Get<IDataStore<MyDataModel>>(null); }
+
+            public readonly SubSection1 subSection1;
+            public MyDataModel(SubSection1 subSection1) { this.subSection1 = subSection1; }
+
+            public class SubSection1 {
+                public readonly bool bool1;
+                public readonly string string1;
+                public SubSection1(string string1, bool bool1) {
+                    this.string1 = string1;
+                    this.bool1 = bool1;
+                }
             }
         }
 
-        public class MyDataModelPresenter : Presenter<MyDataModel> {
+        public class MyDataModelPresenter : Presenter<MyDataModel.SubSection1> {
             public GameObject targetView { get; set; }
 
-            public Task OnLoad(MyDataModel model) {
+            public Task OnLoad(MyDataModel.SubSection1 model) {
                 var map = targetView.GetLinkMap();
                 map.Get<InputField>("string1").text = model.string1;
                 map.Get<InputField>("string1").SetOnValueChangedAction((newVal) => {
@@ -87,6 +94,9 @@ namespace com.csutil.tests.ui {
                 map.Get<Toggle>("bool1").isOn = model.bool1;
                 map.Get<Toggle>("bool1").SetOnValueChangedAction((newVal) => {
                     return true;
+                });
+                map.Get<Button>("ToggleBool1").SetOnClickAction(delegate {
+                    MyDataModel.GetStore().Dispatch(new ActionSetBool1() { newB = !model.bool1 });
                 });
                 map.Get<Button>("ShowDialog").SetOnClickAction(async (b) => {
                     var dialog = await ConfirmCancelDialog.Show("I am a dialog", "Current model.string1=" + model.string1);
@@ -101,8 +111,15 @@ namespace com.csutil.tests.ui {
         private class ActionSetBool1 { public bool newB; }
 
         private MyDataModel MainReducer(MyDataModel prev, object action) {
-            if (action is ActionSetBool1 a1) { return new MyDataModel(prev.string1, a1.newB); }
-            if (action is ActionSetString1 a2) { return new MyDataModel(a2.newS, prev.bool1); }
+            bool changed = false;
+            var subSection1 = prev.subSection1.Mutate(action, MyDataModelSubSection1Reducer, ref changed);
+            if (changed) { return new MyDataModel(subSection1); }
+            return prev;
+        }
+
+        private MyDataModel.SubSection1 MyDataModelSubSection1Reducer(MyDataModel.SubSection1 prev, object action) {
+            if (action is ActionSetBool1 a1) { return new MyDataModel.SubSection1(prev.string1, a1.newB); }
+            if (action is ActionSetString1 a2) { return new MyDataModel.SubSection1(a2.newS, prev.bool1); }
             return prev;
         }
 
