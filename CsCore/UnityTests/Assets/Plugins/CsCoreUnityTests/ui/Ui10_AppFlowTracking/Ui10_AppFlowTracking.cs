@@ -51,7 +51,7 @@ namespace com.csutil.tests.ui {
             Assert.AreEqual(true, store.GetState().subSection1.bool1);
 
             if (presenter != null) {
-                yield return presenter.LoadModelIntoView(store.GetState().subSection1).AsCoroutine();
+                yield return presenter.LoadModelIntoView(store).AsCoroutine();
             }
 
             yield return null;
@@ -81,25 +81,34 @@ namespace com.csutil.tests.ui {
             }
         }
 
-        public class MyDataModelPresenter : Presenter<MyDataModel.SubSection1> {
+        public class MyDataModelPresenter : Presenter<IDataStore<MyDataModel>> {
+
             public GameObject targetView { get; set; }
 
-            public Task OnLoad(MyDataModel.SubSection1 model) {
+            public Task OnLoad(IDataStore<MyDataModel> store) {
                 var map = targetView.GetLinkMap();
-                map.Get<InputField>("string1").text = model.string1;
-                map.Get<InputField>("string1").SetOnValueChangedAction((newVal) => {
-                    if (newVal.IsNullOrEmpty()) { return false; }
+
+                var string1 = map.Get<InputField>("string1");
+                string1.SubscribeToStateChanges(store, state => state.subSection1.string1, newVal => string1.text = newVal);
+                string1.SetOnValueChangedActionThrottled((newVal) => {
+                    store.Dispatch(new ActionSetString1() { newS = newVal });
+                });
+
+                var bool1 = map.Get<Toggle>("bool1");
+                bool1.SubscribeToStateChanges(store, state => state.subSection1.bool1, newVal => bool1.isOn = newVal);
+                bool1.SetOnValueChangedAction((newVal) => {
+                    store.Dispatch(new ActionSetBool1() { newB = newVal });
                     return true;
                 });
-                map.Get<Toggle>("bool1").isOn = model.bool1;
-                map.Get<Toggle>("bool1").SetOnValueChangedAction((newVal) => {
-                    return true;
-                });
+
                 map.Get<Button>("ToggleBool1").SetOnClickAction(delegate {
-                    MyDataModel.GetStore().Dispatch(new ActionSetBool1() { newB = !model.bool1 });
+                    store.Dispatch(new ActionSetBool1() { newB = !store.GetState().subSection1.bool1 });
+                });
+                map.Get<Button>("SetString1").SetOnClickAction(delegate {
+                    store.Dispatch(new ActionSetString1() { newS = "abc" });
                 });
                 map.Get<Button>("ShowDialog").SetOnClickAction(async (b) => {
-                    var dialog = await ConfirmCancelDialog.Show("I am a dialog", "Current model.string1=" + model.string1);
+                    var dialog = await ConfirmCancelDialog.Show("I am a dialog", "Current model.string1=" + store.GetState().subSection1.string1);
                     Log.d("Dialog was confirmed: " + dialog.dialogWasConfirmed);
                 });
                 return Task.CompletedTask;

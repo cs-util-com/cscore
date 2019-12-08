@@ -1,4 +1,5 @@
-﻿using com.csutil.ui;
+﻿using com.csutil.model.immutable;
+using com.csutil.ui;
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -83,6 +84,14 @@ namespace com.csutil {
             }
         }
 
+        public static void SetOnValueChangedActionThrottled(this InputField self, Action<string> onValueChanged, double delayInMs = 2000) {
+            if (self.onValueChanged != null && self.onValueChanged.GetPersistentEventCount() > 0) {
+                Log.w("Overriding old onValueChanged listener for input field " + self, self.gameObject);
+            }
+            self.onValueChanged = new InputField.OnChangeEvent(); // clear previous onValueChanged listeners
+            AddOnValueChangedActionThrottled(self, onValueChanged, delayInMs);
+        }
+
         public static void AddOnValueChangedActionThrottled(this InputField self, Action<string> onValueChanged, double delayInMs = 2000) {
             EventHandler<string> action = (input, newText) => { onValueChanged(newText); };
             var throttledAction = action.AsThrottledDebounce(delayInMs, skipFirstEvent: true);
@@ -95,6 +104,19 @@ namespace com.csutil {
         public static void SelectV2(this InputField self) {
             self.Select();
             self.ActivateInputField();
+        }
+
+        public static void SubscribeToStateChanges<T, V>(this Behaviour self, IDataStore<T> store, Func<T, V> getSubState, Action<V> updateUi) {
+            updateUi(getSubState(store.GetState()));
+            Action listener = null;
+            listener = store.AddStateChangeListener(getSubState, newVal => {
+                Log.d("StateChangeRelevantForBehaviour=" + self, "newVal=" + newVal); // TODO remove me
+                if (self.IsDestroyed()) {
+                    store.onStateChanged -= listener;
+                } else if (self.isActiveAndEnabled) {
+                    updateUi(newVal);
+                }
+            });
         }
 
     }

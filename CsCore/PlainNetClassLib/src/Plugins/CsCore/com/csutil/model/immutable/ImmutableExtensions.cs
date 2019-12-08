@@ -16,7 +16,8 @@ namespace com.csutil.model.immutable {
             var oldState = getSubState(s.GetState());
             Action newListener = () => {
                 var newState = getSubState(s.GetState());
-                if (!Object.ReferenceEquals(oldState, newState)) {
+                bool isPrimitive = typeof(S).IsPrimitive;
+                if ((!isPrimitive && !Object.ReferenceEquals(oldState, newState)) || (isPrimitive && !Equals(oldState, newState))) {
                     onChanged(newState);
                     oldState = newState;
                 }
