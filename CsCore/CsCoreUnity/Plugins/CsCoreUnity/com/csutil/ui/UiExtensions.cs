@@ -4,6 +4,7 @@ using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace com.csutil {
@@ -51,6 +52,8 @@ namespace com.csutil {
                 var oldIsOn = self.isOn;
                 self.onValueChanged.AddListener((newIsOn) => {
                     if (oldIsOn == newIsOn) { return; }
+                    // Ignore event event if it was triggered through code, only fire for actual user input:
+                    if (!self.ChangeWasTriggeredByUserThroughEventSystem()) { return; }
                     if (!onValueChanged(newIsOn)) { // Change was rejected, revert UI:
                         self.isOn = oldIsOn;
                     } else { // Change was accepted:
@@ -59,6 +62,10 @@ namespace com.csutil {
                     }
                 });
             }
+        }
+
+        public static bool ChangeWasTriggeredByUserThroughEventSystem(this Component self) {
+            return EventSystem.current.currentSelectedGameObject == self.gameObject;
         }
 
         public static void SetOnValueChangedAction(this InputField self, Func<string, bool> onValueChanged) {
@@ -74,6 +81,8 @@ namespace com.csutil {
                 var oldText = self.text;
                 self.onValueChanged.AddListener((newText) => {
                     if (newText == oldText) { return; }
+                    // Ignore event event if it was triggered through code, only fire for actual user input:
+                    if (!self.ChangeWasTriggeredByUserThroughEventSystem()) { return; }
                     if (!onValueChanged(newText)) {
                         self.text = oldText;
                     } else {
