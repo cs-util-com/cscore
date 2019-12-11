@@ -134,10 +134,10 @@ namespace com.csutil {
 
         public static void ActivateViewStackTracking(this IAppFlow self) {
             EventBus.instance.Subscribe(self, UiEvents.SHOW_VIEW, (GameObject view) => {
-                self.TrackEvent(AppFlow.catView, UiEvents.SHOW_VIEW + "_" + view, view);
+                self.TrackEvent(AppFlow.catView, UiEvents.SHOW_VIEW + "_" + view.name, view);
             });
             EventBus.instance.Subscribe(self, UiEvents.SWITCH_BACK_TO_LAST_VIEW, (string currentViewName, GameObject lastView) => {
-                self.TrackEvent(AppFlow.catView, UiEvents.SWITCH_BACK_TO_LAST_VIEW + "_" + currentViewName + "->" + lastView, lastView);
+                self.TrackEvent(AppFlow.catView, UiEvents.SWITCH_BACK_TO_LAST_VIEW + "_" + currentViewName + "->" + lastView.name, lastView);
             });
             EventBus.instance.Subscribe(self, UiEvents.SWITCH_TO_NEXT_VIEW, (GameObject currentView, GameObject nextView) => {
                 self.TrackEvent(AppFlow.catView, UiEvents.SWITCH_TO_NEXT_VIEW + "_" + currentView.name + "->" + nextView.name, currentView, nextView);
@@ -158,9 +158,9 @@ namespace com.csutil {
 
             // InputField UI tracking:
             EventHandler<string> action = (input, newText) => {
-                self.TrackEvent(AppFlow.catUi, UiEvents.INPUTFIELD_CHANGED + "_" + input + "_" + newText, input, newText);
+                self.TrackEvent(AppFlow.catUi, UiEvents.INPUTFIELD_CHANGED + "_" + input, input);
             };
-            var delayedAction = action.AsThrottledDebounce(delayInMs: 2000, skipFirstEvent: true);
+            var delayedAction = action.AsThrottledDebounce(delayInMs: 1900, skipFirstEvent: true);
             EventBus.instance.Subscribe(self, UiEvents.INPUTFIELD_CHANGED, (InputField input, string newText) => {
                 delayedAction(input, newText);
             });
