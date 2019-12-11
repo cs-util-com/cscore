@@ -140,7 +140,7 @@ namespace com.csutil {
                 self.TrackEvent(AppFlow.catView, UiEvents.SWITCH_BACK_TO_LAST_VIEW + "_" + currentViewName + "->" + lastView, lastView);
             });
             EventBus.instance.Subscribe(self, UiEvents.SWITCH_TO_NEXT_VIEW, (GameObject currentView, GameObject nextView) => {
-                self.TrackEvent(AppFlow.catView, UiEvents.SWITCH_TO_NEXT_VIEW + "_" + currentView + "->" + nextView, currentView, nextView);
+                self.TrackEvent(AppFlow.catView, UiEvents.SWITCH_TO_NEXT_VIEW + "_" + currentView.name + "->" + nextView.name, currentView, nextView);
             });
         }
 
