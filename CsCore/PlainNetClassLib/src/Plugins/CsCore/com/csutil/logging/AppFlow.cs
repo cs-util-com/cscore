@@ -15,6 +15,7 @@ namespace com.csutil {
         public const string catLinked = "linked";
         public const string catView = "view";
         public const string catPresenter = "presenter";
+        public const string catInjection = "injection";
 
         public static IAppFlow instance;
 

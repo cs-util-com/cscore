@@ -5,6 +5,7 @@ using NUnit.Framework;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -13,48 +14,63 @@ using UnityEngine.UI;
 namespace com.csutil.tests.ui {
 
     public class Ui10_AppFlowTracking : MonoBehaviour {
+        IEnumerator Start() { yield return new Ui10_AppFlowTrackingTests() { targetUi = gameObject }.ExampleUsage(); }
+    }
 
-        IEnumerator Start() {
+    class TestAppFlowTracker : IAppFlow {
+        public List<AppFlowEvent> recordedEvents = new List<AppFlowEvent>();
+        public void TrackEvent(string category, string action, params object[] args) {
+            var e = new AppFlowEvent() { category = category, action = action };
+            Log.d("new AppFlowEvent: " + e);
+            recordedEvents.Add(e);
+        }
+    }
 
-            AppFlow.instance = new TestAppFlowTracker();
+    class AppFlowEvent {
+        public string category;
+        public string action;
+        public override string ToString() { return category + " - " + action; }
+    }
+
+    public class Ui10_AppFlowTrackingTests {
+
+        public GameObject targetUi;
+
+        [UnityTest]
+        public IEnumerator ExampleUsage() {
+
+            var testTracker = new TestAppFlowTracker();
+            AppFlow.instance = testTracker;
             AppFlow.instance.ActivateLinkMapTracking();
             AppFlow.instance.ActivatePrefabLoadTracking();
             AppFlow.instance.ActivateUiEventTracking();
             AppFlow.instance.ActivateViewStackTracking();
 
-            var p = new Ui10_AppFlowTrackingTests.MyDataModelPresenter();
-            p.targetView = gameObject; // Assume that Ui10_AppFlowTracking is attached to the correct UI
-            yield return new Ui10_AppFlowTrackingTests() { presenter = p }.ExampleUsage();
-        }
-
-    }
-
-    class TestAppFlowTracker : IAppFlow {
-        public void TrackEvent(string category, string action, params object[] args) {
-            Log.d("AppFlowTests: " + category + " - " + action);
-        }
-    }
-
-    public class Ui10_AppFlowTrackingTests {
-
-        public MyDataModelPresenter presenter;
-
-        [UnityTest]
-        public IEnumerator ExampleUsage() {
             setupImmutableDatastore();
+            // In setupImmutableDatastore() Log.MethodEntered is used, so there must be a recorded method:
+            Assert.AreEqual(1, testTracker.recordedEvents.Count(x => x.category == AppFlow.catMethod));
+            // In setupImmutableDatastore() the datastore will be set as a singleton:
+            Assert.AreEqual(1, testTracker.recordedEvents.Count(x => x.action.Contains("DataStore")));
 
             var store = MyDataModel.GetStore();
             Assert.NotNull(store);
             store.Dispatch(new ActionSetBool1() { newB = true });
             store.Dispatch(new ActionSetString1 { newS = "abc" });
-            Assert.AreEqual("abc", store.GetState().subSection1.string1);
             Assert.AreEqual(true, store.GetState().subSection1.bool1);
+            Assert.AreEqual("abc", store.GetState().subSection1.string1);
+            // After the 2 mutations, there should be 2 mutation AppFlow events recorded:
+            Assert.AreEqual(2, testTracker.recordedEvents.Count(x => x.category == AppFlow.catMutation));
 
-            if (presenter != null) {
-                yield return presenter.LoadModelIntoView(store).AsCoroutine();
-            }
+            if (targetUi == null) { targetUi = ResourcesV2.LoadPrefab("Ui10_Screen1"); }
+            var presenter = new MyDataModelPresenter();
+            presenter.targetView = targetUi;
+            yield return presenter.LoadModelIntoView(store).AsCoroutine();
+            // After the presenter loaded the UI there should be a load start and load end event recorded:
+            Assert.AreEqual(2, testTracker.recordedEvents.Count(x => x.category == AppFlow.catPresenter));
+            // The MyDataModelPresenter uses a GetLinkMap() when connecting to the view:
+            Assert.AreEqual(1, testTracker.recordedEvents.Count(x => x.category == AppFlow.catLinked));
 
-            yield return null;
+            yield return new WaitForSeconds(10);
         }
 
         private void setupImmutableDatastore() {
@@ -64,7 +80,7 @@ namespace com.csutil.tests.ui {
             IoC.inject.SetSingleton<IDataStore<MyDataModel>>(store);
         }
 
-        public class MyDataModel {
+        class MyDataModel {
 
             public static IDataStore<MyDataModel> GetStore() { return IoC.inject.Get<IDataStore<MyDataModel>>(null); }
 
@@ -81,7 +97,7 @@ namespace com.csutil.tests.ui {
             }
         }
 
-        public class MyDataModelPresenter : Presenter<IDataStore<MyDataModel>> {
+        class MyDataModelPresenter : Presenter<IDataStore<MyDataModel>> {
 
             public GameObject targetView { get; set; }
 
