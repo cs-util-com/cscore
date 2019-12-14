@@ -1,9 +1,11 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.TestTools;
 
 namespace com.csutil.tests {
 
+    [Obsolete("Use the UnitTestMono class instead, it works similar but has some advantages")]
     // This MonoBehaviour can be used for manual tests by attaching it to a scene
     class TestMonoTEMPLATE : MonoBehaviour { IEnumerator Start() { yield return new TestTEMPLATE().Test123(); } }
 

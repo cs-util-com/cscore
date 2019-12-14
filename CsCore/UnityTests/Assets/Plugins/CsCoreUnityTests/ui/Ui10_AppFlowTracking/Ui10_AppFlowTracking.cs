@@ -12,43 +12,14 @@ using UnityEngine.UI;
 namespace com.csutil.tests.ui {
 
     public class Ui10_AppFlowTrackingTests {
-
         [UnityTest]
-        public IEnumerator ExampleUsage() {
-            var viewStack = CanvasFinder.GetOrAddRootCanvas().gameObject.AddComponent<ViewStack>();
-            var screen1 = viewStack.ShowView("Ui10_Screen1");
-            var ui10 = screen1.GetComponent<Ui10_AppFlowTracking>();
-            ui10.isUnitTest = true;
-            yield return ui10.RunTest();
-        }
-
+        public IEnumerator Ui10_AppFlowTracking() { yield return UnitTestMono.LoadAndRunUiTest("Ui10_Screen1"); }
     }
 
-    class TestAppFlowTracker : IAppFlow {
-        public List<AppFlowEvent> recordedEvents = new List<AppFlowEvent>();
-        public void TrackEvent(string category, string action, params object[] args) {
-            var e = new AppFlowEvent() { category = category, action = action };
-            Log.d("new AppFlowEvent: " + e);
-            recordedEvents.Add(e);
-        }
-    }
+    public class Ui10_AppFlowTracking : UnitTestMono {
 
-    class AppFlowEvent {
-        public string category;
-        public string action;
-        public override string ToString() { return category + " - " + action; }
-    }
+        public override IEnumerator RunTest() {
 
-    public class Ui10_AppFlowTracking : MonoBehaviour {
-
-        public bool isUnitTest { get; set; }
-
-        IEnumerator Start() {
-            if (!isUnitTest) { yield return RunTest(); }
-            yield return null;
-        }
-
-        public IEnumerator RunTest() {
             var testTracker = new TestAppFlowTracker();
             AppFlow.instance = testTracker;
             AppFlow.instance.ActivateLinkMapTracking();
@@ -79,10 +50,26 @@ namespace com.csutil.tests.ui {
             // The MyDataModelPresenter uses a GetLinkMap() when connecting to the view:
             Assert.AreEqual(1, testTracker.recordedEvents.Count(x => x.category == AppFlow.catLinked));
 
-            yield return new WaitForSeconds(3);
+            yield return new WaitForSeconds(1);
+
         }
 
-        private void setupImmutableDatastore() {
+        class TestAppFlowTracker : IAppFlow {
+            public List<AppFlowEvent> recordedEvents = new List<AppFlowEvent>();
+            public void TrackEvent(string category, string action, params object[] args) {
+                var e = new AppFlowEvent() { category = category, action = action };
+                Log.d("new AppFlowEvent: " + e);
+                recordedEvents.Add(e);
+            }
+        }
+
+        class AppFlowEvent {
+            public string category;
+            public string action;
+            public override string ToString() { return category + " - " + action; }
+        }
+
+        void setupImmutableDatastore() {
             Log.MethodEntered();
             var log = Middlewares.NewAppFlowTrackerMiddleware<MyDataModel>();
             var store = new DataStore<MyDataModel>(MainReducer, new MyDataModel(new MyDataModel.SubSection1(string1: "", bool1: false)), log);
@@ -141,17 +128,17 @@ namespace com.csutil.tests.ui {
 
         }
 
-        private class ActionSetString1 { public string newS; }
-        private class ActionSetBool1 { public bool newB; }
+        class ActionSetString1 { public string newS; }
+        class ActionSetBool1 { public bool newB; }
 
-        private MyDataModel MainReducer(MyDataModel prev, object action) {
+        MyDataModel MainReducer(MyDataModel prev, object action) {
             bool changed = false;
             var subSection1 = prev.subSection1.Mutate(action, MyDataModelSubSection1Reducer, ref changed);
             if (changed) { return new MyDataModel(subSection1); }
             return prev;
         }
 
-        private MyDataModel.SubSection1 MyDataModelSubSection1Reducer(MyDataModel.SubSection1 prev, object action) {
+        MyDataModel.SubSection1 MyDataModelSubSection1Reducer(MyDataModel.SubSection1 prev, object action) {
             if (action is ActionSetBool1 a1) { return new MyDataModel.SubSection1(prev.string1, a1.newB); }
             if (action is ActionSetString1 a2) { return new MyDataModel.SubSection1(a2.newS, prev.bool1); }
             return prev;
