@@ -1,8 +1,6 @@
-﻿using com.csutil;
-using com.csutil.model.immutable;
+﻿using com.csutil.model.immutable;
 using com.csutil.ui;
 using NUnit.Framework;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,9 +11,17 @@ using UnityEngine.UI;
 
 namespace com.csutil.tests.ui {
 
-    [RequireComponent(typeof(ViewStack))]
-    public class Ui10_AppFlowTracking : MonoBehaviour {
-        IEnumerator Start() { yield return new Ui10_AppFlowTrackingTests() { viewStack = GetComponent<ViewStack>() }.ExampleUsage(); }
+    public class Ui10_AppFlowTrackingTests {
+
+        [UnityTest]
+        public IEnumerator ExampleUsage() {
+            var viewStack = CanvasFinder.GetOrAddRootCanvas().gameObject.AddComponent<ViewStack>();
+            var screen1 = viewStack.ShowView("Ui10_Screen1");
+            var ui10 = screen1.GetComponent<Ui10_AppFlowTracking>();
+            ui10.isUnitTest = true;
+            yield return ui10.RunTest();
+        }
+
     }
 
     class TestAppFlowTracker : IAppFlow {
@@ -33,13 +39,16 @@ namespace com.csutil.tests.ui {
         public override string ToString() { return category + " - " + action; }
     }
 
-    public class Ui10_AppFlowTrackingTests {
+    public class Ui10_AppFlowTracking : MonoBehaviour {
 
-        public ViewStack viewStack;
+        public bool isUnitTest { get; set; }
 
-        [UnityTest]
-        public IEnumerator ExampleUsage() {
+        IEnumerator Start() {
+            if (!isUnitTest) { yield return RunTest(); }
+            yield return null;
+        }
 
+        public IEnumerator RunTest() {
             var testTracker = new TestAppFlowTracker();
             AppFlow.instance = testTracker;
             AppFlow.instance.ActivateLinkMapTracking();
@@ -63,11 +72,7 @@ namespace com.csutil.tests.ui {
             Assert.AreEqual(2, testTracker.recordedEvents.Count(x => x.category == AppFlow.catMutation));
 
             var presenter = new MyDataModelPresenter();
-            if (viewStack == null) {
-                viewStack = CanvasFinder.GetOrAddRootCanvas().gameObject.AddComponent<ViewStack>();
-                viewStack.ShowView("Ui10_Screen1");
-            }
-            presenter.targetView = viewStack.gameObject.GetChild(0);
+            presenter.targetView = gameObject;
             yield return presenter.LoadModelIntoView(store).AsCoroutine();
             // After the presenter loaded the UI there should be a load start and load end event recorded:
             Assert.AreEqual(2, testTracker.recordedEvents.Count(x => x.category == AppFlow.catPresenter));
