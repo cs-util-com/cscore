@@ -65,7 +65,7 @@ namespace com.csutil {
         }
 
         public static bool ChangeWasTriggeredByUserThroughEventSystem(this Component self) {
-            return EventSystem.current.currentSelectedGameObject == self.gameObject;
+            return EventSystem.current?.currentSelectedGameObject == self.gameObject;
         }
 
         public static void SetOnValueChangedAction(this InputField self, Func<string, bool> onValueChanged) {
