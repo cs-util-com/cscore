@@ -16,14 +16,14 @@ namespace com.csutil.tests.ui {
         void Start() {
             var links = gameObject.GetLinkMap();
             links.Get<Button>("OptionsButton").SetOnClickAction(delegate {
-                gameObject.GetViewStack().ShowView(gameObject, "ExampleUi2_OptionsScreen");
+                gameObject.GetViewStack().ShowView("ExampleUi2_OptionsScreen", gameObject);
             });
             links.Get<Button>("UserDetailsButton").SetOnClickAction(ShowUserUi);
         }
 
         private async void ShowUserUi(GameObject buttonGo) {
             Ui1_PresenterTests.MyUserUi presenter = new Ui1_PresenterTests.MyUserUi();
-            GameObject ui = gameObject.GetViewStack().ShowView(gameObject, "MyUserUi1");
+            GameObject ui = gameObject.GetViewStack().ShowView("MyUserUi1", gameObject);
             presenter.targetView = ui;
             await presenter.LoadModelIntoView(currentUser);
 

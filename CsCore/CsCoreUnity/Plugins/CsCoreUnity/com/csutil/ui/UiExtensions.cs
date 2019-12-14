@@ -12,7 +12,7 @@ namespace com.csutil {
     public static class UiExtensions {
 
         public static ViewStack GetViewStack(this GameObject gameObject) {
-            return gameObject.GetComponentInParent<ViewStack>();
+            return gameObject.GetComponentInParents<ViewStack>();
         }
 
         public static Task SetOnClickAction(this Button self, Action<GameObject> onClickAction) {

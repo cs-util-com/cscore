@@ -41,7 +41,7 @@ namespace com.csutil {
         }
 
         private static void InitText(Dictionary<string, Link> map, string id, string text) {
-            if (text.IsNullOrEmpty()) { map.Get<GameObject>(id).SetActive(false); } else { map.Get<Text>(id).text = text; }
+            if (text.IsNullOrEmpty()) { map.Get<GameObject>(id).SetActiveV2(false); } else { map.Get<Text>(id).text = text; }
         }
 
     }

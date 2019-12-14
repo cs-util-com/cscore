@@ -47,11 +47,11 @@ namespace com.csutil.tests.eventbus {
             EventBus.instance.Publish(event1);
             Assert.AreEqual(1, counter);
 
-            myGameObject.SetActive(false);
+            myGameObject.SetActiveV2(false);
             EventBus.instance.Publish(event1); // event should not be received
             Assert.AreEqual(1, counter); // because gameObject is inactive
 
-            myGameObject.SetActive(true);
+            myGameObject.SetActiveV2(true);
             EventBus.instance.Publish(event1, "I am an ignored parameter");
             Assert.AreEqual(2, counter);
 

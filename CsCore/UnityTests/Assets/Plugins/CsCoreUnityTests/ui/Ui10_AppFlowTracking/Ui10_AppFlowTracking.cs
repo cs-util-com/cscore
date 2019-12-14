@@ -13,8 +13,9 @@ using UnityEngine.UI;
 
 namespace com.csutil.tests.ui {
 
+    [RequireComponent(typeof(ViewStack))]
     public class Ui10_AppFlowTracking : MonoBehaviour {
-        IEnumerator Start() { yield return new Ui10_AppFlowTrackingTests() { targetUi = gameObject }.ExampleUsage(); }
+        IEnumerator Start() { yield return new Ui10_AppFlowTrackingTests() { viewStack = GetComponent<ViewStack>() }.ExampleUsage(); }
     }
 
     class TestAppFlowTracker : IAppFlow {
@@ -34,7 +35,7 @@ namespace com.csutil.tests.ui {
 
     public class Ui10_AppFlowTrackingTests {
 
-        public GameObject targetUi;
+        public ViewStack viewStack;
 
         [UnityTest]
         public IEnumerator ExampleUsage() {
@@ -61,16 +62,19 @@ namespace com.csutil.tests.ui {
             // After the 2 mutations, there should be 2 mutation AppFlow events recorded:
             Assert.AreEqual(2, testTracker.recordedEvents.Count(x => x.category == AppFlow.catMutation));
 
-            if (targetUi == null) { targetUi = ResourcesV2.LoadPrefab("Ui10_Screen1"); }
             var presenter = new MyDataModelPresenter();
-            presenter.targetView = targetUi;
+            if (viewStack == null) {
+                viewStack = CanvasFinder.GetOrAddRootCanvas().gameObject.AddComponent<ViewStack>();
+                viewStack.ShowView("Ui10_Screen1");
+            }
+            presenter.targetView = viewStack.gameObject.GetChild(0);
             yield return presenter.LoadModelIntoView(store).AsCoroutine();
             // After the presenter loaded the UI there should be a load start and load end event recorded:
             Assert.AreEqual(2, testTracker.recordedEvents.Count(x => x.category == AppFlow.catPresenter));
             // The MyDataModelPresenter uses a GetLinkMap() when connecting to the view:
             Assert.AreEqual(1, testTracker.recordedEvents.Count(x => x.category == AppFlow.catLinked));
 
-            yield return new WaitForSeconds(10);
+            yield return new WaitForSeconds(3);
         }
 
         private void setupImmutableDatastore() {

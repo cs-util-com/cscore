@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 8316939608145673427}
   - component: {fileID: 4265183427089961522}
   - component: {fileID: 20155366629694260}
-  - component: {fileID: 214173353}
   m_Layer: 5
   m_Name: Ui10_Screen1
   m_TagString: Untagged
@@ -83,18 +82,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &214173353
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8316939608145673424}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0c956af28b16ca14f9bb639797cb45e2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &596244277
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -614,6 +601,26 @@ PrefabInstance:
       propertyPath: m_Name
       value: string1
       objectReference: {fileID: 0}
+    - target: {fileID: 2415568733664853140, guid: dbe80deaafbcf4d4f8d7d2af96148088,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -0.50000095
+      objectReference: {fileID: 0}
+    - target: {fileID: 2868370126669774591, guid: dbe80deaafbcf4d4f8d7d2af96148088,
+        type: 3}
+      propertyPath: m_Text
+      value: Input some text here and wait 2sec to see it in the AppFlow log..
+      objectReference: {fileID: 0}
+    - target: {fileID: 5808628251569709610, guid: dbe80deaafbcf4d4f8d7d2af96148088,
+        type: 3}
+      propertyPath: id
+      value: string1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8094366646397247730, guid: dbe80deaafbcf4d4f8d7d2af96148088,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -0.50000095
+      objectReference: {fileID: 0}
     - target: {fileID: 9175700281819750353, guid: dbe80deaafbcf4d4f8d7d2af96148088,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -718,26 +725,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Pivot.y
       value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 8094366646397247730, guid: dbe80deaafbcf4d4f8d7d2af96148088,
-        type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: -0.50000095
-      objectReference: {fileID: 0}
-    - target: {fileID: 2415568733664853140, guid: dbe80deaafbcf4d4f8d7d2af96148088,
-        type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: -0.50000095
-      objectReference: {fileID: 0}
-    - target: {fileID: 5808628251569709610, guid: dbe80deaafbcf4d4f8d7d2af96148088,
-        type: 3}
-      propertyPath: id
-      value: string1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2868370126669774591, guid: dbe80deaafbcf4d4f8d7d2af96148088,
-        type: 3}
-      propertyPath: m_Text
-      value: Input some text here and wait 2sec to see it in the AppFlow log..
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: dbe80deaafbcf4d4f8d7d2af96148088, type: 3}

@@ -16,12 +16,15 @@ namespace com.csutil {
 
         /// <summary> Used for lazy-initialization of a GameObject, combine with go.GetOrAddComponent </summary>
         public static GameObject GetOrAddChild(this GameObject parentGo, string childName) {
-            var childGo = parentGo.transform.Find(childName);
-            if (childGo != null) { return childGo.gameObject; } // child found, return it
-            var newChild = new GameObject(childName);        // no child found, create it
+            var childGo = GetChild(parentGo, childName);
+            if (childGo != null) { return childGo; } // child found, return it
+            var newChild = new GameObject(childName); // no child found, create it
             newChild.transform.SetParent(parentGo.transform, false); // add it to parent
             return newChild;
         }
+
+        public static GameObject GetChild(this GameObject self, string childName) { return self.transform.Find(childName)?.gameObject; }
+        public static GameObject GetChild(this GameObject self, int index) { return self.transform.GetChild(index)?.gameObject; }
 
         /// <summary> Used for lazy-initialization of a Mono, combine with go.GetOrAddChild </summary>
         public static T GetOrAddComponent<T>(this GameObject self) where T : Component {

@@ -4,22 +4,23 @@ namespace com.csutil.ui {
 
     public class ViewStack : MonoBehaviour {
 
-        public GameObject ShowView(GameObject gameObject, string prefabName, bool hideCurrentView = true) {
-            return ShowView(gameObject, ResourcesV2.LoadPrefab(prefabName), hideCurrentView);
+        /// <summary> Loads a new view based on its prefab name and by default hides the current one </summary>
+        /// <param name="currentViewToHide"> (Any part of) the current view that should be hidden </param>
+        /// <param name="prefabName"> e.g. "Dialogs/Dialog123" </param>
+        /// <returns> The newly created view </returns>
+        public GameObject ShowView(string prefabName, GameObject currentViewToHide = null) {
+            var newView = ShowView(ResourcesV2.LoadPrefab(prefabName));
+            if (currentViewToHide != null) { GetRootFor(currentViewToHide).SetActiveV2(false); }
+            return newView;
         }
 
-        /// <summary> Adds a passed view to the view stack to show it, by default hides the current view on the stack</summary>
+        /// <summary> Adds a passed view to the view stack to show it </summary>
         /// <param name="newView"> The new view to show in the stack </param>
-        /// <param name="hideCurrentView"> If false the current view will stay visible, relevant e.g. for transparent new views </param>
-        /// <returns> The new view that was just added to the stack, useful for chaining </returns>
-        public GameObject ShowView(GameObject gameObject, GameObject newView, bool hideCurrentView = true) {
-            var view = AddView(newView);
-            EventBus.instance.Publish(UiEvents.SHOW_VIEW, view);
-            if (hideCurrentView) { GetRootFor(gameObject).SetActive(false); }
-            return view;
+        public GameObject ShowView(GameObject newView) {
+            gameObject.AddChild(newView);
+            EventBus.instance.Publish(UiEvents.SHOW_VIEW, newView);
+            return newView;
         }
-
-        private GameObject AddView(GameObject newView) { return gameObject.AddChild(newView); }
 
         /// <summary> Will "close" the current view and jump back to the last view and set it back to active </summary>
         /// <param name="destroyFinalView"> If true and the last view on the stack is reached this last view will be destroyed too </param>
@@ -30,7 +31,7 @@ namespace com.csutil.ui {
             AssertV2.AreEqual(currentIndex, transform.childCount - 1, "Current was not last view in the stack");
             if (currentIndex > 0) {
                 var lastView = transform.GetChild(currentIndex - 1).gameObject;
-                lastView.SetActive(true);
+                lastView.SetActiveV2(true);
                 EventBus.instance.Publish(UiEvents.SWITCH_BACK_TO_LAST_VIEW, "" + currentView, lastView);
             }
             if (currentIndex == 0 && !destroyFinalView) { return false; }
@@ -50,9 +51,9 @@ namespace com.csutil.ui {
             if (currentIndex == transform.childCount - 1) { Log.w("Current was last view in the stack"); }
             if (currentIndex >= transform.childCount - 1) { return false; }
             var nextView = transform.GetChild(currentIndex + 1).gameObject;
-            nextView.SetActive(true);
+            nextView.SetActiveV2(true);
             EventBus.instance.Publish(UiEvents.SWITCH_TO_NEXT_VIEW, currentView, nextView);
-            if (hideCurrentView) { currentView.SetActive(false); }
+            if (hideCurrentView) { currentView.SetActiveV2(false); }
             return true;
         }
 

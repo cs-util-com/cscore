@@ -51,7 +51,7 @@ namespace com.csutil.ui.elements {
                 case SwitchDirection.forwards:
                     return gameObject.GetViewStack().SwitchToNextView(gameObject, hideCurrentScreen);
                 case SwitchDirection.loadNextScreenViaPrefab:
-                    return gameObject.GetViewStack().ShowView(gameObject, nextScreenPrefabName, hideCurrentScreen) != null;
+                    return gameObject.GetViewStack().ShowView(nextScreenPrefabName, hideCurrentScreen ? gameObject : null) != null;
                 default: return false;
             }
         }

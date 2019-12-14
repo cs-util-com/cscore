@@ -55,7 +55,7 @@ namespace com.csutil.logging {
             });
             map.Get<Button>("BtnHideLog").SetOnClickAction(delegate {
                 var nowActive = !gameObject.activeSelf;
-                gameObject.SetActive(nowActive);
+                gameObject.SetActiveV2(nowActive);
                 map.Get<CanvasGroup>("MenuButtons").interactable = nowActive;
                 map.Get<CanvasGroup>("MenuButtons").blocksRaycasts = nowActive;
             });

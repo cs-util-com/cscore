@@ -151,7 +151,7 @@ namespace com.csutil.tests {
             }
             {
                 MonoBehaviour myMonoBehaviour = CreateSomeMonoBehaviour();
-                myMonoBehaviour.gameObject.SetActive(false);
+                myMonoBehaviour.gameObject.SetActiveV2(false);
                 AssertV2.Throws<Exception>(() => {
                     myMonoBehaviour.ExecuteDelayed(() => { throw Log.e("Executing coroutine of inactive GO"); });
                 });

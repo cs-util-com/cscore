@@ -16,7 +16,8 @@ namespace com.csutil.tests.ui {
 
             var view1 = viewStackGo.AddChild(new GameObject("View 1"));
 
-            var view2 = view1.GetViewStack().ShowView(view1, new GameObject("View 2"));
+            var view2 = view1.GetViewStack().ShowView(new GameObject("View 2"));
+            view1.SetActiveV2(false);
             Assert.IsFalse(view1.activeInHierarchy);
 
             Assert.IsTrue(view2.GetViewStack().SwitchBackToLastView(view2));
@@ -35,10 +36,11 @@ namespace com.csutil.tests.ui {
             var view1 = viewStackGo.AddChild(new GameObject("View 1"));
             Assert.AreEqual(viewStackGo.GetComponent<ViewStack>(), view1.GetViewStack());
 
-            var view2 = view1.GetViewStack().ShowView(view1, new GameObject("View 2"));
+            var view2 = view1.GetViewStack().ShowView(new GameObject("View 2"));
+            view1.SetActiveV2(false);
             Assert.IsFalse(view1.activeInHierarchy);
 
-            var view3 = view1.GetViewStack().ShowView(view1, new GameObject("View 3"), hideCurrentView: false);
+            var view3 = view1.GetViewStack().ShowView(new GameObject("View 3"));
             Assert.IsTrue(view2.activeInHierarchy);
 
             // Now test SwitchBackToLastView plus the events the view stack sends out:
