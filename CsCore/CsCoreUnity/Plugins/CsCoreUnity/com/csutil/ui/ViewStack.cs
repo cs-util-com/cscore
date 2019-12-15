@@ -22,6 +22,8 @@ namespace com.csutil.ui {
             return newView;
         }
 
+        public void DestroyViewStack() { gameObject.Destroy(); }
+
         /// <summary> Will "close" the current view and jump back to the last view and set it back to active </summary>
         /// <param name="destroyFinalView"> If true and the last view on the stack is reached this last view will be destroyed too </param>
         /// <param name="hideNotDestroyCurrentView"> If set to true the current active view will not be destroyed but instead set to hidden </param>
