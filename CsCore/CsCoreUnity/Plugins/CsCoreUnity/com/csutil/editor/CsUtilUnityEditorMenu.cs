@@ -25,6 +25,11 @@ namespace com.csutil.editor {
         [MenuItem(DIR + "CsCore/Report a problem")]
         static void ReportCsCoreProblem() { Application.OpenURL("https://github.com/cs-util-com/cscore/issues"); }
 
+        [MenuItem(DIR + "CsCore/Install default packages")]
+        static void InstallDefaultPackages() {
+            UnityPackageInstaller.AddToProjectViaPackageManager("com.unity.build-report-inspector", "0.1.2-preview");
+        }
+
         [MenuItem(DIR + "Show Asset Store packages")]
         static void ShowAssetStore() { Application.OpenURL("https://assetstore.unity.com/publishers/40989"); }
 
