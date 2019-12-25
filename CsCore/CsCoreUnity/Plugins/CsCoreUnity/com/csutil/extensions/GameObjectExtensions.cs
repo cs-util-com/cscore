@@ -26,6 +26,8 @@ namespace com.csutil {
         public static GameObject GetChild(this GameObject self, string childName) { return self.transform.Find(childName)?.gameObject; }
         public static GameObject GetChild(this GameObject self, int index) { return self.transform.GetChild(index)?.gameObject; }
 
+        public static int GetChildCount(this GameObject self) { return self.transform.childCount; }
+
         /// <summary> Used for lazy-initialization of a Mono, combine with go.GetOrAddChild </summary>
         public static T GetOrAddComponent<T>(this GameObject self) where T : Component {
             var existingComp = self.GetComponent<T>();

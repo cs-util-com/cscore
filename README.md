@@ -37,6 +37,7 @@ The aim of the cscore package is to stay is slim/minimal as possible while inclu
 * [GameObject.Subscribe & MonoBehaviour.Subscribe](#gameobjectsubscribe--monobehavioursubscribe) - Listening to events while respecting the lifecycle of Unity objects
 * [MonoBehaviour Injection & Singletons](#monobehaviour-injection--singletons) - Using the injection logic to create and access Unity objects 
 * [The Link Pattern](#the-link-pattern) - Making it easy to connect prefabs with code (and by that separate design & UI from your logic)
+* [The ViewStack Pattern](#the-viewstack-pattern) - Using GameObjects as separate views stacked in a parent object and controlled by a single ViewStack to introduce a simple solution for switching views and UI screens. 
 * [MonoBehaviour.ExecuteDelayed & MonoBehaviour.ExecuteRepeated](#monobehaviourexecutedelayed--monobehaviourexecuterepeated) - Executing asynchronous actions delayed and/or repeated
 * [UnityWebRequest.SendV2](#unitywebrequestsendv2) - UnityWebRequest extension methods
 * [PlayerPrefsV2](#playerprefsv2) - Adds `SetBool`, `SetStringEncrypted` and more, see PlayerPrefsV2Tests.cs for all examples
@@ -564,6 +565,35 @@ links.Get<Toggle>("Toggle 1").SetOnValueChangedAction((isNowChecked) => {
     Log.d("Toggle 1 is now " + (isNowChecked ? "checked" : "unchecked"));
     return true;
 });
+```
+
+## The `ViewStack` Pattern
+The ``ViewStack`` Pattern uses GameObjects as separate views stacked in a parent GameObject. A ``ViewStack`` controller attached to this parent object controls switching between views. Views can be hidden or shown through the ``ViewStack`` and new views can be loaded. The main function of the ``ViewStack`` controller is to represent where the root of the ``ViewStack`` can be found, which is especially relevant if multiple ``ViewStack``s are stacked on top of each other. A simple example for stacking multiple ``ViewStack``s would be a main ``ViewStack`` that controls the normal application flow and a second vie stack that is loaded together with one of the view prefabs that represents a temporary tutorial or FUE that the user has to click through. 
+
+```cs
+var viewStackGo = new GameObject();
+var viewStack = viewStackGo.AddComponent<ViewStack>();
+
+// Views can be added manually without using the ViewStack:
+var view1 = viewStackGo.AddChild(new GameObject("View 1"));
+// You can get the ViewStack using any child gameobject:
+Assert.AreEqual(view1.GetViewStack(), viewStack);
+// The latest active view can be accessed from the view stack:
+Assert.AreEqual(view1, viewStack.GetLatestView());
+
+// Views can also be added using the ViewStack.ShowView method:
+var view2 = viewStack.ShowView(new GameObject("View 2"));
+// Hide the old view 1 now that view 2 is on top:
+view1.SetActiveV2(false);
+Assert.IsFalse(view1.activeInHierarchy);
+Assert.AreEqual(view2, viewStack.GetLatestView());
+
+// The ViewStack can be used to return to the last view:
+Assert.IsTrue(viewStack.SwitchBackToLastView(view2));
+// View 2 will be removed from the view stack by destroying it:
+Assert.IsTrue(view2.IsDestroyed());
+// Now view 1 is active and visible again:
+Assert.IsTrue(view1.activeInHierarchy);
 ```
 
 

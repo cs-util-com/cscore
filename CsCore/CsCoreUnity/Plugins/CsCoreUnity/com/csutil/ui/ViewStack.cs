@@ -22,11 +22,24 @@ namespace com.csutil.ui {
             return newView;
         }
 
+        /// <summary> Returns the latest view on the ViewStack that is active. Or null if none is found </summary>
+        public GameObject GetLatestView() {
+            var viewCount = gameObject.GetChildCount();
+            for (int i = viewCount - 1; i >= 0; i--) {
+                var child = gameObject.GetChild(i);
+                if (child.activeSelf) { return child; }
+            }
+            return null;
+        }
+
+        /// <summary> Destroys the complete ViewStack including all views </summary>
         public void DestroyViewStack() { gameObject.Destroy(); }
 
         /// <summary> Will "close" the current view and jump back to the last view and set it back to active </summary>
+        /// <param name="gameObject"> The current view or any part of it </param>
         /// <param name="destroyFinalView"> If true and the last view on the stack is reached this last view will be destroyed too </param>
         /// <param name="hideNotDestroyCurrentView"> If set to true the current active view will not be destroyed but instead set to hidden </param>
+        /// <returns></returns>
         public bool SwitchBackToLastView(GameObject gameObject, bool destroyFinalView = false, bool hideNotDestroyCurrentView = false) {
             var currentView = GetRootFor(gameObject);
             var currentIndex = currentView.transform.GetSiblingIndex();
@@ -45,6 +58,7 @@ namespace com.csutil.ui {
         }
 
         /// <summary> Will show the next view on the view stack and by default automatically hide the current view </summary>
+        /// <param name="gameObject"> The current view or any part of it </param>
         /// <param name="hideCurrentView"> If false the current view will stay visible, relevant e.g. for transparent new views </param>
         /// <returns> True if there was a next view to show, false otherwise </returns>
         public bool SwitchToNextView(GameObject gameObject, bool hideCurrentView = true) {
