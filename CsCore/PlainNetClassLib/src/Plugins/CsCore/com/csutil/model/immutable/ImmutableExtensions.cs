@@ -12,17 +12,34 @@ namespace com.csutil.model.immutable {
             return AddStateChangeListener(s, getSubState, (subState) => { onChanged(subState); });
         }
 
-        public static Action AddStateChangeListener<T, S>(this IDataStore<T> s, Func<T, S> getSubState, Action<S> onChanged) {
-            var oldState = getSubState(s.GetState());
+        public static Action AddStateChangeListener<T, S>(this IDataStore<T> self, Func<T, S> getSubState, Action<S> onChanged) {
+            Action newListener = NewSubstateChangeListener(() => getSubState(self.GetState()), onChanged);
+            self.onStateChanged += newListener;
+            return newListener;
+        }
+
+        public static SubListeners<S> NewSubStateListener<T, S>(this IDataStore<T> self, Func<T, S> getSubState) {
+            var subListener = new SubListeners<S>(getSubState(self.GetState()));
+            self.AddStateChangeListener(getSubState, newSubState => { subListener.OnSubstateChanged(newSubState); });
+            return subListener;
+        }
+
+        public static SubListeners<S> NewSubStateListener<T, S>(this SubListeners<T> self, Func<T, S> getSubState) {
+            var subListener = new SubListeners<S>(getSubState(self.latestSubState));
+            self.AddStateChangeListener(getSubState, newSubState => { subListener.OnSubstateChanged(newSubState); });
+            return subListener;
+        }
+
+        internal static Action NewSubstateChangeListener<S>(Func<S> getSubstate, Action<S> onChanged) {
+            var oldState = getSubstate();
             Action newListener = () => {
-                var newState = getSubState(s.GetState());
+                var newState = getSubstate();
                 bool isPrimitive = typeof(S).IsPrimitive;
                 if ((!isPrimitive && !Object.ReferenceEquals(oldState, newState)) || (isPrimitive && !Equals(oldState, newState))) {
                     onChanged(newState);
                     oldState = newState;
                 }
             };
-            s.onStateChanged += newListener;
             return newListener;
         }
 
@@ -99,5 +116,24 @@ namespace com.csutil.model.immutable {
     /// <typeparam name="T">  The state tree type. </typeparam>
     /// <returns> A function that, when called with a <see cref="Dispatcher" />, returns a new <see cref="Dispatcher" /> that wraps the first one. </returns>
     public delegate Func<Dispatcher, Dispatcher> Middleware<T>(IDataStore<T> store);
+
+    public class SubListeners<SubState> {
+
+        public Action innerListeners;
+        public SubState latestSubState { get; private set; }
+        public SubListeners(SubState currentSubState) { latestSubState = currentSubState; }
+
+        public void OnSubstateChanged(SubState newSubState) {
+            latestSubState = newSubState;
+            innerListeners.InvokeIfNotNull();
+        }
+
+        public Action AddStateChangeListener<SSS>(Func<SubState, SSS> getSubSubState, Action<SSS> onChanged) {
+            Action newListener = ImmutableExtensions.NewSubstateChangeListener(() => getSubSubState(latestSubState), onChanged);
+            innerListeners += newListener;
+            return newListener;
+        }
+
+    }
 
 }
