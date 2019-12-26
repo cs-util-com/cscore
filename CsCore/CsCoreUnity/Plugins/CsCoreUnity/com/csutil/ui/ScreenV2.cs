@@ -22,20 +22,20 @@ namespace com.csutil {
 
         private static ScreenV2 Instance() { return IoC.inject.GetOrAddComponentSingleton<ScreenV2>(new object()); }
 
-        private void OnEnable() {
-            saveScreenSize(); // force initial init
+        private void Start() {
+            SaveScreenSize(); // force initial init
             this.ExecuteRepeated(checkIfWindowSizeChanged, delayInMsBetweenIterations: 100);
         }
 
         private bool checkIfWindowSizeChanged() {
             if (height != Screen.height || width != Screen.width) {
-                saveScreenSize();
+                SaveScreenSize();
                 EventBus.instance.Publish(EVENT_WINDOW_RESIZE, width, height);
             }
             return true;
         }
 
-        private static void saveScreenSize() { _h = Screen.height; _w = Screen.width; }
+        private static void SaveScreenSize() { _h = Screen.height; _w = Screen.width; }
 
         public static Rect GetScreenRect() {
             var screen = new Rect();

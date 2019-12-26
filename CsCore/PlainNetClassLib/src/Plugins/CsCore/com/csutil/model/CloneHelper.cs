@@ -1,12 +1,12 @@
 using System;
 using System.IO;
-using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Bson;
 
-namespace com.csutil.model {
+namespace com.csutil {
+
     public static class CloneHelper {
 
         public static T DeepCopyViaJson<T>(this T objectToDeepCopy) { return MapViaJsonInto<T>(objectToDeepCopy); }
@@ -63,4 +63,5 @@ namespace com.csutil.model {
         public static T ShallowCopyViaClone<T>(this T original) where T : ICloneable { return (T)original.Clone(); }
 
     }
+
 }

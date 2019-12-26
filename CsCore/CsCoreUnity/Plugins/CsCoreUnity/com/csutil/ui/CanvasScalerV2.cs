@@ -13,7 +13,7 @@ namespace com.csutil.ui {
 
         private void OnValidate() { UpdateScaler(); } // Called in editor
 
-        public void OnEnable() { this.ExecuteRepeated(UpdateScaler, 100); }
+        public void Start() { this.ExecuteRepeated(UpdateScaler, 100); }
 
         public bool UpdateScaler() {
             if (canvasScaler == null) { canvasScaler = GetComponent<CanvasScaler>(); }
