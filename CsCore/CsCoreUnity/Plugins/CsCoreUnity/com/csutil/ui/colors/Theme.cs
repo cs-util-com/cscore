@@ -1,10 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace com.csutil.ui {
+
+#if UNITY_EDITOR
+    [UnityEditor.CustomEditor(typeof(Theme))]
+    public class ThemeUnityEditorUi : UnityEditor.Editor {
+        public override void OnInspectorGUI() {
+            base.OnInspectorGUI();
+            if (GUILayout.Button("Save current colors to JSON")) {
+                var path = UnityEditor.EditorUtility.SaveFilePanel("Save current colors to JSON", "", "", "json");
+                (target as Theme)?.SaveToSchemeJson(path);
+            }
+        }
+    }
+#endif
 
     public class Theme : MonoBehaviour {
 
@@ -14,7 +28,7 @@ namespace com.csutil.ui {
             public Color colorValue;
         }
 
-        public string defaultSchemeName = "Colors/colorScheme1";
+        public string schemeName = "Colors/colorScheme1";
         public List<NamedColor> colors = new List<NamedColor>();
         private List<NamedColor> oldColors = new List<NamedColor>();
 
@@ -32,7 +46,7 @@ namespace com.csutil.ui {
         }
 
         private void Start() {
-            if (colors.IsNullOrEmpty()) { colors = LoadHexColors(defaultSchemeName).Map(ToNamedColor).ToList(); }
+            if (colors.IsNullOrEmpty()) { colors = LoadHexColors(schemeName).Map(ToNamedColor).ToList(); }
             this.ExecuteRepeated(() => { CheckIfColorsChanged(); return true; }, 1000);
         }
 
@@ -47,6 +61,18 @@ namespace com.csutil.ui {
         private static Dictionary<string, string> LoadHexColors(string themeName) {
             var themeColorsJson = ResourcesV2.LoadV2<string>(themeName);
             return JsonReader.GetReader().Read<Dictionary<string, string>>(themeColorsJson);
+        }
+
+        public void SaveToSchemeJson(string pathToSaveTo) {
+            new FileInfo(pathToSaveTo).SaveAsText(JsonWriter.AsPrettyString(ToHexColors(colors)));
+        }
+
+        private static Dictionary<string, string> ToHexColors(List<NamedColor> colors) {
+            Dictionary<string, string> result = new Dictionary<string, string>();
+            foreach (var c in colors) {
+                result.Add(c.colorName, ColorUtility.ToHtmlStringRGBA(c.colorValue));
+            }
+            return result;
         }
 
         private static void ApplyColor(ThemeColor target, Color color) {
