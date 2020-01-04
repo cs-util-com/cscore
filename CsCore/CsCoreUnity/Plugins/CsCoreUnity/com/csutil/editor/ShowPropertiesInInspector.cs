@@ -18,7 +18,8 @@ namespace com.csutil.editor {
         internal static ShowPropertiesInInspector[] GetPropertiesToDraw(System.Object obj) {
             if (obj == null) { return null; }
             // Skip all UnityEngine classes:
-            if (obj.GetType().Namespace.StartsWith("UnityEngine")) { return null; }
+            var nameSpace = obj.GetType().Namespace;
+            if (nameSpace != null && nameSpace.StartsWith("UnityEngine")) { return null; }
 
             var readableProps = obj.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).Where(p => p.CanRead);
 
@@ -66,7 +67,7 @@ namespace com.csutil.editor {
             if (!PropertyHasASetter()) { return; }
             propertySet.Invoke(objInstance, new System.Object[] { value });
         }
-        
+
         private bool PropertyHasASetter() { return propertySet != null; }
 
         public Type GetPropertyType() { return property.PropertyType; }
@@ -110,8 +111,7 @@ namespace com.csutil.editor {
         private void DrawInInspector(GUILayoutOption[] o) {
             EditorGUILayout.BeginHorizontal(o);
             GUI.enabled = PropertyHasASetter();
-            try { DrawEditorLayoutUi(o); }
-            catch (Exception e) { Log.w("Draw error for property " + propertyName + ": " + e); }
+            try { DrawEditorLayoutUi(o); } catch (Exception e) { Log.w("Draw error for property " + propertyName + ": " + e); }
             GUI.enabled = true;
             EditorGUILayout.EndHorizontal();
         }
@@ -143,8 +143,7 @@ namespace com.csutil.editor {
                     var v = GetValue() as UnityEngine.Object;
                     try {
                         SetValue(EditorGUILayout.ObjectField(GetLabelForProp(), v, GetPropertyType(), true, o));
-                    }
-                    catch { }
+                    } catch { }
                     break;
                 default:
                     break;
