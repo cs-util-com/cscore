@@ -48,6 +48,7 @@ namespace com.csutil.tests.model.immutable {
 
                 // Make sure the additional listeners did not make the Dispatch slower:
                 float t1t2Ratio = (float)t1.ElapsedMilliseconds / (float)t2.ElapsedMilliseconds;
+                Log.d("t1t2Ratio=" + t1t2Ratio);
                 Assert.True(0.5f < t1t2Ratio && t1t2Ratio < 1.5f, "t1t2Ratio=" + t1t2Ratio);
             }
             { // Now add the listeners directly to the store which slows down the Dispatches:

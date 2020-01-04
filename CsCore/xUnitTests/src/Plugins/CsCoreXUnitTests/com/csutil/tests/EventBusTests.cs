@@ -198,7 +198,7 @@ namespace com.csutil.tests {
             for (int i = 0; i < nrOfEventsSendOut; i++) {
                 eventBus.Publish(eventName);
             }
-            Assert.True(timing.IsUnderXms(10000));
+            Assert.True(timing.IsUnderXms(10000), "timing in ms was: " + timing.ElapsedMilliseconds);
             Assert.Equal(nrOfEventsSendOut, receivedEventsCounter);
 
         }
