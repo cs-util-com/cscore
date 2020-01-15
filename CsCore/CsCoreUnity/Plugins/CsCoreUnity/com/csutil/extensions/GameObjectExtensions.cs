@@ -69,6 +69,13 @@ namespace com.csutil {
             return true;
         }
 
+        public static Bounds GetRendererBoundsOfAllChildren(this GameObject self) {
+            Renderer[] renderers = self.GetComponentsInChildren<Renderer>();
+            var bounds = renderers.First().bounds;
+            foreach (Renderer renderer in renderers) { bounds.Encapsulate(renderer.bounds); }
+            return bounds;
+        }
+
     }
 
 }
