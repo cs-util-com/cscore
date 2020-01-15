@@ -217,6 +217,16 @@ namespace com.csutil.tests {
             });
         }
 
+        [Fact]
+        public async Task TestTaskWithTimeout() {
+            var t1 = TaskV2.Delay(50);
+            await t1.WithTimeout(100);
+            await Assert.ThrowsAsync<TimeoutException>(async () => {
+                Task t2 = TaskV2.Delay(100);
+                await t2.WithTimeout(50);
+            });
+        }
+
         private static async Task CreateAndRunATaskThatFails() {
             Task myFailedTask = null;
             await Assert.ThrowsAsync<AggregateException>(async () => {
