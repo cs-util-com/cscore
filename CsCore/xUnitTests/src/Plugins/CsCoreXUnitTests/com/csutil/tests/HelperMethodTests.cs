@@ -1,11 +1,16 @@
 using System;
 using System.Threading.Tasks;
 using com.csutil.datastructures;
+using System.Linq;
 using Xunit;
+using System.Reflection;
+using System.Collections.Generic;
 
 namespace com.csutil.tests {
 
     public class HelperMethodTests {
+
+        public HelperMethodTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
         [Fact]
         public void DelegateExtensions_Examples() {

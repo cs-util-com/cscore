@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using com.csutil.math;
 using Xunit;
 
 namespace com.csutil.tests {
