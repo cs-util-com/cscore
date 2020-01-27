@@ -48,6 +48,28 @@ namespace com.csutil.logging {
             return "" + arg;
         }
 
+        public virtual StopwatchV2 LogMethodEntered(string methodName, object[] args) {
+#if DEBUG
+            args = new StackFrame(2, true).AddTo(args);
+#endif
+            Log.d(" --> " + methodName, args);
+            if (!methodName.IsNullOrEmpty()) { AppFlow.TrackEvent(AppFlow.catMethod, methodName, args); }
+            return AssertV2.TrackTiming(methodName);
+        }
+
+        public virtual void LogMethodDone(Stopwatch timing, int maxAllowedTimeInMs, string sourceMemberName, string sourceFilePath, int sourceLineNumber) {
+            var timingV2 = timing as StopwatchV2;
+            string methodName = sourceMemberName;
+            if (timingV2 != null) {
+                timingV2.StopV2();
+                methodName = timingV2.methodName;
+            } else { timing.Stop(); }
+            var text = "    <-- " + methodName + " finished after " + timing.ElapsedMilliseconds + " ms";
+            if (timingV2 != null) { text += ", " + timingV2.GetAllocatedMemBetweenStartAndStop(); }
+            text = $"{text} \n at {sourceFilePath}: line {sourceLineNumber}";
+            Log.d(text, new StackFrame(1, true).AddTo(null));
+            if (maxAllowedTimeInMs > 0) { timing.AssertUnderXms(maxAllowedTimeInMs); }
+        }
     }
 
 }

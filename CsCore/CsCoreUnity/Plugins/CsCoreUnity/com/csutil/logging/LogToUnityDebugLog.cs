@@ -1,6 +1,8 @@
 using System;
 using System.Linq;
+using System.Threading;
 using UnityEngine;
+using UnityEngine.Profiling;
 
 namespace com.csutil.logging {
 
@@ -29,6 +31,16 @@ namespace com.csutil.logging {
 
         private static GameObject GetGoFrom(object[] args) {
             return args.Filter(x => x is GameObject).FirstOrDefault() as GameObject;
+        }
+
+        public override StopwatchV2 LogMethodEntered(string methodName, object[] args) {
+            Profiler.BeginSample(methodName, args.FirstOrDefault(x => x is UnityEngine.Object) as UnityEngine.Object);
+            return base.LogMethodEntered(methodName, args);
+        }
+
+        public override void LogMethodDone(System.Diagnostics.Stopwatch timing, int maxAllowedTimeInMs, string sourceMemberName, string sourceFilePath, int sourceLineNumber) {
+            Profiler.EndSample();
+            base.LogMethodDone(timing, maxAllowedTimeInMs, sourceMemberName, sourceFilePath, sourceLineNumber);
         }
 
     }

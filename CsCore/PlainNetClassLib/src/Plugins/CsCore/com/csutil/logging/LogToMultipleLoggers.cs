@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace com.csutil.logging {
@@ -23,6 +24,14 @@ namespace com.csutil.logging {
 
         public void LogWarning(string warning, params object[] args) {
             foreach (var logger in loggers) { logger.LogWarning(warning, args); }
+        }
+
+        public StopwatchV2 LogMethodEntered(string methodName, object[] args) {
+            return loggers.Map(l => l.LogMethodEntered(methodName, args)).FirstOrDefault();
+        }
+
+        public void LogMethodDone(Stopwatch timing, int maxAllowedTimeInMs, string sourceMemberName, string sourceFilePath, int sourceLineNumber) {
+            foreach (var l in loggers) { l.LogMethodDone(timing, maxAllowedTimeInMs, sourceMemberName, sourceFilePath, sourceLineNumber); }
         }
 
     }

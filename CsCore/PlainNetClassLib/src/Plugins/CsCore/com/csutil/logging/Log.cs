@@ -49,12 +49,7 @@ namespace com.csutil {
         private static T Get<T>(this object[] args) { return args != null ? (T)args.FirstOrDefault(x => x is T) : default(T); }
 
         public static StopwatchV2 MethodEntered([CallerMemberName] string methodName = null, params object[] args) {
-#if DEBUG
-            args = new StackFrame(1, true).AddTo(args);
-#endif
-            Log.d(" --> " + methodName, args);
-            if (!methodName.IsNullOrEmpty()) { AppFlow.TrackEvent(AppFlow.catMethod, methodName, args); }
-            return AssertV2.TrackTiming(methodName);
+            return instance.LogMethodEntered(methodName, args);
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_FULL_LOGGING")]
@@ -62,17 +57,7 @@ namespace com.csutil {
                     [CallerMemberName] string sourceMemberName = null,
                     [CallerFilePath] string sourceFilePath = null,
                     [CallerLineNumber] int sourceLineNumber = 0) {
-            var timingV2 = timing as StopwatchV2;
-            string methodName = sourceMemberName;
-            if (timingV2 != null) {
-                timingV2.StopV2();
-                methodName = timingV2.methodName;
-            } else { timing.Stop(); }
-            var text = "    <-- " + methodName + " finished after " + timing.ElapsedMilliseconds + " ms";
-            if (timingV2 != null) { text += ", " + timingV2.GetAllocatedMemBetweenStartAndStop(); }
-            text = $"{text} \n at {sourceFilePath}: line {sourceLineNumber}";
-            Log.d(text, new StackFrame(1, true).AddTo(null));
-            if (maxAllowedTimeInMs > 0) { timing.AssertUnderXms(maxAllowedTimeInMs); }
+            instance.LogMethodDone(timing, maxAllowedTimeInMs, sourceMemberName, sourceFilePath, sourceLineNumber);
         }
 
         public static string ToArgsStr(object[] args, Func<object, string> toString) {
