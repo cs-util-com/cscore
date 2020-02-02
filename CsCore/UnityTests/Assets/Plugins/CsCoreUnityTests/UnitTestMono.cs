@@ -4,6 +4,13 @@ using UnityEngine;
 
 namespace com.csutil.tests {
 
+    /// <summary>
+    /// This class can be instantiated by any normal runtime unit test and then its RunTest() method can be called, e.g.:
+    /// <para/>  public class MyUiScreen1Tests {
+    /// <para/>     [UnityTest] 
+    /// <para/>     public IEnumerator MyTestCase1() { yield return UnitTestMono.LoadAndRunUiTest("MyUiScreen1"); }
+    /// <para/>  } 
+    /// </summary>
     public abstract class UnitTestMono : MonoBehaviour {
 
         /// <summary> Creates a new view stack and adds the specified Prefab to this stack </summary>
