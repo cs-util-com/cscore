@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace com.csutil {
@@ -65,8 +66,7 @@ namespace com.csutil {
                     Task<T> task = taskToTry();
                     var result = await task;
                     if (!task.IsFaulted && !task.IsFaulted) { return result; }
-                }
-                catch (Exception e) { onError.InvokeIfNotNull(e); }
+                } catch (Exception e) { onError.InvokeIfNotNull(e); }
                 retryCount++;
                 int delay = (int)(Math.Pow(2, retryCount) - timer.ElapsedMilliseconds);
                 if (delay > maxDelayInMs && maxDelayInMs > 0) { delay = maxDelayInMs; }
@@ -76,6 +76,16 @@ namespace com.csutil {
                 }
             } while (true);
 
+        }
+
+        public static async Task RunRepeated(Func<Task<bool>> task, int delayInMsBetweenIterations, CancellationToken t, int delayInMsBeforeFirstExecution = 0, float repetitions = -1) {
+            if (delayInMsBeforeFirstExecution > 0) { await Delay(delayInMsBeforeFirstExecution); }
+            while (repetitions != 0) {
+                t.ThrowIfCancellationRequested();
+                if (!await task()) { break; }
+                await TaskV2.Delay(delayInMsBetweenIterations);
+                repetitions--;
+            }
         }
 
     }

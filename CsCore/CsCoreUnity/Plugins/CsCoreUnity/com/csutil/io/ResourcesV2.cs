@@ -22,13 +22,13 @@ namespace com.csutil {
 #endif
             var prefabInstance = GameObject.Instantiate(prefab) as GameObject;
             prefabInstance.name = "Prefab:" + pathInResourcesFolder;
-            EventBus.instance.Publish(AppFlow.catPrefab, prefabInstance);
+            EventBus.instance.Publish(AppFlow.catTemplate, prefabInstance);
             return prefabInstance;
         }
 
         public static void ActivatePrefabLoadTracking(this IAppFlow self) {
-            EventBus.instance.Subscribe(self, AppFlow.catPrefab, (GameObject prefab) => {
-                self.TrackEvent(AppFlow.catPrefab, "Loaded_" + prefab.name, prefab);
+            EventBus.instance.Subscribe(self, AppFlow.catTemplate, (GameObject prefab) => {
+                self.TrackEvent(AppFlow.catTemplate, "Loaded_" + prefab.name, prefab);
             });
         }
 

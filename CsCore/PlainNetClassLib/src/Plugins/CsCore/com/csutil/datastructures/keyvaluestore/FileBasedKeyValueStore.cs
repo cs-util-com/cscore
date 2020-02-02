@@ -8,6 +8,12 @@ namespace com.csutil.keyvaluestore {
 
     public class FileBasedKeyValueStore : IKeyValueStore {
 
+        /// <summary> Will create a new store instance </summary>
+        /// <param name="folderName"> e.g. "MyPersistedElems1" </param>
+        public static FileBasedKeyValueStore New(string folderName) {
+            return new FileBasedKeyValueStore(EnvironmentV2.instance.GetRootAppDataFolder().GetChildDir(folderName));
+        }
+
         private DirectoryInfo folderForAllFiles;
         public IKeyValueStore fallbackStore { get; set; }
 

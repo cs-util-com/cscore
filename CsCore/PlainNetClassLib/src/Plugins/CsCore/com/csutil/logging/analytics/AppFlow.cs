@@ -10,12 +10,13 @@ namespace com.csutil {
         public const string catError = "error";
         public const string catMutation = "mutation";
 
-        public const string catUi = "ui";
-        public const string catPrefab = "prefab";
-        public const string catLinked = "linked";
-        public const string catView = "view";
-        public const string catPresenter = "presenter";
         public const string catInjection = "injection";
+
+        public const string catUi = "ui";
+        public const string catView = "view";
+        public const string catLinked = "linked";
+        public const string catPresenter = "presenter";
+        public const string catTemplate = "template";
 
         public static IAppFlow instance;
 

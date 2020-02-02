@@ -75,9 +75,26 @@ namespace com.csutil.tests.http {
 
             var hasInet = false;
             var hasNoInet = false;
-            await RestFactory.instance.CheckInetConnection(() => { hasInet = true; }, () => { hasNoInet = true; });
+            await RestFactory.instance.HasInternet(() => { hasInet = true; }, () => { hasNoInet = true; });
             Assert.True(hasInet || hasNoInet); // Any of the 2 callbacks was triggered
         }
+
+
+    }
+
+    public class HasInternetTests : IHasInternetListener {
+
+        private bool hasInet;
+
+        [Fact]
+        public async Task TestInternetStateListener() {
+            InternetStateManager.AddListener(this);
+            Assert.False(InternetStateManager.Get(this).hasInet);
+            await TaskV2.Delay(2000);
+            Assert.True(hasInet);
+        }
+
+        public async Task OnHasInternet(bool hasInet) { this.hasInet = hasInet; }
 
     }
 

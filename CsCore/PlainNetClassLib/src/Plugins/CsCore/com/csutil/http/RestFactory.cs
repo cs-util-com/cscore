@@ -19,7 +19,7 @@ namespace com.csutil.http {
             return pingReply.RoundtripTime; // return ping in MS
         }
 
-        public async Task<bool> CheckInetConnection(Action hasInet, Action noInet = null, string ip = "8.8.8.8", int timeoutMs = 500) {
+        public async Task<bool> HasInternet(Action hasInet = null, Action noInet = null, string ip = "8.8.8.8", int timeoutMs = 500) {
             var ping = await GetCurrentPing(ip, timeoutMs);
             if (ping > 0) { hasInet.InvokeIfNotNull(); return true; } else { noInet.InvokeIfNotNull(); return false; }
         }

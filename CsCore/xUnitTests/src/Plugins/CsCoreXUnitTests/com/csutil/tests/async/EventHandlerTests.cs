@@ -143,35 +143,6 @@ namespace com.csutil.tests.async {
             Assert.False(myStringParamWasBad);
         }
 
-        [Fact]
-        public async Task TestTaskV2() {
-
-            Log.d("Now testing TaskV2.Run");
-            await TaskV2.Run(() => {
-                var t = Log.MethodEntered("1");
-                TaskV2.Delay(100).ContinueWith(delegate {
-                    Log.MethodDone(t);
-                });
-            });
-
-            Log.d("Now testing async TaskV2.Run");
-            await TaskV2.Run(async () => {
-                var t = Log.MethodEntered("2");
-                await TaskV2.Delay(100);
-                Log.MethodDone(t);
-            });
-
-            Log.d("Now testing async TaskV2.Run with return value");
-            var result = await TaskV2.Run(async () => {
-                var t = Log.MethodEntered("3");
-                await TaskV2.Delay(100);
-                Log.MethodDone(t);
-                return "3";
-            });
-            Assert.Equal("3", result);
-
-        }
-
     }
 
 }
