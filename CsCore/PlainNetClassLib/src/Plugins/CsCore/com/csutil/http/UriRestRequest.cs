@@ -26,7 +26,11 @@ namespace com.csutil.http {
 
         public RestRequest WithRequestHeaders(Headers requestHeaders) { this.requestHeaders = requestHeaders; return this; }
 
-        public async Task<T> GetResult<T>() { return jsonReader.Read<T>(await (await request).Content.ReadAsStringAsync()); }
+        public async Task<T> GetResult<T>() {
+            var respText = await (await request).Content.ReadAsStringAsync();
+            if (typeof(T) == typeof(string)) { return (T)(object)respText; }
+            return jsonReader.Read<T>(respText);
+        }
 
         public async Task<Headers> GetResultHeaders() { return new Headers((await request).Headers); }
 
