@@ -16,13 +16,13 @@ namespace com.csutil {
                 linkMap.Add(link.id, link);
                 //link.NowLoadedIntoLinkMap(links); // TODO?
             }
-            EventBus.instance.Publish(AppFlow.catLinked, self, linkMap);
+            EventBus.instance.Publish(EventConsts.catLinked, self, linkMap);
             return linkMap;
         }
 
         public static void ActivateLinkMapTracking(this IAppFlow self) {
-            EventBus.instance.Subscribe(self, AppFlow.catLinked, (GameObject target, Dictionary<string, Link> links) => {
-                self.TrackEvent(AppFlow.catLinked, $"Collect_{links.Count}_Links_" + target.name, target, links);
+            EventBus.instance.Subscribe(self, EventConsts.catLinked, (GameObject target, Dictionary<string, Link> links) => {
+                self.TrackEvent(EventConsts.catLinked, $"Collect_{links.Count}_Links_" + target.name, target, links);
             });
         }
 

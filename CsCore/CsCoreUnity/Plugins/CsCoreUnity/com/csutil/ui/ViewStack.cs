@@ -18,7 +18,7 @@ namespace com.csutil.ui {
         /// <param name="newView"> The new view to show in the stack </param>
         public GameObject ShowView(GameObject newView) {
             gameObject.AddChild(newView);
-            EventBus.instance.Publish(UiEvents.SHOW_VIEW, newView);
+            EventBus.instance.Publish(EventConsts.SHOW_VIEW, newView);
             return newView;
         }
 
@@ -47,7 +47,7 @@ namespace com.csutil.ui {
             if (currentIndex > 0) {
                 var lastView = transform.GetChild(currentIndex - 1).gameObject;
                 lastView.SetActiveV2(true);
-                EventBus.instance.Publish(UiEvents.SWITCH_BACK_TO_LAST_VIEW, "" + currentView, lastView);
+                EventBus.instance.Publish(EventConsts.SWITCH_BACK_TO_LAST_VIEW, "" + currentView, lastView);
             }
             if (currentIndex == 0 && !destroyFinalView) { return false; }
             if (hideNotDestroyCurrentView) {
@@ -68,7 +68,7 @@ namespace com.csutil.ui {
             if (currentIndex >= transform.childCount - 1) { return false; }
             var nextView = transform.GetChild(currentIndex + 1).gameObject;
             nextView.SetActiveV2(true);
-            EventBus.instance.Publish(UiEvents.SWITCH_TO_NEXT_VIEW, currentView, nextView);
+            EventBus.instance.Publish(EventConsts.SWITCH_TO_NEXT_VIEW, currentView, nextView);
             if (hideCurrentView) { currentView.SetActiveV2(false); }
             return true;
         }

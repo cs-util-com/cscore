@@ -23,9 +23,9 @@ namespace com.csutil.ui {
         public static async Task<T> LoadModelIntoView<T>(this Presenter<T> self, T model) {
             AssertV2.IsNotNull(self.targetView, "presenter.targetView");
             var name = self.GetType().Name + "_((" + model.GetType().Name + "))";
-            AppFlow.TrackEvent(AppFlow.catPresenter, "Load-start:" + name, self, model);
+            AppFlow.TrackEvent(EventConsts.catPresenter, "Load-start:" + name, self, model);
             await self.OnLoad(model);
-            AppFlow.TrackEvent(AppFlow.catPresenter, "Load-done:" + name, self, model);
+            AppFlow.TrackEvent(EventConsts.catPresenter, "Load-done:" + name, self, model);
             return model;
         }
 

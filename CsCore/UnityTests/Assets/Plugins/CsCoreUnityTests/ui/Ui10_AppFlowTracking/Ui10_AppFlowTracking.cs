@@ -29,7 +29,7 @@ namespace com.csutil.tests.ui {
 
             setupImmutableDatastore();
             // In setupImmutableDatastore() Log.MethodEntered is used, so there must be a recorded method:
-            Assert.AreEqual(1, testTracker.recordedEvents.Count(x => x.category == AppFlow.catMethod));
+            Assert.AreEqual(1, testTracker.recordedEvents.Count(x => x.category == EventConsts.catMethod));
             // In setupImmutableDatastore() the datastore will be set as a singleton:
             Assert.AreEqual(1, testTracker.recordedEvents.Count(x => x.action.Contains("DataStore")));
 
@@ -40,15 +40,15 @@ namespace com.csutil.tests.ui {
             Assert.AreEqual(true, store.GetState().subSection1.bool1);
             Assert.AreEqual("abc", store.GetState().subSection1.string1);
             // After the 2 mutations, there should be 2 mutation AppFlow events recorded:
-            Assert.AreEqual(2, testTracker.recordedEvents.Count(x => x.category == AppFlow.catMutation));
+            Assert.AreEqual(2, testTracker.recordedEvents.Count(x => x.category == EventConsts.catMutation));
 
             var presenter = new MyDataModelPresenter();
             presenter.targetView = gameObject;
             yield return presenter.LoadModelIntoView(store).AsCoroutine();
             // After the presenter loaded the UI there should be a load start and load end event recorded:
-            Assert.AreEqual(2, testTracker.recordedEvents.Count(x => x.category == AppFlow.catPresenter));
+            Assert.AreEqual(2, testTracker.recordedEvents.Count(x => x.category == EventConsts.catPresenter));
             // The MyDataModelPresenter uses a GetLinkMap() when connecting to the view:
-            Assert.AreEqual(1, testTracker.recordedEvents.Count(x => x.category == AppFlow.catLinked));
+            Assert.AreEqual(1, testTracker.recordedEvents.Count(x => x.category == EventConsts.catLinked));
 
             yield return new WaitForSeconds(1);
 

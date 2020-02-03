@@ -133,14 +133,14 @@ namespace com.csutil {
     public static class AppFlowUiExtensions {
 
         public static void ActivateViewStackTracking(this IAppFlow self) {
-            EventBus.instance.Subscribe(self, UiEvents.SHOW_VIEW, (GameObject view) => {
-                self.TrackEvent(AppFlow.catView, UiEvents.SHOW_VIEW + "_" + view.name, view);
+            EventBus.instance.Subscribe(self, EventConsts.SHOW_VIEW, (GameObject view) => {
+                self.TrackEvent(EventConsts.catView, EventConsts.SHOW_VIEW + "_" + view.name, view);
             });
-            EventBus.instance.Subscribe(self, UiEvents.SWITCH_BACK_TO_LAST_VIEW, (string currentViewName, GameObject lastView) => {
-                self.TrackEvent(AppFlow.catView, UiEvents.SWITCH_BACK_TO_LAST_VIEW + "_" + currentViewName + "->" + lastView.name, lastView);
+            EventBus.instance.Subscribe(self, EventConsts.SWITCH_BACK_TO_LAST_VIEW, (string currentViewName, GameObject lastView) => {
+                self.TrackEvent(EventConsts.catView, EventConsts.SWITCH_BACK_TO_LAST_VIEW + "_" + currentViewName + "->" + lastView.name, lastView);
             });
-            EventBus.instance.Subscribe(self, UiEvents.SWITCH_TO_NEXT_VIEW, (GameObject currentView, GameObject nextView) => {
-                self.TrackEvent(AppFlow.catView, UiEvents.SWITCH_TO_NEXT_VIEW + "_" + currentView.name + "->" + nextView.name, currentView, nextView);
+            EventBus.instance.Subscribe(self, EventConsts.SWITCH_TO_NEXT_VIEW, (GameObject currentView, GameObject nextView) => {
+                self.TrackEvent(EventConsts.catView, EventConsts.SWITCH_TO_NEXT_VIEW + "_" + currentView.name + "->" + nextView.name, currentView, nextView);
             });
         }
 
@@ -148,17 +148,17 @@ namespace com.csutil {
 
             // Button UI tracking:
             EventBus.instance.Subscribe(self, UiEvents.BUTTON_CLICKED, (Button button) => {
-                self.TrackEvent(AppFlow.catUi, UiEvents.BUTTON_CLICKED + "_" + button, button);
+                self.TrackEvent(EventConsts.catUi, UiEvents.BUTTON_CLICKED + "_" + button, button);
             });
 
             // Toggle UI tracking:
             EventBus.instance.Subscribe(self, UiEvents.TOGGLE_CHANGED, (Toggle toggle, bool isChecked) => {
-                self.TrackEvent(AppFlow.catUi, UiEvents.TOGGLE_CHANGED + "_" + toggle + "_" + isChecked, toggle, isChecked);
+                self.TrackEvent(EventConsts.catUi, UiEvents.TOGGLE_CHANGED + "_" + toggle + "_" + isChecked, toggle, isChecked);
             });
 
             // InputField UI tracking:
             EventHandler<string> action = (input, newText) => {
-                self.TrackEvent(AppFlow.catUi, UiEvents.INPUTFIELD_CHANGED + "_" + input, input);
+                self.TrackEvent(EventConsts.catUi, UiEvents.INPUTFIELD_CHANGED + "_" + input, input);
             };
             var delayedAction = action.AsThrottledDebounce(delayInMs: 1900, skipFirstEvent: true);
             EventBus.instance.Subscribe(self, UiEvents.INPUTFIELD_CHANGED, (InputField input, string newText) => {

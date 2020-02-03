@@ -38,13 +38,13 @@ namespace com.csutil.logging.analytics {
             store.Set(e.time + "__" + category + ":" + action, e);
         }
 
-        public class AppFlowEvent {
-            public long time { get; set; } = DateTime.UtcNow.ToUnixTimestampUtc();
-            public string cat { get; set; }
-            public string action { get; set; }
-            public object[] args { get; set; }
-        }
+    }
 
+    public class AppFlowEvent {
+        public long time { get; set; } = DateTime.UtcNow.ToUnixTimestampUtc();
+        public string cat { get; set; }
+        public string action { get; set; }
+        public object[] args { get; set; }
     }
 
 }

@@ -15,7 +15,7 @@ namespace com.csutil.injection {
             var eventKey = GetEventKey<T>();
             if (HasInjectorRegistered<T>()) { Log.w("There are already injectors registered for " + eventKey); }
             usedEventBus.Subscribe(injector, eventKey, createServiceAction);
-            AppFlow.TrackEvent(AppFlow.catInjection, "Register_" + eventKey);
+            AppFlow.TrackEvent(EventConsts.catInjection, "Register_" + eventKey);
         }
 
         public T Get<T>(object caller, bool createIfNull = true) {

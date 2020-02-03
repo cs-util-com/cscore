@@ -23,7 +23,7 @@ namespace com.csutil.model.immutable {
             return (IDataStore<T> store) => {
                 return (Dispatcher innerDispatcher) => {
                     Dispatcher outerDispatcher = (action) => {
-                        AppFlow.TrackEvent(AppFlow.catMutation, "" + action, action);
+                        AppFlow.TrackEvent(EventConsts.catMutation, "" + action, action);
                         return innerDispatcher(action);
                     };
                     return outerDispatcher;

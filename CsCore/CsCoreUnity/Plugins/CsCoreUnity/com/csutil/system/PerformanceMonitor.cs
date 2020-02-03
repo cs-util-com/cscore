@@ -17,7 +17,7 @@ namespace com.csutil.system {
             Application.lowMemory -= LogLowMemory;
         }
 
-        private void LogLowMemory() { AppFlow.TrackEvent(AppFlow.catError, "System reports: Low memory warning!"); }
+        private void LogLowMemory() { AppFlow.TrackEvent(EventConsts.catError, "System reports: Low memory warning!"); }
 
 
     }

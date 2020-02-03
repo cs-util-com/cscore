@@ -40,7 +40,7 @@ namespace com.csutil.ui.elements {
                 }
                 Log.w("Cant switch screen in direction " + switchDirection);
             }
-            AppFlow.TrackEvent(AppFlow.catView, "switchViewWasRejected");
+            AppFlow.TrackEvent(EventConsts.catView, "switchViewWasRejected");
             return false;
         }
 

@@ -53,7 +53,7 @@ namespace com.csutil.logging {
             args = new StackFrame(2, true).AddTo(args);
 #endif
             Log.d(" --> " + methodName, args);
-            if (!methodName.IsNullOrEmpty()) { AppFlow.TrackEvent(AppFlow.catMethod, methodName, args); }
+            if (!methodName.IsNullOrEmpty()) { AppFlow.TrackEvent(EventConsts.catMethod, methodName, args); }
             return AssertV2.TrackTiming(methodName);
         }
 

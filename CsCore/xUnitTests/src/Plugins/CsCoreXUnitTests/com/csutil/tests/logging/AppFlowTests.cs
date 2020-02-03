@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using com.csutil.keyvaluestore;
-using com.csutil.logging;
 using com.csutil.logging.analytics;
 using Xunit;
 
@@ -60,7 +56,9 @@ namespace com.csutil.tests {
                 eventsThatWereSent.Add(appFlowEvent);
                 return true;
             }
+
         }
 
     }
+
 }
