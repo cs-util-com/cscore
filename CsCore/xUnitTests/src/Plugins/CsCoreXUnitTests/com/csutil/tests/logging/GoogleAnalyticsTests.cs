@@ -12,20 +12,35 @@ namespace com.csutil.tests.logging {
         // https://analytics.google.com/analytics/web/?pli=1#/report/content-event-events/a130164002w221792235p210768996/
         private const string TEST_APP_KEY = "UA-130164002-5";
 
+        public GoogleAnalyticsTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
+
         [Fact]
-        public async Task TestAppFlowToGoogleAnalytics1() {
-            var tracker = new GoogleAnalyticsTracker(TEST_APP_KEY, new InMemoryKeyValueStore()) {
-                url = GoogleAnalyticsTracker.DEBUG_ENDPOINT // Use the debug endpoint
+        public async Task TestSendEventToGA() {
+            var googleAnalytics = new GoogleAnalytics(TEST_APP_KEY, new InMemoryKeyValueStore()) {
+                url = GoogleAnalytics.DEBUG_ENDPOINT // Use the debug endpoint
             };
             // Test if the GA debug endpoint is returning that the request is valid:
-            var e1 = new AppFlowEvent() { cat = "cat1", action = "action1" };
-            var res1 = await tracker.SendGaEvent(e1, "label1", value: 123).GetResult<GoogleAnalyticsDebugResp>();
-            Assert.True(res1.hitParsingResult.First().valid, JsonWriter.AsPrettyString(res1));
+            var e = googleAnalytics.NewEvent("cat1", "action1", "label1", value: 123);
+            var res = await googleAnalytics.SendToGA(e).GetResult<GoogleAnalyticsDebugResp>();
+            Log.d(JsonWriter.AsPrettyString(res));
+            Assert.True(res.hitParsingResult.First().valid, JsonWriter.AsPrettyString(res));
+        }
+
+        [Fact]
+        public async Task TestSendTimingToGA() {
+            var googleAnalytics = new GoogleAnalytics(TEST_APP_KEY, new InMemoryKeyValueStore()) {
+                url = GoogleAnalytics.DEBUG_ENDPOINT // Use the debug endpoint
+            };
+            // Test if the GA debug endpoint is returning that the request is valid:
+            var e = googleAnalytics.NewTiming("cat1", "var1", timingInMs: 22);
+            var res = await googleAnalytics.SendToGA(e).GetResult<GoogleAnalyticsDebugResp>();
+            Log.d(JsonWriter.AsPrettyString(res));
+            Assert.True(res.hitParsingResult.First().valid, JsonWriter.AsPrettyString(res));
         }
 
         [Fact]
         public async Task TestAppFlowToGoogleAnalytics2() {
-            var tracker = new GoogleAnalyticsTracker(TEST_APP_KEY, new InMemoryKeyValueStore());
+            var tracker = new GoogleAnalytics(TEST_APP_KEY, new InMemoryKeyValueStore());
             AppFlow.instance = tracker;
             Log.MethodEntered(); // This will internally notify the AppFlow instance
             var count1 = (await tracker.store.GetAllKeys()).Count();
