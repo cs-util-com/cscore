@@ -64,6 +64,7 @@ namespace com.csutil.logging {
                 timingV2.StopV2();
                 methodName = timingV2.methodName;
             } else { timing.Stop(); }
+            AppFlow.TrackEvent(EventConsts.catMethod, methodName + " DONE", timing);
             var text = "    <-- " + methodName + " finished after " + timing.ElapsedMilliseconds + " ms";
             if (timingV2 != null) { text += ", " + timingV2.GetAllocatedMemBetweenStartAndStop(); }
             text = $"{text} \n at {sourceFilePath}: line {sourceLineNumber}";

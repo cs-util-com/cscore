@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using com.csutil.http;
@@ -24,7 +25,11 @@ namespace com.csutil.logging.analytics {
 
         protected override async Task<bool> SendEventToExternalSystem(AppFlowEvent e) {
             ExtractScreenName(e);
-            await SendToGA(NewEvent(e.cat, e.action)).GetResult<string>();
+            if (e.args?.FirstOrDefault(x => x is Stopwatch) is Stopwatch timing) {
+                await SendToGA(NewTiming(e.cat, e.action, timingInMs: timing.ElapsedMilliseconds)).GetResult<string>();
+            } else {
+                await SendToGA(NewEvent(e.cat, e.action)).GetResult<string>();
+            }
             return true;
         }
 
@@ -33,7 +38,7 @@ namespace com.csutil.logging.analytics {
             return new Uri(url + "?" + RestRequestHelper.ToUriEncodedString(parameters)).SendGET();
         }
 
-        public Timing NewTiming(string category, string varName, int timingInMs) {
+        public Timing NewTiming(string category, string varName, long timingInMs) {
             return new Timing() { tid = appId, cd = latestScreen, utc = category, utv = varName, utt = timingInMs };
         }
 
@@ -135,7 +140,7 @@ namespace com.csutil.logging.analytics {
             /// <summary> user timing variable </summary>
             public string utv;
             /// <summary> user timing value. The value is in milliseconds </summary>
-            public int? utt;
+            public long? utt;
 
         }
 
