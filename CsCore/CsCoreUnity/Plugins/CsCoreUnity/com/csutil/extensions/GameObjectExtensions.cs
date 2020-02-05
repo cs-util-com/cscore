@@ -25,6 +25,7 @@ namespace com.csutil {
 
         public static GameObject GetChild(this GameObject self, string childName) { return self.transform.Find(childName)?.gameObject; }
         public static GameObject GetChild(this GameObject self, int index) { return self.transform.GetChild(index)?.gameObject; }
+        public static IEnumerable<GameObject> GetChildren(this GameObject self) { return self.transform.Cast<Transform>().Map(x => x.gameObject); }
 
         public static int GetChildCount(this GameObject self) { return self.transform.childCount; }
 

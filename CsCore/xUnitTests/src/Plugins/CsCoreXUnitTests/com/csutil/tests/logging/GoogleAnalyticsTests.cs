@@ -39,7 +39,7 @@ namespace com.csutil.tests.logging {
         }
 
         [Fact]
-        public async Task TestAppFlowToGoogleAnalytics2() {
+        public async Task TestAppFlowToGoogleAnalytics() {
             var tracker = new GoogleAnalytics(TEST_APP_KEY, new InMemoryKeyValueStore());
             AppFlow.instance = tracker;
             Log.MethodEntered(); // This will internally notify the AppFlow instance

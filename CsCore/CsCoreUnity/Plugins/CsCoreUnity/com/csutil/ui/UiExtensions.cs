@@ -2,6 +2,7 @@
 using com.csutil.ui;
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -126,6 +127,13 @@ namespace com.csutil {
                     updateUi(newVal);
                 }
             });
+        }
+
+        public static int CalcCurrentMaxSortingOrderInLayer(this Canvas self) {
+            var l = ResourcesV2.FindAllInScene<Canvas>().Filter(x =>
+                x.gameObject.activeInHierarchy && x.enabled && x != self && x.sortingLayerID == self.sortingLayerID
+            );
+            return l.Max(x => x.sortingOrder);
         }
 
     }
