@@ -69,6 +69,12 @@ namespace com.csutil.logging.analytics {
         // Examples at https://developers.google.com/analytics/devguides/collection/protocol/v1/devguide#overview
         public class BaseMsg {
 
+            public BaseMsg(string type) { t = type; }
+
+            // Event hit type. Must be one of: 
+            // 'pageview', 'screenview', 'event', 'transaction', 'item', 'social', 'exception', 'timing' 
+            public readonly string t = "event";
+
             /// <summary> An id generated in a static context to be used for all events </summary>
             public static string SESSION_ID = Guid.NewGuid().ToString();
             /// <summary> Anonymous Client ID. Required if uid not specified. A UUID associated with particular user, device, or browser instance. </summary>
@@ -107,9 +113,7 @@ namespace com.csutil.logging.analytics {
 
         public class Event : BaseMsg {
 
-            // Event hit type. Must be one of: 
-            // 'pageview', 'screenview', 'event', 'transaction', 'item', 'social', 'exception', 'timing' 
-            public readonly string t = "event";
+            public Event() : base("event") { }
 
             /// <summary> Event category. Must not be empty. </summary>
             public string ec;
@@ -124,9 +128,7 @@ namespace com.csutil.logging.analytics {
 
         public class Timing : BaseMsg {
 
-            // Event hit type. Must be one of: 
-            // 'pageview', 'screenview', 'event', 'transaction', 'item', 'social', 'exception', 'timing' 
-            public readonly string t = "timing";
+            public Timing() : base("timing") { }
 
             /// <summary> user timing category </summary>
             public string utc;

@@ -32,8 +32,8 @@ namespace com.csutil.tests.logging {
                 url = GoogleAnalytics.DEBUG_ENDPOINT // Use the debug endpoint
             };
             // Test if the GA debug endpoint is returning that the request is valid:
-            var e = googleAnalytics.NewTiming("cat1", "var1", timingInMs: 22);
-            var res = await googleAnalytics.SendToGA(e).GetResult<GoogleAnalyticsDebugResp>();
+            var t = googleAnalytics.NewTiming("cat1", "var1", timingInMs: 22);
+            var res = await googleAnalytics.SendToGA(t).GetResult<GoogleAnalyticsDebugResp>();
             Log.d(JsonWriter.AsPrettyString(res));
             Assert.True(res.hitParsingResult.First().valid, JsonWriter.AsPrettyString(res));
         }
