@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,6 +15,18 @@ namespace com.csutil.tests.logging {
         private const string TEST_APP_KEY = "UA-130164002-5";
 
         public GoogleAnalyticsTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
+
+        [Fact]
+        public async Task TestConvertEventToQueryParams() {
+            var googleAnalytics = new GoogleAnalytics(TEST_APP_KEY, new InMemoryKeyValueStore()) {
+                url = GoogleAnalytics.DEBUG_ENDPOINT // Use the debug endpoint
+            };
+            var e = googleAnalytics.NewEvent("cat1", "action1", "label1", value: 123);
+            var queryParams = RestRequestHelper.ToUriEncodedString(e);
+            var fullUrl = googleAnalytics.url + "?" + queryParams;
+            var res = await new Uri(fullUrl).SendGET().GetResult<GoogleAnalyticsDebugResp>();
+            Assert.True(res.hitParsingResult.First().valid, JsonWriter.AsPrettyString(res));
+        }
 
         [Fact]
         public async Task TestSendEventToGA() {

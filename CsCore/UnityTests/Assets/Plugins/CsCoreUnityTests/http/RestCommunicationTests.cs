@@ -93,6 +93,16 @@ namespace com.csutil.tests.http {
         }
 
         [UnityTest]
+        public IEnumerator TestPingViaHeadRequest() {
+            var pingTask = new UnityRestFactory().GetCurrentPingViaHeadRequest("8.8.8.8");
+            yield return pingTask.AsCoroutine();
+            var pingInMs = pingTask.Result;
+            Assert.AreNotEqual(-1, pingInMs);
+            Assert.True(0 <= pingInMs && pingInMs < 500, "pingInMs=" + pingInMs);
+            Log.d("pingInMs took " + pingInMs + "ms");
+        }
+
+        [UnityTest]
         public IEnumerator TestGetCurrentPingViaRestFactory() {
             Task<long> pingTask = RestFactory.instance.GetCurrentPing();
             yield return pingTask.AsCoroutine();

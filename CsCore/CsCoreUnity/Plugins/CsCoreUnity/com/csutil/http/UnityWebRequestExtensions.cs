@@ -79,7 +79,7 @@ namespace com.csutil {
 
         private static void HandleResult<T>(UnityWebRequest self, Response<T> resp) {
             if (self.isNetworkError || self.isHttpError) {
-                resp.onError(self, new Exception(self.error));
+                resp.onError.InvokeIfNotNull(self, new Exception("[" + self.responseCode + "] " + self.error));
             } else {
                 try {
                     if (resp.onResult != null) { resp.onResult(self.GetResult<T>()); } else {
