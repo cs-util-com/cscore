@@ -16,6 +16,7 @@ namespace com.csutil.testing {
 
             public object classInstance;
             public MethodInfo methodToTest;
+            public string name;
             public Task testTask;
             public Action StartTest;
             public object invokeResult;
@@ -24,6 +25,7 @@ namespace com.csutil.testing {
             public Test(object classInstance, MethodInfo methodToTest) {
                 this.classInstance = classInstance;
                 this.methodToTest = methodToTest;
+                this.name = methodToTest.ToStringV2();
             }
 
             public override string ToString() {

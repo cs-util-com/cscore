@@ -28,7 +28,7 @@ namespace com.csutil.keyvaluestore {
 
         private async Task<T> WrapWithTry<T>(Func<Task<T>> f, T defaultValue) {
             try { return await f(); } catch (Exception e) {
-                if (IsOnBlackList(e)) { throw e; } else { onError.InvokeIfNotNull(e); }
+                if (IsOnBlackList(e)) { throw; } else { onError.InvokeIfNotNull(e); }
             }
             return defaultValue;
         }

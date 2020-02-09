@@ -31,14 +31,14 @@ namespace com.csutil.tests {
             AppFlow.instance = tracker;
             Log.MethodEntered(); // This will internally notify the AppFlow instance
             Assert.True((await tracker.store.GetAllKeys()).Count() > 0);
-            await Task.Delay(3000);
+            await TaskV2.Delay(3000);
             // After 3 seconds all events should have been sent to the external system:
             Assert.Empty(await tracker.store.GetAllKeys());
             // Make sure the DefaultAppFlowImpl itself does not create more events while sending the existing ones: 
             for (int i = 0; i < 5; i++) {
-                await Task.Delay(100);
+                await TaskV2.Delay(100);
                 var c1 = tracker.eventsThatWereSent.Count;
-                await Task.Delay(100);
+                await TaskV2.Delay(100);
                 var c2 = tracker.eventsThatWereSent.Count;
                 Assert.Equal(c1, c2);
             }

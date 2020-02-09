@@ -18,7 +18,7 @@ namespace com.csutil.testing {
             entryButton.SetOnClickAction(delegate {
                 GetComponentInParent<XunitTestRunnerUi>().RunTest(test);
             });
-            testName.text = test.methodToTest.ToStringV2();
+            testName.text = test.name;
             if (test.testTask == null) {
                 testStatus.text = "Not started yet";
                 entryBackground.color = Color.white;

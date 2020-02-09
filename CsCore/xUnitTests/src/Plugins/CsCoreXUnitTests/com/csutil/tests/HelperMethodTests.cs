@@ -227,7 +227,7 @@ namespace com.csutil.tests {
             var t1 = TaskV2.Delay(50);
             await t1.WithTimeout(100);
             await Assert.ThrowsAsync<TimeoutException>(async () => {
-                Task t2 = TaskV2.Delay(100);
+                Task t2 = TaskV2.Delay(300);
                 await t2.WithTimeout(50);
             });
         }

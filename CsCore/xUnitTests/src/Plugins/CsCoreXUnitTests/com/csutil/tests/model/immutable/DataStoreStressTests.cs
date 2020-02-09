@@ -22,9 +22,7 @@ namespace com.csutil.tests.model.immutable {
                 var counterA1 = 0;
                 var subListenersA = store.NewSubStateListener(s => s.substateA);
                 for (int i = 0; i < listenerCount; i++) {
-                    subListenersA.AddStateChangeListener(substateA => substateA.valA, newValA => {
-                        counterA1++;
-                    });
+                    subListenersA.AddStateChangeListener(substateA => substateA.valA, newValA => counterA1++);
                 }
                 t1 = Log.MethodEntered("ActionChangeSubstateA");
                 store.Dispatch(new ActionChangeSubstateA() { newVal = "a2" });
@@ -36,9 +34,7 @@ namespace com.csutil.tests.model.immutable {
                 var counterB1 = 0;
                 var subListenersB = store.NewSubStateListener(s => s.substateB);
                 for (int i = 0; i < listenerCount; i++) {
-                    subListenersB.AddStateChangeListener(substateB => substateB.valB, newValB => {
-                        counterB1++;
-                    });
+                    subListenersB.AddStateChangeListener(substateB => substateB.valB, newValB => counterB1++);
                 }
                 t2 = Log.MethodEntered("ActionChangeSubstateB");
                 store.Dispatch(new ActionChangeSubstateB() { newVal = "b2" });

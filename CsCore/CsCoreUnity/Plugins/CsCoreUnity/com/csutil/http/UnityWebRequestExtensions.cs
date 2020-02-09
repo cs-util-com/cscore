@@ -102,7 +102,7 @@ namespace com.csutil {
             }
             if (TypeCheck.AreEqual<T, Headers>()) { return (T)(object)self.GetResponseHeadersV2(); }
             var text = self.downloadHandler.text;
-            if (TypeCheck.AreEqual<T, String>()) { return (T)(object)text; }
+            if (TypeCheck.AreEqual<T, string>()) { return (T)(object)text; }
             return r.Read<T>(text);
         }
 

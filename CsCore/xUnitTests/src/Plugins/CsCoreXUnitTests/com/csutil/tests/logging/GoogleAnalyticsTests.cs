@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using com.csutil.http;
 using com.csutil.keyvaluestore;
 using com.csutil.logging.analytics;
 using Xunit;
@@ -28,6 +29,7 @@ namespace com.csutil.tests.logging {
 
         [Fact]
         public async Task TestSendTimingToGA() {
+            Log.e("rest factory type: " + IoC.inject.Get<RestFactory>(this).GetType());
             var googleAnalytics = new GoogleAnalytics(TEST_APP_KEY, new InMemoryKeyValueStore()) {
                 url = GoogleAnalytics.DEBUG_ENDPOINT // Use the debug endpoint
             };
@@ -47,7 +49,7 @@ namespace com.csutil.tests.logging {
             Log.MethodDone(t);
             var count1 = (await tracker.store.GetAllKeys()).Count();
             Assert.True(count1 > 0);
-            await Task.Delay(3000);
+            await TaskV2.Delay(3000);
             var count2 = (await tracker.store.GetAllKeys()).Count();
             Assert.True(count2 < count1, "count2=" + count2 + ", count1=" + count1);
         }

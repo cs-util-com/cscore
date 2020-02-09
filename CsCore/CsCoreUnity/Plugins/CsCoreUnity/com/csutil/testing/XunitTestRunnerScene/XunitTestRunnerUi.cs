@@ -18,6 +18,7 @@ namespace com.csutil.testing {
             "e.g. MyNamespace.MyClass1, MyAssembly1",
             "com.csutil.tests.MathTests, CsCoreXUnitTests"
         };
+        private List<XunitTestRunner.Test> allTests;
 
         protected override void Start() {
             base.Start();
@@ -41,6 +42,10 @@ namespace com.csutil.testing {
             links.Get<Button>("StartButton").SetOnClickAction((_) => {
                 CollectTests(assembliesToTest, links);
             });
+            links.Get<InputField>("SearchInput").SetOnValueChangedActionThrottled((newSearchText) => {
+                newSearchText = newSearchText.ToLower();
+                CellData = allTests.Filter(t => t.name.ToLower().Contains(newSearchText)).ToList();
+            }, 200);
         }
 
         private void CollectTests(IEnumerable<Assembly> assembliesToTest, Dictionary<string, Link> links) {
@@ -48,7 +53,7 @@ namespace com.csutil.testing {
                 if (assembly == null) { return new Type[0]; } // return emtpy list
                 return assembly.GetExportedTypes();
             });
-            var allTests = XunitTestRunner.CollectAllTests(allClasses, (test) => {
+            allTests = XunitTestRunner.CollectAllTests(allClasses, (test) => {
                 // callback before a test is executed
             });
             AssertV2.AreNotEqual(0, allTests.Count);

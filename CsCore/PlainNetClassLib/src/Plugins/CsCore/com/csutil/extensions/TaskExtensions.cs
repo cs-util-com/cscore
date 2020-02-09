@@ -15,13 +15,13 @@ namespace com.csutil {
         }
 
         public static async Task<T> WithTimeout<T>(this Task<T> self, int timeoutInMs) {
-            var completedTask = await Task.WhenAny(self, Task.Delay(timeoutInMs));
+            var completedTask = await Task.WhenAny(self, TaskV2.Delay(timeoutInMs));
             if (completedTask != self) { throw new TimeoutException(); }
             return await self;  // use await to propagate exceptions
         }
 
         public static async Task WithTimeout(this Task self, int timeoutInMs) {
-            var completedTask = await Task.WhenAny(self, Task.Delay(timeoutInMs));
+            var completedTask = await Task.WhenAny(self, TaskV2.Delay(timeoutInMs));
             if (completedTask != self) { throw new TimeoutException(); }
             await self;  // use await to propagate exceptions
         }

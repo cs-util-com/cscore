@@ -66,5 +66,19 @@ namespace com.csutil.tests.async {
 
         }
 
+        [Fact]
+        public async Task testNotAwaitingAsyncTask() {
+            bool b1 = false, b2 = false;
+            RunSomeAsyncTask(() => b1 = true);
+            Assert.False(b1);
+            await RunSomeAsyncTask(() => b2 = true);
+            Assert.True(b2);
+            Assert.True(b1);
+        }
+
+        private async Task RunSomeAsyncTask(Action p) {
+            await TaskV2.Delay(50);
+            p();
+        }
     }
 }
