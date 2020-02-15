@@ -114,7 +114,6 @@ namespace com.csutil.tests.model.immutable {
             public readonly MyUser1 user;
             public ServerOutbox serverOutbox { get; set; }
             public MyAppState1(MyUser1 user = null) { this.user = user; }
-
         }
 
         private class MyUser1 {

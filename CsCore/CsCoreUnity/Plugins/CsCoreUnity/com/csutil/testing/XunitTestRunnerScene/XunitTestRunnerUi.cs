@@ -49,7 +49,7 @@ namespace com.csutil.testing {
         }
 
         private void CollectTests(IEnumerable<Assembly> assembliesToTest, Dictionary<string, Link> links) {
-            var allClasses = assembliesToTest.ReduceToUnion(assembly => {
+            var allClasses = assembliesToTest.SelectMany(assembly => {
                 if (assembly == null) { return new Type[0]; } // return emtpy list
                 return assembly.GetExportedTypes();
             });

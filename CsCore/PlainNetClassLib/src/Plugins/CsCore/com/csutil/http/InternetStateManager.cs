@@ -10,6 +10,7 @@ namespace com.csutil {
 
         /// <summary> This method will be called roughly every second with the current internet state </summary>
         /// <param name="hasInet"> true if currently internet is available </param>
+        /// <returns> A task that will be avaited before the next listener is informed </returns>
         Task OnHasInternet(bool hasInet);
 
     }
@@ -29,10 +30,12 @@ namespace com.csutil {
         public readonly CancellationTokenSource cancelToken = new CancellationTokenSource();
 
         public InternetStateManager() {
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             TaskV2.RunRepeated(async () => {
                 await HasInet(await RestFactory.instance.HasInternet());
                 return true;
-            }, delayInMsBetweenIterations: 1000, cancelToken.Token);
+            }, delayInMsBetweenIterations: 3000, cancelToken.Token);
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         }
 
         public void Dispose() { cancelToken.Cancel(); }

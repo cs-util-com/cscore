@@ -45,10 +45,13 @@ namespace com.csutil.tests.async {
             var counter = 0;
             var cancel = new CancellationTokenSource();
             {
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                 TaskV2.RunRepeated(async () => {
+                    await TaskV2.Delay(1);
                     counter++;
                     return counter < 3; // stop repeated execution once 3 is reached
                 }, delayInMsBetweenIterations: 300, cancel.Token, delayInMsBeforeFirstExecution: 200);
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             }
             { // while the repeated task is running check over time if the counter increases:
                 await TaskV2.Delay(100);
@@ -69,7 +72,9 @@ namespace com.csutil.tests.async {
         [Fact]
         public async Task testNotAwaitingAsyncTask() {
             bool b1 = false, b2 = false;
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             RunSomeAsyncTask(() => b1 = true);
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             Assert.False(b1);
             await RunSomeAsyncTask(() => b2 = true);
             Assert.True(b2);
@@ -80,5 +85,7 @@ namespace com.csutil.tests.async {
             await TaskV2.Delay(50);
             p();
         }
+
     }
+
 }

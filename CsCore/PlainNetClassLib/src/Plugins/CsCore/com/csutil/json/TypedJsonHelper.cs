@@ -1,4 +1,5 @@
 namespace com.csutil.json {
+
     public class TypedJsonHelper {
 
         public static IJsonReader NewTypedJsonReader() { return new JsonNetReader(JsonNetSettings.typedJsonSettings, null); }

@@ -88,13 +88,16 @@ namespace com.csutil.tests.http {
 
         [Fact]
         public async Task TestInternetStateListener() {
-            InternetStateManager.AddListener(this);
+            await InternetStateManager.AddListener(this);
             Assert.False(InternetStateManager.Get(this).hasInet);
-            await TaskV2.Delay(2000);
+            Assert.False(hasInet);
+            await TaskV2.Delay(2500);
             Assert.True(hasInet);
         }
 
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public async Task OnHasInternet(bool hasInet) { this.hasInet = hasInet; }
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 
     }
 

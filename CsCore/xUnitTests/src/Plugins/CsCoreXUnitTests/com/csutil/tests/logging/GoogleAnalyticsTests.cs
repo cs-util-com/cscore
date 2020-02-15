@@ -42,7 +42,6 @@ namespace com.csutil.tests.logging {
 
         [Fact]
         public async Task TestSendTimingToGA() {
-            Log.e("rest factory type: " + IoC.inject.Get<RestFactory>(this).GetType());
             var googleAnalytics = new GoogleAnalytics(TEST_APP_KEY, new InMemoryKeyValueStore()) {
                 url = GoogleAnalytics.DEBUG_ENDPOINT // Use the debug endpoint
             };
