@@ -52,14 +52,11 @@ namespace com.csutil {
 
         /// <summary> Returns true if the GameObject is null because it was destroyed </summary>
         // == operator overloaded by gameObject but reference still exists:
-        public static bool IsDestroyed(this GameObject self) { return self == null && !ReferenceEquals(self, null); }
+        public static bool IsDestroyed(this UnityEngine.Object self) { return self == null && !ReferenceEquals(self, null); }
 
-        /// <summary> Returns true if the Component is null because it was destroyed </summary>
-        public static bool IsDestroyed(this Component self) { return self == null && !ReferenceEquals(self, null); }
-
-        public static bool Destroy(this GameObject self, bool destroyNextFrame = false) {
+        public static bool Destroy(this UnityEngine.Object self, bool destroyNextFrame = false) {
             if (self == null) { return false; }
-            try { if (destroyNextFrame) { GameObject.Destroy(self); } else { GameObject.DestroyImmediate(self); } } catch { return false; }
+            try { if (destroyNextFrame) { UnityEngine.Object.Destroy(self); } else { GameObject.DestroyImmediate(self); } } catch { return false; }
             AssertV2.IsTrue(self.IsDestroyed(), "gameObject was not destroyed");
             return true;
         }
