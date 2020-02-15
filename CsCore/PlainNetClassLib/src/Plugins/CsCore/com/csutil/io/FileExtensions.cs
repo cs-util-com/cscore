@@ -240,6 +240,10 @@ namespace com.csutil {
             return ByteSizeToString.ByteSizeToReadableString(self.GetFileSize());
         }
 
+        public static string GetNameWithoutExtension(this FileInfo self) {
+            return Path.GetFileNameWithoutExtension(self.Name);
+        }
+
     }
 
 }
