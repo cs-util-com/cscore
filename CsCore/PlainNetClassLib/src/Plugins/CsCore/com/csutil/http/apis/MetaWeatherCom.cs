@@ -8,11 +8,10 @@ namespace com.csutil.http.apis {
 
     public class MetaWeather {
 
-        public static void GetWeather(string cityName, Action<MetaWeatherReport.Report> onResult) {
-            MetaWeatherLocationLookup.GetLocation(cityName).ContinueWith(foundLocations => {
-                var whereOnEarthID = foundLocations.Result.First().woeid;
-                MetaWeatherReport.GetReport(whereOnEarthID).ContinueWith(weatherReports => onResult(weatherReports.Result));
-            });
+        public static async Task<MetaWeatherReport.Report> GetWeather(string cityName) {
+            var foundLocations = await MetaWeatherLocationLookup.GetLocation(cityName);
+            var whereOnEarthID = foundLocations.First().woeid;
+            return await MetaWeatherReport.GetReport(whereOnEarthID);
         }
 
     }
@@ -34,7 +33,7 @@ namespace com.csutil.http.apis {
 
             public string location_type { get; set; }
 
-            // Where On Earth ID - see http://developer.yahoo.com/geo/geoplanet/guide/concepts.html
+            /// <summary> Where On Earth ID - see http://developer.yahoo.com/geo/geoplanet/guide/concepts.html </summary>
             public int woeid { get; set; }
 
             public string latt_long { get; set; }

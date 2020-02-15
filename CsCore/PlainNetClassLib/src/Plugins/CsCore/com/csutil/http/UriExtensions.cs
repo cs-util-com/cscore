@@ -1,7 +1,8 @@
+using System;
 using System.Net.Http;
 using com.csutil.http;
 
-namespace System {
+namespace com.csutil {
 
     public static class UriExtensions {
 

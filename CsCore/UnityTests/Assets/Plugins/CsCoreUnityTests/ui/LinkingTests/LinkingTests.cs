@@ -47,16 +47,13 @@ namespace com.csutil.tests.ui {
                 var counter = 0;
                 toggle.SetOnValueChangedAction((isNowChecked) => {
                     counter++;
-                    if (isNowChecked) { return true; }
                     return false;
                 });
                 Assert.AreNotEqual(true, toggle.isOn);
                 toggle.isOn = true;
                 Assert.AreEqual(true, toggle.isOn);
-                Assert.AreEqual(1, counter);
-                toggle.isOn = false;
-                Assert.AreEqual(true, toggle.isOn);
-                Assert.AreEqual(2, counter);
+                // The toggle was switched via code so the valueChanged listener should not be notified:
+                Assert.AreEqual(0, counter);
             }
             {
                 var input = links.Get<InputField>("Input Field 1");
@@ -64,17 +61,13 @@ namespace com.csutil.tests.ui {
                 var counter = 0;
                 input.SetOnValueChangedAction((newValue) => {
                     counter++;
-                    if (newValue == "1") { return true; }
-                    Assert.AreEqual("2", newValue);
                     return false;
                 });
                 Assert.AreNotEqual("1", input.text);
                 input.text = "1";
                 Assert.AreEqual("1", input.text);
-                Assert.AreEqual(1, counter);
-                input.text = "2";
-                Assert.AreEqual("1", input.text);
-                Assert.AreEqual(2, counter);
+                // The input field was switched via code so the valueChanged listener should not be notified:
+                Assert.AreEqual(0, counter);
             }
         }
 
@@ -89,12 +82,12 @@ namespace com.csutil.tests.ui {
         [Test]
         public void TestLinkMaps() {
             bool prefabLoadedEventReceived = false;
-            EventBus.instance.Subscribe(new object(), IoEvents.PREFAB_LOADED, () => { prefabLoadedEventReceived = true; });
+            EventBus.instance.Subscribe(new object(), EventConsts.catTemplate, () => { prefabLoadedEventReceived = true; });
             GameObject prefab = ResourcesV2.LoadPrefab("ExamplePrefab1.prefab");
             Assert.IsTrue(prefabLoadedEventReceived);
 
             bool linkMapCreationEventReceived = false;
-            EventBus.instance.Subscribe(new object(), LinkingEvents.LINK_MAP_CREATED, () => { linkMapCreationEventReceived = true; });
+            EventBus.instance.Subscribe(new object(), EventConsts.catLinked, () => { linkMapCreationEventReceived = true; });
             var links = prefab.GetLinkMap();
             Assert.IsTrue(linkMapCreationEventReceived);
 

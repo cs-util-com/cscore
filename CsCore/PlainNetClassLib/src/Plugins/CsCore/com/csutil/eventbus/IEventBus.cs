@@ -8,9 +8,11 @@ namespace com.csutil.eventbus {
 
         List<object> Publish(string eventName, params object[] parameters);
 
+        IEnumerable<object> NewPublishIEnumerable(string eventName, params object[] parameters);
+
         void Subscribe(object subscriber, string eventName, Delegate callback);
 
-        ICollection<object> GetSubscribersFor(string eventName);
+        IEnumerable<object> GetSubscribersFor(string eventName);
 
         bool Unsubscribe(object subscriber, string eventName);
         bool UnsubscribeAll(object subscriber);

@@ -9,8 +9,6 @@ namespace com.csutil.animations {
 
     public class MoveAlongVelocityPath : MonoBehaviour {
 
-        
-
         public float moveOmega = 3;
         public float rotateOmega = 3;
 

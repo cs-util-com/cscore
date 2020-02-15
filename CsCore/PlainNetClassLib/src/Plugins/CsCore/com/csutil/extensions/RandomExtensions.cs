@@ -6,23 +6,15 @@ namespace com.csutil {
     public static class RandomExtensions {
 
         public static double NextDouble(this Random random, double lowerBound, double upperBound) {
-            var resolutionFactor = 2; // To avoid problems with max and min double values
+            double resolutionFactor = 2; // To avoid problems with max and min double values
             upperBound = upperBound / resolutionFactor;
             lowerBound = lowerBound / resolutionFactor;
-            var f = (upperBound - lowerBound) * random.NextDouble() + lowerBound;
+            double f = (upperBound - lowerBound) * random.NextDouble() + lowerBound;
             return f * resolutionFactor;
         }
 
-        private const float halfMinFloat = float.MinValue / 2f;
-
         public static float NextFloat(this Random random, float lowerBound = 0, float upperBound = 1) {
-            float f = GetRndValueInHalfFloatRange(random);
-            // f is now a value between float.MinValue/2 and float.MaxValue/2 so scale it to the range 0-1:
-            var resolutionFactor = 2; // To avoid problems with max and min float values
-            upperBound = upperBound / resolutionFactor;
-            lowerBound = lowerBound / resolutionFactor;
-            f = (upperBound - lowerBound) / float.MaxValue * (f - halfMinFloat);
-            return (f + lowerBound) * resolutionFactor;
+            return (float)(NextDouble(random, lowerBound, upperBound));
         }
 
         // Returns a value between float.MinValue/2 and float.MaxValue/2

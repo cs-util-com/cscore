@@ -16,17 +16,32 @@ namespace com.csutil {
 
         /// <summary> Used for lazy-initialization of a GameObject, combine with go.GetOrAddComponent </summary>
         public static GameObject GetOrAddChild(this GameObject parentGo, string childName) {
-            var childGo = parentGo.transform.Find(childName);
-            if (childGo != null) { return childGo.gameObject; } // child found, return it
-            var newChild = new GameObject(childName);        // no child found, create it
+            var childGo = GetChild(parentGo, childName);
+            if (childGo != null) { return childGo; } // child found, return it
+            var newChild = new GameObject(childName); // no child found, create it
             newChild.transform.SetParent(parentGo.transform, false); // add it to parent
             return newChild;
         }
+
+        public static GameObject GetChild(this GameObject self, string childName) { return self.transform.Find(childName)?.gameObject; }
+        public static GameObject GetChild(this GameObject self, int index) { return self.transform.GetChild(index)?.gameObject; }
+        public static IEnumerable<GameObject> GetChildren(this GameObject self) { return self.transform.Cast<Transform>().Map(x => x.gameObject); }
+
+        public static int GetChildCount(this GameObject self) { return self.transform.childCount; }
 
         /// <summary> Used for lazy-initialization of a Mono, combine with go.GetOrAddChild </summary>
         public static T GetOrAddComponent<T>(this GameObject self) where T : Component {
             var existingComp = self.GetComponent<T>();
             return existingComp == null ? self.AddComponent<T>() : existingComp;
+        }
+
+        /// <summary> Searches recursively upwards in all parents until a comp of type T is found </summary>
+        public static T GetComponentInParents<T>(this GameObject gameObject) where T : Component {
+            var comp = gameObject.GetComponent<T>();
+            if (comp != null) { return comp; }
+            var parent = gameObject.GetParent();
+            if (parent != null && parent != gameObject) { return parent.GetComponentInParents<T>(); }
+            return null;
         }
 
         /// <summary> Returns the parent GameObject or null if top scene level is reached </summary>
@@ -37,17 +52,26 @@ namespace com.csutil {
 
         /// <summary> Returns true if the GameObject is null because it was destroyed </summary>
         // == operator overloaded by gameObject but reference still exists:
-        public static bool IsDestroyed(this GameObject self) { return self == null && !ReferenceEquals(self, null); }
+        public static bool IsDestroyed(this UnityEngine.Object self) { return self == null && !ReferenceEquals(self, null); }
 
-        /// <summary> Returns true if the Component is null because it was destroyed </summary>
-        public static bool IsDestroyed(this Component self) { return self == null && !ReferenceEquals(self, null); }
-
-        public static bool Destroy(this GameObject self, bool destroyNextFrame = false) {
+        public static bool Destroy(this UnityEngine.Object self, bool destroyNextFrame = false) {
             if (self == null) { return false; }
-            try { if (destroyNextFrame) { GameObject.Destroy(self); } else { GameObject.DestroyImmediate(self); } }
-            catch { return false; }
+            try { if (destroyNextFrame) { UnityEngine.Object.Destroy(self); } else { GameObject.DestroyImmediate(self); } } catch { return false; }
             AssertV2.IsTrue(self.IsDestroyed(), "gameObject was not destroyed");
             return true;
+        }
+
+        public static bool SetActiveV2(this GameObject self, bool active) {
+            if (self == null) { return false; }
+            self.SetActive(active);
+            return true;
+        }
+
+        public static Bounds GetRendererBoundsOfAllChildren(this GameObject self) {
+            Renderer[] renderers = self.GetComponentsInChildren<Renderer>();
+            var bounds = renderers.First().bounds;
+            foreach (Renderer renderer in renderers) { bounds.Encapsulate(renderer.bounds); }
+            return bounds;
         }
 
     }

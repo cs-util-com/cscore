@@ -1,5 +1,7 @@
 using System;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using com.csutil.http;
@@ -9,63 +11,45 @@ namespace com.csutil.http {
     internal class UriRestRequest : RestRequest, IDisposable {
 
         private Uri uri;
-        public Action<UriRestRequest, HttpResponseMessage> handleResult;
         public IJsonReader jsonReader = JsonReader.GetReader();
-        private Task sendTask;
         private Headers requestHeaders;
+        private Task<HttpResponseMessage> request;
+        private HttpClient client;
+        private HttpContent httpContent;
 
         public UriRestRequest(Uri uri) { this.uri = uri; }
 
-        public Task<T> GetResult<T>(Action<T> successCallback) {
-            Task<string> readResultTask = null;
-            T result = default(T); // Init in case the request fails
-            handleResult = (self, resp) => {
-                using (readResultTask = resp.Content.ReadAsStringAsync()) {
-                    result = ParseResultStringInto<T>(readResultTask.Result);
-                    successCallback.InvokeIfNotNull(result);
-                }
-            };
-            return sendTask.ContinueWith<T>((_) => {
-                if (readResultTask != null) { readResultTask.Wait(); }
-                if (sendTask.Status != TaskStatus.RanToCompletion) {
-                    Log.e("Web-request failed, returned result will be null");
-                }
-                return result;
-            });
-        }
-
-        private T ParseResultStringInto<T>(string result) { return jsonReader.Read<T>(result); }
-
-        public RestRequest Send(HttpMethod method) {
-            sendTask = new Task(() => {
-                Thread.Sleep(5); // wait 5ms so that the created RestRequest can be modified before its sent
-                using (var c = new HttpClient()) {
-                    AddRequestHeaders(c, requestHeaders);
-                    using (var asyncRestRequest = c.SendAsync(new HttpRequestMessage(method, uri))) {
-                        asyncRestRequest.Wait(); //helps so that other thread can set handleResult in time
-                        handleResult.InvokeIfNotNull(this, asyncRestRequest.Result); // calling resp.Result blocks the thread
-                    }
-                }
-            });
-            sendTask.Start();
+        public RestRequest WithTextContent(string textContent, Encoding encoding, string mediaType) {
+            httpContent = new StringContent(textContent, encoding, mediaType);
             return this;
         }
 
-        public void Dispose() { sendTask.Dispose(); }
+        public RestRequest WithRequestHeaders(Headers requestHeaders) { this.requestHeaders = requestHeaders; return this; }
 
-        private static bool AddRequestHeaders(HttpClient self, Headers requestHeadersToAdd) {
-            if (requestHeadersToAdd.IsNullOrEmpty()) { return false; }
-            bool r = true;
-            foreach (var h in requestHeadersToAdd) {
-                if (!self.DefaultRequestHeaders.TryAddWithoutValidation(h.Key, h.Value)) {
-                    Log.e("Could not add header to request: " + h);
-                    r = false;
-                }
-            }
-            return r;
+        public async Task<T> GetResult<T>() {
+            var respText = await (await request).Content.ReadAsStringAsync();
+            if (typeof(T) == typeof(string)) { return (T)(object)respText; }
+            return jsonReader.Read<T>(respText);
         }
 
-        public RestRequest WithRequestHeaders(Headers requestHeaders) { this.requestHeaders = requestHeaders; return this; }
+        public async Task<Headers> GetResultHeaders() { return new Headers((await request).Headers); }
+
+        public RestRequest Send(HttpMethod method) { request = SendAsync(method); return this; }
+
+        public async Task<HttpResponseMessage> SendAsync(HttpMethod method) {
+            client = new HttpClient();
+            await TaskV2.Delay(5); // Wait so that the created RestRequest can be modified before its sent
+            client.AddRequestHeaders(requestHeaders);
+            var message = new HttpRequestMessage(method, uri);
+            if (httpContent != null) { message.Content = httpContent; }
+            request = client.SendAsync(message);
+            return await request;
+        }
+
+        public void Dispose() {
+            request?.Dispose();
+            client?.Dispose();
+        }
 
     }
 

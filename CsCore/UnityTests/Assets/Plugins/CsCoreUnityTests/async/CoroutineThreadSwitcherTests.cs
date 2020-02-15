@@ -4,55 +4,61 @@ using System.Collections;
 using System.Threading;
 using UnityEngine.TestTools;
 using NUnit.Framework;
+using System.Threading.Tasks;
 
 namespace com.csutil.tests.async {
 
     public class CoroutineThreadSwitcherTests {
 
         [UnityTest]
-        public IEnumerator TestRunTaskInBackground() {
-            var myMono = new GameObject().GetOrAddComponent<MyExampleMono1>();
+        public IEnumerator TestMixingBackgroundAndMainThread() {
+            var timing = Log.MethodEntered("TestMixingBackgroundAndMainThread");
 
-            myMono.StartCoroutineInBgThread(MyBackgroundCoroutine1());
-            yield return myMono.StartCoroutine(MyNormalCoroutine1(myMono));
-        }
+            var backgroundTask1IsDone = false;
+            yield return TaskRunner.instance.RunInBackground(async (c) => {
+                Assert.IsFalse(MainThread.isMainThread);
+                await TaskV2.Delay(100);
+                backgroundTask1IsDone = true;
+            }).AsCoroutine();
 
-        IEnumerator MyBackgroundCoroutine1() {
-            var t = Log.MethodEntered();
-
-            Assert.IsFalse(MainThread.isMainThread);
-            Thread.Sleep(2000); // Won't block the main thread
-
-            yield return ThreadSwitcher.ToMainThread;
+            Assert.IsTrue(backgroundTask1IsDone);
             Assert.IsTrue(MainThread.isMainThread);
 
-            yield return ThreadSwitcher.ToBackgroundThread;
-            Assert.IsFalse(MainThread.isMainThread);
-            yield return new WaitForSeconds(1.0f); // WaitForSeconds on background
+            var backgroundTask2 = TaskRunner.instance.RunInBackground(async (c) => {
+                Assert.IsFalse(MainThread.isMainThread);
+                await TaskV2.Delay(100);
+                c.ThrowIfCancellationRequested();
+                return "some result";
+            });
+            yield return backgroundTask2.AsCoroutine();
+            Assert.IsTrue(backgroundTask2.task.IsCompleted);
+            Assert.AreEqual("some result", backgroundTask2.task.Result);
 
-            Assert.IsTrue(t.ElapsedMilliseconds > 3000, "t=" + t.ElapsedMilliseconds);
-            Log.MethodDone(t);
+            Assert.IsTrue(timing.ElapsedMilliseconds > 200, "t=" + timing.ElapsedMilliseconds);
+            Log.MethodDone(timing);
         }
 
-        IEnumerator MyNormalCoroutine1(MonoBehaviour x) {
-            var t = Log.MethodEntered();
-            AsyncTask task;
-            x.StartCoroutineInBgThread(MyBackgroundCoroutine1(), out task);
-            yield return x.StartCoroutine(task.Wait());
-            Assert.AreEqual(TaskState.Done, task.State);
+        [UnityTest]
+        public IEnumerator TestTaskCancel() {
+            var timing = Log.MethodEntered("TestTaskCancel");
 
-            x.StartCoroutineInBgThread(MyNeverEndingBackgroundCoroutine1(), out task);
-            yield return new WaitForSeconds(1.0f);
-            task.Cancel();
-            Assert.AreEqual(TaskState.Cancelled, task.State);
-            Log.MethodDone(t);
-        }
+            var counter = 0;
+            var task1 = TaskRunner.instance.RunInBackground(async (c) => {
+                Assert.IsFalse(MainThread.isMainThread);
+                for (int i = 0; i < int.MaxValue; i++) {
+                    await TaskV2.Delay(10);
+                    counter++;
+                    c.ThrowIfCancellationRequested();
+                }
+            });
+            yield return new WaitForSeconds(0.5f);
+            task1.cancelTask();
+            yield return task1.AsCoroutine();
+            Assert.IsTrue(task1.task.IsCanceled);
+            Assert.IsTrue(counter > 10, "counter=" + counter);
+            Assert.IsTrue(counter < 20, "counter=" + counter);
 
-        IEnumerator MyNeverEndingBackgroundCoroutine1() {
-            var t = Log.MethodEntered();
-            Assert.IsFalse(MainThread.isMainThread);
-            for (int i = 0; i < int.MaxValue; i++) { Thread.Sleep(10000); Log.d("TaskWhichWillBeCancelled Loop"); }
-            yield return null;
+            Log.MethodDone(timing);
         }
 
     }

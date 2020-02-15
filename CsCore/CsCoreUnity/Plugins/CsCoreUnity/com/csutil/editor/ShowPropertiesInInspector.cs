@@ -9,34 +9,32 @@ namespace com.csutil.editor {
 
     /// <summary> 
     /// A custom inspector that automatically shows all public properties in the inspector 
-    /// If the compile constant DISABLE_CSUTIL_PROPERTY_MAGIC is set to true a property must have
-    /// the [ShowInInspector] annotation to show in the Unity inspector
+    /// If the compile constant ENABLE_CSUTIL_PROPERTY_MAGIC is NOT set to true manually
+    /// a property must have the [ShowInInspector] annotation to show in the Unity inspector
     /// </summary>
     internal class ShowPropertiesInInspector {
         // Initial idea from http://wiki.unity3d.com/index.php/Expose_properties_in_inspector
 
         internal static ShowPropertiesInInspector[] GetPropertiesToDraw(System.Object obj) {
             if (obj == null) { return null; }
+            // Skip all UnityEngine classes:
+            var nameSpace = obj.GetType().Namespace;
+            if (nameSpace != null && nameSpace.StartsWith("UnityEngine")) { return null; }
+
             var readableProps = obj.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).Where(p => p.CanRead);
 
             var propertyInspectorUis = new List<ShowPropertiesInInspector>();
             foreach (PropertyInfo property in readableProps) {
                 var type = SerializedPropertyType.Integer;
                 if (GetPropertyType(property, out type)) {
-                    if (HasAttribute<HideInInspector>(property)) { continue; }
-#if DISABLE_CSUTIL_PROPERTY_MAGIC
-                    if (!HasAttribute<ShowInInspectorAttribute>(property)) { continue; }
+                    if (property.HasAttribute<HideInInspector>(true)) { continue; }
+#if !ENABLE_CSUTIL_PROPERTY_MAGIC
+                    if (!property.HasAttribute<ShowPropertyInInspector>()) { continue; }
 #endif
                     propertyInspectorUis.Add(new ShowPropertiesInInspector(obj, property, type));
                 }
             }
             return propertyInspectorUis.ToArray();
-        }
-
-        private static bool HasAttribute<T>(MemberInfo self) {
-            var attributesOfPropertyField = self.GetCustomAttributes(true);
-            foreach (var attr in attributesOfPropertyField) { if (attr.GetType() == typeof(T)) { return true; } }
-            return false;
         }
 
         internal static void DrawInInspector(ShowPropertiesInInspector[] properties) {
@@ -113,7 +111,7 @@ namespace com.csutil.editor {
         private void DrawInInspector(GUILayoutOption[] o) {
             EditorGUILayout.BeginHorizontal(o);
             GUI.enabled = PropertyHasASetter();
-            DrawEditorLayoutUi(o);
+            try { DrawEditorLayoutUi(o); } catch (Exception e) { Log.w("Draw error for property " + propertyName + ": " + e); }
             GUI.enabled = true;
             EditorGUILayout.EndHorizontal();
         }
@@ -121,30 +119,30 @@ namespace com.csutil.editor {
         private void DrawEditorLayoutUi(GUILayoutOption[] o) {
             switch (propertyType) {
                 case SerializedPropertyType.Integer:
-                    SetValue(EditorGUILayout.IntField(propertyName, (int)GetValue(), o));
+                    SetValue(EditorGUILayout.IntField(GetLabelForProp(), (int)GetValue(), o));
                     break;
                 case SerializedPropertyType.Float:
-                    SetValue(EditorGUILayout.FloatField(propertyName, (float)GetValue(), o));
+                    SetValue(EditorGUILayout.FloatField(GetLabelForProp(), (float)GetValue(), o));
                     break;
                 case SerializedPropertyType.Boolean:
-                    SetValue(EditorGUILayout.Toggle(propertyName, (bool)GetValue(), o));
+                    SetValue(EditorGUILayout.Toggle(GetLabelForProp(), (bool)GetValue(), o));
                     break;
                 case SerializedPropertyType.String:
-                    SetValue(EditorGUILayout.TextField(propertyName, (String)GetValue(), o));
+                    SetValue(EditorGUILayout.TextField(GetLabelForProp(), (String)GetValue(), o));
                     break;
                 case SerializedPropertyType.Vector2:
-                    SetValue(EditorGUILayout.Vector2Field(propertyName, (Vector2)GetValue(), o));
+                    SetValue(EditorGUILayout.Vector2Field(GetLabelForProp(), (Vector2)GetValue(), o));
                     break;
                 case SerializedPropertyType.Vector3:
-                    SetValue(EditorGUILayout.Vector3Field(propertyName, (Vector3)GetValue(), o));
+                    SetValue(EditorGUILayout.Vector3Field(GetLabelForProp(), (Vector3)GetValue(), o));
                     break;
                 case SerializedPropertyType.Enum:
-                    SetValue(EditorGUILayout.EnumPopup(propertyName, (Enum)GetValue(), o));
+                    SetValue(EditorGUILayout.EnumPopup(GetLabelForProp(), (Enum)GetValue(), o));
                     break;
                 case SerializedPropertyType.ObjectReference:
                     var v = GetValue() as UnityEngine.Object;
-                    try { 
-                        SetValue(EditorGUILayout.ObjectField(propertyName, v, GetPropertyType(), true, o));
+                    try {
+                        SetValue(EditorGUILayout.ObjectField(GetLabelForProp(), v, GetPropertyType(), true, o));
                     } catch { }
                     break;
                 default:
@@ -152,6 +150,7 @@ namespace com.csutil.editor {
             }
         }
 
+        private string GetLabelForProp() { return "Prop.:" + propertyName; }
     }
 
 }

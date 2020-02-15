@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
-
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
@@ -14,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\PlainNetClassLib\PlainNetClassLib.csproj" />
+    <ProjectReference Include="..\PlainNetClassLib\AaaaaRenameMeAaaaa_PlainNetClasses.csproj" />
   </ItemGroup>
 
 </Project>

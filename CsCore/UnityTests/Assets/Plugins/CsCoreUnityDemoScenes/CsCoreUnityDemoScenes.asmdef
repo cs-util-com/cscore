@@ -2,7 +2,8 @@
     "name": "CsCoreUnityDemoScenes",
     "references": [
         "CsCore",
-        "CsCoreUnity"
+        "CsCoreUnity",
+        "CsCoreXUnitTests"
     ],
     "optionalUnityReferences": [],
     "includePlatforms": [],

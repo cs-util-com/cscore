@@ -14,6 +14,19 @@ namespace com.csutil {
             return IoC.inject.GetOrAddSingleton<IJsonWriter>(new object(), () => new JsonNetWriter());
         }
 
+        public static string AsPrettyString(object o) {
+            var jToken = Newtonsoft.Json.Linq.JToken.Parse(JsonWriter.GetWriter().Write(o));
+            return jToken.ToPrettyString();
+        }
+
+    }
+
+    public static class JTokenExtensions {
+
+        public static string ToPrettyString(this Newtonsoft.Json.Linq.JToken jToken) {
+            return jToken.ToString(Newtonsoft.Json.Formatting.Indented);
+        }
+
     }
 
 }

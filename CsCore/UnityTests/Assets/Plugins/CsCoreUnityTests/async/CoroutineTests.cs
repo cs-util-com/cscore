@@ -18,13 +18,13 @@ namespace com.csutil.tests {
             // Execute a task after a defined time:
             myMonoBehaviour.ExecuteDelayed(() => {
                 Log.d("I am executed after 0.6 seconds");
-            }, delayInSecBeforeExecution: 0.6f);
+            }, delayInMsBeforeExecution: 600);
 
             // Execute a task multiple times:
             myMonoBehaviour.ExecuteRepeated(() => {
                 Log.d("I am executed every 0.3 seconds until I return false");
                 return true;
-            }, delayInSecBetweenIterations: 0.3f, delayInSecBeforeFirstExecution: .2f);
+            }, delayInMsBetweenIterations: 300, delayInMsBeforeFirstExecution: 200);
 
             yield return null;
         }
@@ -37,7 +37,7 @@ namespace com.csutil.tests {
                 MonoBehaviour myMonoBehaviour = CreateSomeMonoBehaviour();
                 myMonoBehaviour.ExecuteDelayed(() => {
                     counter++;
-                }, delayInSecBeforeExecution: 0.6f);
+                }, delayInMsBeforeExecution: 600);
             }
             { // while the delayed task is running check over time if the counter increases:
                 yield return new WaitForSeconds(.5f);
@@ -48,6 +48,10 @@ namespace com.csutil.tests {
                 Assert.AreEqual(1, counter);
             }
 
+            int firstDelayInMs = 100;
+            var x = firstDelayInMs / 1000f;
+            Assert.IsTrue(x > 0);
+            Assert.AreEqual(0.1f, x);
         }
 
         [UnityTest]
@@ -59,7 +63,7 @@ namespace com.csutil.tests {
                 myMonoBehaviour.ExecuteRepeated(() => {
                     counter++;
                     return counter < 3; // stop repeated execution once 3 is reached
-                }, delayInSecBetweenIterations: 0.3f, delayInSecBeforeFirstExecution: .2f);
+                }, delayInMsBetweenIterations: 300, delayInMsBeforeFirstExecution: 200);
             }
             { // while the repeated task is running check over time if the counter increases:
                 yield return new WaitForSeconds(0.1f);
@@ -84,7 +88,7 @@ namespace com.csutil.tests {
                 myMonoBehaviour.ExecuteRepeated(() => {
                     counter++;
                     return true; // the function will never tell the loop to stop
-                }, delayInSecBetweenIterations: 0.1f, repetitions: 3); // stop repeated execution once 3 is reached
+                }, delayInMsBetweenIterations: 100, repetitions: 3); // stop repeated execution once 3 is reached
                 Assert.AreEqual(1, counter); // no delayInSecBeforeFirstExecution is set to task will instantly be executed
             }
             { // while the repeated task is running check over time if the counter increases:
@@ -125,13 +129,13 @@ namespace com.csutil.tests {
         }
 
         private IEnumerator MyCoroutineA() {
-            var t = Log.MethodEntered();
+            var t = Log.MethodEntered("MyCoroutineA");
             yield return new WaitForSeconds(4f);
             Log.MethodDone(t);
         }
 
         private IEnumerator MyCoroutineB(float duration) {
-            var t = Log.MethodEntered("duration=" + duration);
+            var t = Log.MethodEntered("MyCoroutineB", "duration =" + duration);
             yield return new WaitForSeconds(duration);
             Log.MethodDone(t);
         }
@@ -147,7 +151,7 @@ namespace com.csutil.tests {
             }
             {
                 MonoBehaviour myMonoBehaviour = CreateSomeMonoBehaviour();
-                myMonoBehaviour.gameObject.SetActive(false);
+                myMonoBehaviour.gameObject.SetActiveV2(false);
                 AssertV2.Throws<Exception>(() => {
                     myMonoBehaviour.ExecuteDelayed(() => { throw Log.e("Executing coroutine of inactive GO"); });
                 });
@@ -159,15 +163,14 @@ namespace com.csutil.tests {
         public IEnumerator TestCoroutinesAsTasks() {
             MonoBehaviour myMonoBehaviour = CreateSomeMonoBehaviour();
             var someData = new MyDataClass1() { myString = "Not started yet" };
-            var coroutineTask = myMonoBehaviour.StartCoroutineAsTask(MyCoroutine1(someData), () => someData.myString);
+            var coroutineTask = myMonoBehaviour.StartCoroutineAsTask(MyCoroutine1(someData));
 
             while (!coroutineTask.IsCompleted) {
                 Log.d("Waiting for task to finish..");
                 Assert.AreEqual("Started", someData.myString);
                 yield return new WaitForSeconds(0.05f);
             }
-            var result = coroutineTask.Result;
-            Assert.AreEqual("Finished", result);
+            Assert.AreEqual("Finished", someData.myString);
         }
 
         private IEnumerator MyCoroutine1(MyDataClass1 someData) {

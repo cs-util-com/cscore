@@ -4,7 +4,8 @@
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>com.csutil.cscore</PackageId>
-    <Version>1.0.4</Version>
+    <!-- https://www.nuget.org/packages/com.csutil.cscore -->
+    <Version>1.1.4</Version>
     <Authors>csutil.com</Authors>
     <Company>csutil.com</Company>
     <Product>cscore</Product>
@@ -25,5 +26,21 @@
     <!-- Version 9.0.1 chosen because https://github.com/SaladLab/Json.Net.Unity3D uses this version -->
     <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
   </ItemGroup>
+
+  <!-- https://www.nuget.org/packages/LiteDB/ -->
+  <ItemGroup>
+    <PackageReference Include="LiteDB" Version="4.1.4" />
+  </ItemGroup>
+
+  <!-- https://www.nuget.org/packages/System.Collections.Immutable/ -->
+  <ItemGroup>
+    <PackageReference Include="System.Collections.Immutable" Version="1.5.0" />
+  </ItemGroup>
+  
+  <!-- https://www.nuget.org/packages/SharpZipLib/ -->
+  <ItemGroup>
+    <PackageReference Include="SharpZipLib" Version="1.2.0" />
+  </ItemGroup>
+
 
 </Project>

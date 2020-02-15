@@ -1,0 +1,469 @@
+All mutants have been tested, and your mutation score has been calculated
+- \PlainNetClassLib [217/574 (37.80 %)]
+--- \Properties [0/0 (- %)]
+----- \PublishProfiles [0/0 (- %)]
+--- \src [217/574 (37.80 %)]
+----- \Plugins [217/574 (37.80 %)]
+------- \CsCore [217/574 (37.80 %)]
+--------- \com [210/498 (42.17 %)]
+----------- \csutil [210/498 (42.17 %)]
+------------- \datastructures [32/34 (94.12 %)]
+--------------- \collections [14/14 (100.00 %)]
+----------------- FixedSizedQueue.cs [3/3 (100.00 %)]
+----------------- IDictionaryExtensions.cs [1/1 (100.00 %)]
+----------------- IEnumerableExtensions.cs [7/7 (100.00 %)]
+----------------- Transducers.cs [3/3 (100.00 %)]
+--------------- \keyvaluestore [16/18 (88.89 %)]
+----------------- ExceptionWrapperKeyValueStore.cs [2/3 (66.67 %)]
+[Survived] Boolean mutation on line 47: 'false' ==> 'true'
+----------------- IKeyValueStore.cs [0/0 (- %)]
+----------------- IKeyValueStoreExtensions.cs [8/9 (88.89 %)]
+[Survived] Binary expression mutation on line 39: 'storeOldValue != oldValue' ==> 'storeOldValue == oldValue'
+----------------- InMemoryKeyValueStore.cs [6/6 (100.00 %)]
+----------------- ValueWrapper.cs [0/0 (- %)]
+--------------- ChangeTracker.cs [2/2 (100.00 %)]
+------------- \eventbus [16/20 (80.00 %)]
+--------------- EventBus.cs [14/18 (77.78 %)]
+[Survived] Boolean mutation on line 20: 'false' ==> 'true'
+[Survived] Binary expression mutation on line 38: 'replacedDelegate != null' ==> 'replacedDelegate == null'
+[Survived] Binary expression mutation on line 45: 'i >= 0' ==> 'i > 0'
+[Survived] Boolean mutation on line 99: 'false' ==> 'true'
+--------------- IEventBus.cs [0/0 (- %)]
+--------------- IEventBusExtensions.cs [2/2 (100.00 %)]
+------------- \extensions [76/103 (73.79 %)]
+--------------- DateTimeExtensions.cs [9/17 (52.94 %)]
+[Survived] Binary expression mutation on line 8: 'unixTimeInMs > 0' ==> 'unixTimeInMs < 0'
+[Survived] Binary expression mutation on line 8: 'unixTimeInMs > 0' ==> 'unixTimeInMs >= 0'
+[Timeout] Boolean mutation on line 12: 'false' ==> 'true'
+[Survived] Boolean mutation on line 25: 'false' ==> 'true'
+[Survived] Boolean mutation on line 22: 'true' ==> 'false'
+[Survived] Binary expression mutation on line 31: 'self.Ticks >= lowerBound.Ticks' ==> 'self.Ticks > lowerBound.Ticks'
+[Survived] Binary expression mutation on line 31: 'self.Ticks <= upperBound.Ticks' ==> 'self.Ticks < upperBound.Ticks'
+[Survived] Binary expression mutation on line 48: 'self.ToUnixTimestampUtc() < other.ToUnixTimestampUtc()' ==> 'self.ToUnixTimestampUtc() <= other.ToUnixTimestampUtc()'
+[Survived] Binary expression mutation on line 52: 'self.ToUnixTimestampUtc() > other.ToUnixTimestampUtc()' ==> 'self.ToUnixTimestampUtc() >= other.ToUnixTimestampUtc()'
+--------------- DelegateExtensions.cs [17/19 (89.47 %)]
+[Survived] Boolean mutation on line 24: 'true' ==> 'false'
+[Survived] Binary expression mutation on line 33: 'methodParams.Length < passedParams.Length' ==> 'methodParams.Length <= passedParams.Length'
+--------------- EventHandlerExtensions.cs [4/6 (66.67 %)]
+[Survived] Boolean mutation on line 17: 'false' ==> 'true'
+[Survived] Boolean mutation on line 31: 'false' ==> 'true'
+--------------- RandomExtensions.cs [20/24 (83.33 %)]
+[Survived] Binary expression mutation on line 13: 'f * resolutionFactor' ==> 'f / resolutionFactor'
+[Survived] UnaryMinusExpression to UnaryPlusExpression mutation on line 33: '-126' ==> '+126'
+[Survived] Binary expression mutation on line 39: 'random.NextDouble() > 0.5' ==> 'random.NextDouble() < 0.5'
+[Survived] Binary expression mutation on line 39: 'random.NextDouble() > 0.5' ==> 'random.NextDouble() >= 0.5'
+--------------- StringEncryptionExtensions.cs [8/11 (72.73 %)]
+[Survived] Binary expression mutation on line 17: 'data == null' ==> 'data != null'
+[Survived] Binary expression mutation on line 76: '(Keysize / 8) * 2' ==> '(Keysize / 8) / 2'
+[Survived] Binary expression mutation on line 76: 'cipherTextBytesWithSaltAndIv.Length - ((Keysize / 8) * 2)' ==> 'cipherTextBytesWithSaltAndIv.Length + ((Keysize / 8) * 2)'
+--------------- StringExtensions.cs [12/20 (60.00 %)]
+[Survived] Binary expression mutation on line 25: 'lengthUntilEndStarts < 0' ==> 'lengthUntilEndStarts <= 0'
+[Survived] Binary expression mutation on line 28: 'length < 0' ==> 'length <= 0'
+[Survived] Binary expression mutation on line 34: 'pos < 0' ==> 'pos <= 0'
+[Timeout] Binary expression mutation on line 79: 't > 0' ==> 't < 0'
+[Survived] Binary expression mutation on line 79: 't > 0' ==> 't >= 0'
+[Survived] Binary expression mutation on line 80: 'value >= thresholds[t].Key' ==> 'value < thresholds[t].Key'
+[Survived] Binary expression mutation on line 80: 'value >= thresholds[t].Key' ==> 'value > thresholds[t].Key'
+[Survived] Binary expression mutation on line 81: '(double)value / thresholds[t].Key' ==> '(double)value * thresholds[t].Key'
+[Survived] UnaryMinusExpression to UnaryPlusExpression mutation on line 84: '-value' ==> '+value'
+--------------- TaskExtensions.cs [1/1 (100.00 %)]
+--------------- TypeExtensions.cs [5/5 (100.00 %)]
+------------- \http [5/114 (4.39 %)]
+--------------- \apis [0/0 (- %)]
+----------------- \iplookup [0/0 (- %)]
+------------------- ExtremeIpLookupCom.cs [0/0 (- %)]
+------------------- GeoBytesCom.cs [0/0 (- %)]
+------------------- GeoPluginNet.cs [0/0 (- %)]
+------------------- IpApiCom.cs [0/0 (- %)]
+------------------- IpifyOrg.cs [0/0 (- %)]
+----------------- MetaWeatherCom.cs [0/0 (- %)]
+--------------- \cookies [4/96 (4.17 %)]
+----------------- Cookie.cs [1/56 (1.79 %)]
+[Survived] Boolean mutation on line 12: 'false' ==> 'true'
+[Survived] Boolean mutation on line 13: 'true' ==> 'false'
+[Survived] LogicalNotExpression to un-LogicalNotExpression mutation on line 21: '!match.Success' ==> 'match.Success'
+[Survived] Binary expression mutation on line 22: 'this.name == null' ==> 'this.name != null'
+[Survived] Boolean mutation on line 32: 'false' ==> 'true'
+[Survived] Binary expression mutation on line 38: 'path != null' ==> 'path == null'
+[Survived] Binary expression mutation on line 38: 'path != parsedValue' ==> 'path == parsedValue'
+[Survived] Binary expression mutation on line 38: 'path != null && path != parsedValue' ==> 'path != null || path != parsedValue'
+[Survived] Binary expression mutation on line 42: 'domain != null' ==> 'domain == null'
+[Survived] Binary expression mutation on line 42: 'domain != parsedValue' ==> 'domain == parsedValue'
+[Survived] Binary expression mutation on line 42: 'domain != null && domain != parsedValue' ==> 'domain != null || domain != parsedValue'
+[Survived] Boolean mutation on line 46: 'true' ==> 'false'
+[Survived] Negate expression on line 54: 'this.domain.IsNullOrEmpty()' ==> '!this.domain.IsNullOrEmpty()'
+[Survived] Binary expression mutation on line 60: 'expirationDate.ToUnixTimestampUtc() <= 0' ==> 'expirationDate.ToUnixTimestampUtc() > 0'
+[Survived] Binary expression mutation on line 60: 'expirationDate.ToUnixTimestampUtc() <= 0' ==> 'expirationDate.ToUnixTimestampUtc() < 0'
+[Survived] Binary expression mutation on line 61: 'expirationDate.ToUnixTimestampUtc() < 0' ==> 'expirationDate.ToUnixTimestampUtc() > 0'
+[Survived] Binary expression mutation on line 61: 'expirationDate.ToUnixTimestampUtc() < 0' ==> 'expirationDate.ToUnixTimestampUtc() <= 0'
+[Survived] Binary expression mutation on line 70: 'this.secure != accessInfo.secure' ==> 'this.secure == accessInfo.secure'
+[Survived] Boolean mutation on line 70: 'false' ==> 'true'
+[Survived] Binary expression mutation on line 75: 'this.domain != null' ==> 'this.domain == null'
+[Survived] Binary expression mutation on line 75: 'accessInfo.domain == null' ==> 'accessInfo.domain != null'
+[Survived] Binary expression mutation on line 75: 'this.domain != null && accessInfo.domain == null' ==> 'this.domain != null || accessInfo.domain == null'
+[Survived] Boolean mutation on line 75: 'false' ==> 'true'
+[Survived] Binary expression mutation on line 76: 'this.path != null' ==> 'this.path == null'
+[Survived] Binary expression mutation on line 76: 'accessInfo.path == null' ==> 'accessInfo.path != null'
+[Survived] Binary expression mutation on line 76: 'this.path != null && accessInfo.path == null' ==> 'this.path != null || accessInfo.path == null'
+[Survived] Boolean mutation on line 76: 'false' ==> 'true'
+[Survived] Binary expression mutation on line 77: 'this.path != null' ==> 'this.path == null'
+[Survived] Binary expression mutation on line 77: 'accessInfo.path != null' ==> 'accessInfo.path == null'
+[Survived] Binary expression mutation on line 77: 'this.path != null && accessInfo.path != null' ==> 'this.path != null || accessInfo.path != null'
+[Survived] Binary expression mutation on line 77: 'accessInfo.path.IndexOf(this.path) != 0' ==> 'accessInfo.path.IndexOf(this.path) == 0'
+[Survived] Binary expression mutation on line 77: 'this.path != null && accessInfo.path != null && accessInfo.path.IndexOf(this.path) != 0' ==> 'this.path != null && accessInfo.path != null || accessInfo.path.IndexOf(this.path) != 0'
+[Survived] Boolean mutation on line 77: 'false' ==> 'true'
+[Survived] Binary expression mutation on line 78: 'this.domain == accessInfo.domain' ==> 'this.domain != accessInfo.domain'
+[Survived] Binary expression mutation on line 80: 'this.domain != null' ==> 'this.domain == null'
+[Survived] Binary expression mutation on line 80: 'this.domain.Length >= 1' ==> 'this.domain.Length < 1'
+[Survived] Binary expression mutation on line 80: 'this.domain.Length >= 1' ==> 'this.domain.Length > 1'
+[Survived] Binary expression mutation on line 80: 'this.domain != null && this.domain.Length >= 1' ==> 'this.domain != null || this.domain.Length >= 1'
+[Survived] Binary expression mutation on line 80: 'this.domain[0] == '.'' ==> 'this.domain[0] != '.''
+[Survived] Binary expression mutation on line 80: 'this.domain != null && this.domain.Length >= 1 && this.domain[0] == '.'' ==> 'this.domain != null && this.domain.Length >= 1 || this.domain[0] == '.''
+[Survived] Binary expression mutation on line 83: 'this.domain != null' ==> 'this.domain == null'
+[Survived] Boolean mutation on line 83: 'false' ==> 'true'
+[Survived] UnaryMinusExpression to UnaryPlusExpression mutation on line 82: '-1' ==> '+1'
+[Survived] Binary expression mutation on line 82: 'wildcard == -1' ==> 'wildcard != -1'
+[Survived] Binary expression mutation on line 82: 'accessInfo.domain.Length - this.domain.Length' ==> 'accessInfo.domain.Length + this.domain.Length'
+[Survived] Binary expression mutation on line 82: 'accessInfo.domain.Length - this.domain.Length + 1' ==> 'accessInfo.domain.Length - this.domain.Length - 1'
+[Survived] Binary expression mutation on line 82: 'wildcard != accessInfo.domain.Length - this.domain.Length + 1' ==> 'wildcard == accessInfo.domain.Length - this.domain.Length + 1'
+[Survived] Binary expression mutation on line 82: 'wildcard == -1 || wildcard != accessInfo.domain.Length - this.domain.Length + 1' ==> 'wildcard == -1 && wildcard != accessInfo.domain.Length - this.domain.Length + 1'
+[Survived] Boolean mutation on line 79: 'true' ==> 'false'
+[Survived] Boolean mutation on line 84: 'true' ==> 'false'
+[Survived] Binary expression mutation on line 92: 'this.expirationDate != DateTime.MaxValue' ==> 'this.expirationDate == DateTime.MaxValue'
+[Survived] Binary expression mutation on line 93: 'this.domain != null' ==> 'this.domain == null'
+[Survived] Binary expression mutation on line 94: 'this.path != null' ==> 'this.path == null'
+[Survived] Boolean mutation on line 96: 'false' ==> 'true'
+[Survived] Binary expression mutation on line 96: 'this.scriptAccessible == false' ==> 'this.scriptAccessible != false'
+----------------- CookieAccessInfo.cs [0/2 (0.00 %)]
+[Survived] Boolean mutation on line 6: 'false' ==> 'true'
+[Survived] Boolean mutation on line 7: 'true' ==> 'false'
+----------------- CookieJar.cs [3/38 (7.89 %)]
+[Survived] Binary expression mutation on line 44: 'ContentsChanged != null' ==> 'ContentsChanged == null'
+[Survived] Binary expression mutation on line 48: 'cookie.expirationDate.ToUnixTimestampUtc() <= 0' ==> 'cookie.expirationDate.ToUnixTimestampUtc() > 0'
+[Survived] Binary expression mutation on line 48: 'cookie.expirationDate.ToUnixTimestampUtc() <= 0' ==> 'cookie.expirationDate.ToUnixTimestampUtc() < 0'
+[Survived] PreIncrementExpression to PreDecrementExpression mutation on line 51: '++index' ==> '--index'
+[Survived] Binary expression mutation on line 51: 'index < cookies[cookie.name].Count' ==> 'index <= cookies[cookie.name].Count'
+[Survived] LogicalNotExpression to un-LogicalNotExpression mutation on line 54: '!collidableCookie.value.IsNullOrEmpty()' ==> 'collidableCookie.value.IsNullOrEmpty()'
+[Survived] Binary expression mutation on line 54: 'cookie.value.IsNullOrEmpty() && !collidableCookie.value.IsNullOrEmpty()' ==> 'cookie.value.IsNullOrEmpty() || !collidableCookie.value.IsNullOrEmpty()'
+[Survived] Boolean mutation on line 67: 'true' ==> 'false'
+[Survived] Binary expression mutation on line 59: 'cookies[cookie.name].Count == 0' ==> 'cookies[cookie.name].Count != 0'
+[Survived] Boolean mutation on line 63: 'false' ==> 'true'
+[Survived] Boolean mutation on line 74: 'true' ==> 'false'
+[Survived] Boolean mutation on line 76: 'false' ==> 'true'
+[Survived] LogicalNotExpression to un-LogicalNotExpression mutation on line 78: '!cookies.ContainsKey(cookie.name)' ==> 'cookies.ContainsKey(cookie.name)'
+[Survived] Boolean mutation on line 82: 'true' ==> 'false'
+[Survived] Binary expression mutation on line 87: 'cookies[cookieName].Count > 1' ==> 'cookies[cookieName].Count < 1'
+[Survived] Binary expression mutation on line 87: 'cookies[cookieName].Count > 1' ==> 'cookies[cookieName].Count >= 1'
+[Survived] PreIncrementExpression to PreDecrementExpression mutation on line 89: '++i' ==> '--i'
+[Survived] Binary expression mutation on line 89: 'i < cookies[cookieName].Count' ==> 'i > cookies[cookieName].Count'
+[Survived] Binary expression mutation on line 89: 'i < cookies[cookieName].Count' ==> 'i <= cookies[cookieName].Count'
+[Survived] LogicalNotExpression to un-LogicalNotExpression mutation on line 97: '!savingWorked' ==> 'savingWorked'
+[Survived] LogicalNotExpression to un-LogicalNotExpression mutation on line 110: '!cookies.ContainsKey(name)' ==> 'cookies.ContainsKey(name)'
+[Survived] PreIncrementExpression to PreDecrementExpression mutation on line 111: '++index' ==> '--index'
+[Survived] Binary expression mutation on line 111: 'index < cookies[name].Count' ==> 'index > cookies[name].Count'
+[Survived] Binary expression mutation on line 111: 'index < cookies[name].Count' ==> 'index <= cookies[name].Count'
+[Survived] Binary expression mutation on line 114: 'cookie.expirationDate.ToUnixTimestampUtc() > 0' ==> 'cookie.expirationDate.ToUnixTimestampUtc() < 0'
+[Survived] Binary expression mutation on line 114: 'cookie.expirationDate.ToUnixTimestampUtc() > 0' ==> 'cookie.expirationDate.ToUnixTimestampUtc() >= 0'
+[Survived] LogicalNotExpression to un-LogicalNotExpression mutation on line 132: '!cookies.IsNullOrEmpty()' ==> 'cookies.IsNullOrEmpty()'
+[Survived] Binary expression mutation on line 132: '!cookies.IsNullOrEmpty() && cookies.ContainsKey(cookieName)' ==> '!cookies.IsNullOrEmpty() || cookies.ContainsKey(cookieName)'
+[Survived] Binary expression mutation on line 138: 'cookie != null' ==> 'cookie == null'
+[Survived] PreIncrementExpression to PreDecrementExpression mutation on line 144: '++i' ==> '--i'
+[Survived] Binary expression mutation on line 144: 'i < cookieObjects.Length' ==> 'i > cookieObjects.Length'
+[Survived] Binary expression mutation on line 144: 'i < cookieObjects.Length' ==> 'i <= cookieObjects.Length'
+[Survived] LogicalNotExpression to un-LogicalNotExpression mutation on line 149: '!match.Success' ==> 'match.Success'
+[Survived] PreIncrementExpression to PreDecrementExpression mutation on line 150: '++index' ==> '--index'
+[Survived] Binary expression mutation on line 150: 'index < match.Groups.Count' ==> 'index > match.Groups.Count'
+--------------- Headers.cs [0/9 (0.00 %)]
+[Survived] Negate expression on line 24: 'name.IsNullOrEmpty()' ==> '!name.IsNullOrEmpty()'
+[Survived] Binary expression mutation on line 32: 'ext != null' ==> 'ext == null'
+[Survived] Negate expression on line 40: 'headers.IsNullOrEmpty()' ==> '!headers.IsNullOrEmpty()'
+[Survived] Binary expression mutation on line 49: 'v == null' ==> 'v != null'
+[Survived] Binary expression mutation on line 62: 'headerValues == null' ==> 'headerValues != null'
+[Survived] Binary expression mutation on line 68: 'headerWithFilename == null' ==> 'headerWithFilename != null'
+[Survived] Binary expression mutation on line 72: 'pair != null' ==> 'pair == null'
+[Survived] Binary expression mutation on line 72: 'pair != null && pair[0].ToLower().Contains("filename")' ==> 'pair != null || pair[0].ToLower().Contains("filename")'
+[Survived] Binary expression mutation on line 79: 'mime == null' ==> 'mime != null'
+--------------- HttpClientExtensions.cs [1/5 (20.00 %)]
+[Survived] Boolean mutation on line 8: 'false' ==> 'true'
+[Survived] Boolean mutation on line 9: 'true' ==> 'false'
+[Survived] LogicalNotExpression to un-LogicalNotExpression mutation on line 11: '!self.DefaultRequestHeaders.TryAddWithoutValidation(h.Key, h.Value)' ==> 'self.DefaultRequestHeaders.TryAddWithoutValidation(h.Key, h.Value)'
+[Survived] Boolean mutation on line 13: 'false' ==> 'true'
+--------------- RestFactory.cs [0/4 (0.00 %)]
+[Survived] Binary expression mutation on line 28: 'pingTask.Result > 0' ==> 'pingTask.Result < 0'
+[Survived] Binary expression mutation on line 28: 'pingTask.Result > 0' ==> 'pingTask.Result >= 0'
+[Survived] Boolean mutation on line 28: 'false' ==> 'true'
+[Survived] Boolean mutation on line 28: 'true' ==> 'false'
+--------------- RestRequest.cs [0/0 (- %)]
+--------------- UriExtensions.cs [0/0 (- %)]
+--------------- UriRestRequest.cs [0/0 (- %)]
+------------- \injection [9/13 (69.23 %)]
+--------------- Injector.cs [4/6 (66.67 %)]
+[Survived] Negate expression on line 15: 'HasInjectorRegistered<T>()' ==> '!HasInjectorRegistered<T>()'
+[Survived] Binary expression mutation on line 53: 'Thread.CurrentThread == threadOfContextCreation' ==> 'Thread.CurrentThread != threadOfContextCreation'
+--------------- InjectorExtensionsForSingletons.cs [5/7 (71.43 %)]
+[Survived] LogicalNotExpression to un-LogicalNotExpression mutation on line 24: '!self.RemoveAllInjectorsFor<T>()' ==> 'self.RemoveAllInjectorsFor<T>()'
+[Survived] Boolean mutation on line 25: 'false' ==> 'true'
+--------------- IoC.cs [0/0 (- %)]
+------------- \io [26/28 (92.86 %)]
+--------------- \db [12/12 (100.00 %)]
+----------------- HasId.cs [0/0 (- %)]
+----------------- LiteDbKeyValueStore.cs [12/12 (100.00 %)]
+--------------- EnvironmentV2.cs [0/0 (- %)]
+--------------- FileExtensions.cs [14/16 (87.50 %)]
+[Survived] Boolean mutation on line 100: 'true' ==> 'false'
+[Survived] Boolean mutation on line 102: 'false' ==> 'true'
+------------- \json [1/29 (3.45 %)]
+--------------- HandleAdditionalJsonFields.cs [0/0 (- %)]
+--------------- JsonReader.cs [0/0 (- %)]
+--------------- JsonReaderAssertionExtensions.cs [1/29 (3.45 %)]
+[Survived] Binary expression mutation on line 17: 'jsonWriter == null' ==> 'jsonWriter != null'
+[Survived] LogicalNotExpression to un-LogicalNotExpression mutation on line 25: '!targetType.Equals(typeof(System.Collections.Generic.Dictionary<string, object>))' ==> 'targetType.Equals(typeof(System.Collections.Generic.Dictionary<string, object>))'
+[Survived] Binary expression mutation on line 26: 'targetType.GetGenericTypeDefinition() == typeof(System.Collections.Generic.List<>)' ==> 'targetType.GetGenericTypeDefinition() != typeof(System.Collections.Generic.List<>)'
+[Survived] Binary expression mutation on line 26: 'targetType.IsGenericType && targetType.GetGenericTypeDefinition() == typeof(System.Collections.Generic.List<>)' ==> 'targetType.IsGenericType ||
+targetType.GetGenericTypeDefinition() == typeof(System.Collections.Generic.List<>)'
+[Survived] LogicalNotExpression to un-LogicalNotExpression mutation on line 26: '!(targetType.IsGenericType && targetType.GetGenericTypeDefinition() == typeof(System.Collections.Generic.List<>))'
+==> '(targetType.IsGenericType && targetType.GetGenericTypeDefinition() == typeof(System.Collections.Generic.List<>))'
+[Survived] Binary expression mutation on line 25: '!targetType.Equals(typeof(System.Collections.Generic.Dictionary<string, object>))
+                    && !(targetType.IsGenericType && targetType.GetGenericTypeDefinition() == typeof(System.Collections.Generic.List<>))' ==> '!targetType.Equals(typeof(System.Collections.Generic.Dictionary<string, object>))
+                    || !(targetType.IsGenericType && targetType.GetGenericTypeDefinition() == typeof(System.Collections.Generic.List<>))'
+[Survived] Boolean mutation on line 29: 'true' ==> 'false'
+[Survived] Boolean mutation on line 43: 'false' ==> 'true'
+[Survived] Binary expression mutation on line 47: 'depth > MAX_DEPTH' ==> 'depth < MAX_DEPTH'
+[Survived] Boolean mutation on line 47: 'false' ==> 'true'
+[Survived] Binary expression mutation on line 54: 'value != null' ==> 'value == null'
+[Survived] LogicalNotExpression to un-LogicalNotExpression mutation on line 54: '!parsed.Contains(key)' ==> 'parsed.Contains(key)'
+[Survived] Binary expression mutation on line 54: 'value != null && !parsed.Contains(key)' ==> 'value != null || !parsed.Contains(key)'
+[Survived] Binary expression mutation on line 71: '5 + depth' ==> '5 - depth'
+[Survived] Boolean mutation on line 71: 'true' ==> 'false'
+[Survived] Boolean mutation on line 74: 'true' ==> 'false'
+[Survived] PostIncrementExpression to PostDecrementExpression mutation on line 75: 'i++' ==> 'i--'
+[Survived] Binary expression mutation on line 75: 'i < a.Length' ==> 'i > a.Length'
+[Survived] Binary expression mutation on line 75: 'i < a.Length' ==> 'i <= a.Length'
+[Survived] Binary expression mutation on line 76: 'depth + 1' ==> 'depth - 1'
+[Survived] Binary expression mutation on line 64: '5 + depth' ==> '5 - depth'
+[Survived] Boolean mutation on line 64: 'true' ==> 'false'
+[Survived] Binary expression mutation on line 66: 'depth + 1' ==> 'depth - 1'
+[Survived] Binary expression mutation on line 56: 'value != null' ==> 'value == null'
+[Survived] Binary expression mutation on line 57: '5 + depth' ==> '5 - depth'
+[Survived] Boolean mutation on line 57: 'true' ==> 'false'
+[Survived] Boolean mutation on line 59: 'false' ==> 'true'
+[Survived] Boolean mutation on line 81: 'true' ==> 'false'
+--------------- JsonWriter.cs [0/0 (- %)]
+--------------- TypedJsonHelper.cs [0/0 (- %)]
+------------- \logging [12/48 (25.00 %)]
+--------------- AssertV2.cs [7/17 (41.18 %)]
+[Survived] Boolean mutation on line 13: 'true' ==> 'false'
+[Survived] LogicalNotExpression to un-LogicalNotExpression mutation on line 41: '!condition' ==> 'condition'
+[Survived] Binary expression mutation on line 53: 'o != null' ==> 'o == null'
+[Survived] Binary expression mutation on line 83: 'expected != actual' ==> 'expected == actual'
+[Survived] LogicalNotExpression to un-LogicalNotExpression mutation on line 85: '!expected.SequenceEqual(actual)' ==> 'expected.SequenceEqual(actual)'
+[Survived] Binary expression mutation on line 93: 'ms * 100f' ==> 'ms / 100f'
+[Survived] Binary expression mutation on line 93: 'ms * 100f / maxTimeInMs' ==> 'ms * 100f * maxTimeInMs'
+[Survived] Boolean mutation on line 94: 'false' ==> 'true'
+[Survived] Binary expression mutation on line 99: 'self.ElapsedMilliseconds <= maxTimeInMs' ==> 'self.ElapsedMilliseconds < maxTimeInMs'
+[Survived] Boolean mutation on line 102: 'false' ==> 'true'
+--------------- ILog.cs [0/0 (- %)]
+--------------- Log.cs [4/27 (14.81 %)]
+[Survived] Binary expression mutation on line 28: 'args.Get<StackFrame>() != null' ==> 'args.Get<StackFrame>() == null'
+[Survived] Binary expression mutation on line 28: 'args.Get<StackTrace>() != null' ==> 'args.Get<StackTrace>() == null'
+[Survived] Binary expression mutation on line 28: 'args.Get<StackFrame>() != null || args.Get<StackTrace>() != null' ==> 'args.Get<StackFrame>() != null && args.Get<StackTrace>() != null'
+[Survived] Boolean mutation on line 35: 'true' ==> 'false'
+[Survived] Boolean mutation on line 39: 'true' ==> 'false'
+[Survived] Binary expression mutation on line 48: 'args != null' ==> 'args == null'
+[Survived] Binary expression mutation on line 65: 'timingV2 != null' ==> 'timingV2 == null'
+[Survived] Boolean mutation on line 69: 'true' ==> 'false'
+[Survived] Negate expression on line 70: 'methodName.IsNullOrEmpty()' ==> '!methodName.IsNullOrEmpty()'
+[Survived] Boolean mutation on line 70: 'false' ==> 'true'
+[Survived] Binary expression mutation on line 72: 'timingV2 != null' ==> 'timingV2 == null'
+[Survived] Binary expression mutation on line 74: 'maxAllowedTimeInMs > 0' ==> 'maxAllowedTimeInMs < 0'
+[Survived] Binary expression mutation on line 74: 'maxAllowedTimeInMs > 0' ==> 'maxAllowedTimeInMs >= 0'
+[Survived] Negate expression on line 78: 'args.IsNullOrEmpty()' ==> '!args.IsNullOrEmpty()'
+[Survived] Negate expression on line 80: 's.IsNullOrEmpty()' ==> '!s.IsNullOrEmpty()'
+[Survived] Binary expression mutation on line 109: 'args == null' ==> 'args != null'
+[Survived] Binary expression mutation on line 113: 'count <= 0' ==> 'count > 0'
+[Survived] Binary expression mutation on line 113: 'count <= 0' ==> 'count < 0'
+[Survived] Binary expression mutation on line 115: 'offset + count' ==> 'offset - count'
+[Survived] Binary expression mutation on line 115: 'i < offset + count' ==> 'i > offset + count'
+[Survived] Binary expression mutation on line 115: 'i < offset + count' ==> 'i <= offset + count'
+[Survived] Binary expression mutation on line 116: 'i >= self.FrameCount' ==> 'i < self.FrameCount'
+[Survived] Binary expression mutation on line 116: 'i >= self.FrameCount' ==> 'i > self.FrameCount'
+--------------- LogDefaultImpl.cs [0/0 (- %)]
+--------------- LogToConsole.cs [0/0 (- %)]
+--------------- LogToFile.cs [0/0 (- %)]
+--------------- LogToMultipleLoggers.cs [0/0 (- %)]
+--------------- StopwatchV2.cs [1/4 (25.00 %)]
+[Survived] Binary expression mutation on line 15: 'managedMemoryAtStop - managedMemoryAtStart' ==> 'managedMemoryAtStop + managedMemoryAtStart'
+[Survived] Boolean mutation on line 29: 'true' ==> 'false'
+[Survived] Boolean mutation on line 40: 'true' ==> 'false'
+------------- \math [6/76 (7.89 %)]
+--------------- CalculateAverage.cs [6/76 (7.89 %)]
+[Survived] Binary expression mutation on line 27: 'self == null' ==> 'self != null'
+[Survived] Binary expression mutation on line 28: 'CutOff == 0' ==> 'CutOff != 0'
+[Survived] Binary expression mutation on line 30: '1 / dtInSec' ==> '1 * dtInSec'
+[Survived] Binary expression mutation on line 31: 'self.Length - 1' ==> 'self.Length + 1'
+[Survived] Binary expression mutation on line 32: 'dF2 + 4' ==> 'dF2 - 4'
+[Survived] PostIncrementExpression to PostDecrementExpression mutation on line 36: 'r++' ==> 'r--'
+[Survived] Binary expression mutation on line 36: 'r < dF2' ==> 'r > dF2'
+[Survived] Binary expression mutation on line 36: 'r < dF2' ==> 'r <= dF2'
+[Survived] Binary expression mutation on line 38: 'dF2 + 2' ==> 'dF2 - 2'
+[Survived] Binary expression mutation on line 39: 'CutOff * Math.PI' ==> 'CutOff / Math.PI'
+[Survived] Binary expression mutation on line 39: 'CutOff * Math.PI / Samplingrate' ==> 'CutOff * Math.PI * Samplingrate'
+[Survived] Binary expression mutation on line 40: '1.414213562 * wc' ==> '1.414213562 / wc'
+[Survived] Binary expression mutation on line 41: 'wc * wc' ==> 'wc / wc'
+[Survived] Binary expression mutation on line 42: '1 + k1' ==> '1 - k1'
+[Survived] Binary expression mutation on line 42: '1 + k1 + k2' ==> '1 + k1 - k2'
+[Survived] Binary expression mutation on line 42: 'k2 / (1 + k1 + k2)' ==> 'k2 * (1 + k1 + k2)'
+[Survived] Binary expression mutation on line 43: '2 * a' ==> '2 / a'
+[Survived] Binary expression mutation on line 45: 'b / k2' ==> 'b * k2'
+[Survived] UnaryMinusExpression to UnaryPlusExpression mutation on line 46: '-2' ==> '+2'
+[Survived] Binary expression mutation on line 46: '-2 * a' ==> '-2 / a'
+[Survived] Binary expression mutation on line 46: '-2 * a + k3' ==> '-2 * a - k3'
+[Survived] Binary expression mutation on line 47: '2 * a' ==> '2 / a'
+[Survived] Binary expression mutation on line 47: '1 - (2 * a)' ==> '1 + (2 * a)'
+[Survived] Binary expression mutation on line 47: '1 - (2 * a) - k3' ==> '1 - (2 * a) + k3'
+[Survived] Binary expression mutation on line 50: 'dF2 + 4' ==> 'dF2 - 4'
+[Survived] PostIncrementExpression to PostDecrementExpression mutation on line 52: 's++' ==> 's--'
+[Survived] Binary expression mutation on line 52: 'dF2 + 2' ==> 'dF2 - 2'
+[Survived] Binary expression mutation on line 52: 's < dF2 + 2' ==> 's > dF2 + 2'
+[Survived] Binary expression mutation on line 52: 's < dF2 + 2' ==> 's <= dF2 + 2'
+[Survived] Binary expression mutation on line 53: 'a * Dat2[s]' ==> 'a / Dat2[s]'
+[Survived] Binary expression mutation on line 53: 's - 1' ==> 's + 1'
+[Survived] Binary expression mutation on line 53: 'b * Dat2[s - 1]' ==> 'b / Dat2[s - 1]'
+[Survived] Binary expression mutation on line 53: 'a * Dat2[s] + b * Dat2[s - 1]' ==> 'a * Dat2[s] - b * Dat2[s - 1]'
+[Survived] Binary expression mutation on line 53: 's - 2' ==> 's + 2'
+[Survived] Binary expression mutation on line 53: 'c * Dat2[s - 2]' ==> 'c / Dat2[s - 2]'
+[Survived] Binary expression mutation on line 53: 'a * Dat2[s] + b * Dat2[s - 1] + c * Dat2[s - 2]' ==> 'a * Dat2[s] + b * Dat2[s - 1] - c * Dat2[s - 2]'
+[Survived] Binary expression mutation on line 53: 's - 1' ==> 's + 1'
+[Survived] Binary expression mutation on line 53: 'd * DatYt[s - 1]' ==> 'd / DatYt[s - 1]'
+[Survived] Binary expression mutation on line 53: 'a * Dat2[s] + b * Dat2[s - 1] + c * Dat2[s - 2] + d * DatYt[s - 1]' ==> 'a * Dat2[s] + b * Dat2[s - 1] + c * Dat2[s - 2] - d * DatYt[s - 1]'
+[Survived] Binary expression mutation on line 53: 's - 2' ==> 's + 2'
+[Survived] Binary expression mutation on line 53: 'e * DatYt[s - 2]' ==> 'e / DatYt[s - 2]'
+[Survived] Binary expression mutation on line 53: 'a * Dat2[s] + b * Dat2[s - 1] + c * Dat2[s - 2] + d * DatYt[s - 1] + e * DatYt[s - 2]' ==> 'a * Dat2[s] + b * Dat2[s - 1] + c * Dat2[s - 2] + d * DatYt[s - 1] - e * DatYt[s - 2]'
+[Survived] Binary expression mutation on line 55: 'dF2 + 2' ==> 'dF2 - 2'
+[Survived] Binary expression mutation on line 55: 'dF2 + 1' ==> 'dF2 - 1'
+[Survived] Binary expression mutation on line 58: 'dF2 + 2' ==> 'dF2 - 2'
+[Survived] Binary expression mutation on line 59: 'dF2 + 2' ==> 'dF2 - 2'
+[Survived] Binary expression mutation on line 60: 'dF2 + 3' ==> 'dF2 - 3'
+[Survived] PostIncrementExpression to PostDecrementExpression mutation on line 61: 't++' ==> 't--'
+[Survived] Binary expression mutation on line 61: 't <= 0' ==> 't > 0'
+[Survived] Binary expression mutation on line 61: 't <= 0' ==> 't < 0'
+[Survived] UnaryMinusExpression to UnaryPlusExpression mutation on line 62: '-t' ==> '+t'
+[Survived] Binary expression mutation on line 62: 'a * DatYt[-t + 2]' ==> 'a / DatYt[-t + 2]'
+[Survived] UnaryMinusExpression to UnaryPlusExpression mutation on line 62: '-t' ==> '+t'
+[Survived] Binary expression mutation on line 62: '-t + 3' ==> '-t - 3'
+[Survived] Binary expression mutation on line 62: 'b * DatYt[-t + 3]' ==> 'b / DatYt[-t + 3]'
+[Survived] Binary expression mutation on line 62: 'a * DatYt[-t + 2] + b * DatYt[-t + 3]' ==> 'a * DatYt[-t + 2] - b * DatYt[-t + 3]'
+[Survived] UnaryMinusExpression to UnaryPlusExpression mutation on line 62: '-t' ==> '+t'
+[Survived] Binary expression mutation on line 62: '-t + 4' ==> '-t - 4'
+[Survived] Binary expression mutation on line 62: 'c * DatYt[-t + 4]' ==> 'c / DatYt[-t + 4]'
+[Survived] Binary expression mutation on line 62: 'a * DatYt[-t + 2] + b * DatYt[-t + 3] + c * DatYt[-t + 4]' ==> 'a * DatYt[-t + 2] + b * DatYt[-t + 3] - c * DatYt[-t + 4]'
+[Survived] Binary expression mutation on line 62: '-t + 1' ==> '-t - 1'
+[Survived] Binary expression mutation on line 62: 'd * DatZt[-t + 1]' ==> 'd / DatZt[-t + 1]'
+[Survived] Binary expression mutation on line 62: 'a * DatYt[-t + 2] + b * DatYt[-t + 3] + c * DatYt[-t + 4] + d * DatZt[-t + 1]' ==> 'a * DatYt[-t + 2] + b * DatYt[-t + 3] + c * DatYt[-t + 4] - d * DatZt[-t + 1]'
+[Survived] UnaryMinusExpression to UnaryPlusExpression mutation on line 62: '-t' ==> '+t'
+[Survived] Binary expression mutation on line 62: '-t + 2' ==> '-t - 2'
+[Survived] Binary expression mutation on line 62: 'e * DatZt[-t + 2]' ==> 'e / DatZt[-t + 2]'
+[Survived] Binary expression mutation on line 62: 'a * DatYt[-t + 2] + b * DatYt[-t + 3] + c * DatYt[-t + 4] + d * DatZt[-t + 1] + e * DatZt[-t + 2]' ==> 'a * DatYt[-t + 2] + b * DatYt[-t + 3] + c * DatYt[-t + 4] + d * DatZt[-t + 1] - e * DatZt[-t + 2]'
+[Survived] PostIncrementExpression to PostDecrementExpression mutation on line 66: 'p++' ==> 'p--'
+[Survived] Binary expression mutation on line 66: 'p < dF2' ==> 'p > dF2'
+[Survived] Binary expression mutation on line 66: 'p < dF2' ==> 'p <= dF2'
+------------- \model [27/33 (81.82 %)]
+--------------- \immutable [23/28 (82.14 %)]
+----------------- DataStore.cs [0/1 (0.00 %)]
+[Survived] Binary expression mutation on line 45: 'storeName != null' ==> 'storeName == null'
+----------------- IDataStore.cs [0/0 (- %)]
+----------------- ImmutableExtensions.cs [9/9 (100.00 %)]
+----------------- Middlewares.cs [0/0 (- %)]
+----------------- ReplayRecorder.cs [14/18 (77.78 %)]
+[Survived] Binary expression mutation on line 58: 'recordedActionsCount > 0' ==> 'recordedActionsCount < 0'
+[Survived] Binary expression mutation on line 82: 'delayBetweenStepsInMs > 0' ==> 'delayBetweenStepsInMs < 0'
+[Survived] Binary expression mutation on line 82: 'delayBetweenStepsInMs > 0' ==> 'delayBetweenStepsInMs >= 0'
+[Survived] Binary expression mutation on line 100: 'oldEntry.e != newError.Message' ==> 'oldEntry.e == newError.Message'
+----------------- UndoRedoReducer.cs [0/0 (- %)]
+--------------- CloneHelper.cs [1/2 (50.00 %)]
+[Survived] Boolean mutation on line 14: 'true' ==> 'false'
+--------------- ModelValidation.cs [0/0 (- %)]
+--------------- RegexTemplates.cs [0/0 (- %)]
+--------------- StateMachine.cs [3/3 (100.00 %)]
+--------- \libs [7/76 (9.21 %)]
+----------- \JsonDotNet [4/5 (80.00 %)]
+------------- \JsonNet [0/0 (- %)]
+------------- JsonConverterHandlingMissingFields.cs [4/5 (80.00 %)]
+[Survived] Boolean mutation on line 17: 'true' ==> 'false'
+------------- JsonNetReader.cs [0/0 (- %)]
+------------- JsonNetSettings.cs [0/0 (- %)]
+------------- JsonNetWriter.cs [0/0 (- %)]
+----------- \LiteDB [0/0 (- %)]
+----------- \parallelExtensions [3/71 (4.23 %)]
+------------- QueuedTaskScheduler.cs [3/71 (4.23 %)]
+[Survived] Binary expression mutation on line 28: 'scheduler == null' ==> 'scheduler != null'
+[Survived] Binary expression mutation on line 35: '_scheduler._targetScheduler != null' ==> '_scheduler._targetScheduler == null'
+[Survived] Binary expression mutation on line 38: 't != null' ==> 't == null'
+[Survived] Binary expression mutation on line 105: 'targetScheduler == null' ==> 'targetScheduler != null'
+[Survived] Binary expression mutation on line 106: 'maxConcurrencyLevel < 0' ==> 'maxConcurrencyLevel > 0'
+[Survived] Binary expression mutation on line 106: 'maxConcurrencyLevel < 0' ==> 'maxConcurrencyLevel <= 0'
+[Survived] Binary expression mutation on line 115: 'maxConcurrencyLevel != 0' ==> 'maxConcurrencyLevel == 0'
+[Survived] Binary expression mutation on line 116: 'targetScheduler.MaximumConcurrencyLevel > 0' ==> 'targetScheduler.MaximumConcurrencyLevel < 0'
+[Survived] Binary expression mutation on line 116: 'targetScheduler.MaximumConcurrencyLevel > 0' ==> 'targetScheduler.MaximumConcurrencyLevel >= 0'
+[Survived] Binary expression mutation on line 117: 'targetScheduler.MaximumConcurrencyLevel < _concurrencyLevel' ==> 'targetScheduler.MaximumConcurrencyLevel > _concurrencyLevel'
+[Survived] Binary expression mutation on line 117: 'targetScheduler.MaximumConcurrencyLevel < _concurrencyLevel' ==> 'targetScheduler.MaximumConcurrencyLevel <= _concurrencyLevel'
+[Survived] Binary expression mutation on line 116: 'targetScheduler.MaximumConcurrencyLevel > 0 &&
+                targetScheduler.MaximumConcurrencyLevel < _concurrencyLevel' ==> 'targetScheduler.MaximumConcurrencyLevel > 0 ||
+                targetScheduler.MaximumConcurrencyLevel < _concurrencyLevel'
+[Survived] Binary expression mutation on line 144: 'threadCount < 0' ==> 'threadCount > 0'
+[Survived] Binary expression mutation on line 144: 'threadCount < 0' ==> 'threadCount <= 0'
+[Survived] Binary expression mutation on line 145: 'threadCount == 0' ==> 'threadCount != 0'
+[Survived] PostIncrementExpression to PostDecrementExpression mutation on line 153: 'i++' ==> 'i--'
+[Survived] Binary expression mutation on line 153: 'i < threadCount' ==> 'i > threadCount'
+[Survived] Binary expression mutation on line 153: 'i < threadCount' ==> 'i <= threadCount'
+[Survived] LogicalNotExpression to un-LogicalNotExpression mutation on line 156: '!useForegroundThreads' ==> 'useForegroundThreads'
+[Survived] Binary expression mutation on line 158: 'threadName != null' ==> 'threadName == null'
+[Survived] Binary expression mutation on line 170: 'threadInit != null' ==> 'threadInit == null'
+[Survived] Boolean mutation on line 176: 'true' ==> 'false'
+[Survived] Binary expression mutation on line 195: 'targetTask != null' ==> 'targetTask == null'
+[Survived] LogicalNotExpression to un-LogicalNotExpression mutation on line 203: '!Environment.HasShutdownStarted' ==> 'Environment.HasShutdownStarted'
+[Survived] LogicalNotExpression to un-LogicalNotExpression mutation on line 203: '!AppDomain.CurrentDomain.IsFinalizingForUnload()' ==> 'AppDomain.CurrentDomain.IsFinalizingForUnload()'
+[Survived] Binary expression mutation on line 203: '!Environment.HasShutdownStarted && !AppDomain.CurrentDomain.IsFinalizingForUnload()' ==> '!Environment.HasShutdownStarted || !AppDomain.CurrentDomain.IsFinalizingForUnload()'
+[Survived] Binary expression mutation on line 213: 'threadFinally != null' ==> 'threadFinally == null'
+[Survived] AddAssignmentExpression to SubtractAssignmentExpression mutation on line 221: 'count += group.Value.Count' ==> 'count -=group.Value.Count'
+[Survived] Binary expression mutation on line 229: '_targetScheduler != null' ==> '_targetScheduler == null'
+[Survived] Binary expression mutation on line 231: 't != null' ==> 't == null'
+[Survived] Binary expression mutation on line 256: 'items.Count > 0' ==> 'items.Count < 0'
+[Survived] Binary expression mutation on line 256: 'items.Count > 0' ==> 'items.Count >= 0'
+[Survived] Binary expression mutation on line 258: 'items.Count == 0' ==> 'items.Count != 0'
+[Survived] Binary expression mutation on line 258: 'queueForTargetTask._disposed && items.Count == 0' ==> 'queueForTargetTask._disposed || items.Count == 0'
+[Survived] Binary expression mutation on line 261: 'queues.NextQueueIndex + 1' ==> 'queues.NextQueueIndex - 1'
+[Survived] Binary expression mutation on line 261: '(queues.NextQueueIndex + 1) % queueGroup.Value.Count' ==> '(queues.NextQueueIndex + 1) * queueGroup.Value.Count'
+[Survived] Binary expression mutation on line 276: '_targetScheduler == null' ==> '_targetScheduler != null'
+[Survived] Boolean mutation on line 286: 'false' ==> 'true'
+[Survived] Binary expression mutation on line 289: '_delegatesQueuedOrRunning < _concurrencyLevel' ==> '_delegatesQueuedOrRunning <= _concurrencyLevel'
+[Survived] PreIncrementExpression to PreDecrementExpression mutation on line 290: '++_delegatesQueuedOrRunning' ==> '--_delegatesQueuedOrRunning'
+[Survived] Boolean mutation on line 291: 'true' ==> 'false'
+[Survived] Boolean mutation on line 309: 'true' ==> 'false'
+[Survived] Binary expression mutation on line 310: '!_disposeCancellation.IsCancellationRequested && continueProcessing' ==> '!_disposeCancellation.IsCancellationRequested || continueProcessing'
+[Survived] LogicalNotExpression to un-LogicalNotExpression mutation on line 314: '!_disposeCancellation.IsCancellationRequested' ==> '_disposeCancellation.IsCancellationRequested'
+[Survived] Binary expression mutation on line 318: '_nonthreadsafeTaskQueue.Count == 0' ==> '_nonthreadsafeTaskQueue.Count != 0'
+[Survived] Binary expression mutation on line 325: 'targetTask == null' ==> 'targetTask != null'
+[Survived] Binary expression mutation on line 332: 'targetTask != null' ==> 'targetTask == null'
+[Survived] Binary expression mutation on line 333: 'queueForTargetTask != null' ==> 'queueForTargetTask == null'
+[Survived] Binary expression mutation on line 343: '_nonthreadsafeTaskQueue.Count == 0' ==> '_nonthreadsafeTaskQueue.Count != 0'
+[Survived] PostDecrementExpression to PostIncrementExpression mutation on line 344: '_delegatesQueuedOrRunning--' ==> '_delegatesQueuedOrRunning++'
+[Survived] Boolean mutation on line 345: 'false' ==> 'true'
+[Survived] Binary expression mutation on line 369: '_targetScheduler == null' ==> '_targetScheduler != null'
+[Survived] Binary expression mutation on line 376: 't != null' ==> 't == null'
+[Survived] Binary expression mutation on line 372: 't != null' ==> 't == null'
+[Survived] LogicalNotExpression to un-LogicalNotExpression mutation on line 405: '!_queueGroups.TryGetValue(priority, out list)' ==> '_queueGroups.TryGetValue(priority, out list)'
+[Survived] Binary expression mutation on line 425: 'queueGroup.NextQueueIndex >= index' ==> 'queueGroup.NextQueueIndex < index'
+[Survived] Binary expression mutation on line 425: 'queueGroup.NextQueueIndex >= index' ==> 'queueGroup.NextQueueIndex > index'
+[Survived] PostDecrementExpression to PostIncrementExpression mutation on line 425: 'queueGroup.NextQueueIndex--' ==> 'queueGroup.NextQueueIndex++'
+[Survived] PostIncrementExpression to PostDecrementExpression mutation on line 439: 'i++' ==> 'i--'
+[Survived] Binary expression mutation on line 439: 'i < Count' ==> 'i > Count'
+[Survived] Binary expression mutation on line 439: 'i < Count' ==> 'i <= Count'
+[Survived] PostIncrementExpression to PostDecrementExpression mutation on line 440: 'i++' ==> 'i--'
+[Survived] Binary expression mutation on line 440: 'i < NextQueueIndex' ==> 'i > NextQueueIndex'
+[Survived] Binary expression mutation on line 440: 'i < NextQueueIndex' ==> 'i <= NextQueueIndex'
+[Survived] Binary expression mutation on line 454: 'queue == null' ==> 'queue != null'
+[Survived] LogicalNotExpression to un-LogicalNotExpression mutation on line 523: '!_disposed' ==> '_disposed'
+[Survived] Binary expression mutation on line 528: '_workItems.Count == 0' ==> '_workItems.Count != 0'
+[Survived] Boolean mutation on line 532: 'true' ==> 'false'
+----------- \System.Collections.Immutable [0/0 (- %)]

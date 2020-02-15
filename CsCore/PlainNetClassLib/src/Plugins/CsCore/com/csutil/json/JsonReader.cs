@@ -8,6 +8,8 @@ using Newtonsoft.Json.Linq;
 namespace com.csutil {
 
     public interface IJsonReader {
+        object ReadAsType(string jsonString, Type targetType);
+        object ReadAsType(StreamReader streamReader, Type targetType);
         T Read<T>(string jsonString);
         T Read<T>(StreamReader jsonString);
     }

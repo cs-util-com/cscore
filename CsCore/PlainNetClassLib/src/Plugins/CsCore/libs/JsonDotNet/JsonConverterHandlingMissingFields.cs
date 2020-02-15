@@ -11,7 +11,9 @@ namespace com.csutil.json {
     internal class JsonConverterHandlingMissingFields : JsonConverter {
 
         // This converter should only handle classes that implement the HandleAdditionalJsonFields interface:
-        public override bool CanConvert(Type objectType) { return objectType.IsCastableTo<HandleAdditionalJsonFields>(); }
+        public override bool CanConvert(Type objectType) {
+            return objectType.IsCastableTo<HandleAdditionalJsonFields>();
+        }
 
         public override object ReadJson(Newtonsoft.Json.JsonReader reader, Type targetObjectType, object targetObjectToFill, JsonSerializer serializer) {
             targetObjectToFill = targetObjectToFill ?? Activator.CreateInstance(targetObjectType, true);
@@ -20,7 +22,7 @@ namespace com.csutil.json {
             var missingFieldList = FillTargetObjectAndCollectMissingFields(targetObjectType, targetObjectToFill, sourceJson);
             if (!missingFieldList.IsNullOrEmpty()) {
                 var missingFields = missingFieldList.ToDictionary(x => x.Key, x => (object)x.Value);
-                (targetObjectToFill as HandleAdditionalJsonFields).AdditionalJsonFields = missingFields;
+                (targetObjectToFill as HandleAdditionalJsonFields).SetAdditionalJsonFields(missingFields);
             }
             return targetObjectToFill;
         }
@@ -45,7 +47,7 @@ namespace com.csutil.json {
             JToken t = JToken.FromObject(value);
             if (t is JObject) {
                 JObject o = (JObject)t;
-                var missingFields = (value as HandleAdditionalJsonFields).AdditionalJsonFields;
+                var missingFields = (value as HandleAdditionalJsonFields).GetAdditionalJsonFields();
                 if (!missingFields.IsNullOrEmpty()) {
                     foreach (var f in missingFields) { o.Add(new JProperty(f.Key, f.Value)); }
                 }

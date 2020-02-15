@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 
 namespace com.csutil.logging {
 
@@ -8,6 +9,8 @@ namespace com.csutil.logging {
         void LogWarning(string warning, params object[] args);
         Exception LogError(string error, params object[] args);
         Exception LogExeption(Exception e, params object[] args);
+        StopwatchV2 LogMethodEntered(string methodName, object[] args);
+        void LogMethodDone(Stopwatch timing, int maxAllowedTimeInMs, string sourceMemberName, string sourceFilePath, int sourceLineNumber);
 
     }
 

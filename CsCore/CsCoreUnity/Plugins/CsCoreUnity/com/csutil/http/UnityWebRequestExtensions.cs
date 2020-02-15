@@ -29,6 +29,7 @@ namespace com.csutil {
             resp.duration = Stopwatch.StartNew();
             var timer = Stopwatch.StartNew();
             self.ApplyAllCookiesToRequest();
+            if (self.downloadHandler == null) { self.downloadHandler = resp.createDownloadHandler(); }
             resp.debugInfo = self.method + " " + self.url + " with cookies=[" + self.GetRequestHeader("Cookie") + "]";
             Log.d("Sending: " + resp);
             var req = self.SendWebRequest();
@@ -78,9 +79,14 @@ namespace com.csutil {
 
         private static void HandleResult<T>(UnityWebRequest self, Response<T> resp) {
             if (self.isNetworkError || self.isHttpError) {
-                resp.onError(self, new Exception(self.error));
+                resp.onError.InvokeIfNotNull(self, new Exception("[" + self.responseCode + "] " + self.error));
             } else {
-                try { resp.onResult.InvokeIfNotNull(self.GetResult<T>()); } catch (Exception e) { resp.onError(self, e); }
+                try {
+                    if (resp.onResult != null) { resp.onResult(self.GetResult<T>()); } else {
+                        Log.d("resp.onResult was null, resp.GetResult has to be called manually");
+                    }
+                }
+                catch (Exception e) { resp.onError(self, e); }
             }
         }
 
@@ -96,16 +102,23 @@ namespace com.csutil {
             }
             if (TypeCheck.AreEqual<T, Headers>()) { return (T)(object)self.GetResponseHeadersV2(); }
             var text = self.downloadHandler.text;
-            if (TypeCheck.AreEqual<T, String>()) { return (T)(object)text; }
+            if (TypeCheck.AreEqual<T, string>()) { return (T)(object)text; }
             return r.Read<T>(text);
         }
 
         public static UnityWebRequest SetRequestHeaders(this UnityWebRequest self, Headers headersToAdd) {
-            if (!headersToAdd.IsNullOrEmpty()) { foreach (var h in headersToAdd) { self.SetRequestHeader(h.Key, h.Value); } }
+            if (!headersToAdd.IsNullOrEmpty()) {
+                foreach (var h in headersToAdd) {
+                    AssertV2.AreEqual(1, h.Value.Count());
+                    self.SetRequestHeader(h.Key, h.Value.First());
+                }
+            }
             return self;
         }
 
-        public static Headers GetResponseHeadersV2(this UnityWebRequest self) { return new Headers(self.GetResponseHeaders()); }
+        public static Headers GetResponseHeadersV2(this UnityWebRequest self) {
+            return new Headers(self.GetResponseHeaders());
+        }
 
     }
 

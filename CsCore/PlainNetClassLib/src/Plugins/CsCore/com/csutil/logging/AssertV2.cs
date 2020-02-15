@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace com.csutil {
     public static class AssertV2 {
@@ -19,9 +20,8 @@ namespace com.csutil {
         }
 
         public static void Throws<T>(Action actionThatShouldThrowAnException) where T : Exception {
-            try { actionThatShouldThrowAnException(); }
-            catch (Exception e) {
-                if (e.GetType().IsCastableTo(typeof(T))) { return; } // its the expected exception
+            try { actionThatShouldThrowAnException(); } catch (Exception e) {
+                if (e is T) { return; } // its the expected exception
                 throw; // its an unexpected exception, so rethrow it
             }
             throw new ThrowsException("No exception of type " + typeof(T) + " was thrown!");
@@ -63,12 +63,19 @@ namespace com.csutil {
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         public static void AreNotEqual<T>(IEquatable<T> expected, IEquatable<T> actual, string varName = "", params object[] args) {
-            var isEqualRef = ReferenceEquals(expected, actual);
-            Assert(!isEqualRef, "Assert.AreNotEqual() FAILED: " + varName + " is same reference (expected " + expected + " == actual " + actual + " )", args);
-            if (!isEqualRef) {
+            var isNotSameRef = !ReferenceEquals(expected, actual);
+            Assert(isNotSameRef, "Assert.AreNotEqual() FAILED: " + varName + " is same reference (expected " + expected + " == actual " + actual + " )", args);
+            if (isNotSameRef) {
                 var errorMsg = "Assert.AreNotEqual() FAILED: expected " + varName + "= " + expected + " IS equal to actual " + varName + "= " + actual;
-                Assert(!expected.Equals(actual), errorMsg, args);
+                Assert(!Equals(expected, actual), errorMsg, args);
             }
+        }
+
+        [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
+        public static void AreEqualJson(object a, object b) {
+            var expected = JsonWriter.GetWriter().Write(a);
+            var actual = JsonWriter.GetWriter().Write(b);
+            AreEqual(expected, actual);
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
@@ -79,7 +86,7 @@ namespace com.csutil {
             Assert(!expected.SequenceEqual(actual), msg2, args);
         }
 
-        public static Stopwatch TrackTiming() { return Stopwatch.StartNew(); }
+        public static StopwatchV2 TrackTiming([CallerMemberName] string methodName = null) { return new StopwatchV2(methodName).StartV2(); }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         public static void AssertUnderXms(this Stopwatch self, int maxTimeInMs, params object[] args) {

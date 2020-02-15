@@ -30,6 +30,29 @@ namespace com.csutil {
             }
         }
 
+        public static int targetFrameRateV2 {
+
+#if UNITY_2019_3_OR_NEWER
+            // See: 
+            // - https://blogs.unity3d.com/2020/02/07/how-on-demand-rendering-can-improve-mobile-performance/
+            // - https://docs.unity3d.com/2019.3/Documentation/ScriptReference/Rendering.OnDemandRendering-effectiveRenderFrameRate.html
+            set {
+                UnityEngine.Rendering.OnDemandRendering.renderFrameInterval = 1;
+                if (UnityEngine.Rendering.OnDemandRendering.effectiveRenderFrameRate != value) {
+                    if (QualitySettings.vSyncCount > 0) {
+                        UnityEngine.Rendering.OnDemandRendering.renderFrameInterval = (Screen.currentResolution.refreshRate / QualitySettings.vSyncCount / value);
+                    } else {
+                        UnityEngine.Rendering.OnDemandRendering.renderFrameInterval = (Application.targetFrameRate / value);
+                    }
+                }
+            }
+            get { return UnityEngine.Rendering.OnDemandRendering.effectiveRenderFrameRate; }
+#else
+            set { Application.targetFrameRate = value; }
+            get { return Application.targetFrameRate; }
+#endif
+        }
+
     }
 
 }
