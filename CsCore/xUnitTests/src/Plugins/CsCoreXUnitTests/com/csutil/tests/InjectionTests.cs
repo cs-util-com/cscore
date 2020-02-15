@@ -261,5 +261,18 @@ namespace com.csutil.tests {
 
         }
 
+        [Fact]
+        public void TestRemoveAllInjectors2() {
+            var IoC_inject = GetInjectorForTest();
+            var instance = new MyClass1();
+            IoC_inject.RegisterInjector(new object(), (c, _) => instance);
+            var m = IoC_inject.GetAllInjectorsMap(this);
+            Assert.Single(m);
+            Assert.Contains("MyClass1", m.First().Key);
+            Assert.Single(m.First().Value);
+            Assert.IsType<MyClass1>(m.First().Value.First());
+            Assert.Same(instance, m.First().Value.First());
+        }
+
     }
 }

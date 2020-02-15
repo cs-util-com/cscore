@@ -1,6 +1,7 @@
 using com.csutil.eventbus;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 
@@ -10,12 +11,14 @@ namespace com.csutil.injection {
         public static Injector newInjector(IEventBus eventbusToUse) { return new Injector { usedEventBus = eventbusToUse }; }
 
         public IEventBus usedEventBus = EventBus.instance;
+        public IImmutableSet<string> injectorNames { get; private set; } = ImmutableHashSet<string>.Empty;
 
         public void RegisterInjector<T>(object injector, Func<object, bool, T> createServiceAction) {
-            var eventKey = GetEventKey<T>();
-            if (HasInjectorRegistered<T>()) { Log.w("There are already injectors registered for " + eventKey); }
-            usedEventBus.Subscribe(injector, eventKey, createServiceAction);
-            AppFlow.TrackEvent(EventConsts.catInjection, "Register_" + eventKey);
+            var injectorName = GetEventKey<T>();
+            injectorNames = injectorNames.Add(injectorName);
+            if (HasInjectorRegistered<T>()) { Log.w("There are already injectors registered for " + injectorName); }
+            usedEventBus.Subscribe(injector, injectorName, createServiceAction);
+            AppFlow.TrackEvent(EventConsts.catInjection, "Register_" + injectorName);
         }
 
         public T Get<T>(object caller, bool createIfNull = true) {
@@ -23,13 +26,21 @@ namespace com.csutil.injection {
         }
 
         public IEnumerable<T> GetAll<T>(object caller, bool createIfNull = true) {
-            return usedEventBus.NewPublishIEnumerable(GetEventKey<T>(), caller, createIfNull).Filter(x => x is T).Cast<T>();
+            return GetAll(GetEventKey<T>(), caller, createIfNull).Filter(x => x is T).Cast<T>();
+        }
+
+        private IEnumerable<object> GetAll(string injectorKey, object caller, bool createIfNull) {
+            return usedEventBus.NewPublishIEnumerable(injectorKey, caller, createIfNull);
         }
 
         public string GetEventKey<T>() { return "InjectReq:" + typeof(T); }
 
         public bool HasInjectorRegistered<T>() {
             return !usedEventBus.GetSubscribersFor(GetEventKey<T>()).IsNullOrEmpty();
+        }
+
+        public Dictionary<string, IEnumerable<object>> GetAllInjectorsMap(object caller, bool createIfNull = false) {
+            return injectorNames.ToDictionary(n => n, n => GetAll(n, caller, createIfNull));
         }
 
         public bool RemoveAllInjectorsFor<T>() {

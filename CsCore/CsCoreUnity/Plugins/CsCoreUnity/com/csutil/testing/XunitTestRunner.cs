@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
+using UnityEngine;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -74,9 +75,16 @@ namespace com.csutil.testing {
         }
 
         private static void ResetStaticInstances() {
+            DisposeAllInjectors();
             EventBus.instance = new EventBus();
             IoC.inject = new injection.Injector();
             UnitySetup.SetupDefaultSingletonsIfNeeded();
+        }
+
+        private static void DisposeAllInjectors() {
+            IEnumerable<object> instances = IoC.inject.GetAllInjectorsMap(null).SelectMany(x => x.Value);
+            foreach (var d in instances.OfType<IDisposable>()) { try { d.Dispose(); } catch (Exception e) { Log.e(e); } }
+            foreach (var d in instances.OfType<UnityEngine.Object>()) { d.Destroy(); }
         }
 
         private static IEnumerable<MethodInfo> GetMethodsToTest(Type classToTest) {
