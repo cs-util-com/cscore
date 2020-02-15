@@ -57,6 +57,7 @@ namespace com.csutil.tests.json {
             var x1JsonString = JsonWriter.GetWriter().Write(x1);
             var x2 = JsonReader.GetReader().Read<MyClass3>(x1JsonString);
             // myString2 and myComplexChildField are missing x2 as fields/porperties so the count of additionl json fields must be 2:
+            Assert.NotEmpty(x2.GetAdditionalJsonFields());
             Assert.Equal(2, x2.GetAdditionalJsonFields().Count);
             Assert.Equal(x1.myString, x2.myString);
             // The json will still contain the additional fields since they are attached again during serialization:
