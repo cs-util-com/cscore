@@ -1,0 +1,10 @@
+<linker>
+	<assembly fullname="System.Collections.Immutable.ImmutableList">
+		<type fullname="System.Collections.Immutable" preserve="all"/>
+		<type fullname="System.Collections.Immutable.ImmutableList" preserve="all"/>
+	</assembly>
+	<assembly fullname="System.Collections.Immutable">
+		<type fullname="System.Collections.Immutable" preserve="all"/>
+		<type fullname="System.Collections.Immutable.ImmutableList" preserve="all"/>
+	</assembly>
+</linker>
