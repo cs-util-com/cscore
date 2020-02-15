@@ -23,8 +23,8 @@
 
   <!-- https://www.nuget.org/packages/Newtonsoft.Json -->
   <ItemGroup>
-    <!-- Version 9.0.1 chosen because https://github.com/SaladLab/Json.Net.Unity3D uses this version -->
-    <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
+    <!-- Version 12.0.2 chosen because https://docs.unity3d.com/2020.1/Documentation/Manual/com.unity.nuget.newtonsoft-json.html 2.0.0-preview uses this version -->
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
   </ItemGroup>
 
   <!-- https://www.nuget.org/packages/LiteDB/ -->
@@ -34,7 +34,7 @@
 
   <!-- https://www.nuget.org/packages/System.Collections.Immutable/ -->
   <ItemGroup>
-    <PackageReference Include="System.Collections.Immutable" Version="1.5.0" />
+    <PackageReference Include="System.Collections.Immutable" Version="1.7.0" />
   </ItemGroup>
   
   <!-- https://www.nuget.org/packages/SharpZipLib/ -->

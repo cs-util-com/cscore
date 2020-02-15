@@ -15,7 +15,9 @@ namespace com.csutil {
         public static T MapViaJsonInto<T>(this object objectToDeepCopy) {
             using (var stream = new MemoryStream()) {
                 using (var writer = new StreamWriter(stream, encoding: Encoding.UTF8, bufferSize: 1024, leaveOpen: true)) {
-                    var serializer = JsonSerializer.Create(new JsonSerializerSettings { ObjectCreationHandling = ObjectCreationHandling.Replace });
+                    var settings = json.JsonNetSettings.defaultSettings;
+                    settings.ObjectCreationHandling = ObjectCreationHandling.Replace;
+                    var serializer = JsonSerializer.Create(settings);
                     serializer.Serialize(writer, objectToDeepCopy);
                     writer.Flush();
                     stream.Seek(0, SeekOrigin.Begin);
@@ -28,19 +30,21 @@ namespace com.csutil {
             return DeepCopyViaJsonString(objectToDeepCopy, out string jsonString);
         }
 
-        // E.g: If in default constructor a list property is initialized, but in 'objectToDeepCopy' the field was set to null
-        private static JsonSerializerSettings deserializeSettings = new JsonSerializerSettings { ObjectCreationHandling = ObjectCreationHandling.Replace };
-
         public static T DeepCopyViaJsonString<T>(T objectToDeepCopy, out string jsonString) {
             // ObjectCreationHandling.Replace needed so that default constructor values not added to result
             jsonString = JsonConvert.SerializeObject(objectToDeepCopy);
-            return JsonConvert.DeserializeObject<T>(jsonString, deserializeSettings);
+            var settings = json.JsonNetSettings.defaultSettings;
+            // E.g: If in default constructor a list property is initialized, but in 'objectToDeepCopy' the field was set to null
+            settings.ObjectCreationHandling = ObjectCreationHandling.Replace;
+            return JsonConvert.DeserializeObject<T>(jsonString, settings);
         }
 
         public static T DeepCopyViaBsonStream<T>(T objectToDeepCopy) {
             using (var stream = new MemoryStream()) {
                 using (var writer = new BsonWriter(stream)) {
-                    var serializer = JsonSerializer.Create(new JsonSerializerSettings { ObjectCreationHandling = ObjectCreationHandling.Replace });
+                    var settings = json.JsonNetSettings.defaultSettings;
+                    settings.ObjectCreationHandling = ObjectCreationHandling.Replace;
+                    var serializer = JsonSerializer.Create(settings);
                     serializer.Serialize(writer, objectToDeepCopy);
                     writer.Flush();
                     stream.Seek(0, SeekOrigin.Begin);
