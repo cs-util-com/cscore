@@ -28,13 +28,17 @@ namespace com.csutil.editor {
         [MenuItem(DIR + "CsCore/Install default packages")]
         static void InstallDefaultPackages() {
             UnityPackageInstaller.AddToProjectViaPackageManager("com.unity.build-report-inspector", "0.1.2-preview");
+            UnityPackageInstaller.AddToProjectViaPackageManager("com.unity.device-simulator", "2.0.0-preview");
+            UnityPackageInstaller.AddToProjectViaPackageManager("com.unity.mobile.android-logcat", "1.0.0");
+            // UnityPackageInstaller.AddToProjectViaPackageManager("com.unity.nuget.newtonsoft-json", "2.0.0-preview");
+            // UnityPackageInstaller.AddToProjectViaPackageManager("com.unity.vectorgraphics", "2.0.0-preview.11");
         }
 
         [MenuItem(DIR + "Show Asset Store packages")]
         static void ShowAssetStore() { Application.OpenURL("https://assetstore.unity.com/publishers/40989"); }
 
         [MenuItem("CONTEXT/RectTransform/Set Anchors Around Object")]
-        static void SetAnchorsAroundObject(UnityEditor.MenuCommand command) {
+        static void SetAnchorsAroundObject(MenuCommand command) {
             SetAnchorsAroundObject(command.context as RectTransform);
         }
 
