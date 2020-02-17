@@ -4,7 +4,7 @@ using System;
 
 namespace StbImageLib
 {
-	internal static class Conversion
+	public static class Conversion
 	{
 		public static byte stbi__compute_y(int r, int g, int b)
 		{

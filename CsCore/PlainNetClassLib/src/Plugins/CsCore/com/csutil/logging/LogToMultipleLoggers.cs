@@ -27,7 +27,7 @@ namespace com.csutil.logging {
         }
 
         public StopwatchV2 LogMethodEntered(string methodName, object[] args) {
-            return loggers.Map(l => l.LogMethodEntered(methodName, args)).FirstOrDefault();
+            return loggers.Map(l => l.LogMethodEntered(methodName, args)).Filter(x => x != null).ToList().FirstOrDefault();
         }
 
         public void LogMethodDone(Stopwatch timing, int maxAllowedTimeInMs, string sourceMemberName, string sourceFilePath, int sourceLineNumber) {

@@ -3,7 +3,9 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace com.csutil {
+
     public class StopwatchV2 : Stopwatch {
+
         private long managedMemoryAtStart;
         private long managedMemoryAtStop;
         private long memoryAtStart;
@@ -55,4 +57,5 @@ namespace com.csutil {
         }
 
     }
+
 }
