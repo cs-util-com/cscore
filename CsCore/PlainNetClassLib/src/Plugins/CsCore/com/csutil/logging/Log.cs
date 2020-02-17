@@ -52,7 +52,6 @@ namespace com.csutil {
             return instance.LogMethodEntered(methodName, args);
         }
 
-        [Conditional("DEBUG"), Conditional("ENFORCE_FULL_LOGGING")]
         public static void MethodDone(Stopwatch timing, int maxAllowedTimeInMs = -1,
                     [CallerMemberName] string sourceMemberName = null,
                     [CallerFilePath] string sourceFilePath = null,
