@@ -20,16 +20,16 @@ namespace Xunit {
 
         public LogToXUnit(ITestOutputHelper xunitLogger) { this.xunitLogger = xunitLogger; }
 
-        protected override void PrintDebugMessage(string debugLogMsg, object[] args) {
-            try { xunitLogger.WriteLine(debugLogMsg); } catch (System.Exception) { }
+        protected override void PrintDebugMessage(string debugLogMsg, params object[] args) {
+            xunitLogger.WriteLine(debugLogMsg);
         }
 
-        protected override void PrintErrorMessage(string errorMsg, object[] args) {
-            try { xunitLogger.WriteLine(errorMsg); } catch (System.Exception) { }
+        protected override void PrintErrorMessage(string errorMsg, params object[] args) {
+            xunitLogger.WriteLine(errorMsg);
         }
 
-        protected override void PrintWarningMessage(string warningMsg, object[] args) {
-            try { xunitLogger.WriteLine(warningMsg); } catch (System.Exception) { }
+        protected override void PrintWarningMessage(string warningMsg, params object[] args) {
+            xunitLogger.WriteLine(warningMsg);
         }
 
     }

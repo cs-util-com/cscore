@@ -3,7 +3,7 @@ using JsonDiffPatchDotNet;
 using Newtonsoft.Json.Linq;
 
 namespace com.csutil.model.immutable {
-    public class Middlewares {
+    public static class Middlewares {
 
         // See e.g. https://github.com/reduxjs/redux-thunk/blob/master/src/index.js
         public static Middleware<T> NewThunkMiddleware<T>(object extraArgument = null) {

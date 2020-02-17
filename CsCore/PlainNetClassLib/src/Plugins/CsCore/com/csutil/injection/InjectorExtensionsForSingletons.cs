@@ -51,7 +51,9 @@ namespace com.csutil {
 
         [Serializable]
         public class MultipleProvidersException : Exception {
+            public MultipleProvidersException() : base() { }
             public MultipleProvidersException(string message) : base(message) { }
+            public MultipleProvidersException(string message, Exception innerException) : base(message, innerException) { }
         }
 
     }

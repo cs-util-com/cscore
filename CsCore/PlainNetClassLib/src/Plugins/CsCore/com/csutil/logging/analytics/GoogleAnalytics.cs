@@ -16,7 +16,7 @@ namespace com.csutil.logging.analytics {
         public string appId;
         private string latestScreen;
 
-        /// <summary> </summary>
+        /// <summary> Creates a new Google analytics tracker </summary>
         /// <param name="gaTrackingId"> Tracking ID / Property ID. Format: UA-XXXXX-Y </param>
         /// <param name="store"> Optional store to cache the events in </param>
         public GoogleAnalytics(string gaTrackingId, IKeyValueStore store = null) : base(store) {

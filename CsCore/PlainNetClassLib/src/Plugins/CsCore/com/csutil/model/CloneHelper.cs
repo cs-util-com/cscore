@@ -39,6 +39,7 @@ namespace com.csutil {
             return JsonConvert.DeserializeObject<T>(jsonString, settings);
         }
 
+        [Obsolete("Bson logic has been deprecated in Json.net (Moved to separate package)")]
         public static T DeepCopyViaBsonStream<T>(T objectToDeepCopy) {
             using (var stream = new MemoryStream()) {
                 using (var writer = new BsonWriter(stream)) {

@@ -2,7 +2,7 @@ using System;
 using System.Threading.Tasks;
 
 namespace com.csutil.http.apis.iplookup {
-    public class GeoBytesCom {
+    public static class GeoBytesCom {
 
         public static Task<Response> GetResponse() {
             return new Uri("http://getcitydetails.geobytes.com/GetCityDetails").SendGET().GetResult<Response>();

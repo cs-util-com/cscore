@@ -10,8 +10,8 @@ namespace com.csutil.tests.model.immutable {
     /// <summary> 
     /// This is a simple redux datastore example that mutates an immutable datamodel using actions that 
     /// are dispatched to the datastore. Related articles about server outbox & offline flows: 
-    //  - https://hackernoon.com/introducing-redux-offline-offline-first-architecture-for-progressive-web-applications-and-react-68c5167ecfe0
-    //  - https://medium.com/@ianovenden/adding-offline-support-to-redux-ac8eb8873035
+    ///  - https://hackernoon.com/introducing-redux-offline-offline-first-architecture-for-progressive-web-applications-and-react-68c5167ecfe0
+    ///  - https://medium.com/@ianovenden/adding-offline-support-to-redux-ac8eb8873035
     /// </summary>
     public class DataStoreExample3 {
 

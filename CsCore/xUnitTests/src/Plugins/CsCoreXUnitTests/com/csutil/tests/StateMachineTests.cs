@@ -14,7 +14,7 @@ namespace com.csutil.tests {
         public enum MyStates { MyState1, MyState2, MyState3 }
 
         [Fact]
-        public static void StateMachine_ExampleUsage1() {
+        public void StateMachine_ExampleUsage1() {
 
             // First define a set of allowed transitions to define the state machine:
             var stateMachine = new Dictionary<MyStates, HashSet<MyStates>>();
@@ -45,7 +45,7 @@ namespace com.csutil.tests {
         }
 
         [Fact]
-        public static void StateMachine_ExampleUsage2() {
+        public void StateMachine_ExampleUsage2() {
 
             // Create the state machine similar to the first example but wrapped in a enclosing class (see below):
             var myStateMachine = new MyStateMachineForExample2();
@@ -88,7 +88,7 @@ namespace com.csutil.tests {
         }
 
         [Fact]
-        public static void StateMachine_TransitionEventTests() {
+        public void StateMachine_TransitionEventTests() {
 
             var stateMachine = new Dictionary<MyStates, HashSet<MyStates>>();
             stateMachine.AddToValues(MyStates.MyState1, MyStates.MyState2);
@@ -124,7 +124,7 @@ namespace com.csutil.tests {
         }
 
         [Fact]
-        public static void StateMachine_TransitionEventTests2() {
+        public void StateMachine_TransitionEventTests2() {
 
             var stateMachine = new Dictionary<MyStates, HashSet<MyStates>>();
             stateMachine.AddToValues(MyStates.MyState1, MyStates.MyState1);

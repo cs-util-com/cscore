@@ -6,7 +6,7 @@ namespace com.csutil {
         void TrackEvent(string category, string action, params object[] args);
     }
 
-    public class AppFlow {
+    public static class AppFlow {
 
         public static IAppFlow instance;
 

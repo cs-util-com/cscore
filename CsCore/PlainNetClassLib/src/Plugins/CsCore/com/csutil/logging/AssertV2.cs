@@ -29,7 +29,9 @@ namespace com.csutil {
 
         [Serializable]
         public class ThrowsException : Exception {
+            public ThrowsException() : base() { }
             public ThrowsException(string message) : base(message) { }
+            public ThrowsException(string message, Exception innerException) : base(message, innerException) { }
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]

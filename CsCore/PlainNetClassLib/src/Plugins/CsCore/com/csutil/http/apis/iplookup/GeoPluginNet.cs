@@ -2,7 +2,7 @@ using System;
 using System.Threading.Tasks;
 
 namespace com.csutil.http.apis.iplookup {
-    public class GeoPluginNet {
+    public static class GeoPluginNet {
 
         public static Task<Response> GetResponse() {
             return new Uri("http://www.geoplugin.net/json.gp").SendGET().GetResult<Response>();

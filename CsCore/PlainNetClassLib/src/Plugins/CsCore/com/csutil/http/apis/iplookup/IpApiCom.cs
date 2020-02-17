@@ -2,7 +2,7 @@ using System;
 using System.Threading.Tasks;
 
 namespace com.csutil.http.apis.iplookup {
-    public class IpApiCom {
+    public static class IpApiCom {
 
         public static Task<Response> GetResponse() {
             return new Uri("http://ip-api.com/json/").SendGET().GetResult<Response>();

@@ -2,7 +2,7 @@ using System;
 using System.Threading.Tasks;
 
 namespace com.csutil.http.apis.iplookup {
-    public class ExtremeIpLookupCom {
+    public static class ExtremeIpLookupCom {
 
         public static Task<Response> GetResponse() {
             return new Uri("https://extreme-ip-lookup.com/json/").SendGET().GetResult<Response>();

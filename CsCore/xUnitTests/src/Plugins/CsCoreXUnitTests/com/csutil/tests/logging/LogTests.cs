@@ -154,9 +154,9 @@ namespace com.csutil.tests {
             private string latestWarning;
             private string latestError;
 
-            protected override void PrintDebugMessage(string l, object[] args) { this.latestLog = l; }
-            protected override void PrintErrorMessage(string e, object[] args) { this.latestError = e; }
-            protected override void PrintWarningMessage(string w, object[] args) { this.latestWarning = w; }
+            protected override void PrintDebugMessage(string l, params object[] args) { this.latestLog = l; }
+            protected override void PrintErrorMessage(string e, params object[] args) { this.latestError = e; }
+            protected override void PrintWarningMessage(string w, params object[] args) { this.latestWarning = w; }
 
             internal void AssertAllMethodsOfMockLogWereCalled() {
                 Assert.NotEmpty(latestLog);

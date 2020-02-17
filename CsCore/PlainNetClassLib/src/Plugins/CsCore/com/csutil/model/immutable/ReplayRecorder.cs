@@ -30,8 +30,7 @@ namespace com.csutil.model.immutable {
                             var dispatcherResult = innerDispatcher(action);
                             RecordEntry(action, dispatcherResult);
                             return dispatcherResult;
-                        }
-                        catch (Exception e) { RecordEntry(action, null, e.Message); throw e; }
+                        } catch (Exception e) { RecordEntry(action, null, e.Message); throw; }
                     };
                 };
             };
@@ -45,8 +44,7 @@ namespace com.csutil.model.immutable {
                 Entry nextEntry = new Entry() { action = action, e = "" + exception };
                 persistance.Set(GetId(recordedActionsCount), jsonWriter.Write(nextEntry));
                 recordedActionsCount++;
-            }
-            catch (Exception e) { Log.e("Could not record action " + action, e); }
+            } catch (Exception e) { Log.e("Could not record action " + action, e); }
         }
 
         private string GetId(int i) { return "" + i; }
@@ -92,8 +90,7 @@ namespace com.csutil.model.immutable {
             var nextEntry = jsonReader.Read<Entry>(nextEntryJson);
             try {
                 targetStore.Dispatch(nextEntry.action);
-            }
-            catch (System.Exception e) {
+            } catch (System.Exception e) {
                 CompareErrors(nextEntry, e);
             }
         }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace com.csutil.http.apis {
 
-    public class MetaWeather {
+    public static class MetaWeather {
 
         public static async Task<MetaWeatherReport.Report> GetWeather(string cityName) {
             var foundLocations = await MetaWeatherLocationLookup.GetLocation(cityName);
@@ -16,7 +16,7 @@ namespace com.csutil.http.apis {
 
     }
 
-    public class MetaWeatherLocationLookup {
+    public static class MetaWeatherLocationLookup {
 
         public static Task<List<LocationResp>> GetLocation(float latitude, float longiude) {
             var la = latitude.ToString(CultureInfo.InvariantCulture);
@@ -41,7 +41,7 @@ namespace com.csutil.http.apis {
 
     }
 
-    public class MetaWeatherReport {
+    public static class MetaWeatherReport {
 
         public static Task<Report> GetReport(int woeid) {
             return new Uri("https://www.metaweather.com/api/location/" + woeid).SendGET().GetResult<Report>();
