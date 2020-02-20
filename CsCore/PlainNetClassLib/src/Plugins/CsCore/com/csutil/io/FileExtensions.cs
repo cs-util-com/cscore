@@ -186,8 +186,17 @@ namespace com.csutil {
             return target.ExistsV2();
         }
 
+        public static void SaveStream(this FileInfo self, Stream streamToSave) {
+            using (var fileStream = File.Create(self.FullName)) { streamToSave.CopyTo(fileStream); }
+        }
+
+        public static FileStream LoadAsStream(this FileInfo self, FileMode fileMode = FileMode.Open,
+                        FileAccess fileAccess = FileAccess.Read, FileShare FileShare = FileShare.ReadWrite) {
+            return File.Open(self.FullPath(), fileMode, fileAccess, FileShare);
+        }
+
         public static T LoadAs<T>(this FileInfo self) {
-            using (FileStream readStream = File.Open(self.FullPath(), FileMode.Open, FileAccess.Read, FileShare.ReadWrite)) {
+            using (FileStream readStream = self.LoadAsStream()) {
                 using (StreamReader s = new StreamReader(readStream)) {
                     if (typeof(T) == typeof(string)) { return (T)(object)s.ReadToEnd(); }
                     { // If a subscriber reacts to LoadAs return its response:
