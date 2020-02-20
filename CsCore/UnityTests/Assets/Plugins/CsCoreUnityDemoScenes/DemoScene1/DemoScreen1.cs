@@ -88,10 +88,10 @@ namespace com.csutil.demos.demo1 {
             });
         }
 
-        private static Texture2D ToTexture2D(ImageResult image) {
-            AssertV2.AreEqual(8, image.BitsPerChannel);
-            Texture2D tex = new Texture2D(image.Width, image.Height, TextureFormat.RGBA32, false);
-            tex.LoadRawTextureData(image.Data);
+        public static Texture2D ToTexture2D(this ImageResult self) {
+            AssertV2.AreEqual(8, self.BitsPerChannel);
+            Texture2D tex = new Texture2D(self.Width, self.Height, TextureFormat.RGBA32, false);
+            tex.LoadRawTextureData(self.Data);
             tex.Apply();
             return tex;
         }

@@ -85,8 +85,7 @@ namespace com.csutil {
                     if (resp.onResult != null) { resp.onResult(self.GetResult<T>()); } else {
                         Log.d("resp.onResult was null, resp.GetResult has to be called manually");
                     }
-                }
-                catch (Exception e) { resp.onError.InvokeIfNotNull(self, e); }
+                } catch (Exception e) { resp.onError.InvokeIfNotNull(self, e); }
             }
         }
 
@@ -100,6 +99,7 @@ namespace com.csutil {
                 var h = (DownloadHandlerTexture)self.downloadHandler;
                 return (T)(object)h.texture;
             }
+            if (TypeCheck.AreEqual<T, Stream>()) { return (T)(object)new MemoryStream(self.downloadHandler.data); }
             if (TypeCheck.AreEqual<T, byte[]>()) { return (T)(object)self.downloadHandler.data; }
             if (TypeCheck.AreEqual<T, Headers>()) { return (T)(object)self.GetResponseHeadersV2(); }
             var text = self.downloadHandler.text;

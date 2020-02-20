@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -27,7 +28,10 @@ namespace com.csutil.http {
         public RestRequest WithRequestHeaders(Headers requestHeaders) { this.requestHeaders = requestHeaders; return this; }
 
         public async Task<T> GetResult<T>() {
-            var respText = await (await request).Content.ReadAsStringAsync();
+            var c = (await request).Content;
+            if (TypeCheck.AreEqual<T, Stream>()) { return (T)(object)await c.ReadAsStreamAsync(); }
+            if (TypeCheck.AreEqual<T, byte[]>()) { return (T)(object)await c.ReadAsByteArrayAsync(); }
+            var respText = await c.ReadAsStringAsync();
             if (typeof(T) == typeof(string)) { return (T)(object)respText; }
             return jsonReader.Read<T>(respText);
         }

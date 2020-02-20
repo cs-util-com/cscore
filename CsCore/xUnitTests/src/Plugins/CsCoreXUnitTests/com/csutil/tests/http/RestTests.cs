@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using com.csutil.http;
+using StbImageLib;
 using Xunit;
 
 namespace com.csutil.tests.http {
@@ -31,6 +33,29 @@ namespace com.csutil.tests.http {
             Assert.NotNull(x);
             Log.d("Your external IP is " + x.origin);
             Assert.NotNull(x.origin);
+        }
+
+        [Fact]
+        public async Task DownloadTest1() {
+            var h = 100;
+            var w = 50;
+            var stream = await new Uri("https://picsum.photos/" + w + "/" + h).SendGET().GetResult<Stream>();
+            var image = ImageResult.FromStream(stream, ColorComponents.RedGreenBlueAlpha);
+            stream.Dispose();
+            Assert.Equal(h, image.Height);
+            Assert.Equal(w, image.Width);
+        }
+
+        [Fact]
+        public async Task DownloadTest2() {
+            var h = 110;
+            var w = 60;
+            var bytes = await new Uri("https://picsum.photos/" + w + "/" + h).SendGET().GetResult<byte[]>();
+            using (var stream = new MemoryStream(bytes)) {
+                var image = ImageResult.FromStream(stream, ColorComponents.RedGreenBlueAlpha);
+                Assert.Equal(h, image.Height);
+                Assert.Equal(w, image.Width);
+            }
         }
 
         [Fact]
