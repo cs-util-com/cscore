@@ -11,6 +11,8 @@ namespace com.csutil.tests {
 
     public class FileTests {
 
+        public FileTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
+
         [Fact]
         public void ExampleUsage1() {
 
@@ -251,6 +253,11 @@ namespace com.csutil.tests {
             rootDir.DeleteV2();
         }
 
+        private class MyClass1 {
+            public string myString;
+            public int myInt;
+        }
+
         private static DirectoryInfo CreateDirectoryForTesting(string name) {
             var rootDir = EnvironmentV2.instance.GetOrAddTempFolder(name);
             rootDir.DeleteV2(); // ensure that the test folder does not yet exist
@@ -282,10 +289,25 @@ namespace com.csutil.tests {
             rootDir.DeleteV2();
         }
 
-        private class MyClass1 {
-            public string myString;
-            public int myInt;
+        [Fact]
+        public void TestFileWriteAndReadStream() {
+            var rootDir = CreateDirectoryForTesting("TestFileWriteAndReadStream");
+            var file1 = rootDir.GetChild("f1.txt");
+            // Saving the text as a byte stream:
+            var text1 = "Test 123";
+            using (Stream stream1 = new MemoryStream(Encoding.ASCII.GetBytes(text1))) {
+                file1.SaveStream(stream1);
+            }
+            // Loading the same file again to convert the bytes back into a string:
+            using (var stream2 = file1.LoadAsStream()) {
+                var text2 = Encoding.ASCII.GetString(stream2.ToByteArray());
+                Assert.Equal(text1, text2);
+            }
+            Assert.Throws<FileNotFoundException>(() => {
+                rootDir.GetChild("some missing file.txt").LoadAsStream();
+            });
         }
 
     }
+
 }
