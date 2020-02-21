@@ -55,7 +55,7 @@ namespace com.csutil {
         public static void Invoke(Action a) { instance.ExecuteOnMainThread(a); }
 
         public void ExecuteOnMainThread(Action a) {
-            AssertV2.IsNotNull(mainThreadRef, "mainThreadRef");
+            if (Application.isPlaying) { AssertV2.IsNotNull(mainThreadRef, "mainThreadRef"); } 
             if (WasInitializedWhilePlaying) {
                 actionsForMainThread.Enqueue(a);
             } else if (!Application.isPlaying) {

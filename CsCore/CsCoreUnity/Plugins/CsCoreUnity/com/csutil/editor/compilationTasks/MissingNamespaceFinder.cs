@@ -1,19 +1,32 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using UnityEditor;
 using UnityEngine;
 
 namespace com.csutil.editor {
 
     /// <summary> This processor warns about any classes that dont have a namespace specified </summary>
-    class MissingNamespaceFinder : AssetPostprocessor {
+    public class MissingNamespaceFinder : AssetPostprocessor {
+
+        /// <summary> Add assembly names to this list that should be ignored by the checker </summary>
+        public static HashSet<string> blackList = new HashSet<string>() { "UnityEngine" };
 
         [UnityEditor.Callbacks.DidReloadScripts]
-        static void DidReloadScripts() {
-            var allAs = GetAllAssembliesInProject();
-            allAs = allAs.Filter(x => !x.FullName.StartsWith("UnityEngine")); // Exclude all Unity assemblies
-            foreach (var assembly in allAs) { CheckTypesInAssembly(assembly); }
+        static void DidReloadScripts() { CheckAllAssembliesInProject(); }
+
+        private static async Task CheckAllAssembliesInProject() {
+            await TaskV2.Delay(1000);
+            var allAssemblies = GetAllAssembliesInProject().Filter(ShouldBeIncludedInCheck);
+            foreach (var assembly in allAssemblies) { CheckTypesInAssembly(assembly); }
+        }
+
+        /// <summary> Exclude e.g. all Unity assemblies </summary>
+        private static bool ShouldBeIncludedInCheck(Assembly x) {
+            var name = x.FullName;
+            foreach (string assembly in blackList) { if (name.StartsWith(assembly)) { return false; } }
+            return true;
         }
 
         private static IEnumerable<Assembly> GetAllAssembliesInProject() {
@@ -21,8 +34,9 @@ namespace com.csutil.editor {
         }
 
         private static void CheckTypesInAssembly(Assembly assembly) {
-            var types = assembly.GetTypesWithMissingNamespace();
-            foreach (var type in types) { Debug.LogError("Found a class without a namespace: " + type); }
+            foreach (var type in assembly.GetTypesWithMissingNamespace()) {
+                Debug.LogError("(Assembly " + assembly.GetName().Name + ") Missing namespace: " + type);
+            }
         }
 
     }
