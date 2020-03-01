@@ -17,7 +17,7 @@ namespace com.csutil.ui {
 
         private void OnValidate() {
             if (target == null) { // Try to auto assign in Editor if there is a single hidden direct child:
-                try { target = gameObject.GetChildren().Single(x => !x.activeSelf).transform; } catch { }
+                try { target = gameObject.GetChildrenIEnumerable().Single(x => !x.activeSelf).transform; } catch { }
             }
         }
 
