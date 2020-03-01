@@ -43,7 +43,6 @@ namespace com.csutil.ui {
         public bool SwitchBackToLastView(GameObject gameObject, bool destroyFinalView = false, bool hideNotDestroyCurrentView = false) {
             var currentView = GetRootFor(gameObject);
             var currentIndex = currentView.transform.GetSiblingIndex();
-            AssertV2.AreEqual(currentIndex, transform.childCount - 1, "Current was not last view in the stack");
             if (currentIndex > 0) {
                 var lastView = transform.GetChild(currentIndex - 1).gameObject;
                 lastView.SetActiveV2(true);
