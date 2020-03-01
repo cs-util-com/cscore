@@ -45,6 +45,35 @@ namespace com.csutil.tests.extensions {
         }
 
         [Test]
+        public void TestCheckForComponent() {
+            GameObject go1 = new GameObject();
+            if (go1.GetComponent<MyExampleMono1>()) { Assert.Fail(); }
+            if (go1.HasComponent(out MyExampleMono1 m1)) { Assert.Fail(); }
+            go1.AddComponent<MyExampleMono1>();
+            if (!go1.GetComponent<MyExampleMono1>()) { Assert.Fail(); }
+            if (go1.HasComponent(out MyExampleMono1 m2)) {
+                Assert.NotNull(m2);
+            } else {
+                Assert.Fail();
+            }
+        }
+
+        [Test]
+        public void TestGetChildrenIEnumerator() {
+            var count = 3;
+            GameObject go1 = new GameObject();
+            for (int i = 0; i < count; i++) { go1.AddChild(new GameObject("C " + i)); }
+            Assert.AreEqual(count, go1.GetChildren().Count());
+
+            var count2 = 0;
+            foreach (var c in go1.GetChildren()) { count2++; }
+            Assert.AreEqual(count, count2);
+
+            foreach (var c in go1.GetChildren()) { c.Destroy(); }
+            Assert.AreEqual(0, go1.GetChildren().Count);
+        }
+
+        [Test]
         public void TestDestroy() {
             GameObject goToDestroy = null;
             Assert.IsFalse(goToDestroy.Destroy());
