@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace com.csutil.keyvaluestore {
+namespace com.csutil {
 
     public interface IKeyValueStore {
         Task<T> Get<T>(string key, T defaultValue);

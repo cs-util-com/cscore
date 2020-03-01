@@ -1,5 +1,4 @@
 ﻿using com.csutil.json;
-using com.csutil.keyvaluestore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace com.csutil.io {
+namespace com.csutil.keyvaluestore {
 
     public class PlayerPrefsStore : IKeyValueStore {
 
