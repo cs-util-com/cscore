@@ -15,7 +15,7 @@ namespace com.csutil.keyvaluestore {
         private IJsonWriter jsonWriter = TypedJsonHelper.NewTypedJsonWriter();
 
         public async Task<T> Get<T>(string key, T defaultValue) {
-            T value = (T)InternalGet(key, defaultValue);
+            T value = InternalGet(key, defaultValue);
             if (!ReferenceEquals(value, defaultValue)) { return value; }
             return await fallbackStore.Get(key, defaultValue, (res) => InternalSet(key, res));
         }
@@ -26,7 +26,7 @@ namespace com.csutil.keyvaluestore {
         }
 
         private object InternalSet(string key, object value) {
-            object oldValue = InternalGet(key, null);
+            object oldValue = InternalGet<object>(key, null);
             PlayerPrefs.SetString(key, ToJsonString(value));
             return oldValue;
         }
@@ -35,9 +35,9 @@ namespace com.csutil.keyvaluestore {
             return jsonWriter.Write(new ValueWrapper() { value = value });
         }
 
-        private object InternalGet(string key, object defaultValue) {
+        private T InternalGet<T>(string key, T defaultValue) {
             if (!PlayerPrefs.HasKey(key)) { return defaultValue; }
-            return jsonReader.Read<ValueWrapper>(PlayerPrefs.GetString(key)).value;
+            return jsonReader.Read<ValueWrapper>(PlayerPrefs.GetString(key)).GetValueAs<T>();
         }
 
         public async Task<bool> Remove(string key) {

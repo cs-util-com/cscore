@@ -9,8 +9,12 @@ namespace com.csutil.keyvaluestore {
     public class ValueWrapper {
 
         public object value;
-        public long lastModified = new DateTime().ToUnixTimestampUtc();
+        public long lastModified = DateTime.Now.ToUnixTimestampUtc();
 
+        public T GetValueAs<T>() {
+            if ((typeof(T).IsEnum)) { return (T)Enum.Parse(typeof(T), value.ToString()); }
+            return (T)value;
+        }
     }
 
 }

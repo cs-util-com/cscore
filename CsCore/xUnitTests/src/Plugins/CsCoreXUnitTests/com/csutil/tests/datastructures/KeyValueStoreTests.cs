@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using com.csutil.json;
 using com.csutil.keyvaluestore;
 using Xunit;
 
@@ -311,6 +312,33 @@ namespace com.csutil.tests.keyvaluestore {
                 Assert.Equal(requestRetry.maxNrOfRetries, timeoutErrorCounter);
             }
 
+        }
+
+        enum MyEnum1 { state1, state2 }
+
+        [Fact]
+        public async Task TestEnumSetAndGet1() {
+            var jsonReader = TypedJsonHelper.NewTypedJsonReader();
+            var jsonWriter = TypedJsonHelper.NewTypedJsonWriter();
+
+            var x1 = new ValueWrapper() { value = MyEnum1.state2 };
+            var json = jsonWriter.Write(x1);
+            Log.d("json=" + json);
+            var x2 = jsonReader.Read<ValueWrapper>(json);
+
+            Assert.Equal(MyEnum1.state2, x2.GetValueAs<MyEnum1>());
+        }
+
+        [Fact]
+        public async Task TestEnumSetAndGet2() {
+            var f = EnvironmentV2.instance.GetOrAddTempFolder("TestEnumSetAndGet");
+            f.DeleteV2();
+            IKeyValueStore store = new FileBasedKeyValueStore(f);
+            string myKey1 = "myKey1";
+            MyEnum1 e1 = MyEnum1.state2;
+            await store.Set(myKey1, e1);
+            MyEnum1 e2 = await store.Get(myKey1, MyEnum1.state1);
+            Assert.Equal(e1, e2);
         }
 
     }
