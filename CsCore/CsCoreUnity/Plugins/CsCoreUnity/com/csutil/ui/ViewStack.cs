@@ -75,7 +75,7 @@ namespace com.csutil.ui {
 
         /// <summary> Moves up the tree until it reaches the direct child of the viewstack </summary>
         private GameObject GetRootFor(GameObject go) {
-            AssertV2.IsFalse(go == gameObject, "Cant get root for ViewStack gameobject");
+            if (go == gameObject) { throw Log.e("Cant get root for ViewStack gameobject"); }
             var parent = go.GetParent();
             if (parent == gameObject) { return go; } // stop when the GO of the viewstack is reached
             return GetRootFor(parent);
