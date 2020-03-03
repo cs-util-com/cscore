@@ -1,15 +1,10 @@
 ﻿using com.csutil.ui;
 using NUnit.Framework;
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
-using com.csutil;
 
 namespace com.csutil.tests.ui {
 
@@ -21,26 +16,59 @@ namespace com.csutil.tests.ui {
 
         [UnityTest]
         public IEnumerator ExampleUsage() {
-
-            var dialog = new Dialog<ConfirmCancelDialog>(new ConfirmCancelDialog(caption: "I am a dialog", message: "I can be awaited in the " +
-                "code, the async or coroutine can wait for the user to make a decision (select cancel or confirm) before the code continues!"));
-            GameObject dialogUi = dialog.LoadDialogPrefab(new ConfirmCancelDialogPresenter(), dialogPrefabName: "Dialogs/DefaultDialog1");
-            CanvasFinder.GetOrAddRootCanvas().gameObject.AddChild(dialogUi); // Add dialog UI in a canvas
-            Task waitForUserInputInDialogTask = dialog.ShowDialogAsync();
-
-            if (simulateUserInput) {
-                dialogUi.GetComponent<MonoBehaviour>().ExecuteDelayed(() => {
-                    Log.d("Now simulating the user clicking on the confirm button");
-                    dialogUi.GetLinkMap().Get<Button>("ConfirmButton").onClick.Invoke();
-                }, delayInMsBeforeExecution: 500);
-            }
-
-            Assert.IsFalse(dialog.data.dialogWasConfirmed, "Dialog was already confirmed!");
-            yield return waitForUserInputInDialogTask.AsCoroutine(); // Wait until user clicks cancel or confirm
-            Assert.IsTrue(dialog.data.dialogWasConfirmed, "Dialog was not confirmed!");
-
+            yield return ShowCancelConfirmDialog().AsCoroutine();
+            yield return ShowInfoDialog().AsCoroutine();
+            yield return ShowWarningDialog().AsCoroutine();
+            yield return ShowErrorDialog().AsCoroutine();
+            yield return UseDialogLoaderManually().AsCoroutine();
         }
 
+        private async Task ShowCancelConfirmDialog() {
+            var showDialogTask = ConfirmCancelDialog.Show("I am a dialog", "Please click the confirm button to continue");
+            await SimulateConfirmButtonClick();
+            var closedDialog = await showDialogTask; // Wait until the dialog is closed
+            Assert.IsTrue(closedDialog.dialogWasConfirmed); // Check if user clicked confirm
+        }
+
+        private async Task ShowInfoDialog() {
+            var showDialogTask = Dialog.ShowInfoDialog("I am an info dialog", "Please close me now to continue with the next dialog example");
+            await SimulateConfirmButtonClick();
+            await showDialogTask; // Wait until the dialog is closed
+        }
+
+        private async Task ShowWarningDialog() {
+            var showDialogTask = Dialog.ShowWarningDialog("I am a warning", "Please close me now to continue with the next dialog example");
+            await SimulateConfirmButtonClick();
+            await showDialogTask; // Wait until the dialog is closed
+        }
+
+        private async Task ShowErrorDialog() {
+            var showDialogTask = Dialog.ShowErrorDialog("I am an error", "Please close me now to continue with the next dialog example");
+            await SimulateConfirmButtonClick();
+            await showDialogTask; // Wait until the dialog is closed
+        }
+
+        /// <summary> This example shows how to use the DialogLoader manually to have full control over the UI presenter </summary>
+        private async Task UseDialogLoaderManually() {
+            var dialog = new DialogLoader<ConfirmCancelDialog>(new ConfirmCancelDialog(caption: "I am a dialog",
+                            message: "I can be awaited in the code, the async or coroutine can wait for the user " +
+                            "to make a decision (select cancel or confirm) before the code continues!"));
+            GameObject dialogUi = dialog.LoadDialogPrefab(new ConfirmCancelDialog.DefaultPresenter(), dialogPrefabName: "Dialogs/DefaultDialog1");
+            CanvasFinder.GetOrAddRootCanvas().gameObject.AddChild(dialogUi); // Add dialog UI in a canvas
+            Task waitForUserInputInDialogTask = dialog.ShowDialogAsync();
+            Assert.IsFalse(dialog.data.dialogWasConfirmed, "Dialog was already confirmed!");
+            await SimulateConfirmButtonClick();
+            await waitForUserInputInDialogTask; // Wait until user clicks cancel or confirm
+            Assert.IsTrue(dialog.data.dialogWasConfirmed, "Dialog was not confirmed!");
+        }
+
+        private async Task SimulateConfirmButtonClick() {
+            if (simulateUserInput) {
+                await TaskV2.Delay(500);
+                Log.d("Now simulating the user clicking on the confirm button");
+                CanvasFinder.GetOrAddRootCanvas().gameObject.GetLinkMap().Get<Button>("ConfirmButton").onClick.Invoke();
+            }
+        }
     }
 
 }
