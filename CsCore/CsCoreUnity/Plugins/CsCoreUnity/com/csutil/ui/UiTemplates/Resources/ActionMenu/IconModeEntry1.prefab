@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 3692589123451614256}
   - component: {fileID: 2770280863957558249}
   - component: {fileID: 5447489092116137480}
+  - component: {fileID: 3145263772877420946}
   m_Layer: 5
   m_Name: IconModeEntry1
   m_TagString: Untagged
@@ -118,6 +119,18 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!225 &3145263772877420946
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4568568152215441871}
+  m_Enabled: 0
+  m_Alpha: 0.41
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &5572158448617688200
 GameObject:
   m_ObjectHideFlags: 0

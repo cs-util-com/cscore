@@ -40,6 +40,7 @@ namespace com.csutil.tests.ui {
                 });
                 menu2.entries.Add(new ActionMenu.Entry(id: 2, icon: "", name: "Delete") {
                     descr = "Delete all the things! If you click here nothing will happen, deleting things is never a good idea :(",
+                    isEnabled = false
                 });
 
                 var selectedEntry = await gameObject.GetViewStack().ShowActionMenu(menu2);

@@ -103,6 +103,8 @@ namespace com.csutil.ui {
             public string icon;
             public string name;
             public string descr;
+            /// <summary> If false the entry will be shown but disabled </summary>
+            public bool isEnabled = true;
             public Action<GameObject> onClicked;
 
             internal bool isFavorite;
@@ -126,7 +128,10 @@ namespace com.csutil.ui {
                 var entry = this;
                 var iconGo = ResourcesV2.LoadPrefab(entry.iconModeEntryPrefabName);
                 iconGo.GetComponentInChildren<Text>().text = entry.icon;
-                iconGo.GetComponentInChildren<Button>().SetOnClickAction(btnGo => {
+                var button = iconGo.GetComponentInChildren<Button>();
+                button.interactable = entry.isEnabled;
+                iconGo.GetComponentInChildren<CanvasGroup>().enabled = !entry.isEnabled;
+                button.SetOnClickAction(btnGo => {
                     menu.clickedEntry = entry;
                     taskComplSource.TrySetResult(entry);
                     entry.onClicked.InvokeIfNotNull(btnGo);
@@ -143,7 +148,10 @@ namespace com.csutil.ui {
                 var description = map.Get<Text>("Description");
                 description.gameObject.SetActiveV2(menu.viewMode == ViewMode.full && !entry.descr.IsNullOrEmpty());
                 description.text = entry.descr;
-                map.Get<Button>("ActionSelected").SetOnClickAction(go => {
+                var button = map.Get<Button>("ActionSelected");
+                button.interactable = entry.isEnabled;
+                map.Get<CanvasGroup>("ActionSelected").enabled = !entry.isEnabled;
+                button.SetOnClickAction(go => {
                     menu.clickedEntry = entry;
                     taskComplSource.TrySetResult(entry);
                     entry.onClicked.InvokeIfNotNull(go);
