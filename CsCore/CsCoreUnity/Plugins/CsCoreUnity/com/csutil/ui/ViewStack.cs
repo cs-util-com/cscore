@@ -9,16 +9,15 @@ namespace com.csutil.ui {
         /// <param name="prefabName"> e.g. "Dialogs/Dialog123" </param>
         /// <returns> The newly created view </returns>
         public GameObject ShowView(string prefabName, GameObject currentViewToHide = null) {
-            var newView = ShowView(ResourcesV2.LoadPrefab(prefabName));
-            if (currentViewToHide != null) { GetRootFor(currentViewToHide).SetActiveV2(false); }
-            return newView;
+            return ShowView(ResourcesV2.LoadPrefab(prefabName), currentViewToHide);
         }
 
         /// <summary> Adds a passed view to the view stack to show it </summary>
         /// <param name="newView"> The new view to show in the stack </param>
-        public GameObject ShowView(GameObject newView) {
+        public GameObject ShowView(GameObject newView, GameObject currentViewToHide = null) {
             gameObject.AddChild(newView);
             EventBus.instance.Publish(EventConsts.SHOW_VIEW, newView);
+            if (currentViewToHide != null) { GetRootFor(currentViewToHide).SetActiveV2(false); }
             return newView;
         }
 

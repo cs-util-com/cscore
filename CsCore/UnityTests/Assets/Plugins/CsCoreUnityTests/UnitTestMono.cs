@@ -16,7 +16,7 @@ namespace com.csutil.tests {
         /// <summary> Creates a new view stack and adds the specified Prefab to this stack </summary>
         /// <returns> The IEnumerator that can be awaited by the calling test </returns>
         public static IEnumerator LoadAndRunUiTest(string prefabName) {
-            var viewStack = CanvasFinder.GetOrAddRootCanvas().gameObject.AddComponent<ViewStack>();
+            var viewStack = RootCanvas.GetOrAddRootCanvas().gameObject.AddComponent<ViewStack>();
             yield return viewStack.ShowView(prefabName).FindAndRunTest();
         }
 

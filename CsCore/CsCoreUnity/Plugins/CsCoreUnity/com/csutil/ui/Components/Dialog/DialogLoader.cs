@@ -16,9 +16,11 @@ namespace com.csutil.ui {
         }
 
         // Show the data in the dialog and get back the task that can be awaited (will finish when the user made a decision):
-        public Task<T> ShowDialogAsync() {
+        public async Task<T> ShowDialogAsync() {
             if (presenter == null) { throw Log.e("dialog.CreateDialogPrefab() has to be called first"); }
-            return presenter.LoadModelIntoView(data);
+            T data = await presenter.LoadModelIntoView(this.data);
+            presenter.targetView.Destroy(); // Close dialog after user is done with it
+            return data;
         }
 
     }

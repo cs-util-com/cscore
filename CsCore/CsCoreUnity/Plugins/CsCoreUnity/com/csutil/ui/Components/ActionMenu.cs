@@ -20,13 +20,13 @@ namespace com.csutil {
             presenter.targetView = menuUiGo;
             try {
                 var selectedEntry = (await presenter.LoadModelIntoView(menu)).clickedEntry;
-                self.SwitchBackToLastView(menuUiGo); // Close the menu UI again
+                menuUiGo.Destroy(); // Close the menu UI again
                 AppFlow.TrackEvent(EventConsts.catMethod, eventName + " done: " + selectedEntry.name);
                 Log.MethodDone(timing);
                 return selectedEntry;
             }
             catch (TaskCanceledException) { // If the user canceled the action selection:
-                self.SwitchBackToLastView(menuUiGo);
+                menuUiGo.Destroy(); // Close the menu UI again
                 AppFlow.TrackEvent(EventConsts.catMethod, eventName + " canceled");
                 Log.MethodDone(timing);
                 return null;

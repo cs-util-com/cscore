@@ -20,7 +20,7 @@ namespace com.csutil.logging {
         }
 
         private static LogConsoleUi InitLogConsoleUi() {
-            var targetCanvas = CanvasFinder.GetOrAddRootCanvas().gameObject;
+            var targetCanvas = RootCanvas.GetOrAddRootCanvas().gameObject;
             var toastContainer = targetCanvas.AddChild(ResourcesV2.LoadPrefab("Messages/LogConsoleUi1"));
             return toastContainer.GetComponentInChildren<LogConsoleUi>();
         }

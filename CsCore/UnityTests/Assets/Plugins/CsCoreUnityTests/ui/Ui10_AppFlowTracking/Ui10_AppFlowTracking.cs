@@ -120,8 +120,9 @@ namespace com.csutil.tests.ui {
                     store.Dispatch(new ActionSetString1() { newS = "abc" });
                 });
                 map.Get<Button>("ShowDialog").SetOnClickAction(async (b) => {
-                    var dialog = await ConfirmCancelDialog.Show("I am a dialog", "Current model.string1=" + store.GetState().subSection1.string1);
-                    Log.d("Dialog was confirmed: " + dialog.dialogWasConfirmed);
+                    bool dialogWasConfirmed = await ConfirmCancelDialog.Show("I am a dialog",
+                                    "Current model.string1=" + store.GetState().subSection1.string1);
+                    Log.d("Dialog was confirmed: " + dialogWasConfirmed);
                 });
                 return Task.CompletedTask;
             }

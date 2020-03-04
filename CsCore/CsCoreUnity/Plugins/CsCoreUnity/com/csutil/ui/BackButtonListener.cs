@@ -11,7 +11,7 @@ namespace com.csutil.ui {
         public void Update() {
             if (Input.GetKeyUp(KeyCode.Escape)) { // back button pressed
                 var c = GetComponentInParent<Canvas>()?.rootCanvas;
-                if (c != null && c == CanvasFinder.GetAllRootCanvases().First()) {
+                if (c != null && c == RootCanvas.GetAllRootCanvases().First()) {
                     gameObject.GetComponentInParent<ViewStack>()?.SwitchBackToLastView(gameObject, destroyFinalView);
                 }
             }
