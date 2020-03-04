@@ -17,7 +17,7 @@ namespace com.csutil.ui {
             this.confirmBtnText = confirmBtnText;
         }
 
-        public static async Task<bool> Show(string caption, string message, string confirmBtnText = null, string dialogPrefabName = "Dialogs/DefaultDialog1") {
+        public static async Task<bool> Show(string caption, string message, string confirmBtnText = null, string dialogPrefabName = "Dialogs/DefaultDialog2") {
             var loader = new DialogLoader<ConfirmCancelDialog>(new ConfirmCancelDialog(caption, message, confirmBtnText));
             GameObject dialogUi = loader.LoadDialogPrefab(new DefaultPresenter(), dialogPrefabName);
             RootCanvas.GetOrAddRootCanvas().gameObject.AddChild(dialogUi); // Add dialog UI in a canvas

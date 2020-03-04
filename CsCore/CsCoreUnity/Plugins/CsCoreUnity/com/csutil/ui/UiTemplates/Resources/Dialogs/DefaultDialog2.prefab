@@ -252,6 +252,11 @@ PrefabInstance:
       propertyPath: ShadowProperties.Shadows.Array.data[0].Softness
       value: 0.03
       objectReference: {fileID: 0}
+    - target: {fileID: 7317128220929753605, guid: b1b942dc25393004093e5af372cd2ca9,
+        type: 3}
+      propertyPath: ShapeProperties.DrawOutline
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7661386979493607080, guid: b1b942dc25393004093e5af372cd2ca9,
         type: 3}
       propertyPath: m_Color.r
