@@ -1,0 +1,8 @@
+{
+	"I am a static text which is never modified via script" : "I am a static text which is never modified via script",
+	"I am a localized text, today is {0}, so there are {1} days left till the release!": {
+		"zero":  "I am a localized text, today is {0}, TODAY is release day!",
+		"one":   "I am a localized text, today is {0}, so tomorrow is the release!",
+		"other": "I am a localized text, today is {0}, so there are {1} days left till the release!"
+	}
+}

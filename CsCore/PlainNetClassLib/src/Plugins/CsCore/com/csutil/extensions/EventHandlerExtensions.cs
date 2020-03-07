@@ -24,14 +24,14 @@ namespace com.csutil {
                     s.Restart();
                     if (triggerFirstEvent) {
                         triggerFirstEvent = false;
-                        try { self(sender, latestEventArgs); } catch (Exception e) { Log.e(e); }
+                        self(sender, latestEventArgs);
                     }
                 }
                 await TaskV2.Delay(TimeSpan.FromMilliseconds(delayInMs * 1.1f));
                 lock (threadLock) {
                     if (s.ElapsedMilliseconds >= delayInMs) {
                         s.Restart();
-                        try { self(sender, latestEventArgs); } catch (Exception e) { Log.e(e); }
+                        self(sender, latestEventArgs);
                         if (!skipFirstEvent) { triggerFirstEvent = true; }
                     }
                 }
