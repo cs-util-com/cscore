@@ -11,26 +11,32 @@ namespace com.csutil.tests {
             I18n i18n = NewI18nForTesting();
             i18n.SetLocale("en-US");
             Assert.Equal("Hello", i18n.Get("Hello"));
-
             i18n.SetLocale("fr-FR");
             Assert.Equal("Bonjour", i18n.Get("Hello"));
-
             i18n.SetLocale("es-ES");
             Assert.Equal("Hola", i18n.Get("Hello"));
-
             i18n.SetLocale("de-DE");
-            Assert.Equal("de-DE", i18n.currentLocale);
             Assert.Equal("Hallo", i18n.Get("Hello"));
         }
 
         [Fact]
         public void ExampleUsage2() {
             I18n i18n = NewI18nForTesting().SetLocale("en-US");
+            Assert.Equal("en-US", i18n.currentLocale);
             Assert.Equal("-1 credit", i18n.Get("{0} credits", -1));
             Assert.Equal("15 credits", i18n.Get("{0} credits", 15));
             Assert.Equal("15.23 credits", i18n.Get("{0} credits", 15.23));
             Assert.Equal("-15 credits", i18n.Get("{0} credits", -15));
             Assert.Equal("-15.23 credits", i18n.Get("{0} credits", -15.23));
+        }
+
+        [Fact]
+        public void TestDefaultLocale() {
+            I18n i18n = NewI18nForTesting();
+            Assert.False(i18n.currentLocale.IsNullOrEmpty());
+            Assert.False(("" + i18n.currentCulture).IsNullOrEmpty());
+            i18n.SetLocale("en-US");
+            Assert.Equal("en-US", i18n.currentLocale);
         }
 
         [Fact]
@@ -57,6 +63,10 @@ namespace com.csutil.tests {
             Assert.Equal("There is one monkey in the tree.", i18n.Get("There is one monkey in the {1}", 1, "tree"));
             Assert.Equal("There are 27 monkeys in the tree!", i18n.Get("There is one monkey in the {1}", 27, "tree"));
             Assert.Equal("There are -5 monkeys in the tree!", i18n.Get("There is one monkey in the {1}", -5, "tree"));
+
+            Assert.Equal("Hello Carl, you have no credits", i18n.Get("Hello {0}, you have {1} credits", "Carl", 0));
+            Assert.Equal("Hello Carl, you have 1 credit", i18n.Get("Hello {0}, you have {1} credits", "Carl", 1));
+            Assert.Equal("Hello Carl, you have 2 credits", i18n.Get("Hello {0}, you have {1} credits", "Carl", 2));
         }
 
         [Fact]
@@ -100,7 +110,12 @@ namespace com.csutil.tests {
                         'one': '{0} credit',
                         'other': '{0} credits'
                     },
-                    'Level {1} time: {0} score:{3} ammo:{4} player:{2}': 'Level {1} time: {0} score:{3} ammo:{4} player:{2}',
+                    'Hello {0}, you have {1} credits': {
+                        'zero': 'Hello {0}, you have no credits',
+                        'one': 'Hello {0}, you have 1 credit',
+                        'other': 'Hello {0}, you have {1} credits'
+                    },
+                    'Room {1}: time={0} score={3} ammo={4}, User {2}': 'Room {1}: time={0} score={3} ammo={4}, User {2}',
                     'There is one monkey in the {1}': {
                         'zero': 'There are no monkeys in the {1}.',
                         'one': 'There is one monkey in the {1}.',
