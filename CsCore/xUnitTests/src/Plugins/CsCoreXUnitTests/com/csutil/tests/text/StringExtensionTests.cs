@@ -38,7 +38,7 @@ namespace com.csutil.tests {
             myString = "[{a}]-[{b}]";
             Assert.Equal("a}]-[{b}]", myString.SubstringAfter("{"));
             Assert.Equal("{b}]", myString.SubstringAfter("[", startFromBack: true));
-            Assert.Throws<Exception>(() => { myString.SubstringAfter("("); });
+            Assert.Throws<IndexOutOfRangeException>(() => { myString.SubstringAfter("("); });
 
             // Often SubstringAfter and Substring are used in combination:
             myString = "[(abc)]";

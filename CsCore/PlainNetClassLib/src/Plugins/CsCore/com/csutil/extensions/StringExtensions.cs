@@ -31,7 +31,7 @@ namespace com.csutil {
 
         public static string SubstringAfter(this string self, string startAfter, bool startFromBack = false) {
             var pos = startFromBack ? self.LastIndexOf(startAfter) : self.IndexOf(startAfter);
-            if (pos < 0) { throw Log.e("Substring " + startAfter + " not found in " + self); }
+            if (pos < 0) { throw new IndexOutOfRangeException("Substring " + startAfter + " not found in " + self); }
             return self.Substring(pos + startAfter.Length);
         }
 
