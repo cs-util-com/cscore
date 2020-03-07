@@ -29,7 +29,10 @@ namespace com.csutil {
         }
 
         private void LoadTranslationDataForLocale() {
-            if (localeLoader != null) { translationData = JObject.Parse(localeLoader(currentLocale)); }
+            if (localeLoader != null) {
+                var jsonString = localeLoader(currentLocale);
+                if (jsonString != null) { translationData = JObject.Parse(jsonString); }
+            }
         }
 
         public string Get(string key, params object[] args) {

@@ -35,7 +35,11 @@ namespace com.csutil {
         public static T LoadV2<T>(string pathInResourcesFolder) {
             pathInResourcesFolder = RemoveExtensionIfNeeded(pathInResourcesFolder, ".prefab");
             pathInResourcesFolder = RemoveExtensionIfNeeded(pathInResourcesFolder, ".asset");
-            if ((typeof(T).IsCastableTo<string>())) { return (T)(object)LoadV2<TextAsset>(pathInResourcesFolder).text; }
+            if ((typeof(T).IsCastableTo<string>())) {
+                TextAsset textAsset = LoadV2<TextAsset>(pathInResourcesFolder);
+                if (textAsset == null) { throw new System.IO.FileNotFoundException("No text asset found at " + pathInResourcesFolder); }
+                return (T)(object)textAsset.text;
+            }
             return (T)(object)Resources.Load(pathInResourcesFolder, typeof(T));
         }
 

@@ -72,9 +72,9 @@ namespace com.csutil.tests {
         [Fact]
         public void TestComplexReplacement() {
             I18n i18n = NewI18nForTesting().SetLocale("en-US");
-            var s1 = i18n.Get("Hello {0}, how are you today?", "Tester");
+            string s1 = i18n.Get("Hello {0}, how are you today?", "Tester");
             Assert.Equal("Hello Tester, how are you today?", s1);
-            var s2 = i18n.Get("Room {1}: time={0} score={3} ammo={4}, User {2}", "00:44:23", "A", "One", 100000, "12");
+            string s2 = i18n.Get("Room {1}: time={0} score={3} ammo={4}, User {2}", "00:44:23", "A", "One", 100000, "12");
             Assert.Equal("Room A: time=00:44:23 score=100000 ammo=12, User One", s2);
         }
 
@@ -94,6 +94,7 @@ namespace com.csutil.tests {
 
         I18n NewI18nForTesting() { return new I18n().SetLocaleLoader(LoadTestLocales); }
 
+        // For testing purposes, do not load the translation example from an actual file:
         private string LoadTestLocales(string localeName) {
             if (localeName == "en-US") {
                 return @"
