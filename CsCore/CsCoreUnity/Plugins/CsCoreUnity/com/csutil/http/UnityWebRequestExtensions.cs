@@ -49,6 +49,16 @@ namespace com.csutil {
             self.SaveAllNewCookiesFromResponse();
             if (self.error.IsNullOrEmpty()) { resp.progressInPercent.setNewValue(100); }
             resp.getResult = () => { return self.GetResult<T>(); };
+            ProcessServerDate(self.uri, self.GetResponseHeader("date"));
+        }
+
+        /// <summary> If available will process and broadcast the received server date </summary>
+        /// <param name="utcString"> e.g. "Sun, 08 Mar 2020 09:47:52 GMT" </param>
+        private static void ProcessServerDate(Uri uri, string utcString) {
+            DateTime? serverUtcDate = null;
+            try { if (!utcString.IsNullOrEmpty()) { serverUtcDate = DateTime.Parse(utcString); } }
+            catch (Exception e) { Log.w("Failed parsing server UTC date: " + e); }
+            if (serverUtcDate.HasValue) { EventBus.instance.Publish(DateTimeV2.SERVER_UTC_DATE, uri, serverUtcDate.Value); }
         }
 
         private static void SetupDownloadAndUploadHanders<T>(UnityWebRequest self, Response<T> resp) {
@@ -85,7 +95,8 @@ namespace com.csutil {
                     if (resp.onResult != null) { resp.onResult(self.GetResult<T>()); } else {
                         Log.d("resp.onResult was null, resp.GetResult has to be called manually");
                     }
-                } catch (Exception e) { resp.onError.InvokeIfNotNull(self, e); }
+                }
+                catch (Exception e) { resp.onError.InvokeIfNotNull(self, e); }
             }
         }
 

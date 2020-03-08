@@ -47,7 +47,10 @@ namespace com.csutil.http {
             var message = new HttpRequestMessage(method, uri);
             if (httpContent != null) { message.Content = httpContent; }
             request = client.SendAsync(message);
-            return await request;
+            var result = await request;
+            var serverUtcDate = result.Headers.Date;
+            if (serverUtcDate != null) { EventBus.instance.Publish(DateTimeV2.SERVER_UTC_DATE, uri, serverUtcDate.Value.DateTime); }
+            return result;
         }
 
         public void Dispose() {

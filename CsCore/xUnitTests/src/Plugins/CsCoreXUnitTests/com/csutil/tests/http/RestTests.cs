@@ -66,12 +66,44 @@ namespace com.csutil.tests.http {
 
         [Fact]
         public async Task TestRestFactory1() {
+
+            var serverTimeReceived = false;
+            EventBus.instance.Subscribe(this, DateTimeV2.SERVER_UTC_DATE, (Uri uri, DateTime serverUtcTime) => {
+                serverTimeReceived = true;
+                var diff = DateTimeOffset.UtcNow - serverUtcTime;
+                Log.d($"Server {uri} reports server time: {serverUtcTime}, diff={diff.Milliseconds}");
+                Assert.True(Math.Abs(diff.Milliseconds) < 10000, "Difference between system time and server time was " + diff.Milliseconds);
+            });
+
             RestRequest request = RestFactory.instance.SendRequest(new Uri("https://httpbin.org/get"), HttpMethod.Get);
             await ValidateResponse(request);
             Log.d("Will now call await request.GetResultHeaders..");
             var resultHeaders = await request.GetResultHeaders();
             Assert.NotEmpty(resultHeaders);
+            Assert.True(serverTimeReceived);
         }
+
+        [Fact]
+        public async Task TestDateTimeV2() {
+            const int maxDiffInMs = 50;
+            Assert.True(GetDiffBetweenV1AndV2() < maxDiffInMs, "GetTimeDiff()=" + GetDiffBetweenV1AndV2());
+
+            // Trigger any REST request to get a UTC time from the used server:
+            Headers headers = await RestFactory.instance.SendRequest(new Uri("https://httpbin.org/get"), HttpMethod.Get).GetResultHeaders();
+            string serverUtcString = headers.First(h => h.Key == "date").Value.First();
+            DateTime serverUtcTime = DateTime.Parse(serverUtcString);
+            Log.d("Server reported its UTC time to be: " + serverUtcTime);
+            var diffBetweenLocalAndOnline = IoC.inject.Get<DateTimeV2>(this).diffOfLocalToServer.Value;
+            Assert.True(Math.Abs(diffBetweenLocalAndOnline.Milliseconds) > maxDiffInMs);
+            Log.d("Current DateTime.UtcNow: " + DateTime.UtcNow);
+            await TaskV2.Delay(1000);
+            Log.d("Corrected local time: " + DateTimeV2.UtcNow);
+
+            // Now the server utc date should be used which will cause the diff to be larger:
+            Assert.True(GetDiffBetweenV1AndV2() > maxDiffInMs, "GetTimeDiff()=" + GetDiffBetweenV1AndV2());
+        }
+
+        private static int GetDiffBetweenV1AndV2() { return Math.Abs((DateTime.UtcNow - DateTimeV2.UtcNow).Milliseconds); }
 
         private static async Task ValidateResponse(RestRequest request) {
             var includedRequestHeaders = new Dictionary<string, string>();
