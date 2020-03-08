@@ -120,9 +120,7 @@ namespace com.csutil.tests.http {
             Assert.True(hasInet);
         }
 
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-        public async Task OnHasInternet(bool hasInet) { this.hasInet = hasInet; }
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+        Task IHasInternetListener.OnHasInternet(bool hasInet) { this.hasInet = hasInet; return Task.FromResult(true); }
 
     }
 

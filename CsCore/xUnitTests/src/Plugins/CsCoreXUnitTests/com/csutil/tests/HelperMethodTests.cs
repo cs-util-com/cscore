@@ -51,12 +51,12 @@ namespace com.csutil.tests {
             Double a = 123;
             Double b = 123;
             Assert.Equal(a, b); // Both have an equal value
-            // They dont share the same reference in memory:
+                                // They dont share the same reference in memory:
+#pragma warning disable xUnit2005 // Do not use identity check on value type
             Assert.NotSame(a, b);
-            // For primitives c=b will copy the memory:
-            Double c = b;
-            // They still dont have the same reference:
-            Assert.NotSame(b, c);
+            Double c = b; // For primitives c=b will copy the memory
+            Assert.NotSame(b, c); // They still dont have the same reference
+#pragma warning restore xUnit2005 // Do not use identity check on value type
 
             string s1 = "123";
             string s2 = "1" + "2" + "3";

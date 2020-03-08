@@ -317,7 +317,7 @@ namespace com.csutil.tests.keyvaluestore {
         enum MyEnum1 { state1, state2 }
 
         [Fact]
-        public async Task TestEnumSetAndGet1() {
+        public void TestEnumSetAndGet1() {
             var jsonReader = TypedJsonHelper.NewTypedJsonReader();
             var jsonWriter = TypedJsonHelper.NewTypedJsonWriter();
 
