@@ -7,6 +7,12 @@ using Newtonsoft.Json.Bson;
 
 namespace com.csutil {
 
+    public static class Mapper {
+
+        public static T Map<T>(object source) { return CloneHelper.MapViaJsonInto<T>(source); }
+
+    }
+
     public static class CloneHelper {
 
         public static T DeepCopyViaJson<T>(this T objectToDeepCopy) { return MapViaJsonInto<T>(objectToDeepCopy); }
