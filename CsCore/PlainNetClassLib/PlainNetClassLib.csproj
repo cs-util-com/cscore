@@ -42,5 +42,9 @@
     <PackageReference Include="SharpZipLib" Version="1.2.0" />
   </ItemGroup>
 
+  <!-- https://www.nuget.org/packages/QuikGraph -->
+  <ItemGroup>
+    <PackageReference Include="QuikGraph" Version="2.0.0" />
+  </ItemGroup>
 
 </Project>
