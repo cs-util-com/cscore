@@ -42,5 +42,10 @@
     <PackageReference Include="SharpZipLib" Version="1.2.0" />
   </ItemGroup>
 
+<!-- https://www.nuget.org/packages/Zio/ --> 
+  <ItemGroup>
+    <PackageReference Include="Zio" Version="0.7.6" />
+  </ItemGroup>
+
 
 </Project>

@@ -1,8 +1,6 @@
-using com.csutil.encryption;
 using System;
 using System.IO;
 using System.Linq;
-using System.Text;
 
 namespace com.csutil {
 
@@ -184,63 +182,6 @@ namespace com.csutil {
                 AssertV2.IsTrue(createdFile.ExistsV2(), "!createdFile.Exists: " + createdFile);
             }
             return target.ExistsV2();
-        }
-
-        public static void SaveStream(this FileInfo self, Stream streamToSave) {
-            using (var fileStream = File.Create(self.FullName)) { streamToSave.CopyTo(fileStream); }
-        }
-
-        public static FileStream LoadAsStream(this FileInfo self, FileMode fileMode = FileMode.Open,
-                        FileAccess fileAccess = FileAccess.Read, FileShare FileShare = FileShare.ReadWrite) {
-            return File.Open(self.FullPath(), fileMode, fileAccess, FileShare);
-        }
-
-        public static T LoadAs<T>(this FileInfo self) {
-            using (FileStream readStream = self.LoadAsStream()) {
-                using (StreamReader s = new StreamReader(readStream)) {
-                    if (typeof(T) == typeof(string)) { return (T)(object)s.ReadToEnd(); }
-                    { // If a subscriber reacts to LoadAs return its response:
-                        var results = EventBus.instance.NewPublishIEnumerable("LoadAs" + typeof(T), self);
-                        var result = results.Filter(x => x is T).FirstOrDefault();
-                        if (result != null) { return (T)result; }
-                    } // Otherwise use the default json reader approach:
-                    return JsonReader.GetReader().Read<T>(s);
-                }
-            }
-        }
-
-        public static object LoadAs(this FileInfo self, Type t) {
-            using (FileStream readStream = File.Open(self.FullPath(), FileMode.Open, FileAccess.Read, FileShare.ReadWrite)) {
-                using (StreamReader s = new StreamReader(readStream)) {
-                    if (t == typeof(string)) { return s.ReadToEnd(); }
-                    { // If a subscriber reacts to LoadAs return its response:
-                        var results = EventBus.instance.NewPublishIEnumerable("LoadAs" + t, self);
-                        var result = results.Filter(x => t.IsInstanceOfType(x)).FirstOrDefault();
-                        if (result != null) { return result; }
-                    } // Otherwise use the default json reader approach:
-                    return JsonReader.GetReader().ReadAsType(s, t);
-                }
-            }
-        }
-
-        public static void SaveAsJson<T>(this FileInfo self, T objectToSave) {
-            using (StreamWriter file = File.CreateText(self.FullPath())) {
-                JsonWriter.GetWriter().Write(objectToSave, file);
-            }
-        }
-
-        /// <summary> This method helps with decrypting the string before parsing it as a json object </summary>
-        public static T LoadAsEncyptedJson<T>(this FileInfo self, string jsonEncrKey, Func<T> getDefaultValue) {
-            try { return JsonReader.GetReader().Read<T>(self.LoadAs<string>().Decrypt(jsonEncrKey)); } catch (Exception e) { Log.w("" + e); return getDefaultValue(); }
-        }
-
-        public static void SaveAsEncryptedJson<T>(this FileInfo self, T objectToSave, string jsonEncrKey) {
-            self.SaveAsText(JsonWriter.GetWriter().Write(objectToSave).Encrypt(jsonEncrKey));
-        }
-
-        public static void SaveAsText(this FileInfo self, string text) {
-            self.ParentDir().Create();
-            File.WriteAllText(self.FullPath(), text, Encoding.UTF8);
         }
 
         public static long GetFileSize(this FileInfo self) { return self.Length; }
