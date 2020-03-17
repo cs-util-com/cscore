@@ -75,7 +75,7 @@ namespace com.csutil.tests {
 
         }
 
-        private static DirectoryEntry OpenZipReadOnly(FileInfo self) {
+        private static DirectoryEntry OpenZipReadOnly(FileEntry self) {
             if (self == null) { throw new FileNotFoundException("Passed file was null"); }
             if (!self.ExistsV2()) { throw new FileNotFoundException("Did not find any file at " + self); }
             return OpenZipReadOnly(self.FullName);

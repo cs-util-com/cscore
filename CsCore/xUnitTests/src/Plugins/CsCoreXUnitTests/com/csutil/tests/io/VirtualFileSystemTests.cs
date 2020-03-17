@@ -30,7 +30,7 @@ namespace com.csutil.tests {
             dirToTestWith.GetChild(fileName1).SaveAsText("Test 1");
             dirToTestWith.GetChildDir(subDirName1).GetChild(fileName2).SaveAsText("Test 2");
 
-            DirectoryEntry rootDir = dirToTestWith.ToRootDirectoryEntry();
+            DirectoryEntry rootDir = dirToTestWith;
             Assert.Equal(2, rootDir.EnumerateEntries().Count());
             Assert.Null(rootDir.Parent); // Only possible to operate on the initialy defined root dir
 

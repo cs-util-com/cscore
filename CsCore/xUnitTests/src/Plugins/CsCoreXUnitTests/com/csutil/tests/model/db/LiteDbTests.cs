@@ -23,7 +23,7 @@ namespace com.csutil.tests.model {
             var dbFile = EnvironmentV2.instance.GetOrAddTempFolder("tests.io.db").GetChild("TestDB_" + testId);
 
             // Open database (or create if doesn't exist)
-            using (var db = new LiteDatabase(dbFile.FullPath())) {
+            using (var db = new LiteDatabase(dbFile.FullName)) {
 
                 var users = db.GetCollection<User>("users");
 

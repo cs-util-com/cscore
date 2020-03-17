@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using Zio;
+using Zio.FileSystems;
 
 namespace com.csutil.io {
 
@@ -13,16 +15,16 @@ namespace com.csutil.io {
         /// Base impl. would return C:\Users\User123\AppData\Local\Temp\ 
         /// Unity impl. will return C:\Users\User123\AppData\Local\Temp\DefaultCompany\UnityTestsA\
         /// </summary>
-        public override DirectoryInfo GetRootTempFolder() {
-            return new DirectoryInfo(Application.temporaryCachePath);
+        public override DirectoryEntry GetRootTempFolder() {
+            return new DirectoryInfo(Application.temporaryCachePath).ToRootDirectoryEntry();
         }
 
-        public override DirectoryInfo GetRootAppDataFolder() {
-            return new DirectoryInfo(Application.persistentDataPath);
+        public override DirectoryEntry GetRootAppDataFolder() {
+            return new DirectoryInfo(Application.persistentDataPath).ToRootDirectoryEntry();
         }
 
-        public override DirectoryInfo GetCurrentDirectory() {
-            return new DirectoryInfo(Application.dataPath);
+        public override DirectoryEntry GetCurrentDirectory() {
+            return new DirectoryInfo(Application.dataPath).ToRootDirectoryEntry();
         }
 
     }

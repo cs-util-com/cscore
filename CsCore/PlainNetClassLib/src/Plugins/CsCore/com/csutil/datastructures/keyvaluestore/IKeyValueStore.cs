@@ -1,9 +1,10 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace com.csutil {
 
-    public interface IKeyValueStore {
+    public interface IKeyValueStore : IDisposable {
         Task<T> Get<T>(string key, T defaultValue);
         Task<object> Set(string key, object value);
         Task<bool> Remove(string key);

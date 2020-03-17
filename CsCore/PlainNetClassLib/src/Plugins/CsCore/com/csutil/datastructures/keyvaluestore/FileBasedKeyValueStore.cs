@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Zio;
 
 namespace com.csutil.keyvaluestore {
 
@@ -14,26 +15,28 @@ namespace com.csutil.keyvaluestore {
             return new FileBasedKeyValueStore(EnvironmentV2.instance.GetRootAppDataFolder().GetChildDir(folderName));
         }
 
-        private DirectoryInfo folderForAllFiles;
+        private DirectoryEntry folderForAllFiles;
         public IKeyValueStore fallbackStore { get; set; }
 
         private class PrimitiveWrapper { public object val; }
         private static bool IsPrimitiveType(Type t) { return t.IsPrimitive; }
 
-        public FileBasedKeyValueStore(DirectoryInfo folderForAllFiles) { this.folderForAllFiles = folderForAllFiles; }
+        public FileBasedKeyValueStore(DirectoryEntry folderForAllFiles) { this.folderForAllFiles = folderForAllFiles; }
+
+        public void Dispose() { fallbackStore?.Dispose(); }
 
         public async Task<T> Get<T>(string key, T defaultValue) {
             var fileForKey = GetFile(key);
-            if (fileForKey.ExistsV2()) { return (T)InternalGet(fileForKey, typeof(T)); }
+            if (fileForKey.Exists) { return (T)InternalGet(fileForKey, typeof(T)); }
             return await fallbackStore.Get(key, defaultValue, (fallbackValue) => InternalSet(key, fallbackValue));
         }
 
-        private object InternalGet(FileInfo fileForKey, Type type) {
+        private object InternalGet(FileEntry fileForKey, Type type) {
             if (IsPrimitiveType(type)) { return fileForKey.LoadAs<PrimitiveWrapper>().val; }
             return fileForKey.LoadAs(type);
         }
 
-        public FileInfo GetFile(string key) { return folderForAllFiles.GetChild(key); }
+        public FileEntry GetFile(string key) { return folderForAllFiles.GetChild(key); }
 
         public async Task<object> Set(string key, object value) {
             var oldValue = InternalSet(key, value);

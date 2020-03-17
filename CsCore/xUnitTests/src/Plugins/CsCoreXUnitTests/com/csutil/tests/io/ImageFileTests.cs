@@ -1,6 +1,7 @@
 using System.IO;
 using StbImageLib;
 using Xunit;
+using Zio;
 
 namespace com.csutil.tests {
 
@@ -19,8 +20,8 @@ namespace com.csutil.tests {
             Log.d("Image " + imgFile + " has size: " + image.Width + " x " + image.Height);
         }
 
-        private static ImageResult LoadImage(FileInfo imgFile) {
-            if (!imgFile.ExistsV2()) { throw Log.e("No image found at " + imgFile); }
+        private static ImageResult LoadImage(FileEntry imgFile) {
+            if (!imgFile.Exists) { throw Log.e("No image found at " + imgFile); }
             var stream = File.OpenRead(imgFile.FullName);
             var image = ImageResult.FromStream(stream, ColorComponents.RedGreenBlueAlpha);
             stream.Dispose();

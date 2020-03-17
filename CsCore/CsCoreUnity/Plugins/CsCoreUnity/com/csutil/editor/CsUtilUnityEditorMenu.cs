@@ -6,6 +6,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
+using Zio;
 
 namespace com.csutil.editor {
 
@@ -86,7 +87,7 @@ namespace com.csutil.editor {
             AssetFolderAnalysis.FindFolderAnomalies(assetsFolder);
         }
 
-        private static IEnumerator DownloadDefaultUnityGitIgnore(FileInfo file) {
+        private static IEnumerator DownloadDefaultUnityGitIgnore(FileEntry file) {
             var request = UnityWebRequest.Get("https://raw.githubusercontent.com/github/gitignore/master/Unity.gitignore");
             yield return request.SendWebRequest();
             while (!request.isDone) { yield return new WaitForSeconds(0.1f); }
@@ -101,7 +102,7 @@ namespace com.csutil.editor {
 
         private class GitIgnoreUdater {
 
-            public static void AddAllSymlinksToGitIgnores(DirectoryInfo assetsFolder) {
+            public static void AddAllSymlinksToGitIgnores(DirectoryEntry assetsFolder) {
                 var allSymbolicLinks = CollectSymbolicLinkedFolders(assetsFolder);
                 foreach (var symLink in allSymbolicLinks) {
                     var gitignore = symLink.Parent.GetChild(".gitignore");
@@ -112,8 +113,8 @@ namespace com.csutil.editor {
                 }
             }
 
-            private static List<DirectoryInfo> CollectSymbolicLinkedFolders(DirectoryInfo assetsFolder) {
-                var links = new List<DirectoryInfo>();
+            private static List<DirectoryEntry> CollectSymbolicLinkedFolders(DirectoryEntry assetsFolder) {
+                var links = new List<DirectoryEntry>();
                 var normalFolders = assetsFolder.GetDirectories().Filter(dir => {
                     if (!dir.NameV2().IsNullOrEmpty() && IsSymbolicLink(dir)) { links.Add(dir); return false; }
                     return true;
@@ -122,14 +123,14 @@ namespace com.csutil.editor {
                 return links;
             }
 
-            private static bool IsSymbolicLink(DirectoryInfo dir) {
+            private static bool IsSymbolicLink(DirectoryEntry dir) {
                 return dir.Attributes.HasFlag(FileAttributes.ReparsePoint);
             }
 
-            private static bool AddLineToGitIngore(FileInfo gitignore, string symLinkFolderNameToAdd) {
-                var lines = gitignore.ExistsV2() ? File.ReadLines(gitignore.FullPath()) : new string[0];
+            private static bool AddLineToGitIngore(FileEntry gitignore, string symLinkFolderNameToAdd) {
+                var lines = gitignore.ExistsV2() ? File.ReadLines(gitignore.FullName) : new string[0];
                 var found = lines.Any(line => symLinkFolderNameToAdd.Equals(line));
-                if (!found) { File.AppendAllLines(gitignore.FullPath(), new string[2] { "", symLinkFolderNameToAdd }); }
+                if (!found) { File.AppendAllLines(gitignore.FullName, new string[2] { "", symLinkFolderNameToAdd }); }
                 return !found;
             }
 
@@ -137,7 +138,7 @@ namespace com.csutil.editor {
 
         private class AssetFolderAnalysis {
 
-            public static void FindFolderAnomalies(DirectoryInfo folder) {
+            public static void FindFolderAnomalies(DirectoryEntry folder) {
                 if (Equals(0, folder.GetFiles().Count())) { Log.e("Emtpy folder found: " + folder); }
                 foreach (var childDir in folder.GetDirectories()) { FindFolderAnomalies(childDir); }
             }

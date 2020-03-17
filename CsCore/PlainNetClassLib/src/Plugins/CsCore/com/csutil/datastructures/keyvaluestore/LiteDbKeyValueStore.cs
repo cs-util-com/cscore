@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using LiteDB;
+using Zio;
 
 namespace com.csutil.keyvaluestore {
 
@@ -12,6 +13,7 @@ namespace com.csutil.keyvaluestore {
         private class PrimitiveWrapper { public object val; }
 
         private BsonMapper bsonMapper;
+        private Stream dbStream;
         private LiteDatabase db;
         private LiteCollection<BsonDocument> collection;
 
@@ -19,13 +21,20 @@ namespace com.csutil.keyvaluestore {
 
         private static bool IsPrimitiveType(Type t) { return t.IsPrimitive || t == typeof(string); }
 
-        public LiteDbKeyValueStore(FileInfo dbFile) { Init(dbFile); }
+        public LiteDbKeyValueStore(FileEntry dbFile) { Init(dbFile); }
 
-        private void Init(FileInfo dbFile, string collectionName = "Default") {
+        private void Init(FileEntry dbFile, string collectionName = "Default") {
             bsonMapper = new BsonMapper();
             bsonMapper.IncludeFields = true;
-            db = new LiteDatabase(dbFile.FullPath(), bsonMapper);
+            dbStream = dbFile.Open(System.IO.FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read);
+            db = new LiteDatabase(dbStream, bsonMapper);
             collection = db.GetCollection(collectionName);
+        }
+
+        public void Dispose() {
+            db.Dispose();
+            dbStream.Dispose();
+            fallbackStore?.Dispose();
         }
 
         private BsonDocument GetBson(string key) { return collection.FindById(key); }

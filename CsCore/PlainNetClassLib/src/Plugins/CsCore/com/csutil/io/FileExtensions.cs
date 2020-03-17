@@ -122,7 +122,8 @@ namespace com.csutil {
             var originalPath = source.FullPath();
             if (EnvironmentV2.isWebGL) {
                 // In WebGL .MoveTo does not work correctly so copy+delete is tried instead:
-                source.CopyTo(EnvironmentV2.instance.GetOrAddTempFolder("TmpCopies").GetChildDir(tempCopyId));
+                var tempDir = EnvironmentV2.instance.GetOrAddTempFolder("TmpCopies").GetChildDir(tempCopyId);
+                source.CopyTo(new DirectoryInfo(tempDir.FullName));
             }
             source.MoveTo(target.FullPath());
             source.Refresh();
@@ -139,7 +140,8 @@ namespace com.csutil {
         /// <summary> Needed in WebGL because .MoveTo does not correctly move the files to
         /// the new target directory but instead only removes the original dir </summary>
         private static void EmulateMoveViaCopyDelete(string source, string tempDirPath, DirectoryInfo target) {
-            var tempDir = EnvironmentV2.instance.GetOrAddTempFolder("TmpCopies").GetChildDir(tempDirPath);
+            var tempFolderPath = EnvironmentV2.instance.GetOrAddTempFolder("TmpCopies").GetChildDir(tempDirPath).FullName;
+            var tempDir = new DirectoryInfo(tempFolderPath);
             if (tempDir.IsEmtpy()) {
                 target.CreateV2();
                 CleanupAfterEmulatedMove(source, tempDir);

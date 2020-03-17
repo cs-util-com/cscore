@@ -22,7 +22,7 @@ namespace com.csutil.editor {
                         return true;
                     }
                 } else { Log.e("Dependencies list not found in manifest.json"); }
-            } else { Log.e("Manifest.json file not found at " + manifestFile.FullPath()); }
+            } else { Log.e("Manifest.json file not found at " + manifestFile); }
             return false;
         }
 

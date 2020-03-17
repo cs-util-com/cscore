@@ -18,8 +18,8 @@ namespace com.csutil.tests {
 
             // Get a directory to work in:
             string dirName = "ExampleDir_" + DateTime.Now.ToUnixTimestampUtc();
-            DirectoryInfo myDirectory = EnvironmentV2.instance.GetOrAddTempFolder(dirName);
-            Log.d("The directory path is: " + myDirectory.FullPath());
+            DirectoryInfo myDirectory = new DirectoryInfo(Path.GetTempPath()).GetChildDir(dirName);
+            Log.d("The directory path is: " + myDirectory.FullName);
 
             // Get a non-existing child directory
             var childDir = myDirectory.GetChildDir("MyExampleSubDirectory1");
@@ -263,7 +263,7 @@ namespace com.csutil.tests {
             rootDir.DeleteV2(); // ensure that the test folder does not yet exist
             rootDir.CreateV2();
             Assert.True(rootDir.IsNotNullAndExists());
-            return rootDir;
+            return new DirectoryInfo(rootDir.FullName);
         }
 
         [Fact]

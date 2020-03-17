@@ -11,6 +11,13 @@ namespace com.csutil.keyvaluestore {
         private Dictionary<string, object> store = new Dictionary<string, object>();
         public IKeyValueStore fallbackStore { get; set; }
 
+        public void Dispose() {
+            // TODO iterate over entries, and dispose them if possible?
+            store.Clear();
+            store = null;
+            fallbackStore?.Dispose();
+        }
+
         public async Task<T> Get<T>(string key, T defaultValue) {
             object value;
             if (store.TryGetValue(key, out value)) { return (T)value; }

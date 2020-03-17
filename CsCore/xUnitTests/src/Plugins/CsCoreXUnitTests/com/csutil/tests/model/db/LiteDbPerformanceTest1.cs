@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using com.csutil.model;
 using LiteDB;
 using Xunit;
+using Zio;
 
 namespace com.csutil.tests.model {
 
@@ -26,7 +27,7 @@ namespace com.csutil.tests.model {
             var dbFile = testFolder.GetChild("PerformanceTestDB_" + Guid.NewGuid().ToString());
 
             // Open database (or create if doesn't exist)
-            using (var db = new LiteDatabase(dbFile.FullPath())) {
+            using (var db = new LiteDatabase(dbFile.FullName)) {
                 await InsertIntoDb(dataTree, db);
                 await ReadFromDb(dataTree, db);
             }
@@ -63,7 +64,7 @@ namespace com.csutil.tests.model {
             return Task.WhenAll(data.Map(elem => TaskV2.Run(() => actionPerElement(elem))));
         }
 
-        private static async Task WriteFiles(List<TreeElem> dataTree, DirectoryInfo testFolder) {
+        private static async Task WriteFiles(List<TreeElem> dataTree, DirectoryEntry testFolder) {
             var insertTimer = Log.MethodEntered("LiteDbPerformanceTest1.WriteFiles");
             await ParallelExec(dataTree, (elem) => {
                 GetFileForElem(testFolder, elem).SaveAsJson(elem);
@@ -71,7 +72,7 @@ namespace com.csutil.tests.model {
             Log.MethodDone(insertTimer, 7000);
         }
 
-        private static async Task ReadFiles(List<TreeElem> dataTree, DirectoryInfo testFolder) {
+        private static async Task ReadFiles(List<TreeElem> dataTree, DirectoryEntry testFolder) {
             var readTimer = Log.MethodEntered("LiteDbPerformanceTest1.ReadFiles");
             var reader = JsonReader.GetReader();
             await ParallelExec(dataTree, (elem) => {
@@ -81,7 +82,7 @@ namespace com.csutil.tests.model {
             Log.MethodDone(readTimer, 4000);
         }
 
-        private static FileInfo GetFileForElem(DirectoryInfo testFolder, TreeElem elem) {
+        private static FileEntry GetFileForElem(DirectoryEntry testFolder, TreeElem elem) {
             Assert.False(elem.id.IsNullOrEmpty());
             return testFolder.GetChild(elem.id + ".elem");
         }
