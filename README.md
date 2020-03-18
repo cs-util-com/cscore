@@ -12,24 +12,25 @@ All components are loosly coupled so that components can be used individually wh
 [**Getting started**](#-getting-started)
 
 #  Overview 
-See the [examples](#-usage--examples) below to get a quick overview of all library features:
+The following summary gives a quick overview of all library features:
 
 
 ### Pure C# Components
-The aim of the cscore package is to stay is slim/minimal as possible while including the feature and functionality typical projects would benefit from.
+The aim of the cscore package as to stay is slim/minimal as possible while including the feature and functionality typical projects would benefit from.
 
 * [Log](#logging) - A minimalistic logging wrapper + [AssertV2](#assertv2) to add saveguards anywhere in your logic
-* [EventBus](#The-EventBus) - Publish and subscribe to global events from anywhere in your code. Sends **1 million events in under 3 seconds** with minimal memory footprint!
-* [Injection Logic](#Injection-Logic) - A simple inversion of control pattern that does not rely on magic. Relies on the EventBus system, so its super fast as well!
+* [EventBus](#The-EventBus) - Publish and subscribe to global events from anywhere in your code. Handles **1 million events a second** with minimal memory footprint!
+* [Injection Logic](#Injection-Logic) - A simple inversion of control pattern that does not rely on magic. Relies on the EventBus system, so it has the same speed as well!
 * [JSON Parsing](#JSON-Parsing) - Reading and writing JSON through a simple interface. Default implementation uses [Json.NET](https://github.com/JamesNK/Newtonsoft.Json) to ensure high performance
 * [REST Extensions](#REST-Extensions) - Extensions to simplify sending REST requests in as few lines as possible without limiting flexibility
 * [Directory & File Extensions](#directory--file-extensions) - To simplify handling files, folders and persisting data
 * Common String extension methods demonstrated in StringExtensionTests.cs
 * [Functional extensions](#IEnumerable-Extensions) and [Transducers](#Transducers) to allow functional data mapping (filter, map, reduce, ..)
 * Simple [statemachines](#Statemachines) that work on your existing classes
-* An asynchronous chainable [key value store](#KeyValueStore) (get & set) that can be used for simple persistent settings but also for remote server/DB access 
+* An asynchronous chainable [key value store](#KeyValueStore) (get & set) that can be used for anything from simple persistent settings to remote server/DB access 
 * An [immutable datastore](#immutable-datastore) (Redux syntax) that includes undo/redo, timetravel (replay recordings) and a thunk middleware (dispatching async tasks)
 * A [JsonMerger](#JsonMerger) helper to allow simple Json merging and diffing logic that helps to update an instance of a class using a [Three-way merge](https://en.wikipedia.org/wiki/Merge_(version_control)#Three-way_merge)
+* An AutoMapper to map fields and attributes from one class to another using simple json serialization under the hood.
 * Many other helpful extension methods best demonstrated in HelperMethodTests.cs
 
 
@@ -390,8 +391,10 @@ Provides an async chainable key value store (get & set) that can be used for sim
 ```cs
 IKeyValueStore store = new InMemoryKeyValueStore();
 string myKey1 = "myKey1";
+
 MyClass1 x1 = new MyClass1() { myString1 = "Abc", myString2 = "Abc2" };
 store.Set(myKey1, x1);
+
 MyClass1 x2 = store.Get<MyClass1>(myKey1, defaultValue: null).Result;
 Assert.Equal(x1.myString1, x2.myString1);
 Assert.Equal(x1.myString2, x2.myString2);
@@ -402,9 +405,11 @@ The KeyValueStores can be chained so that if the outer store does not find the e
 ```cs
 string myKey1 = "test123";
 MyClass1 x1 = new MyClass1() { myString1 = "Abc", myString2 = "Abc2" };
+
 // Create a fast memory store and combine it with a LiteDB store that is persisted to disk:
 IKeyValueStore store = new InMemoryKeyValueStore().WithFallbackStore(new FileBasedKeyValueStore(EnvironmentV2.instance.GetOrAddTempFolder("SomeFolder123")));
 await store.Set(myKey1, x1);
+
 MyClass1 x2 = await store.Get<MyClass1>(myKey1, null);
 Assert.Equal(x1.myString1, x2.myString1);
 Assert.Equal(x1.myString2, x2.myString2);
@@ -441,6 +446,7 @@ Assert.False(merge.hasMergeConflict);
 
 // Parse the merged result back into a MyClass1 object:
 MyClass1 mergeResult1 = merge.GetResult();
+
 // The changes from both copies were merged correctly:
 Assert.Equal(copy1.myString, mergeResult1.myString);
 Assert.Equal(copy2.myString2, mergeResult1.myString2);
@@ -456,15 +462,19 @@ Some helper methods are added when the com.csutil namespace is imported to help 
 
 ```cs
 GameObject myGo = new GameObject();
+
 // Adding children GameObjects via AddChild:
 GameObject myChildGo = myGo.AddChild(new GameObject());
+
 // Getting the parent of the child via GetParent:
 Assert.AreSame(myGo, myChildGo.GetParent());
 
 // Lazy-initialization of the GameObject in case it does not yet exist:
 GameObject child1 = myGo.GetOrAddChild("Child 1");
+
 // Lazy-initialization of the Mono in case it does not yet exist:
 MyExampleMono1 myMono1 = child1.GetOrAddComponent<MyExampleMono1>();
+
 // Calling the 2 methods again results always in the same mono:
 var myMono1_ref2 = myGo.GetOrAddChild("Child 1").GetOrAddComponent<MyExampleMono1>();
 Assert.AreSame(myMono1, myMono1_ref2);
@@ -576,13 +586,16 @@ var viewStack = viewStackGo.AddComponent<ViewStack>();
 
 // Views can be added manually without using the ViewStack:
 var view1 = viewStackGo.AddChild(new GameObject("View 1"));
+
 // You can get the ViewStack using any child gameobject:
 Assert.AreEqual(view1.GetViewStack(), viewStack);
+
 // The latest active view can be accessed from the view stack:
 Assert.AreEqual(view1, viewStack.GetLatestView());
 
 // Views can also be added using the ViewStack.ShowView method:
 var view2 = viewStack.ShowView(new GameObject("View 2"));
+
 // Hide the old view 1 now that view 2 is on top:
 view1.SetActiveV2(false);
 Assert.IsFalse(view1.activeInHierarchy);
@@ -590,8 +603,10 @@ Assert.AreEqual(view2, viewStack.GetLatestView());
 
 // The ViewStack can be used to return to the last view:
 Assert.IsTrue(viewStack.SwitchBackToLastView(view2));
+
 // View 2 will be removed from the view stack by destroying it:
 Assert.IsTrue(view2.IsDestroyed());
+
 // Now view 1 is active and visible again:
 Assert.IsTrue(view1.activeInHierarchy);
 ```
@@ -625,6 +640,7 @@ Additionally there is myMono.StartCoroutinesInParallel(..) and myMono.StartCorou
 RestRequest request1 = UnityWebRequest.Get("https://httpbin.org/get").SendV2();
 Task<HttpBinGetResp> requestTask = request1.GetResult<HttpBinGetResp>();
 yield return requestTask.AsCoroutine();
+
 HttpBinGetResp response = requestTask.Result;
 Log.d("Your IP is " + response.origin);
 
@@ -652,12 +668,14 @@ Assert.AreEqual(myBool, PlayerPrefsV2.GetBool("myBool", defaultValue: false));
 
 // PlayerPrefsV2.SetStringEncrypted and PlayerPrefsV2.GetStringDecrypted example:
 PlayerPrefsV2.SetStringEncrypted("mySecureString", "some text to encrypt", password: "myPassword123");
+
 var decryptedAgain = PlayerPrefsV2.GetStringDecrypted("mySecureString", null, password: "myPassword123");
 Assert.AreEqual("some text to encrypt", decryptedAgain);
 
 // PlayerPrefsV2.SetObject and PlayerPrefsV2.GetObject example (uses JSON internally):
 MyClass1 myObjectToSave = new MyClass1() { myString = "Im a string", myInt = 123 };
 PlayerPrefsV2.SetObject("myObject1", myObjectToSave);
+
 MyClass1 objLoadedAgain = PlayerPrefsV2.GetObject<MyClass1>("myObject1", defaultValue: null);
 Assert.AreEqual(myObjectToSave.myInt, objLoadedAgain.myInt);
 
