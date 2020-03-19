@@ -34,10 +34,7 @@ namespace com.csutil {
         protected virtual DirectoryInfo GetRootTempDirInfo() { return new DirectoryInfo(Path.GetTempPath()); }
 
         public virtual DirectoryEntry GetOrAddTempFolder(string tempSubfolderName) {
-            var tempSubDir = GetRootTempDirInfo().GetChildDir(tempSubfolderName);
-            var res = tempSubDir.ToRootDirectoryEntry();
-            res.CreateV2();
-            return res;
+            return GetRootTempDirInfo().GetChildDir(tempSubfolderName).CreateV2().ToRootDirectoryEntry();
         }
 
         public virtual DirectoryEntry GetSpecialFolder(Environment.SpecialFolder specialFolder) {

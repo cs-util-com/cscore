@@ -18,11 +18,18 @@ namespace com.csutil {
         }
 
         public static DirectoryEntry ToRootDirectoryEntry(this DirectoryInfo localDir) {
-            var p = localDir.FullName;
-            Log.MethodEnteredWith(p);
-            var pfs = new PhysicalFileSystem();
-            var fs = new SubFileSystem(pfs, pfs.ConvertPathFromInternal(p));
+            if (!localDir.Exists) {
+                throw new DirectoryNotFoundException("ToRootDirectoryEntry on non-existing dir: " + localDir);
+            }
+            var pfs = new PhysicalFileSystemV2(ExtractDiscPrefix(localDir));
+            var fs = new SubFileSystem(pfs, pfs.ConvertPathFromInternal(localDir.FullName));
             return fs.GetDirectoryEntry(UPath.Root);
+        }
+
+        private static string ExtractDiscPrefix(DirectoryInfo localDir) {
+            var absolutePath = localDir.FullName;
+            if (absolutePath[1] == ':') { return absolutePath.Substring(0, 2); }
+            return null;
         }
 
         public static DirectoryEntry AsNewRootDir(this DirectoryEntry self) {
