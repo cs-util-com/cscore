@@ -26,7 +26,7 @@ namespace com.csutil.keyvaluestore {
         private void Init(FileEntry dbFile, string collectionName = "Default") {
             bsonMapper = new BsonMapper();
             bsonMapper.IncludeFields = true;
-            dbStream = dbFile.Open(System.IO.FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read);
+            dbStream = dbFile.OpenOrCreateForReadWrite();
             db = new LiteDatabase(dbStream, bsonMapper);
             collection = db.GetCollection(collectionName);
         }

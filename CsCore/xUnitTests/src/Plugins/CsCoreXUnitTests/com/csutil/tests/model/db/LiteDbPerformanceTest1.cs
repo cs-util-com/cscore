@@ -27,7 +27,7 @@ namespace com.csutil.tests.model {
             var dbFile = testFolder.GetChild("PerformanceTestDB_" + Guid.NewGuid().ToString());
 
             // Open database (or create if doesn't exist)
-            using (var db = new LiteDatabase(dbFile.FullName)) {
+            using (var db = new LiteDatabase(dbFile.OpenOrCreateForReadWrite(), disposeStream: true)) {
                 await InsertIntoDb(dataTree, db);
                 await ReadFromDb(dataTree, db);
             }

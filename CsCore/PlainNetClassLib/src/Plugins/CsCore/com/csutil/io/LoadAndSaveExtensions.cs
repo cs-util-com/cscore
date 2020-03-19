@@ -51,12 +51,18 @@ namespace com.csutil {
         }
 
         public static void SaveAsJson<T>(this FileEntry self, T objectToSave) {
-            using (var stream = self.OpenOrCreate()) {
+            using (var stream = self.OpenOrCreateForWrite()) {
                 using (StreamWriter streamWriter = new StreamWriter(stream)) { streamWriter.SaveAsJson(objectToSave); }
             }
         }
 
-        public static Stream OpenOrCreate(this FileEntry self) { return self.Open(FileMode.OpenOrCreate, FileAccess.Write); }
+        public static Stream OpenOrCreateForWrite(this FileEntry self, FileShare share = FileShare.None) {
+            return self.Open(FileMode.OpenOrCreate, FileAccess.Write, share);
+        }
+
+        public static Stream OpenOrCreateForReadWrite(this FileEntry self, FileShare share = FileShare.Read) {
+            return self.Open(FileMode.OpenOrCreate, FileAccess.ReadWrite, share);
+        }
 
         public static void SaveAsJson<T>(this StreamWriter self, T objectToSave) {
             JsonWriter.GetWriter().Write(objectToSave, self);
@@ -80,7 +86,7 @@ namespace com.csutil {
 
         public static void SaveAsText(this FileEntry self, string text) {
             self.Parent.CreateV2();
-            using (var s = self.OpenOrCreate()) { s.WriteAsText(text); }
+            using (var s = self.OpenOrCreateForWrite()) { s.WriteAsText(text); }
         }
 
         public static void WriteAsText(this Stream self, string text) { using (var w = new StreamWriter(self, Encoding.UTF8)) { w.Write(text); } }

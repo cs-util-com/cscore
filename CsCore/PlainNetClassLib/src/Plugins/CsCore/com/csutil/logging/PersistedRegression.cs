@@ -62,7 +62,9 @@ namespace com.csutil {
                 var foundProblems = GetFilteredDiff(diffToExpectedState, filterAcceptableDiffs);
                 if (!foundProblems.IsNullOrEmpty()) {
                     var problemReport = foundProblems.ToStringV2(p => p.ToPrettyString());
-                    throw new Exception("Diff found in regression test: " + problemReport);
+                    var path = id;
+                    if (regressionStore is FileBasedKeyValueStore f) { path = f.GetFile(id).GetFullFileSystemPath(); }
+                    throw new Exception($"Diff found for regression id {path}: " + problemReport);
                 }
             }
         }

@@ -43,7 +43,7 @@ namespace com.csutil.tests.json {
         public async Task ExampleUsage2() {
 
             MyClass1 myState1 = new MyClass1() {
-                myName = "abc",
+                myName = "fgh",
                 myChildren = new MyClass1[] {
                     new MyClass1() { 
                         // Provoke a change in the state in each test execution:
@@ -67,6 +67,10 @@ namespace com.csutil.tests.json {
                 return true; // For all other diffs confirm that its a non acceptable diff
             }, myState1);
             Assert.True(diffInStateWasAccepted);
+
+            // Make sure the regression entry was really created
+            Assert.True(await new PersistedRegression().regressionStore.ContainsKey("PersistedRegressionTests_ExampleUsage2_1"));
+
         }
 
     }

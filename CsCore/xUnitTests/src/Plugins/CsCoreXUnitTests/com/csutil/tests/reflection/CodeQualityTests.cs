@@ -1,4 +1,6 @@
+using System;
 using Xunit;
+using System.Linq;
 
 namespace com.csutil.tests.reflection {
     public class CodeQualityTests {
@@ -12,7 +14,10 @@ namespace com.csutil.tests.reflection {
             Log.d(JsonWriter.AsPrettyString(assembly.GetAllNamespaces()));
 
             var typesWithMissingNamespace = assembly.GetTypesWithMissingNamespace();
-            Assert.Empty(typesWithMissingNamespace);
+            if (typesWithMissingNamespace.Count() == 0) {
+                throw new Exception("These types have missing namespaces:"
+                    + typesWithMissingNamespace.ToStringV2());
+            }
 
         }
 
