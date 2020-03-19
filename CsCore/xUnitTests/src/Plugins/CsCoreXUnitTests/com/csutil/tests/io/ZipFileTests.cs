@@ -21,21 +21,20 @@ namespace com.csutil.tests {
             var zip1 = root.GetChild("Test1.zip");
             var dir2 = root.GetChildDir("Dir2");
 
-            { // Save a test file in a sub sub dir:
-                dir1.GetChildDir("SubDir1").GetChild("t1.txt").SaveAsText("abc");
-                dir1.GetChildDir("SubDir2").GetChild("t2.txt").SaveAsText("def");
-                var fastZip = new FastZip();
-                fastZip.CreateZip(zip1.FullName, dir1.FullName, true, "");
-            }
-            { // Extract the created zip to dir2:
-                var fastZip = new FastZip();
-                fastZip.ExtractZip(zip1.FullName, dir2.FullName, null);
-            }
+            // Save a test file in a sub sub dir:
+            dir1.GetChildDir("SubDir1").GetChild("t1.txt").SaveAsText("abc");
+            dir1.GetChildDir("SubDir2").GetChild("t2.txt").SaveAsText("def");
+            dir1.ZipToFile(zip1);
+
+            // Extract the created zip to dir2:
+            zip1.ExtractIntoDir(dir2);
+
             Assert.True(dir2.ExistsV2());
             Assert.Equal("abc", dir2.GetChildDir("SubDir1").GetChild("t1.txt").LoadAs<string>());
 
             { // Read content directly from zip without extraction:
-                var zip = new ZipFile(new FileStream(zip1.FullName, FileMode.Open, FileAccess.Read));
+                var zip = new ZipFile(new FileStream(zip1.GetFullFileSystemPath(), FileMode.Open, FileAccess.Read));
+
                 foreach (ZipEntry zipEntry in zip) { Log.d("entry: " + zipEntry.Name); }
                 Assert.Equal(2, zip.Count);
                 var e1 = zip.GetEntry("SubDir1/t1.txt");
@@ -56,13 +55,12 @@ namespace com.csutil.tests {
             var dir1 = root.GetChildDir("Dir1");
             var zip1 = root.GetChild("Test1.zip");
 
-            { // Save a test file in a sub sub dir:
-                dir1.GetChildDir("SubDir1").GetChild("t1.txt").SaveAsText("abc");
-                dir1.GetChildDir("SubDir2").GetChild("t2.txt").SaveAsText("def");
-                dir1.GetChildDir("SubDir2").GetChild("t3.txt").SaveAsText("ghi");
-                dir1.GetChildDir("SubDir3").GetChild("t4.txt").SaveAsText("jkl");
-                new FastZip().CreateZip(zip1.FullName, dir1.FullName, true, "");
-            }
+            // Save a test file in a sub sub dir:
+            dir1.GetChildDir("SubDir1").GetChild("t1.txt").SaveAsText("abc");
+            dir1.GetChildDir("SubDir2").GetChild("t2.txt").SaveAsText("def");
+            dir1.GetChildDir("SubDir2").GetChild("t3.txt").SaveAsText("ghi");
+            dir1.GetChildDir("SubDir3").GetChild("t4.txt").SaveAsText("jkl");
+            dir1.ZipToFile(zip1);
 
             DirectoryEntry zipContent = OpenZipReadOnly(zip1);
             Assert.Equal(3, zipContent.EnumerateEntries().Count());
@@ -78,11 +76,8 @@ namespace com.csutil.tests {
         private static DirectoryEntry OpenZipReadOnly(FileEntry self) {
             if (self == null) { throw new FileNotFoundException("Passed file was null"); }
             if (!self.ExistsV2()) { throw new FileNotFoundException("Did not find any file at " + self); }
-            return OpenZipReadOnly(self.FullName);
-        }
-
-        private static DirectoryEntry OpenZipReadOnly(string path) {
-            return new ZipFileReadSystem(new ZipFile(path)).GetDirectoryEntry(UPath.Root);
+            var s = self.Open(FileMode.Open, FileAccess.Read, FileShare.Read);
+            return new ZipFileReadSystem(new ZipFile(s)).GetDirectoryEntry(UPath.Root);
         }
 
     }

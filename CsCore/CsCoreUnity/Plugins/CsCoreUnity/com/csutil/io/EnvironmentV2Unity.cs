@@ -15,8 +15,8 @@ namespace com.csutil.io {
         /// Base impl. would return C:\Users\User123\AppData\Local\Temp\ 
         /// Unity impl. will return C:\Users\User123\AppData\Local\Temp\DefaultCompany\UnityTestsA\
         /// </summary>
-        public override DirectoryEntry GetRootTempFolder() {
-            return new DirectoryInfo(Application.temporaryCachePath).ToRootDirectoryEntry();
+        protected override DirectoryInfo GetRootTempDirInfo() {
+            return new DirectoryInfo(Application.temporaryCachePath);
         }
 
         public override DirectoryEntry GetRootAppDataFolder() {

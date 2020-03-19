@@ -1,3 +1,4 @@
+using ICSharpCode.SharpZipLib.Zip;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -17,9 +18,16 @@ namespace com.csutil {
         }
 
         public static DirectoryEntry ToRootDirectoryEntry(this DirectoryInfo localDir) {
+            var p = localDir.FullName;
+            Log.MethodEnteredWith(p);
             var pfs = new PhysicalFileSystem();
-            var fs = new SubFileSystem(pfs, pfs.ConvertPathFromInternal(localDir.FullName));
+            var fs = new SubFileSystem(pfs, pfs.ConvertPathFromInternal(p));
             return fs.GetDirectoryEntry(UPath.Root);
+        }
+
+        public static DirectoryEntry AsNewRootDir(this DirectoryEntry self) {
+            UPath subPath = self.FileSystem.ConvertPathFromInternal(self.FullName);
+            return new SubFileSystem(self.FileSystem, subPath).GetDirectoryEntry(UPath.Root);
         }
 
         public static DirectoryEntry CreateV2(this DirectoryEntry self) {
@@ -29,48 +37,50 @@ namespace com.csutil {
 
         public static bool OpenInExternalApp(this FileSystemEntry self) {
             try {
-                System.Diagnostics.Process.Start(@self.FullName);
+                System.Diagnostics.Process.Start(GetFullFileSystemPath(self));
                 return true;
             }
             catch (Exception e) { Log.e(e); }
             return false;
         }
 
+        [Obsolete("Untested!", true)]
         public static bool Rename(this DirectoryEntry self, string newName) {
             var target = self.Parent.GetChildDir(newName);
-            AssertV2.IsFalse(target.IsNotNullAndExists(), "Already exists: target=" + target.FullName);
+            AssertV2.IsFalse(target.IsNotNullAndExists(), "Already exists: target=" + target);
             return self.MoveToV2(target);
         }
 
+        [Obsolete("Untested!", true)]
         public static bool CopyTo(this DirectoryEntry source, DirectoryEntry target, bool replaceExisting = false) {
             AssertNotIdentical(source, target);
             if (!replaceExisting && target.IsNotNullAndExists()) {
                 throw new ArgumentException("Cant copy to existing folder " + target);
             }
             foreach (var subDir in source.EnumerateDirectories()) {
-                CopyTo(subDir, target.GetChildDir(subDir.FullName), replaceExisting);
+                CopyTo(subDir, target.GetChildDir(subDir.Name), replaceExisting);
             }
             foreach (var file in source.EnumerateFiles()) {
                 target.CreateV2();
-                var createdFile = file.CopyTo(target.GetChild(file.Name).FullName, replaceExisting);
+                var createdFile = file.CopyTo(target.GetChild(file.Name).Path, replaceExisting);
                 AssertV2.IsTrue(createdFile.Exists, "!createdFile.Exists: " + createdFile);
             }
             return target.Exists;
         }
 
+        [Obsolete("Untested!", true)]
         public static bool MoveToV2(this DirectoryEntry source, DirectoryEntry target) {
             AssertNotIdentical(source, target);
             var tempCopyId = "" + Guid.NewGuid();
-            var originalPath = source.FullName;
             if (EnvironmentV2.isWebGL) {
                 // In WebGL .MoveTo does not work correctly so copy+delete is tried instead:
                 var tempDir = EnvironmentV2.instance.GetOrAddTempFolder("TmpCopies").GetChildDir(tempCopyId);
                 source.CopyTo(tempDir);
             }
-            source.MoveTo(target.FullName);
+            source.MoveTo(target.Path);
             if (EnvironmentV2.isWebGL) {
                 if (!target.Exists) {
-                    EmulateMoveViaCopyDelete(originalPath, tempCopyId, target);
+                    EmulateMoveViaCopyDelete(source, tempCopyId, target);
                 } else {
                     Log.e("WebGL TempCopy solution was not needed!");
                 }
@@ -79,14 +89,15 @@ namespace com.csutil {
         }
 
         private static void AssertNotIdentical(DirectoryEntry source, DirectoryEntry target) {
-            if (Equals(source.FullName, target.FullName)) {
+            if (Equals(source.Path, target.Path)) {
                 throw new OperationCanceledException("Identical source & target: " + source);
             }
         }
 
         /// <summary> Needed in WebGL because .MoveTo does not correctly move the files to
         /// the new target directory but instead only removes the original dir </summary>
-        private static void EmulateMoveViaCopyDelete(string source, string tempDirPath, DirectoryEntry target) {
+        [Obsolete("Untested!", true)]
+        private static void EmulateMoveViaCopyDelete(DirectoryEntry source, string tempDirPath, DirectoryEntry target) {
             var tempDir = EnvironmentV2.instance.GetOrAddTempFolder("TmpCopies").GetChildDir(tempDirPath);
             if (tempDir.IsEmtpy()) {
                 target.CreateV2();
@@ -98,9 +109,10 @@ namespace com.csutil {
             }
         }
 
-        private static void CleanupAfterEmulatedMove(string source, DirectoryEntry tempDir) {
+        [Obsolete("Untested!", true)]
+        private static void CleanupAfterEmulatedMove(DirectoryEntry source, DirectoryEntry tempDir) {
             tempDir.DeleteV2();
-            var originalDir = new DirectoryInfo(source);
+            var originalDir = source;
             try { if (originalDir.ExistsV2()) { originalDir.DeleteV2(); } } catch (Exception e) { Log.e("Cleanup err of original dir: " + originalDir, e); }
         }
 
@@ -140,10 +152,10 @@ namespace com.csutil {
         /// <exception cref="ArgumentNullException">if path is <see cref="UPath.IsNull"/></exception>
         public static UPath GetFirstPart(this UPath path) {
             path.AssertNotNull();
-            var fullname = path.FullName;
-            var index = fullname.IndexOf(UPath.DirectorySeparator, 1);
-            if (index < 0) { return fullname; }
-            return fullname.Substring(0, index);
+            string pathString = path.FullName;
+            var index = pathString.IndexOf(UPath.DirectorySeparator, 1);
+            if (index < 0) { return pathString; }
+            return pathString.Substring(0, index);
         }
 
         public static bool DeleteV2(this FileSystemEntry self) {
@@ -158,7 +170,7 @@ namespace com.csutil {
                         foreach (var file in self.GetFiles()) { file.DeleteV2(); }
                     }
                 }
-                if (!self.IsEmtpy()) { throw new IOException("Cant delete non-emtpy dir: " + self.FullName); }
+                if (!self.IsEmtpy()) { throw new IOException("Cant delete non-emtpy dir: " + self); }
                 try { self.Delete(); return true; } catch (Exception e) { Log.e(e); }
                 return false;
             });
@@ -171,7 +183,7 @@ namespace com.csutil {
         private static bool DeleteV2(FileSystemEntry self, Func<bool> deleteAction) {
             if (self.IsNotNullAndExists()) {
                 var res = deleteAction();
-                AssertV2.IsFalse(!res || self.Exists, "Still exists: " + self.FullName);
+                AssertV2.IsFalse(!res || self.Exists, "Still exists: " + self);
                 return res;
             }
             return false;
@@ -191,5 +203,28 @@ namespace com.csutil {
             return Path.GetFileNameWithoutExtension(self.Name);
         }
 
+        [Obsolete("Currently only works when working with a physical file system for the target directory")]
+        public static void ExtractIntoDir(this FileEntry self, DirectoryEntry targetDir) {
+            if (targetDir.Exists) { throw new IOException("Target dir to extract zip into already exists: " + targetDir); }
+            var fastZip = new FastZip();
+            FastZip.ConfirmOverwriteDelegate confCallback = (fileName) => false;
+            using (var s = self.Open(FileMode.Open, FileAccess.Read, FileShare.Read)) {
+                fastZip.ExtractZip(s, GetFullFileSystemPath(targetDir), FastZip.Overwrite.Prompt, confCallback, "", "", true, true);
+            }
+        }
+
+        [Obsolete("Currently only works when working with a physical file system for the source directory")]
+        public static void ZipToFile(this DirectoryEntry self, FileEntry targetZipFile) {
+            if (targetZipFile.Exists) { throw new IOException("Target zip file already exists: " + targetZipFile); }
+            var fastZip = new FastZip();
+            fastZip.CreateZip(targetZipFile.Create(), GetFullFileSystemPath(self), true, "", "");
+        }
+
+        public static string GetFullFileSystemPath(this FileSystemEntry f) {
+            return f.FileSystem.ConvertPathToInternal(f.Path);
+        }
+
     }
+
 }
+

@@ -262,8 +262,11 @@ namespace com.csutil.tests {
             var rootDir = EnvironmentV2.instance.GetOrAddTempFolder(name);
             rootDir.DeleteV2(); // ensure that the test folder does not yet exist
             rootDir.CreateV2();
-            Assert.True(rootDir.IsNotNullAndExists());
-            return new DirectoryInfo(rootDir.FullName);
+            Assert.True(rootDir.Exists);
+            var res = new DirectoryInfo(rootDir.GetFullFileSystemPath());
+            Assert.True(res.Exists, res.FullName + " not found after create was called");
+            Assert.Equal(name, res.NameV2());
+            return res;
         }
 
         [Fact]

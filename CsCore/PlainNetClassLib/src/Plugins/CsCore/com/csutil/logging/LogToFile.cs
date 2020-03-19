@@ -44,7 +44,7 @@ namespace com.csutil.logging {
         }
 
         public static LogStructure LoadLogFile(FileEntry targetFileToLogInto) {
-            var logFileContent = targetFileToLogInto.LoadAs<string>();
+            var logFileContent = targetFileToLogInto.LoadAs<string>(FileShare.ReadWrite);
             logFileContent = "{\"logEntries\":[" + logFileContent + "]}";
             return JsonReader.GetReader().Read<LogStructure>(logFileContent);
         }

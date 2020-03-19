@@ -21,11 +21,10 @@ namespace com.csutil.tests {
         }
 
         private static ImageResult LoadImage(FileEntry imgFile) {
-            if (!imgFile.Exists) { throw Log.e("No image found at " + imgFile); }
-            var stream = File.OpenRead(imgFile.FullName);
-            var image = ImageResult.FromStream(stream, ColorComponents.RedGreenBlueAlpha);
-            stream.Dispose();
-            return image;
+            if (!imgFile.Exists) { throw Log.e("No image found at " + imgFile.GetFullFileSystemPath()); }
+            using (var stream = imgFile.Open(FileMode.Open, FileAccess.Read, FileShare.Read)) {
+                return ImageResult.FromStream(stream, ColorComponents.RedGreenBlueAlpha);
+            }
         }
 
     }

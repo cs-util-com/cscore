@@ -79,6 +79,7 @@ namespace com.csutil {
         }
 
         public static void SaveAsText(this FileEntry self, string text) {
+            self.Parent.CreateV2();
             using (var s = self.OpenOrCreate()) { s.WriteAsText(text); }
         }
 

@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using Zio;
+using Zio.FileSystems;
 
 namespace com.csutil {
 
@@ -28,12 +29,15 @@ namespace com.csutil {
         }
 
         /// <summary> On Windows e.g. C:\Users\User123\AppData\Local\Temp\ </summary>
-        public virtual DirectoryEntry GetRootTempFolder() {
-            return new DirectoryInfo(Path.GetTempPath()).ToRootDirectoryEntry();
-        }
+        public DirectoryEntry GetRootTempFolder() { return GetRootTempDirInfo().ToRootDirectoryEntry(); }
+
+        protected virtual DirectoryInfo GetRootTempDirInfo() { return new DirectoryInfo(Path.GetTempPath()); }
 
         public virtual DirectoryEntry GetOrAddTempFolder(string tempSubfolderName) {
-            return GetRootTempFolder().GetChildDir(tempSubfolderName).CreateV2();
+            var tempSubDir = GetRootTempDirInfo().GetChildDir(tempSubfolderName);
+            var res = tempSubDir.ToRootDirectoryEntry();
+            res.CreateV2();
+            return res;
         }
 
         public virtual DirectoryEntry GetSpecialFolder(Environment.SpecialFolder specialFolder) {
