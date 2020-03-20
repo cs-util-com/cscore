@@ -178,8 +178,8 @@ namespace com.csutil {
             foreach (var subDir in source.EnumerateDirectories()) {
                 CopyTo(subDir, target.GetChildDir(subDir.NameV2()), replaceExisting);
             }
+            target.CreateV2();
             foreach (var file in source.EnumerateFiles()) {
-                target.CreateV2();
                 var createdFile = file.CopyTo(target.GetChild(file.Name).FullPath(), replaceExisting);
                 AssertV2.IsTrue(createdFile.ExistsV2(), "!createdFile.Exists: " + createdFile);
             }

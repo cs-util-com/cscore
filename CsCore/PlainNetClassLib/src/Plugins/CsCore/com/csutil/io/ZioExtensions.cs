@@ -48,6 +48,15 @@ namespace com.csutil {
             return result.Exists;
         }
 
+        public static FileEntry CopyToV2(this FileEntry self, FileEntry target, bool replaceExisting) {
+            if (self.FileSystem != target.FileSystem) {
+                using (var t = target.OpenOrCreateForWrite()) { using (var s = self.OpenForRead()) { s.CopyTo(t); } }
+                AssertV2.IsTrue(target.Exists, "Target did not exist after copy to was done: " + target);
+                return target;
+            }
+            return self.CopyTo(target.Path, replaceExisting);
+        }
+
         public static bool MoveToV2(this FileEntry self, DirectoryEntry target, out FileEntry result) {
             result = target.GetChild(self.Name);
             self.MoveTo(result.FullName);
@@ -97,9 +106,10 @@ namespace com.csutil {
             foreach (var subDir in source.EnumerateDirectories()) {
                 CopyTo(subDir, target.GetChildDir(subDir.Name), replaceExisting);
             }
+            target.CreateV2();
             foreach (var file in source.EnumerateFiles()) {
-                target.CreateV2();
-                var createdFile = file.CopyTo(target.GetChild(file.Name).Path, replaceExisting);
+                var to = target.GetChild(file.Name);
+                var createdFile = file.CopyToV2(to, replaceExisting);
                 AssertV2.IsTrue(createdFile.Exists, "!createdFile.Exists: " + createdFile);
             }
             return target.Exists;
@@ -113,8 +123,8 @@ namespace com.csutil {
 
         /// <summary> Needed in WebGL because .MoveTo does not correctly move the files to
         /// the new target directory but instead only removes the original dir </summary>
-        private static void EmulateMoveViaCopyDelete(DirectoryEntry source, string tempDirPath, DirectoryEntry target) {
-            var tempDir = EnvironmentV2.instance.GetOrAddTempFolder("TmpCopies").GetChildDir(tempDirPath);
+        private static void EmulateMoveViaCopyDelete(DirectoryEntry source, string tempDirId, DirectoryEntry target) {
+            var tempDir = EnvironmentV2.instance.GetOrAddTempFolder("TmpCopies").GetChildDir(tempDirId);
             if (tempDir.IsEmtpy()) {
                 target.CreateV2(); // if a rename happened only make sure the target is created
                 CleanupAfterEmulatedMove(source, tempDir);
