@@ -166,7 +166,7 @@ namespace com.csutil {
 
         public static bool Rename(this DirectoryInfo self, string newName) {
             var target = self.Parent.GetChildDir(newName);
-            AssertV2.IsFalse(target.IsNotNullAndExists(), "Already exists: target=" + target.FullPath());
+            if (target.ExistsV2()) { throw new IOException("Cant rename, already exists: " + target); }
             return self.MoveToV2(target);
         }
 

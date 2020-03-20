@@ -42,23 +42,53 @@ namespace com.csutil {
             return self;
         }
 
+        public static bool Rename(this FileEntry self, string newName, out FileEntry result) {
+            result = self.Parent.GetChild(newName);
+            self.MoveTo(result.FullName);
+            return result.Exists;
+        }
+
+        public static bool MoveToV2(this FileEntry self, DirectoryEntry target, out FileEntry result) {
+            result = target.GetChild(self.Name);
+            self.MoveTo(result.FullName);
+            return result.Exists;
+        }
+
         public static bool OpenInExternalApp(this FileSystemEntry self) {
             try {
                 System.Diagnostics.Process.Start(GetFullFileSystemPath(self));
                 return true;
-            }
-            catch (Exception e) { Log.e(e); }
+            } catch (Exception e) { Log.e(e); }
             return false;
         }
 
-        [Obsolete("Untested!", true)]
-        public static bool Rename(this DirectoryEntry self, string newName) {
+        public static bool Rename(this DirectoryEntry self, string newName, out DirectoryEntry result) {
             var target = self.Parent.GetChildDir(newName);
-            AssertV2.IsFalse(target.IsNotNullAndExists(), "Already exists: target=" + target);
-            return self.MoveToV2(target);
+            if (target.Exists) { throw new IOException("Cant rename, already exists: " + target); }
+            return self.MoveToV2(target, out result);
         }
 
-        [Obsolete("Untested!", true)]
+        public static bool MoveToV2(this DirectoryEntry source, DirectoryEntry target, out DirectoryEntry result) {
+            AssertNotIdentical(source, target);
+            var tempCopyId = "" + Guid.NewGuid();
+            if (EnvironmentV2.isWebGL) {
+                // In WebGL .MoveTo does not work correctly so copy+delete is tried instead:
+                var tempDir = EnvironmentV2.instance.GetOrAddTempFolder("TmpCopies").GetChildDir(tempCopyId);
+                source.CopyTo(tempDir);
+            }
+            source.MoveTo(target.Path);
+            if (EnvironmentV2.isWebGL) {
+                if (!target.Exists) {
+                    EmulateMoveViaCopyDelete(source, tempCopyId, target);
+                } else {
+                    Log.e("WebGL TempCopy solution was not needed!");
+                }
+            }
+            if (!target.Exists) { throw new DirectoryNotFoundException("Could not move dir to " + target); }
+            result = target;
+            return target.Exists;
+        }
+
         public static bool CopyTo(this DirectoryEntry source, DirectoryEntry target, bool replaceExisting = false) {
             AssertNotIdentical(source, target);
             if (!replaceExisting && target.IsNotNullAndExists()) {
@@ -75,26 +105,6 @@ namespace com.csutil {
             return target.Exists;
         }
 
-        [Obsolete("Untested!", true)]
-        public static bool MoveToV2(this DirectoryEntry source, DirectoryEntry target) {
-            AssertNotIdentical(source, target);
-            var tempCopyId = "" + Guid.NewGuid();
-            if (EnvironmentV2.isWebGL) {
-                // In WebGL .MoveTo does not work correctly so copy+delete is tried instead:
-                var tempDir = EnvironmentV2.instance.GetOrAddTempFolder("TmpCopies").GetChildDir(tempCopyId);
-                source.CopyTo(tempDir);
-            }
-            source.MoveTo(target.Path);
-            if (EnvironmentV2.isWebGL) {
-                if (!target.Exists) {
-                    EmulateMoveViaCopyDelete(source, tempCopyId, target);
-                } else {
-                    Log.e("WebGL TempCopy solution was not needed!");
-                }
-            }
-            return target.Exists;
-        }
-
         private static void AssertNotIdentical(DirectoryEntry source, DirectoryEntry target) {
             if (Equals(source.Path, target.Path)) {
                 throw new OperationCanceledException("Identical source & target: " + source);
@@ -103,11 +113,10 @@ namespace com.csutil {
 
         /// <summary> Needed in WebGL because .MoveTo does not correctly move the files to
         /// the new target directory but instead only removes the original dir </summary>
-        [Obsolete("Untested!", true)]
         private static void EmulateMoveViaCopyDelete(DirectoryEntry source, string tempDirPath, DirectoryEntry target) {
             var tempDir = EnvironmentV2.instance.GetOrAddTempFolder("TmpCopies").GetChildDir(tempDirPath);
             if (tempDir.IsEmtpy()) {
-                target.CreateV2();
+                target.CreateV2(); // if a rename happened only make sure the target is created
                 CleanupAfterEmulatedMove(source, tempDir);
             } else if (tempDir.CopyTo(target)) {
                 CleanupAfterEmulatedMove(source, tempDir);
@@ -116,11 +125,10 @@ namespace com.csutil {
             }
         }
 
-        [Obsolete("Untested!", true)]
         private static void CleanupAfterEmulatedMove(DirectoryEntry source, DirectoryEntry tempDir) {
             tempDir.DeleteV2();
             var originalDir = source;
-            try { if (originalDir.ExistsV2()) { originalDir.DeleteV2(); } } catch (Exception e) { Log.e("Cleanup err of original dir: " + originalDir, e); }
+            try { if (originalDir.Exists) { originalDir.DeleteV2(); } } catch (Exception e) { Log.e("Cleanup err of original dir: " + originalDir, e); }
         }
 
         [Obsolete("Use .Name instead")]

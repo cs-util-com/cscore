@@ -64,6 +64,15 @@ namespace com.csutil {
             return self.Open(FileMode.OpenOrCreate, FileAccess.ReadWrite, share);
         }
 
+        public static Stream OpenForRead(this FileEntry self, FileMode fileMode = FileMode.Open,
+                               FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.Read) {
+            return self.Open(fileMode, fileAccess, fileShare);
+        }
+
+        public static void SaveStream(this FileEntry self, Stream streamToSave) {
+            using (var fileStream = self.OpenOrCreateForWrite()) { streamToSave.CopyTo(fileStream); }
+        }
+
         public static void SaveAsJson<T>(this StreamWriter self, T objectToSave) {
             JsonWriter.GetWriter().Write(objectToSave, self);
         }
