@@ -38,7 +38,7 @@ namespace com.csutil.tests.model {
             // cleanup after the test
             await ParallelExec(dataTree, (elem) => { GetFileForElem(testFolder, elem).DeleteV2(); });
             Assert.True(dbFile.DeleteV2());
-            Assert.False(dbFile.ExistsV2());
+            Assert.False(dbFile.Exists);
         }
 
         private static async Task ReadFromDb(List<TreeElem> dataTree, LiteDatabase db) {

@@ -79,20 +79,8 @@ namespace com.csutil {
 
         public static bool MoveToV2(this DirectoryEntry source, DirectoryEntry target, out DirectoryEntry result) {
             AssertNotIdentical(source, target);
-            var tempCopyId = "" + Guid.NewGuid();
-            if (EnvironmentV2.isWebGL) {
-                // In WebGL .MoveTo does not work correctly so copy+delete is tried instead:
-                var tempDir = EnvironmentV2.instance.GetOrAddTempFolder("TmpCopies").GetChildDir(tempCopyId);
-                source.CopyTo(tempDir);
-            }
+            AssertV2.IsTrue(source.FileSystem == target.FileSystem, "Moving between different file systems not implemented");
             source.MoveTo(target.Path);
-            if (EnvironmentV2.isWebGL) {
-                if (!target.Exists) {
-                    EmulateMoveViaCopyDelete(source, tempCopyId, target);
-                } else {
-                    Log.e("WebGL TempCopy solution was not needed!");
-                }
-            }
             if (!target.Exists) { throw new DirectoryNotFoundException("Could not move dir to " + target); }
             result = target;
             return target.Exists;
@@ -121,41 +109,15 @@ namespace com.csutil {
             }
         }
 
-        /// <summary> Needed in WebGL because .MoveTo does not correctly move the files to
-        /// the new target directory but instead only removes the original dir </summary>
-        private static void EmulateMoveViaCopyDelete(DirectoryEntry source, string tempDirId, DirectoryEntry target) {
-            var tempDir = EnvironmentV2.instance.GetOrAddTempFolder("TmpCopies").GetChildDir(tempDirId);
-            if (tempDir.IsEmtpy()) {
-                target.CreateV2(); // if a rename happened only make sure the target is created
-                CleanupAfterEmulatedMove(source, tempDir);
-            } else if (tempDir.CopyTo(target)) {
-                CleanupAfterEmulatedMove(source, tempDir);
-            } else {
-                Log.e("Could not move tempDir=" + tempDir + " into target=" + target);
-            }
-        }
-
-        private static void CleanupAfterEmulatedMove(DirectoryEntry source, DirectoryEntry tempDir) {
-            tempDir.DeleteV2();
-            var originalDir = source;
-            try { if (originalDir.Exists) { originalDir.DeleteV2(); } } catch (Exception e) { Log.e("Cleanup err of original dir: " + originalDir, e); }
-        }
-
-        [Obsolete("Use .Name instead")]
-        public static string NameV2(this FileSystemEntry self) { return self.Name; }
-
         public static bool IsNotNullAndExists(this FileSystemEntry self) {
             if (self == null) { return false; } else { return self.Exists; }
         }
 
-        [Obsolete("Use .Exists instead")]
-        public static bool ExistsV2(this FileSystemEntry self) { return self.Exists; }
-
         /// <summary>
         /// Gets the remaining path after the <see cref="prefix"/>.
         /// </summary>
-        /// <param name="prefix">The prefix of the path.</param>
         /// <param name="self">The path to search.</param>
+        /// <param name="prefix">The prefix of the path.</param>
         /// <returns>The path after the prefix, or a <c>null</c> path if <see cref="path"/> does not have the correct prefix.</returns>
         public static UPath RemovePrefix(this UPath self, UPath prefix) {
             if (prefix.IsEmpty) { throw new InvalidDataException("The passed prefix cant be emtpy, must minimum be the UPath.root"); }

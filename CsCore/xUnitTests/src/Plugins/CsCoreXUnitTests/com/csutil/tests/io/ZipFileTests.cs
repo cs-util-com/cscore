@@ -29,7 +29,7 @@ namespace com.csutil.tests {
             // Extract the created zip to dir2:
             zip1.ExtractIntoDir(dir2);
 
-            Assert.True(dir2.ExistsV2());
+            Assert.True(dir2.Exists);
             Assert.Equal("abc", dir2.GetChildDir("SubDir1").GetChild("t1.txt").LoadAs<string>());
 
             { // Read content directly from zip without extraction:
@@ -75,7 +75,7 @@ namespace com.csutil.tests {
 
         private static DirectoryEntry OpenZipReadOnly(FileEntry self) {
             if (self == null) { throw new FileNotFoundException("Passed file was null"); }
-            if (!self.ExistsV2()) { throw new FileNotFoundException("Did not find any file at " + self); }
+            if (!self.Exists) { throw new FileNotFoundException("Did not find any file at " + self); }
             var s = self.Open(FileMode.Open, FileAccess.Read, FileShare.Read);
             return new ZipFileReadSystem(new ZipFile(s)).GetDirectoryEntry(UPath.Root);
         }
