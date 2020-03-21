@@ -91,8 +91,8 @@ namespace com.csutil {
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         public static void IsInRange(double lowerBound, double value, double upperBound, string varName, params object[] args) {
             if (upperBound < lowerBound) { throw Log.e($"Invalid bounds: (upperBound){upperBound} < {lowerBound}(lowerBound)"); }
-            Assert(lowerBound <= value, varName + "=" + value + " is BELOW lower bound=" + lowerBound, args);
-            Assert(value <= upperBound, varName + "=" + value + " is ABOVE upper bound=" + upperBound, args);
+            Assert(lowerBound <= value, "Assert.IsInRange() FAILED: " + varName + "=" + value + " is BELOW lower bound=" + lowerBound, args);
+            Assert(value <= upperBound, "Assert.IsInRange() FAILED: " + varName + "=" + value + " is ABOVE upper bound=" + upperBound, args);
         }
 
         public static StopwatchV2 TrackTiming([CallerMemberName] string methodName = null) { return new StopwatchV2(methodName).StartV2(); }
