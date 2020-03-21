@@ -11,6 +11,8 @@ namespace com.csutil.tests.keyvaluestore {
         public int delay = 100;
         public bool throwTimeoutError = false;
 
+        public void Dispose() { fallbackStore.Dispose(); }
+
         private async Task SimulateDelay() {
             await TaskV2.Delay(delay);
             if (throwTimeoutError) { throw new TimeoutException("Simulated error"); }

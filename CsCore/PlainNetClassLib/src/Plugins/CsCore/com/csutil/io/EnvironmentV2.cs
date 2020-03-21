@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Zio;
 
 namespace com.csutil {
 
@@ -18,25 +19,25 @@ namespace com.csutil {
         }
 
         /// <summary> The folder of the binary (or dll that is executed) </summary>
-        public virtual DirectoryInfo GetCurrentDirectory() {
-            return new DirectoryInfo(Directory.GetCurrentDirectory());
+        public virtual DirectoryEntry GetCurrentDirectory() {
+            return new DirectoryInfo(Directory.GetCurrentDirectory()).ToRootDirectoryEntry();
         }
 
-        public virtual DirectoryInfo GetRootAppDataFolder() {
+        public virtual DirectoryEntry GetRootAppDataFolder() {
             return GetSpecialFolder(Environment.SpecialFolder.ApplicationData);
         }
 
         /// <summary> On Windows e.g. C:\Users\User123\AppData\Local\Temp\ </summary>
-        public virtual DirectoryInfo GetRootTempFolder() {
-            return new DirectoryInfo(Path.GetTempPath());
+        public DirectoryEntry GetRootTempFolder() { return GetRootTempDirInfo().ToRootDirectoryEntry(); }
+
+        protected virtual DirectoryInfo GetRootTempDirInfo() { return new DirectoryInfo(Path.GetTempPath()); }
+
+        public virtual DirectoryEntry GetOrAddTempFolder(string tempSubfolderName) {
+            return GetRootTempDirInfo().GetChildDir(tempSubfolderName).CreateV2().ToRootDirectoryEntry();
         }
 
-        public virtual DirectoryInfo GetOrAddTempFolder(string tempSubfolderName) {
-            return GetRootTempFolder().GetChildDir(tempSubfolderName).CreateV2();
-        }
-
-        public virtual DirectoryInfo GetSpecialFolder(Environment.SpecialFolder specialFolder) {
-            return new DirectoryInfo(Environment.GetFolderPath(specialFolder));
+        public virtual DirectoryEntry GetSpecialFolder(Environment.SpecialFolder specialFolder) {
+            return new DirectoryInfo(Environment.GetFolderPath(specialFolder)).ToRootDirectoryEntry();
         }
 
     }

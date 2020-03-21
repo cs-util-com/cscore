@@ -1,21 +1,22 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Zio;
 
 namespace com.csutil.logging {
 
     public class LogToFile : LogDefaultImpl, IDisposable {
 
         private const string JSON_LB = LB + ",";
-        public FileInfo logFile;
-        private FileStream fileStream;
+        public FileEntry logFile;
+        private Stream stream;
         private TextWriter writer;
         private IJsonWriter jsonWriter;
 
-        public LogToFile(FileInfo targetFileToLogInto) {
-            this.logFile=targetFileToLogInto;
-            fileStream = new FileStream(targetFileToLogInto.FullPath(), FileMode.Append, FileAccess.Write, FileShare.Read);
-            writer = TextWriter.Synchronized(new StreamWriter(fileStream));
+        public LogToFile(FileEntry targetFileToLogInto) {
+            this.logFile = targetFileToLogInto;
+            stream = targetFileToLogInto.Open(FileMode.Append, FileAccess.Write, FileShare.Read);
+            writer = TextWriter.Synchronized(new StreamWriter(stream));
             jsonWriter = JsonWriter.GetWriter();
         }
 
@@ -39,14 +40,13 @@ namespace com.csutil.logging {
 
         public void Dispose() {
             writer.Dispose();
-            fileStream.Dispose();
+            stream.Dispose();
         }
 
-        public static LogToFile.LogStructure LoadLogFile(System.IO.FileInfo targetFileToLogInto) {
-            var logFileContent = targetFileToLogInto.LoadAs<string>();
+        public static LogStructure LoadLogFile(FileEntry targetFileToLogInto) {
+            var logFileContent = targetFileToLogInto.LoadAs<string>(FileShare.ReadWrite);
             logFileContent = "{\"logEntries\":[" + logFileContent + "]}";
-            var logStructure = JsonReader.GetReader().Read<LogToFile.LogStructure>(logFileContent);
-            return logStructure;
+            return JsonReader.GetReader().Read<LogStructure>(logFileContent);
         }
 
         public class LogStructure {

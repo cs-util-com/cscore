@@ -14,6 +14,8 @@ namespace com.csutil.keyvaluestore {
         private IJsonReader jsonReader = TypedJsonHelper.NewTypedJsonReader();
         private IJsonWriter jsonWriter = TypedJsonHelper.NewTypedJsonWriter();
 
+        public void Dispose() { fallbackStore?.Dispose(); }
+
         public async Task<T> Get<T>(string key, T defaultValue) {
             T value = InternalGet(key, defaultValue);
             if (!ReferenceEquals(value, defaultValue)) { return value; }

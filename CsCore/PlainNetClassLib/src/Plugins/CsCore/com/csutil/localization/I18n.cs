@@ -90,9 +90,9 @@ namespace com.csutil {
         private static string TryLoadLocaleFromFile(string localeName) {
             var dir = EnvironmentV2.instance.GetCurrentDirectory().GetChildDir("Locales");
             var f = dir.GetChild(localeName);
-            if (f.ExistsV2()) { return f.LoadAs<string>(); }
+            if (f.Exists) { return f.LoadAs<string>(); }
             f = dir.GetChild(localeName + ".json");
-            if (f.ExistsV2()) { return f.LoadAs<string>(); }
+            if (f.Exists) { return f.LoadAs<string>(); }
             Log.e("Can't load localization file: " + localeName);
             return null;
         }

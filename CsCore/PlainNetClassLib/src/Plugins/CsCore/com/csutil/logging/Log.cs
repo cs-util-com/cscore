@@ -52,6 +52,10 @@ namespace com.csutil {
             return instance.LogMethodEntered(methodName, args);
         }
 
+        public static StopwatchV2 MethodEnteredWith(object arg1, object arg2 = null, object arg3 = null, object arg4 = null, [CallerMemberName] string n = null) {
+            return MethodEntered(n, arg1, arg2, arg3, arg4);
+        }
+
         public static void MethodDone(Stopwatch timing, int maxAllowedTimeInMs = -1,
                     [CallerMemberName] string sourceMemberName = null,
                     [CallerFilePath] string sourceFilePath = null,

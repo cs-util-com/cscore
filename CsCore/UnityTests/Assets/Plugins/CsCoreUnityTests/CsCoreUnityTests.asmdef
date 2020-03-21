@@ -3,16 +3,13 @@
     "references": [
         "CsCore",
         "CsCoreUnity",
-        "CsCoreXUnitTests"
+        "CsCoreXUnitTests",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner"
     ],
-    "optionalUnityReferences": [
-        "TestAssemblies"
+    "includePlatforms": [
+        "Editor"
     ],
-    "includePlatforms": [],
     "excludePlatforms": [],
-    "allowUnsafeCode": false,
-    "overrideReferences": false,
-    "precompiledReferences": [],
-    "autoReferenced": true,
-    "defineConstraints": []
+    "allowUnsafeCode": false
 }

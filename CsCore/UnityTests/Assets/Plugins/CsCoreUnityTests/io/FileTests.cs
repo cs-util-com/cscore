@@ -1,8 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using NUnit.Framework;
-using UnityEngine;
-using UnityEngine.TestTools;
+﻿using NUnit.Framework;
+using Zio;
 
 namespace com.csutil.tests.io {
 
@@ -17,9 +14,11 @@ namespace com.csutil.tests.io {
         [Test]
         public void TestFilesWithEnumeratorPasses() {
             var dir = EnvironmentV2.instance.GetCurrentDirectory();
-            Log.d("dir=" + dir.FullPath());
+            Log.d("dir=" + dir.FullName);
+            Assert.IsNotEmpty(dir.FullName);
             dir = EnvironmentV2.instance.GetRootAppDataFolder();
-            Log.d("dir=" + dir.FullPath());
+            Log.d("dir=" + dir.FullName);
+            Assert.IsNotEmpty(dir.FullName);
         }
 
     }

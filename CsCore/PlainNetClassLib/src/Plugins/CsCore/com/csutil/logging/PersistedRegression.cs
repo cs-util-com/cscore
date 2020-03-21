@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using com.csutil.keyvaluestore;
 using JsonDiffPatchDotNet;
 using Newtonsoft.Json.Linq;
+using Zio;
 
 namespace com.csutil {
 
@@ -21,15 +22,15 @@ namespace com.csutil {
             this.regressionStore = regressionStore;
         }
 
-        private static DirectoryInfo GetProjDir() {
+        private static DirectoryEntry GetProjDir() {
             var binDir = EnvironmentV2.instance.GetCurrentDirectory();
             var projDir = SearchForVersionedParent(binDir);
             if (projDir == null) { projDir = binDir; }
             return projDir.GetChildDir(DEFAULT_FOLDER_NAME);
         }
 
-        private static DirectoryInfo SearchForVersionedParent(DirectoryInfo f) {
-            if (f == null || f.GetChild(".gitignore").ExistsV2()) { return f; }
+        private static DirectoryEntry SearchForVersionedParent(DirectoryEntry f) {
+            if (f == null || f.GetChild(".gitignore").Exists) { return f; }
             return SearchForVersionedParent(f.Parent);
         }
 
@@ -61,7 +62,9 @@ namespace com.csutil {
                 var foundProblems = GetFilteredDiff(diffToExpectedState, filterAcceptableDiffs);
                 if (!foundProblems.IsNullOrEmpty()) {
                     var problemReport = foundProblems.ToStringV2(p => p.ToPrettyString());
-                    throw new Exception("Diff found in regression test: " + problemReport);
+                    var path = id;
+                    if (regressionStore is FileBasedKeyValueStore f) { path = f.GetFile(id).GetFullFileSystemPath(); }
+                    throw new Exception($"Diff found for regression id {path}: " + problemReport);
                 }
             }
         }

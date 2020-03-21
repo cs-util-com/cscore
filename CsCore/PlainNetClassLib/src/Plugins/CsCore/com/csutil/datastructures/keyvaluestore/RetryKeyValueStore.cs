@@ -23,6 +23,8 @@ namespace com.csutil.keyvaluestore {
             this.maxNrOfRetries = maxNrOfRetries;
         }
 
+        public void Dispose() { fallbackStore?.Dispose(); }
+
         public Task<T> Retry<T>(Func<Task<T>> taskToTry) {
             return TaskV2.TryWithExponentialBackoff<T>(taskToTry, onError, maxNrOfRetries, maxDelayInMs, initialExponent);
         }

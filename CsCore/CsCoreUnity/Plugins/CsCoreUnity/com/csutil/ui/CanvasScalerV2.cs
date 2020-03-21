@@ -7,7 +7,6 @@ namespace com.csutil.ui {
     public class CanvasScalerV2 : MonoBehaviour {
 
         public float referenceResolution = 700;
-        public AnimationCurve matchWidthOrHeight = AnimationCurve.Constant(0, 1, 1);
 
         private CanvasScaler canvasScaler;
 
@@ -17,8 +16,6 @@ namespace com.csutil.ui {
 
         public bool UpdateScaler() {
             if (canvasScaler == null) { LazyInitCanvasScaler(); }
-            float ratio = Screen.width / (float)Screen.height;
-            canvasScaler.matchWidthOrHeight = matchWidthOrHeight.Evaluate(ratio);
             if (referenceResolution > 0) {
                 canvasScaler.referenceResolution = new Vector2(referenceResolution, referenceResolution);
             }
@@ -31,6 +28,7 @@ namespace com.csutil.ui {
                 Log.w("Fixed that CanvasScaler not set to ScaleWithScreenSize! Old scaleMode=" + canvasScaler.uiScaleMode);
                 canvasScaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             }
+            canvasScaler.matchWidthOrHeight = 0.5f;
         }
     }
 

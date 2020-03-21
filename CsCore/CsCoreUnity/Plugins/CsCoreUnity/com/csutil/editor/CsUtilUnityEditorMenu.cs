@@ -6,6 +6,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
+using Zio;
 
 namespace com.csutil.editor {
 
@@ -75,9 +76,9 @@ namespace com.csutil.editor {
         static void CreateDefaultGitIgnoreFiles() {
             var projectFolder = EnvironmentV2.instance.GetCurrentDirectory();
             var assetsFolder = projectFolder.GetChildDir("Assets");
-            if (!assetsFolder.ExistsV2()) { throw Log.e("Not the project folder: " + projectFolder); }
+            if (!assetsFolder.Exists) { throw Log.e("Not the project folder: " + projectFolder); }
             var file = projectFolder.GetChild(".gitignore");
-            if (!file.ExistsV2()) {
+            if (!file.Exists) {
                 EditorCoroutineRunner.StartCoroutine(DownloadDefaultUnityGitIgnore(file));
             } else {
                 Log.d("No need to download .gitignore, was already found: " + file);
@@ -86,13 +87,13 @@ namespace com.csutil.editor {
             AssetFolderAnalysis.FindFolderAnomalies(assetsFolder);
         }
 
-        private static IEnumerator DownloadDefaultUnityGitIgnore(FileInfo file) {
+        private static IEnumerator DownloadDefaultUnityGitIgnore(FileEntry file) {
             var request = UnityWebRequest.Get("https://raw.githubusercontent.com/github/gitignore/master/Unity.gitignore");
             yield return request.SendWebRequest();
             while (!request.isDone) { yield return new WaitForSeconds(0.1f); }
             var gitignoreContent = request.GetResult<string>();
             if (!gitignoreContent.IsNullOrEmpty()) { file.SaveAsText(gitignoreContent); }
-            if (file.ExistsV2()) {
+            if (file.Exists) {
                 Log.d("Successfull downloaded gitignore into file=" + file);
             } else {
                 Log.e("Could not donwload  gitignore into file=" + file);
@@ -101,35 +102,35 @@ namespace com.csutil.editor {
 
         private class GitIgnoreUdater {
 
-            public static void AddAllSymlinksToGitIgnores(DirectoryInfo assetsFolder) {
+            public static void AddAllSymlinksToGitIgnores(DirectoryEntry assetsFolder) {
                 var allSymbolicLinks = CollectSymbolicLinkedFolders(assetsFolder);
                 foreach (var symLink in allSymbolicLinks) {
                     var gitignore = symLink.Parent.GetChild(".gitignore");
-                    var symLinkFolderName = "/" + symLink.NameV2();
+                    var symLinkFolderName = "/" + symLink.Name;
                     if (AddLineToGitIngore(gitignore, symLinkFolderName)) {
                         Log.d("Added entry to gitignore " + gitignore + " :\n" + symLinkFolderName + "\n");
                     }
                 }
             }
 
-            private static List<DirectoryInfo> CollectSymbolicLinkedFolders(DirectoryInfo assetsFolder) {
-                var links = new List<DirectoryInfo>();
+            private static List<DirectoryEntry> CollectSymbolicLinkedFolders(DirectoryEntry assetsFolder) {
+                var links = new List<DirectoryEntry>();
                 var normalFolders = assetsFolder.GetDirectories().Filter(dir => {
-                    if (!dir.NameV2().IsNullOrEmpty() && IsSymbolicLink(dir)) { links.Add(dir); return false; }
+                    if (!dir.Name.IsNullOrEmpty() && IsSymbolicLink(dir)) { links.Add(dir); return false; }
                     return true;
                 }); // Then visit all normal children folders to search there too:
                 foreach (var dir in normalFolders) { links.AddRange(CollectSymbolicLinkedFolders(dir)); }
                 return links;
             }
 
-            private static bool IsSymbolicLink(DirectoryInfo dir) {
+            private static bool IsSymbolicLink(DirectoryEntry dir) {
                 return dir.Attributes.HasFlag(FileAttributes.ReparsePoint);
             }
 
-            private static bool AddLineToGitIngore(FileInfo gitignore, string symLinkFolderNameToAdd) {
-                var lines = gitignore.ExistsV2() ? File.ReadLines(gitignore.FullPath()) : new string[0];
+            private static bool AddLineToGitIngore(FileEntry gitignore, string symLinkFolderNameToAdd) {
+                var lines = gitignore.Exists ? File.ReadLines(gitignore.FullName) : new string[0];
                 var found = lines.Any(line => symLinkFolderNameToAdd.Equals(line));
-                if (!found) { File.AppendAllLines(gitignore.FullPath(), new string[2] { "", symLinkFolderNameToAdd }); }
+                if (!found) { File.AppendAllLines(gitignore.FullName, new string[2] { "", symLinkFolderNameToAdd }); }
                 return !found;
             }
 
@@ -137,7 +138,7 @@ namespace com.csutil.editor {
 
         private class AssetFolderAnalysis {
 
-            public static void FindFolderAnomalies(DirectoryInfo folder) {
+            public static void FindFolderAnomalies(DirectoryEntry folder) {
                 if (Equals(0, folder.GetFiles().Count())) { Log.e("Emtpy folder found: " + folder); }
                 foreach (var childDir in folder.GetDirectories()) { FindFolderAnomalies(childDir); }
             }
