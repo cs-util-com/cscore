@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
@@ -9,7 +10,7 @@ namespace com.csutil.http.apis {
     public static class GoogleSheetsV3 {
 
         // Only works if the sheet is published (not the same as setting it to public)
-        public static async Task<List<IEnumerable<string>>> GetSheets(string sheetId) {
+        public static async Task<List<List<string>>> GetSheet(string sheetId) {
             return GetSheetsFromAtomResp(await AtomFeed.Get(GetApiUrlFor(sheetId)));
         }
 
@@ -20,13 +21,13 @@ namespace com.csutil.http.apis {
             return new Uri("https://spreadsheets.google.com/feeds/list/" + id + "/od6/public/values?alt=json");
         }
 
-        public static List<IEnumerable<string>> GetSheetsFromAtomResp(AtomFeed.Response result) {
-            List<IEnumerable<string>> sheets = new List<IEnumerable<string>>();
+        public static List<List<string>> GetSheetsFromAtomResp(AtomFeed.Response result) {
+            List<List<string>> sheets = new List<List<string>>();
             foreach (var columnPlusMetaInfo in result.feed.entry) {
                 var columnKeys = columnPlusMetaInfo.Keys.Filter(x => x.StartsWith("gsx$"));
                 var column = columnKeys.Map(key => columnPlusMetaInfo[key]);
                 var columnAsStrings = column.Map(row => (row as JObject).GetValue("$t").ToString());
-                sheets.Add(columnAsStrings);
+                sheets.Add(columnAsStrings.ToList());
             }
             return sheets;
         }
