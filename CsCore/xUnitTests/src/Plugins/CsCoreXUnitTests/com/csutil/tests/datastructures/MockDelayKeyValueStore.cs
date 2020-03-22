@@ -33,8 +33,7 @@ namespace com.csutil.tests.keyvaluestore {
 
         public async Task<IEnumerable<string>> GetAllKeys() {
             await SimulateDelay();
-            var result = await fallbackStore.GetAllKeys();
-            return result.DeepCopyViaJson();
+            return await fallbackStore.GetAllKeys();
         }
 
         public async Task<bool> Remove(string key) {

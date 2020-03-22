@@ -17,6 +17,7 @@ namespace com.csutil {
     public static class CloneHelper {
 
         public static T DeepCopyViaJson<T>(this T objectToDeepCopy) {
+            if (objectToDeepCopy == null) { return objectToDeepCopy; }
             return (T)MapViaJsonInto(objectToDeepCopy, objectToDeepCopy.GetType());
         }
 
