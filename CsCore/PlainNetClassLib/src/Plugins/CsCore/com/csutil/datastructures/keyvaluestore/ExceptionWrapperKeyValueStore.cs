@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace com.csutil.keyvaluestore {
@@ -9,6 +10,7 @@ namespace com.csutil.keyvaluestore {
         public HashSet<Type> errorTypeBlackList;
         public Action<Exception> onError = (e) => { Log.e(e); };
         private IKeyValueStore wrappedStore;
+        public long latestFallbackGetTimingInMs { get; set; }
         public IKeyValueStore fallbackStore {
             get { return wrappedStore; }
             set {
@@ -40,7 +42,10 @@ namespace com.csutil.keyvaluestore {
         private bool IsOnBlackList(Exception e) { return errorTypeBlackList.Contains(e.GetType()); }
 
         public async Task<T> Get<T>(string key, T defaultValue) {
-            return await WrapWithTry<T>(() => { return wrappedStore.Get<T>(key, defaultValue); }, defaultValue);
+            var s = Stopwatch.StartNew();
+            T result = await WrapWithTry<T>(() => { return wrappedStore.Get<T>(key, defaultValue); }, defaultValue);
+            latestFallbackGetTimingInMs = s.ElapsedMilliseconds;
+            return result;
         }
 
         public async Task<object> Set(string key, object obj) {

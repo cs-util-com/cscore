@@ -21,8 +21,9 @@ namespace com.csutil.tests.model {
             // Setup a feature flag manager that is connected to a remote server and has a local cache when offline:
             var simulatedOnlineStore = new SimulatedOnlineFeatureFlagStore();
             var simulatedInetConnection = new MockDelayKeyValueStore(simulatedOnlineStore);
-            simulatedInetConnection.delay = 10;
             var localCache = new InMemoryKeyValueStore().WithFallbackStore(new ExceptionWrapperKeyValueStore(simulatedInetConnection));
+            simulatedInetConnection.delay = 10;
+            localCache.latestFallbackGetTimingInMs = 40;
             IoC.inject.SetSingleton(new FeatureFlagManager(localCache));
 
             // Feature flag not 
@@ -32,44 +33,38 @@ namespace com.csutil.tests.model {
             Assert.False(await FeatureFlag.IsEnabled("MyFlag1"));
             simulatedOnlineStore.flagToReturn.isEnabled = true;
 
-            // The local store will first time return its cached value and fetch the new online one asynchronously:
-            Assert.False(await FeatureFlag.IsEnabled("MyFlag1")); // Trigger request to server, still old state returned
-            await Task.Delay(40); // Wait for server request to finish, so that local state is updated
             Assert.True(await FeatureFlag.IsEnabled("MyFlag1"));
 
             simulatedOnlineStore.flagToReturn.isStagedRollout = true;
             simulatedOnlineStore.flagToReturn.rolloutPercentServer = 0;
-
             Assert.Equal(0, simulatedOnlineStore.flagToReturn.localRandomValue);
 
             var f = new FeatureFlag();
             Assert.IsType<FeatureFlag>(f);
             Assert.IsType<FeatureFlag>(f.DeepCopyViaJson());
 
-
-            Assert.True(await FeatureFlag.IsEnabled("MyFlag1"));  // Trigger request to server, still old state returned
-            await Task.Delay(40); // Wait for server request to finish, so that local state is updated
+            // Now that the feature is marked as staging rollout the next get will trigger the localRandomValue to be set:
             Assert.False(await FeatureFlag.IsEnabled("MyFlag1"));
-
             Assert.True(simulatedOnlineStore.flagToReturn.localRandomValue > 0);
             Assert.True(simulatedOnlineStore.flagToReturn.localRandomValue < 100);
 
+            // Change the rolloutPercentServer to be bigger then the random value in the local flag data:
             simulatedOnlineStore.flagToReturn.rolloutPercentServer = simulatedOnlineStore.flagToReturn.localRandomValue + 1;
-            Assert.False(await FeatureFlag.IsEnabled("MyFlag1"));  // Trigger request to server, still old state returned
-            await Task.Delay(40); // Wait for server request to finish, so that local state is updated
-            Assert.True(await FeatureFlag.IsEnabled("MyFlag1"));
+            Assert.True(await FeatureFlag.IsEnabled("MyFlag1")); // the client will be included in the staged rollout
 
-            // User not online anymore
-            simulatedInetConnection.throwTimeoutError = true;
+            simulatedInetConnection.throwTimeoutError = true; // Device not online anymore
             // Make sure the local cache of the flags still returns the flag:
             Assert.True(await FeatureFlag.IsEnabled("MyFlag1"));
 
-            simulatedInetConnection.throwTimeoutError = false; // internet is back
-            simulatedOnlineStore.flagToReturn = null; // the server disabled the feature flag again
+            simulatedInetConnection.throwTimeoutError = false; // Internet is back
 
-            Assert.True(await FeatureFlag.IsEnabled("MyFlag1")); // Trigger request to server, still old state returned
-            await Task.Delay(40); // Wait for server request to finish, so that local state is updated
+            simulatedOnlineStore.flagToReturn.isEnabled = false; // The server disabled the feature flag again
             Assert.False(await FeatureFlag.IsEnabled("MyFlag1"));
+            simulatedOnlineStore.flagToReturn.isEnabled = true;
+            Assert.True(await FeatureFlag.IsEnabled("MyFlag1"));
+
+            simulatedOnlineStore.flagToReturn = null; // The server does not know any features anymore
+            Assert.False(await FeatureFlag.IsEnabled("MyFlag1")); // Asking again for the flag will return false
 
         }
 
@@ -78,7 +73,6 @@ namespace com.csutil.tests.model {
             public FeatureFlag flagToReturn; // This simulates the flag stored in the remote server 
 
             public Task<T> Get<T>(string key, T defaultValue) {
-
                 var featureKey = TypedJsonHelper.NewTypedJsonReader().Read<FeatureFlagManager.FeatureKey>(key);
                 Assert.Equal("MyFlag1", featureKey.id);
                 Assert.Equal(typeof(FeatureFlag), typeof(T));
@@ -99,6 +93,8 @@ namespace com.csutil.tests.model {
             }
 
             public IKeyValueStore fallbackStore { get; set; }
+            public long latestFallbackGetTimingInMs { get; set; }
+
             public Task<bool> ContainsKey(string key) { throw new NotImplementedException(); }
             public void Dispose() { throw new NotImplementedException(); }
             public Task<IEnumerable<string>> GetAllKeys() { throw new NotImplementedException(); }

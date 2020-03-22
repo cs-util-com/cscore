@@ -193,11 +193,8 @@ namespace com.csutil.tests.keyvaluestore {
             var value2 = "value2";
 
             {
-                var delayedSetTask = outerStore.Set(key1, value1);
-                Assert.Equal(value1, await outerStore.Get(key1, "")); // The outer store already has the update
-                Assert.NotEqual(value1, await innerStore.Get(key1, "")); // The inner store did not get the update yet
-                // After waiting for set to fully finish the inner store has the update too:
-                await delayedSetTask;
+                await outerStore.Set(key1, value1);
+                Assert.Equal(value1, await outerStore.Get(key1, ""));
                 Assert.Equal(value1, await innerStore.Get(key1, ""));
             }
 
@@ -213,6 +210,15 @@ namespace com.csutil.tests.keyvaluestore {
                 Assert.False(await exWrapperStore.ContainsKey(key2)); // The exc. wrapper returns false if an error is thrown
                 Assert.Null(await exWrapperStore.GetAllKeys()); // Will throw another error and return null
             }
+
+            Log.d("innerStore " + innerStore.latestFallbackGetTimingInMs);
+            Log.d("simulatedDelayStore " + simulatedDelayStore.latestFallbackGetTimingInMs);
+            Log.d("exWrapperStore " + exWrapperStore.latestFallbackGetTimingInMs);
+            Log.d("outerStore " + outerStore.latestFallbackGetTimingInMs);
+            Assert.Equal(0, innerStore.latestFallbackGetTimingInMs);
+            Assert.NotEqual(0, exWrapperStore.latestFallbackGetTimingInMs);
+            Assert.NotEqual(0, outerStore.latestFallbackGetTimingInMs);
+
         }
 
         [Fact]
@@ -283,11 +289,8 @@ namespace com.csutil.tests.keyvaluestore {
             var fallback2 = "fallback2";
 
             {
-                var delayedSetTask = outerStore.Set(key1, value1);
-                Assert.Equal(value1, await outerStore.Get(key1, "")); // The outer store already has the update
-                Assert.NotEqual(value1, await innerStore.Get(key1, "")); // The inner store did not get the update yet
-                // After waiting for set to fully finish the inner store has the update too:
-                await delayedSetTask;
+                await outerStore.Set(key1, value1);
+                Assert.Equal(value1, await outerStore.Get(key1, ""));
                 Assert.Equal(value1, await innerStore.Get(key1, ""));
             }
 

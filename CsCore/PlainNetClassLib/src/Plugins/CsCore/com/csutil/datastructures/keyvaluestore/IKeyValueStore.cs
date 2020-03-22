@@ -12,6 +12,7 @@ namespace com.csutil {
         Task<bool> ContainsKey(string key);
         Task<IEnumerable<string>> GetAllKeys();
         IKeyValueStore fallbackStore { get; set; }
+        long latestFallbackGetTimingInMs { get; set; }
     }
 
 }

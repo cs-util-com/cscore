@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using com.csutil.keyvaluestore;
 
@@ -8,6 +9,8 @@ namespace com.csutil.tests.keyvaluestore {
     public class MockDelayKeyValueStore : IKeyValueStore {
 
         public IKeyValueStore fallbackStore { get; set; }
+        public long latestFallbackGetTimingInMs { get; set; }
+
         public int delay = 100;
         public bool throwTimeoutError = false;
 
@@ -27,7 +30,9 @@ namespace com.csutil.tests.keyvaluestore {
 
         public async Task<T> Get<T>(string key, T defaultValue) {
             await SimulateDelay();
+            var s = Stopwatch.StartNew();
             var result = await fallbackStore.Get<T>(key, defaultValue);
+            latestFallbackGetTimingInMs = s.ElapsedMilliseconds;
             return result.DeepCopyViaJson();
         }
 

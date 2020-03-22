@@ -17,6 +17,7 @@ namespace com.csutil.keyvaluestore {
 
         private DirectoryEntry folderForAllFiles;
         public IKeyValueStore fallbackStore { get; set; }
+        public long latestFallbackGetTimingInMs { get; set; }
 
         private class PrimitiveWrapper { public object val; }
 
@@ -25,7 +26,10 @@ namespace com.csutil.keyvaluestore {
         public void Dispose() { fallbackStore?.Dispose(); }
 
         public async Task<T> Get<T>(string key, T defaultValue) {
-            Task<T> fallbackGet = fallbackStore.Get(key, defaultValue, (fallbackValue) => InternalSet(key, fallbackValue));
+            var s = this.StartFallbackStoreGetTimer();
+            Task<T> fallbackGet = fallbackStore.Get(key, defaultValue, (newVal) => InternalSet(key, newVal));
+            await this.WaitLatestFallbackGetTime(s, fallbackGet);
+
             var fileForKey = GetFile(key);
             if (fileForKey.Exists) { return (T)InternalGet(fileForKey, typeof(T)); }
             return await fallbackGet;

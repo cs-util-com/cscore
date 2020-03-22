@@ -18,6 +18,7 @@ namespace com.csutil.keyvaluestore {
         private LiteCollection<BsonDocument> collection;
 
         public IKeyValueStore fallbackStore { get; set; }
+        public long latestFallbackGetTimingInMs { get; set; }
 
         public LiteDbKeyValueStore(FileEntry dbFile) { Init(dbFile); }
 
@@ -38,7 +39,10 @@ namespace com.csutil.keyvaluestore {
         private BsonDocument GetBson(string key) { return collection.FindById(key); }
 
         public async Task<T> Get<T>(string key, T defaultValue) {
-            Task<T> fallbackGet = fallbackStore.Get(key, defaultValue, (fallbackValue) => InternalSet(key, fallbackValue));
+            var s = this.StartFallbackStoreGetTimer();
+            Task<T> fallbackGet = fallbackStore.Get(key, defaultValue, (newVal) => InternalSet(key, newVal));
+            await this.WaitLatestFallbackGetTime(s, fallbackGet);
+
             var bson = GetBson(key);
             if (bson != null) { return (T)InternalGet(bson, typeof(T)); }
             return await fallbackGet;
