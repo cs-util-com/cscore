@@ -1,23 +1,23 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using com.csutil.http;
 using Xunit;
 
 namespace com.csutil.tests {
 
     public class FileTests {
 
+        public FileTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
+
         [Fact]
         public void ExampleUsage1() {
 
             // Get a directory to work in:
             string dirName = "ExampleDir_" + DateTime.Now.ToUnixTimestampUtc();
-            DirectoryInfo myDirectory = EnvironmentV2.instance.GetOrAddTempFolder(dirName);
-            Log.d("The directory path is: " + myDirectory.FullPath());
+            DirectoryInfo myDirectory = new DirectoryInfo(Path.GetTempPath()).GetChildDir(dirName);
+            Log.d("The directory path is: " + myDirectory.FullName);
 
             // Get a non-existing child directory
             var childDir = myDirectory.GetChildDir("MyExampleSubDirectory1");
@@ -251,12 +251,21 @@ namespace com.csutil.tests {
             rootDir.DeleteV2();
         }
 
+        private class MyClass1 {
+            public string myString;
+            public int myInt;
+        }
+
         private static DirectoryInfo CreateDirectoryForTesting(string name) {
-            var rootDir = EnvironmentV2.instance.GetOrAddTempFolder(name);
+            var rootDir = EnvironmentV2.instance.GetRootTempFolder().GetChildDir(name);
             rootDir.DeleteV2(); // ensure that the test folder does not yet exist
             rootDir.CreateV2();
-            Assert.True(rootDir.IsNotNullAndExists());
-            return rootDir;
+            Assert.True(rootDir.Exists);
+            var res = new DirectoryInfo(rootDir.GetFullFileSystemPath());
+            Assert.True(res.Exists, res.FullName + " not found after create was called");
+            Assert.Equal(name, res.NameV2());
+            Assert.Equal((Zio.UPath)res.FullName, (Zio.UPath)rootDir.GetFullFileSystemPath());
+            return res;
         }
 
         [Fact]
@@ -282,10 +291,25 @@ namespace com.csutil.tests {
             rootDir.DeleteV2();
         }
 
-        private class MyClass1 {
-            public string myString;
-            public int myInt;
+        [Fact]
+        public void TestFileWriteAndReadStream() {
+            var rootDir = CreateDirectoryForTesting("TestFileWriteAndReadStream");
+            var file1 = rootDir.GetChild("f1.txt");
+            // Saving the text as a byte stream:
+            var text1 = "Test 123";
+            using (Stream stream1 = new MemoryStream(Encoding.ASCII.GetBytes(text1))) {
+                file1.SaveStream(stream1);
+            }
+            // Loading the same file again to convert the bytes back into a string:
+            using (var stream2 = file1.LoadAsStream()) {
+                var text2 = Encoding.ASCII.GetString(stream2.ToByteArray());
+                Assert.Equal(text1, text2);
+            }
+            Assert.Throws<FileNotFoundException>(() => {
+                rootDir.GetChild("some missing file.txt").LoadAsStream();
+            });
         }
 
     }
+
 }

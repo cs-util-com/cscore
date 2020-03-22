@@ -24,7 +24,7 @@ namespace com.csutil.tests.datastructures {
                 var t1 = RunOnList("insert", elemCount, (list) => { list.Insert(0, 1); });
                 var t2 = RunOnImmutableList("ExampleUsage1.insert", elemCount, (list) => list.Insert(0, 1));
                 var timeDiff = Math.Abs(t1 - t2);
-                Assert.True(timeDiff < 5000, "insert t1=" + t1 + ", t2=" + t2 + ", timeDiff=" + timeDiff);
+                Assert.True(t2 < t1, "insert t1 (Normal List)=" + t1 + ", t2(Immutable List)=" + t2 + ", timeDiff=" + timeDiff);
             }
             {
                 var elemCount = 100000;
@@ -67,6 +67,7 @@ namespace com.csutil.tests.datastructures {
             Log.MethodDone(t);
             return t.ElapsedMilliseconds;
         }
+
     }
 
 }

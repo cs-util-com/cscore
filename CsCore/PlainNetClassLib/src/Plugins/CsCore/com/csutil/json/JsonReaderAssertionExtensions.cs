@@ -52,7 +52,6 @@ namespace com.csutil.json {
                 var field = (DictionaryEntry)f;
                 var key = field.Key;
                 var value = field.Value;
-                //Assert.IsTrue(field != null);
                 value = JsonReader.convertToGenericDictionaryOrArray(value);
                 if (value != null && !parsed.Contains(key)) {
                     var infoStringAboutField = "field " + path + "." + key + " = " + value;

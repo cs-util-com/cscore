@@ -1,5 +1,6 @@
 ﻿using com.csutil.logging;
 using com.csutil.testing;
+using com.csutil.tests.http;
 using com.csutil.tests.model.immutable;
 using System;
 using System.Collections;
@@ -14,6 +15,11 @@ namespace com.csutil.tests {
         [UnityTest]
         public IEnumerator RunXunitTest_DataStoreExample2() {
             yield return RunTestsInClass(typeof(DataStoreExample2));
+        }
+
+        [UnityTest]
+        public IEnumerator RunXunitTest_RestTests() {
+            yield return RunTestsInClass(typeof(RestTests));
         }
 
         //[UnityTest]
@@ -41,8 +47,10 @@ namespace com.csutil.tests {
             if (runningTest.testTask.IsFaulted) {
                 Debug.LogWarning("Error in test " + runningTest);
                 yield return new WaitForSeconds(0.1f);
-                Log.w("" + runningTest, runningTest.reportedError.SourceException);
-                Debug.LogError(runningTest.reportedError.SourceException);
+                var ex = runningTest.reportedError?.SourceException;
+                if (ex == null) { ex = runningTest.testTask.Exception; }
+                Log.w("" + runningTest, ex);
+                Debug.LogError(ex);
                 yield return new WaitForSeconds(0.1f);
                 runningTest.reportedError.Throw();
             }

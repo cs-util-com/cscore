@@ -55,11 +55,11 @@ namespace com.csutil {
         public static void Invoke(Action a) { instance.ExecuteOnMainThread(a); }
 
         public void ExecuteOnMainThread(Action a) {
-            AssertV2.IsNotNull(mainThreadRef, "mainThreadRef");
+            if (Application.isPlaying) { AssertV2.IsNotNull(mainThreadRef, "mainThreadRef"); } 
             if (WasInitializedWhilePlaying) {
                 actionsForMainThread.Enqueue(a);
             } else if (!Application.isPlaying) {
-                Log.w("ExecuteOnMainThread: Application not playing, action will be instantly executed now");
+                Log.d("ExecuteOnMainThread: Application not playing, action will be instantly executed now");
                 a();
             } else {
                 throw Log.e("MainThread not initialized via MainThread.instance");

@@ -63,7 +63,9 @@ namespace com.csutil.tests.model {
             CompareOriginalAndClone(dataTree, DeepCopyViaJson(dataTree));
             CompareOriginalAndClone(dataTree, DeepCopyViaJsonString(dataTree));
             CompareOriginalAndClone(dataTree, DeepCopyViaJsonOutString(dataTree));
+#pragma warning disable CS0612 // Type or member is obsolete
             CompareOriginalAndClone(dataTree, DeepCopyViaBsonStream(dataTree));
+#pragma warning restore CS0612 // Type or member is obsolete
 
         }
 
@@ -103,6 +105,7 @@ namespace com.csutil.tests.model {
             return copy;
         }
 
+        [Obsolete]
         private static TreeElem DeepCopyViaBsonStream(TreeElem dataTree) {
             var t = Log.MethodEntered("DeepCopyViaBsonStream");
             var copy = CloneHelper.DeepCopyViaBsonStream(dataTree);

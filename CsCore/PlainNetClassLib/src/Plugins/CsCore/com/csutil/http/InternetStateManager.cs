@@ -34,7 +34,7 @@ namespace com.csutil {
             TaskV2.RunRepeated(async () => {
                 await HasInet(await RestFactory.instance.HasInternet());
                 return true;
-            }, delayInMsBetweenIterations: 3000, cancelToken.Token);
+            }, delayInMsBetweenIterations: 3000, cancelToken: cancelToken.Token);
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         }
 

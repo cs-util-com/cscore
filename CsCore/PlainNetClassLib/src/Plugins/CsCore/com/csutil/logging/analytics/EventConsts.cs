@@ -1,6 +1,6 @@
 namespace com.csutil {
 
-    public class EventConsts {
+    public static class EventConsts {
 
         public const string catMethod = "method";
         public const string catError = "error";

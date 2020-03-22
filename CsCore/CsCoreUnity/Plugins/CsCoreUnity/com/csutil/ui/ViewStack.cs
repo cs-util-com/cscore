@@ -9,16 +9,15 @@ namespace com.csutil.ui {
         /// <param name="prefabName"> e.g. "Dialogs/Dialog123" </param>
         /// <returns> The newly created view </returns>
         public GameObject ShowView(string prefabName, GameObject currentViewToHide = null) {
-            var newView = ShowView(ResourcesV2.LoadPrefab(prefabName));
-            if (currentViewToHide != null) { GetRootFor(currentViewToHide).SetActiveV2(false); }
-            return newView;
+            return ShowView(ResourcesV2.LoadPrefab(prefabName), currentViewToHide);
         }
 
         /// <summary> Adds a passed view to the view stack to show it </summary>
         /// <param name="newView"> The new view to show in the stack </param>
-        public GameObject ShowView(GameObject newView) {
+        public GameObject ShowView(GameObject newView, GameObject currentViewToHide = null) {
             gameObject.AddChild(newView);
             EventBus.instance.Publish(EventConsts.SHOW_VIEW, newView);
+            if (currentViewToHide != null) { GetRootFor(currentViewToHide).SetActiveV2(false); }
             return newView;
         }
 
@@ -43,7 +42,6 @@ namespace com.csutil.ui {
         public bool SwitchBackToLastView(GameObject gameObject, bool destroyFinalView = false, bool hideNotDestroyCurrentView = false) {
             var currentView = GetRootFor(gameObject);
             var currentIndex = currentView.transform.GetSiblingIndex();
-            AssertV2.AreEqual(currentIndex, transform.childCount - 1, "Current was not last view in the stack");
             if (currentIndex > 0) {
                 var lastView = transform.GetChild(currentIndex - 1).gameObject;
                 lastView.SetActiveV2(true);
@@ -75,7 +73,7 @@ namespace com.csutil.ui {
 
         /// <summary> Moves up the tree until it reaches the direct child of the viewstack </summary>
         private GameObject GetRootFor(GameObject go) {
-            AssertV2.IsFalse(go == gameObject, "Cant get root for ViewStack gameobject");
+            if (go == gameObject) { throw Log.e("Cant get root for ViewStack gameobject"); }
             var parent = go.GetParent();
             if (parent == gameObject) { return go; } // stop when the GO of the viewstack is reached
             return GetRootFor(parent);

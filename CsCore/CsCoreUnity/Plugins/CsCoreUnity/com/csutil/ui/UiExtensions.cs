@@ -94,7 +94,7 @@ namespace com.csutil {
             }
         }
 
-        public static void SetOnValueChangedActionThrottled(this InputField self, Action<string> onValueChanged, double delayInMs = 2000) {
+        public static void SetOnValueChangedActionThrottled(this InputField self, Action<string> onValueChanged, double delayInMs = 1000) {
             if (self.onValueChanged != null && self.onValueChanged.GetPersistentEventCount() > 0) {
                 Log.w("Overriding old onValueChanged listener for input field " + self, self.gameObject);
             }
@@ -102,9 +102,9 @@ namespace com.csutil {
             AddOnValueChangedActionThrottled(self, onValueChanged, delayInMs);
         }
 
-        public static void AddOnValueChangedActionThrottled(this InputField self, Action<string> onValueChanged, double delayInMs = 2000) {
+        public static void AddOnValueChangedActionThrottled(this InputField self, Action<string> onValueChanged, double delayInMs = 1000) {
             EventHandler<string> action = (input, newText) => { onValueChanged(newText); };
-            var throttledAction = action.AsThrottledDebounce(delayInMs, skipFirstEvent: true);
+            var throttledAction = action.AsThrottledDebounce(delayInMs);
             self.AddOnValueChangedAction((newText) => {
                 throttledAction(self, newText);
                 return true;

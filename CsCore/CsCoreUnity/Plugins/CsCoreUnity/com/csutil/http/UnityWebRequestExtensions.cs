@@ -49,9 +49,20 @@ namespace com.csutil {
             self.SaveAllNewCookiesFromResponse();
             if (self.error.IsNullOrEmpty()) { resp.progressInPercent.setNewValue(100); }
             resp.getResult = () => { return self.GetResult<T>(); };
+            ProcessServerDate(self.uri, self.GetResponseHeader("date"));
+        }
+
+        /// <summary> If available will process and broadcast the received server date </summary>
+        /// <param name="utcString"> e.g. "Sun, 08 Mar 2020 09:47:52 GMT" </param>
+        private static void ProcessServerDate(Uri uri, string utcString) {
+            DateTime? serverUtcDate = null;
+            try { if (!utcString.IsNullOrEmpty()) { serverUtcDate = DateTime.Parse(utcString); } }
+            catch (Exception e) { Log.w("Failed parsing server UTC date: " + e); }
+            if (serverUtcDate.HasValue) { EventBus.instance.Publish(DateTimeV2.SERVER_UTC_DATE, uri, serverUtcDate.Value); }
         }
 
         private static void SetupDownloadAndUploadHanders<T>(UnityWebRequest self, Response<T> resp) {
+            if (self.downloadHandler == null && resp.onResult != null) { self.downloadHandler = resp.createDownloadHandler(); }
             switch (self.method) {
                 case UnityWebRequest.kHttpVerbGET:
                     AssertV2.IsNotNull(self.downloadHandler, "Get-request had no downloadHandler set");
@@ -61,7 +72,6 @@ namespace com.csutil {
                     AssertV2.IsNotNull(self.uploadHandler, "Put/Post-request had no uploadHandler set");
                     break;
             }
-            if (self.downloadHandler == null && resp.onResult != null) { self.downloadHandler = resp.createDownloadHandler(); }
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
@@ -86,7 +96,7 @@ namespace com.csutil {
                         Log.d("resp.onResult was null, resp.GetResult has to be called manually");
                     }
                 }
-                catch (Exception e) { resp.onError(self, e); }
+                catch (Exception e) { resp.onError.InvokeIfNotNull(self, e); }
             }
         }
 
@@ -100,6 +110,8 @@ namespace com.csutil {
                 var h = (DownloadHandlerTexture)self.downloadHandler;
                 return (T)(object)h.texture;
             }
+            if (TypeCheck.AreEqual<T, Stream>()) { return (T)(object)new MemoryStream(self.downloadHandler.data); }
+            if (TypeCheck.AreEqual<T, byte[]>()) { return (T)(object)self.downloadHandler.data; }
             if (TypeCheck.AreEqual<T, Headers>()) { return (T)(object)self.GetResponseHeadersV2(); }
             var text = self.downloadHandler.text;
             if (TypeCheck.AreEqual<T, string>()) { return (T)(object)text; }

@@ -15,7 +15,7 @@ namespace com.csutil {
         }
 
         public static IEnumerable<string> GetTypesWithMissingNamespace(this Assembly self) {
-            return self.GetLoadableTypes().Filter(x => x.Namespace.IsNullOrEmpty()).Map(x => x.FullName);
+            return self.GetLoadableTypes().Filter(x => x.Namespace.IsNullOrEmpty()).Map(x => $"{x.FullName} (Assembly {x.Assembly.FullName})");
         }
 
         public static IOrderedEnumerable<string> GetAllNamespaces(this Assembly self) {

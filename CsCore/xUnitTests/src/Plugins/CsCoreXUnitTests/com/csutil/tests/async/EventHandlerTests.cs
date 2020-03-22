@@ -62,12 +62,12 @@ namespace com.csutil.tests.async {
         public async Task TestThrottledDebounce1() {
             int counter = 0;
             EventHandler<string> action = (_, myStringParam) => {
-                Assert.NotEqual("bad", myStringParam);
                 Log.d("action callback with old counter=" + counter);
                 Interlocked.Increment(ref counter);
                 Log.d("... new counter=" + counter);
+                Assert.NotEqual("bad", myStringParam);
             };
-            var throttledAction = action.AsThrottledDebounce(delayInMs: 5);
+            var throttledAction = action.AsThrottledDebounce(delayInMs: 50);
 
             throttledAction(this, "good");
             throttledAction(this, "bad");
@@ -76,7 +76,7 @@ namespace com.csutil.tests.async {
             throttledAction(this, "good");
             for (int i = 0; i < 30; i++) { await TaskV2.Delay(100); if (counter >= 2) { break; } }
             Assert.Equal(2, counter);
-
+            await TaskV2.Delay(100);
             throttledAction(this, "good");
             throttledAction(this, "bad");
             throttledAction(this, "good");

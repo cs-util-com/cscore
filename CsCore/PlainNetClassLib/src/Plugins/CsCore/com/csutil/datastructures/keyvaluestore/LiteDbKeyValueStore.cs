@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using LiteDB;
+using Zio;
 
 namespace com.csutil.keyvaluestore {
 
@@ -12,32 +13,43 @@ namespace com.csutil.keyvaluestore {
         private class PrimitiveWrapper { public object val; }
 
         private BsonMapper bsonMapper;
+        private Stream dbStream;
         private LiteDatabase db;
         private LiteCollection<BsonDocument> collection;
 
         public IKeyValueStore fallbackStore { get; set; }
+        public long latestFallbackGetTimingInMs { get; set; }
 
-        private static bool IsPrimitiveType(Type t) { return t.IsPrimitive || t == typeof(string); }
+        public LiteDbKeyValueStore(FileEntry dbFile) { Init(dbFile); }
 
-        public LiteDbKeyValueStore(FileInfo dbFile) { Init(dbFile); }
-
-        private void Init(FileInfo dbFile, string collectionName = "Default") {
+        private void Init(FileEntry dbFile, string collectionName = "Default") {
             bsonMapper = new BsonMapper();
             bsonMapper.IncludeFields = true;
-            db = new LiteDatabase(dbFile.FullPath(), bsonMapper);
+            dbStream = dbFile.OpenOrCreateForReadWrite();
+            db = new LiteDatabase(dbStream, bsonMapper);
             collection = db.GetCollection(collectionName);
+        }
+
+        public void Dispose() {
+            db.Dispose();
+            dbStream.Dispose();
+            fallbackStore?.Dispose();
         }
 
         private BsonDocument GetBson(string key) { return collection.FindById(key); }
 
         public async Task<T> Get<T>(string key, T defaultValue) {
+            var s = this.StartFallbackStoreGetTimer();
+            Task<T> fallbackGet = fallbackStore.Get(key, defaultValue, (newVal) => InternalSet(key, newVal));
+            await this.WaitLatestFallbackGetTime(s, fallbackGet);
+
             var bson = GetBson(key);
             if (bson != null) { return (T)InternalGet(bson, typeof(T)); }
-            return await fallbackStore.Get(key, defaultValue, (fallbackValue) => InternalSet(key, fallbackValue));
+            return await fallbackGet;
         }
 
         private object InternalGet(BsonDocument bson, Type targetType) {
-            if (IsPrimitiveType(targetType)) { // unwrap the primitive:
+            if (targetType.IsPrimitiveOrSimple()) { // unwrap the primitive:
                 return bsonMapper.ToObject<PrimitiveWrapper>(bson).val;
             }
             return bsonMapper.ToObject(targetType, bson);
@@ -50,7 +62,7 @@ namespace com.csutil.keyvaluestore {
 
         private object InternalSet(string key, object value) {
             var objType = value.GetType();
-            if (IsPrimitiveType(objType)) { value = new PrimitiveWrapper() { val = value }; }
+            if (objType.IsPrimitiveOrSimple()) { value = new PrimitiveWrapper() { val = value }; }
             var oldBson = GetBson(key);
             var newVal = bsonMapper.ToDocument(value);
             if (oldBson == null) {

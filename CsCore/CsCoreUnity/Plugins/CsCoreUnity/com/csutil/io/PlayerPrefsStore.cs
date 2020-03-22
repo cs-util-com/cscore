@@ -1,5 +1,4 @@
 ﻿using com.csutil.json;
-using com.csutil.keyvaluestore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,18 +6,24 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace com.csutil.io {
+namespace com.csutil.keyvaluestore {
 
     public class PlayerPrefsStore : IKeyValueStore {
 
         public IKeyValueStore fallbackStore { get; set; }
+        public long latestFallbackGetTimingInMs { get; set; }
         private IJsonReader jsonReader = TypedJsonHelper.NewTypedJsonReader();
         private IJsonWriter jsonWriter = TypedJsonHelper.NewTypedJsonWriter();
 
+        public void Dispose() { fallbackStore?.Dispose(); }
+
         public async Task<T> Get<T>(string key, T defaultValue) {
-            T value = (T)InternalGet(key, defaultValue);
+            var s = this.StartFallbackStoreGetTimer();
+            var fallbackGet = fallbackStore.Get(key, defaultValue, (res) => InternalSet(key, res));
+            await this.WaitLatestFallbackGetTime(s, fallbackGet);
+            T value = InternalGet(key, defaultValue);
             if (!ReferenceEquals(value, defaultValue)) { return value; }
-            return await fallbackStore.Get(key, defaultValue, (res) => InternalSet(key, res));
+            return await fallbackGet;
         }
 
         public async Task<object> Set(string key, object value) {
@@ -27,7 +32,7 @@ namespace com.csutil.io {
         }
 
         private object InternalSet(string key, object value) {
-            object oldValue = InternalGet(key, null);
+            object oldValue = InternalGet<object>(key, null);
             PlayerPrefs.SetString(key, ToJsonString(value));
             return oldValue;
         }
@@ -36,9 +41,9 @@ namespace com.csutil.io {
             return jsonWriter.Write(new ValueWrapper() { value = value });
         }
 
-        private object InternalGet(string key, object defaultValue) {
+        private T InternalGet<T>(string key, T defaultValue) {
             if (!PlayerPrefs.HasKey(key)) { return defaultValue; }
-            return jsonReader.Read<ValueWrapper>(PlayerPrefs.GetString(key)).value;
+            return jsonReader.Read<ValueWrapper>(PlayerPrefs.GetString(key)).GetValueAs<T>();
         }
 
         public async Task<bool> Remove(string key) {

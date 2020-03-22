@@ -80,7 +80,7 @@ namespace com.csutil {
                         try {
                             object result;
                             if (subscriberDelegate.DynamicInvokeV2(args, out result, throwPublishErrors)) { return result; }
-                        } catch (Exception e) { if (throwPublishErrors) { throw e; } else { Log.e(e); } }
+                        } catch (Exception e) { if (throwPublishErrors) { throw; } else { Log.e(e); } }
                         return null;
                     });
                 }

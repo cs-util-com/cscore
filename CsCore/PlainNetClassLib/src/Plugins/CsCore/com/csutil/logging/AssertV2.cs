@@ -11,7 +11,7 @@ namespace com.csutil {
         private const string BR = "\r\n";
 
         private static void Assert(bool condition, string errorMsg, object[] args) {
-            args = new StackFrame(2, true).AddTo(args);
+            args = new StackTrace(2, true).AddTo(args);
             if (!condition) {
                 Debugger.Break();
                 var e = Log.e(errorMsg, args);
@@ -29,7 +29,9 @@ namespace com.csutil {
 
         [Serializable]
         public class ThrowsException : Exception {
+            public ThrowsException() : base() { }
             public ThrowsException(string message) : base(message) { }
+            public ThrowsException(string message, Exception innerException) : base(message, innerException) { }
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
@@ -86,15 +88,25 @@ namespace com.csutil {
             Assert(!expected.SequenceEqual(actual), msg2, args);
         }
 
+        [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
+        public static void IsInRange(double lowerBound, double value, double upperBound, string varName, params object[] args) {
+            if (upperBound < lowerBound) { throw Log.e($"Invalid bounds: (upperBound){upperBound} < {lowerBound}(lowerBound)"); }
+            Assert(lowerBound <= value, "Assert.IsInRange() FAILED: " + varName + "=" + value + " is BELOW lower bound=" + lowerBound, args);
+            Assert(value <= upperBound, "Assert.IsInRange() FAILED: " + varName + "=" + value + " is ABOVE upper bound=" + upperBound, args);
+        }
+
         public static StopwatchV2 TrackTiming([CallerMemberName] string methodName = null) { return new StopwatchV2(methodName).StartV2(); }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         public static void AssertUnderXms(this Stopwatch self, int maxTimeInMs, params object[] args) {
             var ms = self.ElapsedMilliseconds;
             int p = (int)(ms * 100f / maxTimeInMs);
-            var errorText = new StackFrame(1).GetMethodName(false);
-            errorText += " took " + p + "% (" + ms + "ms) longer then allowed (" + maxTimeInMs + "ms)!";
+            var errorText = GetMethodName(self) + " took " + p + "% (" + ms + "ms) longer then allowed (" + maxTimeInMs + "ms)!";
             Assert(IsUnderXms(self, maxTimeInMs), errorText, args);
+        }
+
+        private static string GetMethodName(Stopwatch s) {
+            if (s is StopwatchV2 sV2) { return sV2.methodName; } else { return new StackFrame(2).GetMethodName(false); }
         }
 
         public static bool IsUnderXms(this Stopwatch self, int maxTimeInMs) { return self.ElapsedMilliseconds <= maxTimeInMs; }

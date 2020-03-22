@@ -19,7 +19,7 @@ namespace com.csutil {
         }
 
         private static SnackbarsUi InitSnackbarsUi() {
-            var targetCanvas = CanvasFinder.GetOrAddRootCanvas().gameObject;
+            var targetCanvas = RootCanvas.GetOrAddRootCanvas().gameObject;
             var snackbarContainer = targetCanvas.AddChild(ResourcesV2.LoadPrefab("Messages/SnackbarContainer1"));
             return snackbarContainer.GetOrAddComponent<SnackbarsUi>();
         }

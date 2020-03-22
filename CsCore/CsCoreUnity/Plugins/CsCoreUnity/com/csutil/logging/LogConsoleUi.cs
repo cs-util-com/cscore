@@ -2,6 +2,7 @@
 using ReuseScroller;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
@@ -19,7 +20,7 @@ namespace com.csutil.logging {
         }
 
         private static LogConsoleUi InitLogConsoleUi() {
-            var targetCanvas = CanvasFinder.GetOrAddRootCanvas().gameObject;
+            var targetCanvas = RootCanvas.GetOrAddRootCanvas().gameObject;
             var toastContainer = targetCanvas.AddChild(ResourcesV2.LoadPrefab("Messages/LogConsoleUi1"));
             return toastContainer.GetComponentInChildren<LogConsoleUi>();
         }
@@ -34,6 +35,17 @@ namespace com.csutil.logging {
         protected override void PrintDebugMessage(string d, params object[] args) { logUi.AddToLog(LogEntry.d(d)); }
         protected override void PrintWarningMessage(string w, params object[] args) { logUi.AddToLog(LogEntry.w(w)); }
         protected override void PrintErrorMessage(string e, params object[] args) { logUi.AddToLog(LogEntry.e(e)); }
+
+        public override StopwatchV2 LogMethodEntered(string methodName, object[] args) {
+            logUi.AddToLog(LogEntry.d(" --> " + methodName + " args=" + args.ToStringV2(x => "" + x)));
+            return null;
+        }
+
+        public override void LogMethodDone(Stopwatch timing, int maxAllowedTimeInMs, string sourceMemberName, string sourceFilePath, int sourceLineNumber) {
+            string methodName = sourceMemberName;
+            if (timing is StopwatchV2 t2) { methodName = t2.methodName; }
+            logUi.AddToLog(LogEntry.d("    <-- " + methodName + " finished after " + timing.ElapsedMilliseconds + " ms"));
+        }
 
     }
 
@@ -101,7 +113,7 @@ namespace com.csutil.logging {
         public const string ICON_W = "";
         public const string ICON_E = "";
 
-        public static Color COLOR_GRAY = Color.gray;
+        public static Color COLOR_GRAY = Color.black;
         public static Color COLOR_YELLOW = Color.yellow;
         public static Color COLOR_RED = Color.red;
 

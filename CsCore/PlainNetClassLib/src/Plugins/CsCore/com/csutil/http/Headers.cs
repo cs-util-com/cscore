@@ -67,7 +67,7 @@ namespace com.csutil.http {
             var words = headerWithFilename.Split(';');
             foreach (var word in words) {
                 var pair = headerWithFilename.Split('=');
-                if (pair != null && pair[0].ToLower().Contains("filename")) { return pair[1].Trim(); }
+                if (pair != null && pair[0].IndexOf("filename") >= 0) { return pair[1].Trim(); }
             }
             return null;
         }

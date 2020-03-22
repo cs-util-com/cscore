@@ -78,10 +78,10 @@ namespace com.csutil {
 
         }
 
-        public static async Task RunRepeated(Func<Task<bool>> task, int delayInMsBetweenIterations, CancellationToken t, int delayInMsBeforeFirstExecution = 0, float repetitions = -1) {
+        public static async Task RunRepeated(Func<Task<bool>> task, int delayInMsBetweenIterations, CancellationToken cancelToken, int delayInMsBeforeFirstExecution = 0, float repetitions = -1) {
             if (delayInMsBeforeFirstExecution > 0) { await Delay(delayInMsBeforeFirstExecution); }
             while (repetitions != 0) {
-                t.ThrowIfCancellationRequested();
+                cancelToken.ThrowIfCancellationRequested();
                 if (!await task()) { break; }
                 await TaskV2.Delay(delayInMsBetweenIterations);
                 repetitions--;

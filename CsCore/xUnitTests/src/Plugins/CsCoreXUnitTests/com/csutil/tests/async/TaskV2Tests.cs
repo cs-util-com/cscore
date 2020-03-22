@@ -50,7 +50,7 @@ namespace com.csutil.tests.async {
                     await TaskV2.Delay(1);
                     counter++;
                     return counter < 3; // stop repeated execution once 3 is reached
-                }, delayInMsBetweenIterations: 300, cancel.Token, delayInMsBeforeFirstExecution: 200);
+                }, delayInMsBetweenIterations: 300, cancelToken: cancel.Token, delayInMsBeforeFirstExecution: 200);
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             }
             { // while the repeated task is running check over time if the counter increases:

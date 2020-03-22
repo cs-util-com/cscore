@@ -25,7 +25,10 @@ namespace com.csutil {
 
         public static GameObject GetChild(this GameObject self, string childName) { return self.transform.Find(childName)?.gameObject; }
         public static GameObject GetChild(this GameObject self, int index) { return self.transform.GetChild(index)?.gameObject; }
-        public static IEnumerable<GameObject> GetChildren(this GameObject self) { return self.transform.Cast<Transform>().Map(x => x.gameObject); }
+
+        /// <summary> For operations that will execute on all children use GetChildren() instead! </summary>
+        public static IEnumerable<GameObject> GetChildrenIEnumerable(this GameObject self) { return self.transform.Cast<Transform>().Map(x => x.gameObject); }
+        public static List<GameObject> GetChildren(this GameObject self) { return self.GetChildrenIEnumerable().ToList(); }
 
         public static int GetChildCount(this GameObject self) { return self.transform.childCount; }
 
@@ -33,6 +36,11 @@ namespace com.csutil {
         public static T GetOrAddComponent<T>(this GameObject self) where T : Component {
             var existingComp = self.GetComponent<T>();
             return existingComp == null ? self.AddComponent<T>() : existingComp;
+        }
+
+        public static bool HasComponent<T>(this GameObject self, out T existingComp) where T : Component {
+            existingComp = self.GetComponent<T>();
+            return existingComp != null;
         }
 
         /// <summary> Searches recursively upwards in all parents until a comp of type T is found </summary>
@@ -57,7 +65,7 @@ namespace com.csutil {
         public static bool Destroy(this UnityEngine.Object self, bool destroyNextFrame = false) {
             if (self == null) { return false; }
             try { if (destroyNextFrame) { UnityEngine.Object.Destroy(self); } else { GameObject.DestroyImmediate(self); } } catch { return false; }
-            AssertV2.IsTrue(self.IsDestroyed(), "gameObject was not destroyed");
+            AssertV2.IsTrue(destroyNextFrame || self.IsDestroyed(), "gameObject was not destroyed");
             return true;
         }
 

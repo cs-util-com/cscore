@@ -49,7 +49,7 @@ namespace com.csutil {
 
             private MergeConflict ParseIntoConflict(JToken token) {
                 if (token is JProperty prop) { return ToMergeConflict(prop); }
-                throw Log.e("Unhandled type " + token.GetType() + ":\n" + token.ToPrettyString());
+                throw new NotImplementedException("Unhandled type " + token.GetType() + ":\n" + token.ToPrettyString());
             }
 
             public static MergeConflict ToMergeConflict(JProperty prop) {
@@ -67,7 +67,7 @@ namespace com.csutil {
                     res.oldValue = oldAndNewValue[0];
                     res.newValue = oldAndNewValue[1];
                 } else {
-                    throw Log.e("Unhandled type " + prop.Value.GetType() + ":\n" + prop.Value.ToPrettyString());
+                    throw new NotImplementedException("Unhandled type " + prop.Value.GetType() + ":\n" + prop.Value.ToPrettyString());
                 }
                 return res;
             }

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace com.csutil.ui {
+namespace com.csutil {
 
     // https://en.wikipedia.org/wiki/Model–view–presenter
     public interface Presenter<T> {
