@@ -1,38 +1,14 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
-namespace com.csutil.http.apis {
+namespace com.csutil.http {
 
-    public class GoogleSheets {
+    public static class AtomFeed {
 
-        public static async Task<List<List<string>>> GetSheet(string sheetId) {
-            return GetSheetFromResult(await GetFullJson(sheetId));
-        }
+        public static Task<Response> Get(Uri atomUrl) { return atomUrl.SendGET().GetResult<Response>(); }
 
-        public static Task<GSheetsResp.Answer> GetFullJson(string sheetId) {
-            var sheetsUrl = "https://spreadsheets.google.com/feeds/list/" + sheetId + "/od6/public/values?alt=json";
-            return new Uri(sheetsUrl).SendGET().GetResult<GSheetsResp.Answer>();
-        }
-
-        public static List<List<string>> GetSheetFromResult(GSheetsResp.Answer result) {
-            List<List<string>> sheet = new List<List<string>>();
-            var columnsPlusMetaInfo = result.feed.entry;
-            foreach (var columnPlusMetaInfo in columnsPlusMetaInfo) {
-                var columnKeys = columnPlusMetaInfo.Keys.Filter(x => x.StartsWith("gsx$"));
-                var column = columnKeys.Map(key => columnPlusMetaInfo[key]);
-                var columnAsStrings = column.Map(row => (row as JObject).GetValue("$t").ToString());
-                sheet.Add(columnAsStrings.ToList());
-            }
-            return sheet;
-        }
-
-    }
-
-    public class GSheetsResp {
         public class Id {
             [JsonProperty(PropertyName = "$t")]
             public string t { get; set; }
@@ -104,11 +80,12 @@ namespace com.csutil.http.apis {
             public IList<Dictionary<string, object>> entry { get; set; }
         }
 
-        public class Answer {
+        public class Response {
             public string version { get; set; }
             public string encoding { get; set; }
             public Feed feed { get; set; }
         }
+
     }
 
 }
