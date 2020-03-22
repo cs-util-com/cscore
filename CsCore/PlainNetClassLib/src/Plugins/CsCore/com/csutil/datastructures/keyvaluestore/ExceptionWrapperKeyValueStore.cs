@@ -19,7 +19,9 @@ namespace com.csutil.keyvaluestore {
 
         public void Dispose() { wrappedStore.Dispose(); }
 
-        private static HashSet<Type> NewDefaultErrorSet() { return new HashSet<Type>() { typeof(InvalidCastException) }; }
+        private static HashSet<Type> NewDefaultErrorSet() {
+            return new HashSet<Type>() { typeof(InvalidCastException), typeof(NotImplementedException) };
+        }
 
         public ExceptionWrapperKeyValueStore(IKeyValueStore wrappedStore) : this(wrappedStore, NewDefaultErrorSet()) { }
 

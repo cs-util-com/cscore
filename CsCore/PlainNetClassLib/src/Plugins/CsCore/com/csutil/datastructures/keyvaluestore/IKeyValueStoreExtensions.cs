@@ -15,10 +15,16 @@ namespace com.csutil.keyvaluestore {
         public static async Task<T> Get<T>(this IKeyValueStore self, string key, T defaultValue, Action<object> onGetSuccess) {
             if (self != null) {
                 var storeValue = await self.Get<T>(key, defaultValue);
-                if (!Equals(storeValue, defaultValue)) { onGetSuccess(storeValue); }
+                if (!IsDefaultValue(storeValue, defaultValue)) { onGetSuccess(storeValue); }
                 return storeValue;
             }
             return defaultValue;
+        }
+
+        private static bool IsDefaultValue<T>(T storeValue, T defaultValue) {
+            var res = Equals(storeValue, defaultValue);
+            AssertV2.IsTrue(res == CloneHelper.HasEqualJson(storeValue, defaultValue), $"Equals says {res} but EqualJson says {!res}!");
+            return res;
         }
 
         public static async Task<IEnumerable<string>> ConcatAllKeys(this IKeyValueStore self, IEnumerable<string> result) {
@@ -38,8 +44,8 @@ namespace com.csutil.keyvaluestore {
                 if (storeOldValue != null) {
                     if (oldValue == null) { oldValue = storeOldValue; }
                     if (storeOldValue != oldValue) {
-                        AssertV2.IsTrue(storeOldValue.Equals(oldValue), "oldValue != store.oldValue, store value newer?"
-                            + "\n storeOldValue=" + storeOldValue + "\n oldValue=" + oldValue);
+                        AssertV2.IsTrue(CloneHelper.HasEqualJson(storeOldValue, oldValue), "oldValue != store.oldValue, store value newer?"
+                            + "\n storeOldValue=" + JsonWriter.AsPrettyString(storeOldValue) + "\n oldValue=" + JsonWriter.AsPrettyString(oldValue));
                     }
                 }
             }

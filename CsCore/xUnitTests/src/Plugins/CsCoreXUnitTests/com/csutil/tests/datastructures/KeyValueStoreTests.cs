@@ -61,7 +61,7 @@ namespace com.csutil.tests.keyvaluestore {
             // Simulate the DB on the server
             var simulatedDb = new InMemoryKeyValueStore();
             // Simulate the connection (with a delay) to the server:
-            var simulatedRemoteConnection = new MockDekayKeyValueStore().WithFallbackStore(simulatedDb);
+            var simulatedRemoteConnection = new MockDelayKeyValueStore(simulatedDb);
 
             // The connection to the server is wrapped by a automatic retry for failing requests:
             var requestRetry = new RetryKeyValueStore(simulatedRemoteConnection, maxNrOfRetries: 5);
@@ -96,7 +96,7 @@ namespace com.csutil.tests.keyvaluestore {
         public async Task TestAllIKeyValueStoreImplementations() {
             await TestIKeyValueStoreImplementation(new InMemoryKeyValueStore());
             await TestIKeyValueStoreImplementation(new ExceptionWrapperKeyValueStore(new InMemoryKeyValueStore()));
-            await TestIKeyValueStoreImplementation(new MockDekayKeyValueStore().WithFallbackStore(new InMemoryKeyValueStore()));
+            await TestIKeyValueStoreImplementation(new MockDelayKeyValueStore(new InMemoryKeyValueStore()));
             await TestIKeyValueStoreImplementation(NewFileBasedKeyValueStore("TestAllIKeyValueStoreImplementations_FileDB"));
         }
 
@@ -181,7 +181,7 @@ namespace com.csutil.tests.keyvaluestore {
             // Simulates the DB on the server:
             var innerStore = new InMemoryKeyValueStore();
             // Simulates the connection to the server:
-            var simulatedDelayStore = new MockDekayKeyValueStore().WithFallbackStore(innerStore);
+            var simulatedDelayStore = new MockDelayKeyValueStore(innerStore);
             // Handles connection problems to the server:
             var exWrapperStore = new ExceptionWrapperKeyValueStore(simulatedDelayStore);
             // Represents the local cache in case the server cant be reached:
@@ -272,7 +272,7 @@ namespace com.csutil.tests.keyvaluestore {
             // Simulates the DB on the server:
             var innerStore = new InMemoryKeyValueStore();
             // Simulates the connection to the server:
-            var simulatedRemoteConnection = new MockDekayKeyValueStore().WithFallbackStore(innerStore);
+            var simulatedRemoteConnection = new MockDelayKeyValueStore(innerStore);
             var requestRetry = new RetryKeyValueStore(simulatedRemoteConnection, maxNrOfRetries: 5);
             var outerStore = new InMemoryKeyValueStore().WithFallbackStore(requestRetry);
 
@@ -308,8 +308,8 @@ namespace com.csutil.tests.keyvaluestore {
 
                 // The delayedSetTask was canceled after 5 retries: 
                 await Assert.ThrowsAsync<OperationCanceledException>(async () => await delayedSetTask);
-                // There will be 5 TimeoutException in the simulatedRemoteConnection:
-                Assert.Equal(requestRetry.maxNrOfRetries, timeoutErrorCounter);
+                // There will be minimum 5 TimeoutException in the simulatedRemoteConnection:
+                Assert.True(requestRetry.maxNrOfRetries <= timeoutErrorCounter);
             }
 
         }

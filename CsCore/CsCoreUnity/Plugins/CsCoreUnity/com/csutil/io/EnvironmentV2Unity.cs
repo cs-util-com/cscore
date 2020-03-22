@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using UnityEngine;
 using Zio;
@@ -19,6 +20,8 @@ namespace com.csutil.io {
 #endif
             }
         }
+
+        public EnvironmentV2Unity() : base(new UnitySystemInfo()) { }
 
         /// <summary>
         /// Base impl. would return C:\Users\User123\AppData\Local\Temp\ 
@@ -40,6 +43,31 @@ namespace com.csutil.io {
             return new DirectoryInfo(Application.dataPath).ToRootDirectoryEntry();
         }
 
+    }
+
+    internal class UnitySystemInfo : EnvironmentV2.ISystemInfo {
+        // e.g. Arm, X32, Arm64, X64
+        public string OSArchitecture { get; } = "" + RuntimeInformation.OSArchitecture;
+        // On Win 10 => "Microsoft Windows 10.0.16299"
+        // On macOS High Sierra 10.13.4 => "Darwin 17.5.0 Darwin Kernel Version 17.5.0 ..."
+        public string OSDescription { get; } = RuntimeInformation.OSDescription;
+        // On Win 10 => "Win32NT"
+        // On macOS High Sierra 10.13.4 => "Unix"
+        public string OSPlatForm { get; } = "" + Environment.OSVersion.Platform;
+        // On Win 10 => "6.2.9200.0"
+        // On macOS High Sierra 10.13.4 => "17.5.0.0"
+        public string OSVersion { get; } = "" + Environment.OSVersion.Version;
+        // e.g. Arm, X32, Arm64, X64
+        public string ProcessArchitecture { get; } = "" + RuntimeInformation.ProcessArchitecture;
+        // "Windows 7 (6.1.7601) 64bit" on 64 bit Windows 7
+        // "Mac OS X 10.10.4" on Mac OS X Yosemite
+        // "iPhone OS 8.4" on iOS 8.4
+        // "Android OS API-22" on Android 5.1
+        public string OperatingSystem { get; } = "" + SystemInfo.operatingSystem;
+        // e.g. "iPhone6,1" or "PC"
+        public string DeviceModel { get; } = "" + SystemInfo.deviceModel;
+        // e.g. "Intel(R) Core(TM)2 Quad CPU Q6600 @ 2.40GHz"
+        public string ProcessorType { get; } = "" + SystemInfo.processorType;
     }
 
 }

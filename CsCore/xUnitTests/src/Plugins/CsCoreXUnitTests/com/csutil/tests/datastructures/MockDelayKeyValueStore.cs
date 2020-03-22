@@ -5,13 +5,15 @@ using com.csutil.keyvaluestore;
 
 namespace com.csutil.tests.keyvaluestore {
 
-    public class MockDekayKeyValueStore : IKeyValueStore {
+    public class MockDelayKeyValueStore : IKeyValueStore {
 
         public IKeyValueStore fallbackStore { get; set; }
         public int delay = 100;
         public bool throwTimeoutError = false;
 
         public void Dispose() { fallbackStore.Dispose(); }
+
+        public MockDelayKeyValueStore(IKeyValueStore fallbackStore) { this.fallbackStore = fallbackStore; }
 
         private async Task SimulateDelay() {
             await TaskV2.Delay(delay);
@@ -25,12 +27,14 @@ namespace com.csutil.tests.keyvaluestore {
 
         public async Task<T> Get<T>(string key, T defaultValue) {
             await SimulateDelay();
-            return await fallbackStore.Get<T>(key, defaultValue);
+            var result = await fallbackStore.Get<T>(key, defaultValue);
+            return result.DeepCopyViaJson();
         }
 
         public async Task<IEnumerable<string>> GetAllKeys() {
             await SimulateDelay();
-            return await fallbackStore.GetAllKeys();
+            var result = await fallbackStore.GetAllKeys();
+            return result.DeepCopyViaJson();
         }
 
         public async Task<bool> Remove(string key) {
@@ -45,7 +49,8 @@ namespace com.csutil.tests.keyvaluestore {
 
         public async Task<object> Set(string key, object value) {
             await SimulateDelay();
-            return await fallbackStore.Set(key, value);
+            var result = await fallbackStore.Set(key, value.DeepCopyViaJson());
+            return result.DeepCopyViaJson();
         }
 
     }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -19,6 +20,14 @@ namespace com.csutil {
 
         public static bool IsCastableTo(this Type self, params Type[] types) {
             return types.Any(t => (t == self || t.IsAssignableFrom(self)));
+        }
+
+        // From https://stackoverflow.com/a/863944/165106
+        public static bool IsPrimitiveOrSimple(this Type t) {
+            var i = t.GetTypeInfo();
+            // nullable type, check if the nested type is simple:
+            if (i.IsGenericType && i.GetGenericTypeDefinition() == typeof(Nullable<>)) { return IsPrimitiveOrSimple(i.GetGenericArguments()[0]); }
+            return i.IsPrimitive || i.IsEnum || t.Equals(typeof(string)) || t.Equals(typeof(decimal));
         }
 
     }

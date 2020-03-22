@@ -19,8 +19,6 @@ namespace com.csutil.keyvaluestore {
 
         public IKeyValueStore fallbackStore { get; set; }
 
-        private static bool IsPrimitiveType(Type t) { return t.IsPrimitive || t == typeof(string); }
-
         public LiteDbKeyValueStore(FileEntry dbFile) { Init(dbFile); }
 
         private void Init(FileEntry dbFile, string collectionName = "Default") {
@@ -40,13 +38,14 @@ namespace com.csutil.keyvaluestore {
         private BsonDocument GetBson(string key) { return collection.FindById(key); }
 
         public async Task<T> Get<T>(string key, T defaultValue) {
+            Task<T> fallbackGet = fallbackStore.Get(key, defaultValue, (fallbackValue) => InternalSet(key, fallbackValue));
             var bson = GetBson(key);
             if (bson != null) { return (T)InternalGet(bson, typeof(T)); }
-            return await fallbackStore.Get(key, defaultValue, (fallbackValue) => InternalSet(key, fallbackValue));
+            return await fallbackGet;
         }
 
         private object InternalGet(BsonDocument bson, Type targetType) {
-            if (IsPrimitiveType(targetType)) { // unwrap the primitive:
+            if (targetType.IsPrimitiveOrSimple()) { // unwrap the primitive:
                 return bsonMapper.ToObject<PrimitiveWrapper>(bson).val;
             }
             return bsonMapper.ToObject(targetType, bson);
@@ -59,7 +58,7 @@ namespace com.csutil.keyvaluestore {
 
         private object InternalSet(string key, object value) {
             var objType = value.GetType();
-            if (IsPrimitiveType(objType)) { value = new PrimitiveWrapper() { val = value }; }
+            if (objType.IsPrimitiveOrSimple()) { value = new PrimitiveWrapper() { val = value }; }
             var oldBson = GetBson(key);
             var newVal = bsonMapper.ToDocument(value);
             if (oldBson == null) {

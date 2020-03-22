@@ -19,9 +19,10 @@ namespace com.csutil.keyvaluestore {
         }
 
         public async Task<T> Get<T>(string key, T defaultValue) {
+            Task<T> fallbackGet = fallbackStore.Get(key, defaultValue, (res) => InternalSet(key, res));
             object value;
             if (store.TryGetValue(key, out value)) { return (T)value; }
-            return await fallbackStore.Get(key, defaultValue, (res) => InternalSet(key, res));
+            return await fallbackGet;
         }
 
         public async Task<object> Set(string key, object value) {
