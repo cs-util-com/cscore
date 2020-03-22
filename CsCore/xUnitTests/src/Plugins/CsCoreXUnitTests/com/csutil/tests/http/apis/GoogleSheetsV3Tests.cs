@@ -1,5 +1,6 @@
 using com.csutil.http.apis;
 using System;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace com.csutil.tests.http {
@@ -11,7 +12,7 @@ namespace com.csutil.tests.http {
         public GoogleSheetsV3Tests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
         [Fact]
-        public async void ExampleUsage1() {
+        public async Task ExampleUsage1() {
 
             // E.g. https://docs.google.com/spreadsheets/d/1ixEZ7EkbPNrB5ZiIYL12kL25jKIIIvyz4nZKtqTDqWc
             var testSheetId = "1ixEZ7EkbPNrB5ZiIYL12kL25jKIIIvyz4nZKtqTDqWc";

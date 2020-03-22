@@ -1,4 +1,5 @@
-﻿using com.csutil.http.apis;
+﻿using System.Threading.Tasks;
+using com.csutil.http.apis;
 using Xunit;
 
 namespace com.csutil.tests.http {
@@ -8,7 +9,7 @@ namespace com.csutil.tests.http {
         public GoogleSheetsV4Tests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
         [Fact]
-        public async void ExampleUsage1() {
+        public async Task ExampleUsage1() {
 
             // Get your key from https://console.developers.google.com/apis/credentials
             var exampleApiKey = "AIzaSyCtcFQMgRIUHhSuXggm4BtXT4eZvUrBWN0";

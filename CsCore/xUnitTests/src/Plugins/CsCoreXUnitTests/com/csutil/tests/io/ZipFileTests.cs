@@ -49,7 +49,7 @@ namespace com.csutil.tests {
         [Fact]
         public void ExampleUsage2() {
 
-            var root = EnvironmentV2.instance.GetOrAddTempFolder("ZipFileTests_ExampleUsage1");
+            var root = EnvironmentV2.instance.GetOrAddTempFolder("ZipFileTests_ExampleUsage2");
             root.DeleteV2(); // cleanup from previous test if needed
 
             var dir1 = root.GetChildDir("Dir1");

@@ -30,12 +30,18 @@ namespace com.csutil.tests {
             var tracker = new MyAppFlowTracker2(new InMemoryKeyValueStore());
             AppFlow.instance = tracker;
             Log.MethodEntered(); // This will internally notify the AppFlow instance
-            Assert.True((await tracker.store.GetAllKeys()).Count() > 0);
-            await TaskV2.Delay(3000);
-            // After 3 seconds all events should have been sent to the external system:
+            Assert.NotEmpty(await tracker.store.GetAllKeys());
+
+            var s = StopwatchV2.StartNewV2();
+            for (int i = 0; i < 20; i++) {
+                await TaskV2.Delay(500);
+                if ((await tracker.store.GetAllKeys()).Count() == 0) { break; }
+            }
+            Assert.True(s.ElapsedMilliseconds < 5000, "s.ElapsedMilliseconds=" + s.ElapsedMilliseconds);
+
             Assert.Empty(await tracker.store.GetAllKeys());
             // Make sure the DefaultAppFlowImpl itself does not create more events while sending the existing ones: 
-            for (int i = 0; i < 5; i++) {
+            for (int i = 0; i < 10; i++) {
                 await TaskV2.Delay(100);
                 var c1 = tracker.eventsThatWereSent.Count;
                 await TaskV2.Delay(100);
