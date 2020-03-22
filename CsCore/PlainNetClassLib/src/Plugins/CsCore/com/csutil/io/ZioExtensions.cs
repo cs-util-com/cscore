@@ -190,7 +190,7 @@ namespace com.csutil {
             return Path.GetFileNameWithoutExtension(self.Name);
         }
 
-        [Obsolete("Currently only works when working with a physical file system for the target directory")]
+        /// <summary> Currently only works when working with a physical file system for the target directory </summary>
         public static void ExtractIntoDir(this FileEntry self, DirectoryEntry targetDir) {
             if (targetDir.Exists) { throw new IOException("Target dir to extract zip into already exists: " + targetDir); }
             var fastZip = new FastZip();
@@ -200,7 +200,7 @@ namespace com.csutil {
             }
         }
 
-        [Obsolete("Currently only works when working with a physical file system for the source directory")]
+        /// <summary> Currently only works when working with a physical file system for the source directory </summary>
         public static void ZipToFile(this DirectoryEntry self, FileEntry targetZipFile) {
             if (targetZipFile.Exists) { throw new IOException("Target zip file already exists: " + targetZipFile); }
             var fastZip = new FastZip();

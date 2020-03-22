@@ -75,7 +75,10 @@ namespace com.csutil.demos.demo1 {
 
     public static class ImageHelper {
 
-        [Obsolete("Uses the StbImageLib internally and seems to be slower then loading the texture directly via UnityWebRequest")]
+        /// <summary>
+        /// Uses the StbImageLib internally and seems to be a bit slower then loading the texture directly via UnityWebRequest but 
+        /// can be performed in a background thread.
+        /// </summary>
         public static async Task<Texture2D> ToTexture2D(byte[] downloadedBytes) { return ToTexture2D(await ToImageResult(downloadedBytes)); }
 
         private static Task<ImageResult> ToImageResult(byte[] bytes) {
