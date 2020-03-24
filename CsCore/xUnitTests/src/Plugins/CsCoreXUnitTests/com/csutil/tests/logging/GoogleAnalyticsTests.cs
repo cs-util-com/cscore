@@ -56,12 +56,17 @@ namespace com.csutil.tests.logging {
         public async Task TestAppFlowToGoogleAnalytics() {
             var tracker = new GoogleAnalytics(TEST_APP_KEY, new InMemoryKeyValueStore());
             AppFlow.instance = tracker;
+
             var t = Log.MethodEntered(); // This will internally notify the AppFlow instance
             await TaskV2.Delay(100);
             Log.MethodDone(t);
+
+            // Check that in the store of the tracker there are now events waiting to be sent:
             var count1 = (await tracker.store.GetAllKeys()).Count();
             Assert.True(count1 > 0);
+
             await TaskV2.Delay(3000);
+            // Check that the events are no longer in the store (sent to Google Analytics):
             var count2 = (await tracker.store.GetAllKeys()).Count();
             Assert.True(count2 < count1, "count2=" + count2 + ", count1=" + count1);
         }

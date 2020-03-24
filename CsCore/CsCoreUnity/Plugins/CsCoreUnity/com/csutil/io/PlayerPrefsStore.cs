@@ -11,15 +11,19 @@ namespace com.csutil.keyvaluestore {
     public class PlayerPrefsStore : IKeyValueStore {
 
         public IKeyValueStore fallbackStore { get; set; }
+        public long latestFallbackGetTimingInMs { get; set; }
         private IJsonReader jsonReader = TypedJsonHelper.NewTypedJsonReader();
         private IJsonWriter jsonWriter = TypedJsonHelper.NewTypedJsonWriter();
 
         public void Dispose() { fallbackStore?.Dispose(); }
 
         public async Task<T> Get<T>(string key, T defaultValue) {
+            var s = this.StartFallbackStoreGetTimer();
+            var fallbackGet = fallbackStore.Get(key, defaultValue, (res) => InternalSet(key, res));
+            await this.WaitLatestFallbackGetTime(s, fallbackGet);
             T value = InternalGet(key, defaultValue);
             if (!ReferenceEquals(value, defaultValue)) { return value; }
-            return await fallbackStore.Get(key, defaultValue, (res) => InternalSet(key, res));
+            return await fallbackGet;
         }
 
         public async Task<object> Set(string key, object value) {

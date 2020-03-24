@@ -12,7 +12,7 @@ namespace com.csutil {
         public const string UNITY_SETUP_DONE = "Unity setup now done";
 
         static UnitySetup() { // This method is only executed only once at the very beginning 
-            Debug.Log("com.csutil.UnitySetup static constructor called..");
+            // Debug.Log("com.csutil.UnitySetup static constructor called..");
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]

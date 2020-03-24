@@ -1,6 +1,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace com.csutil.keyvaluestore {
@@ -8,6 +9,7 @@ namespace com.csutil.keyvaluestore {
     public class RetryKeyValueStore : IKeyValueStore {
 
         public IKeyValueStore fallbackStore { get; set; }
+        public long latestFallbackGetTimingInMs { get; set; }
         public int maxNrOfRetries;
         public int maxDelayInMs = -1;
         public int initialExponent = 0;
@@ -31,7 +33,12 @@ namespace com.csutil.keyvaluestore {
 
         public Task<bool> ContainsKey(string key) { return Retry(() => fallbackStore.ContainsKey(key)); }
 
-        public Task<T> Get<T>(string key, T defaultValue) { return Retry(() => fallbackStore.Get<T>(key, defaultValue)); }
+        public async Task<T> Get<T>(string key, T defaultValue) {
+            var s = Stopwatch.StartNew();
+            var res = await Retry(() => fallbackStore.Get<T>(key, defaultValue));
+            latestFallbackGetTimingInMs = s.ElapsedMilliseconds;
+            return res;
+        }
 
         public Task<IEnumerable<string>> GetAllKeys() { return Retry(() => fallbackStore.GetAllKeys()); }
 

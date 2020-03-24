@@ -33,7 +33,7 @@ namespace com.csutil {
         }
 
         private static object jsonNetArraytoArrayOfDict(JArray value) {
-            try { return value.Map(x => x.ToObject<Dictionary<string, object>>()).ToArray(); } catch (Exception e) { Log.w("" + e); }
+            try { return value.Map(x => convertToGenericDictionaryOrArray(x)).ToArray(); } catch (Exception e) { Log.w("" + e); }
             return value;
         }
         private static Dictionary<string, object> jsonNetObjectToDictionary(JObject c) { return c.ToObject<Dictionary<string, object>>(); }

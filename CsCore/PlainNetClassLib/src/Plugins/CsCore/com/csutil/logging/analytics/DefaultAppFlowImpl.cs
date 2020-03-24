@@ -26,7 +26,8 @@ namespace com.csutil.logging.analytics {
                 foreach (var key in keys) {
                     try {
                         if (await SendEventToExternalSystem(await store.Get<AppFlowEvent>(key, null))) {
-                            await store.Remove(key);
+                            var wasRemoved = await store.Remove(key);
+                            AssertV2.IsTrue(wasRemoved, "Could not remove key " + key);
                         }
                     } catch (Exception e) { Log.e(e); }
                 }

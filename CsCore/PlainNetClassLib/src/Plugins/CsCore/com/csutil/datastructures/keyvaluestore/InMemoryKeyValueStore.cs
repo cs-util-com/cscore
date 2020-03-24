@@ -9,6 +9,9 @@ namespace com.csutil.keyvaluestore {
     public class InMemoryKeyValueStore : IKeyValueStore {
 
         private Dictionary<string, object> store = new Dictionary<string, object>();
+
+        public long latestFallbackGetTimingInMs { get; set; }
+
         public IKeyValueStore fallbackStore { get; set; }
 
         public void Dispose() {
@@ -19,9 +22,11 @@ namespace com.csutil.keyvaluestore {
         }
 
         public async Task<T> Get<T>(string key, T defaultValue) {
-            object value;
-            if (store.TryGetValue(key, out value)) { return (T)value; }
-            return await fallbackStore.Get(key, defaultValue, (res) => InternalSet(key, res));
+            var s = this.StartFallbackStoreGetTimer();
+            Task<T> fallbackGet = fallbackStore.Get(key, defaultValue, (newVal) => InternalSet(key, newVal));
+            await this.WaitLatestFallbackGetTime(s, fallbackGet);
+            if (store.TryGetValue(key, out object value)) { return (T)value; }
+            return await fallbackGet;
         }
 
         public async Task<object> Set(string key, object value) {

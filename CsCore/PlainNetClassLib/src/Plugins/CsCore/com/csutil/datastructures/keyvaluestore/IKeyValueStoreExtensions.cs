@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -15,10 +16,16 @@ namespace com.csutil.keyvaluestore {
         public static async Task<T> Get<T>(this IKeyValueStore self, string key, T defaultValue, Action<object> onGetSuccess) {
             if (self != null) {
                 var storeValue = await self.Get<T>(key, defaultValue);
-                if (!Equals(storeValue, defaultValue)) { onGetSuccess(storeValue); }
+                if (!IsDefaultValue(storeValue, defaultValue)) { onGetSuccess(storeValue); }
                 return storeValue;
             }
             return defaultValue;
+        }
+
+        private static bool IsDefaultValue<T>(T storeValue, T defaultValue) {
+            var res = Equals(storeValue, defaultValue);
+            AssertV2.IsTrue(res == CloneHelper.HasEqualJson(storeValue, defaultValue), $"Equals says {res} but EqualJson says {!res}!");
+            return res;
         }
 
         public static async Task<IEnumerable<string>> ConcatAllKeys(this IKeyValueStore self, IEnumerable<string> result) {
@@ -38,12 +45,28 @@ namespace com.csutil.keyvaluestore {
                 if (storeOldValue != null) {
                     if (oldValue == null) { oldValue = storeOldValue; }
                     if (storeOldValue != oldValue) {
-                        AssertV2.IsTrue(storeOldValue.Equals(oldValue), "oldValue != store.oldValue, store value newer?"
-                            + "\n storeOldValue=" + storeOldValue + "\n oldValue=" + oldValue);
+                        AssertV2.IsTrue(CloneHelper.HasEqualJson(storeOldValue, oldValue), "oldValue != store.oldValue, store value newer?"
+                            + "\n storeOldValue=" + JsonWriter.AsPrettyString(storeOldValue) + "\n oldValue=" + JsonWriter.AsPrettyString(oldValue));
                     }
                 }
             }
             return oldValue;
+        }
+
+        public static Stopwatch StartFallbackStoreGetTimer(this IKeyValueStore self) {
+            if (self.fallbackStore != null) { return Stopwatch.StartNew(); } else { return null; }
+        }
+
+        public static async Task WaitLatestFallbackGetTime<T>(this IKeyValueStore self, Stopwatch s, Task<T> fallbackGet, float multFactor = 2f) {
+            if (self.fallbackStore != null && s != null) {
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                fallbackGet.ContinueWith(_ => { // Use average of the last 2 requests:
+                    AssertV2.IsTrue(s.ElapsedMilliseconds > 0, "elapsedMilliseconds=" + s.ElapsedMilliseconds);
+                    self.latestFallbackGetTimingInMs = (self.latestFallbackGetTimingInMs + s.ElapsedMilliseconds) / 2;
+                });
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                await Task.WhenAny(fallbackGet, Task.Delay((int)(self.latestFallbackGetTimingInMs * multFactor)));
+            }
         }
 
     }

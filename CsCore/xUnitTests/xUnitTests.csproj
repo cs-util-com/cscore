@@ -6,6 +6,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="src\Plugins\CsCoreXUnitTests\com\csutil\tests\logging\http\**" />
+    <EmbeddedResource Remove="src\Plugins\CsCoreXUnitTests\com\csutil\tests\logging\http\**" />
+    <None Remove="src\Plugins\CsCoreXUnitTests\com\csutil\tests\logging\http\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.7.0" />
     <PackageReference Include="xunit" Version="2.3.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.3.1" />

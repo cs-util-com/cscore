@@ -1,5 +1,7 @@
 using System;
+using System.Globalization;
 using System.IO;
+using System.Runtime.InteropServices;
 using Zio;
 
 namespace com.csutil {
@@ -7,6 +9,11 @@ namespace com.csutil {
     public class EnvironmentV2 {
 
         public static EnvironmentV2 instance { get { return IoC.inject.GetOrAddSingleton<EnvironmentV2>(new object()); } }
+
+        public readonly ISystemInfo systemInfo;
+
+        public EnvironmentV2() : this(new SystemInfo()) { }
+        protected EnvironmentV2(ISystemInfo systemInfo) { this.systemInfo = systemInfo; }
 
         public static bool isWebGL {
             get {
@@ -38,6 +45,44 @@ namespace com.csutil {
 
         public virtual DirectoryEntry GetSpecialFolder(Environment.SpecialFolder specialFolder) {
             return new DirectoryInfo(Environment.GetFolderPath(specialFolder)).ToRootDirectoryEntry();
+        }
+
+        public interface ISystemInfo {
+            string OSArchitecture { get; }
+            string OSDescription { get; }
+            string OSPlatForm { get; }
+            string OSVersion { get; }
+            string ProcessArchitecture { get; }
+            string AppId { get; }
+            string AppName { get; }
+            string AppVersion { get; }
+            string culture { get; }
+            string language { get; }
+            long runDateUtc { get; }
+            int utcOffset { get; }
+        }
+
+        public class SystemInfo : ISystemInfo {
+            // e.g. Arm, X32, Arm64, X64
+            public string OSArchitecture { get; set; } = "" + RuntimeInformation.OSArchitecture;
+            // On Win 10 => "Microsoft Windows 10.0.16299"
+            // On macOS High Sierra 10.13.4 => "Darwin 17.5.0 Darwin Kernel Version 17.5.0 ..."
+            public string OSDescription { get; set; } = RuntimeInformation.OSDescription;
+            // On Win 10 => "Win32NT"
+            // On macOS High Sierra 10.13.4 => "Unix"
+            public string OSPlatForm { get; set; } = "" + Environment.OSVersion.Platform;
+            // On Win 10 => "6.2.9200.0"
+            // On macOS High Sierra 10.13.4 => "17.5.0.0"
+            public string OSVersion { get; set; } = "" + Environment.OSVersion.Version;
+            // e.g. Arm, X32, Arm64, X64
+            public string ProcessArchitecture { get; set; } = "" + RuntimeInformation.ProcessArchitecture;
+            public string AppId { get; set; } = "" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Name;
+            public string AppName { get; set; } = "" + AppDomain.CurrentDomain.FriendlyName;
+            public string AppVersion { get; set; } = "" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+            public string culture { get; set; } = "" + CultureInfo.CurrentCulture;
+            public string language { get; set; } = "" + CultureInfo.CurrentCulture.EnglishName;
+            public long runDateUtc { get; set; } = DateTime.Now.ToUnixTimestampUtc();
+            public int utcOffset { get; set; } = TimeZoneInfo.Local.GetUtcOffset(DateTime.UtcNow).Hours;
         }
 
     }

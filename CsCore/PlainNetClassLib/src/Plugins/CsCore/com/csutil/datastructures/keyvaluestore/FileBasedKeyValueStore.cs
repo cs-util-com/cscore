@@ -17,22 +17,26 @@ namespace com.csutil.keyvaluestore {
 
         private DirectoryEntry folderForAllFiles;
         public IKeyValueStore fallbackStore { get; set; }
+        public long latestFallbackGetTimingInMs { get; set; }
 
         private class PrimitiveWrapper { public object val; }
-        private static bool IsPrimitiveType(Type t) { return t.IsPrimitive; }
 
         public FileBasedKeyValueStore(DirectoryEntry folderForAllFiles) { this.folderForAllFiles = folderForAllFiles; }
 
         public void Dispose() { fallbackStore?.Dispose(); }
 
         public async Task<T> Get<T>(string key, T defaultValue) {
+            var s = this.StartFallbackStoreGetTimer();
+            Task<T> fallbackGet = fallbackStore.Get(key, defaultValue, (newVal) => InternalSet(key, newVal));
+            await this.WaitLatestFallbackGetTime(s, fallbackGet);
+
             var fileForKey = GetFile(key);
             if (fileForKey.Exists) { return (T)InternalGet(fileForKey, typeof(T)); }
-            return await fallbackStore.Get(key, defaultValue, (fallbackValue) => InternalSet(key, fallbackValue));
+            return await fallbackGet;
         }
 
         private object InternalGet(FileEntry fileForKey, Type type) {
-            if (IsPrimitiveType(type)) { return fileForKey.LoadAs<PrimitiveWrapper>().val; }
+            if (type.IsPrimitive) { return fileForKey.LoadAs<PrimitiveWrapper>().val; }
             return fileForKey.LoadAs(type);
         }
 
@@ -45,7 +49,7 @@ namespace com.csutil.keyvaluestore {
 
         private object InternalSet(string key, object value) {
             var objType = value.GetType();
-            if (IsPrimitiveType(objType)) { value = new PrimitiveWrapper() { val = value }; }
+            if (objType.IsPrimitive) { value = new PrimitiveWrapper() { val = value }; }
             var file = GetFile(key);
             var oldVal = file.IsNotNullAndExists() ? InternalGet(file, objType) : null;
             if (objType == typeof(string)) {
