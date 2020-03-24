@@ -48,16 +48,16 @@ namespace com.csutil.io {
 
     internal class UnitySystemInfo : EnvironmentV2.ISystemInfo {
         // e.g. Arm, X32, Arm64, X64
-        public string OSArchitecture { get; set; } = "" + RuntimeInformation.OSArchitecture;
+        public string oSArchitecture { get; set; } = "" + RuntimeInformation.OSArchitecture;
         // On Win 10 => "Microsoft Windows 10.0.16299"
         // On macOS High Sierra 10.13.4 => "Darwin 17.5.0 Darwin Kernel Version 17.5.0 ..."
-        public string OSDescription { get; set; } = RuntimeInformation.OSDescription;
-        public string OSPlatForm { get; set; } = "" + Application.platform;
+        public string oSDescription { get; set; } = RuntimeInformation.OSDescription;
+        public string oSPlatForm { get; set; } = "" + Application.platform;
         // On Win 10 => "6.2.9200.0"
         // On macOS High Sierra 10.13.4 => "17.5.0.0"
-        public string OSVersion { get; set; } = "" + Environment.OSVersion.Version;
+        public string oSVersion { get; set; } = "" + Environment.OSVersion.Version;
         // e.g. Arm, X32, Arm64, X64
-        public string ProcessArchitecture { get; set; } = "" + RuntimeInformation.ProcessArchitecture;
+        public string processArchitecture { get; set; } = "" + RuntimeInformation.ProcessArchitecture;
         // "Windows 7 (6.1.7601) 64bit" on 64 bit Windows 7
         // "Mac OS X 10.10.4" on Mac OS X Yosemite
         // "iPhone OS 8.4" on iOS 8.4
@@ -67,9 +67,9 @@ namespace com.csutil.io {
         public string DeviceModel { get; set; } = "" + SystemInfo.deviceModel;
         // e.g. "Intel(R) Core(TM)2 Quad CPU Q6600 @ 2.40GHz"
         public string ProcessorType { get; set; } = "" + SystemInfo.processorType;
-        public string AppId { get; set; } = "" + Application.identifier;
-        public string AppName { get; set; } = "" + Application.productName;
-        public string AppVersion { get; set; } = "" + Application.version;
+        public string appId { get; set; } = "" + Application.identifier;
+        public string appName { get; set; } = "" + Application.productName;
+        public string appVersion { get; set; } = "" + Application.version;
         public string UnityVersion { get; set; } = "" + Application.unityVersion;
         public string culture { get; set; } = "" + CultureInfo.CurrentCulture;
         public string language { get; set; } = "" + Application.systemLanguage;

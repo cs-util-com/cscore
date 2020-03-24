@@ -48,14 +48,14 @@ namespace com.csutil {
         }
 
         public interface ISystemInfo {
-            string OSArchitecture { get; }
-            string OSDescription { get; }
-            string OSPlatForm { get; }
-            string OSVersion { get; }
-            string ProcessArchitecture { get; }
-            string AppId { get; }
-            string AppName { get; }
-            string AppVersion { get; }
+            string oSArchitecture { get; }
+            string oSDescription { get; }
+            string oSPlatForm { get; }
+            string oSVersion { get; }
+            string processArchitecture { get; }
+            string appId { get; }
+            string appName { get; }
+            string appVersion { get; }
             string culture { get; }
             string language { get; }
             long runDateUtc { get; }
@@ -64,21 +64,21 @@ namespace com.csutil {
 
         public class SystemInfo : ISystemInfo {
             // e.g. Arm, X32, Arm64, X64
-            public string OSArchitecture { get; set; } = "" + RuntimeInformation.OSArchitecture;
+            public string oSArchitecture { get; set; } = "" + RuntimeInformation.OSArchitecture;
             // On Win 10 => "Microsoft Windows 10.0.16299"
             // On macOS High Sierra 10.13.4 => "Darwin 17.5.0 Darwin Kernel Version 17.5.0 ..."
-            public string OSDescription { get; set; } = RuntimeInformation.OSDescription;
+            public string oSDescription { get; set; } = RuntimeInformation.OSDescription;
             // On Win 10 => "Win32NT"
             // On macOS High Sierra 10.13.4 => "Unix"
-            public string OSPlatForm { get; set; } = "" + Environment.OSVersion.Platform;
+            public string oSPlatForm { get; set; } = "" + Environment.OSVersion.Platform;
             // On Win 10 => "6.2.9200.0"
             // On macOS High Sierra 10.13.4 => "17.5.0.0"
-            public string OSVersion { get; set; } = "" + Environment.OSVersion.Version;
+            public string oSVersion { get; set; } = "" + Environment.OSVersion.Version;
             // e.g. Arm, X32, Arm64, X64
-            public string ProcessArchitecture { get; set; } = "" + RuntimeInformation.ProcessArchitecture;
-            public string AppId { get; set; } = "" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Name;
-            public string AppName { get; set; } = "" + AppDomain.CurrentDomain.FriendlyName;
-            public string AppVersion { get; set; } = "" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+            public string processArchitecture { get; set; } = "" + RuntimeInformation.ProcessArchitecture;
+            public string appId { get; set; } = "" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Name;
+            public string appName { get; set; } = "" + AppDomain.CurrentDomain.FriendlyName;
+            public string appVersion { get; set; } = "" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
             public string culture { get; set; } = "" + CultureInfo.CurrentCulture;
             public string language { get; set; } = "" + CultureInfo.CurrentCulture.EnglishName;
             public long runDateUtc { get; set; } = DateTime.Now.ToUnixTimestampUtc();
