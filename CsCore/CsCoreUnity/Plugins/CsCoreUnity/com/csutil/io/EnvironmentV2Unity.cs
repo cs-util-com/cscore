@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -63,11 +64,19 @@ namespace com.csutil.io {
         // "Mac OS X 10.10.4" on Mac OS X Yosemite
         // "iPhone OS 8.4" on iOS 8.4
         // "Android OS API-22" on Android 5.1
-        public string OperatingSystem { get; } = "" + SystemInfo.operatingSystem;
+        public string OperatingSystem { get; set; } = "" + SystemInfo.operatingSystem;
         // e.g. "iPhone6,1" or "PC"
-        public string DeviceModel { get; } = "" + SystemInfo.deviceModel;
+        public string DeviceModel { get; set; } = "" + SystemInfo.deviceModel;
         // e.g. "Intel(R) Core(TM)2 Quad CPU Q6600 @ 2.40GHz"
-        public string ProcessorType { get; } = "" + SystemInfo.processorType;
+        public string ProcessorType { get; set; } = "" + SystemInfo.processorType;
+        public string AppId { get; set; } = "" + Application.identifier;
+        public string AppName { get; set; } = "" + Application.productName;
+        public string AppVersion { get; set; } = "" + Application.version;
+        public string UnityVersion { get; set; } = "" + Application.unityVersion;
+        public string culture { get; set; } = "" + CultureInfo.CurrentCulture;
+        public string language { get; set; } = "" + Application.systemLanguage;
+        public long runDateUtc { get; set; } = DateTime.Now.ToUnixTimestampUtc();
+        public int utcOffset { get; set; } = TimeZoneInfo.Local.GetUtcOffset(DateTime.UtcNow).Hours;
     }
 
 }

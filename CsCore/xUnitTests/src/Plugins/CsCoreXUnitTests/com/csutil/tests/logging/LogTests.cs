@@ -149,6 +149,16 @@ namespace com.csutil.tests {
             if (log is LogToTestMock mockLog) { mockLog.AssertAllMethodsOfMockLogWereCalled(); }
         }
 
+        [Fact]
+        public void TestLogSystemAttributes() {
+            var sysInfo = EnvironmentV2.instance.systemInfo;
+            Log.d("SysInfos: " + JsonWriter.AsPrettyString(sysInfo));
+            var c = TimeZoneInfo.Local.GetUtcOffset(DateTime.UtcNow);
+            Log.d("TimeZoneInfo.Local.GetUtcOffset(DateTime.UtcNow): " + JsonWriter.AsPrettyString(c));
+            var si2 = CloneHelper.DeepCopyViaJson(sysInfo);
+            Assert.Equal(JsonWriter.AsPrettyString(sysInfo), JsonWriter.AsPrettyString(si2));
+        }
+
         private class LogToTestMock : LogDefaultImpl {
             private string latestLog;
             private string latestWarning;
