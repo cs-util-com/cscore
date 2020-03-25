@@ -145,7 +145,7 @@ namespace com.csutil.tests.http {
 
         [Fact]
         public async Task TestInternetStateListener() {
-            await InternetStateManager.AddListener(this);
+            InternetStateManager.AddListener(this);
             Assert.False(InternetStateManager.Get(this).hasInet);
             Assert.False(hasInet);
             await TaskV2.Delay(2500);

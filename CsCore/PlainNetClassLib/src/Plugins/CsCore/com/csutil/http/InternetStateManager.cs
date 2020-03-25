@@ -19,11 +19,8 @@ namespace com.csutil {
 
         public static InternetStateManager Get(object caller) { return IoC.inject.GetOrAddSingleton<InternetStateManager>(caller); }
 
-        public static async Task AddListener(IHasInternetListener l) {
-            var m = Get(l);
-            m.listeners.Add(l);
-            await l.OnHasInternet(m.hasInet);
-        }
+        public static void AddListener(IHasInternetListener l) { Get(l).listeners.Add(l); }
+        public static bool RemoveListener(IHasInternetListener l) { return Get(l).listeners.Remove(l); }
 
         public bool hasInet { get; private set; } = false;
         public readonly List<IHasInternetListener> listeners = new List<IHasInternetListener>();
