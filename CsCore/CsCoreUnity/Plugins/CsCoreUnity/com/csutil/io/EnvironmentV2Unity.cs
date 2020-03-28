@@ -73,8 +73,8 @@ namespace com.csutil.io {
         public string UnityVersion { get; set; } = "" + Application.unityVersion;
         public string culture { get; set; } = "" + CultureInfo.CurrentCulture;
         public string language { get; set; } = "" + Application.systemLanguage;
-        public long runDateUtc { get; set; } = DateTime.Now.ToUnixTimestampUtc();
-        public int utcOffset { get; set; } = TimeZoneInfo.Local.GetUtcOffset(DateTime.UtcNow).Hours;
+        public long runDateUtc { get; set; } = DateTimeV2.UtcNow.ToUnixTimestampUtc();
+        public int utcOffset { get; set; } = TimeZoneInfo.Local.GetUtcOffset(DateTimeV2.UtcNow).Hours;
     }
 
 }

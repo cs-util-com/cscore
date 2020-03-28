@@ -117,7 +117,7 @@ namespace com.csutil.logging {
         public static Color COLOR_YELLOW = Color.yellow;
         public static Color COLOR_RED = Color.red;
 
-        public DateTime createdAt = DateTime.UtcNow;
+        public DateTime createdAt = DateTimeV2.UtcNow;
         public string message;
         public Color color;
         public string icon;

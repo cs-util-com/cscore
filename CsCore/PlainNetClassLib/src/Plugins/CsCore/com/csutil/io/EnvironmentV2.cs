@@ -81,8 +81,8 @@ namespace com.csutil {
             public string appVersion { get; set; } = "" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
             public string culture { get; set; } = "" + CultureInfo.CurrentCulture;
             public string language { get; set; } = "" + CultureInfo.CurrentCulture.EnglishName;
-            public long runDateUtc { get; set; } = DateTime.Now.ToUnixTimestampUtc();
-            public int utcOffset { get; set; } = TimeZoneInfo.Local.GetUtcOffset(DateTime.UtcNow).Hours;
+            public long runDateUtc { get; set; } = DateTimeV2.UtcNow.ToUnixTimestampUtc();
+            public int utcOffset { get; set; } = TimeZoneInfo.Local.GetUtcOffset(DateTimeV2.UtcNow).Hours;
         }
 
     }

@@ -15,7 +15,7 @@ namespace com.csutil.tests {
         public void ExampleUsage1() {
 
             // Get a directory to work in:
-            string dirName = "ExampleDir_" + DateTime.Now.ToUnixTimestampUtc();
+            string dirName = "ExampleDir_" + DateTimeV2.UtcNow.ToUnixTimestampUtc();
             DirectoryInfo myDirectory = new DirectoryInfo(Path.GetTempPath()).GetChildDir(dirName);
             Log.d("The directory path is: " + myDirectory.FullName);
 
@@ -65,7 +65,7 @@ namespace com.csutil.tests {
         public void TestFolderRename() {
 
             // Get a directory to work in:
-            DirectoryInfo myDirectory = CreateDirectoryForTesting("TestFolderRename_" + DateTime.Now.ToUnixTimestampUtc());
+            DirectoryInfo myDirectory = CreateDirectoryForTesting("TestFolderRename_" + DateTimeV2.UtcNow.ToUnixTimestampUtc());
             Log.d("The directory path is: " + myDirectory.FullPath());
 
             // Get a non-existing child directory
@@ -118,7 +118,7 @@ namespace com.csutil.tests {
         [Fact]
         public async Task TestDirectoryMethods() {
             AssertV2.throwExeptionIfAssertionFails = true;
-            var rootDir = CreateDirectoryForTesting("DirMethodsTest_" + DateTime.Now.ToUnixTimestampUtc());
+            var rootDir = CreateDirectoryForTesting("DirMethodsTest_" + DateTimeV2.UtcNow.ToUnixTimestampUtc());
 
             // Test FullPath:
             var dir1 = rootDir.GetChildDir("TestDir 1");

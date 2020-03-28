@@ -95,7 +95,7 @@ namespace com.csutil.tests.http {
             Log.d("Server reported its UTC time to be: " + serverUtcTime);
             var diffBetweenLocalAndOnline = IoC.inject.Get<DateTimeV2>(this).diffOfLocalToServer.Value;
             Assert.True(Math.Abs(diffBetweenLocalAndOnline.Milliseconds) > maxDiffInMs);
-            Log.d("Current DateTime.UtcNow: " + DateTime.UtcNow);
+            Log.d("Current DateTimeV2.UtcNow: " + DateTimeV2.UtcNow);
             await TaskV2.Delay(1000);
             Log.d("Corrected local time: " + DateTimeV2.UtcNow);
 
