@@ -350,19 +350,21 @@ namespace com.csutil.tests.keyvaluestore {
             // Get your key from https://console.developers.google.com/apis/credentials
             var apiKey = "AIzaSyCtcFQMgRIUHhSuXggm4BtXT4eZvUrBWN0";
             // See https://docs.google.com/spreadsheets/d/13R9y6lnUMgRPC0PinJ23tACC6Flgogxa7h7SVaaLhT0
-            var spreadsheetId = "13R9y6lnUMgRPC0PinJ23tACC6Flgogxa7h7SVaaLhT0";
+            var sheetId = "13R9y6lnUMgRPC0PinJ23tACC6Flgogxa7h7SVaaLhT0";
             var sheetName = "UpdateEntriesV1"; // Has to match the sheet name
 
-            var delayInMsBetweenCheck = 1000;
-            var localCache = new InMemoryKeyValueStore(); // Could also persist to disc here
-            var store = new GoogleSheetsKeyValueStore(localCache, apiKey, spreadsheetId, sheetName, delayInMsBetweenCheck);
+            var refreshDelayInMs = 1000;
+            // The cache is where the data from the sheet will be locally stored in:
+            var cache = new InMemoryKeyValueStore(); // Could also persist to disc here
+            var store = new GoogleSheetsKeyValueStore(cache, apiKey, sheetId, sheetName, refreshDelayInMs);
 
             Assert.True(await store.dowloadOnlineDataDebounced());
             Assert.NotEmpty(store.latestRawSheetData);
-
             // Triggering it instant a second time will not download the data again:
             Assert.False(await store.dowloadOnlineDataDebounced());
-            await TaskV2.Delay(delayInMsBetweenCheck * 2);
+
+            // Waiting the refresh delay will allow to redownload:
+            await TaskV2.Delay(refreshDelayInMs * 2);
             Assert.True(await store.dowloadOnlineDataDebounced());
 
             var entry1 = await store.Get<MySheetEntry>("1", null);
