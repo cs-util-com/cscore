@@ -150,12 +150,13 @@ namespace com.csutil.tests.async {
                 Log.d("sender=" + sender);
                 return "awesome";
             };
-            var wrappedFunc = originalFunction.AsThrottledDebounce(10);
+            int delayInMs = 300;
+            var wrappedFunc = originalFunction.AsThrottledDebounce(delayInMs);
             Assert.Equal("awesome", wrappedFunc("good"));
             Assert.Null(wrappedFunc("bad"));
             Assert.Null(wrappedFunc("bad"));
             Assert.Null(wrappedFunc("bad"));
-            await TaskV2.Delay(50);
+            await TaskV2.Delay(delayInMs * 2);
             Assert.Equal("awesome", wrappedFunc("good"));
             Assert.Null(wrappedFunc("bad"));
             Assert.Null(wrappedFunc("bad"));
@@ -164,16 +165,16 @@ namespace com.csutil.tests.async {
 
         [Fact]
         public async Task TestThrottledDebounce5() {
-
+            int delayInMs = 200;
             Func<object, Task> originalFunction = async (object sender) => {
                 Assert.Equal("good", sender);
-                await TaskV2.Delay(100);
+                await TaskV2.Delay(delayInMs * 4);
             };
             var wrappedFunc = originalFunction.AsThrottledDebounce(10);
 
             var t = Stopwatch.StartNew();
             var task = wrappedFunc("good");
-            await TaskV2.Delay(20);
+            await TaskV2.Delay(delayInMs);
             Assert.Null(wrappedFunc("bad"));
             Assert.Null(wrappedFunc("bad"));
             Assert.Null(wrappedFunc("bad"));
