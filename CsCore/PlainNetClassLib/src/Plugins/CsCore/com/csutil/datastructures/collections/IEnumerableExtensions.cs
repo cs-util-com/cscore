@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace com.csutil {
 
@@ -20,6 +22,16 @@ namespace com.csutil {
 
         public static IEnumerable<T> Filter<T>(this IEnumerable<T> self, Func<T, bool> predicate) {
             return self.Where(predicate);
+        }
+
+        public static async Task<IEnumerable<R>> MapAsync<T, R>(this IEnumerable<T> self, Func<T, Task<R>> selector) {
+            return await Task.WhenAll(self.Select(selector));
+        }
+
+        public static async Task<IEnumerable<T>> FilterAsync<T>(this IEnumerable<T> self, Func<T, Task<bool>> predicate) {
+            var results = new ConcurrentQueue<T>();
+            await Task.WhenAll(self.Select(async x => { if (await predicate(x)) { results.Enqueue(x); } }));
+            return results;
         }
 
         public static bool IsNullOrEmpty<T>(this IEnumerable<T> self) { return self == null || !self.Any(); }
