@@ -15,8 +15,15 @@ namespace com.csutil {
         }
 
         public static string AsPrettyString(object o) {
-            var jToken = Newtonsoft.Json.Linq.JToken.Parse(JsonWriter.GetWriter().Write(o));
+            var jToken = Newtonsoft.Json.Linq.JToken.Parse(GetWriter().Write(o));
             return jToken.ToPrettyString();
+        }
+
+        public static bool HasEqualJson<T>(T a, T b) {
+            if (a == null && b != null) { return false; }
+            if (b == null && a != null) { return false; }
+            var w = GetWriter();
+            return Equals(w.Write(a), w.Write(b));
         }
 
     }

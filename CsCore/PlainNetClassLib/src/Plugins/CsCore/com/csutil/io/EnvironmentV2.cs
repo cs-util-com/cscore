@@ -50,7 +50,7 @@ namespace com.csutil {
         public interface ISystemInfo {
             string oSArchitecture { get; }
             string oSDescription { get; }
-            string oSPlatForm { get; }
+            string osPlatform { get; }
             string oSVersion { get; }
             string processArchitecture { get; }
             string appId { get; }
@@ -70,7 +70,7 @@ namespace com.csutil {
             public string oSDescription { get; set; } = RuntimeInformation.OSDescription;
             // On Win 10 => "Win32NT"
             // On macOS High Sierra 10.13.4 => "Unix"
-            public string oSPlatForm { get; set; } = "" + Environment.OSVersion.Platform;
+            public string osPlatform { get; set; } = "" + Environment.OSVersion.Platform;
             // On Win 10 => "6.2.9200.0"
             // On macOS High Sierra 10.13.4 => "17.5.0.0"
             public string oSVersion { get; set; } = "" + Environment.OSVersion.Version;

@@ -7,7 +7,20 @@ using System.Threading.Tasks;
 
 namespace com.csutil {
 
+
     public static class EventHandlerExtensions {
+
+        public class EventHandlerResult<T> { public T result; }
+
+        public static Func<T, R> AsThrottledDebounce<T, R>(this Func<T, R> self, double delayInMs, bool skipFirstEvent = false) {
+            EventHandler<EventHandlerResult<R>> action = (input, output) => { output.result = self((T)input); };
+            EventHandler<EventHandlerResult<R>> throttledAction = action.AsThrottledDebounce(delayInMs, skipFirstEvent);
+            return (T input) => {
+                var output = new EventHandlerResult<R>();
+                throttledAction(input, output);
+                return output.result;
+            };
+        }
 
         /// <summary> 
         /// This will create an EventHandler where the first call is executed and the last call is executed but 
@@ -24,19 +37,29 @@ namespace com.csutil {
                     s.Restart();
                     if (triggerFirstEvent) {
                         triggerFirstEvent = false;
-                        self(sender, latestEventArgs);
+                        self(sender, eventArgs);
                     }
                 }
-                await TaskV2.Delay(TimeSpan.FromMilliseconds(delayInMs * 1.1f));
-                lock (threadLock) {
-                    if (s.ElapsedMilliseconds >= delayInMs) {
-                        s.Restart();
-                        self(sender, latestEventArgs);
-                        if (!skipFirstEvent) { triggerFirstEvent = true; }
+                var delay = TaskV2.Delay((int)(delayInMs * 1.1f));
+                await HandlerTaskResultIfNeeded(eventArgs);
+                await delay;
+                if (s.ElapsedMilliseconds >= delayInMs) {
+                    lock (threadLock) {
+                        if (s.ElapsedMilliseconds >= delayInMs) {
+                            s.Reset(); // Stop (and reset) and only continue below
+                            self(sender, latestEventArgs);
+                            if (!skipFirstEvent) { triggerFirstEvent = true; }
+                        }
                     }
+                    await HandlerTaskResultIfNeeded(latestEventArgs);
+                    s.Restart();
                 }
             };
             return (sender, eventArgs) => { asyncEventHandler(sender, eventArgs); };
+        }
+
+        private static async Task HandlerTaskResultIfNeeded(object eventArgs) {
+            if (eventArgs is EventHandlerResult<Task> t && t.result != null) { await t.result; }
         }
 
     }

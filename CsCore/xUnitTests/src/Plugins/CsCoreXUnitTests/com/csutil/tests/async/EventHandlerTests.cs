@@ -143,6 +143,62 @@ namespace com.csutil.tests.async {
             Assert.False(myStringParamWasBad);
         }
 
+        [Fact]
+        public async Task TestThrottledDebounce4() {
+            Func<object, string> originalFunction = (object sender) => {
+                Assert.Equal("good", sender);
+                Log.d("sender=" + sender);
+                return "awesome";
+            };
+            int delayInMs = 300;
+            var wrappedFunc = originalFunction.AsThrottledDebounce(delayInMs);
+            Assert.Equal("awesome", wrappedFunc("good"));
+            Assert.Null(wrappedFunc("bad"));
+            Assert.Null(wrappedFunc("bad"));
+            Assert.Null(wrappedFunc("bad"));
+            await TaskV2.Delay(delayInMs * 2);
+            Assert.Equal("awesome", wrappedFunc("good"));
+            Assert.Null(wrappedFunc("bad"));
+            Assert.Null(wrappedFunc("bad"));
+            Assert.Null(wrappedFunc("bad"));
+        }
+
+        [Fact]
+        public async Task TestThrottledDebounce5() {
+            int delayInMs = 200;
+            Func<object, Task> originalFunction = async (object sender) => {
+                Assert.Equal("good", sender);
+                await TaskV2.Delay(delayInMs * 4);
+            };
+            var wrappedFunc = originalFunction.AsThrottledDebounce(10);
+
+            var t = Stopwatch.StartNew();
+            var task = wrappedFunc("good");
+            await TaskV2.Delay(delayInMs);
+            Assert.Null(wrappedFunc("bad"));
+            Assert.Null(wrappedFunc("bad"));
+            Assert.Null(wrappedFunc("bad"));
+            await task;
+            task = wrappedFunc("good");
+            Assert.Null(wrappedFunc("bad"));
+            Assert.Null(wrappedFunc("bad"));
+            Assert.Null(wrappedFunc("bad"));
+            await task;
+
+            Assert.True(t.ElapsedMilliseconds > 200, "ElapsedMilliseconds=" + t.ElapsedMilliseconds);
+        }
+
+        [Fact]
+        public async Task TestThrottledDebounce6() {
+            Func<object, Task> originalFunction = async (object sender) => {
+                throw new NotImplementedException();
+            };
+            var wrappedFunc = originalFunction.AsThrottledDebounce(10);
+            await Assert.ThrowsAsync<NotImplementedException>(async () => {
+                await wrappedFunc("good");
+            });
+        }
+
     }
 
 }

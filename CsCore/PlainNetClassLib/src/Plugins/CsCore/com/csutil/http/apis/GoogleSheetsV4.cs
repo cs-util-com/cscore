@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace com.csutil.http.apis {
@@ -7,7 +8,8 @@ namespace com.csutil.http.apis {
     public static class GoogleSheetsV4 {
 
         public static async Task<List<List<string>>> GetSheet(string apiKey, string spreadsheetId, string sheetName) {
-            return (await GetApiUrlFor(apiKey, spreadsheetId, sheetName).SendGET().GetResult<Response>()).values;
+            Response resp = await GetApiUrlFor(apiKey, spreadsheetId, sheetName).SendGET().GetResult<Response>();
+            return resp.values;
         }
 
         /// <summary> Loads the sheet content </summary>

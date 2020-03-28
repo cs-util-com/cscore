@@ -27,7 +27,7 @@ namespace com.csutil.http.apis {
                 var columnKeys = columnPlusMetaInfo.Keys.Filter(x => x.StartsWith("gsx$"));
                 var column = columnKeys.Map(key => columnPlusMetaInfo[key]);
                 var columnAsStrings = column.Map(row => (row as JObject).GetValue("$t").ToString());
-                sheets.Add(columnAsStrings.ToList());
+                sheets.Add(columnAsStrings.Filter(x => !x.IsNullOrEmpty()).ToList());
             }
             return sheets;
         }

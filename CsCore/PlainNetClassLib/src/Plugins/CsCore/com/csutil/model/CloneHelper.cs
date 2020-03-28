@@ -44,11 +44,6 @@ namespace com.csutil {
             }
         }
 
-        public static bool HasEqualJson<T>(T a, T b) {
-            var settings = json.JsonNetSettings.defaultSettings;
-            return Equals(ToJsonString(a, settings), ToJsonString(b, settings));
-        }
-
         public static T DeepCopyViaJsonString<T>(T objectToDeepCopy) {
             return DeepCopyViaJsonString(objectToDeepCopy, out string jsonString);
         }
