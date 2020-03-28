@@ -8,11 +8,15 @@ namespace com.csutil.keyvaluestore {
 
     public class InMemoryKeyValueStore : IKeyValueStore {
 
-        private Dictionary<string, object> store = new Dictionary<string, object>();
+        private Dictionary<string, object> store;
 
         public long latestFallbackGetTimingInMs { get; set; }
 
         public IKeyValueStore fallbackStore { get; set; }
+
+        public InMemoryKeyValueStore() : this(new Dictionary<string, object>()) { }
+
+        public InMemoryKeyValueStore(Dictionary<string, object> store) { this.store = store; }
 
         public void Dispose() {
             // TODO iterate over entries, and dispose them if possible?
