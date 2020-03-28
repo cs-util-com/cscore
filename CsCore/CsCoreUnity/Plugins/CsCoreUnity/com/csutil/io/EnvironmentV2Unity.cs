@@ -52,7 +52,7 @@ namespace com.csutil.io {
         // On Win 10 => "Microsoft Windows 10.0.16299"
         // On macOS High Sierra 10.13.4 => "Darwin 17.5.0 Darwin Kernel Version 17.5.0 ..."
         public string oSDescription { get; set; } = RuntimeInformation.OSDescription;
-        public string oSPlatForm { get; set; } = "" + Application.platform;
+        public string osPlatform { get; set; } = "" + Application.platform;
         // On Win 10 => "6.2.9200.0"
         // On macOS High Sierra 10.13.4 => "17.5.0.0"
         public string oSVersion { get; set; } = "" + Environment.OSVersion.Version;
