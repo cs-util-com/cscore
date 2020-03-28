@@ -8,12 +8,8 @@ namespace com.csutil.http.apis {
     public static class GoogleSheetsV4 {
 
         public static async Task<List<List<string>>> GetSheet(string apiKey, string spreadsheetId, string sheetName) {
-            var resp = await GetApiUrlFor(apiKey, spreadsheetId, sheetName).SendGET().GetResult<Response>();
-            return RemoveEmpty(resp.values);
-        }
-
-        private static List<List<string>> RemoveEmpty(List<List<string>> values) {
-            return values.Map(x => x.Filter(e => !e.IsNullOrEmpty()).ToList()).ToList();
+            Response resp = await GetApiUrlFor(apiKey, spreadsheetId, sheetName).SendGET().GetResult<Response>();
+            return resp.values;
         }
 
         /// <summary> Loads the sheet content </summary>

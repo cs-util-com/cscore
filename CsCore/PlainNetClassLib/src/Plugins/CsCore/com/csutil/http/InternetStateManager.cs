@@ -17,28 +17,42 @@ namespace com.csutil {
 
     public class InternetStateManager : IDisposable {
 
-        public static InternetStateManager Get(object caller) { return IoC.inject.GetOrAddSingleton<InternetStateManager>(caller); }
+        public static InternetStateManager Instance(object caller) { return IoC.inject.GetOrAddSingleton<InternetStateManager>(caller); }
 
-        public static void AddListener(IHasInternetListener l) { Get(l).listeners.Add(l); }
-        public static bool RemoveListener(IHasInternetListener l) { return Get(l).listeners.Remove(l); }
+        public static void AddListener(IHasInternetListener l) { Instance(l).listeners.Add(l); }
+        public static bool RemoveListener(IHasInternetListener l) { return Instance(l).listeners.Remove(l); }
 
-        public bool hasInet { get; private set; } = false;
+        public bool HasInet { get; private set; } = false;
+        public Task<bool> HasInetAsync { get; private set; }
+
         public readonly List<IHasInternetListener> listeners = new List<IHasInternetListener>();
         public readonly CancellationTokenSource cancelToken = new CancellationTokenSource();
 
         public InternetStateManager() {
+            HasInetAsync = RunInternetCheck();
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-            TaskV2.RunRepeated(async () => {
-                await HasInet(await RestFactory.instance.HasInternet());
-                return true;
-            }, delayInMsBetweenIterations: 3000, cancelToken: cancelToken.Token);
+            RunInternetCheckLoop(HasInetAsync);
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         }
 
         public void Dispose() { cancelToken.Cancel(); }
 
-        private async Task HasInet(bool hasInet) {
-            this.hasInet = hasInet;
+        private async Task RunInternetCheckLoop(Task firstInetCheck) {
+            await firstInetCheck;
+            await TaskV2.RunRepeated(async () => {
+                HasInetAsync = RunInternetCheck();
+                await HasInetAsync;
+                return true;
+            }, delayInMsBetweenIterations: 3000, cancelToken: cancelToken.Token);
+        }
+
+        private async Task<bool> RunInternetCheck() {
+            await SetHasInet(await RestFactory.instance.HasInternet());
+            return HasInet;
+        }
+
+        private async Task SetHasInet(bool hasInet) {
+            this.HasInet = hasInet;
             foreach (var l in listeners) {
                 try { await l.OnHasInternet(hasInet); } catch (Exception e) { Log.e(e); }
             }

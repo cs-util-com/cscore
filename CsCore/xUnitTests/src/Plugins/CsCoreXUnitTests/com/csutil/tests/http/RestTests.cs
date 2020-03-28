@@ -146,10 +146,12 @@ namespace com.csutil.tests.http {
         [Fact]
         public async Task TestInternetStateListener() {
             InternetStateManager.AddListener(this);
-            Assert.False(InternetStateManager.Get(this).hasInet);
+            Assert.False(InternetStateManager.Instance(this).HasInet);
             Assert.False(hasInet);
-            await TaskV2.Delay(2500);
+            await InternetStateManager.Instance(this).HasInetAsync;
+            Assert.True(InternetStateManager.Instance(this).HasInet);
             Assert.True(hasInet);
+
         }
 
         Task IHasInternetListener.OnHasInternet(bool hasInet) { this.hasInet = hasInet; return Task.FromResult(true); }
