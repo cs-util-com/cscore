@@ -53,7 +53,7 @@ namespace com.csutil.demos.demo1 {
 
         private void TestJsonSerialization() {
             var prefsKey = "testObj1";
-            var myObj = new MyClass1() { theCurrentTime = "It is " + DateTime.Now, myInt = 123 };
+            var myObj = new MyClass1() { theCurrentTime = "It is " + DateTimeV2.Now, myInt = 123 };
             PlayerPrefsV2.SetObject(prefsKey, myObj);
             AssertV2.AreEqual(myObj.theCurrentTime, PlayerPrefsV2.GetObject<MyClass1>(prefsKey, null).theCurrentTime);
             AssertV2.AreEqual(myObj.myInt, PlayerPrefsV2.GetObject<MyClass1>(prefsKey, null).myInt);

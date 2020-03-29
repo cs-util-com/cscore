@@ -15,6 +15,8 @@ namespace com.csutil {
 
         public static DateTime UtcNow { get { return IoC.inject.GetOrAddSingleton<DateTimeV2>(null).GetUtcNow(); } }
 
+        public static DateTime Now { get { return IoC.inject.GetOrAddSingleton<DateTimeV2>(null).GetNow(); } }
+
         public ISet<string> uriBlacklist = new HashSet<string>();
         public TimeSpan? diffOfLocalToServer { get; private set; }
 
@@ -30,6 +32,11 @@ namespace com.csutil {
         public DateTime GetUtcNow() {
             if (diffOfLocalToServer != null) { return DateTime.UtcNow + diffOfLocalToServer.Value; }
             return DateTime.UtcNow;
+        }
+
+        public DateTime GetNow() {
+            if (diffOfLocalToServer != null) { return DateTime.Now + diffOfLocalToServer.Value; }
+            return DateTime.Now;
         }
 
     }

@@ -14,7 +14,7 @@ namespace com.csutil.tests {
             Text text1 = map.Get<Text>("DynamicText1");
 
             // Instead of using text1.text = "Abc" you can use text1.textLocalized.. to automatically use the I18n logic:
-            text1.textLocalized("I am a localized text, today is {0}, so there are {1} days left till the release!", DateTime.Now, daysLeft);
+            text1.textLocalized("I am a localized text, today is {0}, so there are {1} days left till the release!", DateTimeV2.Now, daysLeft);
         }
 
     }
