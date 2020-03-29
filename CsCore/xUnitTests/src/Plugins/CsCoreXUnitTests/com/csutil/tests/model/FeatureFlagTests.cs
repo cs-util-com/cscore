@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using com.csutil.json;
+﻿using System.Threading.Tasks;
 using com.csutil.keyvaluestore;
 using com.csutil.model;
-using com.csutil.tests.keyvaluestore;
 using Xunit;
 
 namespace com.csutil.tests.model {
@@ -16,90 +12,92 @@ namespace com.csutil.tests.model {
         [Fact]
         public async Task ExampleUsage1() {
 
-            AssertV2.throwExeptionIfAssertionFails = true;
+            // Get your key from https://console.developers.google.com/apis/credentials
+            var apiKey = "AIzaSyCtcFQMgRIUHhSuXggm4BtXT4eZvUrBWN0";
+            var sheetId = "1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM";
+            var sheetName = "MySheet1"; // Has to match the sheet name
+            var googleSheetsStore = new GoogleSheetsKeyValueStore(new InMemoryKeyValueStore(), apiKey, sheetId, sheetName);
+            var testStore = new TestFeatureFlagStore(new InMemoryKeyValueStore(), googleSheetsStore);
+            IoC.inject.SetSingleton(new FeatureFlagManager(testStore));
 
-            // Setup a feature flag manager that is connected to a remote server and has a local cache when offline:
-            var simulatedOnlineStore = new SimulatedOnlineFeatureFlagStore();
-            var simulatedInetConnection = new MockDelayKeyValueStore(simulatedOnlineStore);
-            var localCache = new InMemoryKeyValueStore().WithFallbackStore(new ExceptionWrapperKeyValueStore(simulatedInetConnection));
-            simulatedInetConnection.delay = 10;
-            localCache.latestFallbackGetTimingInMs = 40;
-            IoC.inject.SetSingleton(new FeatureFlagManager(localCache));
-
-            // Feature flag not 
+            // Open https://docs.google.com/spreadsheets/d/1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM for these:
             Assert.False(await FeatureFlag.IsEnabled("MyFlag1"));
+            Assert.True(await FeatureFlag.IsEnabled("MyFlag2"));
 
-            simulatedOnlineStore.flagToReturn = new FeatureFlag() { isEnabled = false };
-            Assert.False(await FeatureFlag.IsEnabled("MyFlag1"));
-            simulatedOnlineStore.flagToReturn.isEnabled = true;
+            var key3 = "MyFlag3";
+            FeatureFlag flag3 = await FeatureFlagManager.instance.GetFeatureFlag(key3);
+            Assert.Equal(40, flag3.rolloutPercentage); // Rollout of feature 3 is at 40%
 
-            Assert.True(await FeatureFlag.IsEnabled("MyFlag1"));
-
-            simulatedOnlineStore.flagToReturn.isStagedRollout = true;
-            simulatedOnlineStore.flagToReturn.rolloutPercentServer = 0;
-            Assert.Equal(0, simulatedOnlineStore.flagToReturn.localRandomValue);
-
-            var f = new FeatureFlag();
-            Assert.IsType<FeatureFlag>(f);
-            Assert.IsType<FeatureFlag>(f.DeepCopyViaJson());
-
-            // Now that the feature is marked as staging rollout the next get will trigger the localRandomValue to be set:
-            Assert.False(await FeatureFlag.IsEnabled("MyFlag1"));
-            Assert.True(simulatedOnlineStore.flagToReturn.localRandomValue > 0);
-            Assert.True(simulatedOnlineStore.flagToReturn.localRandomValue < 100);
-
-            // Change the rolloutPercentServer to be bigger then the random value in the local flag data:
-            simulatedOnlineStore.flagToReturn.rolloutPercentServer = simulatedOnlineStore.flagToReturn.localRandomValue + 1;
-            Assert.True(await FeatureFlag.IsEnabled("MyFlag1")); // the client will be included in the staged rollout
-
-            simulatedInetConnection.throwTimeoutError = true; // Device not online anymore
-            // Make sure the local cache of the flags still returns the flag:
-            Assert.True(await FeatureFlag.IsEnabled("MyFlag1"));
-
-            simulatedInetConnection.throwTimeoutError = false; // Internet is back
-
-            simulatedOnlineStore.flagToReturn.isEnabled = false; // The server disabled the feature flag again
-            Assert.False(await FeatureFlag.IsEnabled("MyFlag1"));
-            simulatedOnlineStore.flagToReturn.isEnabled = true;
-            Assert.True(await FeatureFlag.IsEnabled("MyFlag1"));
-
-            simulatedOnlineStore.flagToReturn = null; // The server does not know any features anymore
-            Assert.False(await FeatureFlag.IsEnabled("MyFlag1")); // Asking again for the flag will return false
+            // The local random value that was chosen determines if the flag is enabled or not:
+            if (flag3.localState.randomPercentage <= flag3.rolloutPercentage) {
+                Assert.True(await FeatureFlag.IsEnabled(key3));
+            } else {
+                Assert.False(await FeatureFlag.IsEnabled(key3));
+            }
 
         }
 
-        private class SimulatedOnlineFeatureFlagStore : IKeyValueStore {
+        [Fact]
+        public async Task ExtendedTest1() {
 
-            public FeatureFlag flagToReturn; // This simulates the flag stored in the remote server 
+            // Get your key from https://console.developers.google.com/apis/credentials
+            var apiKey = "AIzaSyCtcFQMgRIUHhSuXggm4BtXT4eZvUrBWN0";
+            // See https://docs.google.com/spreadsheets/d/1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM
+            var sheetId = "1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM";
+            var sheetName = "MySheet1"; // Has to match the sheet name
+            var googleSheetsStore = new GoogleSheetsKeyValueStore(new InMemoryKeyValueStore(), apiKey, sheetId, sheetName);
 
-            public Task<T> Get<T>(string key, T defaultValue) {
-                var featureKey = TypedJsonHelper.NewTypedJsonReader().Read<FeatureFlagManager.FeatureKey>(key);
-                Assert.Equal("MyFlag1", featureKey.id);
-                Assert.Equal(typeof(FeatureFlag), typeof(T));
-                if (flagToReturn == null) { return Task.FromResult((T)(object)new FeatureFlag() { isEnabled = false }); }
-                return Task.FromResult((T)(object)flagToReturn);
+
+            var localStore = new InMemoryKeyValueStore();
+            var testStore = new TestFeatureFlagStore(localStore, googleSheetsStore);
+
+            IoC.inject.SetSingleton(new FeatureFlagManager(testStore));
+
+            var key1 = "MyFlag1";
+            var key2 = "MyFlag2";
+            var key3 = "MyFlag3";
+
+            Assert.NotNull(await googleSheetsStore.Get<FeatureFlag>(key1, null));
+            Assert.NotNull(await googleSheetsStore.Get<FeatureFlag>(key2, null));
+            Assert.NotNull(await testStore.Get<FeatureFlag>(key2, null));
+            Assert.NotNull(await FeatureFlagManager.instance.GetFeatureFlag(key2));
+
+            Assert.False(await FeatureFlag.IsEnabled(key1));
+            Assert.True(await FeatureFlag.IsEnabled(key2));
+
+            var flag3_1 = await FeatureFlagManager.instance.GetFeatureFlag(key3);
+            Assert.Equal(40, flag3_1.rolloutPercentage);
+
+            var state3_1 = await localStore.Get<FeatureFlag.LocalState>(key3, null);
+            var percent3_1 = state3_1.randomPercentage;
+            Assert.NotEqual(0, percent3_1);
+            if (percent3_1 < flag3_1.rolloutPercentage) {
+                Assert.True(await FeatureFlag.IsEnabled(key3));
+            } else {
+                Assert.False(await FeatureFlag.IsEnabled(key3));
             }
+            state3_1.randomPercentage = flag3_1.rolloutPercentage - 1;
+            await localStore.Set(key3, state3_1);
 
-            public Task<object> Set(string key, object value) {
-                var featureKey = TypedJsonHelper.NewTypedJsonReader().Read<FeatureFlagManager.FeatureKey>(key);
-                Assert.Equal("MyFlag1", featureKey.id);
-                Assert.NotNull(value);
-                Assert.IsType<FeatureFlag>(value);
-                var f = value as FeatureFlag;
-                Assert.NotEqual(0, f.localRandomValue);
-                Assert.NotEqual(f, flagToReturn);
-                flagToReturn = f;
-                return Task.FromResult(value);
+            var state3_2 = await localStore.Get<FeatureFlag.LocalState>(key3, null);
+            Assert.NotEqual(percent3_1, state3_2.randomPercentage);
+
+            var flag3_2 = await FeatureFlagManager.instance.GetFeatureFlag(key3);
+            Assert.Equal(state3_2.randomPercentage, flag3_2.localState.randomPercentage);
+            Assert.True(flag3_2.IsEnabled());
+            Assert.True(await FeatureFlag.IsEnabled(key3));
+
+        }
+
+        private class TestFeatureFlagStore : DefaultFeatureFlagStore {
+
+            public TestFeatureFlagStore(IKeyValueStore l, IKeyValueStore r) : base(l, r) { }
+
+            protected override string GenerateFeatureKey(string featureId) {
+                // Here e.g the EnvironmentV2.instance.systemInfo.osPlatform could be added to
+                // allow different rollout percentages for different target platforms 
+                return featureId; // for the test just return the featureId
             }
-
-            public IKeyValueStore fallbackStore { get; set; }
-            public long latestFallbackGetTimingInMs { get; set; }
-
-            public Task<bool> ContainsKey(string key) { throw new NotImplementedException(); }
-            public void Dispose() { throw new NotImplementedException(); }
-            public Task<IEnumerable<string>> GetAllKeys() { throw new NotImplementedException(); }
-            public Task<bool> Remove(string key) { throw new NotImplementedException(); }
-            public Task RemoveAll() { throw new NotImplementedException(); }
 
         }
 
