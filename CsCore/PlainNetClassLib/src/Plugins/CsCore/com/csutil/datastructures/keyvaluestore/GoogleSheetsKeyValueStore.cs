@@ -12,19 +12,33 @@ namespace com.csutil.keyvaluestore {
         public long latestFallbackGetTimingInMs { get { return fallbackStore.latestFallbackGetTimingInMs; } set { } }
 
         private readonly string apiKey;
-        private readonly string spreadsheetId;
-        private readonly string sheetName;
+        public readonly string spreadsheetId;
 
-        public readonly Func<Task<bool>> dowloadOnlineDataDebounced;
+        private string _sheetName;
+        public string sheetName {
+            get { return _sheetName; }
+            set {
+                _sheetName = value;
+                InitDebouncedDownloadLogic();
+            }
+        }
+
+        private readonly double delayInMsBetweenCheck;
+        public Func<Task<bool>> dowloadOnlineDataDebounced;
         public List<List<string>> latestRawSheetData { get; private set; }
 
-        public GoogleSheetsKeyValueStore(IKeyValueStore store, string apiKey,
+        public GoogleSheetsKeyValueStore(IKeyValueStore localCache, string apiKey,
                     string spreadsheetId, string sheetName, double delayInMsBetweenCheck = 10000) {
-            this.fallbackStore = store;
+            this.fallbackStore = localCache;
             this.apiKey = apiKey;
             this.spreadsheetId = spreadsheetId;
             this.sheetName = sheetName;
+            this.delayInMsBetweenCheck = delayInMsBetweenCheck;
+            InitDebouncedDownloadLogic();
+        }
 
+        private void InitDebouncedDownloadLogic() {
+            latestRawSheetData = null;
             // Create a debounced func that only downloads new data max every 10 seconds and
             // trigger this method only if inet available:
             Func<object, Task> debouncedFunc = DowloadOnlineData;
@@ -85,24 +99,28 @@ namespace com.csutil.keyvaluestore {
 
         private object ToObject(List<string> names, List<string> values) {
             var nc = names.Count();
-            var vc = values.Count();
-            if (nc < vc) { throw new IndexOutOfRangeException($"Only {nc} names but {vc} values in row"); }
+            var vCount = values.Count();
+            if (nc < vCount) { throw new IndexOutOfRangeException($"Only {nc} names but {vCount} values in row"); }
             var result = new Dictionary<string, object>();
             var jsonReader = JsonReader.GetReader();
-            for (int i = 0; i < vc; i++) {
-                var fieldName = names[i];
-                var value = values[i].Trim();
-                if (value.IsNullOrEmpty()) { continue; }
-
-                if (value.StartsWith("{")) {
-                    result.Add(fieldName, jsonReader.Read<Dictionary<string, object>>(value));
-                } else if (value.StartsWith("[")) {
-                    result.Add(fieldName, jsonReader.Read<List<object>>(value));
-                } else {
-                    result.Add(fieldName, ParsePrimitive(value));
-                }
-            }
+            for (int i = 0; i < vCount; i++) { AddToResult(result, jsonReader, names[i], values[i].Trim()); }
             return result;
+        }
+
+        private bool AddToResult(Dictionary<string, object> result, IJsonReader jsonReader, string fieldName, string value) {
+            if (value.IsNullOrEmpty()) { return false; }
+            try {
+                if (value.StartsWith("{") && value.EndsWith("}")) {
+                    result.Add(fieldName, jsonReader.Read<Dictionary<string, object>>(value));
+                    return true;
+                }
+                if (value.StartsWith("[") && value.EndsWith("]")) {
+                    result.Add(fieldName, jsonReader.Read<List<object>>(value));
+                    return true;
+                }
+            } catch (Exception e) { Log.e(e); }
+            result.Add(fieldName, ParsePrimitive(value));
+            return true;
         }
 
         private object ParsePrimitive(string value) {

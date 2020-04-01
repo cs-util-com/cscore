@@ -96,6 +96,12 @@ namespace Xunit {
             }
         }
 
+        public static void DoesNotContain(string subString, string fullString) {
+            if (fullString.Contains(subString)) {
+                throw new AssertException("'" + subString + "' is substring of '" + fullString + "'");
+            }
+        }
+
     }
 
 }

@@ -1,6 +1,11 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
+using com.csutil.keyvaluestore;
 using Newtonsoft.Json.Linq;
 
 namespace com.csutil {
@@ -12,67 +17,57 @@ namespace com.csutil {
         public bool isWarningLogEnabled = true;
         public string currentLocale { get; private set; } = "" + CultureInfo.CurrentUICulture;
         public CultureInfo currentCulture = CultureInfo.CurrentCulture;
-        private Func<string, string> localeLoader = TryLoadLocaleFromFile;
-        private JObject translationData;
 
-        public I18n SetLocale(string newLocale) {
+        private Func<string, Task<Dictionary<string, Translation>>> localeLoader = TryLoadLocaleFromFile();
+        private Dictionary<string, Translation> translationData;
+
+        public async Task<I18n> SetLocale(string newLocale) {
             currentLocale = newLocale;
             currentCulture = new CultureInfo(currentLocale);
-            LoadTranslationDataForLocale();
+            await LoadTranslationDataForLocale();
             return this;
         }
 
-        public I18n SetLocaleLoader(Func<string, string> newLocaleLoader) {
+        public async Task<I18n> SetLocaleLoader(Func<string, Task<Dictionary<string, Translation>>> newLocaleLoader) {
             localeLoader = newLocaleLoader;
-            LoadTranslationDataForLocale();
+            await LoadTranslationDataForLocale();
             return this;
         }
 
-        private void LoadTranslationDataForLocale() {
-            if (localeLoader != null) {
-                var jsonString = localeLoader(currentLocale);
-                if (jsonString != null) { translationData = JObject.Parse(jsonString); }
-            }
+        public async Task<I18n> SetLocaleLoader(Func<string, Task<Dictionary<string, Translation>>> newLocaleLoader, string newLocale) {
+            localeLoader = newLocaleLoader;
+            currentLocale = newLocale;
+            await LoadTranslationDataForLocale();
+            return this;
+        }
+
+        private async Task LoadTranslationDataForLocale() {
+            AssertV2.IsNotNull(localeLoader, "localeLoader");
+            translationData = await localeLoader(currentLocale);
         }
 
         public string Get(string key, params object[] args) {
             string translation = key;
-            if (translationData == null) { LoadTranslationDataForLocale(); }
-            if (translationData?[key] != null) {
-                // if this key is a direct string
-                if (translationData[key].Count() == 0) {
-                    translation = "" + translationData[key];
-                } else {
-                    translation = FindSingularOrPlural(key, args);
-                }
-            } else if (isWarningLogEnabled) { Log.w("Could not translate: " + key); }
-            // check if we have embeddable data
-            if (args.Length > 0) {
-                translation = string.Format(currentCulture, translation, args);
+            if (translationData == null) { LoadTranslationDataForLocale().Wait(); }
+            if (translationData != null && translationData.TryGetValue(key, out Translation t)) {
+                translation = GetTranslation(t, args);
             }
+            // check if we have additional embeddable data:
+            if (args.Length > 0) { return string.Format(currentCulture, translation, args); }
             return translation;
         }
 
-        string FindSingularOrPlural(string key, object[] args) {
-            var translationOptions = translationData[key];
-            string translation = key;
-            string singPlurKey = GetKey(args);
-            // try to use this plural/singular key
-            if (translationOptions[singPlurKey] != null) {
-                translation = "" + translationOptions[singPlurKey];
-            } else if (isWarningLogEnabled) {
-                Log.w("Missing singPlurKey:" + singPlurKey + " for:" + key);
+        private string GetTranslation(Translation t, object[] args) {
+            if (t.zero != null || t.one != null) {
+                var number = GetNumberInArgs(args);
+                if (number == 0) { return t.zero; }
+                if (number == 1) { return t.one; }
             }
-            return translation;
+            if (t.other != null) { return t.other; }
+            return t.key;
         }
 
-        private string GetKey(object[] args) {
-            if (GetNumberInArgs(args) == 0) { return "zero"; }
-            if (GetNumberInArgs(args) == 1) { return "one"; }
-            return "other";
-        }
-
-        int GetNumberInArgs(object[] args) {
+        private static int GetNumberInArgs(object[] args) {
             var firstNumberFound = args.First(a => IsNumeric(a));
             var argOne = Math.Abs(Convert.ToInt32(firstNumberFound));
             if (argOne == 0 && Math.Abs(Convert.ToDouble(firstNumberFound)) != 0) { return 2; }
@@ -80,21 +75,51 @@ namespace com.csutil {
             return argOne;
         }
 
-        bool IsNumeric(object Expression) {
+        private static bool IsNumeric(object Expression) {
             if (Expression == null || Expression is DateTime) { return false; }
             return Expression is short || Expression is int || Expression is long
                     || Expression is decimal || Expression is float
                     || Expression is double || Expression is bool;
         }
 
-        private static string TryLoadLocaleFromFile(string localeName) {
-            var dir = EnvironmentV2.instance.GetCurrentDirectory().GetChildDir("Locales");
-            var f = dir.GetChild(localeName);
-            if (f.Exists) { return f.LoadAs<string>(); }
-            f = dir.GetChild(localeName + ".json");
-            if (f.Exists) { return f.LoadAs<string>(); }
-            Log.e("Can't load localization file: " + localeName);
-            return null;
+        public static Func<string, Task<Dictionary<string, Translation>>> TryLoadLocaleFromFile() {
+            return (string localeName) => {
+                var dir = EnvironmentV2.instance.GetCurrentDirectory().GetChildDir("Locales");
+                var f = dir.GetChild(localeName);
+                if (!f.Exists) { f = dir.GetChild(localeName + ".json"); }
+                if (f.Exists) {
+                    List<Translation> translations = f.LoadAs<List<Translation>>();
+                    AssertV2.AreNotEqual(0, translations.Count);
+                    return Task.FromResult(translations.ToDictionary(e => e.key, e => e));
+                }
+                throw new FileNotFoundException("Can't load localization file: " + localeName);
+            };
+        }
+
+        public static Func<string, Task<Dictionary<string, Translation>>> LoadFromGoogleSheets(
+                IKeyValueStore localCache, string apiKey, string sheetId, string initialSheetName = "en-US") {
+            var translationDatabase = new GoogleSheetsKeyValueStore(localCache, apiKey, sheetId, initialSheetName);
+            return async (string localeName) => {
+                if (localeName != translationDatabase.sheetName) { translationDatabase.sheetName = localeName; }
+                var downloadTask = translationDatabase.dowloadOnlineDataDebounced();
+                if (downloadTask != null && !await downloadTask) {
+                    Log.w($"Could not download {localeName} translation data from sheet {sheetId}, device offline?");
+                }
+                IEnumerable<GSheetsTranslation> entries = await translationDatabase.GetAll<GSheetsTranslation>();
+                return entries.Cast<Translation>().ToDictionary(t => t.key, t => t);
+            };
+        }
+
+        public class Translation {
+            public string key;
+            public string other;
+            public string zero;
+            public string one;
+        }
+
+        public class GSheetsTranslation : Translation {
+            public string zeroSrc;
+            public string oneSrc;
         }
 
     }

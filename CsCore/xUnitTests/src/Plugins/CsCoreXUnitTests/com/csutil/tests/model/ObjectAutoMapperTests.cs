@@ -55,8 +55,8 @@ namespace com.csutil.tests.json {
 
             // Check that the password was not included in any form:
             string dtoJson = JsonWriter.GetWriter().Write(user1Dto);
-            Assert.False(dtoJson.Contains(user1.password));
-            Assert.False(dtoJson.Contains("contacts"));
+            Assert.DoesNotContain(user1.password, dtoJson);
+            Assert.DoesNotContain("contacts", dtoJson);
         }
 
     }

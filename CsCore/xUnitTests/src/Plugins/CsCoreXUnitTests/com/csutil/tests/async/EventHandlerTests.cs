@@ -190,7 +190,7 @@ namespace com.csutil.tests.async {
 
         [Fact]
         public async Task TestThrottledDebounce6() {
-            Func<object, Task> originalFunction = async (object sender) => {
+            Func<object, Task> originalFunction = (object sender) => {
                 throw new NotImplementedException();
             };
             var wrappedFunc = originalFunction.AsThrottledDebounce(10);
