@@ -47,10 +47,19 @@ namespace com.csutil.keyvaluestore {
                 if (latestRawSheetData.IsNullOrEmpty()) { await InternetStateManager.Instance(this).HasInetAsync; }
                 if (InternetStateManager.Instance(this).HasInet) {
                     var downloadTask = debouncedFunc(null);
-                    if (downloadTask != null) { await downloadTask; return true; }
+                    if (downloadTask != null) {
+                        await downloadTask;
+                        ThrowIfSheetDataMissing();
+                        return true;
+                    }
                 }
+                ThrowIfSheetDataMissing();
                 return false;
             };
+        }
+
+        private void ThrowIfSheetDataMissing() {
+            if (latestRawSheetData == null) { throw new Exception("Could not download Google Sheet data"); }
         }
 
         public void Dispose() { fallbackStore.Dispose(); }
