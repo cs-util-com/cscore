@@ -99,9 +99,9 @@ namespace com.csutil.keyvaluestore {
         private Dictionary<string, object> ParseRawSheetData(List<List<string>> rawSheetData) {
             var result = new Dictionary<string, object>();
             if (rawSheetData.IsNullOrEmpty()) { return result; }
-            var fieldNames = rawSheetData.First().Skip(1).ToList();
+            var fieldNames = rawSheetData.First().ToList();
             foreach (var column in rawSheetData.Skip(1)) {
-                result.Add(column.First(), ToObject(fieldNames, column.Skip(1).ToList()));
+                result.Add(column.First(), ToObject(fieldNames, column.ToList()));
             }
             return result;
         }
