@@ -24,6 +24,8 @@ namespace com.csutil.system {
 
         public NewsType GetNewsType() { return EnumHelper.TryParse(type, NewsType.Unknown); }
 
+        public DateTime GetDate() { return DateTimeV2.ParseUtc(date); }
+
     }
 
 }

@@ -1,5 +1,6 @@
 using com.csutil.keyvaluestore;
 using com.csutil.system;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -26,9 +27,11 @@ namespace com.csutil.tests.system {
             Assert.NotNull(news1);
             Assert.Equal("Warning", news1.type);
             Assert.Equal(News.NewsType.Warning, news1.GetNewsType());
-            var news = await newsStore.GetAll<News>();
+            Log.e("News1 release date: " + news1.GetDate().ToReadableString());
+            Assert.True(news1.GetDate().IsUtc());
 
-            foreach (var n in news) { Log.d(n.title); }
+            //var news = await newsStore.GetAll<News>();
+            //foreach (var n in news) { Log.d(n.title); }
 
         }
 

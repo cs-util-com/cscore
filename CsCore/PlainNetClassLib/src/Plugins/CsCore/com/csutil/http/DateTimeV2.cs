@@ -11,6 +11,33 @@ namespace com.csutil {
     /// </summary>
     public class DateTimeV2 : IDisposable {
 
+        public static DateTime NewDateTimeFromUnixTimestamp(long unixTimeInMs, bool autoCorrectIfPassedInSeconds = true) {
+            AssertV2.IsTrue(unixTimeInMs > 0, "NewDateTimeFromUnixTimestamp: unixTimeInMs was " + unixTimeInMs);
+            System.DateTime dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
+            var result = dtDateTime.AddMilliseconds(unixTimeInMs);
+            if (autoCorrectIfPassedInSeconds && result.Year == 1970) {
+                var correctedDate = NewDateTimeFromUnixTimestamp(unixTimeInMs * 1000, false);
+                Log.e("The passed unixTimeInMs was likely passed in seconds instead of milliseconds,"
+                    + " it was too small by a factor of *1000, which would result in " + correctedDate.ToReadableString());
+                return correctedDate;
+            }
+            return result;
+        }
+
+        public static DateTime ParseUtc(string utcString) {
+            if (utcString.Contains("GMT")) {
+                utcString = utcString.Substring(0, "GMT", true);
+            } else if (utcString.Contains("UTC")) {
+                // RFC1123Pattern expects GMT and crashes on UTC
+                utcString = utcString.Substring(0, "UTC", false) + "GMT";
+            }
+            return DateTime.SpecifyKind(DateTime.Parse(utcString), DateTimeKind.Utc);
+        }
+
+        public static DateTime ParseLocalTime(string localTimeString) {
+            return DateTime.Parse(localTimeString);
+        }
+
         public const string SERVER_UTC_DATE = "SERVER_UTC_DATE";
 
         public static DateTime UtcNow { get { return IoC.inject.GetOrAddSingleton<DateTimeV2>(null).GetUtcNow(); } }
@@ -26,7 +53,8 @@ namespace com.csutil {
         private void onUtcUpdate(Uri uri, DateTime serverUtcDate) {
             try {
                 if (!uriBlacklist.Contains(uri.Host)) { diffOfLocalToServer = serverUtcDate - DateTime.UtcNow; }
-            } catch (Exception e) { Log.e("Error when processing server utc date from " + uri, e); }
+            }
+            catch (Exception e) { Log.e("Error when processing server utc date from " + uri, e); }
         }
 
         public DateTime GetUtcNow() {
