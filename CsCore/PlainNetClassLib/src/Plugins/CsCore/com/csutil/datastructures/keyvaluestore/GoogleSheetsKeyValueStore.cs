@@ -47,10 +47,19 @@ namespace com.csutil.keyvaluestore {
                 if (latestRawSheetData.IsNullOrEmpty()) { await InternetStateManager.Instance(this).HasInetAsync; }
                 if (InternetStateManager.Instance(this).HasInet) {
                     var downloadTask = debouncedFunc(null);
-                    if (downloadTask != null) { await downloadTask; return true; }
+                    if (downloadTask != null) {
+                        await downloadTask;
+                        ThrowIfSheetDataMissing();
+                        return true;
+                    }
                 }
+                ThrowIfSheetDataMissing();
                 return false;
             };
+        }
+
+        private void ThrowIfSheetDataMissing() {
+            if (latestRawSheetData == null) { throw new Exception("Could not download Google Sheet data"); }
         }
 
         public void Dispose() { fallbackStore.Dispose(); }
@@ -90,9 +99,9 @@ namespace com.csutil.keyvaluestore {
         private Dictionary<string, object> ParseRawSheetData(List<List<string>> rawSheetData) {
             var result = new Dictionary<string, object>();
             if (rawSheetData.IsNullOrEmpty()) { return result; }
-            var fieldNames = rawSheetData.First().Skip(1).ToList();
+            var fieldNames = rawSheetData.First().ToList();
             foreach (var column in rawSheetData.Skip(1)) {
-                result.Add(column.First(), ToObject(fieldNames, column.Skip(1).ToList()));
+                result.Add(column.First(), ToObject(fieldNames, column.ToList()));
             }
             return result;
         }

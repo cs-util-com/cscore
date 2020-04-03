@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
+using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
 
 namespace com.csutil {
@@ -12,11 +12,13 @@ namespace com.csutil {
 
         private static void Assert(bool condition, string errorMsg, object[] args) {
             args = new StackTrace(2, true).AddTo(args);
-            if (!condition) {
-                Debugger.Break();
-                var e = Log.e(errorMsg, args);
-                if (throwExeptionIfAssertionFails) { throw e; }
-            }
+            if (!condition) { Fail(errorMsg, args); }
+        }
+
+        private static void Fail(string errorMsg, object[] args) {
+            Debugger.Break();
+            var e = Log.e(errorMsg, args);
+            if (throwExeptionIfAssertionFails) { throw e; }
         }
 
         public static void Throws<T>(Action actionThatShouldThrowAnException) where T : Exception {
@@ -42,6 +44,15 @@ namespace com.csutil {
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         public static void IsFalse(bool condition, string errorMsg, params object[] args) {
             Assert(!condition, "Assert.IsFalse() FAILED: " + errorMsg, args);
+        }
+
+        [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
+        public static void IsEqualToPersisted(string id, object o, params object[] args) {
+            args = new StackTrace(1, true).AddTo(args);
+            var persisted = IoC.inject.GetOrAddSingleton<PersistedRegression>(o);
+            persisted.AssertEqualToPersisted(id, o).ContinueWith((Task t) => {
+                if (t.Exception != null) { Fail(t.Exception.Message, args); }
+            });
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]

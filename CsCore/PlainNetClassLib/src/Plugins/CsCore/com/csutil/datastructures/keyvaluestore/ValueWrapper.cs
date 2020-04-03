@@ -11,6 +11,7 @@ namespace com.csutil.keyvaluestore {
             if ((typeof(T).IsEnum)) { return (T)Enum.Parse(typeof(T), value.ToString()); }
             return (T)value;
         }
+
     }
 
 }

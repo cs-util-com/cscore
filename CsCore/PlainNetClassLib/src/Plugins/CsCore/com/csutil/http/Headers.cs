@@ -47,7 +47,7 @@ namespace com.csutil.http {
             try {
                 string v = GetHeaderValue("last-modified", null);
                 if (v == null) { return fallbackValue; }
-                return DateTimeParser.NewDateTimeFromUnixTimestamp(long.Parse(v));
+                return DateTimeV2.NewDateTimeFromUnixTimestamp(long.Parse(v));
             } catch (Exception) { return fallbackValue; }
         }
 

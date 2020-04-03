@@ -17,10 +17,9 @@ namespace com.csutil {
 
         public IKeyValueStore regressionStore;
 
-        public PersistedRegression(IKeyValueStore regressionStore = null) {
-            if (regressionStore == null) { regressionStore = new FileBasedKeyValueStore(GetProjDir()); }
-            this.regressionStore = regressionStore;
-        }
+        public PersistedRegression() : this(new FileBasedKeyValueStore(GetProjDir())) { }
+
+        public PersistedRegression(IKeyValueStore regressionStore) { this.regressionStore = regressionStore; }
 
         private static DirectoryEntry GetProjDir() {
             var binDir = EnvironmentV2.instance.GetCurrentDirectory();
@@ -34,7 +33,7 @@ namespace com.csutil {
             return SearchForVersionedParent(f.Parent);
         }
 
-        public async Task<JToken> VerifyState(string id, params object[] objectsToCheck) {
+        public async Task<JToken> GetDiffToPersisted(string id, params object[] objectsToCheck) {
             if (!await regressionStore.ContainsKey(id)) {
                 await SaveToRegressionStore(id, objectsToCheck);
                 return null;
@@ -52,12 +51,12 @@ namespace com.csutil {
             await regressionStore.Set(id, jToken.ToPrettyString());
         }
 
-        public Task AssertState(string id, params object[] objectsToCheck) {
-            return AssertState(id, p => true, objectsToCheck);
+        public Task AssertEqualToPersisted(string id, params object[] objectsToCheck) {
+            return AssertEqualToPersisted(id, p => true, objectsToCheck);
         }
 
-        public async Task AssertState(string id, Func<JToken, bool> filterAcceptableDiffs, params object[] objectsToCheck) {
-            JToken diffToExpectedState = await VerifyState(id, objectsToCheck);
+        public async Task AssertEqualToPersisted(string id, Func<JToken, bool> filterAcceptableDiffs, params object[] objectsToCheck) {
+            JToken diffToExpectedState = await GetDiffToPersisted(id, objectsToCheck);
             if (!diffToExpectedState.IsNullOrEmpty()) {
                 var foundProblems = GetFilteredDiff(diffToExpectedState, filterAcceptableDiffs);
                 if (!foundProblems.IsNullOrEmpty()) {
