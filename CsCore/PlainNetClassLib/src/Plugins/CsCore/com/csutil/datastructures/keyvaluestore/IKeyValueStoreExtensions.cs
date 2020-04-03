@@ -73,6 +73,10 @@ namespace com.csutil.keyvaluestore {
             return await (await self.GetAllKeys()).MapAsync(key => self.Get<T>(key, default(T)));
         }
 
+        public static KeyValueStoreTypeAdapter<T> GetTypeAdapter<T>(this IKeyValueStore self) {
+            return new KeyValueStoreTypeAdapter<T>(self);
+        }
+
     }
 
 }
