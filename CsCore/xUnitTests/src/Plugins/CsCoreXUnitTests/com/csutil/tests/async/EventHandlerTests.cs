@@ -190,13 +190,17 @@ namespace com.csutil.tests.async {
 
         [Fact]
         public async Task TestThrottledDebounce6() {
+            bool wasCalled = false;
             Func<object, Task> originalFunction = (object sender) => {
+                wasCalled = true;
                 throw new NotImplementedException();
             };
             var wrappedFunc = originalFunction.AsThrottledDebounce(10);
-            await Assert.ThrowsAsync<NotImplementedException>(async () => {
-                await wrappedFunc("good");
-            });
+            Assert.NotNull(wrappedFunc);
+            Assert.False(wasCalled);
+            Assert.Null(wrappedFunc("good"));
+            Assert.True(wasCalled);
+            await TaskV2.Delay(50); // To allow the error show in the log
         }
 
     }
