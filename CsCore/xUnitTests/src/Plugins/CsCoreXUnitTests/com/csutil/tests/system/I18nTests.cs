@@ -186,7 +186,7 @@ namespace com.csutil.tests {
             // See https://docs.google.com/spreadsheets/d/193NfNg8Prtt4XOX4WgRIBK4o53nBYbHeo7nxBrxom5A
             var sheetId = "193NfNg8Prtt4XOX4WgRIBK4o53nBYbHeo7nxBrxom5A";
 
-            var loader = I18n.LoadFromGoogleSheets(new InMemoryKeyValueStore(), apiKey, sheetId);
+            var loader = I18n.LoadLocaleFromGoogleSheets(new InMemoryKeyValueStore(), apiKey, sheetId);
             I18n i18n = await new I18n().SetLocaleLoader(loader);
 
             Assert.Equal("Hello World", i18n.Get("Hello World"));

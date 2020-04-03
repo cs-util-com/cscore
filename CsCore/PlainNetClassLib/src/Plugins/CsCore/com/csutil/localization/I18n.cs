@@ -18,7 +18,7 @@ namespace com.csutil {
         public string currentLocale { get; private set; } = "" + CultureInfo.CurrentUICulture;
         public CultureInfo currentCulture = CultureInfo.CurrentCulture;
 
-        private Func<string, Task<Dictionary<string, Translation>>> localeLoader = TryLoadLocaleFromFile();
+        private Func<string, Task<Dictionary<string, Translation>>> localeLoader = LoadLocaleFromFile();
         private Dictionary<string, Translation> translationData;
 
         public async Task<I18n> SetLocale(string newLocale) {
@@ -82,32 +82,32 @@ namespace com.csutil {
                     || Expression is double || Expression is bool;
         }
 
-        public static Func<string, Task<Dictionary<string, Translation>>> TryLoadLocaleFromFile() {
+        public static Func<string, Task<Dictionary<string, Translation>>> LoadLocaleFromFile() {
             return (string localeName) => {
                 var dir = EnvironmentV2.instance.GetCurrentDirectory().GetChildDir("Locales");
                 var f = dir.GetChild(localeName);
                 if (!f.Exists) { f = dir.GetChild(localeName + ".json"); }
-                if (f.Exists) {
-                    List<Translation> translations = f.LoadAs<List<Translation>>();
-                    AssertV2.AreNotEqual(0, translations.Count);
-                    return Task.FromResult(translations.ToDictionary(e => e.key, e => e));
-                }
+                if (f.Exists) { return ConvertToDictionary(f.LoadAs<List<Translation>>()); }
                 throw new FileNotFoundException("Can't load localization file: " + localeName);
             };
         }
 
-        public static Func<string, Task<Dictionary<string, Translation>>> LoadFromGoogleSheets(
+        public static Func<string, Task<Dictionary<string, Translation>>> LoadLocaleFromGoogleSheets(
                 IKeyValueStore localCache, string apiKey, string sheetId, string initialSheetName = "en-US") {
             var translationDatabase = new GoogleSheetsKeyValueStore(localCache, apiKey, sheetId, initialSheetName);
             return async (string localeName) => {
                 if (localeName != translationDatabase.sheetName) { translationDatabase.sheetName = localeName; }
                 var downloadTask = translationDatabase.dowloadOnlineDataDebounced();
-                if (downloadTask != null && !await downloadTask) {
+                if (downloadTask != null && !await downloadTask) { // Make sure the data is downloaded at least once
                     Log.w($"Could not download {localeName} translation data from sheet {sheetId}, device offline?");
                 }
-                IEnumerable<GSheetsTranslation> entries = await translationDatabase.GetAll<GSheetsTranslation>();
-                return entries.Cast<Translation>().ToDictionary(t => t.key, t => t);
+                return await ConvertToDictionary(await translationDatabase.GetAll<Translation>());
             };
+        }
+
+        private static Task<Dictionary<string, Translation>> ConvertToDictionary(IEnumerable<Translation> translations) {
+            AssertV2.AreNotEqual(0, translations.Count());
+            return Task.FromResult(translations.ToDictionary(e => e.key, e => e));
         }
 
         public class Translation {
