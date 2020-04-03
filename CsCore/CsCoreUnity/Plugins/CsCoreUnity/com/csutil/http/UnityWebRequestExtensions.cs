@@ -56,7 +56,7 @@ namespace com.csutil {
         /// <param name="utcString"> e.g. "Sun, 08 Mar 2020 09:47:52 GMT" </param>
         private static void ProcessServerDate(Uri uri, string utcString) {
             DateTime? serverUtcDate = null;
-            try { if (!utcString.IsNullOrEmpty()) { serverUtcDate = DateTimeV2.Parse(utcString); } }
+            try { if (!utcString.IsNullOrEmpty()) { serverUtcDate = DateTimeV2.ParseUtc(utcString); } }
             catch (Exception e) { Log.w("Failed parsing server UTC date: " + e); }
             if (serverUtcDate.HasValue) { EventBus.instance.Publish(DateTimeV2.SERVER_UTC_DATE, uri, serverUtcDate.Value); }
         }

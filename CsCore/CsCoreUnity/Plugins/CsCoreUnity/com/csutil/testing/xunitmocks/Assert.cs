@@ -102,6 +102,12 @@ namespace Xunit {
             }
         }
 
+        public static void DoesNotContain<T>(T element, IEnumerable<T> elements) {
+            if (elements.Contains(element)) {
+                throw new AssertException("'" + element + "' is substring of '" + elements + "'");
+            }
+        }
+
     }
 
 }
