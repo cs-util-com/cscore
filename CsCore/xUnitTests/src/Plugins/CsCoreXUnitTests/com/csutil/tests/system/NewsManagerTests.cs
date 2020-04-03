@@ -20,18 +20,21 @@ namespace com.csutil.tests.system {
             // See https://docs.google.com/spreadsheets/d/1Hwu4ZtRR0iXD65Wuj_XyJxLw4PN8SE0sRgnBKeVoq3A
             var sheetId = "1Hwu4ZtRR0iXD65Wuj_XyJxLw4PN8SE0sRgnBKeVoq3A";
             var sheetName = "MySheet1"; // Has to match the sheet name
-            var localCache = new InMemoryKeyValueStore();
-            IKeyValueStore newsStore = new GoogleSheetsKeyValueStore(localCache, apiKey, sheetId, sheetName);
+            IKeyValueStore newsStore = new GoogleSheetsKeyValueStore(new InMemoryKeyValueStore(), apiKey, sheetId, sheetName);
+            var newsLocalDataStore = new InMemoryKeyValueStore().GetTypeAdapter<News.LocalData>();
+            NewsManager m = new NewsManager(newsLocalDataStore, newsStore.GetTypeAdapter<News>());
 
-            var news1 = await newsStore.Get<News>("News1", null);
+            IEnumerable<News> news = await m.GetAllNews();
+            var news1 = news.First();
             Assert.NotNull(news1);
             Assert.Equal("Warning", news1.type);
             Assert.Equal(News.NewsType.Warning, news1.GetNewsType());
-            Log.e("News1 release date: " + news1.GetDate().ToReadableString());
             Assert.True(news1.GetDate().IsUtc());
 
-            //var news = await newsStore.GetAll<News>();
-            //foreach (var n in news) { Log.d(n.title); }
+            await m.MarkNewsAsRead(news1);
+            Assert.True(news.First().localData.isRead);
+            Assert.True((await m.GetAllNews()).First().localData.isRead);
+            Assert.True((await newsLocalDataStore.Get(news1.key, null)).isRead);
 
         }
 
