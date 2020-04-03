@@ -44,7 +44,6 @@ namespace com.csutil.system {
         public string title { get; set; }
         public string date { get; set; }
         public string type { get; set; }
-        public string color { get; set; }
         public string description { get; set; }
         public string thumbnailUrl { get; set; }
         public string imageUrl { get; set; }
