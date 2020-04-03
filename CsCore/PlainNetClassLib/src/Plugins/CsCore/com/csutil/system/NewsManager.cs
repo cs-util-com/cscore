@@ -2,6 +2,7 @@ using com.csutil.keyvaluestore;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace com.csutil.system {
 
@@ -15,18 +16,26 @@ namespace com.csutil.system {
             this.newsStore = newsStore;
         }
 
+        public async Task<IEnumerable<News>> GetAllUnreadNews() {
+            IEnumerable<News> allNews = await GetAllNews();
+            return allNews.Filter(n => n.localData == null || !n.localData.isRead);
+        }
+
         public async Task<IEnumerable<News>> GetAllNews() {
-            var allNews = await newsStore.GetAll();
-            return await allNews.MapAsync(async news => { // Include localData from the cache:
+            IEnumerable<News> allNews = await newsStore.GetAll();
+            allNews = await allNews.MapAsync(async news => { // Include localData from the cache:
                 news.localData = await localCache.Get(news.key, null);
                 return news;
             });
+            allNews = allNews.OrderBy(x => x.GetDate());
+            return allNews;
         }
 
         public async Task MarkNewsAsRead(News news) {
             news.localData = new News.LocalData() { isRead = true };
             await localCache.Set(news.key, news.localData);
         }
+
     }
 
     public class News {
