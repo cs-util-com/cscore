@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using com.csutil.http.apis;
@@ -132,11 +133,15 @@ namespace com.csutil.keyvaluestore {
             return true;
         }
 
-        private object ParsePrimitive(string value) {
+        private static object ParsePrimitive(string value) {
             if (bool.TryParse(value, out bool b)) { return b; }
             if (int.TryParse(value, out int i)) { return i; }
-            if (double.TryParse(value, out double d)) { return d; }
+            if (DoubleTryParseV2(value, out double d)) { return d; }
             return value;
+        }
+
+        private static bool DoubleTryParseV2(string value, out double d) {
+            return double.TryParse(value.Replace(",", "."), NumberStyles.Any, CultureInfo.InvariantCulture, out d);
         }
 
         public async Task<bool> ContainsKey(string key) {

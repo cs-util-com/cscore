@@ -75,7 +75,9 @@ namespace com.csutil {
                 // from Response.cs:
                 if (cookieString.IndexOf("domain=", StringComparison.CurrentCultureIgnoreCase) == -1) { cookieString += "; domain=" + self.url; }
                 if (cookieString.IndexOf("path=", StringComparison.CurrentCultureIgnoreCase) == -1) { cookieString += "; path=" + self.url; }
-                return IoC.inject.Get<CookieJar>(self).SetCookie(new Cookie(cookieString));
+                var cookieJar = IoC.inject.Get<CookieJar>(self);
+                if (cookieJar == null) { return false; }
+                return cookieJar.SetCookie(new Cookie(cookieString));
             }
             catch (Exception e) { Log.e(e); }
             return false;

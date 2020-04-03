@@ -35,7 +35,8 @@ namespace com.csutil.tests.system {
                 Assert.Equal("https://github.com/cs-util-com/cscore", instructions.url);
                 Log.d("instructions: " + JsonWriter.AsPrettyString(instructions));
             } else {
-                Log.e("This test cant be fully performed on the current system");
+                Log.e("Test cant be fully done on current system: "
+                    + JsonWriter.AsPrettyString(EnvironmentV2.instance.systemInfo));
             }
 
         }

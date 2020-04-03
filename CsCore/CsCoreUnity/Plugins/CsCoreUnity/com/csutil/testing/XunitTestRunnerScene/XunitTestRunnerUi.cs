@@ -41,11 +41,18 @@ namespace com.csutil.testing {
             });
             links.Get<Button>("StartButton").SetOnClickAction((_) => {
                 CollectTests(assembliesToTest, links);
+                UpdateSearchFilter(links);
             });
-            links.Get<InputField>("SearchInput").SetOnValueChangedActionThrottled((newSearchText) => {
-                newSearchText = newSearchText.ToLower();
-                CellData = allTests.Filter(t => t.name.ToLower().Contains(newSearchText)).ToList();
+            links.Get<InputField>("SearchInput").SetOnValueChangedActionThrottled((_) => {
+                UpdateSearchFilter(links);
             }, 200);
+        }
+
+        private void UpdateSearchFilter(Dictionary<string, Link> links) {
+            var newSearchText = links.Get<InputField>("SearchInput").text;
+            newSearchText = newSearchText.ToLower();
+            if (allTests.IsNullOrEmpty()) { return; }
+            CellData = allTests.Filter(t => t.name.ToLower().Contains(newSearchText)).ToList();
         }
 
         private void CollectTests(IEnumerable<Assembly> assembliesToTest, Dictionary<string, Link> links) {
