@@ -23,7 +23,7 @@ namespace com.csutil.http {
             if (name.IsNullOrEmpty()) {
                 Log.w("Filename not found, will fallback to hash+mimetype");
                 string ext = GetFileExtensionFromMimeType(null);
-                name = GetHeaderValue("content-md5", null);
+                name = GetMd5Checksum();
                 if (name.IsNullOrEmpty()) {
                     name += GetHeaderValue("Last-Modified", "");
                     name += GetHeaderValue("Content-Length", "");
@@ -35,6 +35,8 @@ namespace com.csutil.http {
             }
             return name;
         }
+
+        public string GetMd5Checksum() { return GetHeaderValue("content-md5", null); }
 
         public long GetFileSizeInBytesOnServer() { return long.Parse(GetHeaderValue("Content-Length", "-1")); }
 
