@@ -21,6 +21,7 @@ namespace com.csutil.tests.json {
             MyClass1 x2 = JsonReader.GetReader().Read<MyClass1>(jsonString);
             Assert.Equal(x1.myString, x2.myString);
             Assert.Equal(x1.myString2, x2.myString2);
+            AssertV2.AreEqualJson(x1, x2);
         }
 
         private class MyClass2 {

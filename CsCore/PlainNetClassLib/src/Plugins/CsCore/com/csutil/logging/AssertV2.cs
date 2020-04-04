@@ -86,6 +86,7 @@ namespace com.csutil {
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         public static void AreEqualJson(object a, object b) {
+            if (ReferenceEquals(a, b)) { throw new ArgumentException("Both references pointed to the same object"); }
             var expected = JsonWriter.GetWriter().Write(a);
             var actual = JsonWriter.GetWriter().Write(b);
             AreEqual(expected, actual);
