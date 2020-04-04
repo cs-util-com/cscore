@@ -85,11 +85,10 @@ namespace com.csutil {
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
-        public static void AreEqualJson(object a, object b) {
+        public static void AreEqualJson(object a, object b, params object[] args) {
             if (ReferenceEquals(a, b)) { throw new ArgumentException("Both references pointed to the same object"); }
-            var expected = JsonWriter.GetWriter().Write(a);
-            var actual = JsonWriter.GetWriter().Write(b);
-            AreEqual(expected, actual);
+            var jsonDiff = MergeJson.GetDiff(a, b);
+            Assert(jsonDiff == null, "Difference found:\n" + jsonDiff?.ToPrettyString(), args);
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]

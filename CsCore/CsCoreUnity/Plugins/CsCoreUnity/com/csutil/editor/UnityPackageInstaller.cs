@@ -17,7 +17,8 @@ namespace com.csutil.editor {
                             return true;
                         } else { Log.w("Package " + packageName + ":" + packageVersion + " not added, found exist. version in manifest.json: " + foundVersion); }
                     } else {
-                        dependencies.Add(packageName, JToken.FromObject(packageVersion));
+                        var s = JsonSerializer.Create(JsonNetSettings.defaultSettings);
+                        dependencies.Add(packageName, JToken.FromObject(packageVersion, s));
                         manifestFile.SaveAsText(JsonWriter.AsPrettyString(manifest));
                         return true;
                     }
