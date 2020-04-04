@@ -76,7 +76,7 @@ namespace com.csutil.ui {
         }
 
         private static void ApplyColor(ThemeColor target, Color color) {
-            var graphic = target.GetComponent<Graphic>();
+            var graphic = target.GetComponentV2<Graphic>();
             if (graphic == null) { Log.w("Passed target graphic was null!"); return; }
             graphic.color = color;
         }

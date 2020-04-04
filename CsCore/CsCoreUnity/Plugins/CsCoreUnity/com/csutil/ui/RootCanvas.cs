@@ -24,7 +24,7 @@ namespace com.csutil.ui {
 
         public static Canvas CreateNewRootCanvas(string rootCanvasPrefab = "Canvas/DefaultRootCanvas") {
             InitEventSystemIfNeeded();
-            return ResourcesV2.LoadPrefab(rootCanvasPrefab).GetComponent<Canvas>();
+            return ResourcesV2.LoadPrefab(rootCanvasPrefab).GetComponentV2<Canvas>();
         }
 
         public static void InitEventSystemIfNeeded() {

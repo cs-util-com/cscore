@@ -38,7 +38,7 @@ namespace com.csutil.tests.extensions {
 
             GameObject go1_child2 = go1.GetOrAddChild("GO1 Child2");
             Assert.AreSame(go1_child2, go1.GetOrAddChild("GO1 Child2"));
-            Assert.IsNull(go1_child2.GetComponent<MyExampleMono1>());
+            Assert.IsNull(go1_child2.GetComponentV2<MyExampleMono1>());
             MyExampleMono1 mono1 = go1_child2.GetOrAddComponent<MyExampleMono1>();
             Assert.NotNull(mono1);
             Assert.AreSame(mono1, go1_child2.GetOrAddComponent<MyExampleMono1>());
@@ -47,10 +47,10 @@ namespace com.csutil.tests.extensions {
         [Test]
         public void TestCheckForComponent() {
             GameObject go1 = new GameObject();
-            if (go1.GetComponent<MyExampleMono1>()) { Assert.Fail(); }
+            if (go1.GetComponentV2<MyExampleMono1>()) { Assert.Fail(); }
             if (go1.HasComponent(out MyExampleMono1 m1)) { Assert.Fail(); }
             go1.AddComponent<MyExampleMono1>();
-            if (!go1.GetComponent<MyExampleMono1>()) { Assert.Fail(); }
+            if (!go1.GetComponentV2<MyExampleMono1>()) { Assert.Fail(); }
             if (go1.HasComponent(out MyExampleMono1 m2)) {
                 Assert.NotNull(m2);
             } else {

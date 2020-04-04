@@ -32,20 +32,32 @@ namespace com.csutil {
 
         public static int GetChildCount(this GameObject self) { return self.transform.childCount; }
 
+        /// <summary> Unity returns a comp that pretents to be null so return actual null </summary>
+        public static T GetComponentV2<T>(this GameObject self) where T : Component {
+            var existingComp = self.GetComponent<T>();
+            return existingComp == null ? null : existingComp;
+        }
+
+        /// <summary> Unity returns a comp that pretents to be null so return actual null </summary>
+        public static T GetComponentV2<T>(this Component self) where T : Component {
+            var existingComp = self.GetComponent<T>();
+            return existingComp == null ? (T)(object)null : existingComp;
+        }
+
         /// <summary> Used for lazy-initialization of a Mono, combine with go.GetOrAddChild </summary>
         public static T GetOrAddComponent<T>(this GameObject self) where T : Component {
-            var existingComp = self.GetComponent<T>();
+            var existingComp = self.GetComponentV2<T>();
             return existingComp == null ? self.AddComponent<T>() : existingComp;
         }
 
         public static bool HasComponent<T>(this GameObject self, out T existingComp) where T : Component {
-            existingComp = self.GetComponent<T>();
+            existingComp = self.GetComponentV2<T>();
             return existingComp != null;
         }
 
         /// <summary> Searches recursively upwards in all parents until a comp of type T is found </summary>
         public static T GetComponentInParents<T>(this GameObject gameObject) where T : Component {
-            var comp = gameObject.GetComponent<T>();
+            var comp = gameObject.GetComponentV2<T>();
             if (comp != null) { return comp; }
             var parent = gameObject.GetParent();
             if (parent != null && parent != gameObject) { return parent.GetComponentInParents<T>(); }

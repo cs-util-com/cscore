@@ -21,7 +21,7 @@ namespace com.csutil {
             var singletonsGo = GetOrAddGameObject(singletonsGoName);
             if (createIfNull) { return singletonsGo.GetOrAddChild("" + typeof(T)).GetOrAddComponent<T>(); }
             var t = singletonsGo.transform.Find("" + typeof(T));
-            return t != null ? t.GetComponent<T>() : null;
+            return t != null ? t.GetComponentV2<T>() : null;
         }
 
         private static GameObject GetOrAddGameObject(string gameObjectName) {
