@@ -1,5 +1,6 @@
 using com.csutil.json;
 using Xunit;
+using Zio;
 
 namespace com.csutil.tests.json {
 
@@ -21,6 +22,7 @@ namespace com.csutil.tests.json {
             MyClass1 x2 = JsonReader.GetReader().Read<MyClass1>(jsonString);
             Assert.Equal(x1.myString, x2.myString);
             Assert.Equal(x1.myString2, x2.myString2);
+            AssertV2.AreEqualJson(x1, x2);
         }
 
         private class MyClass2 {
@@ -60,6 +62,28 @@ namespace com.csutil.tests.json {
             Assert.Equal(x3.myString, x1.myString);
             Assert.Equal((x3.myComplexField2 as MySubClass1).myString, (x1.myComplexField2 as MySubClass1).myString);
         }
+
+        [Fact]
+        public void TestFilePathesInJson() {
+
+            var root = EnvironmentV2.instance.GetOrAddTempFolder("TestFilePathesInJson");
+            var file1 = root.GetChildDir("SubDir1").GetChildDir("SubSubDir1").GetChild("child1.txt");
+            var savedText = "Test 123";
+            file1.SaveAsText(savedText);
+            MyClass3 x1 = new MyClass3() { myPath = file1.FullName };
+
+            var x2 = x1.DeepCopyViaJson();
+            AssertV2.AreEqualJson(x1, x2);
+            Assert.NotEmpty(x1.myPath);
+            Assert.NotEmpty(x2.myPath);
+
+            var file2 = root.GetChild(x2.myPath);
+            Assert.True(file2.Exists);
+            Assert.Equal(savedText, file2.LoadAs<string>());
+
+        }
+
+        private class MyClass3 { public string myPath; }
 
     }
 

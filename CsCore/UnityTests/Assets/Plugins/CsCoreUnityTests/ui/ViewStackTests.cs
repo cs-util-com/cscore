@@ -45,7 +45,7 @@ namespace com.csutil.tests.ui {
             viewStackGo.AddComponent<ViewStack>();
 
             var view1 = viewStackGo.AddChild(new GameObject("View 1"));
-            Assert.AreEqual(viewStackGo.GetComponent<ViewStack>(), view1.GetViewStack());
+            Assert.AreEqual(viewStackGo.GetComponentV2<ViewStack>(), view1.GetViewStack());
 
             var view2 = view1.GetViewStack().ShowView(new GameObject("View 2"));
             view1.SetActiveV2(false);

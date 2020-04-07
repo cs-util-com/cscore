@@ -1,4 +1,3 @@
-using com.csutil.encryption;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -22,17 +21,22 @@ namespace com.csutil.http {
         public string GetFileNameOnServer() {
             var name = ExtractFileName(GetHeaderValue("content-disposition", null));
             if (name.IsNullOrEmpty()) {
-                Log.w("Filename not found, will try fallback to hash+mimetype");
-                name += GetHeaderValue("Last-Modified", "");
-                name += GetHeaderValue("Content-Length", "");
-                name += GetContentMimeType("");
-                AssertV2.IsFalse(name.IsNullOrEmpty(), "name was emtpy");
-                name = name.GetSHA1Hash();
+                Log.w("Filename not found, will fallback to hash+mimetype");
                 string ext = GetFileExtensionFromMimeType(null);
+                name = GetMd5Checksum();
+                if (name.IsNullOrEmpty()) {
+                    name += GetHeaderValue("Last-Modified", "");
+                    name += GetHeaderValue("Content-Length", "");
+                    name += GetContentMimeType("");
+                    AssertV2.IsFalse(name.IsNullOrEmpty(), "Name still emtpy");
+                    name = name.GetMD5Hash();
+                }
                 if (ext != null) { name += "." + ext; }
             }
             return name;
         }
+
+        public string GetMd5Checksum() { return GetHeaderValue("content-md5", null); }
 
         public long GetFileSizeInBytesOnServer() { return long.Parse(GetHeaderValue("Content-Length", "-1")); }
 

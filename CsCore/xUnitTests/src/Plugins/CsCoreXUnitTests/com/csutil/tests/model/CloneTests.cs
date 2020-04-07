@@ -22,11 +22,14 @@ namespace com.csutil.tests.model {
             MyClass1 original = new MyClass1() { name = "1", child = new MyClass1() { name = "2" } };
 
             MyClass1 copy = original.DeepCopyViaJson();
+            Assert.Null(MergeJson.GetDiff(original, copy)); // No diff between original and copy
+            AssertV2.AreEqualJson(original, copy); // WIll use MergeJson.GetDiff internally
             Assert.Equal(original.child.name, copy.child.name);
             // Modify the copy, changing the copy will not change the original:
             copy.child.name = "Some new name..";
             // Check that the change was only done in the copy and not the original:
             Assert.NotEqual(original.child.name, copy.child.name);
+            Assert.NotNull(MergeJson.GetDiff(original, copy));
 
             // Objects that impl. IClonable can also ShallowCopy (will call .Clone internally):
             MyClass1 shallowCopy = original.ShallowCopyViaClone();

@@ -45,7 +45,7 @@ namespace com.csutil.editor {
 
         static void SetAnchorsAroundObject(RectTransform t) {
             if (!t.transform.parent) { return; }
-            Rect pT = t.transform.parent.GetComponent<RectTransform>().rect;
+            Rect pT = t.transform.parent.GetComponentV2<RectTransform>().rect;
             t.anchorMin = new Vector2(t.anchorMin.x + (t.offsetMin.x / pT.width), t.anchorMin.y + (t.offsetMin.y / pT.height));
             t.anchorMax = new Vector2(t.anchorMax.x + (t.offsetMax.x / pT.width), t.anchorMax.y + (t.offsetMax.y / pT.height));
             t.offsetMin = Vector2.zero;

@@ -35,7 +35,7 @@ namespace com.csutil {
             var toastUiElems = newToast.GetLinkMap();
             InitText(toastUiElems, "Caption", toastCaption);
             InitText(toastUiElems, "Message", toastMessage);
-            newToast.GetComponent<MonoBehaviour>().ExecuteDelayed(() => newToast.Destroy(), displayDurationInMs);
+            newToast.GetComponentV2<MonoBehaviour>().ExecuteDelayed(() => newToast.Destroy(), displayDurationInMs);
             toastsContainer.AddChild(newToast);
             return newToast;
         }

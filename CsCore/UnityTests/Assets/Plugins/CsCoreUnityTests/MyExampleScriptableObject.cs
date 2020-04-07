@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace com.csutil.tests {
 
-    [CreateAssetMenu(menuName = "Tests/MyExampleScriptableObject")]
+    [CreateAssetMenu(menuName = "MyTests123/MyExampleScriptableObject")]
     public class MyExampleScriptableObject : ScriptableObject {
 
         public string myString1;

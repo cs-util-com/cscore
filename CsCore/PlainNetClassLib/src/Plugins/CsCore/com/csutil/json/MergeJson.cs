@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using com.csutil.json;
 using JsonDiffPatchDotNet;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace com.csutil {
@@ -14,9 +16,10 @@ namespace com.csutil {
 
         public static Result<T> Merge<T>(this JsonDiffPatch self, T originalObj, T variant1, T variant2) {
             var res = new Result<T>();
-            res.original = JToken.FromObject(originalObj);
-            res.variant1 = JToken.FromObject(variant1);
-            res.variant2 = JToken.FromObject(variant2);
+            var s = JsonSerializer.Create(JsonNetSettings.defaultSettings);
+            res.original = JToken.FromObject(originalObj, s);
+            res.variant1 = JToken.FromObject(variant1, s);
+            res.variant2 = JToken.FromObject(variant2, s);
             res.patch2 = self.Diff(res.original, res.variant2);
             res.mergeOf2Into1 = self.Patch(res.variant1, res.patch2);
             res.patch1 = self.Diff(res.original, res.variant1);
@@ -27,7 +30,10 @@ namespace com.csutil {
             return res;
         }
 
-        public static JToken GetDiff<T>(T a, T b) { return new JsonDiffPatch().Diff(JToken.FromObject(a), JToken.FromObject(b)); }
+        public static JToken GetDiff<T>(T a, T b) {
+            var s = JsonSerializer.Create(JsonNetSettings.defaultSettings);
+            return new JsonDiffPatch().Diff(JToken.FromObject(a, s), JToken.FromObject(b, s));
+        }
 
         public class Result<T> {
             internal JToken original;

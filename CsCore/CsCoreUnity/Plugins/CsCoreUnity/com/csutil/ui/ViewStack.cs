@@ -16,9 +16,19 @@ namespace com.csutil.ui {
         /// <param name="newView"> The new view to show in the stack </param>
         public GameObject ShowView(GameObject newView, GameObject currentViewToHide = null) {
             gameObject.AddChild(newView);
+            SetAnchorsStretchStretch(newView.GetComponent<RectTransform>());
             EventBus.instance.Publish(EventConsts.SHOW_VIEW, newView);
             if (currentViewToHide != null) { GetRootFor(currentViewToHide).SetActiveV2(false); }
             return newView;
+        }
+
+        // Top-level UIs in the view stack should always fill their parent
+        private static void SetAnchorsStretchStretch(RectTransform rt) {
+            if (rt == null) { return; } // The view is not a UI
+            rt.anchorMin = new Vector2(0, 0);
+            rt.anchorMax = new Vector2(1, 1);
+            rt.pivot = new Vector2(0.5f, 0.5f);
+            rt.SetPadding(0);
         }
 
         /// <summary> Returns the latest view on the ViewStack that is active. Or null if none is found </summary>

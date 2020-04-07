@@ -41,7 +41,7 @@ namespace com.csutil {
             } else {
                 map.Get<GameObject>("SnackbarButton").Destroy();
             }
-            newSnackbar.GetComponent<MonoBehaviour>().ExecuteDelayed(() => newSnackbar.Destroy(), displayDurationInMs);
+            newSnackbar.GetComponentV2<MonoBehaviour>().ExecuteDelayed(() => newSnackbar.Destroy(), displayDurationInMs);
             snackbarsContainer.AddChild(newSnackbar);
             return newSnackbar;
         }

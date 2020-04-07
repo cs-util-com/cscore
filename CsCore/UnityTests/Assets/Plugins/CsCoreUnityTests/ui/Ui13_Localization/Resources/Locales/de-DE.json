@@ -1,8 +1,0 @@
-{
-	"I am a static text which is never modified via script" : "Ich bin ein statischer Text, der nie per Script geändert wird",
-	"I am a localized text, today is {0}, so there are {1} days left till the release!": {
-        "zero":  "Ich bin ein lokalisierter Text, heute ist {0}, HEUTE ist Release-Tag!",
-        "one":   "Ich bin ein lokalisierter Text, heute ist {0}, daher ist morgen Release-Tag!",
-        "other": "Ich bin ein lokalisierter Text, heute ist {0}, daher sind noch {1} Tage übrig bis zum Release!"
-	}
-}

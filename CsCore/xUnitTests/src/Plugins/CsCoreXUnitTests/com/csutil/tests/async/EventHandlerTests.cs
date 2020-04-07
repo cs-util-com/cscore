@@ -150,7 +150,7 @@ namespace com.csutil.tests.async {
                 Log.d("sender=" + sender);
                 return "awesome";
             };
-            int delayInMs = 300;
+            int delayInMs = 500;
             var wrappedFunc = originalFunction.AsThrottledDebounce(delayInMs);
             Assert.Equal("awesome", wrappedFunc("good"));
             Assert.Null(wrappedFunc("bad"));

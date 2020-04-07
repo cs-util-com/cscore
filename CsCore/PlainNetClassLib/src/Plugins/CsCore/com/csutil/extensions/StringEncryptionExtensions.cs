@@ -4,31 +4,36 @@ using System.Security.Cryptography;
 using System.IO;
 using System.Linq;
 
-namespace com.csutil.encryption {
+namespace com.csutil {
 
-    public static class SHA1HashingStringExtensions {
+    public static class HashingHelper {
 
-        /// <summary>
-        /// Take any string and encrypt it using SHA1 then return the encrypted data
-        /// </summary>
-        /// <param name="data">input text you will enterd to encrypt it</param>
-        /// <returns>return the encrypted text as hexadecimal string</returns>
+        public static string GetMD5Hash(this string data) {
+            return GetMD5Hash(Encoding.ASCII.GetBytes(data));
+        }
+
         public static string GetSHA1Hash(this string data) {
-            if (data == null) { Log.e("GetSHA1Hash: passed string is null"); return null; }
-            string strResult = string.Empty;
-            SHA1CryptoServiceProvider sha1Obj = new SHA1CryptoServiceProvider();
-            byte[] bytesToHash = Encoding.ASCII.GetBytes(data);
-            bytesToHash = sha1Obj.ComputeHash(bytesToHash);
-            foreach (Byte b in bytesToHash) {
-                strResult += b.ToString("x2");
-            }
-            return strResult;
+            return GetSHA1Hash(Encoding.ASCII.GetBytes(data));
+        }
+
+        public static string GetMD5Hash(this byte[] bytesToHash) {
+            return HashToString(MD5.Create().ComputeHash(bytesToHash));
+        }
+
+        public static string GetSHA1Hash(this byte[] bytesToHash) {
+            return HashToString(new SHA1CryptoServiceProvider().ComputeHash(bytesToHash));
+        }
+
+        private static string HashToString(byte[] hash) {
+            StringBuilder sb = new StringBuilder(); // Convert byte array to hex string:
+            for (int i = 0; i < hash.Length; i++) { sb.Append(hash[i].ToString("X2")); }
+            return sb.ToString();
         }
 
     }
 
     public static class StringEncryption { // Modified version of https://stackoverflow.com/a/10177020/165106
-        
+
         // This constant is used to determine the keysize of the encryption algorithm in bits.
         // We divide this by 8 within the code below to get the equivalent number of bytes.
         private const int Keysize = 128;
@@ -67,13 +72,13 @@ namespace com.csutil.encryption {
         public static string Decrypt(this string cipherText, string passPhrase) {
             // Get the complete stream of bytes that represent:
             // [16 bytes of Salt] + [16 bytes of IV] + [n bytes of CipherText]
-            var cipherTextBytesWithSaltAndIv = Convert.FromBase64String(cipherText);
+            var cipherTextBytes = Convert.FromBase64String(cipherText);
             // Get the saltbytes by extracting the first 16 bytes from the supplied cipherText bytes.
-            var saltStringBytes = cipherTextBytesWithSaltAndIv.Take(Keysize / 8).ToArray();
+            var saltStringBytes = cipherTextBytes.Take(Keysize / 8).ToArray();
             // Get the IV bytes by extracting the next 16 bytes from the supplied cipherText bytes.
-            var ivStringBytes = cipherTextBytesWithSaltAndIv.Skip(Keysize / 8).Take(Keysize / 8).ToArray();
+            var ivStringBytes = cipherTextBytes.Skip(Keysize / 8).Take(Keysize / 8).ToArray();
             // Get the actual cipher text bytes by removing the first 64 bytes from the cipherText string.
-            var cipherTextBytes = cipherTextBytesWithSaltAndIv.Skip((Keysize / 8) * 2).Take(cipherTextBytesWithSaltAndIv.Length - ((Keysize / 8) * 2)).ToArray();
+            cipherTextBytes = cipherTextBytes.Skip(Keysize / 8 * 2).Take(cipherTextBytes.Length - (Keysize / 8 * 2)).ToArray();
             var password = new Rfc2898DeriveBytes(passPhrase, saltStringBytes, DerivationIterations);
             var keyBytes = password.GetBytes(Keysize / 8);
             using (var symmetricKey = new RijndaelManaged()) {
