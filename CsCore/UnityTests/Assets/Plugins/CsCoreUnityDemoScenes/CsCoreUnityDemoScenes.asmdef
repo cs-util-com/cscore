@@ -2,15 +2,15 @@
     "name": "CsCoreUnityDemoScenes",
     "references": [
         "CsCore",
-        "CsCoreUnity",
-        "CsCoreXUnitTests"
+        "CsCoreUnity"
     ],
-    "optionalUnityReferences": [],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": true,
-    "defineConstraints": []
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
 }

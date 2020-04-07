@@ -1,9 +1,5 @@
 ﻿using NUnit.Framework;
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -16,9 +12,10 @@ namespace com.csutil.tests.eventbus {
     /// cases the Unity profiler to automatically track these methods as separate steps
     /// in the Unity Profiler UI to allow easier debugging. 
     /// </summary>
-    public class LoggingTests : UnitTestMono {
+    public class LoggingTests {
 
-        public override IEnumerator RunTest() {
+        [UnityTest]
+        public IEnumerator RunTest() {
             Assert.IsTrue(MainThread.isMainThread);
             yield return new WaitForSeconds(2);
 

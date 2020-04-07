@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using com.csutil.http;
+using com.csutil.io;
 using StbImageLib;
 using Xunit;
 
@@ -40,8 +41,7 @@ namespace com.csutil.tests.http {
             var h = 100;
             var w = 50;
             var stream = await new Uri("https://picsum.photos/" + w + "/" + h).SendGET().GetResult<Stream>();
-            var image = ImageResult.FromStream(stream, ColorComponents.RedGreenBlueAlpha);
-            stream.Dispose();
+            var image = await ImageLoader.LoadAndDispose(stream);
             Assert.Equal(h, image.Height);
             Assert.Equal(w, image.Width);
         }
@@ -51,11 +51,9 @@ namespace com.csutil.tests.http {
             var h = 110;
             var w = 60;
             var bytes = await new Uri("https://picsum.photos/" + w + "/" + h).SendGET().GetResult<byte[]>();
-            using (var stream = new MemoryStream(bytes)) {
-                var image = ImageResult.FromStream(stream, ColorComponents.RedGreenBlueAlpha);
-                Assert.Equal(h, image.Height);
-                Assert.Equal(w, image.Width);
-            }
+            var image = await ImageLoader.LoadAndDispose(new MemoryStream(bytes));
+            Assert.Equal(h, image.Height);
+            Assert.Equal(w, image.Width);
         }
 
         [Fact]
