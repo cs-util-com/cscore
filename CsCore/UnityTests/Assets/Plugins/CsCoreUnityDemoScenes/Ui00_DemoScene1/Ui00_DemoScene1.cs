@@ -5,14 +5,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace com.csutil.demos.demo1 {
+namespace com.csutil.tests {
 
-    public class DemoScreen1 : MonoBehaviour {
+    public class Ui00_DemoScene1 : UnitTestMono {
+
 
         private Dictionary<string, Link> links;
-        public string url = "https://picsum.photos/4000/2000";
 
-        void Start() {
+        public override IEnumerator RunTest() {
 
             LogConsole.RegisterForAllLogEvents(this);
 
@@ -22,6 +22,12 @@ namespace com.csutil.demos.demo1 {
                 StartCoroutine(TestCurrentPing(links.Get<InputField>("IpInput").text));
             });
 
+            yield return new WaitForSeconds(0.5f);
+            SimulateButtonClickOn("ButtonTestJsonLib");
+
+            yield return new WaitForSeconds(0.5f);
+            SimulateButtonClickOn("ButtonTestPing");
+
         }
 
         private class MyClass1 {
@@ -30,12 +36,14 @@ namespace com.csutil.demos.demo1 {
         }
 
         private void TestJsonSerialization() {
+            var t = Log.MethodEntered();
             var prefsKey = "testObj1";
             var myObj = new MyClass1() { theCurrentTime = "It is " + DateTimeV2.Now, myInt = 123 };
             PlayerPrefsV2.SetObject(prefsKey, myObj);
             AssertV2.AreEqual(myObj.theCurrentTime, PlayerPrefsV2.GetObject<MyClass1>(prefsKey, null).theCurrentTime);
             AssertV2.AreEqual(myObj.myInt, PlayerPrefsV2.GetObject<MyClass1>(prefsKey, null).myInt);
             links.Get<Text>("JsonOutput").text = JsonWriter.GetWriter().Write(PlayerPrefsV2.GetObject<MyClass1>(prefsKey, null));
+            Log.MethodDone(t);
         }
 
         private IEnumerator TestCurrentPing(string ipOrUrl) {
