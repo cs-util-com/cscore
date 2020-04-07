@@ -68,14 +68,20 @@ namespace com.csutil {
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
-        public static void AreEqual<T>(IEquatable<T> expected, IEquatable<T> actual, string varName = "", params object[] args) {
+        public static void NotNull(object o, string varName, params object[] args) {
+            string errorMsg = "Assert.NotNull(" + varName + ") FAILED";
+            Assert(o != null, errorMsg, args);
+        }
+
+        [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
+        public static void AreEqual<T>(T expected, T actual, string varName = "", params object[] args) {
             var errorMsg = "Assert.AreEqual() FAILED: expected " +
                 varName + "= " + expected + " NOT equal to actual " + varName + "= " + actual;
             Assert(expected.Equals(actual), errorMsg, args);
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
-        public static void AreNotEqual<T>(IEquatable<T> expected, IEquatable<T> actual, string varName = "", params object[] args) {
+        public static void AreNotEqual<T>(T expected, T actual, string varName = "", params object[] args) {
             var isNotSameRef = !ReferenceEquals(expected, actual);
             Assert(isNotSameRef, "Assert.AreNotEqual() FAILED: " + varName + " is same reference (expected " + expected + " == actual " + actual + " )", args);
             if (isNotSameRef) {

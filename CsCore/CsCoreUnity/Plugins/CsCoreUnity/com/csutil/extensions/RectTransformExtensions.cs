@@ -54,6 +54,16 @@ namespace com.csutil {
             return self.GetComponentInParent<Canvas>().rootCanvas;
         }
 
+        public static RectTransform SetPadding(this RectTransform self, float paddingInPixels) {
+            return self.SetPadding(paddingInPixels, paddingInPixels, paddingInPixels, paddingInPixels);
+        }
+
+        public static RectTransform SetPadding(this RectTransform self, float left, float right, float top, float bottom) {
+            self.offsetMin = new Vector2(left, bottom);
+            self.offsetMax = new Vector2(-right, -top);
+            return self;
+        }
+
     }
 
 }
