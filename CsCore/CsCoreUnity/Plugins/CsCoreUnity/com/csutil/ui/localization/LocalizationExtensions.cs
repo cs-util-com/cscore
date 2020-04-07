@@ -22,7 +22,8 @@ namespace com.csutil {
 
         private static Task<Dictionary<string, I18n.Translation>> DefaultUnityLocaleLoader(string localeToLoad) {
             try {
-                var list = ResourcesV2.LoadV2<List<I18n.Translation>>("Locales/" + localeToLoad);
+                var listJson = ResourcesV2.LoadV2<string>("Locales/" + localeToLoad);
+                var list = JsonReader.GetReader().Read<List<I18n.Translation>>(listJson);
                 return Task.FromResult(list.ToDictionary(e => e.key, e => e));
             }
             catch (Exception e) { Log.w("Could not load json for locale=" + localeToLoad, e); }
