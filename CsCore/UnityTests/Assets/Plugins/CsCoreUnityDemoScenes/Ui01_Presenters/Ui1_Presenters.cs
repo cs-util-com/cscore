@@ -1,17 +1,10 @@
-﻿using com.csutil.ui;
-using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.TestTools;
 using UnityEngine.UI;
 
 namespace com.csutil.tests.ui {
-
-    // public class Ui1_Presenters : MonoBehaviour { IEnumerator Start() { yield return new Ui1_PresenterTests().ExampleUsage(); } }
 
     public class Ui1_Presenters : UnitTestMono {
 

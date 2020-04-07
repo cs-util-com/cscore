@@ -10,11 +10,6 @@ using UnityEngine.UI;
 
 namespace com.csutil.tests.ui {
 
-    //public class Ui10_AppFlowTrackingTests {
-    //    [UnityTest]
-    //    public IEnumerator Ui10_AppFlowTracking() { yield return UnitTestMono.LoadAndRunUiTest("Ui10_Screen1"); }
-    //}
-
     public class Ui10_AppFlowTracking : UnitTestMono {
 
         public override IEnumerator RunTest() {

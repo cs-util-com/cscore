@@ -3,11 +3,6 @@ using UnityEngine.UI;
 
 namespace com.csutil.tests {
 
-    //public class Ui13_LocalizationTests {
-    //    [UnityTest]
-    //    public IEnumerator Ui13_Localization() { yield return UnitTestMono.LoadAndRunUiTest("Ui13_Localization"); }
-    //}
-
     public class Ui13_Localization : UnitTestMono {
 
         /// <summary> Try out 0, 1 and 2 </summary>

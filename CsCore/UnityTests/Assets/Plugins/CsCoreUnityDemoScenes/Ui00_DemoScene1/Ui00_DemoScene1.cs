@@ -9,7 +9,6 @@ namespace com.csutil.tests {
 
     public class Ui00_DemoScene1 : UnitTestMono {
 
-
         private Dictionary<string, Link> links;
 
         public override IEnumerator RunTest() {

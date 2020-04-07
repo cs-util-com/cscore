@@ -4,11 +4,6 @@ using UnityEngine.UI;
 
 namespace com.csutil.tests.ui {
 
-    //public class Ui12_ActionMenuTests {
-    //    [UnityTest]
-    //    public IEnumerator Ui12_ActionMenu() { yield return UnitTestMono.LoadAndRunUiTest("Ui12_ActionMenu"); }
-    //}
-
     public class Ui12_ActionMenu : UnitTestMono {
 
         public override IEnumerator RunTest() {
