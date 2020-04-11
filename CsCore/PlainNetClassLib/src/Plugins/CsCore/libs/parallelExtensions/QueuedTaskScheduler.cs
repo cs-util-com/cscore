@@ -361,6 +361,8 @@ namespace System.Threading.Tasks.Schedulers {
             return TryExecuteTask(task);
         }
 
+        public int GetRemainingScheduledTaskCount() { return GetScheduledTasks().Count(); }
+
         /// <summary>Gets the tasks scheduled to this scheduler.</summary>
         /// <returns>An enumerable of all tasks queued to this scheduler.</returns>
         /// <remarks>This does not include the tasks on sub-schedulers.  Those will be retrieved by the debugger separately.</remarks>

@@ -92,8 +92,8 @@ namespace com.csutil.tests.ui {
         private MyUser3 ReduceUser(MyUser3 previousState, object action) {
             if (action is ActionSetNewUser a) { return a.newUser; }
             if (action is ActionUpdateUser a2) {
-                AssertV2.AreEqual(a2.target, previousState);
-                if (object.Equals(a2.target, previousState)) { return a2.newValues; }
+                AssertV2.AreEqual(a2.target.name, previousState.name);
+                if (object.Equals(a2.target.name, previousState.name)) { return a2.newValues; }
             }
             return previousState;
         }

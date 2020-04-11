@@ -5,7 +5,7 @@ namespace com.csutil {
 
     public static class InjectorExtensionsForUnity {
 
-        private const string DEFAULT_SINGLETON_NAME = "Singletons";
+        public const string DEFAULT_SINGLETON_NAME = "Singletons";
 
         public static T GetOrAddComponentSingleton<T>(this Injector self, object caller, string singletonsGoName = DEFAULT_SINGLETON_NAME) where T : Component {
             T x = self.Get<T>(caller, true);
@@ -24,7 +24,7 @@ namespace com.csutil {
             return t != null ? t.GetComponentV2<T>() : null;
         }
 
-        private static GameObject GetOrAddGameObject(string gameObjectName) {
+        public static GameObject GetOrAddGameObject(string gameObjectName) {
             var go = GameObject.Find(gameObjectName);
             if (go == null) { return new GameObject(gameObjectName); } else { return go; }
         }

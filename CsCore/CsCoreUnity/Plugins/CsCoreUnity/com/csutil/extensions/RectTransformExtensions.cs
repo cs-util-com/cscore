@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace com.csutil {
 
@@ -24,11 +25,9 @@ namespace com.csutil {
             return cache;
         }
 
-        public static Bounds GetWorldBounds(this RectTransform self, Vector3[] cache = null) {
-            var corners = self.GetWorldCornersV2();
-            var height = (corners[0] - corners[1]).magnitude;
-            var width = (corners[1] - corners[2]).magnitude;
-            return new Bounds(self.position, size: new Vector3(width, height, 0));
+        public static Bounds GetWorldBounds(this RectTransform self, Vector3[] cornersCache = null) {
+            var corners = self.GetWorldCornersV2(cornersCache);
+            return new Bounds(self.position, corners[2] - corners[0]);
         }
 
         public static bool IsVisibleInScreen(this RectTransform self, Vector3[] cache = null) {
@@ -51,7 +50,7 @@ namespace com.csutil {
         }
 
         public static Canvas GetRootCanvas(this RectTransform self) {
-            return self.GetComponentInParent<Canvas>().rootCanvas;
+            return self.GetComponentInParent<Canvas>()?.rootCanvas;
         }
 
         public static RectTransform SetPadding(this RectTransform self, float paddingInPixels) {

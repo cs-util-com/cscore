@@ -19,12 +19,13 @@ namespace com.csutil {
         static void BeforeSceneLoad() {
             Debug.Log("BeforeSceneLoad");
             SystemConsoleToUnityLogRedirector.Setup();
-            try { DestroyExistingMainThreadIfNeeded(); } catch (Exception e) { Debug.LogError(e); }
+            try { DestroyExistingMainThreadIfNeeded(); } catch (Exception e) { Debug.Log(e); }
         }
 
         private static void DestroyExistingMainThreadIfNeeded() {
             var mt = IoC.inject.Get<MainThread>(null, false);
             if (mt != null) { mt.gameObject.Destroy(); }
+            InjectorExtensionsForUnity.GetOrAddGameObject(InjectorExtensionsForUnity.DEFAULT_SINGLETON_NAME).Destroy();
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
