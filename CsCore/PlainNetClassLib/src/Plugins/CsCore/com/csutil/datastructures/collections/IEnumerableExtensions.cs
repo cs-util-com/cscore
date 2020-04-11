@@ -41,8 +41,8 @@ namespace com.csutil {
         }
 
         public static string ToStringV2<T>(this IEnumerable<T> args, Func<T, string> toString, string bracket1 = "[", string bracket2 = "]", string separator = ", ") {
-            if (args.GetType() == typeof(string)) { return (string)(object)args; }
             if (args == null) { return "null"; }
+            if (args.GetType() == typeof(string)) { return (string)(object)args; }
             if (args.IsNullOrEmpty()) { return bracket1 + bracket2; }
             var filteredResultStrings = args.Map(x => "" + toString(x)).Filter(x => !x.IsNullOrEmpty());
             if (filteredResultStrings.IsNullOrEmpty()) { return bracket1 + bracket2; }
