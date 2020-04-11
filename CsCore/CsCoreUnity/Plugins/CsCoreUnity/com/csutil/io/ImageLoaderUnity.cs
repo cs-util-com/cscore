@@ -1,8 +1,12 @@
-﻿using StbImageLib;
+﻿using com.csutil.io;
+using com.csutil.ui.Components;
+using StbImageLib;
+using System;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.UI;
 
-namespace com.csutil.io {
+namespace com.csutil {
 
     public static class ImageLoaderUnity {
 
@@ -20,6 +24,16 @@ namespace com.csutil.io {
             tex.LoadRawTextureData(self.Data);
             tex.Apply();
             return tex;
+        }
+
+        public static async Task<Texture2D> LoadFromUrl(this Image self, string imageUrl) {
+            if (imageUrl.IsNullOrEmpty()) { throw new ArgumentNullException("The passed imageUrl cant be null"); }
+            self.GetComponent<LoadTexture2dTaskMono>().Destroy(); // Cancel previous task if possible
+            var textureLoader = self.gameObject.AddComponent<LoadTexture2dTaskMono>();
+            Texture2D texture2d = await textureLoader.LoadFromUrl(imageUrl);
+            self.sprite = texture2d.ToSprite();
+            textureLoader.Destroy();
+            return texture2d;
         }
 
     }
