@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -39,11 +36,29 @@ namespace com.csutil {
 
         protected virtual Task RunTask(Func<Task> asyncAction) { return Task.Run(asyncAction); }
 
-        public static Task<T> Run<T>(Func<Task<T>> asyncAction) {
-            return IoC.inject.GetOrAddSingleton<TaskV2>(null).RunTask(asyncAction);
+        public static Task Run(Func<Task> asyncAction, CancellationTokenSource cancel, TaskScheduler scheduler) {
+            return IoC.inject.GetOrAddSingleton<TaskV2>(null).RunTask(asyncAction, cancel, scheduler);
         }
 
-        protected virtual Task<T> RunTask<T>(Func<Task<T>> asyncAction) { return Task.Run(asyncAction); }
+        protected virtual Task RunTask(Func<Task> asyncAction, CancellationTokenSource cancel, TaskScheduler scheduler) {
+            return Task.Factory.StartNew(() => Wait(Run(asyncAction)), cancel.Token, TaskCreationOptions.None, scheduler);
+        }
+
+        public static Task<T> Run<T>(Func<Task<T>> asyncFunction) {
+            return IoC.inject.GetOrAddSingleton<TaskV2>(null).RunTask(asyncFunction);
+        }
+
+        protected virtual Task<T> RunTask<T>(Func<Task<T>> asyncFunction) { return Task.Run(asyncFunction); }
+
+        public static Task<T> Run<T>(Func<Task<T>> asyncFunction, CancellationTokenSource cancel, TaskScheduler scheduler) {
+            return IoC.inject.GetOrAddSingleton<TaskV2>(null).RunTask(asyncFunction, cancel, scheduler);
+        }
+
+        protected virtual Task<T> RunTask<T>(Func<Task<T>> asyncFunction, CancellationTokenSource cancel, TaskScheduler scheduler) {
+            return Task.Factory.StartNew(() => Wait(Run(asyncFunction)), cancel.Token, TaskCreationOptions.None, scheduler).Unwrap();
+        }
+
+        private static T Wait<T>(T task) where T : Task { task.Wait(); return task; }
 
         public static async Task TryWithExponentialBackoff(Func<Task> taskToTry,
                         Action<Exception> onError = null, int maxNrOfRetries = -1, int maxDelayInMs = -1, int initialExponent = 0) {

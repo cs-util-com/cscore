@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -33,7 +34,15 @@ namespace com.csutil.async {
 
         protected override Task RunTask(Func<Task> asyncAction) { return asyncAction(); }
 
-        protected override Task<T> RunTask<T>(Func<Task<T>> asyncAction) { return asyncAction(); }
+        protected override Task<T> RunTask<T>(Func<Task<T>> asyncFunction) { return asyncFunction(); }
+
+        protected override Task RunTask(Func<Task> asyncAction, CancellationTokenSource cancel, TaskScheduler scheduler) {
+            return asyncAction();
+        }
+
+        protected override Task<T> RunTask<T>(Func<Task<T>> asyncFunction, CancellationTokenSource cancel, TaskScheduler scheduler) {
+            return asyncFunction();
+        }
 
     }
 
