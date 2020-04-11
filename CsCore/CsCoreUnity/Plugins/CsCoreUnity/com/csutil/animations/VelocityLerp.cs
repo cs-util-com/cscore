@@ -10,6 +10,7 @@ namespace com.csutil {
 
         /// <summary> Critically Damped Spring Smoothing - http://mathproofs.blogspot.jp/2013/07/critically-damped-spring-smoothing.html </summary>
         /// <param name="currentVelocity"> Should be a field which is passed with every call again </param>
+        /// <param name="dt"> Normally Time.deltaTime </param>
         /// <returns>the new value</returns>
         public static float LerpWithVelocity(float self, float destination, ref float currentVelocity, float dt, float omega = 1) {
             // impl. from https://github.com/keijiro/SmoothingTest/blob/master/Assets/Flask/Tween.cs

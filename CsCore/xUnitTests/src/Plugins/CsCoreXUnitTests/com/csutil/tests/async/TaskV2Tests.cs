@@ -1,8 +1,7 @@
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Threading.Tasks.Schedulers;
 using Xunit;
 
 namespace com.csutil.tests.async {
@@ -84,6 +83,64 @@ namespace com.csutil.tests.async {
         private async Task RunSomeAsyncTask(Action p) {
             await TaskV2.Delay(50);
             p();
+        }
+
+        [Fact]
+        public async Task TestRunWithTaskScheduler1() { // Aligned with the coroutine test TestExecuteRepeated1
+
+            var maxConcurrencyLevel = 1;
+            QueuedTaskScheduler scheduler = new QueuedTaskScheduler(TaskScheduler.Default, maxConcurrencyLevel);
+            var cancel = new CancellationTokenSource();
+
+            // Create both tasks at the same time:
+            Task t1 = TaskV2.Run(SomeAsyncTask1, cancel, scheduler);
+            Task<string> t2 = TaskV2.Run(SomeAsyncTask2, cancel, scheduler);
+
+            Assert.Equal(1, scheduler.GetRemainingScheduledTaskCount()); // 1 task started and 1 waiting
+            Assert.Equal("Some string result", await t2);
+            Assert.Equal(0, scheduler.GetRemainingScheduledTaskCount());
+
+            // Since the scheduler allows only one task at a time, if t2 is done, t1 also must be completed:
+            Assert.True(t1.IsCompleted);
+
+        }
+
+        [Fact]
+        public async Task TestRunWithTaskScheduler2() { // Aligned with the coroutine test TestExecuteRepeated1
+
+            var maxConcurrencyLevel = 2;
+            QueuedTaskScheduler scheduler = new QueuedTaskScheduler(TaskScheduler.Default, maxConcurrencyLevel);
+            var cancel = new CancellationTokenSource();
+
+            // Create both tasks at the same time:
+            Task t1 = TaskV2.Run(SomeAsyncTask1, cancel, scheduler);
+            Task<string> t2 = TaskV2.Run(SomeAsyncTask2, cancel, scheduler);
+
+            Assert.Equal(0, scheduler.GetRemainingScheduledTaskCount());
+            var t3 = TaskV2.Run(SomeAsyncTask1, cancel, scheduler); // Add a 3rd task (will not be started)
+            Assert.Equal(1, scheduler.GetRemainingScheduledTaskCount());
+
+            Assert.Equal("Some string result", await t2);
+
+            // Check that now also task t3 was started:
+            Assert.Equal(0, scheduler.GetRemainingScheduledTaskCount());
+
+            // Since the scheduler allows 2 tasks at a time, t1 will not be complete when t2 is done:
+            Assert.False(t1.IsCompleted);
+            await t1;
+        }
+
+        private async Task SomeAsyncTask1() {
+            var t = Log.MethodEntered();
+            await TaskV2.Delay(500);
+            Log.MethodDone(t);
+        }
+
+        private async Task<string> SomeAsyncTask2() {
+            var t = Log.MethodEntered();
+            await TaskV2.Delay(5);
+            Log.MethodDone(t);
+            return "Some string result";
         }
 
     }

@@ -17,24 +17,46 @@ namespace com.csutil {
         }
 
         public static Task SetOnClickAction(this Button self, Action<GameObject> onClickAction) {
+            SetupOnClickEventObject(self);
+            return self.AddOnClickAction(onClickAction);
+        }
+
+        public static Task<T> SetOnClickAction<T>(this Button self, Func<GameObject, T> onClickAction) {
+            SetupOnClickEventObject(self);
+            return self.AddOnClickAction(onClickAction);
+        }
+
+        private static void SetupOnClickEventObject(Button self) {
             if (self.onClick != null && self.onClick.GetPersistentEventCount() > 0) {
                 Log.w("Overriding existing onClick action in " + self, self.gameObject);
             }
             self.onClick = new Button.ButtonClickedEvent(); // clear previous onClick listeners
-            return self.AddOnClickAction(onClickAction);
         }
 
         public static Task AddOnClickAction(this Button self, Action<GameObject> onClickAction) {
-            return AddOnClickFunc(self, (go) => { onClickAction(go); return true; });
+            return AddOnClickAction(self, (go) => { onClickAction(go); return true; });
         }
 
-        public static Task<T> AddOnClickFunc<T>(this Button self, Func<GameObject, T> onClickFunc) {
+        public static Task<T> AddOnClickAction<T>(this Button self, Func<GameObject, T> onClickFunc) {
             var tcs = new TaskCompletionSource<T>();
             if (onClickFunc != null) {
                 var originTrace = new StackTrace();
                 self.onClick.AddListener(() => {
                     EventBus.instance.Publish(UiEvents.BUTTON_CLICKED, self);
-                    try { tcs.TrySetResult(onClickFunc(self.gameObject)); } catch (Exception e) { Log.e(e + " at " + originTrace); tcs.TrySetException(e); }
+                    try {
+                        T res = onClickFunc(self.gameObject);
+                        if (res is Task<T> asyncT) {
+                            asyncT.ContinueWith(task => tcs.TrySetResult(task.Result));
+                        } else if (res is Task t) {
+                            t.ContinueWith(task => tcs.TrySetResult((T)(object)task));
+                        } else {
+                            tcs.TrySetResult(res);
+                        }
+                    }
+                    catch (Exception e) {
+                        Log.e(e + " at " + originTrace);
+                        tcs.TrySetException(e);
+                    }
                 });
             }
             return tcs.Task;

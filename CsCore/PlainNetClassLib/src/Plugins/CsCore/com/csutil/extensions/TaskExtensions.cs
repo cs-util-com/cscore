@@ -26,6 +26,14 @@ namespace com.csutil {
             await self;  // use await to propagate exceptions
         }
 
+        public static Task<Task> OnError(this Task self, Func<Exception, Task> onError) {
+            return self.ContinueWith(t => { if (t.IsFaulted) { return onError(t.Exception); } return t; });
+        }
+
+        public static Task<Task<T>> OnError<T>(this Task<T> self, Func<Exception, Task<T>> onError) {
+            return self.ContinueWith(t => { if (t.IsFaulted) { return onError(t.Exception); } return t; });
+        }
+
     }
 
 }

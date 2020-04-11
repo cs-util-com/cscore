@@ -8,6 +8,14 @@ namespace com.csutil.system {
 
     public class NewsManager {
 
+        public static NewsManager NewManagerViaGSheets(string apiKey, string sheetId, string sheetName) {
+            var newsDir = EnvironmentV2.instance.GetOrAddTempFolder("NewsManagerCache");
+            var gSheetsCache = new FileBasedKeyValueStore(newsDir.GetChildDir("GSheetsData"));
+            var newsLocalDataCache = new FileBasedKeyValueStore(newsDir.GetChildDir("LocalData"));
+            IKeyValueStore newsStore = new GoogleSheetsKeyValueStore(gSheetsCache, apiKey, sheetId, sheetName);
+            return new NewsManager(newsLocalDataCache.GetTypeAdapter<News.LocalData>(), newsStore.GetTypeAdapter<News>());
+        }
+
         private KeyValueStoreTypeAdapter<News.LocalData> localCache;
         private KeyValueStoreTypeAdapter<News> newsStore;
 
