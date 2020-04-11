@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 using com.csutil;
 using Newtonsoft.Json.Linq;
 
@@ -37,13 +39,20 @@ namespace com.csutil.json {
 
         private static bool JsonCouldBeFullyParsed(IJsonReader jsonReader, IJsonWriter jsonWriter, object result, string json) {
             try {
+                json = RemoveNonAsciiCharacters(json);
                 AssertV2.IsFalse(string.IsNullOrEmpty(json), "Json isNullOrEmpty");
-                var input = jsonReader.Read<System.Collections.Generic.Dictionary<string, object>>(json);
-                var parsed = jsonReader.Read<System.Collections.Generic.Dictionary<string, object>>(jsonWriter.Write(result));
+                var input = jsonReader.Read<Dictionary<string, object>>(json);
+                var parsed = jsonReader.Read<Dictionary<string, object>>(jsonWriter.Write(result));
                 AssertV2.IsNotNull(parsed, "parsed");
                 return JsonCouldBeFullyParsed(jsonReader, result.GetType().Name, input, parsed, 0);
-            } catch (Exception e) { Log.e(new Exception("exception during parsing json=" + json, e)); }
+            }
+            catch (Exception e) { Log.e(new Exception("exception during parsing json=" + json, e)); }
             return false;
+        }
+
+        private static string RemoveNonAsciiCharacters(string input) {
+            // From https://stackoverflow.com/a/123340/165106 :
+            return Regex.Replace(input, @"[^\u0000-\u007F]+", string.Empty);
         }
 
         private static bool JsonCouldBeFullyParsed(IJsonReader reader, string path, IDictionary input, IDictionary parsed, int depth) {
