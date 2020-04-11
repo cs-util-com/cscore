@@ -101,3 +101,12 @@ Update Mode: updateDependencies
 
 The following packages were updated:
   com.unity.test-framework from version 1.1.9 to 1.1.11
+
+=== Sat Apr 11 07:48:05 2020
+
+Packages were changed.
+Update Mode: updateDependencies
+
+The following packages were updated:
+  com.unity.mobile.android-logcat from version 1.0.0 to 1.1.1
+  com.unity.test-framework from version 1.1.11 to 1.1.13
