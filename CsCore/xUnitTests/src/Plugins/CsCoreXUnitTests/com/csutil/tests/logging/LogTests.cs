@@ -80,6 +80,13 @@ namespace com.csutil.tests {
             AssertV2.ThrowExeptionIfAssertionFails(() => { stopWatch.AssertUnderXms(200); });
             Assert.True(stopWatch.IsUnderXms(200), "More time was needed than expected!");
 
+            AssertV2.AreEqual("abcd", "abce");
+            AssertV2.AreEqual(new int[4] { 1, 2, 2, 4 }, new int[4] { 1, 2, 3, 4 });
+            AssertV2.AreEqual(new int[2] { 1, 2 }, new int[2] { 1, 3 });
+            AssertV2.AreEqual(new int[6] { 1, 2, 3, 4, 5, 6 }, new int[6] { 1, 2, 3, 4, 5, 7 });
+            AssertV2.AreEqual(new int[2] { 1, 2 }, new int[1] { 1 });
+            AssertV2.AreEqual(new int[1] { 1 }, new int[2] { 1, 2 });
+
         }
 
         [Fact]
