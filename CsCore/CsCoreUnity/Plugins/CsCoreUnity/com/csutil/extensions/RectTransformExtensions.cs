@@ -63,6 +63,14 @@ namespace com.csutil {
             return self;
         }
 
+        // Top-level UIs in the view stack should always fill their parent
+        public static void SetAnchorsStretchStretch(this RectTransform self) {
+            self.anchorMin = new Vector2(0, 0);
+            self.anchorMax = new Vector2(1, 1);
+            self.pivot = new Vector2(0.5f, 0.5f);
+            self.SetPadding(0);
+        }
+
     }
 
 }

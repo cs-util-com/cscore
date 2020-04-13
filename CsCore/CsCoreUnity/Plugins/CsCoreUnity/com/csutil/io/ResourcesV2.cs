@@ -18,12 +18,16 @@ namespace com.csutil {
             GameObject prefab = LoadV2<GameObject>(pathInResourcesFolder);
             if (prefab == null) { throw new Exception("Could not find prefab at path='" + pathInResourcesFolder + "'"); }
 #if UNITY_EDITOR
-            if (keepReferenceToEditorPrefab) { return UnityEditor.PrefabUtility.InstantiatePrefab(prefab) as GameObject; }
+            if (keepReferenceToEditorPrefab) {
+                var prefabInstance = UnityEditor.PrefabUtility.InstantiatePrefab(prefab) as GameObject;
+                prefabInstance.name = pathInResourcesFolder;
+                return prefabInstance;
+            }
 #endif
-            var prefabInstance = GameObject.Instantiate(prefab) as GameObject;
-            prefabInstance.name = "Prefab:" + pathInResourcesFolder;
-            EventBus.instance.Publish(EventConsts.catTemplate, prefabInstance);
-            return prefabInstance;
+            var go = GameObject.Instantiate(prefab) as GameObject;
+            go.name = pathInResourcesFolder;
+            EventBus.instance.Publish(EventConsts.catTemplate, go);
+            return go;
         }
 
         public static void ActivatePrefabLoadTracking(this IAppFlow self) {

@@ -16,19 +16,11 @@ namespace com.csutil.ui {
         /// <param name="newView"> The new view to show in the stack </param>
         public GameObject ShowView(GameObject newView, GameObject currentViewToHide = null) {
             gameObject.AddChild(newView);
-            SetAnchorsStretchStretch(newView.GetComponent<RectTransform>());
+            var rt = newView.GetComponent<RectTransform>();
+            if (rt == null) { rt.SetAnchorsStretchStretch(); } // The view is in a UI
             EventBus.instance.Publish(EventConsts.SHOW_VIEW, newView);
-            if (currentViewToHide != null) { GetRootFor(currentViewToHide).SetActiveV2(false); }
+            if (currentViewToHide != null) { GetRootViewOf(currentViewToHide).SetActiveV2(false); }
             return newView;
-        }
-
-        // Top-level UIs in the view stack should always fill their parent
-        private static void SetAnchorsStretchStretch(RectTransform rt) {
-            if (rt == null) { return; } // The view is not a UI
-            rt.anchorMin = new Vector2(0, 0);
-            rt.anchorMax = new Vector2(1, 1);
-            rt.pivot = new Vector2(0.5f, 0.5f);
-            rt.SetPadding(0);
         }
 
         /// <summary> Returns the latest view on the ViewStack that is active. Or null if none is found </summary>
@@ -50,7 +42,7 @@ namespace com.csutil.ui {
         /// <param name="hideNotDestroyCurrentView"> If set to true the current active view will not be destroyed but instead set to hidden </param>
         /// <returns></returns>
         public bool SwitchBackToLastView(GameObject gameObject, bool destroyFinalView = false, bool hideNotDestroyCurrentView = false) {
-            var currentView = GetRootFor(gameObject);
+            var currentView = GetRootViewOf(gameObject);
             var currentIndex = currentView.transform.GetSiblingIndex();
             if (currentIndex > 0) {
                 var lastView = transform.GetChild(currentIndex - 1).gameObject;
@@ -70,7 +62,7 @@ namespace com.csutil.ui {
         /// <param name="hideCurrentView"> If false the current view will stay visible, relevant e.g. for transparent new views </param>
         /// <returns> True if there was a next view to show, false otherwise </returns>
         public bool SwitchToNextView(GameObject gameObject, bool hideCurrentView = true) {
-            var currentView = GetRootFor(gameObject);
+            var currentView = GetRootViewOf(gameObject);
             var currentIndex = currentView.transform.GetSiblingIndex();
             if (currentIndex == transform.childCount - 1) { Log.w("Current was last view in the stack"); }
             if (currentIndex >= transform.childCount - 1) { return false; }
@@ -81,12 +73,12 @@ namespace com.csutil.ui {
             return true;
         }
 
-        /// <summary> Moves up the tree until it reaches the direct child of the viewstack </summary>
-        private GameObject GetRootFor(GameObject go) {
-            if (go == gameObject) { throw Log.e("Cant get root for ViewStack gameobject"); }
-            var parent = go.GetParent();
-            if (parent == gameObject) { return go; } // stop when the GO of the viewstack is reached
-            return GetRootFor(parent);
+        /// <summary> Moves up the tree until it reaches the direct child (the view) of the viewstack </summary>
+        public GameObject GetRootViewOf(GameObject viewElement) {
+            if (viewElement == gameObject) { throw Log.e("Cant get root for ViewStack gameobject"); }
+            var parent = viewElement.GetParent();
+            if (parent == gameObject) { return viewElement; } // stop when the GO of the viewstack is reached
+            return GetRootViewOf(parent);
         }
 
     }
