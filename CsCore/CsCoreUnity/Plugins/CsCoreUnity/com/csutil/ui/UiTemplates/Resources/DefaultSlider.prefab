@@ -58,7 +58,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.38431373, g: 0, b: 0.93333334, a: 1}
+  m_Color: {r: 0.03529412, g: 0.5529412, b: 0.8588236, a: 1}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -139,7 +139,7 @@ MonoBehaviour:
   ShapeProperties:
     FillColor:
       serializedVersion: 2
-      rgba: 4293787746
+      rgba: 4292578569
     DrawFill: 1
     DrawFillShadow: 1
     DrawOutline: 0
@@ -289,7 +289,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.80784315, g: 0.7372549, b: 0.9019608, a: 1}
+  m_Color: {r: 0.909804, g: 0.92549026, b: 1, a: 1}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
