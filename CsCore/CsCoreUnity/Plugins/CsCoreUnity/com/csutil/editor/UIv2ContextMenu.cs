@@ -70,6 +70,9 @@ namespace com.csutil.editor {
         [MenuItem(UIv2menu + "DefaultSlider", false, priorityOfUiMenu + 6)]
         static void DefaultSlider() { AddPrefabToActiveView("DefaultSlider"); }
 
+        [MenuItem(UIv2menu + "DefaultSliderWithText", false, priorityOfUiMenu + 6)]
+        static void DefaultSliderWithText() { AddPrefabToActiveView("DefaultSliderWithText"); }
+
         [MenuItem(UIv2menu + "Messages/Tooltip", false, priorityOfUiMenu + 7)]
         static void Tooltip() { AddPrefabToActiveView("Messages/Tooltip"); }
 
