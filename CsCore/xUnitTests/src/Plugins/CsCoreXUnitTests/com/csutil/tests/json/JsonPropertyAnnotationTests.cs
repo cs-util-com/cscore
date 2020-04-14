@@ -7,6 +7,7 @@ namespace com.csutil.tests.json {
 
         public JsonPropertyAnnotationTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
+#pragma warning disable 0649 // Variable is never assigned to, and will always have its default value
         class MyClass1 {
             [JsonProperty(Required = Required.Always)]
             public string myString;
@@ -14,6 +15,7 @@ namespace com.csutil.tests.json {
             [JsonProperty(Required = Required.Always)]
             public string myString2 { get; set; }
         }
+#pragma warning restore 0649 // Variable is never assigned to, and will always have its default value
 
         [Fact]
         public void ExampleUsage1() {

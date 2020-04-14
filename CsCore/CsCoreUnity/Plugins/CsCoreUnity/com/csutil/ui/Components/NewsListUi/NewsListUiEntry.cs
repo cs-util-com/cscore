@@ -8,6 +8,7 @@ namespace com.csutil.ui {
 
     class NewsListUiEntry : BaseCell<News> {
 
+#pragma warning disable 0649 // Variable is never assigned to, and will always have its default value
         public Text dateText;
         public Text typeText;
         public Text titleText;
@@ -18,6 +19,8 @@ namespace com.csutil.ui {
         public Image thumbnail;
         public Button titleButton;
         public Button detailsUrlButton;
+#pragma warning restore 0649 // Variable is never assigned to, and will always have its default value
+
         private NewsListUi newsListUi;
 
         public override void UpdateContent(News item) {

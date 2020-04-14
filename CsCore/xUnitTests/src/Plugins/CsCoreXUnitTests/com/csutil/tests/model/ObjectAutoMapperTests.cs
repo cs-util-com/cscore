@@ -9,6 +9,7 @@ namespace com.csutil.tests.json {
 
         public ObjectAutoMapperTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
+#pragma warning disable 0649 // Variable is never assigned to, and will always have its default value
         class User {
             public int id;
             public string myName;
@@ -35,6 +36,7 @@ namespace com.csutil.tests.json {
 
             public List<string> contactEmails { get; set; }
         }
+#pragma warning restore 0649 // Variable is never assigned to, and will always have its default value
 
         [Fact]
         public void ExampleUsage1() {

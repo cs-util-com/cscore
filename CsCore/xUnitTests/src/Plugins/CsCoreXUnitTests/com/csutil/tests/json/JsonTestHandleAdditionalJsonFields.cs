@@ -39,6 +39,7 @@ namespace com.csutil.tests.json {
             Assert.Equal(x1.myComplexField.myString2, x3.myComplexField.myString2);
         }
 
+#pragma warning disable 0649 // Variable is never assigned to, and will always have its default value
         private class MyClass3 {
             public string myString = "Some string";
 
@@ -47,6 +48,7 @@ namespace com.csutil.tests.json {
 
             internal IDictionary<string, Newtonsoft.Json.Linq.JToken> GetAdditionalJsonFields() { return _additionalData; }
         }
+#pragma warning restore 0649 // Variable is never assigned to, and will always have its default value
 
         [Fact]
         public void TestKeepMissingFieldsViaJsonExtensionData() {

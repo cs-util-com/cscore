@@ -385,6 +385,7 @@ namespace com.csutil.tests.keyvaluestore {
 
         }
 
+#pragma warning disable 0649 // Variable is never assigned to, and will always have its default value
         // Fields must be in sync with first row in the source Google Sheet, see names in:
         // https://docs.google.com/spreadsheets/d/13R9y6lnUMgRPC0PinJ23tACC6Flgogxa7h7SVaaLhT0
         private class MySheetEntry {
@@ -395,6 +396,7 @@ namespace com.csutil.tests.keyvaluestore {
             public double myDouble1;
             public class MyObj { public string a; }
         }
+#pragma warning restore 0649 // Variable is never assigned to, and will always have its default value
 
     }
 
