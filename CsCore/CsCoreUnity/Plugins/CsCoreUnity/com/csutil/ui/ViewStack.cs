@@ -16,8 +16,9 @@ namespace com.csutil.ui {
         /// <param name="newView"> The new view to show in the stack </param>
         public GameObject ShowView(GameObject newView, GameObject currentViewToHide = null) {
             gameObject.AddChild(newView);
-            var rt = newView.GetComponent<RectTransform>();
-            if (rt == null) { rt.SetAnchorsStretchStretch(); } // The view is in a UI
+            if (newView.GetComponentInParents<Canvas>() != null) { // The view is in a UI
+                newView.GetOrAddComponent<RectTransform>().SetAnchorsStretchStretch();
+            }
             EventBus.instance.Publish(EventConsts.SHOW_VIEW, newView);
             if (currentViewToHide != null) { GetRootViewOf(currentViewToHide).SetActiveV2(false); }
             return newView;
