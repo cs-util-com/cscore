@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 namespace com.csutil.ui {
@@ -15,7 +10,7 @@ namespace com.csutil.ui {
     [RequireComponent(typeof(Canvas))]
     class CanvasOrderOnTop : MonoBehaviour {
 
-        private void OnEnable() {
+        private void Start() {
             var canvas = GetComponent<Canvas>();
             canvas.overrideSorting = true;
             canvas.sortingOrder = canvas.CalcCurrentMaxSortingOrderInLayer() + 1;

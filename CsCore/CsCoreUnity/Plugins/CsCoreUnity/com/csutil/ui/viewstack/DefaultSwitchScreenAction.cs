@@ -1,15 +1,12 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
-namespace com.csutil.ui.elements {
+namespace com.csutil.ui.viewstack {
 
     [RequireComponent(typeof(Button))]
     public class DefaultSwitchScreenAction : MonoBehaviour {
 
-        public enum SwitchDirection { backwards, forwards, loadNextScreenViaPrefab }
+        public enum SwitchDirection { backwards, forwards, loadNextScreenViaPrefab, backwardsOrForwards }
 
         public SwitchDirection switchDirection = SwitchDirection.backwards;
         /// <summary> e.g. "uis/MyScreenPrefab1" - The path of the prefab that should be loaded as the next view </summary>
@@ -19,7 +16,7 @@ namespace com.csutil.ui.elements {
         /// <summary> If true and the final view in the stack is reached then the stack will be destroyed </summary>
         public bool destroyViewStackWhenLastScreenReached = false;
         /// <summary> If false the current active view will not be hidden and the new one shown on top </summary>
-        public bool hideCurrentScreen = true;
+        public bool hideCurrentView = true;
         /// <summary> If true the current view on the stack will be set to inactive instead of destroying it </summary>
         public bool hideNotDestroyCurrentViewWhenGoingBackwards = false;
 
@@ -35,10 +32,10 @@ namespace com.csutil.ui.elements {
             if (!TrySwitchView()) {
                 var isForwardOrBackward = switchDirection != SwitchDirection.loadNextScreenViaPrefab;
                 if (isForwardOrBackward && destroyViewStackWhenLastScreenReached) {
-                    gameObject.GetViewStack().gameObject.Destroy();
+                    gameObject.GetViewStack().gameObject.Destroy(); // Destroys complete ViewStack
                     return true;
                 }
-                Log.w("Cant switch screen in direction " + switchDirection);
+                Log.w("Cant switch view in direction " + switchDirection);
             }
             AppFlow.TrackEvent(EventConsts.catView, "switchViewWasRejected");
             return false;
@@ -47,13 +44,23 @@ namespace com.csutil.ui.elements {
         private bool TrySwitchView() {
             switch (switchDirection) {
                 case SwitchDirection.backwards:
-                    return gameObject.GetViewStack().SwitchBackToLastView(gameObject, destroyViewStackWhenLastScreenReached, hideNotDestroyCurrentViewWhenGoingBackwards);
+                    return GoBackwards();
+                case SwitchDirection.backwardsOrForwards:
+                    return GoBackwards() || (GoForwards() && DestroyCurrentView());
                 case SwitchDirection.forwards:
-                    return gameObject.GetViewStack().SwitchToNextView(gameObject, hideCurrentScreen);
+                    return GoForwards();
                 case SwitchDirection.loadNextScreenViaPrefab:
-                    return gameObject.GetViewStack().ShowView(nextScreenPrefabName, hideCurrentScreen ? gameObject : null) != null;
+                    return gameObject.GetViewStack().ShowView(nextScreenPrefabName, hideCurrentView ? gameObject : null) != null;
                 default: return false;
             }
+        }
+
+        private bool DestroyCurrentView() { return gameObject.GetViewStack().GetRootViewOf(gameObject).Destroy(); }
+
+        private bool GoForwards() { return gameObject.GetViewStack().SwitchToNextView(gameObject, hideCurrentView); }
+
+        private bool GoBackwards() {
+            return gameObject.GetViewStack().SwitchBackToLastView(gameObject, destroyViewStackWhenLastScreenReached, hideNotDestroyCurrentViewWhenGoingBackwards);
         }
 
     }

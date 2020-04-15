@@ -16,7 +16,7 @@ MonoBehaviour:
   nextScreenPrefabName: SideBar
   forceAddingAction: 0
   destroyViewStackWhenLastScreenReached: 0
-  hideCurrentScreen: 0
+  hideCurrentView: 0
   hideNotDestroyCurrentViewWhenGoingBackwards: 0
 --- !u!1 &1560433004050050222
 GameObject:
@@ -168,7 +168,7 @@ MonoBehaviour:
   nextScreenPrefabName: 
   forceAddingAction: 0
   destroyViewStackWhenLastScreenReached: 0
-  hideCurrentScreen: 1
+  hideCurrentView: 1
   hideNotDestroyCurrentViewWhenGoingBackwards: 0
 --- !u!1 &8473828115249956650
 GameObject:
@@ -242,7 +242,7 @@ MonoBehaviour:
     m_BestFit: 0
     m_MinSize: 1
     m_MaxSize: 40
-    m_Alignment: 3
+    m_Alignment: 6
     m_AlignByGeometry: 0
     m_RichText: 1
     m_HorizontalOverflow: 0
@@ -293,6 +293,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Text
       value: "\uE5D2"
+      objectReference: {fileID: 0}
+    - target: {fileID: 1826576467927810384, guid: 1c599e31dd8ea2d40acdfa6166c8de0d,
+        type: 3}
+      propertyPath: m_FontData.m_Alignment
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 3671181214303023935, guid: 1c599e31dd8ea2d40acdfa6166c8de0d,
         type: 3}
@@ -430,6 +435,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 5612786063431223322}
     m_Modifications:
+    - target: {fileID: 1826576467927810384, guid: 1c599e31dd8ea2d40acdfa6166c8de0d,
+        type: 3}
+      propertyPath: m_FontData.m_Alignment
+      value: 7
+      objectReference: {fileID: 0}
     - target: {fileID: 3671181214303023935, guid: 1c599e31dd8ea2d40acdfa6166c8de0d,
         type: 3}
       propertyPath: m_Name

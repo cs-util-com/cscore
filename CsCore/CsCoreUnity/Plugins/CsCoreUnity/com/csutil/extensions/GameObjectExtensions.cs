@@ -9,8 +9,9 @@ namespace com.csutil {
     public static class GameObjectExtensions {
 
         /// <summary> Adds a child GameObject to the calling new parent GameObject </summary>
-        public static GameObject AddChild(this GameObject parentGo, GameObject child, bool worldPositionStays = false) {
+        public static GameObject AddChild(this GameObject parentGo, GameObject child, bool worldPositionStays = false, int siblingIndex = -1) {
             child.transform.SetParent(parentGo.transform, worldPositionStays); // add it to parent
+            if (siblingIndex > -1) { child.transform.SetSiblingIndex(siblingIndex); }
             return child;
         }
 

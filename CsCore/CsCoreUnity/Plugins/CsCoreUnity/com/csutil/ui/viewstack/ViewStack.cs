@@ -4,18 +4,21 @@ namespace com.csutil.ui {
 
     public class ViewStack : MonoBehaviour {
 
+        public string screenToShowAsCloseView;
+        protected GameObject activeCloseView;
+
         /// <summary> Loads a new view based on its prefab name and by default hides the current one </summary>
         /// <param name="currentViewToHide"> (Any part of) the current view that should be hidden </param>
         /// <param name="prefabName"> e.g. "Dialogs/Dialog123" </param>
         /// <returns> The newly created view </returns>
-        public GameObject ShowView(string prefabName, GameObject currentViewToHide = null) {
-            return ShowView(ResourcesV2.LoadPrefab(prefabName), currentViewToHide);
+        public GameObject ShowView(string prefabName, GameObject currentViewToHide = null, int siblingIndex = -1) {
+            return ShowView(ResourcesV2.LoadPrefab(prefabName), currentViewToHide, siblingIndex);
         }
 
         /// <summary> Adds a passed view to the view stack to show it </summary>
         /// <param name="newView"> The new view to show in the stack </param>
-        public GameObject ShowView(GameObject newView, GameObject currentViewToHide = null) {
-            gameObject.AddChild(newView);
+        public GameObject ShowView(GameObject newView, GameObject currentViewToHide = null, int siblingIndex = -1) {
+            gameObject.AddChild(newView, siblingIndex: siblingIndex);
             if (newView.GetComponentInParents<Canvas>() != null) { // The view is in a UI
                 newView.GetOrAddComponent<RectTransform>().SetAnchorsStretchStretch();
             }
@@ -49,8 +52,13 @@ namespace com.csutil.ui {
                 var lastView = transform.GetChild(currentIndex - 1).gameObject;
                 lastView.SetActiveV2(true);
                 EventBus.instance.Publish(EventConsts.SWITCH_BACK_TO_LAST_VIEW, "" + currentView, lastView);
+            } else {
+                if (!screenToShowAsCloseView.IsNullOrEmpty() && activeCloseView == null) {
+                    activeCloseView = ShowView(screenToShowAsCloseView, siblingIndex: 0);
+                    return true;
+                }
+                if (!destroyFinalView) { return false; }
             }
-            if (currentIndex == 0 && !destroyFinalView) { return false; }
             if (hideNotDestroyCurrentView) {
                 return currentView.SetActiveV2(false);
             } else {
