@@ -357,11 +357,6 @@ PrefabInstance:
       propertyPath: m_SizeDelta.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 2615101646392753283, guid: e583237d2b00d1d4b8dab0df03e0871c,
-        type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: 5.6401367
-      objectReference: {fileID: 0}
     - target: {fileID: 2639706535033033757, guid: e583237d2b00d1d4b8dab0df03e0871c,
         type: 3}
       propertyPath: m_AnchorMin.y
@@ -416,6 +411,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_SizeDelta.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5904549030437474547, guid: e583237d2b00d1d4b8dab0df03e0871c,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6413950125801366604, guid: e583237d2b00d1d4b8dab0df03e0871c,
         type: 3}
@@ -560,7 +560,7 @@ PrefabInstance:
     - target: {fileID: 7941899351897223322, guid: e583237d2b00d1d4b8dab0df03e0871c,
         type: 3}
       propertyPath: m_AnchorMax.x
-      value: 1.000312
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7941899351897223322, guid: e583237d2b00d1d4b8dab0df03e0871c,
         type: 3}
@@ -581,6 +581,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: ExampleUi2_MainScreen
+      objectReference: {fileID: 0}
+    - target: {fileID: 8006131566406589846, guid: e583237d2b00d1d4b8dab0df03e0871c,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e583237d2b00d1d4b8dab0df03e0871c, type: 3}
@@ -651,6 +656,7 @@ GameObject:
   - component: {fileID: 1770289703}
   - component: {fileID: 1770289702}
   - component: {fileID: 1770289704}
+  - component: {fileID: 1770289705}
   m_Layer: 5
   m_Name: ViewStack
   m_TagString: Untagged
@@ -813,6 +819,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   destroyFinalView: 1
+--- !u!114 &1770289705
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1770289695}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 409e8e15fa53fd140ae4057ac671aabb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1999163227
 GameObject:
   m_ObjectHideFlags: 0
@@ -933,6 +951,50 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1154535086}
+  - {fileID: 2098423384}
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2098423383
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2098423384}
+  - component: {fileID: 2098423385}
+  m_Layer: 0
+  m_Name: com.csutil.ScreenV2
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2098423384
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2098423383}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 2036250439}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2098423385
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2098423383}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d2d0d6d5fff702a4eadb9ee0930bdc56, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
