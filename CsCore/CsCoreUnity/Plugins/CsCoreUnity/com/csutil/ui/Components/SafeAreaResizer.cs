@@ -9,12 +9,14 @@ namespace com.csutil.ui {
 
         private bool refreshing;
 
+        private void OnEnable() { Recalc(); }
+
         private void OnRectTransformDimensionsChange() { Recalc(); }
 
         private void OnValidate() { Recalc(); }
 
         private void Recalc() {
-            if (refreshing) { return; }
+            if (refreshing || !enabled) { return; }
             refreshing = true;
             CalcAnchors();
             refreshing = false;
@@ -43,7 +45,7 @@ namespace com.csutil.ui {
                 rt.anchorMax = anchorMax;
                 rt.SetPadding(0);
             }
-            catch (System.Exception e) { }
+            catch (System.Exception) { }
         }
     }
 
