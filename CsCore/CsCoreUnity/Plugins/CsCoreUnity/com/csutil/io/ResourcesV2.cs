@@ -30,12 +30,6 @@ namespace com.csutil {
             return go;
         }
 
-        public static void ActivatePrefabLoadTracking(this IAppFlow self) {
-            EventBus.instance.Subscribe(self, EventConsts.catTemplate, (GameObject prefab) => {
-                self.TrackEvent(EventConsts.catTemplate, "Loaded_" + prefab.name, prefab);
-            });
-        }
-
         public static T LoadV2<T>(string pathInResourcesFolder) {
             pathInResourcesFolder = RemoveExtensionIfNeeded(pathInResourcesFolder, ".prefab");
             pathInResourcesFolder = RemoveExtensionIfNeeded(pathInResourcesFolder, ".asset");

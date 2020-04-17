@@ -15,11 +15,8 @@ namespace com.csutil.tests.ui {
         public override IEnumerator RunTest() {
 
             var testTracker = new TestAppFlowTracker();
-            AppFlow.instance = testTracker;
-            AppFlow.instance.ActivateLinkMapTracking();
-            AppFlow.instance.ActivatePrefabLoadTracking();
-            AppFlow.instance.ActivateUiEventTracking();
-            AppFlow.instance.ActivateViewStackTracking();
+            testTracker.WithAllTrackingActive();
+            AppFlow.AddAppFlowTracker(testTracker);
 
             setupImmutableDatastore();
             // In setupImmutableDatastore() Log.MethodEntered is used, so there must be a recorded method:

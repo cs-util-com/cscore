@@ -8,19 +8,20 @@ namespace com.csutil {
 
     public static class AppFlow {
 
-        public static IAppFlow instance;
+        public static IAppFlow instance(object caller) { return IoC.inject.Get<IAppFlow>(caller); }
 
         public static void TrackEvent(string category, string action, params object[] args) {
-            instance?.TrackEvent(category, action, args);
+            instance(category)?.TrackEvent(category, action, args);
         }
 
         public static void AddAppFlowTracker(IAppFlow tracker) {
-            if (instance == null) {
-                instance = tracker;
-            } else if (instance is AppFlowMultipleTrackers multi) {
+            var oldInstance = instance(null);
+            if (oldInstance == null) {
+                IoC.inject.SetSingleton(tracker);
+            } else if (oldInstance is AppFlowMultipleTrackers multi) {
                 multi.trackers.Add(tracker);
             } else {
-                instance = new AppFlowMultipleTrackers(instance, tracker);
+                IoC.inject.SetSingleton(new AppFlowMultipleTrackers(oldInstance, tracker));
             }
         }
 

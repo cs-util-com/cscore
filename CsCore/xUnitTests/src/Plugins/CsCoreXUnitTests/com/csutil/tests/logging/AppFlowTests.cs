@@ -13,9 +13,9 @@ namespace com.csutil.tests {
 
         [Fact]
         public void TestAppFlowTracking() {
-            AppFlow.instance = new MyAppFlowTracker1();
+            AppFlow.AddAppFlowTracker(new MyAppFlowTracker1());
             Log.MethodEntered(); // This will internally notify the AppFlow instance
-            Assert.True((AppFlow.instance as MyAppFlowTracker1).wasCalledByTestAppFlowTrackingTest);
+            Assert.True((AppFlow.instance(null) as MyAppFlowTracker1).wasCalledByTestAppFlowTrackingTest);
         }
 
         private class MyAppFlowTracker1 : IAppFlow {
@@ -28,7 +28,7 @@ namespace com.csutil.tests {
         [Fact]
         public async Task TestDefaultAppFlowImplementation() {
             var tracker = new MyAppFlowTracker2(new InMemoryKeyValueStore());
-            AppFlow.instance = tracker;
+            AppFlow.AddAppFlowTracker(tracker);
             Log.MethodEntered(); // This will internally notify the AppFlow instance
             Assert.NotEmpty(await tracker.store.GetAllKeys());
 

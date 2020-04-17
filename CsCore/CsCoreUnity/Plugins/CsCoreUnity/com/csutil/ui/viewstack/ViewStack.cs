@@ -4,7 +4,7 @@ namespace com.csutil.ui {
 
     public class ViewStack : MonoBehaviour {
 
-        public string screenToShowAsCloseView;
+        public string screenToShowAsCloseView = "SideBar";
         protected GameObject activeCloseView;
 
         /// <summary> Loads a new view based on its prefab name and by default hides the current one </summary>
@@ -22,7 +22,7 @@ namespace com.csutil.ui {
             if (newView.GetComponentInParents<Canvas>() != null) { // The view is in a UI
                 newView.GetOrAddComponent<RectTransform>().SetAnchorsStretchStretch();
             }
-            EventBus.instance.Publish(EventConsts.SHOW_VIEW, newView);
+            EventBus.instance.Publish(EventConsts.VIEW_SHOW, newView);
             if (currentViewToHide != null) { GetRootViewOf(currentViewToHide).SetActiveV2(false); }
             return newView;
         }
@@ -51,11 +51,14 @@ namespace com.csutil.ui {
             if (currentIndex > 0) {
                 var lastView = transform.GetChild(currentIndex - 1).gameObject;
                 lastView.SetActiveV2(true);
-                EventBus.instance.Publish(EventConsts.SWITCH_BACK_TO_LAST_VIEW, "" + currentView, lastView);
+                EventBus.instance.Publish(EventConsts.VIEW_SWITCH_BACK_TO_LAST, "" + currentView, lastView);
             } else {
                 if (!screenToShowAsCloseView.IsNullOrEmpty() && activeCloseView == null) {
-                    activeCloseView = ShowView(screenToShowAsCloseView, siblingIndex: 0);
-                    return true;
+                    try {
+                        activeCloseView = ShowView(screenToShowAsCloseView, siblingIndex: 0);
+                        return true;
+                    }
+                    catch (System.Exception e) { Log.w("Could not show screenToShowAsCloseView=" + screenToShowAsCloseView, e); }
                 }
                 if (!destroyFinalView) { return false; }
             }
@@ -77,7 +80,7 @@ namespace com.csutil.ui {
             if (currentIndex >= transform.childCount - 1) { return false; }
             var nextView = transform.GetChild(currentIndex + 1).gameObject;
             nextView.SetActiveV2(true);
-            EventBus.instance.Publish(EventConsts.SWITCH_TO_NEXT_VIEW, currentView, nextView);
+            EventBus.instance.Publish(EventConsts.VIEW_SWITCH_TO_NEXT, currentView, nextView);
             if (hideCurrentView) { currentView.SetActiveV2(false); }
             return true;
         }
