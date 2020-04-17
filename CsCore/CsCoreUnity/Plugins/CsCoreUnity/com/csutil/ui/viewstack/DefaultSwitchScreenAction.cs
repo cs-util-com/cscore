@@ -29,15 +29,14 @@ namespace com.csutil.ui.viewstack {
         }
 
         public bool TriggerSwitchView() {
-            if (!TrySwitchView()) {
-                var isForwardOrBackward = switchDirection != SwitchDirection.loadNextScreenViaPrefab;
-                if (isForwardOrBackward && destroyViewStackWhenLastScreenReached) {
-                    gameObject.GetViewStack().gameObject.Destroy(); // Destroys complete ViewStack
-                    return true;
-                }
-                Log.w("Cant switch view in direction " + switchDirection);
+            if (TrySwitchView()) { return true; }
+            var isForwardOrBackward = switchDirection != SwitchDirection.loadNextScreenViaPrefab;
+            if (isForwardOrBackward && destroyViewStackWhenLastScreenReached) {
+                gameObject.GetViewStack().gameObject.Destroy(); // Destroys complete ViewStack
+                return true;
             }
-            AppFlow.TrackEvent(EventConsts.catView, "switchViewWasRejected");
+            Log.w("Cant switch view in direction " + switchDirection);
+            AppFlow.TrackEvent(EventConsts.catView, "switchViewWasRejected", switchDirection);
             return false;
         }
 

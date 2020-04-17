@@ -10,7 +10,11 @@ namespace com.csutil.ui {
     [RequireComponent(typeof(Canvas))]
     class CanvasOrderOnTop : MonoBehaviour {
 
-        private void Start() {
+        private void OnEnable() { SetCanvasSortingOrderOnTop(); }
+
+        private void Start() { SetCanvasSortingOrderOnTop(); }
+
+        private void SetCanvasSortingOrderOnTop() {
             var canvas = GetComponent<Canvas>();
             canvas.overrideSorting = true;
             canvas.sortingOrder = canvas.CalcCurrentMaxSortingOrderInLayer() + 1;

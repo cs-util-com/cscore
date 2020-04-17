@@ -95,6 +95,12 @@ namespace com.csutil {
             return bounds;
         }
 
+        /// <summary> Combines the names of all parents with the GOs name "GO 1 -> Child 1 -> Abc" </summary>
+        public static string FullQualifiedName(this GameObject self, string separator = " -> ") {
+            var parent = self.GetParent();
+            return (parent != null ? parent.FullQualifiedName() + separator : "") + self.name;
+        }
+
     }
 
 }
