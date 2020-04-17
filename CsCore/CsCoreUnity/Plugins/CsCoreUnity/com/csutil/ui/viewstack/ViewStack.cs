@@ -7,6 +7,10 @@ namespace com.csutil.ui {
         public string screenToShowAsCloseView = "SideBar";
         protected GameObject activeCloseView;
 
+        private void OnEnable() {
+            RootCanvas.InitEventSystemIfNeeded();
+        }
+
         /// <summary> Loads a new view based on its prefab name and by default hides the current one </summary>
         /// <param name="currentViewToHide"> (Any part of) the current view that should be hidden </param>
         /// <param name="prefabName"> e.g. "Dialogs/Dialog123" </param>
