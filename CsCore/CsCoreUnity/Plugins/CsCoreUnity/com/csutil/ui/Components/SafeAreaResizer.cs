@@ -37,7 +37,7 @@ namespace com.csutil.ui {
                 //AssertV2.IsTrue(anchorMax.y <= ONE, "anchorMax.y=" + anchorMax.y);
                 AssertV2.IsTrue(rt.localScale.magnitude > 0, "rt.localScale=" + rt.localScale);
                 if (anchorMax.x > ONE || anchorMax.y > ONE) { return; }
-                if (anchorMin.x == 0 && anchorMin.y == 0 && anchorMax.x < MIN && anchorMax.y < MIN) { return; }
+                if (anchorMin.x == 0 && anchorMin.y == 0 && (anchorMax.x < MIN || anchorMax.y < MIN)) { return; }
 
                 rt.anchorMin = anchorMin;
                 rt.anchorMax = anchorMax;
