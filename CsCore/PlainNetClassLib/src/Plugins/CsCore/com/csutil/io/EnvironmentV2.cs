@@ -47,6 +47,15 @@ namespace com.csutil {
             return new DirectoryInfo(Environment.GetFolderPath(specialFolder)).ToRootDirectoryEntry();
         }
 
+        public virtual DirectoryEntry GetNewInMemorySystem() {
+            return new DirectoryEntry(new Zio.FileSystems.MemoryFileSystem(), UPath.Root);
+        }
+
+        public static string SanatizeToFileName(string fileName) {
+            char[] invalids = Path.GetInvalidFileNameChars();
+            return string.Join("_", fileName.Split(invalids, StringSplitOptions.RemoveEmptyEntries)).TrimEnd('.');
+        }
+
         public interface ISystemInfo {
             string oSArchitecture { get; }
             string oSDescription { get; }

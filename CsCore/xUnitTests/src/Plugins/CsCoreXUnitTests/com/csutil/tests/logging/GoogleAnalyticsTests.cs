@@ -18,7 +18,7 @@ namespace com.csutil.tests.logging {
 
         [Fact]
         public async Task TestConvertEventToQueryParams() {
-            var googleAnalytics = new GoogleAnalytics(TEST_APP_KEY, new InMemoryKeyValueStore()) {
+            var googleAnalytics = new GoogleAnalytics(TEST_APP_KEY, NewInMemoryStore()) {
                 url = GoogleAnalytics.DEBUG_ENDPOINT // Use the debug endpoint
             };
             var e = googleAnalytics.NewEvent("cat1", "action1", "label1", value: 123);
@@ -30,7 +30,7 @@ namespace com.csutil.tests.logging {
 
         [Fact]
         public async Task TestSendEventToGA() {
-            var googleAnalytics = new GoogleAnalytics(TEST_APP_KEY, new InMemoryKeyValueStore()) {
+            var googleAnalytics = new GoogleAnalytics(TEST_APP_KEY, NewInMemoryStore()) {
                 url = GoogleAnalytics.DEBUG_ENDPOINT // Use the debug endpoint
             };
             // Test if the GA debug endpoint is returning that the request is valid:
@@ -42,7 +42,7 @@ namespace com.csutil.tests.logging {
 
         [Fact]
         public async Task TestSendTimingToGA() {
-            var googleAnalytics = new GoogleAnalytics(TEST_APP_KEY, new InMemoryKeyValueStore()) {
+            var googleAnalytics = new GoogleAnalytics(TEST_APP_KEY, NewInMemoryStore()) {
                 url = GoogleAnalytics.DEBUG_ENDPOINT // Use the debug endpoint
             };
             // Test if the GA debug endpoint is returning that the request is valid:
@@ -54,7 +54,7 @@ namespace com.csutil.tests.logging {
 
         [Fact]
         public async Task TestAppFlowToGoogleAnalytics() {
-            var tracker = new GoogleAnalytics(TEST_APP_KEY, new InMemoryKeyValueStore());
+            var tracker = new GoogleAnalytics(TEST_APP_KEY, NewInMemoryStore());
             AppFlow.AddAppFlowTracker(tracker);
 
             var t = Log.MethodEntered(); // This will internally notify the AppFlow instance
@@ -69,6 +69,10 @@ namespace com.csutil.tests.logging {
             // Check that the events are no longer in the store (sent to Google Analytics):
             var count2 = (await tracker.store.GetAllKeys()).Count();
             Assert.True(count2 < count1, "count2=" + count2 + ", count1=" + count1);
+        }
+
+        private KeyValueStoreTypeAdapter<AppFlowEvent> NewInMemoryStore() {
+            return new InMemoryKeyValueStore().GetTypeAdapter<AppFlowEvent>();
         }
 
         // See https://developers.google.com/analytics/devguides/collection/protocol/v1/validating-hits#response

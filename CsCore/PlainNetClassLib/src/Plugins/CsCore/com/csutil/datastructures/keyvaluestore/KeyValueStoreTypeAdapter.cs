@@ -15,15 +15,15 @@ namespace com.csutil.keyvaluestore {
             return store.Get<T>(key, defaultValue);
         }
 
-        public async Task<T> Set(string key, T value) {
+        public virtual async Task<T> Set(string key, T value) {
             return (T)await store.Set(key, value);
         }
 
-        public Task<bool> Remove(string key) {
+        public virtual Task<bool> Remove(string key) {
             return store.Remove(key);
         }
 
-        public Task RemoveAll() {
+        public virtual Task RemoveAll() {
             return store.RemoveAll();
         }
 

@@ -10,9 +10,9 @@ namespace com.csutil.keyvaluestore {
     public class FileBasedKeyValueStore : IKeyValueStore {
 
         /// <summary> Will create a new store instance </summary>
-        /// <param name="folderName"> e.g. "MyPersistedElems1" </param>
-        public static FileBasedKeyValueStore New(string folderName) {
-            return new FileBasedKeyValueStore(EnvironmentV2.instance.GetRootAppDataFolder().GetChildDir(folderName));
+        /// <param name="dirName"> e.g. "MyPersistedElems1" </param>
+        public static FileBasedKeyValueStore New(string dirName) {
+            return new FileBasedKeyValueStore(EnvironmentV2.instance.GetRootAppDataFolder().GetChildDir(dirName));
         }
 
         private DirectoryEntry folderForAllFiles;
@@ -40,7 +40,7 @@ namespace com.csutil.keyvaluestore {
             return fileForKey.LoadAs(type);
         }
 
-        public FileEntry GetFile(string key) { return folderForAllFiles.GetChild(key); }
+        public FileEntry GetFile(string key) { return folderForAllFiles.GetChild(EnvironmentV2.SanatizeToFileName(key)); }
 
         public async Task<object> Set(string key, object value) {
             var oldValue = InternalSet(key, value);
