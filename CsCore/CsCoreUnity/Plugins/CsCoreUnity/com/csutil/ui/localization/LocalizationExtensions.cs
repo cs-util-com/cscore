@@ -17,7 +17,7 @@ namespace com.csutil {
 
         private static async Task<I18n> SetupDefaultI18nInstance(object caller) {
             var a = await new I18n().SetLocaleLoader(DefaultUnityLocaleLoader);
-            return IoC.inject.SetSingleton(caller, a);
+            return IoC.inject.SetSingleton<I18n>(caller, a);
         }
 
         private static Task<Dictionary<string, I18n.Translation>> DefaultUnityLocaleLoader(string localeToLoad) {
@@ -25,8 +25,7 @@ namespace com.csutil {
                 var listJson = ResourcesV2.LoadV2<string>("Locales/" + localeToLoad);
                 var list = JsonReader.GetReader().Read<List<I18n.Translation>>(listJson);
                 return Task.FromResult(list.ToDictionary(e => e.key, e => e));
-            }
-            catch (Exception e) { Log.w("Could not load json for locale=" + localeToLoad, e); }
+            } catch (Exception e) { Log.w("Could not load json for locale=" + localeToLoad, e); }
             return Task.FromResult<Dictionary<string, I18n.Translation>>(null);
         }
 
