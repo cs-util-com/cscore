@@ -16,7 +16,7 @@ namespace com.csutil.tests.io {
             var dir = EnvironmentV2.instance.GetCurrentDirectory();
             Log.d("dir=" + dir.FullName);
             Assert.IsNotEmpty(dir.FullName);
-            dir = EnvironmentV2.instance.GetRootAppDataFolder();
+            dir = EnvironmentV2.instance.GetOrAddAppDataFolder("MyApp1");
             Log.d("dir=" + dir.FullName);
             Assert.IsNotEmpty(dir.FullName);
         }

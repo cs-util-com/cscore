@@ -83,10 +83,6 @@ namespace com.csutil.tests {
         public void TestIsNotNullAndExists() {
             DirectoryInfo dir = null;
             Assert.False(dir.IsNotNullAndExists(), "null.IsNotNullAndExists was true");
-            Assert.True(EnvironmentV2.instance.GetRootTempFolder().IsNotNullAndExists(),
-                "RootTempFolder did not exist:" + EnvironmentV2.instance.GetRootTempFolder());
-            Assert.True(EnvironmentV2.instance.GetRootAppDataFolder().IsNotNullAndExists(),
-                "RootAppDataFolder did not exist:" + EnvironmentV2.instance.GetRootAppDataFolder());
         }
 
         [Fact]

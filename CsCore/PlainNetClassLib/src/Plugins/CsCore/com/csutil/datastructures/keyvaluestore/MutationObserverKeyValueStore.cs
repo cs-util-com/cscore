@@ -26,18 +26,18 @@ namespace com.csutil.keyvaluestore {
 
         public async Task<bool> Remove(string key) {
             if (!await fallbackStore.Remove(key)) { return false; }
-            await onRemove?.Invoke(key);
+            if (onRemove != null) { await onRemove(key); }
             return true;
         }
 
         public async Task RemoveAll() {
             await fallbackStore.RemoveAll();
-            await onRemoveAll?.Invoke();
+            if (onRemoveAll != null) { await onRemoveAll(); }
         }
 
         public async Task<object> Set(string key, object value) {
             var replacedValue = await fallbackStore.Set(key, value);
-            await onSet(key, value, replacedValue);
+            if (onSet != null) { await onSet(key, value, replacedValue); }
             return replacedValue;
         }
 

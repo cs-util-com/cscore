@@ -17,7 +17,7 @@ namespace com.csutil.logging.analytics {
         };
 
         public LocalAnalytics(string dirName = DEFAULT_DIR)
-            : this(FileBasedKeyValueStore.New(dirName)) {
+            : this(new MutationObserverKeyValueStore().WithFallbackStore(FileBasedKeyValueStore.New(dirName))) {
         }
 
         public LocalAnalytics(IKeyValueStore mainStore) : base(mainStore) { }
@@ -30,17 +30,17 @@ namespace com.csutil.logging.analytics {
 
         public override async Task<bool> Remove(string key) {
             var res = await base.Remove(key);
-            foreach (IKeyValueStore s in categoryStores.Values) { res &= await s.Remove(key); }
+            foreach (var s in categoryStores.Values) { res &= await s.Remove(key); }
             return res;
         }
 
         public override async Task RemoveAll() {
             await base.RemoveAll();
-            foreach (IKeyValueStore s in categoryStores.Values) { await s.RemoveAll(); }
+            foreach (var s in categoryStores.Values) { await s.RemoveAll(); }
         }
 
         public KeyValueStoreTypeAdapter<AppFlowEvent> GetStoreForCategory(string catMethod) {
-            if (categoryStores.TryGetValue(catMethod, out KeyValueStoreTypeAdapter<AppFlowEvent> store)) { return store; }
+            if (categoryStores.TryGetValue(catMethod, out var store)) { return store; }
             var createdStore = createStoreFor(catMethod);
             categoryStores.Add(catMethod, createdStore);
             return createdStore;
@@ -48,7 +48,7 @@ namespace com.csutil.logging.analytics {
 
         public void Dispose() {
             store.Dispose();
-            foreach (IKeyValueStore s in categoryStores.Values) { s.Dispose(); }
+            foreach (var s in categoryStores.Values) { s.store.Dispose(); }
             categoryStores.Clear();
         }
 

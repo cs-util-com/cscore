@@ -30,8 +30,13 @@ namespace com.csutil {
             return new DirectoryInfo(Directory.GetCurrentDirectory()).ToRootDirectoryEntry();
         }
 
-        public virtual DirectoryEntry GetRootAppDataFolder() {
-            return GetSpecialFolder(Environment.SpecialFolder.ApplicationData);
+        /// <summary> On Windows e.g. C:\Users\User123\AppData\Roaming\MyFolderName123 </summary>
+        public virtual DirectoryEntry GetOrAddAppDataFolder(string appDataSubfolderName) {
+            if (appDataSubfolderName.IsNullOrEmpty()) {
+                throw new ArgumentNullException("Invalid appDataSubfolderName");
+            }
+            var appDataRoot = GetSpecialDirInfo(Environment.SpecialFolder.ApplicationData);
+            return appDataRoot.GetChildDir(appDataSubfolderName).CreateV2().ToRootDirectoryEntry();
         }
 
         /// <summary> On Windows e.g. C:\Users\User123\AppData\Local\Temp\ </summary>
@@ -43,8 +48,12 @@ namespace com.csutil {
             return GetRootTempDirInfo().GetChildDir(tempSubfolderName).CreateV2().ToRootDirectoryEntry();
         }
 
-        public virtual DirectoryEntry GetSpecialFolder(Environment.SpecialFolder specialFolder) {
-            return new DirectoryInfo(Environment.GetFolderPath(specialFolder)).ToRootDirectoryEntry();
+        public DirectoryEntry GetSpecialFolder(Environment.SpecialFolder specialFolder) {
+            return GetSpecialDirInfo(specialFolder).ToRootDirectoryEntry();
+        }
+
+        protected virtual DirectoryInfo GetSpecialDirInfo(Environment.SpecialFolder specialFolder) {
+            return new DirectoryInfo(Environment.GetFolderPath(specialFolder));
         }
 
         public virtual DirectoryEntry GetNewInMemorySystem() {

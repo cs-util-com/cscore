@@ -9,7 +9,10 @@ namespace com.csutil.logging.analytics {
         public KeyValueStoreTypeAdapter<AppFlowEvent> store;
 
         public AppFlowToStore(KeyValueStoreTypeAdapter<AppFlowEvent> store = null) {
-            this.store = store == null ? FileBasedKeyValueStore.New(DEFAULT_FOLDER).GetTypeAdapter<AppFlowEvent>() : store;
+            if (store == null) {
+                store = FileBasedKeyValueStore.New(DEFAULT_FOLDER).GetTypeAdapter<AppFlowEvent>();
+            }
+            this.store = store;
         }
 
         public void TrackEvent(string category, string action, params object[] args) {

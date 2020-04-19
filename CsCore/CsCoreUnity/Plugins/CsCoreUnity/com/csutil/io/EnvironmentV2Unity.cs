@@ -32,17 +32,19 @@ namespace com.csutil.io {
             return new DirectoryInfo(Application.temporaryCachePath);
         }
 
-        public override DirectoryEntry GetRootAppDataFolder() {
-            return new DirectoryInfo(Application.persistentDataPath).ToRootDirectoryEntry();
+        public override DirectoryEntry GetOrAddAppDataFolder(string appDataSubfolderName) {
+            return GetRootAppDataFolder().GetChildDir(appDataSubfolderName).ToRootDirectoryEntry();
         }
 
         public override DirectoryEntry GetCurrentDirectory() {
             if (EnvironmentV2.isWebGL && !isUnityEditor) {
                 AssertV2.IsTrue(Application.dataPath.StartsWith("http"), "Application.dataPath=" + Application.dataPath);
-                return GetRootAppDataFolder();
+                return GetRootAppDataFolder().ToRootDirectoryEntry();
             }
             return new DirectoryInfo(Application.dataPath).ToRootDirectoryEntry();
         }
+
+        private DirectoryInfo GetRootAppDataFolder() { return new DirectoryInfo(Application.persistentDataPath); }
 
     }
 

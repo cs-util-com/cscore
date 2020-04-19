@@ -164,6 +164,50 @@ namespace com.csutil.tests.model {
 
         }
 
+        [Fact]
+        public async Task TestDefaultProgressionSystem() {
+
+            // Get your key from https://console.developers.google.com/apis/credentials
+            var apiKey = "AIzaSyCtcFQMgRIUHhSuXggm4BtXT4eZvUrBWN0";
+            // https://docs.google.com/spreadsheets/d/1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM contains the sheetId:
+            var sheetId = "1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM";
+            var sheetName = "MySheet1"; // Has to match the sheet name
+            var googleSheetsStore = new GoogleSheetsKeyValueStore(new InMemoryKeyValueStore(), apiKey, sheetId, sheetName);
+            var testStore = new TestFeatureFlagStore(new InMemoryKeyValueStore(), googleSheetsStore);
+            IoC.inject.SetSingleton<FeatureFlagManager>(new FeatureFlagManager(testStore));
+
+            LocalAnalytics analytics = new LocalAnalytics();
+            AppFlow.AddAppFlowTracker(new AppFlowToStore(analytics));
+            var xpSystem = new DefaultProgressionSystem(analytics);
+            IoC.inject.SetSingleton<ProgressionSystem>(xpSystem);
+
+            { // Cleanup from previous tests (needed because persistance to disc is used):
+                // First trigger 1 event for each relevant catory to load the category stores:
+                foreach (var category in xpSystem.xpFactors.Keys) { AppFlow.TrackEvent(category, "Dummy Event"); }
+                await analytics.RemoveAll(); // Then clear all stores
+                Assert.Empty(await analytics.GetAllKeys()); // Now the main store should be emtpy
+            }
+
+            // Simulate User progression by causing analytics events:
+            var eventCount = 1000;
+            for (int i = 0; i < eventCount; i++) {
+                AppFlow.TrackEvent(EventConsts.catMutation, "User did mutation nr " + i);
+            }
+
+            var flagId4 = "MyFlag4";
+            var flag4 = await FeatureFlagManager.instance.GetFeatureFlag(flagId4);
+            Assert.Equal(1000, flag4.requiredXp); // The user needs >= 1000 XP for the feature
+
+            // Now that the user has 1000 XP the condition of the TestXpSystem is met:
+            Assert.True(await FeatureFlag.IsEnabled(flagId4));
+
+            // The number of mutation events:
+            Assert.Equal(eventCount, xpSystem.cachedCategoryCounts[EventConsts.catMutation]);
+            // Since there are only mutation events the XP is equal to the factor*event count:
+            Assert.Equal(xpSystem.GetCurrentXp(), eventCount * xpSystem.xpFactors[EventConsts.catMutation]);
+
+        }
+
         private class TestFeatureFlagStore : DefaultFeatureFlagStore {
 
             public TestFeatureFlagStore(IKeyValueStore l, IKeyValueStore r) : base(l, r) { }

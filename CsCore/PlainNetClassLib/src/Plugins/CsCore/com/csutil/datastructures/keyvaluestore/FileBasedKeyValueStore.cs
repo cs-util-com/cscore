@@ -12,7 +12,11 @@ namespace com.csutil.keyvaluestore {
         /// <summary> Will create a new store instance </summary>
         /// <param name="dirName"> e.g. "MyPersistedElems1" </param>
         public static FileBasedKeyValueStore New(string dirName) {
-            return new FileBasedKeyValueStore(EnvironmentV2.instance.GetRootAppDataFolder().GetChildDir(dirName));
+            return New(EnvironmentV2.SanatizeToFileName(EnvironmentV2.instance.systemInfo.appId), dirName);
+        }
+
+        public static FileBasedKeyValueStore New(string appId, string dirName) {
+            return new FileBasedKeyValueStore(EnvironmentV2.instance.GetOrAddAppDataFolder(appId).GetChildDir(dirName));
         }
 
         private DirectoryEntry folderForAllFiles;
@@ -78,6 +82,7 @@ namespace com.csutil.keyvaluestore {
         }
 
         public async Task<IEnumerable<string>> GetAllKeys() {
+            if (!folderForAllFiles.Exists) { return Enumerable.Empty<string>(); }
             var result = folderForAllFiles.GetFiles().Map(x => x.Name);
             return await fallbackStore.ConcatAllKeys(result);
         }
