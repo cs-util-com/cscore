@@ -7,37 +7,21 @@ namespace com.csutil.keyvaluestore {
 
         public IKeyValueStore store { get; set; }
 
-        public KeyValueStoreTypeAdapter(IKeyValueStore store) {
-            this.store = store;
-        }
+        public KeyValueStoreTypeAdapter(IKeyValueStore store) { this.store = store; }
 
-        public Task<T> Get(string key, T defaultValue) {
-            return store.Get<T>(key, defaultValue);
-        }
+        public virtual Task<T> Get(string key, T defVal) { return store.Get(key, defVal); }
 
-        public virtual async Task<T> Set(string key, T value) {
-            return (T)await store.Set(key, value);
-        }
+        public virtual async Task<T> Set(string key, T val) { return (T)await store.Set(key, val); }
 
-        public virtual Task<bool> Remove(string key) {
-            return store.Remove(key);
-        }
+        public virtual Task<bool> Remove(string key) { return store.Remove(key); }
 
-        public virtual Task RemoveAll() {
-            return store.RemoveAll();
-        }
+        public virtual Task RemoveAll() { return store.RemoveAll(); }
 
-        public Task<bool> ContainsKey(string key) {
-            return store.ContainsKey(key);
-        }
+        public virtual Task<bool> ContainsKey(string key) { return store.ContainsKey(key); }
 
-        public Task<IEnumerable<string>> GetAllKeys() {
-            return store.GetAllKeys();
-        }
+        public virtual Task<IEnumerable<string>> GetAllKeys() { return store.GetAllKeys(); }
 
-        public Task<IEnumerable<T>> GetAll() {
-            return store.GetAll<T>();
-        }
+        public virtual Task<IEnumerable<T>> GetAll() { return store.GetAll<T>(); }
 
     }
 

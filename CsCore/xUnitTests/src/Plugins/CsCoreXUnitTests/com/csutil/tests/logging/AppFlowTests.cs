@@ -15,7 +15,8 @@ namespace com.csutil.tests {
         public void TestAppFlowTracking() {
             AppFlow.AddAppFlowTracker(new MyAppFlowTracker1());
             Log.MethodEntered(); // This will internally notify the AppFlow instance
-            Assert.True((AppFlow.instance(null) as MyAppFlowTracker1).wasCalledByTestAppFlowTrackingTest);
+            MyAppFlowTracker1 t = AppFlow.GetAllOfType<MyAppFlowTracker1>().First();
+            Assert.True(t.wasCalledByTestAppFlowTrackingTest);
         }
 
         private class MyAppFlowTracker1 : IAppFlow {

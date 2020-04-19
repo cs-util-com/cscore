@@ -5,7 +5,7 @@ using com.csutil.keyvaluestore;
 
 namespace com.csutil.logging.analytics {
 
-    public class LocalAnalytics : KeyValueStoreTypeAdapter<AppFlowEvent> {
+    public class LocalAnalytics : KeyValueStoreTypeAdapter<AppFlowEvent>, IDisposable {
 
         private const string DEFAULT_DIR = "AppFlowAnalytics";
 
@@ -44,6 +44,12 @@ namespace com.csutil.logging.analytics {
             var createdStore = createStoreFor(catMethod);
             categoryStores.Add(catMethod, createdStore);
             return createdStore;
+        }
+
+        public void Dispose() {
+            store.Dispose();
+            foreach (IKeyValueStore s in categoryStores.Values) { s.Dispose(); }
+            categoryStores.Clear();
         }
 
     }
