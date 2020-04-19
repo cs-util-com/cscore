@@ -53,6 +53,9 @@ namespace com.csutil.keyvaluestore {
                         ThrowIfSheetDataMissing();
                         return true;
                     }
+                } else { // No inet, so check if cached data is present:
+                    var fallbackContent = await fallbackStore.GetAllKeys();
+                    if (!fallbackContent.IsNullOrEmpty()) { return false; }
                 }
                 ThrowIfSheetDataMissing();
                 return false;

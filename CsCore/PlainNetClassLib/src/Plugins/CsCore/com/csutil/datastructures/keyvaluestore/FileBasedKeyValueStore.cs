@@ -19,7 +19,7 @@ namespace com.csutil.keyvaluestore {
             return new FileBasedKeyValueStore(EnvironmentV2.instance.GetOrAddAppDataFolder(appId).GetChildDir(dirName));
         }
 
-        private DirectoryEntry folderForAllFiles;
+        public DirectoryEntry folderForAllFiles { get; private set; }
         public IKeyValueStore fallbackStore { get; set; }
         public long latestFallbackGetTimingInMs { get; set; }
 

@@ -13,6 +13,14 @@ namespace com.csutil.model {
 
     public class DefaultProgressionSystem : ProgressionSystem {
 
+        public static void Setup(DefaultFeatureFlagStore featureFlagStore) {
+            IoC.inject.SetSingleton(new FeatureFlagManager(featureFlagStore));
+            LocalAnalytics analytics = new LocalAnalytics();
+            AppFlow.AddAppFlowTracker(new AppFlowToStore(analytics));
+            var xpSystem = new DefaultProgressionSystem(analytics);
+            IoC.inject.SetSingleton<ProgressionSystem>(xpSystem);
+        }
+
         public readonly Dictionary<string, float> xpFactors = InitXpFactors();
         public readonly Dictionary<string, int> cachedCategoryCounts = new Dictionary<string, int>();
 

@@ -181,12 +181,7 @@ namespace com.csutil.tests.model {
             var xpSystem = new DefaultProgressionSystem(analytics);
             IoC.inject.SetSingleton<ProgressionSystem>(xpSystem);
 
-            { // Cleanup from previous tests (needed because persistance to disc is used):
-                // First trigger 1 event for each relevant catory to load the category stores:
-                foreach (var category in xpSystem.xpFactors.Keys) { AppFlow.TrackEvent(category, "Dummy Event"); }
-                await analytics.RemoveAll(); // Then clear all stores
-                Assert.Empty(await analytics.GetAllKeys()); // Now the main store should be emtpy
-            }
+            await CleanupFilesFromTest(analytics, xpSystem);
 
             // Simulate User progression by causing analytics events:
             var eventCount = 1000;
@@ -205,6 +200,34 @@ namespace com.csutil.tests.model {
             Assert.Equal(eventCount, xpSystem.cachedCategoryCounts[EventConsts.catMutation]);
             // Since there are only mutation events the XP is equal to the factor*event count:
             Assert.Equal(xpSystem.GetCurrentXp(), eventCount * xpSystem.xpFactors[EventConsts.catMutation]);
+
+            await CleanupFilesFromTest(analytics, xpSystem);
+        }
+
+        // Cleanup from previous tests (needed because persistance to disc is used):
+        private static async Task CleanupFilesFromTest(LocalAnalytics analytics, DefaultProgressionSystem xpSystem) {
+            // First trigger 1 event for each relevant catory to load the category stores:
+            foreach (var category in xpSystem.xpFactors.Keys) { AppFlow.TrackEvent(category, "Dummy Event"); }
+            await analytics.RemoveAll(); // Then clear all stores
+            Assert.Empty(await analytics.GetAllKeys()); // Now the main store should be emtpy
+        }
+
+        [Fact]
+        public async Task TestDefaultProgressionSystemSetup() {
+
+            // Get your key from https://console.developers.google.com/apis/credentials
+            var apiKey = "AIzaSyCtcFQMgRIUHhSuXggm4BtXT4eZvUrBWN0";
+            // https://docs.google.com/spreadsheets/d/1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM contains the sheetId:
+            var sheetId = "1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM";
+            var sheetName = "MySheet1"; // Has to match the sheet name
+            var cachedFlags = FileBasedKeyValueStore.New("FeatureFlags");
+            var cachedFlagsLocalData = FileBasedKeyValueStore.New("FeatureFlags_LocalData");
+            var googleSheetsStore = new GoogleSheetsKeyValueStore(cachedFlags, apiKey, sheetId, sheetName);
+            DefaultProgressionSystem.Setup(new TestFeatureFlagStore(cachedFlagsLocalData, googleSheetsStore));
+
+            AppFlow.TrackEvent(EventConsts.catMethod, "Some event");
+            Assert.False(await FeatureFlag.IsEnabled("MyFlag4"));
+            Log.d("Now take a look at the folders in " + cachedFlags.folderForAllFiles.Parent.GetFullFileSystemPath());
 
         }
 
