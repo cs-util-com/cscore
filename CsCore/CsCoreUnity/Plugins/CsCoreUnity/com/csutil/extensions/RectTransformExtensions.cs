@@ -71,6 +71,16 @@ namespace com.csutil {
             self.SetPadding(0);
         }
 
+        public static float GetVerticalPercentOnScreen(this RectTransform self, Camera cachedCam, Vector3[] cachedCorners) {
+            if (cachedCorners == null) { cachedCorners = new Vector3[4]; }
+            var prtBounds = self.GetWorldBounds(cachedCorners);
+            if (cachedCam == null) { cachedCam = self.GetRootCanvas()?.worldCamera; }
+            var bottomCorner = RectTransformUtility.WorldToScreenPoint(cachedCam, cachedCorners[2]);
+            var totalHeightInPixels = ScreenV2.height + prtBounds.extents.y * 2;
+            var progressInPixels = Mathf.Min(Mathf.Max(0, bottomCorner.y), totalHeightInPixels);
+            return progressInPixels / totalHeightInPixels;
+        }
+
     }
 
 }
