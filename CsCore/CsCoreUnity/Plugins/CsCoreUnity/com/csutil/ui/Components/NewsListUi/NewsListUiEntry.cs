@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using com.csutil.system;
+using com.csutil.ui.Components;
 using ReuseScroller;
 using UnityEngine.UI;
 
@@ -19,6 +20,7 @@ namespace com.csutil.ui {
         public Image thumbnail;
         public Button titleButton;
         public Button detailsUrlButton;
+        public VerticalPositionListener listener;
 #pragma warning restore 0649 // Variable is never assigned to, and will always have its default value
 
         private NewsListUi newsListUi;
@@ -33,7 +35,7 @@ namespace com.csutil.ui {
             LoadImageFromUrl(image, item.imageUrl);
             LoadImageFromUrl(thumbnail, item.thumbnailUrl);
 
-            SetText(dateText, item.GetDate().ToReadableString());
+            SetText(dateText, item.GetDate().ToLocalUiString());
             SetText(titleText, item.title);
             SetText(descrText, item.description);
 
@@ -45,6 +47,26 @@ namespace com.csutil.ui {
                 titleButton.SetOnClickAction(_ => newsListUi.OnItemClicked(item));
             }
 
+            var isItemRead = item.localData != null && item.localData.isRead;
+            listener.enabled = !isItemRead;
+            SetTextColorsTransparent(isItemRead);
+            listener.onScreen = (percent) => {
+                if (!isItemRead && percent > newsListUi.markAsReadVerticalPosThreshold) {
+                    isItemRead = true;
+                    newsListUi.MarkAsRead(item).OnError(async e => Log.e(e));
+                    SetTextColorsTransparent(isItemRead);
+                }
+            };
+
+        }
+
+        private void SetTextColorsTransparent(bool isItemRead) {
+            float textTransparency = isItemRead ? newsListUi.markasReadTransparency : 1;
+            dateText.color = dateText.color.WithAlpha(textTransparency);
+            typeText.color = typeText.color.WithAlpha(textTransparency);
+            titleText.color = titleText.color.WithAlpha(textTransparency);
+            descrText.color = descrText.color.WithAlpha(textTransparency);
+            detailsUrlText.color = detailsUrlText.color.WithAlpha(textTransparency);
         }
 
         private void LoadImageFromUrl(Image targetImage, string urlToLoad) {

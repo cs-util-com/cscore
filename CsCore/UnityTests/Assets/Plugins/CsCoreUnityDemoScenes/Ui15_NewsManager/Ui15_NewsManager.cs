@@ -21,8 +21,9 @@ namespace com.csutil.tests {
         }
 
         private async Task LoadAllNews(NewsManager manager) {
-            var map = gameObject.GetLinkMap();
-            await map.Get<NewsListUi>("NewsListUi").LoadUnreadFrom(manager);
+            var newsListUi = gameObject.GetLinkMap().Get<NewsListUi>("NewsListUi");
+            newsListUi.newsManager = manager;
+            await newsListUi.LoadNews();
         }
 
     }
