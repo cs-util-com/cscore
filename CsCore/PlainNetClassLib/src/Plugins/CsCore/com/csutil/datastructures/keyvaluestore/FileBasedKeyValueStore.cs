@@ -35,13 +35,24 @@ namespace com.csutil.keyvaluestore {
             await this.WaitLatestFallbackGetTime(s, fallbackGet);
 
             var fileForKey = GetFile(key);
-            if (fileForKey.Exists) { return (T)InternalGet(fileForKey, typeof(T)); }
+            if (TryInternalGet(fileForKey, typeof(T), out object result)) { return (T)result; }
             return await fallbackGet;
         }
 
-        private object InternalGet(FileEntry fileForKey, Type type) {
-            if (type.IsPrimitive) { return fileForKey.LoadAs<PrimitiveWrapper>().val; }
-            return fileForKey.LoadAs(type);
+        private bool TryInternalGet(FileEntry fileForKey, Type type, out object result) {
+            if (fileForKey.IsNotNullAndExists()) {
+                try {
+                    if (type.IsPrimitive) {
+                        result = fileForKey.LoadAs<PrimitiveWrapper>().val;
+                        return true;
+                    }
+                    result = fileForKey.LoadAs(type);
+                    return true;
+                }
+                catch (Exception e) { Log.e(e); }
+            }
+            result = null;
+            return false;
         }
 
         public FileEntry GetFile(string key) { return folderForAllFiles.GetChild(EnvironmentV2.SanatizeToFileName(key)); }
@@ -55,7 +66,7 @@ namespace com.csutil.keyvaluestore {
             var objType = value.GetType();
             if (objType.IsPrimitive) { value = new PrimitiveWrapper() { val = value }; }
             var file = GetFile(key);
-            var oldVal = file.IsNotNullAndExists() ? InternalGet(file, objType) : null;
+            TryInternalGet(file, objType, out object oldVal);
             if (objType == typeof(string)) {
                 file.SaveAsText((string)value);
             } else {

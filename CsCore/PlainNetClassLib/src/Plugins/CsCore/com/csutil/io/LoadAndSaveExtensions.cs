@@ -46,12 +46,17 @@ namespace com.csutil {
         }
 
         public static void SaveAsJson<T>(this FileInfo self, T objectToSave) {
-            using (StreamWriter streamWriter = File.CreateText(self.FullPath())) { streamWriter.SaveAsJson(objectToSave); }
+            using (StreamWriter streamWriter = File.CreateText(self.FullPath())) {
+                streamWriter.SaveAsJson(objectToSave);
+            }
         }
 
         public static void SaveAsJson<T>(this FileEntry self, T objectToSave) {
             using (var stream = self.OpenOrCreateForWrite()) {
-                using (StreamWriter streamWriter = new StreamWriter(stream)) { streamWriter.SaveAsJson(objectToSave); }
+                stream.SetLength(0); // Reset the stream in case it was opened
+                using (StreamWriter streamWriter = new StreamWriter(stream)) {
+                    streamWriter.SaveAsJson(objectToSave);
+                }
             }
         }
 
@@ -69,7 +74,10 @@ namespace com.csutil {
         }
 
         public static void SaveStream(this FileEntry self, Stream streamToSave) {
-            using (var fileStream = self.OpenOrCreateForWrite()) { streamToSave.CopyTo(fileStream); }
+            using (var fileStream = self.OpenOrCreateForWrite()) {
+                fileStream.SetLength(0); // Reset the stream in case it was opened
+                streamToSave.CopyTo(fileStream);
+            }
         }
 
         public static void SaveAsJson<T>(this StreamWriter self, T objectToSave) {
@@ -97,7 +105,10 @@ namespace com.csutil {
             using (var s = self.OpenOrCreateForWrite()) { s.WriteAsText(text); }
         }
 
-        public static void WriteAsText(this Stream self, string text) { using (var w = new StreamWriter(self, Encoding.UTF8)) { w.Write(text); } }
+        public static void WriteAsText(this Stream self, string text) {
+            self.SetLength(0); // Reset the stream in case it was opened
+            using (var w = new StreamWriter(self, Encoding.UTF8)) { w.Write(text); }
+        }
 
     }
 

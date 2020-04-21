@@ -315,6 +315,15 @@ namespace com.csutil.tests {
             });
         }
 
+        [Fact]
+        public void TestOverwrite() {
+            var dir1 = CreateDirectoryForTesting("TestDelete");
+            var f1 = dir1.GetChild("MyFile1.txt");
+            f1.SaveAsText("Some text 1 Some text 1");
+            f1.SaveAsText("Some text 2");
+            Assert.Equal("Some text 2", f1.LoadAs<string>());
+        }
+
     }
 
 }
