@@ -35,7 +35,7 @@ namespace com.csutil.system {
                 news.localData = await localCache.Get(news.key, null);
                 return news;
             });
-            allNews = allNews.OrderBy(x => x.GetDate());
+            allNews = allNews.OrderByDescending(x => x.GetDate());
             return allNews;
         }
 

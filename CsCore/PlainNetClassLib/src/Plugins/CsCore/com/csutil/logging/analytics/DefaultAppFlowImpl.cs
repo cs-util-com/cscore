@@ -1,7 +1,7 @@
-﻿using com.csutil.keyvaluestore;
-using System;
+﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using com.csutil.keyvaluestore;
 
 namespace com.csutil.logging.analytics {
 
@@ -9,12 +9,9 @@ namespace com.csutil.logging.analytics {
     /// A producer consumer wrapper around a KeyValue store that automatically registeres for internet 
     /// connectivity to send the collected events to an external system like an Analytics tracking system
     /// </summary>
-    public abstract class DefaultAppFlowImpl : IAppFlow, IHasInternetListener, IDisposable {
+    public abstract class DefaultAppFlowImpl : AppFlowToStore, IHasInternetListener, IDisposable {
 
-        public IKeyValueStore store;
-
-        public DefaultAppFlowImpl(IKeyValueStore store = null) {
-            this.store = store == null ? FileBasedKeyValueStore.New("AppFlowEvents") : store;
+        public DefaultAppFlowImpl(KeyValueStoreTypeAdapter<AppFlowEvent> store = null) : base(store) {
             InternetStateManager.AddListener(this);
         }
 
@@ -22,10 +19,9 @@ namespace com.csutil.logging.analytics {
 
         public async Task OnHasInternet(bool hasInet) {
             if (hasInet) {
-                var keys = (await store.GetAllKeys()).ToList();
-                foreach (var key in keys) {
+                foreach (var key in (await store.GetAllKeys()).ToList()) {
                     try {
-                        if (await SendEventToExternalSystem(await store.Get<AppFlowEvent>(key, null))) {
+                        if (await SendEventToExternalSystem(await store.Get(key, null))) {
                             var wasRemoved = await store.Remove(key);
                             AssertV2.IsTrue(wasRemoved, "Could not remove key " + key);
                         }
@@ -36,18 +32,6 @@ namespace com.csutil.logging.analytics {
 
         protected abstract Task<bool> SendEventToExternalSystem(AppFlowEvent appFlowEvent);
 
-        public void TrackEvent(string category, string action, params object[] args) {
-            var e = new AppFlowEvent() { cat = category, action = action, args = args };
-            store.Set(e.time + "__" + category + ":" + action, e);
-        }
-
-    }
-
-    public class AppFlowEvent {
-        public long time { get; set; } = DateTimeV2.UtcNow.ToUnixTimestampUtc();
-        public string cat { get; set; }
-        public string action { get; set; }
-        public object[] args { get; set; }
     }
 
 }

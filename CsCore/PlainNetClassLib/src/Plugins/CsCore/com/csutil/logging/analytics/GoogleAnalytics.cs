@@ -19,7 +19,7 @@ namespace com.csutil.logging.analytics {
         /// <summary> Creates a new Google analytics tracker </summary>
         /// <param name="gaTrackingId"> Tracking ID / Property ID. Format: UA-XXXXX-Y </param>
         /// <param name="store"> Optional store to cache the events in </param>
-        public GoogleAnalytics(string gaTrackingId, IKeyValueStore store = null) : base(store) {
+        public GoogleAnalytics(string gaTrackingId, KeyValueStoreTypeAdapter<AppFlowEvent> store = null) : base(store) {
             this.appId = gaTrackingId;
         }
 
@@ -53,16 +53,20 @@ namespace com.csutil.logging.analytics {
         private bool ExtractScreenName(AppFlowEvent appFlowEvent) {
             try {
                 if (appFlowEvent.cat == EventConsts.catView) {
-                    if (appFlowEvent.action.StartsWith(EventConsts.SHOW_VIEW)) {
+                    if (appFlowEvent.action.StartsWith(EventConsts.VIEW_SHOW)) {
                         latestScreen = "" + appFlowEvent.args.First();
                         return true;
                     }
-                    if (appFlowEvent.action.StartsWith(EventConsts.SWITCH_BACK_TO_LAST_VIEW)) {
+                    if (appFlowEvent.action.StartsWith(EventConsts.VIEW_SWITCH_BACK_TO_LAST)) {
                         latestScreen = "" + appFlowEvent.args.First();
                         return true;
                     }
-                    if (appFlowEvent.action.StartsWith(EventConsts.SWITCH_TO_NEXT_VIEW)) {
+                    if (appFlowEvent.action.StartsWith(EventConsts.VIEW_SWITCH_TO_NEXT)) {
                         latestScreen = "" + appFlowEvent.args[1];
+                        return true;
+                    }
+                    if (appFlowEvent.action.StartsWith(EventConsts.VIEW_ADDED)) {
+                        latestScreen = "" + appFlowEvent.args.First();
                         return true;
                     }
                 }

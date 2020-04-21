@@ -50,7 +50,10 @@ namespace com.csutil {
 
         public static FileEntry CopyToV2(this FileEntry self, FileEntry target, bool replaceExisting) {
             if (self.FileSystem != target.FileSystem) {
-                using (var t = target.OpenOrCreateForWrite()) { using (var s = self.OpenForRead()) { s.CopyTo(t); } }
+                using (var t = target.OpenOrCreateForWrite()) {
+                    t.SetLength(0); // Reset the stream in case it was opened
+                    using (var s = self.OpenForRead()) { s.CopyTo(t); }
+                }
                 AssertV2.IsTrue(target.Exists, "Target did not exist after copy to was done: " + target);
                 return target;
             }

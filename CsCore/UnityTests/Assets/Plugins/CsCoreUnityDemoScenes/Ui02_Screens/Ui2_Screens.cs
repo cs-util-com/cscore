@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using com.csutil.analytics;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,6 +8,8 @@ namespace com.csutil.tests.ui {
     public class Ui2_Screens : UnitTestMono {
 
         public override IEnumerator RunTest() {
+
+            AppFlow.AddAppFlowTracker(new AppFlowToLog().WithAllTrackingActive());
 
             var links = gameObject.GetLinkMap();
             links.Get<Button>("OptionsButton").SetOnClickAction(delegate {

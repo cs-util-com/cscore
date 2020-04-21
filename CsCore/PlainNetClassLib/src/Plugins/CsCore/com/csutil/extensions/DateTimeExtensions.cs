@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 
 namespace com.csutil {
 
@@ -11,6 +12,11 @@ namespace com.csutil {
         /// <summary> sortable, short, hard to read wrong, can be used in pathes. read also https://stackoverflow.com/a/15952652/165106 </summary>
         public static string ToReadableString(this DateTime self) {
             return self.ToUniversalTime().ToString("yyyy-MM-dd_HH.mm");
+        }
+
+        /// <summary> sortable, short, hard to read wrong, can be used in pathes. read also https://stackoverflow.com/a/15952652/165106 </summary>
+        public static string ToLocalUiString(this DateTime self) {
+            return self.ToLocalTime().ToString("MMMM dd, yyyy " + DateTimeFormatInfo.CurrentInfo.ShortTimePattern);
         }
 
         /// <summary> e.g. 2019-10-27T13:35:47Z (see https://en.wikipedia.org/wiki/ISO_8601 for details) </summary>

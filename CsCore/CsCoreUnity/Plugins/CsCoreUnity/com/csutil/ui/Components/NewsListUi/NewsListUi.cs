@@ -11,12 +11,15 @@ namespace com.csutil.ui {
     public class NewsListUi : BaseController<News> {
 
         public ColorDict colors = InitDefaultColors(); // Init with default color suggestions
-        protected NewsManager manager; // protected because its accessed by the list entries
+        public float markAsReadVerticalPosThreshold = 0.8f;
+        public float markasReadTransparency = 0.3f;
+        public bool showOnlyUnread = false;
+        public NewsManager newsManager; // protected because its accessed by the list entries
 
-        public async Task LoadUnreadFrom(NewsManager manager) {
-            this.manager = manager;
-            var unreadNews = await manager.GetAllUnreadNews();
-            this.CellData = unreadNews.ToList(); // This will trigger showing the list entries
+        public async Task LoadNews() {
+            AssertV2.NotNull(newsManager, "newsManager");
+            var allNews = showOnlyUnread ? await newsManager.GetAllUnreadNews() : await newsManager.GetAllNews();
+            this.CellData = allNews.ToList(); // This will trigger showing the list entries
         }
 
         public Color GetColorFor(News item) {
@@ -47,6 +50,7 @@ namespace com.csutil.ui {
             return colors;
         }
 
+        internal async Task MarkAsRead(News news) { await newsManager.MarkNewsAsRead(news); }
     }
 
 }

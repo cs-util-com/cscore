@@ -14,9 +14,11 @@ namespace com.csutil {
         public const string catPresenter = "presenter";
         public const string catTemplate = "template";
 
-        public const string SHOW_VIEW = "ShowView";
-        public const string SWITCH_BACK_TO_LAST_VIEW = "SwitchBackToLastView";
-        public const string SWITCH_TO_NEXT_VIEW = "SwitchToNextView";
+        public const string VIEW_SHOW = "ViewShow";
+        public const string VIEW_SWITCH_BACK_TO_LAST = "ViewSwitchBackToLast";
+        public const string VIEW_SWITCH_TO_NEXT = "ViewSwitchToNext";
+        public const string VIEW_ADDED = "ViewAdded";
+        public const string VIEW_REMOVED = "ViewRemoved";
 
     }
 

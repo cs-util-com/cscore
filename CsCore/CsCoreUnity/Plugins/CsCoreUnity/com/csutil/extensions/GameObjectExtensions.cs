@@ -9,8 +9,9 @@ namespace com.csutil {
     public static class GameObjectExtensions {
 
         /// <summary> Adds a child GameObject to the calling new parent GameObject </summary>
-        public static GameObject AddChild(this GameObject parentGo, GameObject child, bool worldPositionStays = false) {
+        public static GameObject AddChild(this GameObject parentGo, GameObject child, bool worldPositionStays = false, int siblingIndex = -1) {
             child.transform.SetParent(parentGo.transform, worldPositionStays); // add it to parent
+            if (siblingIndex > -1) { child.transform.SetSiblingIndex(siblingIndex); }
             return child;
         }
 
@@ -92,6 +93,12 @@ namespace com.csutil {
             var bounds = renderers.First().bounds;
             foreach (Renderer renderer in renderers) { bounds.Encapsulate(renderer.bounds); }
             return bounds;
+        }
+
+        /// <summary> Combines the names of all parents with the GOs name "GO 1 -> Child 1 -> Abc" </summary>
+        public static string FullQualifiedName(this GameObject self, string separator = " -> ") {
+            var parent = self.GetParent();
+            return (parent != null ? parent.FullQualifiedName() + separator : "") + self.name;
         }
 
     }

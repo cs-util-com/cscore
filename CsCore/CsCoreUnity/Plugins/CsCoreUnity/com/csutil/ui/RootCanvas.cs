@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.SceneManagement;
 
 namespace com.csutil.ui {
 
@@ -12,8 +9,19 @@ namespace com.csutil.ui {
         public static Canvas GetOrAddRootCanvas() {
             var roots = GetAllRootCanvases();
             if (roots.IsNullOrEmpty()) { return CreateNewRootCanvas(); }
-            var firstCanvasOnSceneRootLevel = roots.FirstOrDefault(x => x.gameObject.GetParent() == null);
-            if (firstCanvasOnSceneRootLevel != null) { return firstCanvasOnSceneRootLevel; }
+            // Check if there is a root canvas that has a ViewStack attached:
+            var rootCanvasesWithViewStack = roots.Filter(x => x.GetComponent<ViewStack>() != null);
+            if (!rootCanvasesWithViewStack.IsNullOrEmpty()) {
+                AssertV2.AreEqual(1, rootCanvasesWithViewStack.Count(), "rootCanvasesWithViewStack");
+                return rootCanvasesWithViewStack.First();
+            }
+            // Prefer canvas objects that are on the root level of the open scene:
+            var canvasesOnRootOfScene = roots.Filter(x => x.gameObject.GetParent() == null);
+            if (canvasesOnRootOfScene.IsNullOrEmpty()) {
+                AssertV2.AreEqual(1, canvasesOnRootOfScene.Count(), "canvasesOnRootOfScene");
+                return canvasesOnRootOfScene.First();
+            }
+            // As a fallback return the first root canvas:
             return roots.First();
         }
 
