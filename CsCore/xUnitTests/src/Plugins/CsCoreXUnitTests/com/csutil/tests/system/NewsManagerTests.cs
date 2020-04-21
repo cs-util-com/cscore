@@ -27,8 +27,8 @@ namespace com.csutil.tests.system {
             IEnumerable<News> allNews = await manager.GetAllNews();
             var news1 = allNews.First();
             Assert.NotNull(news1);
-            Assert.Equal("Warning", news1.type);
-            Assert.Equal(News.NewsType.Warning, news1.GetNewsType());
+            Assert.Equal("Coming Soon", news1.type);
+            Assert.Equal(News.NewsType.ComingSoon, news1.GetNewsType());
             Assert.True(news1.GetDate().IsUtc());
 
             // Mark that the user has read the news:
