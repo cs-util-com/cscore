@@ -87,6 +87,48 @@ namespace com.csutil {
             }
         }
 
+        public static void SetOnValueChangedAction(this Slider self, Func<float, bool> onValueChanged) {
+            if (self.onValueChanged != null && self.onValueChanged.GetPersistentEventCount() > 0) {
+                Log.w("Overriding old onValueChanged listener for slider " + self, self.gameObject);
+            }
+            self.onValueChanged = new Slider.SliderEvent(); // clear previous onValueChanged listeners
+            AddOnValueChangedAction(self, onValueChanged);
+        }
+
+        public static void AddOnValueChangedAction(this Slider self, Func<float, bool> onValueChanged) {
+            if (onValueChanged != null) {
+                var oldValue = self.value;
+                self.onValueChanged.AddListener((newValue) => {
+                    if (oldValue == newValue) { return; }
+                    // Ignore event event if it was triggered through code, only fire for actual user input:
+                    if (!self.ChangeWasTriggeredByUserThroughEventSystem()) { return; }
+                    if (!onValueChanged(newValue)) { // Change was rejected, revert UI:
+                        self.value = oldValue;
+                    } else { // Change was accepted:
+                        oldValue = newValue;
+                        EventBus.instance.Publish(UiEvents.SLIDER_CHANGED, self, newValue);
+                    }
+                });
+            }
+        }
+
+        public static void SetOnValueChangedActionThrottled(this Slider self, Action<float> onValueChanged, double delayInMs = 200) {
+            if (self.onValueChanged != null && self.onValueChanged.GetPersistentEventCount() > 0) {
+                Log.w("Overriding old onValueChanged listener for input field " + self, self.gameObject);
+            }
+            self.onValueChanged = new Slider.SliderEvent(); // clear previous onValueChanged listeners
+            AddOnValueChangedActionThrottled(self, onValueChanged, delayInMs);
+        }
+
+        public static void AddOnValueChangedActionThrottled(this Slider self, Action<float> onValueChanged, double delayInMs = 1000) {
+            EventHandler<float> action = (input, newText) => { onValueChanged(newText); };
+            var throttledAction = action.AsThrottledDebounce(delayInMs, true);
+            self.AddOnValueChangedAction((newValue) => {
+                throttledAction(self, newValue);
+                return true;
+            });
+        }
+
         public static bool ChangeWasTriggeredByUserThroughEventSystem(this Component self) {
             return EventSystem.current?.currentSelectedGameObject == self.gameObject;
         }
@@ -142,7 +184,6 @@ namespace com.csutil {
             updateUi(getSubState(store.GetState()));
             Action listener = null;
             listener = store.AddStateChangeListener(getSubState, newVal => {
-                Log.d("StateChangeRelevantForBehaviour=" + self, "newVal=" + newVal); // TODO remove me
                 if (self.IsDestroyed()) {
                     store.onStateChanged -= listener;
                 } else if (self.isActiveAndEnabled) {

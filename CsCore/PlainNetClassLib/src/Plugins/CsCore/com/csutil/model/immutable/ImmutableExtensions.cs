@@ -96,6 +96,12 @@ namespace com.csutil.model.immutable {
             }
         }
 
+        public static T DeepCopy<T>(this T objectToDeepCopy, Action<T> onCopy) {
+            var copy = objectToDeepCopy.DeepCopyViaJson();
+            onCopy(copy);
+            return copy;
+        }
+
     }
 
     /// <summary> Similar to the StateReducer but provides the parent context of the field as well </summary>

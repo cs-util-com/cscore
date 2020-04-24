@@ -314,6 +314,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3f35593b8ce04f146b41df38e025af16, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  screenToShowAsCloseView: SideBar
 --- !u!114 &1414039855
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -624,7 +625,7 @@ PrefabInstance:
     - target: {fileID: 1399410667530023840, guid: 23cbcafa05700004c8059bf9fdfdcd6e,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0.00009242905
+      value: 0.790158
       objectReference: {fileID: 0}
     - target: {fileID: 1613443606300104753, guid: 23cbcafa05700004c8059bf9fdfdcd6e,
         type: 3}
@@ -795,6 +796,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6506638797314180796, guid: 23cbcafa05700004c8059bf9fdfdcd6e,
+        type: 3}
+      propertyPath: m_Value
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6506638797314180796, guid: 23cbcafa05700004c8059bf9fdfdcd6e,
+        type: 3}
+      propertyPath: m_Size
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6636261595213482616, guid: 23cbcafa05700004c8059bf9fdfdcd6e,
         type: 3}
