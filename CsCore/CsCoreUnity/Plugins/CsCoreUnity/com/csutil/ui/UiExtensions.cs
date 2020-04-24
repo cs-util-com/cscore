@@ -192,6 +192,18 @@ namespace com.csutil {
             });
         }
 
+        public static void SubscribeToStateChanges<T>(this InputField self, IDataStore<T> store, Func<T, string> getSubState) {
+            self.SubscribeToStateChanges(store, getSubState, newText => self.text = newText);
+        }
+
+        public static void SubscribeToStateChanges<T>(this Toggle self, IDataStore<T> store, Func<T, bool> getSubState) {
+            self.SubscribeToStateChanges(store, getSubState, newCheckedState => self.isOn = newCheckedState);
+        }
+
+        public static void SubscribeToStateChanges<T>(this Slider self, IDataStore<T> store, Func<T, float> getSubState) {
+            self.SubscribeToStateChanges(store, getSubState, newText => self.value = newText);
+        }
+
         public static int CalcCurrentMaxSortingOrderInLayer(this Canvas self) {
             var l = ResourcesV2.FindAllInScene<Canvas>().Filter(x =>
                 x.gameObject.activeInHierarchy && x.enabled && x != self && x.sortingLayerID == self.sortingLayerID
