@@ -24,14 +24,15 @@ namespace com.csutil {
             return result;
         }
 
-        public static DateTime ParseUtc(string utcString) {
-            if (utcString.Contains("GMT")) {
-                utcString = utcString.Substring(0, "GMT", true);
-            } else if (utcString.Contains("UTC")) {
+        public static DateTime ParseUtc(string utcTime) {
+            if (long.TryParse(utcTime, out long unixTimeInMs)) { return NewDateTimeFromUnixTimestamp(unixTimeInMs); }
+            if (utcTime.Contains("GMT")) {
+                utcTime = utcTime.Substring(0, "GMT", true);
+            } else if (utcTime.Contains("UTC")) {
                 // RFC1123Pattern expects GMT and crashes on UTC
-                utcString = utcString.Substring(0, "UTC", false) + "GMT";
+                utcTime = utcTime.Substring(0, "UTC", false) + "GMT";
             }
-            return DateTime.SpecifyKind(DateTime.Parse(utcString), DateTimeKind.Utc);
+            return DateTime.SpecifyKind(DateTime.Parse(utcTime), DateTimeKind.Utc);
         }
 
         public static DateTime ParseLocalTime(string localTimeString) {
@@ -53,8 +54,7 @@ namespace com.csutil {
         private void onUtcUpdate(Uri uri, DateTime serverUtcDate) {
             try {
                 if (!uriBlacklist.Contains(uri.Host)) { diffOfLocalToServer = serverUtcDate - DateTime.UtcNow; }
-            }
-            catch (Exception e) { Log.e("Error when processing server utc date from " + uri, e); }
+            } catch (Exception e) { Log.e("Error when processing server utc date from " + uri, e); }
         }
 
         public DateTime GetUtcNow() {

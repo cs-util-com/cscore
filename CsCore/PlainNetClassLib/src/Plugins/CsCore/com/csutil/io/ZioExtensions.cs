@@ -214,6 +214,14 @@ namespace com.csutil {
             return f.FileSystem.ConvertPathToInternal(f.Path);
         }
 
+        public static DateTime LastWriteTimeUtc(this FileSystemEntry targetFile) {
+            return targetFile.LastWriteTime.ToUniversalTime();
+        }
+
+        public static void SetLastWriteTimeUtc(this FileSystemEntry targetFile, DateTime utcTimestamp) {
+            targetFile.LastWriteTime = utcTimestamp.ToLocalTime();
+        }
+
     }
 
 }

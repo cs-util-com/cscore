@@ -20,6 +20,10 @@ namespace com.csutil {
             return HashToString(MD5.Create().ComputeHash(bytesToHash));
         }
 
+        public static string GetMD5Hash(this Stream bytesToHash) {
+            return HashToString(MD5.Create().ComputeHash(bytesToHash));
+        }
+
         public static string GetSHA1Hash(this byte[] bytesToHash) {
             return HashToString(new SHA1CryptoServiceProvider().ComputeHash(bytesToHash));
         }

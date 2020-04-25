@@ -19,24 +19,31 @@ namespace com.csutil.http {
         }
 
         public string GetFileNameOnServer() {
-            var name = ExtractFileName(GetHeaderValue("content-disposition", null));
-            if (name.IsNullOrEmpty()) {
-                Log.w("Filename not found, will fallback to hash+mimetype");
-                string ext = GetFileExtensionFromMimeType(null);
-                name = GetMd5Checksum();
-                if (name.IsNullOrEmpty()) {
-                    name += GetHeaderValue("Last-Modified", "");
-                    name += GetHeaderValue("Content-Length", "");
-                    name += GetContentMimeType("");
-                    AssertV2.IsFalse(name.IsNullOrEmpty(), "Name still emtpy");
-                    name = name.GetMD5Hash();
-                }
-                if (ext != null) { name += "." + ext; }
-            }
-            return name;
+            return ExtractFileName(GetHeaderValue("content-disposition", null));
         }
 
-        public string GetMd5Checksum() { return GetHeaderValue("content-md5", null); }
+        public string GenerateHashNameFromHeaders() {
+            var generatedName = CombineHeadersToName();
+            if (generatedName.IsNullOrEmpty()) {
+                Log.w("None of the headers were used to generate a file name: " + this.ToString());
+                return null;
+            }
+            generatedName = generatedName.GetMD5Hash();
+            string ext = GetFileExtensionFromMimeType(null);
+            if (ext != null) { generatedName += "." + ext; }
+            return generatedName;
+        }
+
+        private string CombineHeadersToName() {
+            Log.w("Filename not found, will fallback to hash+mimetype");
+            if (!GetEtagHeader().IsNullOrEmpty()) { return GetEtagHeader(); }
+            if (!GetMD5Checksum().IsNullOrEmpty()) { return GetMD5Checksum(); }
+            return GetHeaderValue("Last-Modified", "") + GetHeaderValue("Content-Length", "") + GetContentMimeType("");
+        }
+
+        public string GetMD5Checksum() { return GetHeaderValue("content-md5", null); }
+
+        public string GetEtagHeader() { return GetHeaderValue("etag", null); }
 
         public long GetFileSizeInBytesOnServer() { return long.Parse(GetHeaderValue("Content-Length", "-1")); }
 
@@ -47,13 +54,13 @@ namespace com.csutil.http {
             return s + "/n))";
         }
 
-        public DateTime GetLastModified(DateTime fallbackValue) {
-            try {
-                string v = GetHeaderValue("last-modified", null);
-                if (v == null) { return fallbackValue; }
-                return DateTimeV2.NewDateTimeFromUnixTimestamp(long.Parse(v));
-            } catch (Exception) { return fallbackValue; }
+        public DateTime GetLastModifiedUtcDate(DateTime fallbackUtcTime) {
+            string dateString = GetRawLastModifiedString();
+            try { if (dateString != null) { return DateTimeV2.ParseUtc(dateString); } } catch { }
+            return fallbackUtcTime;
         }
+
+        public string GetRawLastModifiedString() { return GetHeaderValue("last-modified", null); }
 
         public IEnumerable<string> GetHeaderValues(string headerName) {
             return headers.GetValue(headerName.ToLower(), null);
