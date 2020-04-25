@@ -1,4 +1,5 @@
-﻿using com.csutil.http;
+﻿using com.csutil.datastructures;
+using com.csutil.http;
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -25,7 +26,7 @@ namespace com.csutil.model {
                 var onlineMD5 = headers.GetMD5Checksum();
                 if (!onlineMD5.IsNullOrEmpty()) {
                     if (self.HasMatchingChecksum(onlineMD5)) { return false; }
-                    if (onlineMD5 == targetFile.OpenForRead().GetMD5Hash()) { return false; }
+                    if (onlineMD5 == CalcLocalMd5Hash(targetFile)) { return false; }
                 }
 
                 // Cancel download if local file with the exact last-write timestamp exists:
@@ -38,8 +39,16 @@ namespace com.csutil.model {
             }
 
             using (var stream = await request.GetResult<Stream>()) {
-                self.CheckMD5AfterDownload(stream, headers);
-                targetFile.SaveStream(stream);
+
+                float totalBytes = headers.GetFileSizeInBytesOnServer();
+                var progressInPercent = new ChangeTracker<float>(0);
+                await targetFile.SaveStreamAsync(stream, (savedBytes) => {
+                    if (progressInPercent.setNewValue(100 * savedBytes / totalBytes)) {
+                        request.onProgress?.Invoke(progressInPercent.value);
+                    }
+                });
+
+                self.CheckMD5AfterDownload(targetFile, headers);
                 self.fileName = targetFile.Name;
                 self.dir = targetDirectory.FullName;
                 self.mimeType = headers.GetContentMimeType(null);
@@ -61,10 +70,10 @@ namespace com.csutil.model {
             return self.url.GetMD5Hash();
         }
 
-        private static bool CheckMD5AfterDownload(this FileRef self, Stream stream, Headers headers) {
+        private static bool CheckMD5AfterDownload(this FileRef self, FileEntry targetFile, Headers headers) {
             var onlineMD5 = headers.GetMD5Checksum();
             if (onlineMD5.IsNullOrEmpty()) { return false; }
-            var localMD5 = stream.GetMD5Hash();
+            string localMD5 = CalcLocalMd5Hash(targetFile);
             if (localMD5 == onlineMD5) {
                 throw new InvalidDataException($"Missmatch in MD5 hashes, local={localMD5} & online={onlineMD5}");
             }
@@ -72,6 +81,9 @@ namespace com.csutil.model {
             return true;
         }
 
+        private static string CalcLocalMd5Hash(FileEntry targetFile) {
+            using (var fileStream = targetFile.OpenForRead()) { return fileStream.GetMD5Hash(); }
+        }
     }
 
 }

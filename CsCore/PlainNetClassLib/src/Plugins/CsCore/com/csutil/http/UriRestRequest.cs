@@ -3,16 +3,16 @@ using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
-using com.csutil.http;
 
 namespace com.csutil.http {
 
     internal class UriRestRequest : RestRequest, IDisposable {
 
-        private Uri uri;
         public IJsonReader jsonReader = JsonReader.GetReader();
+        public Action<float> onProgress { get; set; }
+
+        private Uri uri;
         private Headers requestHeaders;
         private Task<HttpResponseMessage> request;
         private HttpClient client;
@@ -36,7 +36,9 @@ namespace com.csutil.http {
             return jsonReader.Read<T>(respText);
         }
 
-        public async Task<Headers> GetResultHeaders() { return new Headers((await request).Headers); }
+        public async Task<Headers> GetResultHeaders() { return new Headers(await GetHttpClientResultHeaders()); }
+
+        public async Task<HttpResponseHeaders> GetHttpClientResultHeaders() { return (await request).Headers; }
 
         public RestRequest Send(HttpMethod method) { request = SendAsync(method); return this; }
 
@@ -46,7 +48,7 @@ namespace com.csutil.http {
             client.AddRequestHeaders(requestHeaders);
             var message = new HttpRequestMessage(method, uri);
             if (httpContent != null) { message.Content = httpContent; }
-            request = client.SendAsync(message);
+            request = client.SendAsync(message, HttpCompletionOption.ResponseHeadersRead);
             var result = await request;
             var serverUtcDate = result.Headers.Date;
             if (serverUtcDate != null) { EventBus.instance.Publish(DateTimeV2.SERVER_UTC_DATE, uri, serverUtcDate.Value.DateTime); }

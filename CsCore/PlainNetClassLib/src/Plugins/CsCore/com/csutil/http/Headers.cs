@@ -68,6 +68,12 @@ namespace com.csutil.http {
 
         public string GetHeaderValue(string headerName, string fallbackValue) {
             var headerValues = GetHeaderValues(headerName);
+            if (headerValues == null) {
+                // Google names it "x-goog-stored-content-length" instead of "content-length"
+                var similar = headers.Filter(x => x.Key.Contains(headerName.ToLower()));
+                // If there is exactly 1 header that matches the fuzzy search, use that one:
+                if (similar.Count() == 1) { headerValues = similar.First().Value; }
+            }
             if (headerValues == null) { return fallbackValue; }
             AssertV2.AreEqual(1, headerValues.Count());
             return headerValues.First();

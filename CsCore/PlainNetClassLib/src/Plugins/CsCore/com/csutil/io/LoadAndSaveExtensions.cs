@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using Zio;
 
 namespace com.csutil {
@@ -73,10 +74,25 @@ namespace com.csutil {
             return self.Open(fileMode, fileAccess, fileShare);
         }
 
-        public static void SaveStream(this FileEntry self, Stream streamToSave) {
+        public static void SaveStream(this FileEntry self, Stream streamToSave, Action<long> onProgress = null) {
             using (var fileStream = self.OpenOrCreateForWrite()) {
                 fileStream.SetLength(0); // Reset the stream in case it was opened
-                streamToSave.CopyTo(fileStream);
+                if (onProgress == null) {
+                    streamToSave.CopyTo(fileStream);
+                } else {
+                    streamToSave.CopyTo(fileStream, onProgress);
+                }
+            }
+        }
+
+        public static async Task SaveStreamAsync(this FileEntry self, Stream streamToSave, Action<long> onProgress = null) {
+            using (var fileStream = self.OpenOrCreateForWrite()) {
+                fileStream.SetLength(0); // Reset the stream in case it was opened
+                if (onProgress == null) {
+                    await streamToSave.CopyToAsync(fileStream);
+                } else {
+                    await streamToSave.CopyToAsync(fileStream, onProgress);
+                }
             }
         }
 

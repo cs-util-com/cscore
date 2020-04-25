@@ -68,6 +68,18 @@ namespace com.csutil.tests.model {
             return downloadWasNeeded;
         }
 
+        [Fact]
+        public async Task TestLargeFileDownloadWithProgress() {
+
+            var dir = EnvironmentV2.instance.GetOrAddTempFolder("TestLargeFileDownloadWithProgress");
+
+            // Url from https://gist.github.com/jsturgis/3b19447b304616f18657
+            var f = new FileRef() { url = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" };
+            await f.DownloadTo(dir);
+            Log.d("FileRef: " + JsonWriter.AsPrettyString(f));
+
+        }
+
     }
 
 }

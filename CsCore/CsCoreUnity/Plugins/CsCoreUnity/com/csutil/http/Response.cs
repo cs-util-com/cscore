@@ -15,6 +15,7 @@ namespace com.csutil.http {
         public UnityWebRequest request;
         public Action<T> onResult;
         public Action<UnityWebRequest, Exception> onError = (r, e) => { Log.e(e); };
+        /// <summary> A value between 0 and 100 </summary>
         public Action<float> onProgress;
         public long maxMsWithoutProgress = 60000;
         public WaitForSeconds wait = new WaitForSeconds(0.05f);

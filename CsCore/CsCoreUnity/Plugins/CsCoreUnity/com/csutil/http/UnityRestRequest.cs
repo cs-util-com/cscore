@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using com.csutil.datastructures;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -14,10 +15,14 @@ namespace com.csutil.http {
         private UnityWebRequest request;
         private Headers requestHeaders;
 
+        /// <summary> A value between 0 and 100 </summary>
+        public Action<float> onProgress { get; set; }
+
         public UnityRestRequest(UnityWebRequest request) { this.request = request; }
 
         public Task<T> GetResult<T>() {
             var resp = new Response<T>();
+            resp.WithProgress(onProgress);
             return WebRequestRunner.GetInstance(this).StartCoroutineAsTask(prepareRequest(resp), () => resp.getResult());
         }
 
