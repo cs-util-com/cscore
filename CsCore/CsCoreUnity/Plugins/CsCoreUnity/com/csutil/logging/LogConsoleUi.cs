@@ -61,21 +61,27 @@ namespace com.csutil.logging {
         private Toggle ToggleShowErrors() { return map.Get<Toggle>("ToggleShowErrors"); }
 
         protected override void Start() {
-            map = gameObject.GetComponentInParents<Canvas>().gameObject.GetLinkMap();
-            map.Get<Button>("BtnClear").SetOnClickAction(delegate {
-                allData.Clear(); CellData.Clear(); ReloadData();
-            });
-            map.Get<Button>("BtnHideLog").SetOnClickAction(delegate {
-                var nowActive = !gameObject.activeSelf;
-                gameObject.SetActiveV2(nowActive);
-                map.Get<CanvasGroup>("MenuButtons").interactable = nowActive;
-                map.Get<CanvasGroup>("MenuButtons").blocksRaycasts = nowActive;
-            });
+            InitMap();
+            map.Get<Button>("BtnClear").SetOnClickAction(delegate { ClearConsole(); });
+            map.Get<Button>("BtnHideLog").SetOnClickAction(delegate { ToggleConsoleVisibility(); });
             ToggleShowDebugs().SetOnValueChangedAction(delegate { UpdateFilter(NewFilter()); return true; });
             ToggleShowWarngs().SetOnValueChangedAction(delegate { UpdateFilter(NewFilter()); return true; });
             ToggleShowErrors().SetOnValueChangedAction(delegate { UpdateFilter(NewFilter()); return true; });
             SearchInputField().SetOnValueChangedAction(delegate { UpdateFilter(NewFilter()); return true; });
         }
+
+        private void InitMap() { map = gameObject.GetComponentInParents<Canvas>().gameObject.GetLinkMap(); }
+
+        private void ToggleConsoleVisibility() { ShowConsole(!gameObject.activeSelf); }
+
+        public void ShowConsole(bool isConsoleVisible) {
+            gameObject.SetActiveV2(isConsoleVisible);
+            InitMap();
+            map.Get<CanvasGroup>("MenuButtons").interactable = isConsoleVisible;
+            map.Get<CanvasGroup>("MenuButtons").blocksRaycasts = isConsoleVisible;
+        }
+
+        public void ClearConsole() { allData.Clear(); CellData.Clear(); ReloadData(); }
 
         private Func<LogEntry, bool> NewFilter() {
             bool d = ToggleShowDebugs().isOn;

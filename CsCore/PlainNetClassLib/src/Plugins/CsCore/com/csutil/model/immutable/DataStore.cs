@@ -11,10 +11,10 @@ namespace com.csutil.model.immutable {
 
         private readonly object threadLock = new object();
         private readonly Dispatcher dispatcher;
-        private readonly StateReducer<T> reducer;
         private T state;
 
         public string storeName;
+        public readonly StateReducer<T> reducer;
         public Action onStateChanged { get; set; }
 
         public DataStore(StateReducer<T> reducer, T initialState = default(T), params Middleware<T>[] middlewares) {

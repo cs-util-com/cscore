@@ -99,7 +99,7 @@ namespace com.csutil {
             if (onValueChanged != null) {
                 var oldValue = self.value;
                 self.onValueChanged.AddListener((newValue) => {
-                    if (oldValue == newValue) { return; }
+                    if (SameValueAsBefore(oldValue, newValue, self.minValue, self.maxValue)) { return; }
                     // Ignore event event if it was triggered through code, only fire for actual user input:
                     if (!self.ChangeWasTriggeredByUserThroughEventSystem()) { return; }
                     if (!onValueChanged(newValue)) { // Change was rejected, revert UI:
@@ -112,6 +112,13 @@ namespace com.csutil {
             }
         }
 
+        private static bool SameValueAsBefore(float oldValue, float newValue, float minValue, float maxValue) {
+            var absoluteChange = Mathf.Abs(newValue - oldValue);
+            var fullSliderRange = maxValue - minValue;
+            var percentageChanged = absoluteChange / fullSliderRange; // Values will be between 0 and 1
+            return percentageChanged < 0.01; // If less then 1% change ignore it, UI glitch 
+        }
+
         public static void SetOnValueChangedActionThrottled(this Slider self, Action<float> onValueChanged, double delayInMs = 200) {
             if (self.onValueChanged != null && self.onValueChanged.GetPersistentEventCount() > 0) {
                 Log.w("Overriding old onValueChanged listener for input field " + self, self.gameObject);
@@ -121,7 +128,7 @@ namespace com.csutil {
         }
 
         public static void AddOnValueChangedActionThrottled(this Slider self, Action<float> onValueChanged, double delayInMs = 1000) {
-            EventHandler<float> action = (input, newText) => { onValueChanged(newText); };
+            EventHandler<float> action = (_, newText) => { onValueChanged(newText); };
             var throttledAction = action.AsThrottledDebounce(delayInMs, true);
             self.AddOnValueChangedAction((newValue) => {
                 throttledAction(self, newValue);

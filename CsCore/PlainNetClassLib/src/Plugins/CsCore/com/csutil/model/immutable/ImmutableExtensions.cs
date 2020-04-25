@@ -102,6 +102,10 @@ namespace com.csutil.model.immutable {
             return copy;
         }
 
+        public static ForkedStore<T> NewFork<T>(this DataStore<T> s) {
+            return new ForkedStore<T>(s, s.reducer);
+        }
+
     }
 
     /// <summary> Similar to the StateReducer but provides the parent context of the field as well </summary>

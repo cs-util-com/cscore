@@ -1,7 +1,5 @@
 ﻿using com.csutil.model.immutable;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -10,8 +8,10 @@ namespace com.csutil {
     // https://en.wikipedia.org/wiki/Model–view–presenter
     public interface Presenter<T> {
 
+        /// <summary> The target view to load the model into </summary>
         GameObject targetView { get; set; }
 
+        /// <summary> Called to load the model into the targetView </summary>
         Task OnLoad(T model);
 
     }

@@ -53,7 +53,7 @@ namespace com.csutil.ui {
             listener.onScreen = (percent) => {
                 if (!isItemRead && percent > newsListUi.markAsReadVerticalPosThreshold) {
                     isItemRead = true;
-                    newsListUi.MarkAsRead(item).OnError(async e => Log.e(e));
+                    newsListUi.MarkAsRead(item).OnError(e => throw Log.e(e));
                     SetTextColorsTransparent(isItemRead);
                 }
             };
