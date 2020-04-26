@@ -1,13 +1,39 @@
 ﻿using com.csutil.datastructures;
 using com.csutil.http;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Zio;
 
 namespace com.csutil.model {
 
-    public static class FileRefExtensions {
+    public static class FileRefHelper {
+
+        public const string CHECKSUM_MD5 = "md5";
+        public const string CHECKSUM_ETAG = "etag";
+
+        public static UPath GetPath(this FileRef self) { return (UPath)self.dir / self.fileName; }
+
+        public static void SetPath(this FileRef self, FileEntry file) {
+            UPath value = file.Path;
+            self.dir = "" + value.GetDirectory();
+            self.fileName = value.GetName();
+        }
+
+        public static void AddCheckSum(this FileRef self, string type, string hash) {
+            if (hash == null) { throw new ArgumentNullException($"The passed {type}-hash was null"); }
+            if (self.checksums == null) { self.checksums = new Dictionary<string, object>(); }
+            self.checksums.Add(type, hash);
+        }
+
+        public static bool HasMatchingChecksum(this FileRef self, string hash) {
+            return !hash.IsNullOrEmpty() && self.checksums != null && self.checksums.Any(x => {
+
+                return hash.Equals(x.Value);
+            });
+        }
 
         public static async Task<bool> DownloadTo(this FileRef self, DirectoryEntry targetDirectory) {
             if (!targetDirectory.IsNotNullAndExists()) {
@@ -37,7 +63,6 @@ namespace com.csutil.model {
                 }
 
             }
-
             using (var stream = await request.GetResult<Stream>()) {
 
                 float totalBytes = headers.GetFileSizeInBytesOnServer();
@@ -55,7 +80,7 @@ namespace com.csutil.model {
                 if (headers.GetRawLastModifiedString() != null) {
                     targetFile.LastWriteTime = headers.GetLastModifiedUtcDate(DateTime.MinValue);
                 }
-                if (headers.GetEtagHeader() != null) { self.AddCheckSum(FileRef.CheckSum.TYPE_ETAG, headers.GetEtagHeader()); }
+                if (headers.GetEtagHeader() != null) { self.AddCheckSum(CHECKSUM_ETAG, headers.GetEtagHeader()); }
             }
 
             return true;
@@ -77,7 +102,7 @@ namespace com.csutil.model {
             if (localMD5 == onlineMD5) {
                 throw new InvalidDataException($"Missmatch in MD5 hashes, local={localMD5} & online={onlineMD5}");
             }
-            self.AddCheckSum(FileRef.CheckSum.TYPE_MD5, localMD5);
+            self.AddCheckSum(CHECKSUM_MD5, localMD5);
             return true;
         }
 

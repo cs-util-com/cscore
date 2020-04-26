@@ -66,9 +66,9 @@ namespace com.csutil.http {
             return headers.GetValue(headerName.ToLower(), null);
         }
 
-        public string GetHeaderValue(string headerName, string fallbackValue) {
+        public string GetHeaderValue(string headerName, string fallbackValue, bool allowFuzzyHeaderName = true) {
             var headerValues = GetHeaderValues(headerName);
-            if (headerValues == null) {
+            if (headerValues == null && allowFuzzyHeaderName) {
                 // Google names it "x-goog-stored-content-length" instead of "content-length"
                 var similar = headers.Filter(x => x.Key.Contains(headerName.ToLower()));
                 // If there is exactly 1 header that matches the fuzzy search, use that one:
@@ -99,7 +99,9 @@ namespace com.csutil.http {
             return x.Last();
         }
 
-        public string GetContentMimeType(string fallbackValue) { return GetHeaderValue("Content-Type", fallbackValue); }
+        public string GetContentMimeType(string fallbackValue) {
+            return GetHeaderValue("Content-Type", fallbackValue, allowFuzzyHeaderName: false);
+        }
 
         public IEnumerator<KeyValuePair<string, IEnumerable<string>>> GetEnumerator() { return headers.GetEnumerator(); }
 
