@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using com.csutil.model;
@@ -79,7 +80,11 @@ namespace com.csutil.tests.model {
 
             // Url from https://gist.github.com/jsturgis/3b19447b304616f18657
             var f = new MyFileRef() { url = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" };
-            await f.DownloadTo(dir);
+            await Assert.ThrowsAsync<TaskCanceledException>(async () => {
+                await f.DownloadTo(dir, downloadProgress => {
+                    if (downloadProgress > 5) { throw new TaskCanceledException("Download canceled after 5%"); }
+                });
+            });
             Log.d("FileRef: " + JsonWriter.AsPrettyString(f));
 
         }
