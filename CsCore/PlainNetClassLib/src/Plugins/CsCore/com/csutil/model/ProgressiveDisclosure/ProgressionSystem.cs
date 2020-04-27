@@ -8,28 +8,46 @@ using com.csutil.logging.analytics;
 namespace com.csutil.model {
 
     public interface ProgressionSystem {
+
         Task<bool> IsFeatureUnlocked(FeatureFlag featureFlag);
+        Task<IEnumerable<FeatureFlag>> GetLockedFeatures();
+        Task<IEnumerable<FeatureFlag>> GetUnlockedFeatures();
+
     }
 
     public class DefaultProgressionSystem : ProgressionSystem {
 
-        public static void Setup(DefaultFeatureFlagStore featureFlagStore) {
-            IoC.inject.SetSingleton(new FeatureFlagManager(featureFlagStore));
-            LocalAnalytics analytics = new LocalAnalytics();
+        public static async Task<DefaultProgressionSystem> SetupWithGSheets(string apiKey, string sheetId, string sheetName) {
+            var cachedFlags = FileBasedKeyValueStore.New("FeatureFlags");
+            var cachedFlagsLocalData = FileBasedKeyValueStore.New("FeatureFlags_LocalData");
+            var googleSheetsStore = new GoogleSheetsKeyValueStore(cachedFlags, apiKey, sheetId, sheetName);
+            return await Setup(new DefaultFeatureFlagStore(cachedFlagsLocalData, googleSheetsStore));
+        }
+
+        public static async Task<DefaultProgressionSystem> Setup(FeatureFlagStore featureFlagStore) {
+            return await Setup(featureFlagStore, new LocalAnalytics());
+        }
+
+        public static async Task<DefaultProgressionSystem> Setup(FeatureFlagStore featureFlagStore, LocalAnalytics analytics) {
+            var ffm = new FeatureFlagManager(featureFlagStore);
+            IoC.inject.SetSingleton(ffm);
             AppFlow.AddAppFlowTracker(new AppFlowToStore(analytics));
-            var xpSystem = new DefaultProgressionSystem(analytics);
+            var xpSystem = new DefaultProgressionSystem(analytics, ffm);
             IoC.inject.SetSingleton<ProgressionSystem>(xpSystem);
+            await xpSystem.UpdateCurrentCategoryCounts();
+            return xpSystem;
         }
 
         public readonly Dictionary<string, float> xpFactors = InitXpFactors();
         public readonly Dictionary<string, int> cachedCategoryCounts = new Dictionary<string, int>();
+        public readonly LocalAnalytics analytics;
+        public readonly FeatureFlagManager featureFlagManager;
 
-        private LocalAnalytics analytics;
-
-        public DefaultProgressionSystem(LocalAnalytics analytics) {
+        public DefaultProgressionSystem(LocalAnalytics analytics, FeatureFlagManager featureFlagManager) {
             // Make sure the FeatureFlag system was set up too:
             AssertV2.NotNull(FeatureFlagManager.instance, "FeatureFlagManager.instance");
             this.analytics = analytics;
+            this.featureFlagManager = featureFlagManager;
         }
 
         private static Dictionary<string, float> InitXpFactors() {
@@ -42,23 +60,45 @@ namespace com.csutil.model {
 
         public async Task<bool> IsFeatureUnlocked(FeatureFlag featureFlag) {
             await UpdateCurrentCategoryCounts();
-            return featureFlag.requiredXp <= GetCurrentXp();
+            return LastCachedIsFeatureUnlocked(featureFlag);
+        }
+
+        private bool LastCachedIsFeatureUnlocked(FeatureFlag featureFlag) {
+            return featureFlag.requiredXp <= GetLastCachedXp();
+        }
+
+        public async Task<IEnumerable<FeatureFlag>> GetLockedFeatures() {
+            await UpdateCurrentCategoryCounts();
+            var allFeatures = await featureFlagManager.GetAllFeatureFlags();
+            return allFeatures.Filter(f => !LastCachedIsFeatureUnlocked(f));
+        }
+
+        public async Task<IEnumerable<FeatureFlag>> GetUnlockedFeatures() {
+            await UpdateCurrentCategoryCounts();
+            var allFeatures = await featureFlagManager.GetAllFeatureFlags();
+            return allFeatures.Filter(f => LastCachedIsFeatureUnlocked(f));
         }
 
         public async Task UpdateCurrentCategoryCounts() {
             foreach (var xpFactor in xpFactors) {
                 var category = xpFactor.Key;
-                if (analytics.categoryStores.TryGetValue(category, out KeyValueStoreTypeAdapter<AppFlowEvent> store)) {
-                    var currentCountForCategory = (await store.GetAllKeys()).Count();
-                    cachedCategoryCounts.AddOrReplace(category, currentCountForCategory);
-                }
+                var store = analytics.GetStoreForCategory(category);
+                var currentCountForCategory = (await store.GetAllKeys()).Count();
+                cachedCategoryCounts.AddOrReplace(category, currentCountForCategory);
             }
         }
 
-        public int GetCurrentXp() {
+        public async Task<int> GetLatestXp() {
+            await UpdateCurrentCategoryCounts();
+            return GetLastCachedXp();
+        }
+
+        public int GetLastCachedXp() {
             float xp = 0;
             foreach (var f in xpFactors) {
-                if (cachedCategoryCounts.TryGetValue(f.Key, out int count)) { xp += count * f.Value; }
+                if (cachedCategoryCounts.TryGetValue(f.Key, out int count)) {
+                    xp += count * f.Value;
+                }
             }
             return (int)xp;
         }

@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using com.csutil.keyvaluestore;
 using com.csutil.logging.analytics;
@@ -20,7 +22,7 @@ namespace com.csutil.tests.model {
             var sheetId = "1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM";
             var sheetName = "MySheet1"; // Has to match the sheet name
             var googleSheetsStore = new GoogleSheetsKeyValueStore(new InMemoryKeyValueStore(), apiKey, sheetId, sheetName);
-            var testStore = new TestFeatureFlagStore(new InMemoryKeyValueStore(), googleSheetsStore);
+            var testStore = new DefaultFeatureFlagStore(new InMemoryKeyValueStore(), googleSheetsStore);
             IoC.inject.SetSingleton<FeatureFlagManager>(new FeatureFlagManager(testStore));
 
             // Open https://docs.google.com/spreadsheets/d/1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM for these:
@@ -41,6 +43,23 @@ namespace com.csutil.tests.model {
         }
 
         [Fact]
+        public async Task ExampleUsage2() {
+
+            // Get your key from https://console.developers.google.com/apis/credentials
+            var apiKey = "AIzaSyCtcFQMgRIUHhSuXggm4BtXT4eZvUrBWN0";
+            // https://docs.google.com/spreadsheets/d/1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM contains the sheetId:
+            var sheetId = "1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM";
+            var sheetName = "MySheet1"; // Has to match the sheet name
+            var xpSys = await DefaultProgressionSystem.SetupWithGSheets(apiKey, sheetId, sheetName);
+
+            // The DefaultProgressionSystem will give 1 xp for each mutation:
+            AppFlow.TrackEvent(EventConsts.catMutation, "Some mutation"); // Would also be triggered by DataStore
+            Assert.NotEqual(0, await xpSys.GetLatestXp());
+            Assert.True(await FeatureFlag.IsEnabled("MyFlag5")); // MyFlag5 needs minimum 1 xp
+
+        }
+
+        [Fact]
         public async Task ExtendedTest1() {
 
             // Get your key from https://console.developers.google.com/apis/credentials
@@ -52,7 +71,7 @@ namespace com.csutil.tests.model {
 
 
             var localStore = new InMemoryKeyValueStore();
-            var testStore = new TestFeatureFlagStore(localStore, googleSheetsStore);
+            var testStore = new DefaultFeatureFlagStore(localStore, googleSheetsStore);
 
             IoC.inject.SetSingleton<FeatureFlagManager>(new FeatureFlagManager(testStore));
 
@@ -101,7 +120,7 @@ namespace com.csutil.tests.model {
             var sheetId = "1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM";
             var sheetName = "MySheet1"; // Has to match the sheet name
             var googleSheetsStore = new GoogleSheetsKeyValueStore(new InMemoryKeyValueStore(), apiKey, sheetId, sheetName);
-            var testStore = new TestFeatureFlagStore(new InMemoryKeyValueStore(), googleSheetsStore);
+            var testStore = new DefaultFeatureFlagStore(new InMemoryKeyValueStore(), googleSheetsStore);
             IoC.inject.SetSingleton<FeatureFlagManager>(new FeatureFlagManager(testStore));
 
             // Make sure user would normally be included in the rollout:
@@ -162,6 +181,10 @@ namespace com.csutil.tests.model {
                 return Task.FromResult(featureFlag.requiredXp <= currentXp);
             }
 
+            public Task<IEnumerable<FeatureFlag>> GetLockedFeatures() { throw new NotImplementedException(); }
+
+            public Task<IEnumerable<FeatureFlag>> GetUnlockedFeatures() { throw new NotImplementedException(); }
+
         }
 
         [Fact]
@@ -173,12 +196,12 @@ namespace com.csutil.tests.model {
             var sheetId = "1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM";
             var sheetName = "MySheet1"; // Has to match the sheet name
             var googleSheetsStore = new GoogleSheetsKeyValueStore(new InMemoryKeyValueStore(), apiKey, sheetId, sheetName);
-            var testStore = new TestFeatureFlagStore(new InMemoryKeyValueStore(), googleSheetsStore);
-            IoC.inject.SetSingleton<FeatureFlagManager>(new FeatureFlagManager(testStore));
+            var ffm = new FeatureFlagManager(new DefaultFeatureFlagStore(new InMemoryKeyValueStore(), googleSheetsStore));
+            IoC.inject.SetSingleton<FeatureFlagManager>(ffm);
 
             LocalAnalytics analytics = new LocalAnalytics();
             AppFlow.AddAppFlowTracker(new AppFlowToStore(analytics));
-            var xpSystem = new DefaultProgressionSystem(analytics);
+            var xpSystem = new DefaultProgressionSystem(analytics, ffm);
             IoC.inject.SetSingleton<ProgressionSystem>(xpSystem);
 
             await CleanupFilesFromTest(analytics, xpSystem);
@@ -199,7 +222,7 @@ namespace com.csutil.tests.model {
             // The number of mutation events:
             Assert.Equal(eventCount, xpSystem.cachedCategoryCounts[EventConsts.catMutation]);
             // Since there are only mutation events the XP is equal to the factor*event count:
-            Assert.Equal(xpSystem.GetCurrentXp(), eventCount * xpSystem.xpFactors[EventConsts.catMutation]);
+            Assert.Equal(await xpSystem.GetLatestXp(), eventCount * xpSystem.xpFactors[EventConsts.catMutation]);
 
             await CleanupFilesFromTest(analytics, xpSystem);
         }
@@ -213,34 +236,57 @@ namespace com.csutil.tests.model {
         }
 
         [Fact]
-        public async Task TestDefaultProgressionSystemSetup() {
+        public async Task ExtensiveDefaultProgressionSystemTests() {
 
             // Get your key from https://console.developers.google.com/apis/credentials
             var apiKey = "AIzaSyCtcFQMgRIUHhSuXggm4BtXT4eZvUrBWN0";
             // https://docs.google.com/spreadsheets/d/1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM contains the sheetId:
             var sheetId = "1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM";
             var sheetName = "MySheet1"; // Has to match the sheet name
-            var cachedFlags = FileBasedKeyValueStore.New("FeatureFlags");
-            var cachedFlagsLocalData = FileBasedKeyValueStore.New("FeatureFlags_LocalData");
-            var googleSheetsStore = new GoogleSheetsKeyValueStore(cachedFlags, apiKey, sheetId, sheetName);
-            DefaultProgressionSystem.Setup(new TestFeatureFlagStore(cachedFlagsLocalData, googleSheetsStore));
+            DefaultProgressionSystem xpSys = await NewInMemoryTestXpSystem(apiKey, sheetId, sheetName);
 
-            AppFlow.TrackEvent(EventConsts.catMethod, "Some event");
-            Assert.False(await FeatureFlag.IsEnabled("MyFlag4"));
-            Log.d("Now take a look at the folders in " + cachedFlags.folderForAllFiles.Parent.GetFullFileSystemPath());
+            Assert.Empty(await xpSys.analytics.GetStoreForCategory(EventConsts.catMutation).GetAllKeys());
+            Assert.Equal(0, await xpSys.GetLatestXp());
+
+            Assert.False(await FeatureFlag.IsEnabled("MyFlag5")); // Needs 1 xp
+
+            // The DefaultProgressionSystem will give 1 xp for each mutation:
+            AppFlow.TrackEvent(EventConsts.catMutation, "Some mutation"); // Would also be triggered by DataStore
+            Assert.Single(await xpSys.analytics.GetStoreForCategory(EventConsts.catMutation).GetAllKeys());
+            Assert.NotEqual(0, await xpSys.GetLatestXp());
+
+            Assert.False(await FeatureFlag.IsEnabled("MyFlag4")); // Needs 1000 xp
+            Assert.True(await FeatureFlag.IsEnabled("MyFlag5")); // Needs 1 xp
+
+            await GetLockedAndUnlockedFeatures(xpSys, xpSys.GetLastCachedXp());
 
         }
 
-        private class TestFeatureFlagStore : DefaultFeatureFlagStore {
+        private static async Task GetLockedAndUnlockedFeatures(ProgressionSystem xpSys, int currentUserXp) {
+            var t = Log.MethodEntered();
+            {
+                var lockedFeatures = await xpSys.GetLockedFeatures();
+                var unlockedFeatures = await xpSys.GetUnlockedFeatures();
 
-            public TestFeatureFlagStore(IKeyValueStore l, IKeyValueStore r) : base(l, r) { }
+                Assert.Empty(lockedFeatures.Intersect(unlockedFeatures)); // There should be no features in both lists
+                foreach (var l in lockedFeatures) { Assert.True(currentUserXp < l.requiredXp); }
+                foreach (var l in unlockedFeatures) { Assert.True(currentUserXp >= l.requiredXp); }
 
-            protected override string GenerateFeatureKey(string featureId) {
-                // Here e.g the EnvironmentV2.instance.systemInfo.osPlatform could be added to
-                // allow different rollout percentages for different target platforms 
-                return featureId; // for the test just return the featureId
+                var nextAvailableFeature = lockedFeatures.OrderBy(f => f.requiredXp).First();
+                Log.d("The next unlocked feature will be " + JsonWriter.AsPrettyString(nextAvailableFeature));
+
             }
+            Log.MethodDone(t);
+        }
 
+        private static async Task<DefaultProgressionSystem> NewInMemoryTestXpSystem(string apiKey, string sheetId, string sheetName) {
+            var cachedFlags = new InMemoryKeyValueStore();
+            var googleSheetsStore = new GoogleSheetsKeyValueStore(cachedFlags, apiKey, sheetId, sheetName);
+            var cachedFlagsLocalData = new InMemoryKeyValueStore();
+            var analytics = new LocalAnalytics(new InMemoryKeyValueStore());
+            analytics.createStoreFor = (_ => new InMemoryKeyValueStore().GetTypeAdapter<AppFlowEvent>());
+            var featureFlagStore = new DefaultFeatureFlagStore(cachedFlagsLocalData, googleSheetsStore);
+            return await DefaultProgressionSystem.Setup(featureFlagStore, analytics);
         }
 
     }

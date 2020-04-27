@@ -22,7 +22,7 @@ namespace com.csutil.model {
         }
 
         public static async Task<bool> DownloadTo(this FileRef self, DirectoryEntry targetDirectory, Action<float> onProgress = null) {
-            self.SetTargetDir(targetDirectory);
+            self.AssertValidDirectory(targetDirectory);
             RestRequest request = new Uri(self.url).SendGET();
             if (onProgress != null) { request.onProgress = onProgress; }
             return await self.DownloadTo(request, targetDirectory);
@@ -75,8 +75,9 @@ namespace com.csutil.model {
         }
 
         private static void SetLocalFileInfosFrom(this FileRef self, Headers headers, FileEntry targetFile) {
+            self.AssertValidDirectory(targetFile.Parent);
+            self.dir = targetFile.Parent.FullName;
             self.fileName = targetFile.Name;
-            self.SetTargetDir(targetFile.Parent);
             self.mimeType = headers.GetContentMimeType(null);
             if (headers.GetRawLastModifiedString() != null) {
                 targetFile.LastWriteTime = headers.GetLastModifiedUtcDate(DateTime.MinValue);
@@ -84,14 +85,13 @@ namespace com.csutil.model {
             if (headers.GetEtagHeader() != null) { self.AddCheckSum(CHECKSUM_ETAG, headers.GetEtagHeader()); }
         }
 
-        private static void SetTargetDir(this FileRef self, DirectoryEntry targetDirectory) {
+        private static void AssertValidDirectory(this FileRef self, DirectoryEntry targetDirectory) {
             if (!targetDirectory.IsNotNullAndExists()) {
                 throw new ArgumentException("Cant download into non existing directory=" + targetDirectory);
             }
             if (self.dir != null && targetDirectory.FullName != self.dir) {
                 throw new ArgumentException($"Dir already set, wont change from '{self.dir}' to '{targetDirectory}'");
             }
-            self.dir = targetDirectory.FullName;
         }
 
         private static string CalculateFileName(FileRef self, Headers headers) {

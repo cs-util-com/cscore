@@ -4,14 +4,27 @@ using System.Threading.Tasks;
 
 namespace com.csutil.model {
 
-    public abstract class DefaultFeatureFlagStore : KeyValueStoreTypeAdapter<FeatureFlag>, IDisposable {
+    public class DefaultFeatureFlagStore : FeatureFlagStore {
+
+        public DefaultFeatureFlagStore(IKeyValueStore l, IKeyValueStore r) : base(l, r) { }
+
+        // By default just return the featureId:
+        protected override string GenerateFeatureKey(string featureId) { return featureId; }
+
+    }
+
+    public abstract class FeatureFlagStore : KeyValueStoreTypeAdapter<FeatureFlag>, IDisposable {
 
         private IKeyValueStore localStore;
 
-        public DefaultFeatureFlagStore(IKeyValueStore localStore, IKeyValueStore remoteStore) : base(remoteStore) {
+        public FeatureFlagStore(IKeyValueStore localStore, IKeyValueStore remoteStore) : base(remoteStore) {
             this.localStore = localStore;
         }
 
+        /// <summary>
+        ///  Here e.g the EnvironmentV2.instance.systemInfo.osPlatform could be added to
+        ///  allow different rollout percentages for different target platforms
+        /// </summary>
         protected abstract string GenerateFeatureKey(string featureId);
 
         public override async Task<FeatureFlag> Get(string featureId, FeatureFlag defVal) {
