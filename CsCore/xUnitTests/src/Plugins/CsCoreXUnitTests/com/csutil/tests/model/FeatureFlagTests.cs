@@ -22,15 +22,15 @@ namespace com.csutil.tests.model {
             var sheetId = "1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM";
             var sheetName = "MySheet1"; // Has to match the sheet name
             var googleSheetsStore = new GoogleSheetsKeyValueStore(new InMemoryKeyValueStore(), apiKey, sheetId, sheetName);
-            var testStore = new DefaultFeatureFlagStore(new InMemoryKeyValueStore(), googleSheetsStore);
-            IoC.inject.SetSingleton<FeatureFlagManager>(new FeatureFlagManager(testStore));
+            var testStore = new FeatureFlagStore(new InMemoryKeyValueStore(), googleSheetsStore);
+            IoC.inject.SetSingleton<FeatureFlagManager<FeatureFlag>>(new FeatureFlagManager<FeatureFlag>(testStore));
 
             // Open https://docs.google.com/spreadsheets/d/1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM for these:
             Assert.False(await FeatureFlag.IsEnabled("MyFlag1"));
             Assert.True(await FeatureFlag.IsEnabled("MyFlag2"));
 
             var key3 = "MyFlag3";
-            FeatureFlag flag3 = await FeatureFlagManager.instance.GetFeatureFlag(key3);
+            IFeatureFlag flag3 = await FeatureFlagManager<FeatureFlag>.instance.GetFeatureFlag(key3);
             Assert.Equal(40, flag3.rolloutPercentage); // Rollout of feature 3 is at 40%
 
             // The local random value that was chosen determines if the flag is enabled or not:
@@ -71,9 +71,9 @@ namespace com.csutil.tests.model {
 
 
             var localStore = new InMemoryKeyValueStore();
-            var testStore = new DefaultFeatureFlagStore(localStore, googleSheetsStore);
+            var testStore = new FeatureFlagStore(localStore, googleSheetsStore);
 
-            IoC.inject.SetSingleton<FeatureFlagManager>(new FeatureFlagManager(testStore));
+            IoC.inject.SetSingleton<FeatureFlagManager<FeatureFlag>>(new FeatureFlagManager<FeatureFlag>(testStore));
 
             var key1 = "MyFlag1";
             var key2 = "MyFlag2";
@@ -82,30 +82,30 @@ namespace com.csutil.tests.model {
             Assert.NotNull(await googleSheetsStore.Get<FeatureFlag>(key1, null));
             Assert.NotNull(await googleSheetsStore.Get<FeatureFlag>(key2, null));
             Assert.NotNull(await testStore.Get(key2, null));
-            Assert.NotNull(await FeatureFlagManager.instance.GetFeatureFlag(key2));
+            Assert.NotNull(await FeatureFlagManager<FeatureFlag>.instance.GetFeatureFlag(key2));
 
             Assert.False(await FeatureFlag.IsEnabled(key1));
             Assert.True(await FeatureFlag.IsEnabled(key2));
 
-            var flag3_1 = await FeatureFlagManager.instance.GetFeatureFlag(key3);
+            var flag3_1 = await FeatureFlagManager<FeatureFlag>.instance.GetFeatureFlag(key3);
             Assert.Equal(40, flag3_1.rolloutPercentage);
 
-            var state3_1 = await localStore.Get<FeatureFlag.LocalState>(key3, null);
-            var percent3_1 = state3_1.randomPercentage;
+            var localState3_1 = await localStore.Get<IFeatureFlagLocalState>(key3, null);
+            var percent3_1 = localState3_1.randomPercentage;
             Assert.NotEqual(0, percent3_1);
             if (percent3_1 < flag3_1.rolloutPercentage) {
                 Assert.True(await FeatureFlag.IsEnabled(key3));
             } else {
                 Assert.False(await FeatureFlag.IsEnabled(key3));
             }
-            state3_1.randomPercentage = flag3_1.rolloutPercentage - 1;
-            await localStore.Set(key3, state3_1);
+            localState3_1.randomPercentage = flag3_1.rolloutPercentage - 1;
+            await localStore.Set(key3, localState3_1);
 
-            var state3_2 = await localStore.Get<FeatureFlag.LocalState>(key3, null);
-            Assert.NotEqual(percent3_1, state3_2.randomPercentage);
+            var localState3_2 = await localStore.Get<IFeatureFlagLocalState>(key3, null);
+            Assert.NotEqual(percent3_1, localState3_2.randomPercentage);
 
-            var flag3_2 = await FeatureFlagManager.instance.GetFeatureFlag(key3);
-            Assert.Equal(state3_2.randomPercentage, flag3_2.localState.randomPercentage);
+            var flag3_2 = await FeatureFlagManager<FeatureFlag>.instance.GetFeatureFlag(key3);
+            Assert.Equal(localState3_2.randomPercentage, flag3_2.localState.randomPercentage);
             Assert.True(await flag3_2.IsEnabled());
             Assert.True(await FeatureFlag.IsEnabled(key3));
 
@@ -120,12 +120,12 @@ namespace com.csutil.tests.model {
             var sheetId = "1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM";
             var sheetName = "MySheet1"; // Has to match the sheet name
             var googleSheetsStore = new GoogleSheetsKeyValueStore(new InMemoryKeyValueStore(), apiKey, sheetId, sheetName);
-            var testStore = new DefaultFeatureFlagStore(new InMemoryKeyValueStore(), googleSheetsStore);
-            IoC.inject.SetSingleton<FeatureFlagManager>(new FeatureFlagManager(testStore));
+            var testStore = new FeatureFlagStore(new InMemoryKeyValueStore(), googleSheetsStore);
+            IoC.inject.SetSingleton<FeatureFlagManager<FeatureFlag>>(new FeatureFlagManager<FeatureFlag>(testStore));
 
             // Make sure user would normally be included in the rollout:
             var flagId4 = "MyFlag4";
-            var flag4 = await FeatureFlagManager.instance.GetFeatureFlag(flagId4);
+            var flag4 = await FeatureFlagManager<FeatureFlag>.instance.GetFeatureFlag(flagId4);
             Assert.Equal(flagId4, flag4.id);
             Assert.Equal(100, flag4.rolloutPercentage);
 
@@ -135,10 +135,10 @@ namespace com.csutil.tests.model {
 
             // Setup progression system and check again:
             var xpSystem = new TestXpSystem();
-            IoC.inject.SetSingleton<ProgressionSystem>(xpSystem);
+            IoC.inject.SetSingleton<IProgressionSystem<FeatureFlag>>(xpSystem);
             // Now that there is a progression system 
-            Assert.False(await FeatureFlag.IsEnabled(flagId4));
             Assert.False(await flag4.IsFeatureUnlocked());
+            Assert.False(await FeatureFlag.IsEnabled(flagId4));
 
             var eventCount = 1000;
 
@@ -173,7 +173,7 @@ namespace com.csutil.tests.model {
             Assert.True(await FeatureFlag.IsEnabled(flagId4));
         }
 
-        private class TestXpSystem : ProgressionSystem {
+        private class TestXpSystem : IProgressionSystem<FeatureFlag> {
 
             public int currentXp = 0;
 
@@ -196,13 +196,13 @@ namespace com.csutil.tests.model {
             var sheetId = "1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM";
             var sheetName = "MySheet1"; // Has to match the sheet name
             var googleSheetsStore = new GoogleSheetsKeyValueStore(new InMemoryKeyValueStore(), apiKey, sheetId, sheetName);
-            var ffm = new FeatureFlagManager(new DefaultFeatureFlagStore(new InMemoryKeyValueStore(), googleSheetsStore));
-            IoC.inject.SetSingleton<FeatureFlagManager>(ffm);
+            var ffm = new FeatureFlagManager<FeatureFlag>(new FeatureFlagStore(new InMemoryKeyValueStore(), googleSheetsStore));
+            IoC.inject.SetSingleton<FeatureFlagManager<FeatureFlag>>(ffm);
 
             LocalAnalytics analytics = new LocalAnalytics();
             AppFlow.AddAppFlowTracker(new AppFlowToStore(analytics));
-            var xpSystem = new DefaultProgressionSystem(analytics, ffm);
-            IoC.inject.SetSingleton<ProgressionSystem>(xpSystem);
+            var xpSystem = new ProgressionSystem<FeatureFlag>(analytics, ffm);
+            IoC.inject.SetSingleton<IProgressionSystem<FeatureFlag>>(xpSystem);
 
             await CleanupFilesFromTest(analytics, xpSystem);
 
@@ -213,7 +213,7 @@ namespace com.csutil.tests.model {
             }
 
             var flagId4 = "MyFlag4";
-            var flag4 = await FeatureFlagManager.instance.GetFeatureFlag(flagId4);
+            var flag4 = await FeatureFlagManager<FeatureFlag>.instance.GetFeatureFlag(flagId4);
             Assert.Equal(1000, flag4.requiredXp); // The user needs >= 1000 XP for the feature
 
             // Now that the user has 1000 XP the condition of the TestXpSystem is met:
@@ -228,7 +228,7 @@ namespace com.csutil.tests.model {
         }
 
         // Cleanup from previous tests (needed because persistance to disc is used):
-        private static async Task CleanupFilesFromTest(LocalAnalytics analytics, DefaultProgressionSystem xpSystem) {
+        private static async Task CleanupFilesFromTest(LocalAnalytics analytics, ProgressionSystem<FeatureFlag> xpSystem) {
             // First trigger 1 event for each relevant catory to load the category stores:
             foreach (var category in xpSystem.xpFactors.Keys) { AppFlow.TrackEvent(category, "Dummy Event"); }
             await analytics.RemoveAll(); // Then clear all stores
@@ -243,7 +243,7 @@ namespace com.csutil.tests.model {
             // https://docs.google.com/spreadsheets/d/1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM contains the sheetId:
             var sheetId = "1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM";
             var sheetName = "MySheet1"; // Has to match the sheet name
-            DefaultProgressionSystem xpSys = await NewInMemoryTestXpSystem(apiKey, sheetId, sheetName);
+            ProgressionSystem<FeatureFlag> xpSys = await NewInMemoryTestXpSystem(apiKey, sheetId, sheetName);
 
             Assert.Empty(await xpSys.analytics.GetStoreForCategory(EventConsts.catMutation).GetAllKeys());
             Assert.Equal(0, await xpSys.GetLatestXp());
@@ -262,7 +262,7 @@ namespace com.csutil.tests.model {
 
         }
 
-        private static async Task GetLockedAndUnlockedFeatures(ProgressionSystem xpSys, int currentUserXp) {
+        private static async Task GetLockedAndUnlockedFeatures(IProgressionSystem<FeatureFlag> xpSys, int currentUserXp) {
             var t = Log.MethodEntered();
             {
                 var lockedFeatures = await xpSys.GetLockedFeatures();
@@ -279,13 +279,13 @@ namespace com.csutil.tests.model {
             Log.MethodDone(t);
         }
 
-        private static async Task<DefaultProgressionSystem> NewInMemoryTestXpSystem(string apiKey, string sheetId, string sheetName) {
+        private static async Task<ProgressionSystem<FeatureFlag>> NewInMemoryTestXpSystem(string apiKey, string sheetId, string sheetName) {
             var cachedFlags = new InMemoryKeyValueStore();
             var googleSheetsStore = new GoogleSheetsKeyValueStore(cachedFlags, apiKey, sheetId, sheetName);
             var cachedFlagsLocalData = new InMemoryKeyValueStore();
             var analytics = new LocalAnalytics(new InMemoryKeyValueStore());
             analytics.createStoreFor = (_ => new InMemoryKeyValueStore().GetTypeAdapter<AppFlowEvent>());
-            var featureFlagStore = new DefaultFeatureFlagStore(cachedFlagsLocalData, googleSheetsStore);
+            var featureFlagStore = new FeatureFlagStore(cachedFlagsLocalData, googleSheetsStore);
             return await DefaultProgressionSystem.Setup(featureFlagStore, analytics);
         }
 

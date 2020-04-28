@@ -7,45 +7,16 @@ using com.csutil.logging.analytics;
 
 namespace com.csutil.model {
 
-    public interface ProgressionSystem {
-
-        Task<bool> IsFeatureUnlocked(FeatureFlag featureFlag);
-        Task<IEnumerable<FeatureFlag>> GetLockedFeatures();
-        Task<IEnumerable<FeatureFlag>> GetUnlockedFeatures();
-
-    }
-
-    public class DefaultProgressionSystem : ProgressionSystem {
-
-        public static async Task<DefaultProgressionSystem> SetupWithGSheets(string apiKey, string sheetId, string sheetName) {
-            var cachedFlags = FileBasedKeyValueStore.New("FeatureFlags");
-            var cachedFlagsLocalData = FileBasedKeyValueStore.New("FeatureFlags_LocalData");
-            var googleSheetsStore = new GoogleSheetsKeyValueStore(cachedFlags, apiKey, sheetId, sheetName);
-            return await Setup(new DefaultFeatureFlagStore(cachedFlagsLocalData, googleSheetsStore));
-        }
-
-        public static async Task<DefaultProgressionSystem> Setup(FeatureFlagStore featureFlagStore) {
-            return await Setup(featureFlagStore, new LocalAnalytics());
-        }
-
-        public static async Task<DefaultProgressionSystem> Setup(FeatureFlagStore featureFlagStore, LocalAnalytics analytics) {
-            var ffm = new FeatureFlagManager(featureFlagStore);
-            IoC.inject.SetSingleton(ffm);
-            AppFlow.AddAppFlowTracker(new AppFlowToStore(analytics));
-            var xpSystem = new DefaultProgressionSystem(analytics, ffm);
-            IoC.inject.SetSingleton<ProgressionSystem>(xpSystem);
-            await xpSystem.UpdateCurrentCategoryCounts();
-            return xpSystem;
-        }
+    public class ProgressionSystem<T> : IProgressionSystem<T> where T : IFeatureFlag {
 
         public readonly Dictionary<string, float> xpFactors = InitXpFactors();
         public readonly Dictionary<string, int> cachedCategoryCounts = new Dictionary<string, int>();
         public readonly LocalAnalytics analytics;
-        public readonly FeatureFlagManager featureFlagManager;
+        public readonly FeatureFlagManager<T> featureFlagManager;
 
-        public DefaultProgressionSystem(LocalAnalytics analytics, FeatureFlagManager featureFlagManager) {
+        public ProgressionSystem(LocalAnalytics analytics, FeatureFlagManager<T> featureFlagManager) {
             // Make sure the FeatureFlag system was set up too:
-            AssertV2.NotNull(FeatureFlagManager.instance, "FeatureFlagManager.instance");
+            AssertV2.NotNull(FeatureFlagManager<T>.instance, "FeatureFlagManager.instance");
             this.analytics = analytics;
             this.featureFlagManager = featureFlagManager;
         }
@@ -58,22 +29,22 @@ namespace com.csutil.model {
             return res;
         }
 
-        public async Task<bool> IsFeatureUnlocked(FeatureFlag featureFlag) {
+        public async Task<bool> IsFeatureUnlocked(T featureFlag) {
             await UpdateCurrentCategoryCounts();
             return LastCachedIsFeatureUnlocked(featureFlag);
         }
 
-        private bool LastCachedIsFeatureUnlocked(FeatureFlag featureFlag) {
+        private bool LastCachedIsFeatureUnlocked(IFeatureFlag featureFlag) {
             return featureFlag.requiredXp <= GetLastCachedXp();
         }
 
-        public async Task<IEnumerable<FeatureFlag>> GetLockedFeatures() {
+        public async Task<IEnumerable<T>> GetLockedFeatures() {
             await UpdateCurrentCategoryCounts();
             var allFeatures = await featureFlagManager.GetAllFeatureFlags();
             return allFeatures.Filter(f => !LastCachedIsFeatureUnlocked(f));
         }
 
-        public async Task<IEnumerable<FeatureFlag>> GetUnlockedFeatures() {
+        public async Task<IEnumerable<T>> GetUnlockedFeatures() {
             await UpdateCurrentCategoryCounts();
             var allFeatures = await featureFlagManager.GetAllFeatureFlags();
             return allFeatures.Filter(f => LastCachedIsFeatureUnlocked(f));

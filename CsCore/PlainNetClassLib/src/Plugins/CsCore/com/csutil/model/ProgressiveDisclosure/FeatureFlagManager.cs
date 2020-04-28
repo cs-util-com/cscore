@@ -5,32 +5,33 @@ using System.Threading.Tasks;
 
 namespace com.csutil.model {
 
-    public class FeatureFlagManager {
+    public class FeatureFlagManager<T> where T : IFeatureFlag {
 
-        public static FeatureFlagManager instance => IoC.inject.Get<FeatureFlagManager>(null, false);
+        public static FeatureFlagManager<T> instance => IoC.inject.Get<FeatureFlagManager<T>>(null, false);
 
-        private KeyValueStoreTypeAdapter<FeatureFlag> featureFlagStore;
+        private KeyValueStoreTypeAdapter<T> featureFlagStore;
 
-        public FeatureFlagManager(KeyValueStoreTypeAdapter<FeatureFlag> featureFlagStore) {
+        public FeatureFlagManager(KeyValueStoreTypeAdapter<T> featureFlagStore) {
             this.featureFlagStore = featureFlagStore;
         }
 
-        public async Task<bool> IsEnabled(string featureId) {
-            FeatureFlag flag = await GetFeatureFlag(featureId);
+        public async Task<bool> IsFeatureEnabled(string featureId) {
+            T flag = await GetFeatureFlag(featureId);
             if (flag == null) { return false; } // No feature returned so feature not enabled
             return await flag.IsEnabled();
         }
 
-        public async Task<FeatureFlag> GetFeatureFlag(string featureId) {
-            return await ReturnInitializedFlag(await featureFlagStore.Get(featureId, null));
+        public async Task<T> GetFeatureFlag(string featureId) {
+            return await ReturnInitializedFlag(await featureFlagStore.Get(featureId, default(T)));
         }
 
-        public async Task<IEnumerable<FeatureFlag>> GetAllFeatureFlags() {
+        public async Task<IEnumerable<T>> GetAllFeatureFlags() {
             var all = await featureFlagStore.GetAll();
             return await all.MapAsync(async x => await ReturnInitializedFlag(x));
         }
 
-        private async Task<FeatureFlag> ReturnInitializedFlag(FeatureFlag flag) {
+        private async Task<T> ReturnInitializedFlag(T flag) {
+            AssertV2.IsNotNull(flag.localState, "flag.localState");
             if (flag != null && flag.localState.randomPercentage == 0) {
                 // if the server decided its a staged rollout no rnd % generated yet so do it:
                 flag.localState.randomPercentage = new Random().Next(1, 100);
