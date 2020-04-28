@@ -267,10 +267,18 @@ namespace com.csutil.tests.model {
             {
                 var lockedFeatures = await xpSys.GetLockedFeatures();
                 var unlockedFeatures = await xpSys.GetUnlockedFeatures();
-
+                Assert.NotEmpty(lockedFeatures);
+                Assert.NotEmpty(unlockedFeatures);
                 Assert.Empty(lockedFeatures.Intersect(unlockedFeatures)); // There should be no features in both lists
-                foreach (var l in lockedFeatures) { Assert.True(currentUserXp < l.requiredXp); }
-                foreach (var l in unlockedFeatures) { Assert.True(currentUserXp >= l.requiredXp); }
+
+                foreach (var feature in lockedFeatures) {
+                    Assert.True(currentUserXp < feature.requiredXp);
+                    Assert.False(await xpSys.IsFeatureUnlocked(feature));
+                }
+                foreach (var feature in unlockedFeatures) {
+                    Assert.True(currentUserXp >= feature.requiredXp);
+                    Assert.True(await xpSys.IsFeatureUnlocked(feature));
+                }
 
                 var nextAvailableFeature = lockedFeatures.OrderBy(f => f.requiredXp).First();
                 Log.d("The next unlocked feature will be " + JsonWriter.AsPrettyString(nextAvailableFeature));
