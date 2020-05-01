@@ -10,6 +10,15 @@ namespace com.csutil.keyvaluestore {
 
     public class PlayerPrefsStore : IKeyValueStore {
 
+        /// <summary> 
+        /// THe default store uses a Dictionary for memory caching and an exception layer to catch
+        /// and errors that might happen e.g. when the PlayerPrefs are accessed from a background task
+        /// </summary>
+        public static Preferences NewPreferencesUsingPlayerPrefs() {
+            var wrappedPlayerPrefs = new ExceptionWrapperKeyValueStore(new PlayerPrefsStore());
+            return new Preferences(new InMemoryKeyValueStore().WithFallbackStore(wrappedPlayerPrefs));
+        }
+
         public IKeyValueStore fallbackStore { get; set; }
         public long latestFallbackGetTimingInMs { get; set; }
         private IJsonReader jsonReader = TypedJsonHelper.NewTypedJsonReader();
@@ -43,7 +52,13 @@ namespace com.csutil.keyvaluestore {
 
         private T InternalGet<T>(string key, T defaultValue) {
             if (!PlayerPrefs.HasKey(key)) { return defaultValue; }
-            return jsonReader.Read<ValueWrapper>(PlayerPrefs.GetString(key)).GetValueAs<T>();
+            var value = PlayerPrefs.GetString(key);
+            var wrapper = jsonReader.Read<ValueWrapper>(value);
+            if (wrapper == null) {
+                Log.e($"Entry not a ValueWrapper but instead: '{value}'");
+                return defaultValue;
+            }
+            return wrapper.GetValueAs<T>();
         }
 
         public async Task<bool> Remove(string key) {

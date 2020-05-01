@@ -76,7 +76,9 @@ namespace com.csutil {
             string appVersion { get; }
             string culture { get; }
             string language { get; }
-            long runDateUtc { get; }
+            long? lastUpdateDate { get; }
+            long? firstLaunchDate { get; }
+            long latestLaunchDate { get; }
             int utcOffset { get; }
         }
 
@@ -99,8 +101,11 @@ namespace com.csutil {
             public string appVersion { get; set; } = "" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
             public string culture { get; set; } = "" + CultureInfo.CurrentCulture;
             public string language { get; set; } = "" + CultureInfo.CurrentCulture.EnglishName;
-            public long runDateUtc { get; set; } = DateTimeV2.UtcNow.ToUnixTimestampUtc();
+            public long latestLaunchDate { get; set; } = DateTimeV2.UtcNow.ToUnixTimestampUtc();
             public int utcOffset { get; set; } = TimeZoneInfo.Local.GetUtcOffset(DateTimeV2.UtcNow).Hours;
+            public long? lastUpdateDate => IoC.inject.Get<IPreferences>(null)?.GetLastUpdateDate();
+            public long? firstLaunchDate => IoC.inject.Get<IPreferences>(null)?.GetFirstStartDate();
+
         }
 
     }

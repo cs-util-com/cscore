@@ -1,31 +1,39 @@
-﻿using com.csutil.io;
-using com.csutil.keyvaluestore;
+﻿using com.csutil.keyvaluestore;
 using NUnit.Framework;
 using System;
 using System.Collections;
-using System.Linq;
 using System.Threading.Tasks;
-using UnityEngine;
 using UnityEngine.TestTools;
 
 namespace com.csutil.tests.io {
 
+    [Obsolete("Consider using Preferences.instance over PlayerPrefsV2")]
     public class PlayerPrefsV2Tests {
 
         [Test]
         public void ExampleUsage1() {
+
+            // In the setup logic of your application set the Preferences singleton to use the Unity PlayerPrefs:
+            IoC.inject.SetSingleton<IPreferences>(PlayerPrefsStore.NewPreferencesUsingPlayerPrefs());
+
             string key1 = "key1";
             string value1 = "value1";
-
-            var store = PlayerPrefsV2.instance;
-            store.Set(key1, value1);
-            string x = store.Get(key1, "defaultValue1").Result;
-            store.Remove(key1); // cleanup
+            var prefs = Preferences.instance;
+            prefs.Set(key1, value1);
+            string x = prefs.Get(key1, "defaultValue1").Result;
+            prefs.Remove(key1); // cleanup
             Assert.AreEqual(value1, x);
+
         }
 
         [Test]
-        public void ExampleUsage2() {
+        public void OldUsage2() {
+
+            /* Its possible to stay closer to the original Unity syntax by using PlayerPrefsV2 where you typically 
+             * would write PlayerPrefs but this will couple the code to Unity. Typically Preferences.instance is 
+             * the recommended way to interact with persisted preferences. Below are some examples if you want to
+             * stick to PlayerPrefsV2 anyways:
+             */
 
             // PlayerPrefsV2.SetBool and PlayerPrefsV2.GetBool example:
             bool myBool = true;

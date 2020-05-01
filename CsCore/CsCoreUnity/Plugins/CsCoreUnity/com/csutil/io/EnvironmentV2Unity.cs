@@ -75,8 +75,11 @@ namespace com.csutil.io {
         public string UnityVersion { get; set; } = "" + Application.unityVersion;
         public string culture { get; set; } = "" + CultureInfo.CurrentCulture;
         public string language { get; set; } = "" + Application.systemLanguage;
-        public long runDateUtc { get; set; } = DateTimeV2.UtcNow.ToUnixTimestampUtc();
+        public long latestLaunchDate { get; set; } = DateTimeV2.UtcNow.ToUnixTimestampUtc();
         public int utcOffset { get; set; } = TimeZoneInfo.Local.GetUtcOffset(DateTimeV2.UtcNow).Hours;
+        public long? lastUpdateDate => IoC.inject.Get<IPreferences>(null)?.GetLastUpdateDate();
+        public long? firstLaunchDate => IoC.inject.Get<IPreferences>(null)?.GetFirstStartDate();
+
     }
 
 }

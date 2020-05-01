@@ -1,6 +1,5 @@
-﻿using com.csutil.ui;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,15 +13,17 @@ namespace com.csutil.tests.ui {
 
         private Dictionary<string, Link> links;
 
-        void Start() {
+        void Start() { OnLoad().LogOnError(); }
+
+        private async Task OnLoad() {
             links = gameObject.GetLinkMap();
-            toggle1().isOn = PlayerPrefsV2.GetBool(TOGGLE1, false);
-            toggle2().isOn = PlayerPrefsV2.GetBool(TOGGLE2, false);
-            toggle3().isOn = PlayerPrefsV2.GetBool(TOGGLE3, false);
-            links.Get<Button>("ConfirmButton").SetOnClickAction(delegate {
-                PlayerPrefsV2.SetBool(TOGGLE1, toggle1().isOn);
-                PlayerPrefsV2.SetBool(TOGGLE2, toggle2().isOn);
-                PlayerPrefsV2.SetBool(TOGGLE3, toggle3().isOn);
+            toggle1().isOn = await Preferences.instance.Get(TOGGLE1, false);
+            toggle2().isOn = await Preferences.instance.Get(TOGGLE2, false);
+            toggle3().isOn = await Preferences.instance.Get(TOGGLE3, false);
+            await links.Get<Button>("ConfirmButton").SetOnClickAction(async delegate {
+                await Preferences.instance.Set(TOGGLE1, toggle1().isOn);
+                await Preferences.instance.Set(TOGGLE2, toggle2().isOn);
+                await Preferences.instance.Set(TOGGLE3, toggle3().isOn);
                 gameObject.GetViewStack().SwitchBackToLastView(gameObject);
             });
         }

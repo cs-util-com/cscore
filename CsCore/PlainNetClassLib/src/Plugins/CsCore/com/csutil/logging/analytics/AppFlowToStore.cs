@@ -17,10 +17,7 @@ namespace com.csutil.logging.analytics {
 
         public void TrackEvent(string category, string action, params object[] args) {
             var e = new AppFlowEvent() { cat = category, action = action, args = args };
-            store.Set(e.time + "__" + category + ":" + action + ".json", e).OnError((exeption) => {
-                Log.e(exeption);
-                return Task.FromException(exeption);
-            });
+            store.Set(e.time + "__" + category + ":" + action + ".json", e).LogOnError();
         }
 
     }

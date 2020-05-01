@@ -2,6 +2,7 @@
 using com.csutil.logging;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -16,7 +17,7 @@ namespace com.csutil.tests {
             LogConsole.RegisterForAllLogEvents(this);
 
             links = gameObject.GetLinkMap();
-            links.Get<Button>("ButtonTestJsonLib").SetOnClickAction(delegate { TestJsonSerialization(); });
+            links.Get<Button>("ButtonTestJsonLib").SetOnClickAction(delegate { TestJsonSerialization().LogOnError(); });
             links.Get<Button>("ButtonTestPing").SetOnClickAction(delegate {
                 StartCoroutine(TestCurrentPing(links.Get<InputField>("IpInput").text));
             });
@@ -34,14 +35,14 @@ namespace com.csutil.tests {
             public int myInt;
         }
 
-        private void TestJsonSerialization() {
+        private async Task TestJsonSerialization() {
             var t = Log.MethodEntered();
             var prefsKey = "testObj1";
             var myObj = new MyClass1() { theCurrentTime = "It is " + DateTimeV2.Now, myInt = 123 };
-            PlayerPrefsV2.SetObject(prefsKey, myObj);
-            AssertV2.AreEqual(myObj.theCurrentTime, PlayerPrefsV2.GetObject<MyClass1>(prefsKey, null).theCurrentTime);
-            AssertV2.AreEqual(myObj.myInt, PlayerPrefsV2.GetObject<MyClass1>(prefsKey, null).myInt);
-            links.Get<Text>("JsonOutput").text = JsonWriter.GetWriter().Write(PlayerPrefsV2.GetObject<MyClass1>(prefsKey, null));
+            await Preferences.instance.Set(prefsKey, myObj);
+            AssertV2.AreEqual(myObj.theCurrentTime, (await Preferences.instance.Get<MyClass1>(prefsKey, null)).theCurrentTime);
+            AssertV2.AreEqual(myObj.myInt, (await Preferences.instance.Get<MyClass1>(prefsKey, null)).myInt);
+            links.Get<Text>("JsonOutput").text = JsonWriter.GetWriter().Write(await Preferences.instance.Get<MyClass1>(prefsKey, null));
             Log.MethodDone(t);
         }
 

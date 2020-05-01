@@ -1,4 +1,5 @@
 ﻿using com.csutil.analytics;
+using com.csutil.keyvaluestore;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,6 +10,7 @@ namespace com.csutil.tests.ui {
 
         public override IEnumerator RunTest() {
 
+            IoC.inject.SetSingleton<IPreferences>(PlayerPrefsStore.NewPreferencesUsingPlayerPrefs());
             AppFlow.AddAppFlowTracker(new AppFlowToLog().WithAllTrackingActive());
 
             var links = gameObject.GetLinkMap();
@@ -17,6 +19,7 @@ namespace com.csutil.tests.ui {
             });
             links.Get<Button>("UserDetailsButton").SetOnClickAction(ShowUserUi);
             yield return null;
+
         }
 
         public Ui1_Presenters.MyUserModel currentUser = new Ui1_Presenters.MyUserModel() { userName = "Carl" };
