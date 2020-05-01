@@ -16,20 +16,11 @@ namespace com.csutil.io {
         }
 
         public static async Task<ImageResult> LoadAndDispose(Stream stream) {
-            stream = await CopyToSeekableStreamIfNeeded(stream);
+            stream = await stream.CopyToSeekableStreamIfNeeded(disposeOriginalStream: true);
             var image = ImageResult.FromStream(stream, ColorComponents.RedGreenBlueAlpha);
             stream.Dispose();
             Conversion.stbi__vertical_flip(image.Data, image.Width, image.Height, 4);
             return image;
-        }
-
-        private static async Task<Stream> CopyToSeekableStreamIfNeeded(Stream stream) {
-            if (stream.CanSeek) { return stream; }
-            var seekableStream = new MemoryStream();
-            await stream.CopyToAsync(seekableStream);
-            stream.Dispose();
-            seekableStream.Seek(0, SeekOrigin.Begin);
-            return seekableStream;
         }
 
     }
