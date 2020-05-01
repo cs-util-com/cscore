@@ -14,7 +14,7 @@ namespace com.csutil.keyvaluestore {
         /// THe default store uses a Dictionary for memory caching and an exception layer to catch
         /// and errors that might happen e.g. when the PlayerPrefs are accessed from a background task
         /// </summary>
-        public static Preferences NewPreferencesUsingPlayerPrefs() {
+        public static IPreferences NewPreferencesUsingPlayerPrefs() {
             var wrappedPlayerPrefs = new ExceptionWrapperKeyValueStore(new PlayerPrefsStore());
             return new Preferences(new InMemoryKeyValueStore().WithFallbackStore(wrappedPlayerPrefs));
         }
