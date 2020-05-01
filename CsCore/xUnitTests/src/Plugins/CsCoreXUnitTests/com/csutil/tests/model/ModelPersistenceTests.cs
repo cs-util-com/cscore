@@ -85,6 +85,10 @@ namespace com.csutil.tests.model {
                     if (downloadProgress > 5) { throw new TaskCanceledException("Download canceled after 5%"); }
                 });
             });
+            Assert.NotNull(f.url);
+            // Local values should only be set after successful download to have a more atomic predicatable behavior: 
+            Assert.Null(f.fileName);
+            Assert.Null(f.dir);
             Log.d("FileRef: " + JsonWriter.AsPrettyString(f));
 
         }
