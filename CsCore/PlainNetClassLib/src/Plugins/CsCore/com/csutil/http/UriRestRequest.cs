@@ -11,6 +11,7 @@ namespace com.csutil.http {
 
         public IJsonReader jsonReader = JsonReader.GetReader();
         public Action<float> onProgress { get; set; }
+        public HttpCompletionOption sendAsyncCompletedAfter = HttpCompletionOption.ResponseHeadersRead;
 
         private Uri uri;
         private Headers requestHeaders;
@@ -48,7 +49,7 @@ namespace com.csutil.http {
             client.AddRequestHeaders(requestHeaders);
             var message = new HttpRequestMessage(method, uri);
             if (httpContent != null) { message.Content = httpContent; }
-            request = client.SendAsync(message, HttpCompletionOption.ResponseHeadersRead);
+            request = client.SendAsync(message, sendAsyncCompletedAfter);
             var result = await request;
             var serverUtcDate = result.Headers.Date;
             if (serverUtcDate != null) { EventBus.instance.Publish(DateTimeV2.SERVER_UTC_DATE, uri, serverUtcDate.Value.DateTime); }
