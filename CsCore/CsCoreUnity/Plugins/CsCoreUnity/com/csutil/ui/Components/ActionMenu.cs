@@ -21,13 +21,13 @@ namespace com.csutil {
             try {
                 var selectedEntry = (await presenter.LoadModelIntoView(menu)).clickedEntry;
                 menuUiGo.Destroy(); // Close the menu UI again
-                AppFlow.TrackEvent(EventConsts.catMethod, eventName + " done: " + selectedEntry.name);
+                EventBus.instance.Publish(EventConsts.catMethod, eventName + " done: " + selectedEntry.name);
                 Log.MethodDone(timing);
                 return selectedEntry;
             }
             catch (TaskCanceledException) { // If the user canceled the action selection:
                 menuUiGo.Destroy(); // Close the menu UI again
-                AppFlow.TrackEvent(EventConsts.catMethod, eventName + " canceled");
+                EventBus.instance.Publish(EventConsts.catMethod, eventName + " canceled");
                 Log.MethodDone(timing);
                 return null;
             }

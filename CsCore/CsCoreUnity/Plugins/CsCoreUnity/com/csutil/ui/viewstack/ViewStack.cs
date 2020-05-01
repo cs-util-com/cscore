@@ -26,7 +26,7 @@ namespace com.csutil.ui {
             if (newView.GetComponentInParents<Canvas>() != null) { // The view is in a UI
                 newView.GetOrAddComponent<RectTransform>().SetAnchorsStretchStretch();
             }
-            EventBus.instance.Publish(EventConsts.VIEW_SHOW, newView);
+            EventBus.instance.Publish(EventConsts.catView + EventConsts.SHOW, newView);
             if (currentViewToHide != null) { GetRootViewOf(currentViewToHide).SetActiveV2(false); }
             return newView;
         }
@@ -55,7 +55,7 @@ namespace com.csutil.ui {
             if (currentIndex > 0) {
                 var lastView = transform.GetChild(currentIndex - 1).gameObject;
                 lastView.SetActiveV2(true);
-                EventBus.instance.Publish(EventConsts.VIEW_SWITCH_BACK_TO_LAST, "" + currentView, lastView);
+                EventBus.instance.Publish(EventConsts.catView + EventConsts.SWITCH_BACK_TO_LAST, "" + currentView, lastView);
             } else {
                 if (!screenToShowAsCloseView.IsNullOrEmpty() && activeCloseView == null) {
                     try {
@@ -84,7 +84,7 @@ namespace com.csutil.ui {
             if (currentIndex >= transform.childCount - 1) { return false; }
             var nextView = transform.GetChild(currentIndex + 1).gameObject;
             nextView.SetActiveV2(true);
-            EventBus.instance.Publish(EventConsts.VIEW_SWITCH_TO_NEXT, currentView, nextView);
+            EventBus.instance.Publish(EventConsts.catView + EventConsts.SWITCH_TO_NEXT, currentView, nextView);
             if (hideCurrentView) { currentView.SetActiveV2(false); }
             return true;
         }

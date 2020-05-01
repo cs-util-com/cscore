@@ -8,7 +8,7 @@ namespace com.csutil.system {
 
         private void OnDisable() { Application.lowMemory -= LogLowMemory; }
 
-        private void LogLowMemory() { AppFlow.TrackEvent(EventConsts.catSystem, "System reports: Low memory warning!"); }
+        private void LogLowMemory() { EventBus.instance.Publish(EventConsts.catSystem + EventConsts.LOW_MEMORY); }
 
     }
 

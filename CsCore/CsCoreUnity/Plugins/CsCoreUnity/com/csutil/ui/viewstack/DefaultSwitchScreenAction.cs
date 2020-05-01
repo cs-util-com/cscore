@@ -36,7 +36,7 @@ namespace com.csutil.ui.viewstack {
                 return true;
             }
             Log.w("Cant switch view in direction " + switchDirection);
-            AppFlow.TrackEvent(EventConsts.catView, "switchViewWasRejected", switchDirection);
+            EventBus.instance.Publish(EventConsts.catView + EventConsts.SWITCH_REJECTED, switchDirection);
             return false;
         }
 

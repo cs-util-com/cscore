@@ -19,11 +19,11 @@ namespace com.csutil.ui {
         }
 
         protected virtual void OnViewAdded(GameObject addedView) {
-            EventBus.instance.Publish(EventConsts.VIEW_ADDED, addedView);
+            EventBus.instance.Publish(EventConsts.catView + EventConsts.ADDED, addedView);
         }
 
         protected virtual void OnViewRemoved(GameObject removedView) {
-            EventBus.instance.Publish(EventConsts.VIEW_REMOVED, removedView);
+            EventBus.instance.Publish(EventConsts.catView + EventConsts.REMOVED, removedView);
         }
 
     }

@@ -62,7 +62,7 @@ namespace com.csutil.tests.ui {
 
         void setupImmutableDatastore() {
             Log.MethodEntered();
-            var log = Middlewares.NewAppFlowTrackerMiddleware<MyDataModel>();
+            var log = Middlewares.NewMutationBroadcasterMiddleware<MyDataModel>();
             var store = new DataStore<MyDataModel>(MainReducer, new MyDataModel(new MyDataModel.SubSection1(string1: "", bool1: false)), log);
             IoC.inject.SetSingleton<IDataStore<MyDataModel>>(store);
         }

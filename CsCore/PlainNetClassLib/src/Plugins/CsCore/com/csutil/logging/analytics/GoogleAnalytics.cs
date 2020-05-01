@@ -53,19 +53,19 @@ namespace com.csutil.logging.analytics {
         private bool ExtractScreenName(AppFlowEvent appFlowEvent) {
             try {
                 if (appFlowEvent.cat == EventConsts.catView) {
-                    if (appFlowEvent.action.StartsWith(EventConsts.VIEW_SHOW)) {
+                    if (appFlowEvent.action.StartsWith(EventConsts.SHOW)) {
                         latestScreen = "" + appFlowEvent.args.First();
                         return true;
                     }
-                    if (appFlowEvent.action.StartsWith(EventConsts.VIEW_SWITCH_BACK_TO_LAST)) {
+                    if (appFlowEvent.action.StartsWith(EventConsts.SWITCH_BACK_TO_LAST)) {
                         latestScreen = "" + appFlowEvent.args.First();
                         return true;
                     }
-                    if (appFlowEvent.action.StartsWith(EventConsts.VIEW_SWITCH_TO_NEXT)) {
+                    if (appFlowEvent.action.StartsWith(EventConsts.SWITCH_TO_NEXT)) {
                         latestScreen = "" + appFlowEvent.args[1];
                         return true;
                     }
-                    if (appFlowEvent.action.StartsWith(EventConsts.VIEW_ADDED)) {
+                    if (appFlowEvent.action.StartsWith(EventConsts.ADDED)) {
                         latestScreen = "" + appFlowEvent.args.First();
                         return true;
                     }

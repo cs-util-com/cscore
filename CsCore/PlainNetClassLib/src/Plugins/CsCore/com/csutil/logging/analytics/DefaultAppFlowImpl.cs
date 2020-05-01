@@ -21,7 +21,7 @@ namespace com.csutil.logging.analytics {
         public async Task OnHasInternet(bool hasInet) {
             if (oldHasInet != hasInet) {
                 if (oldHasInet != null) {
-                    AppFlow.TrackEvent(EventConsts.catSystem, EventConsts.SYSTEM_INET_CHANGED, oldHasInet, hasInet);
+                    EventBus.instance.Publish(EventConsts.catSystem + EventConsts.INET_CHANGED, oldHasInet, hasInet);
                 }
                 oldHasInet = hasInet;
             }
@@ -32,7 +32,8 @@ namespace com.csutil.logging.analytics {
                             var wasRemoved = await store.Remove(key);
                             AssertV2.IsTrue(wasRemoved, "Could not remove key " + key);
                         }
-                    } catch (Exception e) { Log.e(e); }
+                    }
+                    catch (Exception e) { Log.e(e); }
                 }
             }
         }

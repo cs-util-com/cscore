@@ -50,7 +50,7 @@ namespace com.csutil.model {
         public static async Task<ProgressionSystem<FeatureFlag>> Setup(KeyValueStoreTypeAdapter<FeatureFlag> featureFlagStore, LocalAnalytics analytics) {
             var ffm = new FeatureFlagManager<FeatureFlag>(featureFlagStore);
             IoC.inject.SetSingleton(ffm);
-            AppFlow.AddAppFlowTracker(new AppFlowToStore(analytics));
+            AppFlow.AddAppFlowTracker(new AppFlowToStore(analytics).WithBasicTrackingActive());
             var xpSystem = new ProgressionSystem<FeatureFlag>(analytics, ffm);
             IoC.inject.SetSingleton<IProgressionSystem<FeatureFlag>>(xpSystem);
             await xpSystem.UpdateCurrentCategoryCounts();

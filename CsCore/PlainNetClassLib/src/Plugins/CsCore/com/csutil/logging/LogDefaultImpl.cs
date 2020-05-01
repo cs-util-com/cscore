@@ -53,7 +53,9 @@ namespace com.csutil.logging {
             args = new StackFrame(2, true).AddTo(args);
 #endif
             Log.d(" --> " + methodName, args);
-            if (!methodName.IsNullOrEmpty()) { AppFlow.TrackEvent(EventConsts.catMethod, methodName, args); }
+            if (!methodName.IsNullOrEmpty()) {
+                EventBus.instance.Publish(EventConsts.catMethod + " ENTERED", methodName, args);
+            }
             return AssertV2.TrackTiming(methodName);
         }
 
@@ -64,7 +66,7 @@ namespace com.csutil.logging {
                 timingV2.StopV2();
                 methodName = timingV2.methodName;
             } else { timing.Stop(); }
-            AppFlow.TrackEvent(EventConsts.catMethod, methodName + " DONE", timing);
+            EventBus.instance.Publish(EventConsts.catMethod + " DONE", methodName, timing);
             var text = "    <-- " + methodName + " finished after " + timing.ElapsedMilliseconds + " ms";
             if (timingV2 != null) { text += ", " + timingV2.GetAllocatedMemBetweenStartAndStop(); }
             text = $"{text} \n at {sourceFilePath}: line {sourceLineNumber}";

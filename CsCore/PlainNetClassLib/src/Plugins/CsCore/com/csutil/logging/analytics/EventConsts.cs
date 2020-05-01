@@ -14,14 +14,19 @@ namespace com.csutil {
         public const string catPresenter = "presenter";
         public const string catTemplate = "template";
 
-        public const string VIEW_SHOW = "ViewShow";
-        public const string VIEW_SWITCH_BACK_TO_LAST = "ViewSwitchBackToLast";
-        public const string VIEW_SWITCH_TO_NEXT = "ViewSwitchToNext";
-        public const string VIEW_ADDED = "ViewAdded";
-        public const string VIEW_REMOVED = "ViewRemoved";
+        public const string LOAD_START = "LoadStart";
+        public const string LOAD_DONE = "LoadDone";
 
-        public const string SYSTEM_APP_VERSION_CHANGED = "AppVersionChanged";
-        public const string SYSTEM_INET_CHANGED = "InetChanged";
+        public const string SHOW = "Show";
+        public const string ADDED = "Added";
+        public const string REMOVED = "Removed";
+        public const string SWITCH_BACK_TO_LAST = "SwitchBackToLast";
+        public const string SWITCH_TO_NEXT = "SwitchToNext";
+        public const string SWITCH_REJECTED = "SwitchWasRejected";
+
+        public const string APP_VERSION_CHANGED = "AppVersionChanged";
+        public const string INET_CHANGED = "InetChanged";
+        public const string LOW_MEMORY = "LowMemory";
 
     }
 
