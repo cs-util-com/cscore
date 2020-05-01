@@ -1,4 +1,5 @@
 ﻿using com.csutil.http;
+using com.csutil.keyvaluestore;
 using com.csutil.logging;
 using System.Collections;
 using System.Collections.Generic;
@@ -14,6 +15,7 @@ namespace com.csutil.tests {
 
         public override IEnumerator RunTest() {
 
+            IoC.inject.SetSingleton<IPreferences>(PlayerPrefsStore.NewPreferencesUsingPlayerPrefs());
             LogConsole.RegisterForAllLogEvents(this);
 
             links = gameObject.GetLinkMap();
