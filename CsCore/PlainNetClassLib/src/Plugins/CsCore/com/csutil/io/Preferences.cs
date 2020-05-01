@@ -75,6 +75,7 @@ namespace com.csutil {
                 // Every time the app version must be updated also set the new date:
                 cachedLastUpdateDate = DateTimeV2.UtcNow.ToUnixTimestampUtc();
                 await fallbackStore.Set(LAST_UPDATE_DATE, cachedLastUpdateDate);
+                AppFlow.TrackEvent(EventConsts.catSystem, EventConsts.SYSTEM_APP_VERSION_CHANGED, storedVersion, currentVersion);
             }
         }
 

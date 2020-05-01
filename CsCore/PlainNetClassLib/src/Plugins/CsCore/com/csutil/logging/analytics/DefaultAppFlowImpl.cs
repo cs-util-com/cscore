@@ -10,6 +10,7 @@ namespace com.csutil.logging.analytics {
     /// connectivity to send the collected events to an external system like an Analytics tracking system
     /// </summary>
     public abstract class DefaultAppFlowImpl : AppFlowToStore, IHasInternetListener, IDisposable {
+        private bool? oldHasInet;
 
         public DefaultAppFlowImpl(KeyValueStoreTypeAdapter<AppFlowEvent> store = null) : base(store) {
             InternetStateManager.AddListener(this);
@@ -18,6 +19,12 @@ namespace com.csutil.logging.analytics {
         public void Dispose() { InternetStateManager.RemoveListener(this); }
 
         public async Task OnHasInternet(bool hasInet) {
+            if (oldHasInet != hasInet) {
+                if (oldHasInet != null) {
+                    AppFlow.TrackEvent(EventConsts.catSystem, EventConsts.SYSTEM_INET_CHANGED, oldHasInet, hasInet);
+                }
+                oldHasInet = hasInet;
+            }
             if (hasInet) {
                 foreach (var key in (await store.GetAllKeys()).ToList()) {
                     try {

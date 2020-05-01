@@ -5,7 +5,7 @@ namespace com.csutil {
         public const string catMethod = "method";
         public const string catError = "error";
         public const string catMutation = "mutation";
-
+        public const string catSystem = "system";
         public const string catInjection = "injection";
 
         public const string catUi = "ui";
@@ -19,6 +19,9 @@ namespace com.csutil {
         public const string VIEW_SWITCH_TO_NEXT = "ViewSwitchToNext";
         public const string VIEW_ADDED = "ViewAdded";
         public const string VIEW_REMOVED = "ViewRemoved";
+
+        public const string SYSTEM_APP_VERSION_CHANGED = "AppVersionChanged";
+        public const string SYSTEM_INET_CHANGED = "InetChanged";
 
     }
 
