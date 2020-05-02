@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using com.csutil.model;
-using LiteDB;
+using UltraLiteDB;
 using Xunit;
 using Zio;
 
@@ -27,7 +27,7 @@ namespace com.csutil.tests.model {
             var dbFile = testFolder.GetChild("PerformanceTestDB_" + Guid.NewGuid().ToString());
 
             // Open database (or create if doesn't exist)
-            using (var db = new LiteDatabase(dbFile.OpenOrCreateForReadWrite(), disposeStream: true)) {
+            using (var db = new UltraLiteDatabase(dbFile.OpenOrCreateForReadWrite(), disposeStream: true)) {
                 await InsertIntoDb(dataTree, db);
                 await ReadFromDb(dataTree, db);
             }
@@ -41,7 +41,7 @@ namespace com.csutil.tests.model {
             Assert.False(dbFile.Exists);
         }
 
-        private static async Task ReadFromDb(List<TreeElem> dataTree, LiteDatabase db) {
+        private static async Task ReadFromDb(List<TreeElem> dataTree, UltraLiteDatabase db) {
             var readTimer = Log.MethodEntered("LiteDbPerformanceTest1.ReadFromDb");
             var elements = db.GetCollection<TreeElem>("elements");
             await ParallelExec(dataTree, (elem) => {
@@ -51,13 +51,17 @@ namespace com.csutil.tests.model {
             Log.MethodDone(readTimer, 800);
         }
 
-        private static async Task InsertIntoDb(List<TreeElem> dataTree, LiteDatabase db) {
+        private static async Task InsertIntoDb(List<TreeElem> dataTree, UltraLiteDatabase db) {
             var insertTimer = Log.MethodEntered("LiteDbPerformanceTest1.InsertIntoDb");
             var elements = db.GetCollection<TreeElem>("elements");
+            object threadLock = new object();
             await ParallelExec(dataTree, (elem) => {
-                elements.Insert(elem);
+                lock (threadLock) {
+                    elements.Insert(elem);
+                }
             });
             Log.MethodDone(insertTimer, 4000);
+            Assert.Equal(dataTree.Count, elements.FindAll().Count());
         }
 
         private static Task ParallelExec<T>(IEnumerable<T> data, Action<T> actionPerElement) {
