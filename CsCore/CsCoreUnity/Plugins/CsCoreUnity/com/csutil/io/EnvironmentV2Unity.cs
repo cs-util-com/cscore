@@ -33,7 +33,7 @@ namespace com.csutil.io {
         }
 
         public override DirectoryEntry GetOrAddAppDataFolder(string appDataSubfolderName) {
-            return GetRootAppDataFolder().GetChildDir(appDataSubfolderName).ToRootDirectoryEntry();
+            return GetRootAppDataFolder().GetChildDir(appDataSubfolderName).CreateV2().ToRootDirectoryEntry();
         }
 
         public override DirectoryEntry GetCurrentDirectory() {
