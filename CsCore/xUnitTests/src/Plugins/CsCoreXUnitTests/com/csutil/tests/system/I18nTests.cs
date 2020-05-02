@@ -36,6 +36,11 @@ namespace com.csutil.tests {
 
         [Fact]
         public async Task TestDefaultLocale() {
+            Assert.NotNull(EnvironmentV2.instance.CurrentCulture);
+            Assert.NotNull(EnvironmentV2.instance.CurrentUICulture);
+            Assert.NotEmpty("" + EnvironmentV2.instance.CurrentCulture);
+            Assert.NotEmpty("" + EnvironmentV2.instance.CurrentUICulture);
+
             I18n i18n = await NewI18nForTesting();
             Assert.False(i18n.currentLocale.IsNullOrEmpty());
             Assert.False(("" + i18n.currentCulture).IsNullOrEmpty());
@@ -175,6 +180,7 @@ namespace com.csutil.tests {
                 ]";
             }
             var list = JsonReader.GetReader().Read<List<I18n.Translation>>(jsonString);
+            if (list.IsNullOrEmpty()) throw Log.e($"Invalid localeName='{localeName}'");
             return Task.FromResult(list.ToDictionary(t => t.key, t => t));
         }
 

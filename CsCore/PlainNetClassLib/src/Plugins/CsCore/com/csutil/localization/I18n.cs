@@ -15,8 +15,8 @@ namespace com.csutil {
         public static I18n instance(object caller) { return IoC.inject.Get<I18n>(caller); }
 
         public bool isWarningLogEnabled = true;
-        public string currentLocale { get; private set; } = "" + CultureInfo.CurrentUICulture;
-        public CultureInfo currentCulture = CultureInfo.CurrentCulture;
+        public string currentLocale { get; private set; } = "" + EnvironmentV2.instance.CurrentUICulture;
+        public CultureInfo currentCulture = EnvironmentV2.instance.CurrentCulture;
 
         private Func<string, Task<Dictionary<string, Translation>>> localeLoader = LoadLocaleFromFile();
         private Dictionary<string, Translation> translationData;

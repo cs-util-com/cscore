@@ -42,6 +42,10 @@ namespace com.csutil.io {
 
         private static DirectoryInfo GetPersistentDataPath() { return new DirectoryInfo(Application.persistentDataPath); }
 
+        public override CultureInfo CurrentCulture { get => Application.systemLanguage.ToCultureInfo(); set => throw new NotSupportedException(); }
+
+        public override CultureInfo CurrentUICulture { get => CurrentCulture; set => CurrentCulture = value; }
+
         public static bool isUnityEditor {
             get {
 #if UNITY_EDITOR
@@ -129,7 +133,7 @@ namespace com.csutil.io {
         public string appName { get; set; } = "" + Application.productName;
         public string appVersion { get; set; } = "" + Application.version;
         public string UnityVersion { get; set; } = "" + Application.unityVersion;
-        public string culture { get; set; } = "" + CultureInfo.CurrentCulture;
+        public string culture => "" + EnvironmentV2.instance.CurrentCulture;
         public string language { get; set; } = "" + Application.systemLanguage;
         public long latestLaunchDate { get; set; } = DateTimeV2.UtcNow.ToUnixTimestampUtc();
         public int utcOffset { get; set; } = TimeZoneInfo.Local.GetUtcOffset(DateTimeV2.UtcNow).Hours;

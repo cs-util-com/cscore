@@ -25,6 +25,16 @@ namespace com.csutil {
             }
         }
 
+        public virtual CultureInfo CurrentCulture {
+            get => CultureInfo.CurrentCulture;
+            set => CultureInfo.CurrentCulture = value;
+        }
+
+        public virtual CultureInfo CurrentUICulture {
+            get => CultureInfo.CurrentUICulture != null ? CultureInfo.CurrentUICulture : CurrentCulture;
+            set => CultureInfo.CurrentUICulture = value;
+        }
+
         /// <summary> The folder of the binary (or dll that is executed) </summary>
         public virtual DirectoryEntry GetCurrentDirectory() {
             return new DirectoryInfo(Directory.GetCurrentDirectory()).ToRootDirectoryEntry();
