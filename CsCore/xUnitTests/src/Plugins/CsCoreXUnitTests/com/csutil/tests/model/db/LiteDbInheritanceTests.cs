@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 using com.csutil.model;
-using LiteDB;
+using UltraLiteDB;
 using Xunit;
 
 namespace com.csutil.tests.model {
@@ -23,7 +23,7 @@ namespace com.csutil.tests.model {
             var dbFile = EnvironmentV2.instance.GetOrAddTempFolder("tests.io.db").GetChild("TestDB_" + NewId());
 
             // Open database (or create if doesn't exist)
-            using (var db = new LiteDatabase(dbFile.OpenOrCreateForReadWrite(), disposeStream: true)) {
+            using (var db = new UltraLiteDatabase(dbFile.OpenOrCreateForReadWrite(), disposeStream: true)) {
 
                 var elems = db.GetCollection<ClassA>("users");
                 {

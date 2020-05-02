@@ -25,7 +25,7 @@ namespace com.csutil.model {
         public int randomPercentage { get; set; }
     }
 
-    public class FeatureFlagStore : BaseFeatureFlagStore<FeatureFlag> {
+    public class FeatureFlagStore : BaseFeatureFlagStore<FeatureFlag, FeatureFlagLocalState> {
 
         public FeatureFlagStore(IKeyValueStore l, IKeyValueStore r) : base(l, r) { }
 

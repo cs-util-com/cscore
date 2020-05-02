@@ -16,7 +16,7 @@ namespace com.csutil.tests.model.immutable {
             var store = new DataStore<MyAppState1>(ReduceMyAppState1, initialState);
 
             // In total this test will create 4 million state change listeners:
-            int listenerCount = 1000000;
+            int listenerCount = 100000;
             StopwatchV2 t1, t2, t3, t4; // The 4 measured timings of the Dispatches
             { // Add subListeners that are only informed by the one listener attached directly to the store:
                 var counterA1 = 0;

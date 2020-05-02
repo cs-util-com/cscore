@@ -2,13 +2,15 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
+using System.IO;
+using UnityEngine;
 
 namespace com.csutil.editor {
 
     class UnityPackageInstaller {
 
         public static bool AddToProjectViaPackageManager(string packageName, string packageVersion) {
-            var manifestFile = EnvironmentV2.instance.GetCurrentDirectory().Parent.GetChildDir("Packages").GetChild("manifest.json");
+            var manifestFile = EditorIO.GetProjectFolder().GetChildDir("Packages").GetChild("manifest.json");
             if (manifestFile.IsNotNullAndExists()) {
                 var manifest = manifestFile.LoadAs<Dictionary<string, object>>();
                 JObject dependencies = (manifest["dependencies"] as JObject);

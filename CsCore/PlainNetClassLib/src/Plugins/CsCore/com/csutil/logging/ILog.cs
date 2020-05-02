@@ -10,7 +10,7 @@ namespace com.csutil.logging {
         Exception LogError(string error, params object[] args);
         Exception LogExeption(Exception e, params object[] args);
         StopwatchV2 LogMethodEntered(string methodName, object[] args);
-        void LogMethodDone(Stopwatch timing, int maxAllowedTimeInMs, string sourceMemberName, string sourceFilePath, int sourceLineNumber);
+        void LogMethodDone(Stopwatch timing, object[] args, int maxAllowedTimeInMs, string sourceMemberName, string sourceFilePath, int sourceLineNumber);
 
     }
 

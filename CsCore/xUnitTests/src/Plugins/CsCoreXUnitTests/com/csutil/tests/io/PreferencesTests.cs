@@ -31,17 +31,23 @@ namespace com.csutil.tests {
 
             var store = new InMemoryKeyValueStore();
             var prefs = new Preferences(store);
+            IoC.inject.SetSingleton<IPreferences>(prefs);
 
             var firstStart = prefs.GetFirstStartDate();
             var lastUpdate = prefs.GetLastUpdateDate();
             var diffInMs = Math.Abs(firstStart - lastUpdate);
-            Assert.True(diffInMs < 20, "diffInMs=" + diffInMs);
+            Assert.True(diffInMs < 1000, "diffInMs=" + diffInMs);
 
             prefs = new Preferences(store);
             Assert.Equal(firstStart, prefs.GetFirstStartDate());
             Assert.Equal(lastUpdate, prefs.GetLastUpdateDate());
 
             var sysInfo = EnvironmentV2.instance.systemInfo as EnvironmentV2.SystemInfo;
+
+            Assert.NotEqual(0, sysInfo.latestLaunchDate);
+            Assert.NotNull(sysInfo.lastUpdateDate);
+            Assert.NotNull(sysInfo.firstLaunchDate);
+
             sysInfo.appVersion += "_v2"; // Simulate that the app was updated 
 
             prefs = new Preferences(store);

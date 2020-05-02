@@ -40,7 +40,7 @@ namespace com.csutil.tests.datastructures {
                 var t2 = RunOnImmutableList("ExampleUsage1.remove", ref l2, elemCount, (list) => list.RemoveAt(0));
                 Assert.Empty(l2);
                 var timeDiff = Math.Abs(t1 - t2);
-                Assert.True(timeDiff < 4000, "remove t1=" + t1 + ", t2=" + t2 + ", timeDiff=" + timeDiff);
+                Assert.True(t2 < t1, "remove t1=" + t1 + ", t2=" + t2 + ", timeDiff=" + timeDiff);
             }
 
         }

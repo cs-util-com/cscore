@@ -65,7 +65,7 @@ namespace com.csutil.tests {
             DirectoryEntry zipContent = OpenZipReadOnly(zip1);
             Assert.Equal(3, zipContent.EnumerateEntries().Count());
 
-            var subDir2 = zipContent.GetChildDir("/SubDir2");
+            var subDir2 = zipContent.GetChildDir("SubDir2");
             Assert.Equal(2, subDir2.EnumerateEntries().Count());
             Assert.Equal("def", subDir2.GetChild("t2.txt").LoadAs<string>());
 

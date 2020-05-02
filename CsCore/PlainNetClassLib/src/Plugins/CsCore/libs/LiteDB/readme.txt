@@ -1,2 +1,0 @@
-The currently used version of LiteDB is v4.1.4
-The DLL name should not be changed so that the assembly file name in Unity is excatly like the assembly filepath, see https://github.com/Unity-Technologies/UnityCsReference/blob/master/Editor/Mono/AssemblyHelper.cs#L34 for details

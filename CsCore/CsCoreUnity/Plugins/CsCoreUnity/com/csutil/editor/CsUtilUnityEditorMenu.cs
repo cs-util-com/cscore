@@ -74,8 +74,8 @@ namespace com.csutil.editor {
 
         [MenuItem(DIR + "Create default Unity .gitignore files")]
         static void CreateDefaultGitIgnoreFiles() {
-            var projectFolder = EnvironmentV2.instance.GetCurrentDirectory();
-            var assetsFolder = projectFolder.GetChildDir("Assets");
+            var projectFolder = EditorIO.GetProjectFolder();
+            var assetsFolder = EditorIO.GetAssetsFolder();
             if (!assetsFolder.Exists) { throw Log.e("Not the project folder: " + projectFolder); }
             var file = projectFolder.GetChild(".gitignore");
             if (!file.Exists) {

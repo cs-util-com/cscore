@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace com.csutil.model {
 
-    public abstract class BaseFeatureFlagStore<T> : KeyValueStoreTypeAdapter<T>, IDisposable where T : IFeatureFlag {
+    public abstract class BaseFeatureFlagStore<T, V> : KeyValueStoreTypeAdapter<T>, IDisposable where T : IFeatureFlag where V : IFeatureFlagLocalState {
 
         private IKeyValueStore localStore;
 
@@ -20,7 +20,7 @@ namespace com.csutil.model {
 
         public override async Task<T> Get(string featureId, T defVal) {
             var flag = await base.Get(GenerateFeatureKey(featureId), defVal);
-            if (flag != null) { flag.localState = await localStore.Get(featureId, flag.localState); }
+            if (flag != null) { flag.localState = await localStore.Get(featureId, (V)flag.localState); }
             return flag;
         }
 

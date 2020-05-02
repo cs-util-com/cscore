@@ -1,10 +1,7 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
-using com.csutil.datastructures;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -20,10 +17,24 @@ namespace com.csutil.http {
 
         public UnityRestRequest(UnityWebRequest request) { this.request = request; }
 
-        public Task<T> GetResult<T>() {
-            var resp = new Response<T>();
+        public async Task<T> GetResult<T>() {
+            if (!request.isModifiable) { // Request was already sent
+                await WaitForRequestToFinish();
+                return request.GetResult<T>();
+            }
+            return await SendRequest(new Response<T>());
+        }
+
+        private async Task<T> SendRequest<T>(Response<T> resp) {
             resp.WithProgress(onProgress);
-            return WebRequestRunner.GetInstance(this).StartCoroutineAsTask(prepareRequest(resp), () => resp.getResult());
+            var runningResTask = WebRequestRunner.GetInstance(this).StartCoroutineAsTask(prepareRequest(resp), () => resp.getResult());
+            return await WrapWithResponseErrorHandling(resp, runningResTask);
+        }
+
+        public static async Task<T> WrapWithResponseErrorHandling<T>(Response<T> response, Task<T> runningResTask) {
+            TaskCompletionSource<T> onErrorTask = new TaskCompletionSource<T>();
+            response.onError = (_, e) => { onErrorTask.SetException(e); };
+            return await Task.WhenAny<T>(runningResTask, onErrorTask.Task).Unwrap();
         }
 
         private IEnumerator prepareRequest<T>(Response<T> response) {
@@ -45,8 +56,12 @@ namespace com.csutil.http {
 
         public async Task<Headers> GetResultHeaders() {
             if (request.isModifiable) { return await GetResult<Headers>(); }
-            while (!request.isDone && !request.isHttpError && !request.isNetworkError) { await TaskV2.Delay(5); }
+            await WaitForRequestToFinish();
             return request.GetResponseHeadersV2();
+        }
+
+        private async Task WaitForRequestToFinish() {
+            while (!request.isDone && !request.isHttpError && !request.isNetworkError) { await TaskV2.Delay(10); }
         }
 
     }

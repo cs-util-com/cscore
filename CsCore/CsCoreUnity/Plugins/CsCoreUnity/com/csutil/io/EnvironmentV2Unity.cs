@@ -12,16 +12,6 @@ namespace com.csutil.io {
 
     class EnvironmentV2Unity : EnvironmentV2 {
 
-        public bool isUnityEditor {
-            get {
-#if UNITY_EDITOR
-                return true;
-#else
-                return false;
-#endif
-            }
-        }
-
         public EnvironmentV2Unity() : base(new UnitySystemInfo()) { }
 
         /// <summary>
@@ -33,18 +23,88 @@ namespace com.csutil.io {
         }
 
         public override DirectoryEntry GetOrAddAppDataFolder(string appDataSubfolderName) {
-            return GetRootAppDataFolder().GetChildDir(appDataSubfolderName).ToRootDirectoryEntry();
+            return GetPersistentDataPath().GetChildDir(appDataSubfolderName).CreateV2().ToRootDirectoryEntry();
         }
 
         public override DirectoryEntry GetCurrentDirectory() {
-            if (EnvironmentV2.isWebGL && !isUnityEditor) {
-                AssertV2.IsTrue(Application.dataPath.StartsWith("http"), "Application.dataPath=" + Application.dataPath);
-                return GetRootAppDataFolder().ToRootDirectoryEntry();
+            if (isWindows || isMacOs || isLinux || isUnityEditor) {
+                var assetFolder = new DirectoryInfo(Application.dataPath);
+                if (isUnityEditor) {
+                    // Return "/Assets/TestApplicationData" to protect the rest of the Assets folder:
+                    return assetFolder.GetChildDir("TestApplicationData").CreateV2().ToRootDirectoryEntry();
+                }
+                // On Windows, Linux and MacOS it makes sense to return the install folder:
+                return assetFolder.ToRootDirectoryEntry();
             }
-            return new DirectoryInfo(Application.dataPath).ToRootDirectoryEntry();
+            // On all other platforms there is no install folder so return the normal GetPersistentDataPath:
+            return GetPersistentDataPath().ToRootDirectoryEntry();
         }
 
-        private DirectoryInfo GetRootAppDataFolder() { return new DirectoryInfo(Application.persistentDataPath); }
+        private static DirectoryInfo GetPersistentDataPath() { return new DirectoryInfo(Application.persistentDataPath); }
+
+        public override CultureInfo CurrentCulture { get => Application.systemLanguage.ToCultureInfo(); set => throw new NotSupportedException(); }
+
+        public override CultureInfo CurrentUICulture { get => CurrentCulture; set => CurrentCulture = value; }
+
+        public static bool isUnityEditor {
+            get {
+#if UNITY_EDITOR
+                return true;
+#else
+                return false;
+#endif
+            }
+        }
+
+        public static bool isWindows {
+            get {
+#if UNITY_STANDALONE_WIN 
+                return true;
+#else
+                return false;
+#endif
+            }
+        }
+
+        public static bool isMacOs {
+            get {
+#if UNITY_STANDALONE_OSX 
+                return true;
+#else
+                return false;
+#endif
+            }
+        }
+
+        public static bool isLinux {
+            get {
+#if UNITY_STANDALONE_LINUX || UNITY_EDITOR_LINUX
+                return true;
+#else
+                return false;
+#endif
+            }
+        }
+
+        public static bool isAndroid {
+            get {
+#if UNITY_ANDROID
+                return true;
+#else
+                return false;
+#endif
+            }
+        }
+
+        public static bool isIos {
+            get {
+#if UNITY_IOS
+                return true;
+#else
+                return false;
+#endif
+            }
+        }
 
     }
 
@@ -73,7 +133,7 @@ namespace com.csutil.io {
         public string appName { get; set; } = "" + Application.productName;
         public string appVersion { get; set; } = "" + Application.version;
         public string UnityVersion { get; set; } = "" + Application.unityVersion;
-        public string culture { get; set; } = "" + CultureInfo.CurrentCulture;
+        public string culture => "" + EnvironmentV2.instance.CurrentCulture;
         public string language { get; set; } = "" + Application.systemLanguage;
         public long latestLaunchDate { get; set; } = DateTimeV2.UtcNow.ToUnixTimestampUtc();
         public int utcOffset { get; set; } = TimeZoneInfo.Local.GetUtcOffset(DateTimeV2.UtcNow).Hours;

@@ -16,7 +16,9 @@ namespace com.csutil.tests {
 
             // Get a directory to work in:
             string dirName = "ExampleDir_" + DateTimeV2.UtcNow.ToUnixTimestampUtc();
-            DirectoryInfo myDirectory = new DirectoryInfo(Path.GetTempPath()).GetChildDir(dirName);
+
+            string tempFolder = EnvironmentV2.instance.GetRootTempFolder().GetFullFileSystemPath();
+            DirectoryInfo myDirectory = new DirectoryInfo(tempFolder).GetChildDir(dirName);
             Log.d("The directory path is: " + myDirectory.FullName);
 
             // Get a non-existing child directory

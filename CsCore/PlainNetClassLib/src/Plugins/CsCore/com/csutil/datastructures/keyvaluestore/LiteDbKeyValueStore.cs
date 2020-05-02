@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using LiteDB;
+using UltraLiteDB;
 using Zio;
 
 namespace com.csutil.keyvaluestore {
@@ -14,8 +14,9 @@ namespace com.csutil.keyvaluestore {
 
         private BsonMapper bsonMapper;
         private Stream dbStream;
-        private LiteDatabase db;
-        private LiteCollection<BsonDocument> collection;
+        private UltraLiteDatabase db;
+        private UltraLiteCollection<BsonDocument> collection;
+        private object threadLock = new object();
 
         public IKeyValueStore fallbackStore { get; set; }
         public long latestFallbackGetTimingInMs { get; set; }
@@ -26,7 +27,7 @@ namespace com.csutil.keyvaluestore {
             bsonMapper = new BsonMapper();
             bsonMapper.IncludeFields = true;
             dbStream = dbFile.OpenOrCreateForReadWrite();
-            db = new LiteDatabase(dbStream, bsonMapper);
+            db = new UltraLiteDatabase(dbStream, bsonMapper);
             collection = db.GetCollection(collectionName);
         }
 
@@ -66,23 +67,24 @@ namespace com.csutil.keyvaluestore {
             var oldBson = GetBson(key);
             var newVal = bsonMapper.ToDocument(value);
             if (oldBson == null) {
-                collection.Insert(key, newVal);
+                lock (threadLock) { collection.Insert(key, newVal); }
                 return null;
             } else {
                 var oldVal = InternalGet(oldBson, objType);
-                collection.Update(key, newVal);
+                lock (threadLock) { collection.Update(key, newVal); }
                 return oldVal;
             }
         }
 
         public async Task<bool> Remove(string key) {
-            var res = collection.Delete(key);
+            var res = false;
+            lock (threadLock) { res = collection.Delete(key); }
             if (fallbackStore != null) { res &= await fallbackStore.Remove(key); }
             return res;
         }
 
         public async Task RemoveAll() {
-            db.DropCollection(collection.Name);
+            lock (threadLock) { db.DropCollection(collection.Name); }
             if (fallbackStore != null) { await fallbackStore.RemoveAll(); }
         }
 
@@ -98,9 +100,8 @@ namespace com.csutil.keyvaluestore {
         }
 
         private static string GetKeyFromBsonDoc(BsonDocument x) {
-            var key = x.Keys.First();
-            AssertV2.AreEqual("_id", key);
-            return x[key].AsString;
+            AssertV2.IsTrue(x.Keys.Any(k => k == "_id"), "No '_id' key found: " + x.Keys.ToStringV2(k => "" + k));
+            return x["_id"].AsString;
         }
 
     }

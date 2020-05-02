@@ -36,6 +36,19 @@ namespace com.csutil.testing {
                 return res;
             }
 
+            public Task RunTestOnMethod() {
+                try {
+                    invokeResult = methodToTest.Invoke(classInstance, null);
+                    // Its an async test so the run task should wait for the test to finish
+                    if (invokeResult is Task t) { return t; }
+                    return Task.FromResult(invokeResult);
+                }
+                catch (Exception e) {
+                    reportedError = ExceptionDispatchInfo.Capture(e);
+                    return Task.FromException(e);
+                }
+            }
+
         }
 
         public static List<Test> CollectAllTests(IEnumerable<Type> classesToTest, Action<Test> onTestStarted) {
@@ -52,26 +65,10 @@ namespace com.csutil.testing {
                 test.StartTest = () => {
                     ResetStaticInstances();
                     onTestStarted(test);
-                    test.testTask = RunTestOnMethod(test);
+                    test.testTask = test.RunTestOnMethod();
                 };
                 return test;
             });
-        }
-
-        private static Task RunTestOnMethod(Test res) {
-            try {
-                res.invokeResult = res.methodToTest.Invoke(res.classInstance, null);
-                if (res.invokeResult is Task t) { return t; }
-                return Task.FromResult<object>(res.invokeResult);
-            }
-            catch (Exception e) {
-                SetError(res, e.InnerException);
-                return Task.FromException(e);
-            }
-        }
-
-        private static void SetError(Test res, Exception e2) {
-            res.reportedError = ExceptionDispatchInfo.Capture(e2);
         }
 
         private static void ResetStaticInstances() {

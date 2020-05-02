@@ -27,11 +27,6 @@
     <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
   </ItemGroup>
 
-  <!-- https://www.nuget.org/packages/LiteDB/ -->
-  <ItemGroup>
-    <PackageReference Include="LiteDB" Version="4.1.4" />
-  </ItemGroup>
-
   <!-- https://www.nuget.org/packages/System.Collections.Immutable/ -->
   <ItemGroup>
     <PackageReference Include="System.Collections.Immutable" Version="1.7.0" />

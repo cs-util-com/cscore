@@ -51,9 +51,13 @@ namespace com.csutil.tests {
 
         private string GetUrl() { return links.Get<InputField>("UrlToLoadInput").text; }
 
-        public static IEnumerator DownloadTexture2D(Uri self, Response<Texture2D> resp) { yield return UnityWebRequestTexture.GetTexture(self).SendWebRequestV2(resp); }
+        public static IEnumerator DownloadTexture2D(Uri self, Response<Texture2D> resp) {
+            yield return UnityWebRequestTexture.GetTexture(self).SendWebRequestV2(resp);
+        }
 
-        public static IEnumerator DownloadBytes(Uri self, Response<byte[]> resp) { yield return new UnityWebRequest(self).SendWebRequestV2(resp); }
+        public static IEnumerator DownloadBytes(Uri self, Response<byte[]> resp) {
+            yield return new UnityWebRequest(self).SendWebRequestV2(resp);
+        }
 
     }
 
