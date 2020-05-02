@@ -1,5 +1,4 @@
-﻿using System.IO;
-using UnityEditor;
+﻿using UnityEditor;
 using Zio;
 
 namespace com.csutil.editor {
@@ -13,12 +12,11 @@ namespace com.csutil.editor {
 
         [UnityEditor.Callbacks.DidReloadScripts]
         static void DidReloadScripts() {
-            var assets = EnvironmentV2.instance.GetCurrentDirectory();
-            LogAllEmptyFoldersIn(assets);
+            LogAllEmptyFoldersIn(EditorIO.GetAssetsFolder());
         }
 
-        private static void LogAllEmptyFoldersIn(DirectoryEntry dir) {
-            foreach (var d in dir.GetDirectories()) {
+        private static void LogAllEmptyFoldersIn(DirectoryEntry assetsFolder) {
+            foreach (var d in assetsFolder.GetDirectories()) {
                 if (d.IsEmtpy()) {
                     Log.e("Found an emtpy folder at: " + d);
                     d.OpenInExternalApp();
@@ -27,6 +25,7 @@ namespace com.csutil.editor {
                 }
             }
         }
+
     }
 
 }

@@ -26,10 +26,10 @@ namespace com.csutil.tests {
         private static async Task<FileEntry> GetImageFile(string imageFileName) {
             FileEntry imgFile = EnvironmentV2.instance.GetCurrentDirectory().GetChild(imageFileName);
             if (!imgFile.Exists) { // If the file does not exist, download a random image and save it there:
+                Log.d("Saving random image for testing to: " + imgFile.GetFullFileSystemPath());
                 var stream = await new Uri("https://picsum.photos/50/50").SendGET().GetResult<Stream>();
                 imgFile.SaveStream(stream);
                 stream.Dispose();
-                Log.e("Saved a random image for testing to " + imgFile.GetFullFileSystemPath());
             }
             return imgFile;
         }

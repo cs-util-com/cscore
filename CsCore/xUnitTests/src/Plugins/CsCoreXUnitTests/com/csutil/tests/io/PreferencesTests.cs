@@ -36,7 +36,7 @@ namespace com.csutil.tests {
             var firstStart = prefs.GetFirstStartDate();
             var lastUpdate = prefs.GetLastUpdateDate();
             var diffInMs = Math.Abs(firstStart - lastUpdate);
-            Assert.True(diffInMs < 20, "diffInMs=" + diffInMs);
+            Assert.True(diffInMs < 1000, "diffInMs=" + diffInMs);
 
             prefs = new Preferences(store);
             Assert.Equal(firstStart, prefs.GetFirstStartDate());
