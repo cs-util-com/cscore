@@ -1,6 +1,7 @@
 using System;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using Zio;
 
@@ -11,6 +12,7 @@ namespace com.csutil {
         public static EnvironmentV2 instance { get { return IoC.inject.GetOrAddSingleton<EnvironmentV2>(new object()); } }
 
         public readonly ISystemInfo systemInfo;
+        private static char[] invalidChars;
 
         public EnvironmentV2() : this(new SystemInfo()) { }
         protected EnvironmentV2(ISystemInfo systemInfo) { this.systemInfo = systemInfo; }
@@ -71,8 +73,8 @@ namespace com.csutil {
         }
 
         public static string SanatizeToFileName(string fileName) {
-            char[] invalids = Path.GetInvalidFileNameChars();
-            return string.Join("_", fileName.Split(invalids, StringSplitOptions.RemoveEmptyEntries)).TrimEnd('.');
+            if (invalidChars == null) { invalidChars = Path.GetInvalidFileNameChars().AddViaUnion(':').ToArray(); }
+            return string.Join("_", fileName.Split(invalidChars, StringSplitOptions.RemoveEmptyEntries)).TrimEnd('.');
         }
 
         public interface ISystemInfo {
