@@ -56,11 +56,19 @@ namespace com.csutil {
             return MethodEntered(n, arg1, arg2, arg3, arg4);
         }
 
+        public static void MethodDoneWith(Stopwatch timing, object arg1, object arg2 = null, object arg3 = null, int maxAllowedTimeInMs = -1,
+                    [CallerMemberName] string sourceMemberName = null,
+                    [CallerFilePath] string sourceFilePath = null,
+                    [CallerLineNumber] int sourceLineNumber = 0) {
+            var args = new object[3] { arg1, arg2, arg3 };
+            instance.LogMethodDone(timing, args, maxAllowedTimeInMs, sourceMemberName, sourceFilePath, sourceLineNumber);
+        }
+
         public static void MethodDone(Stopwatch timing, int maxAllowedTimeInMs = -1,
                     [CallerMemberName] string sourceMemberName = null,
                     [CallerFilePath] string sourceFilePath = null,
                     [CallerLineNumber] int sourceLineNumber = 0) {
-            instance.LogMethodDone(timing, maxAllowedTimeInMs, sourceMemberName, sourceFilePath, sourceLineNumber);
+            instance.LogMethodDone(timing, null, maxAllowedTimeInMs, sourceMemberName, sourceFilePath, sourceLineNumber);
         }
 
         public static string ToArgsStr(object[] args, Func<object, string> toString) {
@@ -99,7 +107,8 @@ namespace com.csutil {
                 var methodString = method.ReflectedType.Name + "." + method.Name;
                 var paramsString = includeParams ? method.GetParameters().ToStringV2(x => "" + x, "", "") : "..";
                 return methodString + "(" + paramsString + ")";
-            } catch (Exception e) { Console.WriteLine("" + e); return ""; }
+            }
+            catch (Exception e) { Console.WriteLine("" + e); return ""; }
         }
 
         internal static object[] AddTo(this StackFrame self, object[] args) { return Add(args, self); }

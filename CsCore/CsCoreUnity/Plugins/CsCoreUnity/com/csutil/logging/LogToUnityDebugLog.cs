@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using System.Threading;
 using UnityEngine;
 using UnityEngine.Profiling;
 
@@ -38,9 +37,10 @@ namespace com.csutil.logging {
             return base.LogMethodEntered(methodName, args);
         }
 
-        public override void LogMethodDone(System.Diagnostics.Stopwatch timing, int maxAllowedTimeInMs, string sourceMemberName, string sourceFilePath, int sourceLineNumber) {
+        public override void LogMethodDone(System.Diagnostics.Stopwatch timing, object[] args, int maxAllowedTimeInMs,
+                                                string sourceMemberName, string sourceFilePath, int sourceLineNumber) {
             Profiler.EndSample();
-            base.LogMethodDone(timing, maxAllowedTimeInMs, sourceMemberName, sourceFilePath, sourceLineNumber);
+            base.LogMethodDone(timing, args, maxAllowedTimeInMs, sourceMemberName, sourceFilePath, sourceLineNumber);
         }
 
     }

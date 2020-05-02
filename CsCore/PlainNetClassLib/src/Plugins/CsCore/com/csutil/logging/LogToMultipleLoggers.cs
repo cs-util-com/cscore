@@ -30,8 +30,8 @@ namespace com.csutil.logging {
             return loggers.Map(l => l.LogMethodEntered(methodName, args)).Filter(x => x != null).ToList().FirstOrDefault();
         }
 
-        public void LogMethodDone(Stopwatch timing, int maxAllowedTimeInMs, string sourceMemberName, string sourceFilePath, int sourceLineNumber) {
-            foreach (var l in loggers) { l.LogMethodDone(timing, maxAllowedTimeInMs, sourceMemberName, sourceFilePath, sourceLineNumber); }
+        public void LogMethodDone(Stopwatch timing, object[] args, int maxAllowedTimeInMs, string sourceMemberName, string sourceFilePath, int sourceLineNumber) {
+            foreach (var l in loggers) { l.LogMethodDone(timing, args, maxAllowedTimeInMs, sourceMemberName, sourceFilePath, sourceLineNumber); }
         }
 
     }

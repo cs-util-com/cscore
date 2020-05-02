@@ -41,10 +41,11 @@ namespace com.csutil.logging {
             return null;
         }
 
-        public override void LogMethodDone(Stopwatch timing, int maxAllowedTimeInMs, string sourceMemberName, string sourceFilePath, int sourceLineNumber) {
+        public override void LogMethodDone(Stopwatch timing, object[] args, int maxAllowedTimeInMs, string sourceMemberName, string sourceFilePath, int sourceLineNumber) {
             string methodName = sourceMemberName;
             if (timing is StopwatchV2 t2) { methodName = t2.methodName; }
-            logUi.AddToLog(LogEntry.d("    <-- " + methodName + " finished after " + timing.ElapsedMilliseconds + " ms"));
+            var argStr = args != null ? " with " + args.Filter(a => a != null).Map(a => "" + a).ToStringV2() : "";
+            logUi.AddToLog(LogEntry.d("    <-- " + methodName + " finished after " + timing.ElapsedMilliseconds + " ms" + argStr));
         }
 
     }
