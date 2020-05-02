@@ -35,6 +35,8 @@ namespace com.csutil.tests {
 
             var firstStart = prefs.GetFirstStartDate();
             var lastUpdate = prefs.GetLastUpdateDate();
+            Assert.True(firstStart > 0, "firstStart=" + firstStart);
+            Assert.True(lastUpdate > 0, "lastUpdate=" + lastUpdate);
             var diffInMs = Math.Abs(firstStart - lastUpdate);
             Assert.True(diffInMs < 1000, "diffInMs=" + diffInMs);
 
@@ -44,6 +46,9 @@ namespace com.csutil.tests {
 
             var sysInfo = EnvironmentV2.instance.systemInfo as EnvironmentV2.SystemInfo;
 
+            Assert.True(DateTime.UtcNow.ToUnixTimestampUtc() > 0, "DateTime.UtcNow=" + DateTime.UtcNow.ToUnixTimestampUtc());
+            Assert.True(DateTimeV2.UtcNow.ToUnixTimestampUtc() > 0, "DateTimeV2.UtcNow=" + DateTimeV2.UtcNow.ToUnixTimestampUtc());
+            Assert.True(sysInfo.latestLaunchDate > 0, "sysInfo.latestLaunchDate=" + sysInfo.latestLaunchDate);
             Assert.NotEqual(0, sysInfo.latestLaunchDate);
             Assert.NotNull(sysInfo.lastUpdateDate);
             Assert.NotNull(sysInfo.firstLaunchDate);
