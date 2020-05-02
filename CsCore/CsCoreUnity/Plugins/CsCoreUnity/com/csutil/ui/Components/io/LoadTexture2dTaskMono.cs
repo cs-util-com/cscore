@@ -19,11 +19,12 @@ namespace com.csutil.ui.Components {
         }
 
         private Task<Texture2D> StartLoading(string imageUrl) {
-            return this.StartCoroutineAsTask(LoadFromUrlCoroutine(imageUrl, response), () => {
+            var runningTask = this.StartCoroutineAsTask(LoadFromUrlCoroutine(imageUrl, response), () => {
                 var result = response.getResult();
                 response = null; // Set back to null to indicate the task is done
                 return result;
             });
+            return UnityRestRequest.WrapWithResponseErrorHandling(response, runningTask);
         }
 
         private IEnumerator LoadFromUrlCoroutine(string imageUrl, Response<Texture2D> response) {

@@ -1,13 +1,9 @@
-﻿using com.csutil;
-using com.csutil.http;
+﻿using com.csutil.http;
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -25,31 +21,40 @@ namespace com.csutil {
         }
 
         private static IEnumerator SendAndWait<T>(this UnityWebRequest self, Response<T> resp) {
-            SetupDownloadAndUploadHanders(self, resp);
-            resp.duration = Stopwatch.StartNew();
             var timer = Stopwatch.StartNew();
-            self.ApplyAllCookiesToRequest();
-            if (self.downloadHandler == null) { self.downloadHandler = resp.createDownloadHandler(); }
-            resp.debugInfo = self.method + " " + self.url + " with cookies=[" + self.GetRequestHeader("Cookie") + "]";
-            Log.d("Sending: " + resp);
+            try {
+                SetupDownloadAndUploadHanders(self, resp);
+                resp.duration = Stopwatch.StartNew();
+                self.ApplyAllCookiesToRequest();
+                if (self.downloadHandler == null) { self.downloadHandler = resp.createDownloadHandler(); }
+                resp.debugInfo = self.method + " " + self.url + " with cookies=[" + self.GetRequestHeader("Cookie") + "]";
+                Log.d("Sending: " + resp);
+            }
+            catch (Exception ex) { resp.onError(self, ex); throw; }
             var req = self.SendWebRequest();
             timer.AssertUnderXms(40);
             while (!req.isDone) {
-                var currentProgress = req.progress * 100;
-                if (resp.progressInPercent.setNewValue(currentProgress)) {
-                    timer.Restart();
-                    resp.onProgress.InvokeIfNotNull(resp.progressInPercent.value);
+                try {
+                    var currentProgress = req.progress * 100;
+                    if (resp.progressInPercent.setNewValue(currentProgress)) {
+                        timer.Restart();
+                        resp.onProgress.InvokeIfNotNull(resp.progressInPercent.value);
+                    }
                 }
+                catch (Exception ex) { resp.onError(self, ex); throw; }
                 yield return resp.wait;
                 if (timer.ElapsedMilliseconds > resp.maxMsWithoutProgress) { self.Abort(); }
             }
-            resp.duration.Stop();
-            Log.d("   > Finished " + resp);
-            AssertResponseLooksNormal(self, resp);
-            self.SaveAllNewCookiesFromResponse();
-            if (self.error.IsNullOrEmpty()) { resp.progressInPercent.setNewValue(100); }
-            resp.getResult = () => { return self.GetResult<T>(); };
-            ProcessServerDate(self.uri, self.GetResponseHeader("date"));
+            try {
+                resp.duration.Stop();
+                Log.d("   > Finished " + resp);
+                AssertResponseLooksNormal(self, resp);
+                self.SaveAllNewCookiesFromResponse();
+                if (self.error.IsNullOrEmpty()) { resp.progressInPercent.setNewValue(100); }
+                resp.getResult = () => { return self.GetResult<T>(); };
+                ProcessServerDate(self.uri, self.GetResponseHeader("date"));
+            }
+            catch (Exception ex) { resp.onError(self, ex); throw; }
         }
 
         /// <summary> If available will process and broadcast the received server date </summary>

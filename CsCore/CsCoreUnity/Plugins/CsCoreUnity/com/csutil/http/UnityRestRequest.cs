@@ -22,9 +22,19 @@ namespace com.csutil.http {
                 await WaitForRequestToFinish();
                 return request.GetResult<T>();
             }
-            var resp = new Response<T>();
+            return await SendRequest(new Response<T>());
+        }
+
+        private async Task<T> SendRequest<T>(Response<T> resp) {
             resp.WithProgress(onProgress);
-            return await WebRequestRunner.GetInstance(this).StartCoroutineAsTask(prepareRequest(resp), () => resp.getResult());
+            var runningResTask = WebRequestRunner.GetInstance(this).StartCoroutineAsTask(prepareRequest(resp), () => resp.getResult());
+            return await WrapWithResponseErrorHandling(resp, runningResTask);
+        }
+
+        public static async Task<T> WrapWithResponseErrorHandling<T>(Response<T> response, Task<T> runningResTask) {
+            TaskCompletionSource<T> onErrorTask = new TaskCompletionSource<T>();
+            response.onError = (_, e) => { onErrorTask.SetException(e); };
+            return await Task.WhenAny<T>(runningResTask, onErrorTask.Task).Unwrap();
         }
 
         private IEnumerator prepareRequest<T>(Response<T> response) {
