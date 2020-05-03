@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace com.csutil.model {
 
-    public interface FileRef {
+    public interface IFileRef {
 
         string dir { get; set; }
         string fileName { get; set; }
