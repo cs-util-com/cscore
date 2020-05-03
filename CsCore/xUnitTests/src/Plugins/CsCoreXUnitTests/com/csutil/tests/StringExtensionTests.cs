@@ -66,9 +66,18 @@ namespace com.csutil.tests {
             Assert.True("aa@bb.com".IsRegexMatch(RegexTemplates.EMAIL_ADDRESS));
             Assert.False("a@a@bb.com".IsRegexMatch(RegexTemplates.EMAIL_ADDRESS));
 
+            Assert.False("".IsRegexMatch(RegexTemplates.NON_EMPTY_STRING));
+            Assert.False(" ".IsRegexMatch(RegexTemplates.NON_EMPTY_STRING));
+            Assert.False("  ".IsRegexMatch(RegexTemplates.NON_EMPTY_STRING));
+            Assert.True("x".IsRegexMatch(RegexTemplates.NON_EMPTY_STRING));
+            Assert.True(" x".IsRegexMatch(RegexTemplates.NON_EMPTY_STRING));
+            Assert.True("x ".IsRegexMatch(RegexTemplates.NON_EMPTY_STRING));
+            Assert.True(" x ".IsRegexMatch(RegexTemplates.NON_EMPTY_STRING));
+
             string nullString = null;
-            Assert.False("x".IsRegexMatch(nullString));
             Assert.False(nullString.IsRegexMatch("x"));
+            Assert.Throws<ArgumentException>(() => { "x".IsRegexMatch(nullString); });
+            Assert.Throws<ArgumentException>(() => { "x".IsRegexMatch(""); });
 
         }
 

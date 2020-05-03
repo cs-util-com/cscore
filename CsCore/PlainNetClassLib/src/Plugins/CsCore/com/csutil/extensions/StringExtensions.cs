@@ -57,12 +57,13 @@ namespace com.csutil {
         /// <para> Assert.False("joe".IsRegexMatch("[A-Z][a-z][a-z]"));  </para>
         /// </summary>
         public static bool IsRegexMatch(this string self, string regexToMatch) {
-            if (self == null || regexToMatch.IsNullOrEmpty()) return false;
+            if (self == null) { return false; }
+            if (regexToMatch.IsNullOrEmpty()) { throw new ArgumentException($"Invalid regexToMatch '{regexToMatch}'"); };
             try { return Regex.IsMatch(self, regexToMatch); } catch (ArgumentException e) {
                 throw new ArgumentException("Invalid pattern: " + regexToMatch, e);
             }
         }
-        
+
     }
 
     public static class ByteSizeToString {

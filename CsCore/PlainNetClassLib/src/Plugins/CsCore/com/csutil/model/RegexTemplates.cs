@@ -1,7 +1,6 @@
 namespace com.csutil.model {
-    // Related links: 
-    // - http://regexlib.com/ 
-    // - https://www.debuggex.com/
+
+    /// <summary> Related links: https://www.debuggex.com and http://regexlib.com </summary>
     public static class RegexTemplates {
 
         public const string EMAIL_ADDRESS = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
@@ -12,7 +11,8 @@ namespace com.csutil.model {
         public const string IP = "^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])$";
         public const string PHONE_NR = "^\\+?[\\d\\s]{3,}$";
 
-
+        /// <summary> Matches if string is not emtpy and not only whitespaces </summary>
+        public const string NON_EMPTY_STRING = "^(?!\\s*$).+";
         public const string NUMBER = "^[-+]?[0-9]*\\.?[0-9]+$";
         public const string NUMBER_INTEGER = "^-{0,1}\\d+$";
         public const string NUMBER_DECIMAL = "^-{0,1}\\d*\\.{0,1}\\d+$";
