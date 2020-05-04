@@ -19,7 +19,7 @@ namespace com.csutil.ui {
 
         [ShowPropertyInInspector]
         public ColorNames colorNameSuggestion {
-            get { return ColorNames.custom.ParseOrFallback(colorName); }
+            get { return ColorNames.custom.TryParse(colorName); }
             set { if (ColorNames.custom != value) { colorName = value.GetName(); } }
         }
 

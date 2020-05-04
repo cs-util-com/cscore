@@ -26,7 +26,23 @@ namespace com.csutil {
             return self.GetCustomAttributes(typeof(T), inherit).Any();
         }
 
-        public static string ToStringV2(this MemberInfo m) { return m.DeclaringType.Name + "." + m.Name; }
+        public static bool CanWriteTo(this MemberInfo self) {
+            if (self is FieldInfo f) { return !f.Attributes.ContainsFlag(FieldAttributes.InitOnly); }
+            if (self is PropertyInfo p) { return p.CanWrite; }
+            return false;
+        }
+
+        public static object GetValue(this MemberInfo self, object obj) {
+            if (self is PropertyInfo p) { return p.GetValue(obj); }
+            if (self is FieldInfo f) { return f.GetValue(obj); }
+            if (self is MethodInfo m) { return m.Invoke(obj, null); }
+            return null;
+        }
+
+        public static string ToStringV2(this MemberInfo m) {
+            if (m.DeclaringType == null) { return m.Name; }
+            return m.DeclaringType.Name + "." + m.Name;
+        }
 
     }
 }

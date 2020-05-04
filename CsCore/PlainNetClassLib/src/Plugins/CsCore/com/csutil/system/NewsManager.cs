@@ -63,7 +63,7 @@ namespace com.csutil.system {
             Blog, Announcement, ComingSoon, Beta, New, Improvement, Warning, Fix, Unknown
         }
 
-        public NewsType GetNewsType() { return EnumHelper.TryParse(type, NewsType.Unknown); }
+        public NewsType GetNewsType() { return EnumUtil.TryParse(type, NewsType.Unknown); }
 
         public DateTime GetDate() { return DateTimeV2.ParseUtc(date); }
 
