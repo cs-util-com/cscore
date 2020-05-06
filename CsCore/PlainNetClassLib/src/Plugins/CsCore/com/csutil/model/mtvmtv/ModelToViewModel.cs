@@ -6,9 +6,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 namespace com.csutil.model.mtvmtv {
 
+    [Serializable]
     public class ViewModel {
 
         public string modelName;
@@ -16,6 +18,7 @@ namespace com.csutil.model.mtvmtv {
         public List<string> order;
         public Dictionary<string, Field> fields;
 
+        [Serializable]
         public class Field {
 
             public Text text;
@@ -28,11 +31,13 @@ namespace com.csutil.model.mtvmtv {
             public ViewModel objVm;
             public ChildList children;
 
+            [Serializable]
             public class Text {
                 public string name;
                 public string descr;
             }
 
+            [Serializable]
             public class ChildList {
                 public string type;
                 public List<ViewModel> entries;
@@ -95,18 +100,22 @@ namespace com.csutil.model.mtvmtv {
         }
 
         private void AddFieldsViaJson(ViewModel viewModel, object model) {
-            IEnumerable<KeyValuePair<string, JToken>> o = JObject.FromObject(model, jsonSerializer);
-            viewModel.order = o.Map(property => property.Key).ToList();
-            foreach (var property in o) {
+            IEnumerable<KeyValuePair<string, JToken>> jsonModel = ToJsonModel(model);
+            viewModel.order = jsonModel.Map(property => property.Key).ToList();
+            foreach (var property in jsonModel) {
                 viewModel.fields.Add(property.Key, NewField(property.Key, model.GetType(), model, property.Value));
             }
+        }
+
+        public JObject ToJsonModel(object model) {
+            return JObject.FromObject(model, jsonSerializer);
         }
 
         public virtual ViewModel.Field NewField(string name, Type parentType, object pInstance = null, JToken jpInstance = null) {
             MemberInfo model = parentType.GetMember(name).First();
             Type modelType = GetFieldOrPropType(model);
             JTokenType jTokenType = ToJTokenType(modelType, jpInstance);
-            ViewModel.Field newField = new ViewModel.Field() { type = "" + jTokenType };
+            ViewModel.Field newField = new ViewModel.Field() { type = "" + jTokenType, text = ToTextName(name) };
             if (!model.CanWriteTo()) { newField.readOnly = true; }
             if (jTokenType == JTokenType.Object) {
                 var modelInstance = pInstance != null ? model.GetValue(pInstance) : null;
@@ -116,6 +125,11 @@ namespace com.csutil.model.mtvmtv {
                 SetupFieldAsArray(newField, GetListElementType(modelType), GetChildrenArray(pInstance, model));
             }
             return newField;
+        }
+
+        private ViewModel.Field.Text ToTextName(string name) {
+            name = RegexTemplates.SplitCamelCaseString(name);
+            return new ViewModel.Field.Text() { name = name };
         }
 
         private Type GetListElementType(Type listType) {
@@ -147,7 +161,7 @@ namespace com.csutil.model.mtvmtv {
             return children.Cast<object>().ToArray();
         }
 
-        private bool IsSimpleType(JTokenType type) {
+        public bool IsSimpleType(JTokenType type) {
             return type is JTokenType.Boolean || type is JTokenType.Integer ||
                     type is JTokenType.Float || type is JTokenType.String;
         }

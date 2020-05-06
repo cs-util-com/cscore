@@ -87,6 +87,7 @@ namespace com.csutil.tests.model.mtvmtv {
         }
 
         private class MyUserModel {
+
             public string id;
             public string name;
             public string password;
@@ -99,16 +100,19 @@ namespace com.csutil.tests.model.mtvmtv {
             public class UserContact {
                 public MyUserModel user;
                 public int[] phoneNumbers { get; set; }
+                public List<MyUserModel> enemies;
             }
 
         }
 
         private class FileRef : IFileRef {
+
             public string dir { get; set; }
             public string fileName { get; set; }
             public string url { get; set; }
             public Dictionary<string, object> checksums { get; set; }
             public string mimeType { get; set; }
+
         }
 
     }

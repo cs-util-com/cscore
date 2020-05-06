@@ -1,3 +1,6 @@
+using System;
+using System.Text.RegularExpressions;
+
 namespace com.csutil.model {
 
     /// <summary> Related links: https://www.debuggex.com and http://regexlib.com </summary>
@@ -25,5 +28,10 @@ namespace com.csutil.model {
         public const string TIME_12h = "(1[012]|[1-9]):[0-5][0-9](\\s)?(?i)(am|pm)";
         public const string TIME_24h = "([01]?[0-9]|2[0-3]):[0-5][0-9]";
 
+        private static Regex camelCaseSplitter = new Regex(@"(\B[A-Z]+?(?=[A-Z][^A-Z])|\B[A-Z]+?(?=[^A-Z]))");
+
+        internal static string SplitCamelCaseString(string camelCaseString) {
+            return camelCaseSplitter.Replace(camelCaseString, " $1").ToFirstCharUpperCase();
+        }
     }
 }

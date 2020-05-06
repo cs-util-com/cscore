@@ -86,6 +86,11 @@ namespace com.csutil {
             return "-" + ByteSizeToReadableString(-value); // negative bytes (common case optimised to the end of this routine)
         }
 
+        public static string ToFirstCharUpperCase(this string self) {
+            if (self.IsNullOrEmpty()) { return self; }
+            return self.Substring(0, 1).ToUpper() + self.Substring(1);
+        }
+
     }
 
 }
