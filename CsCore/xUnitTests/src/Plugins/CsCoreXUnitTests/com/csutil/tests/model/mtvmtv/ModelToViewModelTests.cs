@@ -86,6 +86,29 @@ namespace com.csutil.tests.model.mtvmtv {
             }
         }
 
+        [Fact]
+        public void TestJsonToViewModel() {
+
+            string json = JsonWriter.GetWriter().Write(new MyUserModel.UserContact() {
+                phoneNumbers = new int[1] { 123 },
+                user = new MyUserModel() {
+                    name = "Tom",
+                    age = 99,
+                }
+            });
+            Log.d("json=" + json);
+
+            var mtvm = new ModelToViewModel();
+            ViewModel vm = mtvm.ToViewModel("MyUserModel", json);
+
+            Log.d(JsonWriter.AsPrettyString(vm));
+
+            Assert.Equal("Age", vm.fields["user"].objVm.fields["age"].text.name);
+            Assert.Equal("Integer", vm.fields["phoneNumbers"].children.type);
+
+
+        }
+
         private class MyUserModel {
 
             public string id;

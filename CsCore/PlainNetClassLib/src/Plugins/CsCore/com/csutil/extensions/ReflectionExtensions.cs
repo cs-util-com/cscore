@@ -23,7 +23,12 @@ namespace com.csutil {
         }
 
         public static bool HasAttribute<T>(this MemberInfo self, bool inherit = false) where T : Attribute {
-            return self.GetCustomAttributes(typeof(T), inherit).Any();
+            return self.IsDefined(typeof(T), inherit);
+        }
+
+        public static bool TryGetCustomAttribute<T>(this MemberInfo self, out T attr, bool inherit = false) where T : Attribute {
+            attr = self.GetCustomAttribute<T>(inherit);
+            return attr != null;
         }
 
         public static bool CanWriteTo(this MemberInfo self) {

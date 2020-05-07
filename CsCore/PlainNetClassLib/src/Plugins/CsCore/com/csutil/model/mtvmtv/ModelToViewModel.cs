@@ -71,6 +71,11 @@ namespace com.csutil.model.mtvmtv {
             return NewViewModel(modelName, modelType);
         }
 
+        public ViewModel ToViewModel(string modelName, string json) {
+            if (viewModels.TryGetValue(modelName, out ViewModel vm)) { return vm; }
+            return NewViewModel(modelName, JsonReader.GetReader().Read<JObject>(json));
+        }
+
         private bool GetExistingViewModelFor(Type modelType, out ViewModel vm) {
             return viewModels.TryGetValue(ToTypeString(modelType), out vm);
         }
@@ -88,6 +93,13 @@ namespace com.csutil.model.mtvmtv {
             return viewModel;
         }
 
+        private ViewModel NewViewModel(string modelName, JObject jObject) {
+            var viewModel = new ViewModel() { modelName = modelName };
+            viewModel.fields = new Dictionary<string, ViewModel.Field>();
+            AddFieldsViaJson(viewModel, null, jObject);
+            return viewModel;
+        }
+
         private void AddFieldsViaReflection(ViewModel viewModel, Type modelType) {
             viewModel.order = new List<string>();
             foreach (var member in modelType.GetMembers()) {
@@ -100,10 +112,13 @@ namespace com.csutil.model.mtvmtv {
         }
 
         private void AddFieldsViaJson(ViewModel viewModel, object model) {
-            IEnumerable<KeyValuePair<string, JToken>> jsonModel = ToJsonModel(model);
+            AddFieldsViaJson(viewModel, model, ToJsonModel(model));
+        }
+
+        private void AddFieldsViaJson(ViewModel viewModel, object model, IEnumerable<KeyValuePair<string, JToken>> jsonModel) {
             viewModel.order = jsonModel.Map(property => property.Key).ToList();
             foreach (var property in jsonModel) {
-                viewModel.fields.Add(property.Key, NewField(property.Key, model.GetType(), model, property.Value));
+                viewModel.fields.Add(property.Key, NewField(property.Key, model?.GetType(), model, property.Value));
             }
         }
 
@@ -112,19 +127,61 @@ namespace com.csutil.model.mtvmtv {
         }
 
         public virtual ViewModel.Field NewField(string name, Type parentType, object pInstance = null, JToken jpInstance = null) {
-            MemberInfo model = parentType.GetMember(name).First();
+            MemberInfo model = parentType?.GetMember(name).First();
             Type modelType = GetFieldOrPropType(model);
             JTokenType jTokenType = ToJTokenType(modelType, jpInstance);
+            AssertV2.NotNull(jTokenType, "jTokenType");
             ViewModel.Field newField = new ViewModel.Field() { type = "" + jTokenType, text = ToTextName(name) };
-            if (!model.CanWriteTo()) { newField.readOnly = true; }
+            if (TryGetDescription(model, jTokenType, pInstance, jpInstance, out string description)) {
+                newField.text.descr = description;
+            }
+            if (model != null) {
+                if (model.TryGetCustomAttribute(out RegexAttribute attr)) { newField.regex = attr.regex; }
+                if (!model.CanWriteTo()) { newField.readOnly = true; }
+            }
             if (jTokenType == JTokenType.Object) {
-                var modelInstance = pInstance != null ? model.GetValue(pInstance) : null;
-                newField.objVm = NewInnerViewModel(name, modelType, modelInstance);
+                if (modelType == null) {
+                    newField.objVm = NewViewModel(name, jpInstance as JObject);
+                } else {
+                    var modelInstance = pInstance != null ? model.GetValue(pInstance) : null;
+                    newField.objVm = NewInnerViewModel(name, modelType, modelInstance);
+                }
             }
             if (jTokenType == JTokenType.Array) {
-                SetupFieldAsArray(newField, GetListElementType(modelType), GetChildrenArray(pInstance, model));
+                var listElemType = GetListElementType(modelType);
+                newField.children = new ViewModel.Field.ChildList();
+                var arrayElemJType = ToJTokenType(listElemType);
+                if (arrayElemJType == JTokenType.Null) {
+                    if (jpInstance is JArray a && a.Count > 0) { arrayElemJType = a.First.Type; }
+                }
+                if (arrayElemJType != JTokenType.Null) {
+                    newField.children.type = "" + arrayElemJType;
+                    if (!IsSimpleType(arrayElemJType)) {
+                        SetupFieldAsArray(newField, listElemType, GetChildrenArray(pInstance, jpInstance, model));
+                    }
+                }
             }
             return newField;
+        }
+
+        public virtual bool TryGetDescription(MemberInfo m, JTokenType t, object pInstance, JToken jpInstance, out string result) {
+            if (IsSimpleType(t)) {
+                var description = m?.GetCustomAttribute<DescriptionAttribute>(true)?.description;
+                if (description != null) {
+                    result = description;
+                    return true;
+                }
+                if (pInstance != null) {
+                    result = $"e.g. '{m.GetValue(pInstance)}'";
+                    return true;
+                }
+                if (jpInstance != null) {
+                    result = $"e.g. '{jpInstance}'";
+                    return true;
+                }
+            }
+            result = null;
+            return false;
         }
 
         private ViewModel.Field.Text ToTextName(string name) {
@@ -133,6 +190,7 @@ namespace com.csutil.model.mtvmtv {
         }
 
         private Type GetListElementType(Type listType) {
+            if (listType == null) { return null; }
             if (listType.IsArray) { return listType.GetElementType(); }
             var args = listType.GetGenericArguments();
             AssertV2.IsTrue(args.Count() == 1, "Not 1 generic list type, instead: " + args.ToStringV2(x => "" + x));
@@ -140,22 +198,17 @@ namespace com.csutil.model.mtvmtv {
         }
 
         private void SetupFieldAsArray(ViewModel.Field field, Type arrayElemType, object[] childrenInstances) {
-            field.children = new ViewModel.Field.ChildList();
-            var arrayElemJType = ToJTokenType(arrayElemType);
-            field.children.type = "" + arrayElemJType;
-            if (!IsSimpleType(arrayElemJType)) {
-                if (childrenInstances == null || AllChildrenHaveSameType(childrenInstances)) {
-                    var firstChildInstance = childrenInstances?.FirstOrDefault();
-                    var childVm = NewInnerViewModel(modelName: "EntryType", arrayElemType, firstChildInstance);
-                    field.children.entries = new List<ViewModel>() { childVm };
-                } else {
-                    AddAllChildrenViewModels(field, childrenInstances);
-                }
+            if (childrenInstances == null || AllChildrenHaveSameType(childrenInstances)) {
+                var firstChildInstance = childrenInstances?.FirstOrDefault();
+                var childVm = NewInnerViewModel(modelName: "EntryType", arrayElemType, firstChildInstance);
+                field.children.entries = new List<ViewModel>() { childVm };
+            } else {
+                AddAllChildrenViewModels(field, childrenInstances);
             }
         }
 
-        private object[] GetChildrenArray(object parentInstance, MemberInfo model) {
-            if (parentInstance == null) { return null; }
+        private object[] GetChildrenArray(object parentInstance, JToken jpInstance, MemberInfo model) {
+            if (parentInstance == null) { return jpInstance?.ToArray(); }
             IEnumerable children = model.GetValue(parentInstance) as IEnumerable;
             if (children == null) { return null; }
             return children.Cast<object>().ToArray();
@@ -172,6 +225,7 @@ namespace com.csutil.model.mtvmtv {
         }
 
         private JTokenType ToJTokenType(Type elemType) {
+            if (elemType == null) { return JTokenType.Null; }
             if (elemType.IsCastableTo<bool>()) { return JTokenType.Boolean; }
             if (elemType.IsWholeNumberType()) { return JTokenType.Integer; }
             if (elemType.IsDecimalNumberType()) { return JTokenType.Float; }

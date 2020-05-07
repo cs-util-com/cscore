@@ -2,6 +2,7 @@
 using com.csutil.model.mtvmtv;
 using com.csutil.ui;
 using com.csutil.ui.mtvmtv;
+using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -51,10 +52,17 @@ namespace com.csutil.tests {
 
         private class MyUserModel {
 
+            [JsonProperty(Required = Required.Always)]
             public string id;
+            [Description("e.g. Tom Riddle")]
             public string name;
+            [Description("e.g. tom@email.com")]
+            public string email;
             public string password;
             public int age;
+            [Regex(RegexTemplates.PHONE_NR)]
+            [Description("e.g. +1 234 5678 90")]
+            public int? phoneNumber;
             public FileRef profilePic;
             public UserContact bestFriend;
             //public List<string> tags { get; set; }
