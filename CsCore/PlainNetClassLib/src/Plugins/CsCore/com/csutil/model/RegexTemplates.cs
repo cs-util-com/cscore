@@ -9,7 +9,7 @@ namespace com.csutil.model {
         public const string EMAIL_ADDRESS = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
             + "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
         public const string ZIP_CODE = "^\\d{5}$";
-        public const string USERNAME = "^[a-z0-9_-]{3,16}$";
+        public const string USERNAME = "^[A-Za-z0-9_-]{3,16}$";
         public const string URL = "^(https?:\\/\\/)?([\\da-z\\.-]+)\\.([a-z\\.]{2,6})([\\/\\w \\.-]*)*\\/?$";
         public const string IP = "^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])$";
         public const string PHONE_NR = "^\\+?[\\d\\s]{3,}$";

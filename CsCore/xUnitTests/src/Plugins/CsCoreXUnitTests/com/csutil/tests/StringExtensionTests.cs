@@ -63,6 +63,7 @@ namespace com.csutil.tests {
             Assert.True("YES".IsRegexMatch("(YES|MAYBE|NO)"));
 
             Assert.True("anna123".IsRegexMatch(RegexTemplates.USERNAME));
+            Assert.True("Anna_123".IsRegexMatch(RegexTemplates.USERNAME));
             Assert.True("aa@bb.com".IsRegexMatch(RegexTemplates.EMAIL_ADDRESS));
             Assert.False("a@a@bb.com".IsRegexMatch(RegexTemplates.EMAIL_ADDRESS));
 
