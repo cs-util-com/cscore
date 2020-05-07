@@ -94,6 +94,7 @@ namespace com.csutil.tests.model.mtvmtv {
                 user = new MyUserModel() {
                     name = "Tom",
                     age = 99,
+                    phoneNumber = 12345
                 }
             });
             Log.d("json=" + json);
@@ -109,6 +110,27 @@ namespace com.csutil.tests.model.mtvmtv {
 
         }
 
+        [Fact]
+        public void TestNullable() {
+
+            var user = new MyUserModel() { phoneNumber = 12345 };
+            string json = JsonWriter.GetWriter().Write(user);
+
+            ViewModel vm1 = new ModelToViewModel().ToViewModel("FromClassInstance", user);
+            ViewModel vm2 = new ModelToViewModel().ToViewModel("FromJson", json);
+            ViewModel vm3 = new ModelToViewModel().ToViewModel("FromClassInstance", typeof(MyUserModel));
+
+            var n1 = vm1.fields["phoneNumber"];
+            var n2 = vm2.fields["phoneNumber"];
+            var n3 = vm3.fields["phoneNumber"];
+
+            Assert.Equal(n1.type, n2.type);
+            Assert.Equal(n2.type, n3.type);
+            Assert.Equal(n1.text.name, n2.text.name);
+            Assert.Equal(n2.text.name, n3.text.name);
+
+        }
+
         private class MyUserModel {
 
             public string id;
@@ -117,6 +139,9 @@ namespace com.csutil.tests.model.mtvmtv {
             public int age;
             public FileRef profilePic;
             public UserContact bestFriend;
+            [Regex(RegexTemplates.PHONE_NR)]
+            [Description("e.g. +1 234 5678 90")]
+            public int? phoneNumber;
             public List<string> tags { get; set; }
             public List<UserContact> contacts { get; } = new List<UserContact>();
 

@@ -128,7 +128,7 @@ namespace com.csutil.model.mtvmtv {
 
         public virtual ViewModel.Field NewField(string name, Type parentType, object pInstance = null, JToken jpInstance = null) {
             MemberInfo model = parentType?.GetMember(name).First();
-            Type modelType = GetFieldOrPropType(model);
+            Type modelType = GetModelType(model);
             JTokenType jTokenType = ToJTokenType(modelType, jpInstance);
             AssertV2.NotNull(jTokenType, "jTokenType");
             ViewModel.Field newField = new ViewModel.Field() { type = "" + jTokenType, text = ToTextName(name) };
@@ -265,6 +265,15 @@ namespace com.csutil.model.mtvmtv {
         }
 
         private string ToTypeString(Type type) { return type.ToString(); }
+
+        private static Type GetModelType(MemberInfo model) {
+            Type modelType = GetFieldOrPropType(model);
+            if (modelType != null) {
+                var nullableType = Nullable.GetUnderlyingType(modelType);
+                if (nullableType != null) { modelType = nullableType; }
+            }
+            return modelType;
+        }
 
         private static Type GetFieldOrPropType(MemberInfo info) {
             if (info is FieldInfo f) { return f.FieldType; }
