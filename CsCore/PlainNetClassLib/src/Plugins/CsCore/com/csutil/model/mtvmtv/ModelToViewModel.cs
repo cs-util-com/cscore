@@ -6,46 +6,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text.RegularExpressions;
 
 namespace com.csutil.model.mtvmtv {
-
-    [Serializable]
-    public class ViewModel {
-
-        public string modelName;
-        public string modelType;
-        public List<string> order;
-        public Dictionary<string, Field> fields;
-
-        [Serializable]
-        public class Field {
-
-            public Text text;
-            public string type;
-            public bool? readOnly;
-            public bool? writeOnly;
-            public bool? mandatory;
-            public string regex;
-            /// <summary> If the field is an object it has a view model itself </summary>
-            public ViewModel objVm;
-            public ChildList children;
-
-            [Serializable]
-            public class Text {
-                public string name;
-                public string descr;
-            }
-
-            [Serializable]
-            public class ChildList {
-                public string type;
-                public List<ViewModel> entries;
-            }
-
-        }
-
-    }
 
     public class ModelToViewModel {
 
@@ -122,9 +84,7 @@ namespace com.csutil.model.mtvmtv {
             }
         }
 
-        public JObject ToJsonModel(object model) {
-            return JObject.FromObject(model, jsonSerializer);
-        }
+        public JObject ToJsonModel(object model) { return JObject.FromObject(model, jsonSerializer); }
 
         public virtual ViewModel.Field NewField(string name, Type parentType, object pInstance = null, JToken jpInstance = null) {
             MemberInfo model = parentType?.GetMember(name).First();
@@ -193,7 +153,7 @@ namespace com.csutil.model.mtvmtv {
             if (listType == null) { return null; }
             if (listType.IsArray) { return listType.GetElementType(); }
             var args = listType.GetGenericArguments();
-            AssertV2.IsTrue(args.Count() == 1, "Not 1 generic list type, instead: " + args.ToStringV2(x => "" + x));
+            AssertV2.IsTrue(args.Length == 1, "Not 1 generic list type, instead: " + args.ToStringV2(x => "" + x));
             return args.Single();
         }
 
@@ -214,9 +174,8 @@ namespace com.csutil.model.mtvmtv {
             return children.Cast<object>().ToArray();
         }
 
-        public bool IsSimpleType(JTokenType type) {
-            return type is JTokenType.Boolean || type is JTokenType.Integer ||
-                    type is JTokenType.Float || type is JTokenType.String;
+        public bool IsSimpleType(JTokenType t) {
+            return t is JTokenType.Boolean || t is JTokenType.Integer || t is JTokenType.Float || t is JTokenType.String;
         }
 
         private JTokenType ToJTokenType(Type elemType, JToken jpInstance = null) {
