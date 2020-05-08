@@ -20,6 +20,7 @@ namespace com.csutil.model.mtvmtv {
             public bool? writeOnly;
             public bool? mandatory;
             public string regex;
+            public string contentType;
             /// <summary> If the field is an object it has a view model itself </summary>
             public ViewModel objVm;
             public ChildList children;
@@ -36,8 +37,11 @@ namespace com.csutil.model.mtvmtv {
                 public List<ViewModel> entries;
             }
 
+
         }
 
     }
+
+    public enum ContentType { Alphanumeric, Name, Email, Password, Pin, Essay }
 
 }

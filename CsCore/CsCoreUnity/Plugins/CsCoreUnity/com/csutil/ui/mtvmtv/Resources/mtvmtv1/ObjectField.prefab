@@ -93,8 +93,8 @@ MonoBehaviour:
     DrawOutline: 1
     OutlineColor:
       serializedVersion: 2
-      rgba: 2181038080
-    DrawOutlineShadow: 0
+      rgba: 1432693794
+    DrawOutlineShadow: 1
   RoundedProperties:
     Type: 1
     ResolutionMode: 0
@@ -126,7 +126,7 @@ MonoBehaviour:
       ResolutionMaxDistance: 2
   OutlineProperties:
     Type: 2
-    LineWeight: 1
+    LineWeight: 0.81
   ShadowProperties:
     ShowShape: 1
     ShowShadows: 1
@@ -135,7 +135,7 @@ MonoBehaviour:
     Shadows: []
     Offset: {x: 0, y: -0}
   AntiAliasingProperties:
-    AntiAliasing: 0.73
+    AntiAliasing: 1.16
   Sprite: {fileID: 0}
 --- !u!1 &1796790491758894909
 GameObject:

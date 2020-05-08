@@ -5,7 +5,11 @@ namespace com.csutil {
     public static class EnumUtil {
 
         public static T TryParse<T>(string entryName, T fallback) where T : struct, Enum {
-            if (Enum.TryParse(entryName.Replace(" ", ""), out T result)) { return result; } else { return fallback; }
+            if (Enum.TryParse(entryName?.Replace(" ", ""), out T result)) { return result; } else { return fallback; }
+        }
+
+        public static bool TryParse<T>(string entryName, out T result) where T : struct, Enum {
+            return Enum.TryParse(entryName?.Replace(" ", ""), out result);
         }
 
         /// <summary> Will return the entry for the passed name if found, otherwise the passed in fallback entry </summary>

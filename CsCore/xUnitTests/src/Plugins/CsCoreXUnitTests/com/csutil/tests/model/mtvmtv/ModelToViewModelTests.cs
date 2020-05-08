@@ -15,8 +15,7 @@ namespace com.csutil.tests.model.mtvmtv {
         public void ExampleUsage1() {
 
             // A normal user model with a few example fields that users typically have:
-            var user1 = new MyUserModel() {
-                id = Guid.NewGuid().ToString(),
+            var user1 = new MyUserModel("" + Guid.NewGuid()) {
                 name = "Tom",
                 password = "12345678",
                 age = 50,
@@ -36,6 +35,7 @@ namespace com.csutil.tests.model.mtvmtv {
             Assert.Null(vm.fields["tags"].children.entries);
 
             Assert.Equal("Array", vm.fields["contacts"].type);
+            Assert.True(vm.fields["id"].readOnly.Value); // id has private setter
             Assert.True(vm.fields["contacts"].readOnly.Value); // contacts has only a getter
             Assert.Equal("Object", vm.fields["contacts"].children.type);
 
@@ -44,6 +44,8 @@ namespace com.csutil.tests.model.mtvmtv {
             Assert.Null(entryVm.fields);
 
             Assert.Equal("" + typeof(MyUserModel.UserContact), vm.fields["bestFriend"].objVm.modelType);
+
+            Assert.Equal("" + ContentType.Password, vm.fields["password"].contentType);
 
             ViewModel userVmInUserContactClass = vm.fields["bestFriend"].objVm.fields["user"].objVm;
             Assert.Equal("" + typeof(MyUserModel), userVmInUserContactClass.modelType);
@@ -133,15 +135,20 @@ namespace com.csutil.tests.model.mtvmtv {
 
         private class MyUserModel {
 
-            public string id;
+            public string id { get; private set; }
             public string name;
+            [Content(ContentType.Password, "A secure password")]
             public string password;
             public int age;
+            public float money;
             public FileRef profilePic;
             public UserContact bestFriend;
             [Regex(RegexTemplates.PHONE_NR)]
             [Description("e.g. +1 234 5678 90")]
             public int? phoneNumber;
+
+            public MyUserModel(string id = null) { this.id = id == null ? "" + Guid.NewGuid() : id; }
+
             public List<string> tags { get; set; }
             public List<UserContact> contacts { get; } = new List<UserContact>();
 

@@ -33,7 +33,7 @@ namespace com.csutil {
 
         public static bool CanWriteTo(this MemberInfo self) {
             if (self is FieldInfo f) { return !f.Attributes.ContainsFlag(FieldAttributes.InitOnly); }
-            if (self is PropertyInfo p) { return p.CanWrite; }
+            if (self is PropertyInfo p) { return p.CanWrite && p.GetSetMethod(nonPublic: true).IsPublic; }
             return false;
         }
 

@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
@@ -62,18 +63,18 @@ namespace com.csutil {
             return tcs.Task;
         }
 
-        public static void SetOnValueChangedAction(this Toggle self, Func<bool, bool> onValueChanged) {
+        public static UnityAction<bool> SetOnValueChangedAction(this Toggle self, Func<bool, bool> onValueChanged) {
             if (self.onValueChanged != null && self.onValueChanged.GetPersistentEventCount() > 0) {
                 Log.w("Overriding old onValueChanged listener for toggle " + self, self.gameObject);
             }
             self.onValueChanged = new Toggle.ToggleEvent(); // clear previous onValueChanged listeners
-            AddOnValueChangedAction(self, onValueChanged);
+            return AddOnValueChangedAction(self, onValueChanged);
         }
 
-        public static void AddOnValueChangedAction(this Toggle self, Func<bool, bool> onValueChanged) {
+        public static UnityAction<bool> AddOnValueChangedAction(this Toggle self, Func<bool, bool> onValueChanged) {
             if (onValueChanged != null) {
                 var oldIsOn = self.isOn;
-                self.onValueChanged.AddListener((newIsOn) => {
+                UnityAction<bool> newListener = (newIsOn) => {
                     if (oldIsOn == newIsOn) { return; }
                     // Ignore event event if it was triggered through code, only fire for actual user input:
                     if (!self.ChangeWasTriggeredByUserThroughEventSystem()) { return; }
@@ -83,22 +84,25 @@ namespace com.csutil {
                         oldIsOn = newIsOn;
                         EventBus.instance.Publish(UiEvents.TOGGLE_CHANGED, self, newIsOn);
                     }
-                });
+                };
+                self.onValueChanged.AddListener(newListener);
+                return newListener;
             }
+            return null;
         }
 
-        public static void SetOnValueChangedAction(this Slider self, Func<float, bool> onValueChanged) {
+        public static UnityAction<float> SetOnValueChangedAction(this Slider self, Func<float, bool> onValueChanged) {
             if (self.onValueChanged != null && self.onValueChanged.GetPersistentEventCount() > 0) {
                 Log.w("Overriding old onValueChanged listener for slider " + self, self.gameObject);
             }
             self.onValueChanged = new Slider.SliderEvent(); // clear previous onValueChanged listeners
-            AddOnValueChangedAction(self, onValueChanged);
+            return AddOnValueChangedAction(self, onValueChanged);
         }
 
-        public static void AddOnValueChangedAction(this Slider self, Func<float, bool> onValueChanged) {
+        public static UnityAction<float> AddOnValueChangedAction(this Slider self, Func<float, bool> onValueChanged) {
             if (onValueChanged != null) {
                 var oldValue = self.value;
-                self.onValueChanged.AddListener((newValue) => {
+                UnityAction<float> newListener = (newValue) => {
                     if (SameValueAsBefore(oldValue, newValue, self.minValue, self.maxValue)) { return; }
                     // Ignore event event if it was triggered through code, only fire for actual user input:
                     if (!self.ChangeWasTriggeredByUserThroughEventSystem()) { return; }
@@ -108,8 +112,11 @@ namespace com.csutil {
                         oldValue = newValue;
                         EventBus.instance.Publish(UiEvents.SLIDER_CHANGED, self, newValue);
                     }
-                });
+                };
+                self.onValueChanged.AddListener(newListener);
+                return newListener;
             }
+            return null;
         }
 
         private static bool SameValueAsBefore(float oldValue, float newValue, float minValue, float maxValue) {
@@ -119,18 +126,18 @@ namespace com.csutil {
             return percentageChanged < 0.01; // If less then 1% change ignore it, UI glitch 
         }
 
-        public static void SetOnValueChangedActionThrottled(this Slider self, Action<float> onValueChanged, double delayInMs = 200) {
+        public static UnityAction<float> SetOnValueChangedActionThrottled(this Slider self, Action<float> onValueChanged, double delayInMs = 200) {
             if (self.onValueChanged != null && self.onValueChanged.GetPersistentEventCount() > 0) {
                 Log.w("Overriding old onValueChanged listener for input field " + self, self.gameObject);
             }
             self.onValueChanged = new Slider.SliderEvent(); // clear previous onValueChanged listeners
-            AddOnValueChangedActionThrottled(self, onValueChanged, delayInMs);
+            return AddOnValueChangedActionThrottled(self, onValueChanged, delayInMs);
         }
 
-        public static void AddOnValueChangedActionThrottled(this Slider self, Action<float> onValueChanged, double delayInMs = 1000) {
+        public static UnityAction<float> AddOnValueChangedActionThrottled(this Slider self, Action<float> onValueChanged, double delayInMs = 1000) {
             EventHandler<float> action = (_, newText) => { onValueChanged(newText); };
             var throttledAction = action.AsThrottledDebounce(delayInMs, true);
-            self.AddOnValueChangedAction((newValue) => {
+            return self.AddOnValueChangedAction((newValue) => {
                 throttledAction(self, newValue);
                 return true;
             });
@@ -140,18 +147,18 @@ namespace com.csutil {
             return EventSystem.current?.currentSelectedGameObject == self.gameObject;
         }
 
-        public static void SetOnValueChangedAction(this InputField self, Func<string, bool> onValueChanged) {
+        public static UnityAction<string> SetOnValueChangedAction(this InputField self, Func<string, bool> onValueChanged) {
             if (self.onValueChanged != null && self.onValueChanged.GetPersistentEventCount() > 0) {
                 Log.w("Overriding old onValueChanged listener for input field " + self, self.gameObject);
             }
             self.onValueChanged = new InputField.OnChangeEvent(); // clear previous onValueChanged listeners
-            AddOnValueChangedAction(self, onValueChanged);
+            return AddOnValueChangedAction(self, onValueChanged);
         }
 
-        public static void AddOnValueChangedAction(this InputField self, Func<string, bool> onValueChanged) {
+        public static UnityAction<string> AddOnValueChangedAction(this InputField self, Func<string, bool> onValueChanged) {
             if (onValueChanged != null) {
                 var oldText = self.text;
-                self.onValueChanged.AddListener((newText) => {
+                UnityAction<string> newListener = (newText) => {
                     if (newText == oldText) { return; }
                     // Ignore event event if it was triggered through code, only fire for actual user input:
                     if (!self.ChangeWasTriggeredByUserThroughEventSystem()) { return; }
@@ -161,22 +168,25 @@ namespace com.csutil {
                         oldText = newText;
                         EventBus.instance.Publish(UiEvents.INPUTFIELD_CHANGED, self, newText);
                     }
-                });
+                };
+                self.onValueChanged.AddListener(newListener);
+                return newListener;
             }
+            return null;
         }
 
-        public static void SetOnValueChangedActionThrottled(this InputField self, Action<string> onValueChanged, double delayInMs = 1000) {
+        public static UnityAction<string> SetOnValueChangedActionThrottled(this InputField self, Action<string> onValueChanged, double delayInMs = 1000) {
             if (self.onValueChanged != null && self.onValueChanged.GetPersistentEventCount() > 0) {
                 Log.w("Overriding old onValueChanged listener for input field " + self, self.gameObject);
             }
             self.onValueChanged = new InputField.OnChangeEvent(); // clear previous onValueChanged listeners
-            AddOnValueChangedActionThrottled(self, onValueChanged, delayInMs);
+            return AddOnValueChangedActionThrottled(self, onValueChanged, delayInMs);
         }
 
-        public static void AddOnValueChangedActionThrottled(this InputField self, Action<string> onValueChanged, double delayInMs = 1000) {
+        public static UnityAction<string> AddOnValueChangedActionThrottled(this InputField self, Action<string> onValueChanged, double delayInMs = 1000) {
             EventHandler<string> action = (input, newText) => { onValueChanged(newText); };
             var throttledAction = action.AsThrottledDebounce(delayInMs);
-            self.AddOnValueChangedAction((newText) => {
+            return self.AddOnValueChangedAction((newText) => {
                 throttledAction(self, newText);
                 return true;
             });

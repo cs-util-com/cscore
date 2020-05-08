@@ -98,6 +98,7 @@ namespace com.csutil.model.mtvmtv {
             if (model != null) {
                 if (model.TryGetCustomAttribute(out RegexAttribute attr)) { newField.regex = attr.regex; }
                 if (!model.CanWriteTo()) { newField.readOnly = true; }
+                if (model.TryGetCustomAttribute(out ContentAttribute content)) { newField.contentType = "" + content.type; }
             }
             if (jTokenType == JTokenType.Object) {
                 if (modelType == null) {
@@ -137,6 +138,14 @@ namespace com.csutil.model.mtvmtv {
                 }
                 if (jpInstance != null) {
                     result = $"e.g. '{jpInstance}'";
+                    return true;
+                }
+                if (t == JTokenType.Integer) {
+                    result = "e.g. 99";
+                    return true;
+                }
+                if (t == JTokenType.Float) {
+                    result = "e.g. " + 1.23f;
                     return true;
                 }
             }

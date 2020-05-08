@@ -36,7 +36,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 160, y: 32}
+  m_SizeDelta: {x: 400, y: 32}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &3095502471476532378
 MonoBehaviour:
@@ -51,6 +51,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   title: {fileID: 6845556817462830730}
+  description: {fileID: 0}
   mainLink: {fileID: 5182895795914394200}
   fieldName: 
   field:
@@ -59,6 +60,7 @@ MonoBehaviour:
       descr: 
     type: 
     regex: 
+    contentType: 
     objVm:
       modelName: 
       modelType: 
@@ -82,7 +84,7 @@ MonoBehaviour:
   m_IgnoreLayout: 0
   m_MinWidth: 160
   m_MinHeight: 32
-  m_PreferredWidth: -1
+  m_PreferredWidth: 400
   m_PreferredHeight: -1
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
@@ -98,6 +100,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: DefaultButton
+      objectReference: {fileID: 0}
+    - target: {fileID: 1209258386854057822, guid: 1fd3597345472ec4aa2e3417d5c2a061,
+        type: 3}
+      propertyPath: m_Text
+      value: Open Recursive View Model
       objectReference: {fileID: 0}
     - target: {fileID: 5821456930683950224, guid: 1fd3597345472ec4aa2e3417d5c2a061,
         type: 3}
@@ -204,7 +211,13 @@ PrefabInstance:
       propertyPath: m_Pivot.y
       value: 0.5
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    - target: {fileID: 6928010300718020943, guid: 1fd3597345472ec4aa2e3417d5c2a061,
+        type: 3}
+      propertyPath: m_PreferredWidth
+      value: 200
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 6928010300718020943, guid: 1fd3597345472ec4aa2e3417d5c2a061, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 1fd3597345472ec4aa2e3417d5c2a061, type: 3}
 --- !u!224 &2234229082480846148 stripped
 RectTransform:

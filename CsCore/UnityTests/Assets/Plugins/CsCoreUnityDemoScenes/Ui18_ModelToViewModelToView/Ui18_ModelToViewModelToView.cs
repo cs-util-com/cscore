@@ -37,6 +37,7 @@ namespace com.csutil.tests {
         private static async Task<GameObject> GenerateViewFor(Type t, string prefabFolder) {
             var mtvm = new ModelToViewModel();
             ViewModel viewModel = mtvm.ToViewModel("" + t, t);
+            Log.d(JsonWriter.AsPrettyString(viewModel));
             var vmtv = new ViewModelToView(mtvm, prefabFolder);
             return await vmtv.ToView(viewModel);
         }
@@ -53,24 +54,47 @@ namespace com.csutil.tests {
         private class MyUserModel {
 
             [JsonProperty(Required = Required.Always)]
-            public string id;
-            [Description("e.g. Tom Riddle")]
+            public string id { get; }
+
+            [Content(ContentType.Name, "e.g. Tom Riddle")]
             public string name;
-            [Description("e.g. tom@email.com")]
+
+            [Content(ContentType.Email, "e.g. tom@email.com")]
+            [Regex(RegexTemplates.EMAIL_ADDRESS)]
             public string email;
+
+            [Content(ContentType.Password, "Minimum 50 characters")]
             public string password;
-            public int age;
+
+            [Description("e.g. 99")]
+            public int? age;
+
+            public float money;
+
             [Regex(RegexTemplates.PHONE_NR)]
             [Description("e.g. +1 234 5678 90")]
-            public int? phoneNumber;
+            public string phoneNumber;
+
             public FileRef profilePic;
+
             public UserContact bestFriend;
+
+            [Content(ContentType.Essay, "A detailed description")]
+            public string description;
+
+            [Regex(RegexTemplates.URL)]
+            public string homepage;
+
             //public List<string> tags { get; set; }
+
             //public List<UserContact> contacts { get; } = new List<UserContact>();
 
             public class UserContact {
+
                 public MyUserModel user;
+
                 //public int[] phoneNumbers { get; set; }
+
             }
 
         }

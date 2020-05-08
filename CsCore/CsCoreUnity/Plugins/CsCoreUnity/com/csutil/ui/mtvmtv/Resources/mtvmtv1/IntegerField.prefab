@@ -22,6 +22,7 @@ MonoBehaviour:
       descr: 
     type: 
     regex: 
+    contentType: 
     objVm:
       modelName: 
       modelType: 
@@ -37,6 +38,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1562174254810496527, guid: dedafae22c3eeff4eb4fea2716aab113,
+        type: 3}
+      propertyPath: m_Text
+      value: e.g. 99
+      objectReference: {fileID: 0}
     - target: {fileID: 2847672524440963901, guid: dedafae22c3eeff4eb4fea2716aab113,
         type: 3}
       propertyPath: m_AnchorMin.y
@@ -81,6 +87,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_CharacterValidation
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4678824498559800660, guid: dedafae22c3eeff4eb4fea2716aab113,
+        type: 3}
+      propertyPath: m_Text
+      value: Name of the integer field
       objectReference: {fileID: 0}
     - target: {fileID: 4750268404707593151, guid: dedafae22c3eeff4eb4fea2716aab113,
         type: 3}
