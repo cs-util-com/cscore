@@ -5,13 +5,11 @@ using UnityEngine.UI;
 
 namespace com.csutil.ui.mtvmtv {
 
-    public class RecursiveModelField : FieldView {
+    public class RecursiveModelField : ViewModelFieldView {
 
         public Button openButton;
-        internal ViewModelToView viewModelToView;
-        internal ViewModel recursiveViewModel;
 
-        protected override Task Setup(string fieldName) {
+        protected override Task Setup(string fieldName, string fullPath) {
             openButton.SetOnClickAction(async delegate {
 
                 ViewModel rootViewModel = recursiveViewModel != null ? recursiveViewModel : field.objVm;

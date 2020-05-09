@@ -7,7 +7,7 @@ namespace com.csutil.ui.mtvmtv {
 
         public Toggle toggle;
 
-        protected override Task Setup(string fieldName) {
+        protected override Task Setup(string fieldName, string fullPath) {
             toggle.interactable = field.readOnly != true;
             return Task.FromResult(true);
         }

@@ -7,19 +7,19 @@ namespace com.csutil.logging {
 
     public class LogToUnityDebugLog : LogDefaultImpl {
 
-        protected override void PrintDebugMessage(string debugLogMsg, object[] args) {
+        protected override void PrintDebugMessage(string debugLogMsg, params object[] args) {
             Debug.Log(debugLogMsg, GetGoFrom(args));
         }
 
-        protected override void PrintWarningMessage(string warningMsg, object[] args) {
+        protected override void PrintWarningMessage(string warningMsg, params object[] args) {
             Debug.LogWarning(warningMsg, GetGoFrom(args));
         }
 
-        protected override void PrintErrorMessage(string errorMsg, object[] args) {
+        protected override void PrintErrorMessage(string errorMsg, params object[] args) {
             Debug.LogError(errorMsg, GetGoFrom(args));
         }
 
-        protected override void PrintException(Exception e, object[] args) {
+        protected override void PrintException(Exception e, params object[] args) {
             Debug.LogException(e, GetGoFrom(args));
         }
 

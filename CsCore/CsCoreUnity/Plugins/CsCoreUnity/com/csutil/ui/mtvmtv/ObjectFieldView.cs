@@ -7,7 +7,7 @@ namespace com.csutil.ui.mtvmtv {
 
         public CanvasGroup canvasGroup;
 
-        protected override Task Setup(string fieldName) {
+        protected override Task Setup(string fieldName, string fullPath) {
             canvasGroup.interactable = field.readOnly != true;
             return Task.FromResult(true);
         }

@@ -37,10 +37,10 @@ namespace com.csutil.tests {
             var myChangeTracker = new ChangeTracker<string>("a"); // init its value with "a"
 
             // Switch its value form "a" to "b"
-            Assert.True(myChangeTracker.setNewValue("b"));
+            Assert.True(myChangeTracker.SetNewValue("b"));
 
             // If "b" is set again, the change tracker return false:
-            Assert.False(myChangeTracker.setNewValue("b"));
+            Assert.False(myChangeTracker.SetNewValue("b"));
             Assert.Equal("b", myChangeTracker.value);
 
         }

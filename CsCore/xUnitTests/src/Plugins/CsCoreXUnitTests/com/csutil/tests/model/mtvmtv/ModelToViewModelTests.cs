@@ -133,6 +133,7 @@ namespace com.csutil.tests.model.mtvmtv {
 
         }
 
+#pragma warning disable 0649 // Variable is never assigned to, and will always have its default value
         private class MyUserModel {
 
             public string id { get; private set; }
@@ -169,6 +170,7 @@ namespace com.csutil.tests.model.mtvmtv {
             public string mimeType { get; set; }
 
         }
+#pragma warning restore 0649 // Variable is never assigned to, and will always have its default value
 
     }
 

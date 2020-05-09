@@ -1,4 +1,5 @@
-﻿using com.csutil.model.immutable;
+﻿using com.csutil.datastructures;
+using com.csutil.model.immutable;
 using com.csutil.ui;
 using System;
 using System.Diagnostics;
@@ -135,8 +136,8 @@ namespace com.csutil {
         }
 
         public static UnityAction<float> AddOnValueChangedActionThrottled(this Slider self, Action<float> onValueChanged, double delayInMs = 1000) {
-            EventHandler<float> action = (_, newText) => { onValueChanged(newText); };
-            var throttledAction = action.AsThrottledDebounce(delayInMs, true);
+            EventHandler<float> action = (_, newFloat) => { onValueChanged(newFloat); };
+            var throttledAction = action.AsThrottledDebounce(delayInMs, skipFirstEvent: true);
             return self.AddOnValueChangedAction((newValue) => {
                 throttledAction(self, newValue);
                 return true;
@@ -184,8 +185,8 @@ namespace com.csutil {
         }
 
         public static UnityAction<string> AddOnValueChangedActionThrottled(this InputField self, Action<string> onValueChanged, double delayInMs = 1000) {
-            EventHandler<string> action = (input, newText) => { onValueChanged(newText); };
-            var throttledAction = action.AsThrottledDebounce(delayInMs);
+            EventHandler<string> action = (_, newText) => { onValueChanged(newText); };
+            var throttledAction = action.AsThrottledDebounce(delayInMs, skipFirstEvent: true);
             return self.AddOnValueChangedAction((newText) => {
                 throttledAction(self, newText);
                 return true;

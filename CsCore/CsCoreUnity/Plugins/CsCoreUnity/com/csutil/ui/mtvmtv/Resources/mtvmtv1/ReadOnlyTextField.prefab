@@ -308,9 +308,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   title: {fileID: 4678824498559800660}
-  description: {fileID: 1037016443711948945}
+  description: {fileID: 0}
   mainLink: {fileID: 3290371631199780541}
-  fieldName: 
   field:
     text:
       name: 
@@ -325,3 +324,5 @@ MonoBehaviour:
     children:
       type: 
       entries: []
+  fieldName: 
+  fullPath: 

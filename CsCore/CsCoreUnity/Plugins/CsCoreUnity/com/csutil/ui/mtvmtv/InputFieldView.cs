@@ -5,25 +5,25 @@ using UnityEngine.UI;
 
 namespace com.csutil.ui.mtvmtv {
 
-    public class StringFieldView : FieldView {
+    public class InputFieldView : FieldView {
 
         public InputField input;
 
-        protected override Task Setup(string fieldName) {
+        protected override Task Setup(string fieldName, string fullPath) {
             input.interactable = field.readOnly != true;
             SetupForContentType(input, field.contentType);
-            if (!field.regex.IsNullOrEmpty()) { SetupRegexEnforcer(); }
+            if (!field.regex.IsNullOrEmpty()) { SetupRegexValidator(); }
             return Task.FromResult(true);
         }
 
-        private void SetupRegexEnforcer() {
-            var regexEnforcer = GetComponent<RegexValidator>();
-            if (regexEnforcer?.errorText != null) {
+        private void SetupRegexValidator() {
+            var regexValidator = GetComponent<RegexValidator>();
+            if (regexValidator?.errorText != null) {
                 var errorText = $"Invalid {field.text.name}!";
                 if (!field.text.descr.IsNullOrEmpty()) { errorText += " Valid: " + field.text.descr; }
-                regexEnforcer.errorText.textLocalized(errorText);
+                regexValidator.errorText.textLocalized(errorText);
             }
-            regexEnforcer?.EnforceRegex(field.regex);
+            regexValidator?.EnforceRegex(field.regex);
         }
 
         private static void SetupForContentType(InputField self, string fieldContentType) {

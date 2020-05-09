@@ -28,9 +28,12 @@ namespace com.csutil.ui.mtvmtv {
             });
         }
 
-        public void CheckIfValidInput() { CheckIfValidInput(inputToValidate.text); }
+        public bool IsCurrentInputValid() {
+            if (!enabled) { return true; }
+            return CheckIfValidInput(inputToValidate.text);
+        }
 
-        private void CheckIfValidInput(string newValue) {
+        private bool CheckIfValidInput(string newValue) {
             isValidInput = newValue.IsRegexMatch(regex);
             errorUi.SetActiveV2(!isValidInput);
             if (inputToValidate.targetGraphic != null) {
@@ -43,6 +46,7 @@ namespace com.csutil.ui.mtvmtv {
                     inputToValidate.targetGraphic.color = originalColor.Value;
                 }
             }
+            return isValidInput;
         }
 
         private void OnDisable() {

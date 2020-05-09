@@ -11,28 +11,28 @@ namespace com.csutil.ui.mtvmtv {
         public Text description;
         public Link mainLink;
 
-        public string fieldName;
         [SerializeField]
         public ViewModel.Field field;
+        public string fieldName;
+        public string fullPath;
 
         /// <summary> Will be called by the ViewModelToView logic when the view created </summary>
-        public virtual Task OnViewCreated(string fieldName) {
-            this.fieldName = fieldName;
+        public virtual Task OnViewCreated(string fieldName, string fullPath) {
             if (field != null) {
                 title.textLocalized(field.text.name);
                 if (!field.text.descr.IsNullOrEmpty()) {
                     if (description == null) {
-                        Log.e("No description UI set for the field view", this);
+                        Log.w("No description UI set for the field view", gameObject);
                     } else {
                         description.textLocalized(field.text.descr);
                     }
                 }
             }
-            mainLink.id = fieldName;
-            return Setup(fieldName);
+            mainLink.id = fullPath;
+            return Setup(fieldName, fullPath);
         }
 
-        protected virtual Task Setup(string fieldName) {
+        protected virtual Task Setup(string fieldName, string fullPath) {
             return Task.FromResult(false);
         }
 

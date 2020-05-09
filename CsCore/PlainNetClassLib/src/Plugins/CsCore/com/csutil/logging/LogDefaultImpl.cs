@@ -10,12 +10,12 @@ namespace com.csutil.logging {
 
         public void LogDebug(string msg, params object[] args) {
             PrintDebugMessage("> " + msg + Log.ToArgsStr(args, ArgToString) + LB
-                + "  * at " + Log.CallingMethodStr(args) + LB + LB);
+                + "  * at " + Log.CallingMethodStr(args) + LB + LB, args);
         }
 
         public void LogWarning(string warning, params object[] args) {
             PrintWarningMessage("> WARNING: " + warning + Log.ToArgsStr(args, ArgToString) + LB
-                + "  * at " + Log.CallingMethodStr(args) + LB + LB);
+                + "  * at " + Log.CallingMethodStr(args) + LB + LB, args);
         }
 
         public Exception LogError(string error, params object[] args) {
@@ -30,14 +30,14 @@ namespace com.csutil.logging {
 
         private void PrintErrorString(string e, object[] args) {
             PrintErrorMessage(e + Log.ToArgsStr(args, ArgToString) + LB
-                + "    * at " + Log.CallingMethodStr(args, count: 4) + LB + LB);
+                + "    * at " + Log.CallingMethodStr(args, count: 4) + LB + LB, args);
         }
 
         protected abstract void PrintDebugMessage(string debugLogMsg, params object[] args);
         protected abstract void PrintWarningMessage(string warningMsg, params object[] args);
         protected abstract void PrintErrorMessage(string errorMsg, params object[] args);
 
-        protected virtual void PrintException(Exception e, object[] args) {
+        protected virtual void PrintException(Exception e, params object[] args) {
             // The default implementation prints exceptions the same as errors:
             PrintErrorString(">>> EXCEPTION: " + e, args);
         }
@@ -48,7 +48,7 @@ namespace com.csutil.logging {
             return "" + arg;
         }
 
-        public virtual StopwatchV2 LogMethodEntered(string methodName, object[] args) {
+        public virtual StopwatchV2 LogMethodEntered(string methodName, params object[] args) {
 #if DEBUG
             args = new StackFrame(2, true).AddTo(args);
 #endif

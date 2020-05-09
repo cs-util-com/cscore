@@ -36,7 +36,7 @@ namespace com.csutil {
             while (!req.isDone) {
                 try {
                     var currentProgress = req.progress * 100;
-                    if (resp.progressInPercent.setNewValue(currentProgress)) {
+                    if (resp.progressInPercent.SetNewValue(currentProgress)) {
                         timer.Restart();
                         resp.onProgress.InvokeIfNotNull(resp.progressInPercent.value);
                     }
@@ -50,7 +50,7 @@ namespace com.csutil {
                 Log.d("   > Finished " + resp);
                 AssertResponseLooksNormal(self, resp);
                 self.SaveAllNewCookiesFromResponse();
-                if (self.error.IsNullOrEmpty()) { resp.progressInPercent.setNewValue(100); }
+                if (self.error.IsNullOrEmpty()) { resp.progressInPercent.SetNewValue(100); }
                 resp.getResult = () => { return self.GetResult<T>(); };
                 ProcessServerDate(self.uri, self.GetResponseHeader("date"));
             }

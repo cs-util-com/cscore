@@ -6,8 +6,10 @@ using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace com.csutil.tests {
 
@@ -20,33 +22,59 @@ namespace com.csutil.tests {
         }
 
         private static async Task GenerateAndShowViewFor(ViewStack viewStack) {
-            var userView = await GenerateViewFor(typeof(MyUserModel), prefabFolder);
-            viewStack.ShowView(userView);
-            //LoadModelIntoGeneratedView(userView);
-        }
+            var t = typeof(MyUserModel);
 
-        private static void LoadModelIntoGeneratedView(GameObject userView) {
-            // TODO load model into generated view:
-            Presenter<MyUserModel> p = new MyUserPresenter();
-            p.targetView = userView;
-
-            MyUserModel model = new MyUserModel() { name = "Tom" };
-            p.LoadModelIntoView(model);
-        }
-
-        private static async Task<GameObject> GenerateViewFor(Type t, string prefabFolder) {
             var mtvm = new ModelToViewModel();
             ViewModel viewModel = mtvm.ToViewModel("" + t, t);
             Log.d(JsonWriter.AsPrettyString(viewModel));
+
             var vmtv = new ViewModelToView(mtvm, prefabFolder);
-            return await vmtv.ToView(viewModel);
+            var userView = await vmtv.ToView(viewModel);
+
+            viewStack.ShowView(userView);
+
+            Presenter<MyUserModel> p = new MyPresenter1();
+            p.targetView = userView;
+
+            MyUserModel model = new MyUserModel() {
+                name = "Tom",
+                email = "a@b.com",
+                password = "12345678",
+                age = 98,
+                money = 0f,
+                hasMoney = false,
+                phoneNumber = "+1 234 5678 90",
+                profilePic = new FileRef() { url = "https://picsum.photos/50/50" },
+                bestFriend = new MyUserModel.UserContact() { name = "Bella" },
+                description = "A normal person, nothing suspicious here..",
+                homepage = "https://marvolo.uk"
+            };
+            await p.LoadModelIntoView(model);
+            viewStack.SwitchBackToLastView(userView);
         }
 
-        private class MyUserPresenter : Presenter<MyUserModel> {
+
+        private class MyPresenter1 : Presenter<MyUserModel> {
             public GameObject targetView { get; set; }
 
-            public Task OnLoad(MyUserModel model) {
-                throw new NotImplementedException();
+            public async Task OnLoad(MyUserModel u) {
+
+                var map = this.GetFieldViewMap();
+                map.LinkViewToModel("id", u.id);
+                map.LinkViewToModel("name", u.name, newVal => u.name = newVal);
+                map.LinkViewToModel("email", u.email, newVal => u.email = newVal);
+                map.LinkViewToModel("password", u.password, newVal => u.password = newVal);
+                map.LinkViewToModel("age", "" + u.age, newVal => u.age = int.Parse(newVal));
+                map.LinkViewToModel("money", "" + u.money, newVal => u.money = float.Parse(newVal));
+                map.LinkViewToModel("phoneNumber", u.phoneNumber, newVal => u.phoneNumber = newVal);
+                map.LinkViewToModel("description", u.description, newVal => u.description = newVal);
+                map.LinkViewToModel("homepage", u.homepage, newVal => u.homepage = newVal);
+                map.LinkViewToModel("hasMoney", u.hasMoney, newVal => u.hasMoney = newVal);
+
+                map.LinkViewToModel("bestFriend.name", u.bestFriend.name, newVal => u.bestFriend.name = newVal);
+                map.LinkViewToModel("profilePic.url", u.profilePic.url, newVal => u.profilePic.url = newVal);
+
+                await targetView.GetLinkMap().Get<Button>("ConfirmButton").SetOnClickAction(delegate { });
             }
 
         }
@@ -71,6 +99,9 @@ namespace com.csutil.tests {
 
             public float money;
 
+            [Description("Checked if there is any money")]
+            public bool hasMoney;
+
             [Regex(RegexTemplates.PHONE_NR)]
             [Description("e.g. +1 234 5678 90")]
             public string phoneNumber;
@@ -89,8 +120,10 @@ namespace com.csutil.tests {
 
             //public List<UserContact> contacts { get; } = new List<UserContact>();
 
+#pragma warning disable 0649 // Variable is never assigned to, and will always have its default value
             public class UserContact {
 
+                public string name;
                 public MyUserModel user;
 
                 //public int[] phoneNumbers { get; set; }
@@ -101,13 +134,16 @@ namespace com.csutil.tests {
 
         private class FileRef : IFileRef {
 
+            [Regex(RegexTemplates.URL)]
+            public string url { get; set; }
+
             public string dir { get; set; }
             public string fileName { get; set; }
-            public string url { get; set; }
             public Dictionary<string, object> checksums { get; set; }
             public string mimeType { get; set; }
 
         }
+#pragma warning restore 0649 // Variable is never assigned to, and will always have its default value
 
     }
 
