@@ -9,16 +9,17 @@ namespace com.csutil.ui.mtvmtv {
 
         public Button openButton;
 
-        protected override Task Setup(string fieldName, string fullPath) {
-            openButton.SetOnClickAction(async delegate {
+        public async Task<GameObject> NewViewFromViewModel() {
+            return await NewViewFromViewModel(recursiveViewModel != null ? recursiveViewModel : field.objVm);
+        }
 
-                ViewModel rootViewModel = recursiveViewModel != null ? recursiveViewModel : field.objVm;
-                GameObject rootContainerView = await viewModelToView.NewRootContainerView(rootViewModel);
-                gameObject.GetViewStack().ShowView(rootContainerView);
-                var innerContainer = await viewModelToView.SelectInnerViewContainerFromObjectFieldView(rootContainerView);
-                await viewModelToView.ToView(recursiveViewModel, innerContainer);
-            });
-            return Task.FromResult(true);
+        public async Task<GameObject> NewViewFromViewModel(ViewModel viewModel) {
+            AssertV2.NotNull(viewModel, "viewModel");
+            AssertV2.NotNull(viewModel.fields, "viewModel.fields");
+            GameObject rootContainerView = await viewModelToView.NewRootContainerView(viewModel);
+            var innerContainer = await viewModelToView.SelectInnerViewContainerFromObjectFieldView(rootContainerView);
+            await viewModelToView.ToView(viewModel, innerContainer);
+            return rootContainerView;
         }
     }
 

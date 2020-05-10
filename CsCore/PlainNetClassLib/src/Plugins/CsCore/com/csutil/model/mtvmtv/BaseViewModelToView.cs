@@ -22,7 +22,7 @@ namespace com.csutil.model.mtvmtv {
         public async Task ToView(ViewModel viewModel, V parentView) {
             foreach (var fieldName in viewModel.order) {
                 ViewModel.Field field = viewModel.fields[fieldName];
-                var type = EnumUtil.Parse<JTokenType>(field.type);
+                JTokenType type = field.GetJTokenType();
                 if (type == JTokenType.Boolean) {
                     await InitChild(await AddChild(parentView, await NewBoolFieldView(field)), fieldName, field);
                 }

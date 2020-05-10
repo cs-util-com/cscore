@@ -77,7 +77,8 @@ namespace com.csutil.ui.mtvmtv {
             fieldView.field = field;
             fieldView.fieldName = fieldName;
             var parent = view.GetParent()?.GetComponentInParents<FieldView>();
-            var fullPath = parent?.fullPath != null ? parent.fullPath + "." + fieldName : fieldName;
+            var fullPath = fieldName;
+            if (parent != null && !parent.fullPath.IsNullOrEmpty()) { fullPath = parent.fullPath + "." + fieldName; }
             view.name = fullPath;
             fieldView.fullPath = fullPath;
             await fieldView.OnViewCreated(fieldName, fullPath);
@@ -101,15 +102,15 @@ namespace com.csutil.ui.mtvmtv {
         }
 
         public override Task HandleSimpleArray(GameObject parent, string fieldName, ViewModel.Field field, JTokenType arrayType) {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public override Task HandleMixedObjectArray(GameObject parent, string fieldName, ViewModel.Field field) {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public override Task HandleObjectArray(GameObject parent, string fieldName, ViewModel.Field field, ViewModel entryViewModel) {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
     }

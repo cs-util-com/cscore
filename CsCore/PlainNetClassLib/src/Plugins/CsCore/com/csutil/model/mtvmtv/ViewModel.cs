@@ -37,7 +37,6 @@ namespace com.csutil.model.mtvmtv {
                 public List<ViewModel> entries;
             }
 
-
         }
 
     }

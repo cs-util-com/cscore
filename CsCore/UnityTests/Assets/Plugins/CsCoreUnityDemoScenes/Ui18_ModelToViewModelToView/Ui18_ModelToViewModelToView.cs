@@ -3,6 +3,7 @@ using com.csutil.model.mtvmtv;
 using com.csutil.ui;
 using com.csutil.ui.mtvmtv;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -33,8 +34,7 @@ namespace com.csutil.tests {
 
             viewStack.ShowView(userView);
 
-            Presenter<MyUserModel> p = new MyPresenter1();
-            p.targetView = userView;
+
 
             MyUserModel model = new MyUserModel() {
                 name = "Tom",
@@ -45,21 +45,33 @@ namespace com.csutil.tests {
                 hasMoney = false,
                 phoneNumber = "+1 234 5678 90",
                 profilePic = new FileRef() { url = "https://picsum.photos/50/50" },
-                bestFriend = new MyUserModel.UserContact() { name = "Bella" },
+                bestFriend = new MyUserModel.UserContact() {
+                    name = "Bella",
+                    user = new MyUserModel() {
+                        name = "Bella",
+                        email = "b@cd.e"
+                    }
+                },
                 description = "A normal person, nothing suspicious here..",
                 homepage = "https://marvolo.uk"
             };
-            await p.LoadModelIntoView(model);
-            viewStack.SwitchBackToLastView(userView);
-        }
 
+            var presenter = new JObjectPresenter();
+            presenter.targetView = userView;
+            MyUserModel newModel = await presenter.LoadViaJsonIntoView(model);
+            viewStack.SwitchBackToLastView(userView);
+            var changedFields = MergeJson.GetDiff(model, newModel);
+            Log.e(JsonWriter.AsPrettyString(newModel));
+            Log.e("changed fields: " + changedFields?.ToPrettyString());
+
+        }
 
         private class MyPresenter1 : Presenter<MyUserModel> {
             public GameObject targetView { get; set; }
 
             public async Task OnLoad(MyUserModel u) {
 
-                var map = this.GetFieldViewMap();
+                var map = targetView.GetFieldViewMap();
                 map.LinkViewToModel("id", u.id);
                 map.LinkViewToModel("name", u.name, newVal => u.name = newVal);
                 map.LinkViewToModel("email", u.email, newVal => u.email = newVal);
@@ -79,10 +91,49 @@ namespace com.csutil.tests {
 
         }
 
+        private class JObjectPresenter : Presenter<JObject> {
+            public GameObject targetView { get; set; }
+
+            public async Task OnLoad(JObject root) {
+                Log.e("root: " + JsonWriter.AsPrettyString(root));
+                var vv = targetView.GetFieldViewMap().Values;
+                foreach (var fieldView in vv) {
+                    if (!fieldView.LinkToJsonModel(root)) {
+                        if (fieldView is RecursiveModelField r) {
+                            ShowChildModelInNewScreen(r, root);
+                        } else {
+                            Log.w("Did not link " + fieldView.fullPath);
+                        }
+                    }
+                }
+                await targetView.GetLinkMap().Get<Button>("ConfirmButton").SetOnClickAction(delegate {
+                    Log.d("Confirm pressed");
+                });
+            }
+
+            private void ShowChildModelInNewScreen(RecursiveModelField self, JObject root) {
+                self.openButton.SetOnClickAction(async delegate {
+                    var newScreen = await self.NewViewFromViewModel();
+                    var viewStack = targetView.GetViewStack();
+                    viewStack.ShowView(newScreen, targetView);
+
+                    var p = new JObjectPresenter();
+                    p.targetView = newScreen;
+                    var model = self.GetChildJObjFrom(root);
+                    await p.LoadModelIntoView(model);
+                    viewStack.SwitchBackToLastView(newScreen);
+
+                    Log.e("After recursive save: " + JsonWriter.AsPrettyString(root));
+
+                }).LogOnError();
+            }
+
+        }
+
         private class MyUserModel {
 
             [JsonProperty(Required = Required.Always)]
-            public string id { get; }
+            public string id { get; private set; } = Guid.NewGuid().ToString();
 
             [Regex(2, 30)]
             [Content(ContentType.Name, "e.g. Tom Riddle")]
