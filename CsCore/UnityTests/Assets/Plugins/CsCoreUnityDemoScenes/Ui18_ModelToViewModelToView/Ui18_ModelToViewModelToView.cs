@@ -84,6 +84,7 @@ namespace com.csutil.tests {
             [JsonProperty(Required = Required.Always)]
             public string id { get; }
 
+            [Regex(2, 30)]
             [Content(ContentType.Name, "e.g. Tom Riddle")]
             public string name;
 
@@ -91,7 +92,8 @@ namespace com.csutil.tests {
             [Regex(RegexTemplates.EMAIL_ADDRESS)]
             public string email;
 
-            [Content(ContentType.Password, "Minimum 50 characters")]
+            [Content(ContentType.Password, "Lenght >= 6 & has A-Z a-z 0-9 ?!..")]
+            [Regex(6, RegexTemplates.HAS_UPPERCASE, RegexTemplates.HAS_LOWERCASE, RegexTemplates.HAS_NUMBER, RegexTemplates.HAS_SPECIAL_CHAR)]
             public string password;
 
             [Description("e.g. 99")]
@@ -123,6 +125,7 @@ namespace com.csutil.tests {
 #pragma warning disable 0649 // Variable is never assigned to, and will always have its default value
             public class UserContact {
 
+                [Content(ContentType.Name, "e.g. Barbara")]
                 public string name;
                 public MyUserModel user;
 

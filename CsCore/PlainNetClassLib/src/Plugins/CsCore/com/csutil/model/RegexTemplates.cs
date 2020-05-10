@@ -11,14 +11,11 @@ namespace com.csutil.model {
         public const string ZIP_CODE = "^\\d{5}$";
         public const string USERNAME = "^[A-Za-z0-9_-]{3,16}$";
         public const string URL = "^(https?:\\/\\/)?([\\da-z\\.-]+)\\.([a-z\\.]{2,6})([\\/\\w \\.-]*)*\\/?$";
-        public const string IP = "^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])$";
         public const string PHONE_NR = "^\\+?[\\d\\s]{3,}$";
 
         /// <summary> Matches if string is not emtpy and not only whitespaces </summary>
         public const string NON_EMPTY_STRING = "^(?!\\s*$).+";
-        public const string NUMBER = "^[-+]?[0-9]*\\.?[0-9]+$";
         public const string NUMBER_INTEGER = "^-{0,1}\\d+$";
-        public const string NUMBER_DECIMAL = "^-{0,1}\\d*\\.{0,1}\\d+$";
         public const string COLOR_HEX_RGB = "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$";
         public const string COLOR_HEX_RGBA = "^#([A-Fa-f0-9]{8}|[A-Fa-f0-9]{4})$";
 
@@ -27,10 +24,18 @@ namespace com.csutil.model {
         public const string TIME_12h = "(1[012]|[1-9]):[0-5][0-9](\\s)?(?i)(am|pm)";
         public const string TIME_24h = "([01]?[0-9]|2[0-3]):[0-5][0-9]";
 
+        public const string HAS_UPPERCASE = ".*[A-Z].*";
+        public const string HAS_LOWERCASE = ".*[a-z].*";
+        public const string HAS_NUMBER = @".*\d.*";
+        public const string HAS_SPECIAL_CHAR = @".*\W.*";
+
         private static Regex camelCaseSplitter = new Regex(@"(\B[A-Z]+?(?=[A-Z][^A-Z])|\B[A-Z]+?(?=[^A-Z]))");
 
-        internal static string SplitCamelCaseString(string camelCaseString) {
+
+
+        public static string SplitCamelCaseString(string camelCaseString) {
             return camelCaseSplitter.Replace(camelCaseString, " $1").ToFirstCharUpperCase();
         }
+
     }
 }

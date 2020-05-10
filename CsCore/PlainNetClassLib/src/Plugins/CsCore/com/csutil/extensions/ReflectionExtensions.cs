@@ -31,6 +31,11 @@ namespace com.csutil {
             return attr != null;
         }
 
+        public static bool TryGetCustomAttributes<T>(this MemberInfo self, out IEnumerable<T> attr, bool inherit = false) where T : Attribute {
+            attr = self.GetCustomAttributes<T>(inherit);
+            return !attr.IsNullOrEmpty();
+        }
+
         public static bool CanWriteTo(this MemberInfo self) {
             if (self is FieldInfo f) { return !f.Attributes.ContainsFlag(FieldAttributes.InitOnly); }
             if (self is PropertyInfo p) { return p.CanWrite && p.GetSetMethod(nonPublic: true).IsPublic; }

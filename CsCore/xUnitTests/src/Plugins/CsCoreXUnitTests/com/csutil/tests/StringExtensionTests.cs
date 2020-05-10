@@ -80,6 +80,13 @@ namespace com.csutil.tests {
             Assert.Throws<ArgumentException>(() => { "x".IsRegexMatch(nullString); });
             Assert.Throws<ArgumentException>(() => { "x".IsRegexMatch(""); });
 
+
+            const string minMaxCharLength = "^.{2,4}$";
+            Assert.False("a".IsRegexMatch(minMaxCharLength));
+            Assert.True("ab".IsRegexMatch(minMaxCharLength));
+            Assert.True("abcd".IsRegexMatch(minMaxCharLength));
+            Assert.False("abcde".IsRegexMatch(minMaxCharLength));
+
         }
 
         [Fact]

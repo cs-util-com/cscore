@@ -19,7 +19,7 @@ namespace com.csutil.model.mtvmtv {
             public bool? readOnly;
             public bool? writeOnly;
             public bool? mandatory;
-            public string regex;
+            public string[] regex;
             public string contentType;
             /// <summary> If the field is an object it has a view model itself </summary>
             public ViewModel objVm;

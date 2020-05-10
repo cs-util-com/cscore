@@ -96,7 +96,9 @@ namespace com.csutil.model.mtvmtv {
                 newField.text.descr = description;
             }
             if (model != null) {
-                if (model.TryGetCustomAttribute(out RegexAttribute attr)) { newField.regex = attr.regex; }
+                if (model.TryGetCustomAttributes(out IEnumerable<RegexAttribute> attr)) {
+                    newField.regex = attr.Filter(x => x?.regex != null).SelectMany(x => x.regex).ToArray();
+                }
                 if (!model.CanWriteTo()) { newField.readOnly = true; }
                 if (model.TryGetCustomAttribute(out ContentAttribute content)) { newField.contentType = "" + content.type; }
             }
