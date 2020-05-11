@@ -48,9 +48,9 @@ namespace com.csutil {
                     try {
                         T res = onClickFunc(self.gameObject);
                         if (res is Task<T> asyncT) {
-                            asyncT.ContinueWith(task => tcs.TrySetResult(task.Result));
+                            asyncT.ForwardResultTo(tcs);
                         } else if (res is Task t) {
-                            t.ContinueWith(task => tcs.TrySetResult((T)(object)task));
+                            t.ForwardResultTo(tcs);
                         } else {
                             tcs.TrySetResult(res);
                         }

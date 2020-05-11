@@ -38,6 +38,28 @@ namespace com.csutil {
             return self.OnError(e => Task.FromException(Log.e(e)));
         }
 
+        public static void ForwardResultTo<T>(this Task<T> self, TaskCompletionSource<T> tcs) {
+            self.ContinueWith(task => {
+                if (!task.IsCanceledOrFaulted(tcs)) { tcs.TrySetResult(task.Result); }
+            });
+        }
+
+        public static void ForwardResultTo<T>(this Task self, TaskCompletionSource<T> tcs) {
+            self.ContinueWith(task => {
+                if (!task.IsCanceledOrFaulted(tcs)) { tcs.TrySetResult((T)(object)task); }
+            });
+        }
+
+        private static bool IsCanceledOrFaulted<T>(this Task task, TaskCompletionSource<T> tcs) {
+            if (task.IsCanceled) {
+                tcs.TrySetCanceled();
+                return true;
+            } else if (task.IsFaulted) {
+                tcs.TrySetException(task.Exception);
+                return true;
+            }
+            return false;
+        }
     }
 
 }

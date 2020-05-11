@@ -55,11 +55,13 @@ namespace com.csutil.ui.mtvmtv {
             return self;
         }
 
-        public static async Task<T> LoadViaJsonIntoView<T>(this Presenter<JObject> self, T model) {
+        public static async Task<T> LoadViaJsonIntoView<T>(this Presenter<JObject> self, T model, Task userSavesChanges) {
             JObject json = JObject.Parse(JsonWriter.GetWriter().Write(model));
             await self.LoadModelIntoView(json);
+            await userSavesChanges;
             return JsonReader.GetReader().Read<T>(json.ToString());
         }
+
 
         public static bool IsInChildObject(this FieldView self) { return self.fieldName != self.fullPath; }
 
@@ -67,24 +69,58 @@ namespace com.csutil.ui.mtvmtv {
             string name = self.fieldName;
             var model = self.GetChildJObjFrom(root);
             if (self is InputFieldView i) {
-                i.LinkToModel("" + model[name], newVal => { model[name] = self.field.ParseToJValue(newVal); });
+                i.LinkToModel("" + model?[name], newVal => {
+                    self.CreateChildJObjIfNeeded(root);
+                    self.GetChildJObjFrom(root)[name] = self.field.ParseToJValue(newVal);
+                });
                 return true;
             }
             if (self is BoolFieldView b) {
-                b.LinkToModel((model[name] as JValue).Value<bool>(), newB => { model[name] = new JValue(newB); });
+                bool val = (model?[name] as JValue)?.Value<bool>() == true;
+                b.LinkToModel(val, newB => {
+                    self.CreateChildJObjIfNeeded(root);
+                    self.GetChildJObjFrom(root)[name] = new JValue(newB);
+                });
                 return true;
             }
             if (self.field.readOnly == true) {
-                self.LinkToModel("" + model[name]);
+                self.LinkToModel("" + model?[name]);
                 return true;
             }
             return false;
         }
 
+        public static void ShowChildModelInNewScreen(this RecursiveModelField self, JObject root, GameObject currentScreen) {
+            self.openButton.SetOnClickAction(async delegate {
+                var newScreen = await self.NewViewFromViewModel();
+                var viewStack = currentScreen.GetViewStack();
+                viewStack.ShowView(newScreen, currentScreen);
+                var p = new JObjectPresenter();
+                p.targetView = newScreen;
+                var model = self.GetChildJObjFrom(root)[self.fieldName] as JObject;
+                AssertV2.NotNull(model, "model");
+                await p.LoadModelIntoView(model);
+                viewStack.SwitchBackToLastView(newScreen);
+            }).LogOnError();
+        }
+
+        private static void CreateChildJObjIfNeeded(this FieldView self, JObject rootModel) {
+            if (self.IsInChildObject()) { // Navigate down to the correct child JObject
+                string[] parents = self.fullPath.Split(".");
+                foreach (var p in parents.Take(parents.Length - 1)) {
+                    if (rootModel[p] == null) { rootModel[p] = new JObject(); }
+                    rootModel = rootModel[p] as JObject;
+                    AssertV2.NotNull(rootModel, $"rootModel (p={p}");
+                }
+            }
+        }
+
         public static JObject GetChildJObjFrom(this FieldView self, JObject rootModel) {
             if (self.IsInChildObject()) { // Navigate down to the correct child JObject
                 string[] parents = self.fullPath.Split(".");
-                foreach (var p in parents.Take(parents.Length - 1)) { rootModel = rootModel[p] as JObject; }
+                foreach (var p in parents.Take(parents.Length - 1)) {
+                    rootModel = rootModel[p] as JObject;
+                }
             }
             return rootModel;
         }

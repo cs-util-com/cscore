@@ -29,44 +29,56 @@ namespace com.csutil.tests {
             ViewModel viewModel = mtvm.ToViewModel("" + t, t);
             Log.d(JsonWriter.AsPrettyString(viewModel));
 
-            var vmtv = new ViewModelToView(mtvm, prefabFolder);
-            var userView = await vmtv.ToView(viewModel);
-
-            viewStack.ShowView(userView);
-
-
-
-            MyUserModel model = new MyUserModel() {
-                name = "Tom",
-                email = "a@b.com",
-                password = "12345678",
-                age = 98,
-                money = 0f,
-                hasMoney = false,
-                phoneNumber = "+1 234 5678 90",
-                profilePic = new FileRef() { url = "https://picsum.photos/50/50" },
-                bestFriend = new MyUserModel.UserContact() {
-                    name = "Bella",
-                    user = new MyUserModel() {
-                        name = "Bella",
-                        email = "b@cd.e"
-                    }
-                },
-                description = "A normal person, nothing suspicious here..",
-                homepage = "https://marvolo.uk"
-            };
-
-            var presenter = new JObjectPresenter();
-            presenter.targetView = userView;
-            MyUserModel newModel = await presenter.LoadViaJsonIntoView(model);
-            viewStack.SwitchBackToLastView(userView);
-            var changedFields = MergeJson.GetDiff(model, newModel);
-            Log.e(JsonWriter.AsPrettyString(newModel));
-            Log.e("changed fields: " + changedFields?.ToPrettyString());
+            await LoadModelIntoGeneratedView(viewStack, mtvm, viewModel);
 
         }
 
-        private class MyPresenter1 : Presenter<MyUserModel> {
+        private static async Task LoadModelIntoGeneratedView(ViewStack viewStack, ModelToViewModel mtvm, ViewModel viewModel) {
+            MyUserModel model = NewExampleUserInstance();
+
+            { // First an example to connect the model to a generated view via a manual presenter "MyManualPresenter1":
+                GameObject generatedView = await GenerateViewFromViewModel(mtvm, viewModel);
+                viewStack.ShowView(generatedView);
+
+                var presenter = new MyManualPresenter1();
+                presenter.targetView = generatedView;
+
+                Log.d("Model BEFORE changes: " + JsonWriter.AsPrettyString(model));
+                await presenter.LoadModelIntoView(model);
+                Log.d("Model AFTER changes: " + JsonWriter.AsPrettyString(model));
+
+                viewStack.SwitchBackToLastView(generatedView);
+
+            }
+            { // The second option is to use a generic JObjectPresenter to connect the model to the generated view:
+                GameObject generatedView = await GenerateViewFromViewModel(mtvm, viewModel);
+                viewStack.ShowView(generatedView);
+
+                var presenter = new JObjectPresenter();
+                presenter.targetView = generatedView;
+
+                Log.d("Model BEFORE changes: " + JsonWriter.AsPrettyString(model));
+                MyUserModel changedModel = await presenter.LoadViaJsonIntoView(model, SetupConfirmButton(generatedView));
+                Log.d("Model AFTER changes: " + JsonWriter.AsPrettyString(changedModel));
+
+                viewStack.SwitchBackToLastView(generatedView);
+                var changedFields = MergeJson.GetDiff(model, changedModel);
+                Log.d("Fields changed: " + changedFields?.ToPrettyString());
+            }
+        }
+
+        private static Task SetupConfirmButton(GameObject targetView) {
+            return targetView.GetLinkMap().Get<Button>("ConfirmButton").SetOnClickAction(async delegate {
+                Toast.Show("Saving..");
+                await TaskV2.Delay(500); // Wait for throttled actions to update the model
+            });
+        }
+
+        private static async Task<GameObject> GenerateViewFromViewModel(ModelToViewModel mtvm, ViewModel viewModel) {
+            return await new ViewModelToView(mtvm, prefabFolder).ToView(viewModel);
+        }
+
+        private class MyManualPresenter1 : Presenter<MyUserModel> {
             public GameObject targetView { get; set; }
 
             public async Task OnLoad(MyUserModel u) {
@@ -86,48 +98,31 @@ namespace com.csutil.tests {
                 map.LinkViewToModel("bestFriend.name", u.bestFriend.name, newVal => u.bestFriend.name = newVal);
                 map.LinkViewToModel("profilePic.url", u.profilePic.url, newVal => u.profilePic.url = newVal);
 
-                await targetView.GetLinkMap().Get<Button>("ConfirmButton").SetOnClickAction(delegate { });
+                await SetupConfirmButton(targetView);
             }
 
         }
 
-        private class JObjectPresenter : Presenter<JObject> {
-            public GameObject targetView { get; set; }
-
-            public async Task OnLoad(JObject root) {
-                Log.e("root: " + JsonWriter.AsPrettyString(root));
-                var vv = targetView.GetFieldViewMap().Values;
-                foreach (var fieldView in vv) {
-                    if (!fieldView.LinkToJsonModel(root)) {
-                        if (fieldView is RecursiveModelField r) {
-                            ShowChildModelInNewScreen(r, root);
-                        } else {
-                            Log.w("Did not link " + fieldView.fullPath);
-                        }
+        private static MyUserModel NewExampleUserInstance() {
+            return new MyUserModel() {
+                name = "Tom",
+                email = "a@b.com",
+                password = "12345678",
+                age = 98,
+                money = 0f,
+                hasMoney = false,
+                phoneNumber = "+1 234 5678 90",
+                profilePic = new FileRef() { url = "https://picsum.photos/50/50" },
+                bestFriend = new MyUserModel.UserContact() {
+                    name = "Bella",
+                    user = new MyUserModel() {
+                        name = "Bella",
+                        email = "b@cd.e"
                     }
-                }
-                await targetView.GetLinkMap().Get<Button>("ConfirmButton").SetOnClickAction(delegate {
-                    Log.d("Confirm pressed");
-                });
-            }
-
-            private void ShowChildModelInNewScreen(RecursiveModelField self, JObject root) {
-                self.openButton.SetOnClickAction(async delegate {
-                    var newScreen = await self.NewViewFromViewModel();
-                    var viewStack = targetView.GetViewStack();
-                    viewStack.ShowView(newScreen, targetView);
-
-                    var p = new JObjectPresenter();
-                    p.targetView = newScreen;
-                    var model = self.GetChildJObjFrom(root);
-                    await p.LoadModelIntoView(model);
-                    viewStack.SwitchBackToLastView(newScreen);
-
-                    Log.e("After recursive save: " + JsonWriter.AsPrettyString(root));
-
-                }).LogOnError();
-            }
-
+                },
+                description = "A normal person, nothing suspicious here..",
+                homepage = "https://marvolo.uk"
+            };
         }
 
         private class MyUserModel {
