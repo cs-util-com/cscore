@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Linq;
+using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
@@ -8,7 +9,7 @@ namespace com.csutil.ui.mtvmtv {
 
         public string[] regex;
         public InputField inputToValidate;
-        public bool isValidInput;
+        public bool isValidInput = true;
         public GameObject errorUi;
         public Text errorText;
         public double validationDelayInMs = 500;
@@ -54,6 +55,17 @@ namespace com.csutil.ui.mtvmtv {
 
         private void OnDisable() {
             if (inputListener != null) { inputToValidate.onValueChanged.RemoveListener(inputListener); }
+        }
+
+        public static bool IsAllInputCurrentlyValid(GameObject view) {
+            var allFoundValidators = view.GetComponentsInChildren<RegexValidator>();
+            var invalidFields = allFoundValidators.Filter(v => !v.isValidInput);
+            if (invalidFields.IsNullOrEmpty()) { return true; }
+            var f = invalidFields.First();
+            f.inputToValidate.SelectV2(); // Set focus on invalid field
+            var errorText = f.errorText?.text;
+            if (!errorText.IsNullOrEmpty()) { Toast.Show(errorText); }
+            return false;
         }
 
     }

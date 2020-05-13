@@ -67,15 +67,22 @@ namespace com.csutil.tests {
             }
         }
 
-        private static Task SetupConfirmButton(GameObject targetView) {
+        private static async Task SetupConfirmButton(GameObject targetView) {
+            do {
+                await ConfirmButtonClicked(targetView);
+            } while (!RegexValidator.IsAllInputCurrentlyValid(targetView));
+        }
+
+        private static Task ConfirmButtonClicked(GameObject targetView) {
             return targetView.GetLinkMap().Get<Button>("ConfirmButton").SetOnClickAction(async delegate {
                 Toast.Show("Saving..");
-                await TaskV2.Delay(500); // Wait for throttled actions to update the model
+                await TaskV2.Delay(500); // Wait for potential pending throttled actions to update the model
             });
         }
 
         private static async Task<GameObject> GenerateViewFromViewModel(ModelToViewModel mtvm, ViewModel viewModel) {
-            return await new ViewModelToView(mtvm, prefabFolder).ToView(viewModel);
+            var vmtv = new ViewModelToView(mtvm, prefabFolder) { rootContainerPrefab = ViewModelToView.CONTAINER2 };
+            return await vmtv.ToView(viewModel);
         }
 
         private class MyManualPresenter1 : Presenter<MyUserModel> {

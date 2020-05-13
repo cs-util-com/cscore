@@ -193,6 +193,7 @@ namespace com.csutil {
             });
         }
 
+        /// <summary> Sets focus on the input field </summary>
         public static void SelectV2(this InputField self) {
             self.Select();
             self.ActivateInputField();

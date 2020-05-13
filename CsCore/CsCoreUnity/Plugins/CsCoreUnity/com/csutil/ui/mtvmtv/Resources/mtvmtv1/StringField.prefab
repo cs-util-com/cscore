@@ -12,11 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 74bdada6d6c222d49b8c99abacd3c42e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  regex: 
+  regex: []
   inputToValidate: {fileID: 7429551617911626097}
-  isValidInput: 0
+  isValidInput: 1
   errorUi: {fileID: 4016776087293872776}
   errorText: {fileID: 7973196563673575659}
+  validationDelayInMs: 500
 --- !u!1001 &5406684202949952971
 PrefabInstance:
   m_ObjectHideFlags: 0

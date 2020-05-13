@@ -1,5 +1,6 @@
 ﻿using com.csutil.datastructures;
 using com.csutil.model.mtvmtv;
+using com.csutil.ui.viewstack;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -100,7 +101,6 @@ namespace com.csutil.ui.mtvmtv {
                 var model = self.GetChildJObjFrom(root)[self.fieldName] as JObject;
                 AssertV2.NotNull(model, "model");
                 await p.LoadModelIntoView(model);
-                viewStack.SwitchBackToLastView(newScreen);
             }).LogOnError();
         }
 

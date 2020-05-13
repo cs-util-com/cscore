@@ -9,8 +9,12 @@ namespace com.csutil.ui.mtvmtv {
 
     public class ViewModelToView : BaseViewModelToView<GameObject> {
 
+        public const string CONTAINER1 = "RootContainer";
+        public const string CONTAINER2 = "RootContainer2";
+        public const string CONTAINER3 = "RootContainer3";
+
         public string prefabFolder;
-        public string rootContainerPrefab = "RootContainer";
+        public string rootContainerPrefab = CONTAINER1;
         public string objectFieldPrefab = "ObjectField";
         public string boolFieldPrefab = "BoolField";
         public string integerFieldPrefab = "IntegerField";
@@ -24,8 +28,12 @@ namespace com.csutil.ui.mtvmtv {
         }
 
         public override async Task<GameObject> NewRootContainerView(ViewModel rootViewModel) {
+            return await NewRootContainerView(rootViewModel, rootContainerPrefab);
+        }
+
+        public async Task<GameObject> NewRootContainerView(ViewModel rootViewModel, string rootPrefabName) {
             var name = rootViewModel.modelName;
-            var rootView = await LoadFieldViewPrefab(rootContainerPrefab);
+            var rootView = await LoadFieldViewPrefab(rootPrefabName);
             SetViewModel(rootView, rootViewModel);
             return rootView;
         }
