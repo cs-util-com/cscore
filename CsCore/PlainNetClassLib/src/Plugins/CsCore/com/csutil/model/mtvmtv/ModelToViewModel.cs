@@ -92,7 +92,7 @@ namespace com.csutil.model.mtvmtv {
             JTokenType jTokenType = ToJTokenType(modelType, jpInstance);
             AssertV2.NotNull(jTokenType, "jTokenType");
             ViewModel.Field newField = new ViewModel.Field() { type = "" + jTokenType, text = ToTextName(name) };
-            if (TryGetDescription(model, jTokenType, pInstance, jpInstance, out string description)) {
+            if (TryGetDescription(model, modelType, jTokenType, pInstance, jpInstance, out string description)) {
                 newField.text.descr = description;
             }
             if (model != null) {
@@ -101,6 +101,8 @@ namespace com.csutil.model.mtvmtv {
                 }
                 if (!model.CanWriteTo()) { newField.readOnly = true; }
                 if (model.TryGetCustomAttribute(out ContentAttribute content)) { newField.contentType = "" + content.type; }
+                if (model.TryGetCustomAttribute(out EnumAttribute e)) { newField.contentEnum = e.names; }
+                if (modelType.IsEnum) { newField.contentEnum = Enum.GetNames(modelType); }
             }
             if (jTokenType == JTokenType.Object) {
                 if (modelType == null) {
@@ -127,7 +129,7 @@ namespace com.csutil.model.mtvmtv {
             return newField;
         }
 
-        public virtual bool TryGetDescription(MemberInfo m, JTokenType t, object pInstance, JToken jpInstance, out string result) {
+        public virtual bool TryGetDescription(MemberInfo m, Type modelType, JTokenType t, object pInstance, JToken jpInstance, out string result) {
             if (IsSimpleType(t)) {
                 var description = m?.GetCustomAttribute<DescriptionAttribute>(true)?.description;
                 if (description != null) {
@@ -143,6 +145,10 @@ namespace com.csutil.model.mtvmtv {
                     return true;
                 }
                 if (t == JTokenType.Integer) {
+                    if (modelType != null && modelType.IsEnum) {
+                        result = null;
+                        return false;
+                    }
                     result = "e.g. 99";
                     return true;
                 }
@@ -202,6 +208,7 @@ namespace com.csutil.model.mtvmtv {
             if (elemType.IsCastableTo<string>()) { return JTokenType.String; }
             if (elemType.IsCastableTo<IDictionary>()) { return JTokenType.Object; }
             if (elemType.IsCastableTo<IEnumerable>()) { return JTokenType.Array; }
+            if (elemType.IsEnum) { return JTokenType.Integer; }
             return JTokenType.Object;
         }
 

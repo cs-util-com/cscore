@@ -30,4 +30,11 @@ namespace com.csutil.model.mtvmtv {
         public ContentAttribute(ContentType type, string description) : base(description) { this.type = type; }
     }
 
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
+    public class EnumAttribute : DescriptionAttribute {
+        public string[] names;
+        public EnumAttribute(string description, params string[] names) : base(description) { this.names = names; }
+        public EnumAttribute(string description, Type enumType) : base(description) { names = Enum.GetNames(enumType); }
+    }
+
 }

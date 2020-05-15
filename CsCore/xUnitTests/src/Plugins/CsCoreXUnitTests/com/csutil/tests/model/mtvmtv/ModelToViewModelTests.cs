@@ -120,7 +120,7 @@ namespace com.csutil.tests.model.mtvmtv {
 
             ViewModel vm1 = new ModelToViewModel().ToViewModel("FromClassInstance", user);
             ViewModel vm2 = new ModelToViewModel().ToViewModel("FromJson", json);
-            ViewModel vm3 = new ModelToViewModel().ToViewModel("FromClassInstance", typeof(MyUserModel));
+            ViewModel vm3 = new ModelToViewModel().ToViewModel("FromClassType", typeof(MyUserModel));
 
             var n1 = vm1.fields["phoneNumber"];
             var n2 = vm2.fields["phoneNumber"];
@@ -130,6 +130,23 @@ namespace com.csutil.tests.model.mtvmtv {
             Assert.Equal(n2.type, n3.type);
             Assert.Equal(n1.text.name, n2.text.name);
             Assert.Equal(n2.text.name, n3.text.name);
+
+        }
+
+        [Fact]
+        public void TestEnum() {
+
+            ViewModel vm = new ModelToViewModel().ToViewModel("FromClassType", typeof(UserStats));
+            var e1 = vm.fields["experience1"];
+            var e2 = vm.fields["experience2"];
+            var e3 = vm.fields["experience3"];
+            var e4 = vm.fields["experience4"];
+            Log.d(JsonWriter.AsPrettyString(vm));
+
+            Assert.Equal(Enum.GetNames(typeof(UserStats.Experience)), e1.contentEnum);
+            Assert.Equal(e1.contentEnum, e2.contentEnum);
+            Assert.Equal(e2.contentEnum, e3.contentEnum);
+            Assert.Equal(e3.contentEnum, e4.contentEnum);
 
         }
 
@@ -170,6 +187,23 @@ namespace com.csutil.tests.model.mtvmtv {
             public string mimeType { get; set; }
 
         }
+
+        private class UserStats {
+
+            public enum Experience { Beginner, Avg, Expert }
+
+            [Enum("Level of experience 1", typeof(Experience))]
+            public string experience1;
+
+            [Enum("Level of experience 2", "Beginner", "Avg", "Expert")]
+            public string experience2;
+
+            public Experience experience3;
+
+            public Experience experience4;
+
+        }
+
 #pragma warning restore 0649 // Variable is never assigned to, and will always have its default value
 
     }

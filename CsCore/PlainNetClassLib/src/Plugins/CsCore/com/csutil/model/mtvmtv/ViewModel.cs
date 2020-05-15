@@ -25,6 +25,9 @@ namespace com.csutil.model.mtvmtv {
             public ViewModel objVm;
             public ChildList children;
 
+            /// <summary> Indicates that the field can only have descrete values </summary>
+            public string[] contentEnum;
+
             [Serializable]
             public class Text {
                 public string name;
