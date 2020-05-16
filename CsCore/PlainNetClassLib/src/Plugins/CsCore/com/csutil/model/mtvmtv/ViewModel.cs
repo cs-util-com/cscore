@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 
@@ -7,7 +8,7 @@ namespace com.csutil.model.mtvmtv {
     public class ViewModel {
 
         public string title;
-        /// <summary> Will contain the type like "Object", "Integer", .. </summary>
+        /// <summary> Will contain the type like "Object", "Integer", "Array", .. </summary>
         public string type;
         /// <summary> This will contain the concrete name of the model if type is an "Object" </summary>
         public string modelType;
@@ -28,9 +29,13 @@ namespace com.csutil.model.mtvmtv {
             public string contentType;
             /// <summary> If the field is an object it has a view model itself </summary>
             public ViewModel objVm;
+
             public List<ViewModel> items;
+            /// <summary> If true items is a set so it can only contain unique items </summary>
+            public bool? uniqueItems;
 
             /// <summary> Indicates that the field can only have descrete values </summary>
+            [JsonProperty("enum")]
             public string[] contentEnum;
 
         }
