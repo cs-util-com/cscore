@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
@@ -45,7 +46,7 @@ namespace com.csutil.model.mtvmtv {
                 }
                 if (type == JTokenType.Object) {
                     if (field.objVm.properties == null) {
-                        await HandleRecursiveViewModel(parentView, fieldName, field, mtvm.viewModels.GetValue(field.objVm.type, null));
+                        await HandleRecursiveViewModel(parentView, fieldName, field, mtvm.viewModels.GetValue(field.objVm.modelType, null));
                     } else {
                         var objectFieldView = await NewObjectFieldView(field);
                         await InitChild(await AddChild(parentView, objectFieldView), fieldName, field);
@@ -53,16 +54,19 @@ namespace com.csutil.model.mtvmtv {
                     }
                 }
                 if (type == JTokenType.Array) {
-                    var ct = EnumUtil.Parse<JTokenType>(field.items.type);
-                    if (mtvm.IsSimpleType(ct)) {
-                        await HandleSimpleArray(parentView, fieldName, field, ct);
-                    } else if (ct == JTokenType.Object) {
-                        var e = field.items.entries;
-                        if (e.Count == 1) {
-                            await HandleObjectArray(parentView, fieldName, field, e.First());
+                    var e = field.items;
+                    if (e.Count == 1) {
+                        ViewModel item = e.First();
+                        var ct = EnumUtil.Parse<JTokenType>(item.type);
+                        if (mtvm.IsSimpleType(ct)) {
+                            await HandleSimpleArray(parentView, fieldName, field, ct);
+                        } else if (ct == JTokenType.Object) {
+                            await HandleObjectArray(parentView, fieldName, field, item);
                         } else {
-                            await HandleMixedObjectArray(parentView, fieldName, field);
+                            throw new NotImplementedException("Array handling not impl. for type " + ct);
                         }
+                    } else {
+                        await HandleMixedObjectArray(parentView, fieldName, field);
                     }
                 }
             }

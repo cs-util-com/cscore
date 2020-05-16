@@ -31,24 +31,27 @@ namespace com.csutil.tests.model.mtvmtv {
             Assert.Equal("String", profilePicVm.properties["url"].type);
 
             Assert.Equal("Array", vm.properties["tags"].type);
-            Assert.Equal("String", vm.properties["tags"].items.type);
-            Assert.Null(vm.properties["tags"].items.entries);
+            Assert.Equal("String", vm.properties["tags"].items.First().type);
+            Assert.Null(vm.properties["tags"].items.First().properties);
 
             Assert.Equal("Array", vm.properties["contacts"].type);
             Assert.True(vm.properties["id"].readOnly.Value); // id has private setter
             Assert.True(vm.properties["contacts"].readOnly.Value); // contacts has only a getter
-            Assert.Equal("Object", vm.properties["contacts"].items.type);
 
-            ViewModel entryVm = vm.properties["contacts"].items.entries.First();
-            Assert.Equal("" + typeof(MyUserModel.UserContact), entryVm.type);
+            Assert.Equal("Object", vm.properties["contacts"].items.First().type);
+            // Contacts ViewModel already resolve as part of the bestFried field, so here no properties are included:
+            Assert.Null(vm.properties["contacts"].items.First().properties);
+
+            ViewModel entryVm = vm.properties["contacts"].items.First();
+            Assert.Equal("" + typeof(MyUserModel.UserContact), entryVm.modelType);
             Assert.Null(entryVm.properties);
 
-            Assert.Equal("" + typeof(MyUserModel.UserContact), vm.properties["bestFriend"].objVm.type);
+            Assert.Equal("" + typeof(MyUserModel.UserContact), vm.properties["bestFriend"].objVm.modelType);
 
             Assert.Equal("" + ContentType.Password, vm.properties["password"].contentType);
 
             ViewModel userVmInUserContactClass = vm.properties["bestFriend"].objVm.properties["user"].objVm;
-            Assert.Equal("" + typeof(MyUserModel), userVmInUserContactClass.type);
+            Assert.Equal("" + typeof(MyUserModel), userVmInUserContactClass.modelType);
             // The other fields of this ViewModel are null since it was already defined:
             Assert.Null(userVmInUserContactClass.properties);
 
@@ -68,7 +71,7 @@ namespace com.csutil.tests.model.mtvmtv {
             ViewModel vm = mtvm.ToViewModel("UserContact", userContact1);
             var userVm = vm.properties["user"].objVm;
             var userContactVm = userVm.properties["bestFriend"].objVm;
-            Assert.Equal("" + typeof(MyUserModel.UserContact), userContactVm.type);
+            Assert.Equal("" + typeof(MyUserModel.UserContact), userContactVm.modelType);
 
         }
 
@@ -107,8 +110,7 @@ namespace com.csutil.tests.model.mtvmtv {
             Log.d(JsonWriter.AsPrettyString(vm));
 
             Assert.Equal("Age", vm.properties["user"].objVm.properties["age"].title);
-            Assert.Equal("Integer", vm.properties["phoneNumbers"].items.type);
-
+            Assert.Equal("Integer", vm.properties["phoneNumbers"].items.First().type);
 
         }
 

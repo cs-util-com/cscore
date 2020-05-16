@@ -17,7 +17,10 @@ namespace com.csutil {
             if (Enum.TryParse(entryName, out T res)) { return res; } else { return fallback; }
         }
 
-        public static T Parse<T>(string enumString) { return (T)Enum.Parse(typeof(T), enumString); }
+        public static T Parse<T>(string enumString) {
+            if (enumString.IsNullOrEmpty()) { throw new ArgumentException("Cant parse null or emtpy string to enum " + typeof(T)); }
+            return (T)Enum.Parse(typeof(T), enumString);
+        }
 
         public static bool IsEnum<T>() { return typeof(T).IsEnum; }
 

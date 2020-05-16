@@ -7,14 +7,16 @@ namespace com.csutil.model.mtvmtv {
     public class ViewModel {
 
         public string title;
+        /// <summary> Will contain the type like "Object", "Integer", .. </summary>
         public string type;
+        /// <summary> This will contain the concrete name of the model if type is an "Object" </summary>
+        public string modelType;
         public List<string> order;
         public Dictionary<string, Field> properties;
 
         [Serializable]
         public class Field {
 
-            //public Text text;
             public string type;
             public string title;
             public string description;
@@ -26,22 +28,10 @@ namespace com.csutil.model.mtvmtv {
             public string contentType;
             /// <summary> If the field is an object it has a view model itself </summary>
             public ViewModel objVm;
-            public ChildList items;
+            public List<ViewModel> items;
 
             /// <summary> Indicates that the field can only have descrete values </summary>
             public string[] contentEnum;
-
-            //[Serializable]
-            //public class Text {
-            //    public string name;
-            //    public string descr;
-            //}
-
-            [Serializable]
-            public class ChildList {
-                public string type;
-                public List<ViewModel> entries;
-            }
 
         }
 
