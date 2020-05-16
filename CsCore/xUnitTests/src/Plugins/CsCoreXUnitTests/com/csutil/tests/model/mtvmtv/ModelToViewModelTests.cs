@@ -141,12 +141,14 @@ namespace com.csutil.tests.model.mtvmtv {
             var e2 = vm.fields["experience2"];
             var e3 = vm.fields["experience3"];
             var e4 = vm.fields["experience4"];
+            var e5 = vm.fields["experience5"];
             Log.d(JsonWriter.AsPrettyString(vm));
 
             Assert.Equal(Enum.GetNames(typeof(UserStats.Experience)), e1.contentEnum);
             Assert.Equal(e1.contentEnum, e2.contentEnum);
             Assert.Equal(e2.contentEnum, e3.contentEnum);
             Assert.Equal(e3.contentEnum, e4.contentEnum);
+            Assert.Equal(e4.contentEnum, e5.contentEnum);
 
         }
 
@@ -200,7 +202,10 @@ namespace com.csutil.tests.model.mtvmtv {
 
             public Experience experience3;
 
-            public Experience experience4;
+            public Experience? experience4;
+
+            [Enum("Level of experience 5", "Beginner", "Avg", "Expert")]
+            public int experience5;
 
         }
 

@@ -27,13 +27,21 @@ namespace com.csutil.model.mtvmtv {
                     await InitChild(await AddChild(parentView, await NewBoolFieldView(field)), fieldName, field);
                 }
                 if (type == JTokenType.Integer) {
-                    await InitChild(await AddChild(parentView, await NewIntegerFieldView(field)), fieldName, field);
+                    if (!field.contentEnum.IsNullOrEmpty()) {
+                        await InitChild(await AddChild(parentView, await NewEnumFieldView(field)), fieldName, field);
+                    } else {
+                        await InitChild(await AddChild(parentView, await NewIntegerFieldView(field)), fieldName, field);
+                    }
                 }
                 if (type == JTokenType.Float) {
                     await InitChild(await AddChild(parentView, await NewFloatFieldView(field)), fieldName, field);
                 }
                 if (type == JTokenType.String) {
-                    await InitChild(await AddChild(parentView, await NewStringFieldView(field)), fieldName, field);
+                    if (!field.contentEnum.IsNullOrEmpty()) {
+                        await InitChild(await AddChild(parentView, await NewEnumFieldView(field)), fieldName, field);
+                    } else {
+                        await InitChild(await AddChild(parentView, await NewStringFieldView(field)), fieldName, field);
+                    }
                 }
                 if (type == JTokenType.Object) {
                     if (field.objVm.fields == null) {
@@ -71,6 +79,7 @@ namespace com.csutil.model.mtvmtv {
         public abstract Task<V> NewStringFieldView(ViewModel.Field field);
         public abstract Task<V> NewFloatFieldView(ViewModel.Field field);
         public abstract Task<V> NewIntegerFieldView(ViewModel.Field field);
+        public abstract Task<V> NewEnumFieldView(ViewModel.Field field);
         public abstract Task<V> NewObjectFieldView(ViewModel.Field field);
 
         public abstract Task HandleRecursiveViewModel(V parentView, string fieldName, ViewModel.Field field, ViewModel recursiveViewModel);

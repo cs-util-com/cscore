@@ -20,6 +20,7 @@ namespace com.csutil.ui.mtvmtv {
         public string integerFieldPrefab = "IntegerField";
         public string floatFieldPrefab = "FloatField";
         public string stringFieldPrefab = "StringField";
+        public string enumFieldPrefab = "EnumField";
         public string readOnlyTextFieldPrefab = "ReadOnlyTextField";
         public string recursiveViewModelPrefab = "RecursiveViewModelUi";
 
@@ -56,24 +57,23 @@ namespace com.csutil.ui.mtvmtv {
         }
 
         public override async Task<GameObject> NewIntegerFieldView(ViewModel.Field field) {
-            if (field.readOnly == true) {
-                return await LoadFieldViewPrefab(readOnlyTextFieldPrefab);
-            }
+            if (field.readOnly == true) { return await LoadFieldViewPrefab(readOnlyTextFieldPrefab); }
             return await LoadFieldViewPrefab(integerFieldPrefab);
         }
 
         public override async Task<GameObject> NewFloatFieldView(ViewModel.Field field) {
-            if (field.readOnly == true) {
-                return await LoadFieldViewPrefab(readOnlyTextFieldPrefab);
-            }
+            if (field.readOnly == true) { return await LoadFieldViewPrefab(readOnlyTextFieldPrefab); }
             return await LoadFieldViewPrefab(floatFieldPrefab);
         }
 
         public override async Task<GameObject> NewStringFieldView(ViewModel.Field field) {
-            if (field.readOnly == true) {
-                return await LoadFieldViewPrefab(readOnlyTextFieldPrefab);
-            }
+            if (field.readOnly == true) { return await LoadFieldViewPrefab(readOnlyTextFieldPrefab); }
             return await LoadFieldViewPrefab(stringFieldPrefab);
+        }
+
+        public override async Task<GameObject> NewEnumFieldView(ViewModel.Field field) {
+            if (field.readOnly == true) { return await LoadFieldViewPrefab(readOnlyTextFieldPrefab); }
+            return await LoadFieldViewPrefab(enumFieldPrefab);
         }
 
         public virtual Task<GameObject> LoadFieldViewPrefab(string prefabName) {
@@ -90,11 +90,6 @@ namespace com.csutil.ui.mtvmtv {
             view.name = fullPath;
             fieldView.fullPath = fullPath;
             await fieldView.OnViewCreated(fieldName, fullPath);
-        }
-
-        private IEnumerable<FieldView> ResolveFullParentFieldViewPath(GameObject view, List<FieldView> target) {
-
-            return target;
         }
 
         public override async Task HandleRecursiveViewModel(GameObject parent, string fieldName, ViewModel.Field field, ViewModel recursiveViewModel) {

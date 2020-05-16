@@ -154,6 +154,14 @@ namespace com.csutil.tests {
 
             public float money;
 
+            public enum Experience { Beginner, Avg, Expert }
+            //[Enum("Level of experience", "Beginner", "Avg.", "Expert")]
+            [Enum("Level of experience", typeof(Experience))]
+            public string experience;
+
+            [Description("Level of experience 2")]
+            public Experience experience2;
+
             [Description("Checked if there is any money")]
             public bool hasMoney;
 
