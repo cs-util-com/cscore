@@ -25,10 +25,13 @@ namespace com.csutil.tests.model.mtvmtv {
 
             var mtvm = new ModelToViewModel();
             ViewModel vm = mtvm.ToViewModel("MyUserModel", user1);
+            Log.d("viewModel: " + JsonWriter.AsPrettyString(vm));
 
             ViewModel profilePicVm = vm.properties["profilePic"].objVm;
             Assert.Equal("String", profilePicVm.properties["dir"].type);
             Assert.Equal("String", profilePicVm.properties["url"].type);
+
+            Assert.Equal("name", vm.required.First());
 
             Assert.Equal("Array", vm.properties["tags"].type);
             Assert.Equal("String", vm.properties["tags"].items.First().type);
@@ -54,8 +57,6 @@ namespace com.csutil.tests.model.mtvmtv {
             Assert.Equal("" + typeof(MyUserModel), userVmInUserContactClass.modelType);
             // The other fields of this ViewModel are null since it was already defined:
             Assert.Null(userVmInUserContactClass.properties);
-
-            Log.d("viewModel: " + JsonWriter.AsPrettyString(vm));
 
         }
 
@@ -158,9 +159,13 @@ namespace com.csutil.tests.model.mtvmtv {
         private class MyUserModel {
 
             public string id { get; private set; }
+
+            [Required]
             public string name;
+
             [Content(ContentType.Password, "A secure password")]
             public string password;
+
             public int age;
             public float money;
             public FileRef profilePic;
@@ -186,6 +191,7 @@ namespace com.csutil.tests.model.mtvmtv {
 
             public string dir { get; set; }
             public string fileName { get; set; }
+            [Required]
             public string url { get; set; }
             public Dictionary<string, object> checksums { get; set; }
             public string mimeType { get; set; }

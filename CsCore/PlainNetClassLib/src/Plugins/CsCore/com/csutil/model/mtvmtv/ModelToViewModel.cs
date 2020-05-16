@@ -12,7 +12,11 @@ namespace com.csutil.model.mtvmtv {
     public class ModelToViewModel {
 
         public JsonSerializer jsonSerializer;
-        public bool forceSameTypeForAllChildren = false;
+        /// <summary>
+        /// If true and the view model is derived from an model instance,   
+        /// the default will be set to the value of the instance field.
+        /// </summary>
+        public bool useInstanceValAsDefault = false;
         public Dictionary<string, ViewModel> viewModels = new Dictionary<string, ViewModel>();
         public ISet<string> namespaceBacklist = null;
 
@@ -52,6 +56,8 @@ namespace com.csutil.model.mtvmtv {
             } else {
                 AddFieldsViaReflection(viewModel, modelType);
             }
+            var req = viewModel.properties.Filter(f => f.Value.required == true).Map(f => f.Key);
+            if (!req.IsNullOrEmpty()) { viewModel.required = req.ToList(); }
             return viewModel;
         }
 
@@ -92,9 +98,7 @@ namespace com.csutil.model.mtvmtv {
             JTokenType jTokenType = ToJTokenType(modelType, jpInstance);
             AssertV2.NotNull(jTokenType, "jTokenType");
             ViewModel.Field newField = new ViewModel.Field() { type = "" + jTokenType, title = ToTitle(name) };
-            if (TryGetDescription(model, modelType, jTokenType, pInstance, jpInstance, out string description)) {
-                newField.description = description;
-            }
+            ExtractFieldDocu(newField, model, modelType, jTokenType, pInstance, jpInstance);
             if (model != null) {
                 if (model.TryGetCustomAttributes(out IEnumerable<RegexAttribute> attr)) {
                     newField.regex = attr.Filter(x => x?.regex != null).SelectMany(x => x.regex).ToArray();
@@ -102,6 +106,7 @@ namespace com.csutil.model.mtvmtv {
                 if (!model.CanWriteTo()) { newField.readOnly = true; }
                 if (model.TryGetCustomAttribute(out ContentAttribute content)) { newField.contentType = "" + content.type; }
                 if (model.TryGetCustomAttribute(out EnumAttribute e)) { newField.contentEnum = e.names; }
+                if (model.TryGetCustomAttribute(out RequiredAttribute r)) { newField.required = true; }
                 if (modelType.IsEnum) { newField.contentEnum = Enum.GetNames(modelType); }
             }
             if (jTokenType == JTokenType.Object) {
@@ -148,35 +153,35 @@ namespace com.csutil.model.mtvmtv {
             AssertV2.AreEqual(childrenInstances.Length, arrayField.items.Count);
         }
 
-        public virtual bool TryGetDescription(MemberInfo m, Type modelType, JTokenType t, object pInstance, JToken jpInstance, out string result) {
+        public virtual bool ExtractFieldDocu(ViewModel.Field field, MemberInfo m, Type modelType, JTokenType t, object pInstance, JToken jpInstance) {
+            var descrAttr = m?.GetCustomAttribute<DescriptionAttribute>(true);
+            if (descrAttr != null) {
+                field.description = descrAttr.description;
+                field.defaultVal = descrAttr.defaultVal;
+                return true;
+            }
             if (IsSimpleType(t)) {
-                var description = m?.GetCustomAttribute<DescriptionAttribute>(true)?.description;
-                if (description != null) {
-                    result = description;
-                    return true;
-                }
                 if (pInstance != null) {
-                    result = $"e.g. '{m.GetValue(pInstance)}'";
+                    var value = m.GetValue(pInstance);
+                    field.description = $"e.g. '{value}'";
+                    if (useInstanceValAsDefault) { field.defaultVal = "" + value; }
                     return true;
                 }
                 if (jpInstance != null) {
-                    result = $"e.g. '{jpInstance}'";
+                    field.description = $"e.g. '{jpInstance}'";
+                    if (useInstanceValAsDefault) { field.defaultVal = "" + jpInstance; }
                     return true;
                 }
                 if (t == JTokenType.Integer) {
-                    if (modelType != null && modelType.IsEnum) {
-                        result = null;
-                        return false;
-                    }
-                    result = "e.g. 99";
+                    if (modelType != null && modelType.IsEnum) { return false; }
+                    field.description = "e.g. 99";
                     return true;
                 }
                 if (t == JTokenType.Float) {
-                    result = "e.g. " + 1.23f;
+                    field.description = "e.g. " + 1.23f;
                     return true;
                 }
             }
-            result = null;
             return false;
         }
 
@@ -221,7 +226,6 @@ namespace com.csutil.model.mtvmtv {
         }
 
         private bool AllChildrenHaveSameType(object[] childrenInstances) {
-            if (forceSameTypeForAllChildren) { return true; }
             if (childrenInstances.IsNullOrEmpty()) { return true; }
             Type childrenType = childrenInstances.First().GetType();
             return childrenInstances.All(c => c.GetType() == childrenType);

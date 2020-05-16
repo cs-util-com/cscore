@@ -13,18 +13,22 @@ namespace com.csutil.model.mtvmtv {
         /// <summary> This will contain the concrete name of the model if type is an "Object" </summary>
         public string modelType;
         public List<string> order;
+        public List<string> required;
         public Dictionary<string, Field> properties;
 
         [Serializable]
         public class Field {
 
             public string type;
+
             public string title;
             public string description;
+            [JsonProperty("default")]
+            public string defaultVal;
 
             public bool? readOnly;
             public bool? writeOnly;
-            public bool? mandatory;
+            public bool? required;
             public string[] regex;
             public string contentType;
             /// <summary> If the field is an object it has a view model itself </summary>
