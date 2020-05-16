@@ -21,7 +21,7 @@ namespace com.csutil.model.mtvmtv {
 
         public async Task ToView(ViewModel viewModel, V parentView) {
             foreach (var fieldName in viewModel.order) {
-                ViewModel.Field field = viewModel.fields[fieldName];
+                ViewModel.Field field = viewModel.properties[fieldName];
                 JTokenType type = field.GetJTokenType();
                 if (type == JTokenType.Boolean) {
                     await InitChild(await AddChild(parentView, await NewBoolFieldView(field)), fieldName, field);
@@ -44,8 +44,8 @@ namespace com.csutil.model.mtvmtv {
                     }
                 }
                 if (type == JTokenType.Object) {
-                    if (field.objVm.fields == null) {
-                        await HandleRecursiveViewModel(parentView, fieldName, field, mtvm.viewModels.GetValue(field.objVm.modelType, null));
+                    if (field.objVm.properties == null) {
+                        await HandleRecursiveViewModel(parentView, fieldName, field, mtvm.viewModels.GetValue(field.objVm.type, null));
                     } else {
                         var objectFieldView = await NewObjectFieldView(field);
                         await InitChild(await AddChild(parentView, objectFieldView), fieldName, field);
@@ -53,11 +53,11 @@ namespace com.csutil.model.mtvmtv {
                     }
                 }
                 if (type == JTokenType.Array) {
-                    var ct = EnumUtil.Parse<JTokenType>(field.children.type);
+                    var ct = EnumUtil.Parse<JTokenType>(field.items.type);
                     if (mtvm.IsSimpleType(ct)) {
                         await HandleSimpleArray(parentView, fieldName, field, ct);
                     } else if (ct == JTokenType.Object) {
-                        var e = field.children.entries;
+                        var e = field.items.entries;
                         if (e.Count == 1) {
                             await HandleObjectArray(parentView, fieldName, field, e.First());
                         } else {

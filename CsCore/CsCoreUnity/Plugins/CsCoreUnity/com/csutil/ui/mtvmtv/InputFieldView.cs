@@ -19,8 +19,8 @@ namespace com.csutil.ui.mtvmtv {
         private void SetupRegexValidator() {
             var regexValidator = GetComponent<RegexValidator>();
             if (regexValidator?.errorText != null) {
-                var errorText = $"Invalid {field.text.name}!";
-                if (!field.text.descr.IsNullOrEmpty()) { errorText += " Valid: " + field.text.descr; }
+                var errorText = $"Invalid {field.title}!";
+                if (!field.description.IsNullOrEmpty()) { errorText += " Valid: " + field.description; }
                 regexValidator.errorText.textLocalized(errorText);
             }
             regexValidator?.EnforceRegex(field.regex);

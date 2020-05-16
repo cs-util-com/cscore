@@ -33,7 +33,7 @@ namespace com.csutil.ui.mtvmtv {
         }
 
         public async Task<GameObject> NewRootContainerView(ViewModel rootViewModel, string rootPrefabName) {
-            var name = rootViewModel.modelName;
+            var name = rootViewModel.title;
             var rootView = await LoadFieldViewPrefab(rootPrefabName);
             SetViewModel(rootView, rootViewModel);
             return rootView;

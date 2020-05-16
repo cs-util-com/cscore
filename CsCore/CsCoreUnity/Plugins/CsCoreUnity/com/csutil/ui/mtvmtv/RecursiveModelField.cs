@@ -16,7 +16,7 @@ namespace com.csutil.ui.mtvmtv {
 
         public async Task<GameObject> NewViewFromViewModel(ViewModel viewModel) {
             AssertV2.NotNull(viewModel, "viewModel");
-            AssertV2.NotNull(viewModel.fields, "viewModel.fields");
+            AssertV2.NotNull(viewModel.properties, "viewModel.fields");
             GameObject rootContainerView = await viewModelToView.NewRootContainerView(viewModel, rootPrefabName);
             var innerContainer = await viewModelToView.SelectInnerViewContainerFromObjectFieldView(rootContainerView);
             await viewModelToView.ToView(viewModel, innerContainer);

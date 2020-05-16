@@ -26,31 +26,31 @@ namespace com.csutil.tests.model.mtvmtv {
             var mtvm = new ModelToViewModel();
             ViewModel vm = mtvm.ToViewModel("MyUserModel", user1);
 
-            ViewModel profilePicVm = vm.fields["profilePic"].objVm;
-            Assert.Equal("String", profilePicVm.fields["dir"].type);
-            Assert.Equal("String", profilePicVm.fields["url"].type);
+            ViewModel profilePicVm = vm.properties["profilePic"].objVm;
+            Assert.Equal("String", profilePicVm.properties["dir"].type);
+            Assert.Equal("String", profilePicVm.properties["url"].type);
 
-            Assert.Equal("Array", vm.fields["tags"].type);
-            Assert.Equal("String", vm.fields["tags"].children.type);
-            Assert.Null(vm.fields["tags"].children.entries);
+            Assert.Equal("Array", vm.properties["tags"].type);
+            Assert.Equal("String", vm.properties["tags"].items.type);
+            Assert.Null(vm.properties["tags"].items.entries);
 
-            Assert.Equal("Array", vm.fields["contacts"].type);
-            Assert.True(vm.fields["id"].readOnly.Value); // id has private setter
-            Assert.True(vm.fields["contacts"].readOnly.Value); // contacts has only a getter
-            Assert.Equal("Object", vm.fields["contacts"].children.type);
+            Assert.Equal("Array", vm.properties["contacts"].type);
+            Assert.True(vm.properties["id"].readOnly.Value); // id has private setter
+            Assert.True(vm.properties["contacts"].readOnly.Value); // contacts has only a getter
+            Assert.Equal("Object", vm.properties["contacts"].items.type);
 
-            ViewModel entryVm = vm.fields["contacts"].children.entries.First();
-            Assert.Equal("" + typeof(MyUserModel.UserContact), entryVm.modelType);
-            Assert.Null(entryVm.fields);
+            ViewModel entryVm = vm.properties["contacts"].items.entries.First();
+            Assert.Equal("" + typeof(MyUserModel.UserContact), entryVm.type);
+            Assert.Null(entryVm.properties);
 
-            Assert.Equal("" + typeof(MyUserModel.UserContact), vm.fields["bestFriend"].objVm.modelType);
+            Assert.Equal("" + typeof(MyUserModel.UserContact), vm.properties["bestFriend"].objVm.type);
 
-            Assert.Equal("" + ContentType.Password, vm.fields["password"].contentType);
+            Assert.Equal("" + ContentType.Password, vm.properties["password"].contentType);
 
-            ViewModel userVmInUserContactClass = vm.fields["bestFriend"].objVm.fields["user"].objVm;
-            Assert.Equal("" + typeof(MyUserModel), userVmInUserContactClass.modelType);
+            ViewModel userVmInUserContactClass = vm.properties["bestFriend"].objVm.properties["user"].objVm;
+            Assert.Equal("" + typeof(MyUserModel), userVmInUserContactClass.type);
             // The other fields of this ViewModel are null since it was already defined:
-            Assert.Null(userVmInUserContactClass.fields);
+            Assert.Null(userVmInUserContactClass.properties);
 
             Log.d("viewModel: " + JsonWriter.AsPrettyString(vm));
 
@@ -66,9 +66,9 @@ namespace com.csutil.tests.model.mtvmtv {
             };
             var mtvm = new ModelToViewModel();
             ViewModel vm = mtvm.ToViewModel("UserContact", userContact1);
-            var userVm = vm.fields["user"].objVm;
-            var userContactVm = userVm.fields["bestFriend"].objVm;
-            Assert.Equal("" + typeof(MyUserModel.UserContact), userContactVm.modelType);
+            var userVm = vm.properties["user"].objVm;
+            var userContactVm = userVm.properties["bestFriend"].objVm;
+            Assert.Equal("" + typeof(MyUserModel.UserContact), userContactVm.type);
 
         }
 
@@ -79,12 +79,12 @@ namespace com.csutil.tests.model.mtvmtv {
                 var mtvm = new ModelToViewModel();
                 ViewModel vm = mtvm.ToViewModel("UserContact", user);
                 Assert.Null(user.user); // The model field is null
-                Assert.NotNull(vm.fields["user"].objVm); // The viewmodel info is still defined
+                Assert.NotNull(vm.properties["user"].objVm); // The viewmodel info is still defined
             }
             {
                 var mtvm = new ModelToViewModel();
                 ViewModel vm = mtvm.ToViewModel("UserContact", typeof(MyUserModel.UserContact));
-                Assert.NotNull(vm.fields["user"].objVm); // The viewmodel info is still defined
+                Assert.NotNull(vm.properties["user"].objVm); // The viewmodel info is still defined
             }
         }
 
@@ -106,8 +106,8 @@ namespace com.csutil.tests.model.mtvmtv {
 
             Log.d(JsonWriter.AsPrettyString(vm));
 
-            Assert.Equal("Age", vm.fields["user"].objVm.fields["age"].text.name);
-            Assert.Equal("Integer", vm.fields["phoneNumbers"].children.type);
+            Assert.Equal("Age", vm.properties["user"].objVm.properties["age"].title);
+            Assert.Equal("Integer", vm.properties["phoneNumbers"].items.type);
 
 
         }
@@ -122,14 +122,14 @@ namespace com.csutil.tests.model.mtvmtv {
             ViewModel vm2 = new ModelToViewModel().ToViewModel("FromJson", json);
             ViewModel vm3 = new ModelToViewModel().ToViewModel("FromClassType", typeof(MyUserModel));
 
-            var n1 = vm1.fields["phoneNumber"];
-            var n2 = vm2.fields["phoneNumber"];
-            var n3 = vm3.fields["phoneNumber"];
+            var n1 = vm1.properties["phoneNumber"];
+            var n2 = vm2.properties["phoneNumber"];
+            var n3 = vm3.properties["phoneNumber"];
 
             Assert.Equal(n1.type, n2.type);
             Assert.Equal(n2.type, n3.type);
-            Assert.Equal(n1.text.name, n2.text.name);
-            Assert.Equal(n2.text.name, n3.text.name);
+            Assert.Equal(n1.title, n2.title);
+            Assert.Equal(n2.title, n3.title);
 
         }
 
@@ -137,11 +137,11 @@ namespace com.csutil.tests.model.mtvmtv {
         public void TestEnum() {
 
             ViewModel vm = new ModelToViewModel().ToViewModel("FromClassType", typeof(UserStats));
-            var e1 = vm.fields["experience1"];
-            var e2 = vm.fields["experience2"];
-            var e3 = vm.fields["experience3"];
-            var e4 = vm.fields["experience4"];
-            var e5 = vm.fields["experience5"];
+            var e1 = vm.properties["experience1"];
+            var e2 = vm.properties["experience2"];
+            var e3 = vm.properties["experience3"];
+            var e4 = vm.properties["experience4"];
+            var e5 = vm.properties["experience5"];
             Log.d(JsonWriter.AsPrettyString(vm));
 
             Assert.Equal(Enum.GetNames(typeof(UserStats.Experience)), e1.contentEnum);
