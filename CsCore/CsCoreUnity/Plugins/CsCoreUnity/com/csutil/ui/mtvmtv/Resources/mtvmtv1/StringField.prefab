@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 74bdada6d6c222d49b8c99abacd3c42e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  regex: []
+  regex: 
   inputToValidate: {fileID: 7429551617911626097}
   isValidInput: 1
   errorUi: {fileID: 4016776087293872776}
@@ -123,7 +123,7 @@ PrefabInstance:
     - target: {fileID: 4750268404707593151, guid: dedafae22c3eeff4eb4fea2716aab113,
         type: 3}
       propertyPath: m_SizeDelta.x
-      value: 350
+      value: 300
       objectReference: {fileID: 0}
     - target: {fileID: 4750268404707593151, guid: dedafae22c3eeff4eb4fea2716aab113,
         type: 3}

@@ -426,7 +426,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 4.27, y: -31.33}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 388.54, y: 202.64}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6707746182227877547
@@ -461,8 +461,6 @@ MonoBehaviour:
   titleButton: {fileID: 6555815025287344101}
   detailsUrlButton: {fileID: 8826228820914161185}
   listener: {fileID: 2168842482511052971}
-  markAsReadVerticalPosThreshold: 0.5
-  markasReadTransparency: 0.3
 --- !u!114 &2168842482511052971
 MonoBehaviour:
   m_ObjectHideFlags: 0

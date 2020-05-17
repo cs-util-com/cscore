@@ -71,7 +71,7 @@ MonoBehaviour:
     m_BestFit: 0
     m_MinSize: 10
     m_MaxSize: 40
-    m_Alignment: 6
+    m_Alignment: 3
     m_AlignByGeometry: 0
     m_RichText: 1
     m_HorizontalOverflow: 0
@@ -92,7 +92,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_IgnoreLayout: 0
   m_MinWidth: 75
-  m_MinHeight: 21
+  m_MinHeight: 32
   m_PreferredWidth: 110
   m_PreferredHeight: -1
   m_FlexibleWidth: -1
@@ -248,7 +248,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 400, y: 32}
+  m_SizeDelta: {x: 300, y: 32}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &5324004833558977325
 MonoBehaviour:
@@ -311,18 +311,19 @@ MonoBehaviour:
   description: {fileID: 0}
   mainLink: {fileID: 3290371631199780541}
   field:
-    text:
-      name: 
-      descr: 
     type: 
-    regex: 
+    title: 
+    description: 
+    defaultVal: 
+    pattern: 
     contentType: 
     objVm:
-      modelName: 
+      title: 
+      type: 
       modelType: 
       order: []
-    children:
-      type: 
-      entries: []
+      required: []
+    items: []
+    contentEnum: []
   fieldName: 
   fullPath: 

@@ -219,8 +219,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 43.07, y: -30.57}
-  m_SizeDelta: {x: 436.14, y: 93.14}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 300, y: 32}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &5324004833558977325
 MonoBehaviour:
@@ -283,19 +283,20 @@ MonoBehaviour:
   description: {fileID: 1562174254810496527}
   mainLink: {fileID: 7133682866338095834}
   field:
-    text:
-      name: 
-      descr: 
     type: 
-    regex: 
+    title: 
+    description: 
+    defaultVal: 
+    pattern: 
     contentType: 
     objVm:
-      modelName: 
+      title: 
+      type: 
       modelType: 
       order: []
-    children:
-      type: 
-      entries: []
+      required: []
+    items: []
+    contentEnum: []
   fieldName: 
   fullPath: 
   input: {fileID: 3176013512048729274}
