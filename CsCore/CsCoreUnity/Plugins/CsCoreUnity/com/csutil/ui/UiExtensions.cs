@@ -199,6 +199,11 @@ namespace com.csutil {
             self.ActivateInputField();
         }
 
+        public static void SetTextWithNotify(this InputField self, string text) {
+            self.SelectV2(); // Without this the change listeners are not triggered
+            self.text = text;
+        }
+
         public static void SubscribeToStateChanges<T, V>(this Behaviour self, IDataStore<T> store, Func<T, V> getSubState, Action<V> updateUi) {
             updateUi(getSubState(store.GetState()));
             Action listener = null;
