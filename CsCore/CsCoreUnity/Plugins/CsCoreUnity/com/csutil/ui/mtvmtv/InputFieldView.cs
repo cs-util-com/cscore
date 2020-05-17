@@ -11,7 +11,7 @@ namespace com.csutil.ui.mtvmtv {
 
         protected override Task Setup(string fieldName, string fullPath) {
             input.interactable = field.readOnly != true;
-            SetupForContentType(input, field.contentType);
+            SetupForContentType(input, field);
             if (!field.pattern.IsNullOrEmpty()) { SetupRegexValidator(); }
             return Task.FromResult(true);
         }
@@ -26,8 +26,8 @@ namespace com.csutil.ui.mtvmtv {
             regexValidator?.EnforceRegex(field.pattern);
         }
 
-        private static void SetupForContentType(InputField self, string fieldContentType) {
-            if (EnumUtil.TryParse(fieldContentType, out ContentType contentType)) {
+        private static void SetupForContentType(InputField self, ViewModel.Field field) {
+            if (EnumUtil.TryParse(field.contentType, out ContentType contentType)) {
                 switch (contentType) {
                     case ContentType.Alphanumeric:
                         self.contentType = InputField.ContentType.Alphanumeric;
@@ -48,6 +48,9 @@ namespace com.csutil.ui.mtvmtv {
                         self.contentType = InputField.ContentType.Autocorrected;
                         self.lineType = InputField.LineType.MultiLineNewline;
                         ForceRecalculateNeededHeightOfInputField(self);
+                        break;
+                    default:
+                        Log.e($"Content type ignored for field {field.title}: {field.contentType}");
                         break;
                 }
             }

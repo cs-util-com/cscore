@@ -108,6 +108,12 @@ namespace com.csutil.model.mtvmtv {
                     newField.additionalItems = e.additionalItems;
                 }
                 if (model.TryGetCustomAttribute(out RequiredAttribute r)) { newField.required = true; }
+                if (model.TryGetCustomAttribute(out JsonPropertyAttribute p)) {
+                    if (p.Required == Required.Always || p.Required == Required.DisallowNull) {
+                        newField.required = true;
+                    }
+                }
+
                 if (modelType.IsEnum) { newField.contentEnum = Enum.GetNames(modelType); }
             }
             if (jTokenType == JTokenType.Object) {

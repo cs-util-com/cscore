@@ -49,6 +49,6 @@ namespace com.csutil.model.mtvmtv {
 
     }
 
-    public enum ContentType { Alphanumeric, Name, Email, Password, Pin, Essay }
+    public enum ContentType { Alphanumeric, Name, Email, Password, Pin, Essay, Color, Date }
 
 }

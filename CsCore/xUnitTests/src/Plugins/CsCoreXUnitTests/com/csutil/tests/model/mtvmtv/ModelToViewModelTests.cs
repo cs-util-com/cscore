@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using com.csutil.model;
 using com.csutil.model.mtvmtv;
+using Newtonsoft.Json;
 using Xunit;
 
 namespace com.csutil.tests.model.mtvmtv {
@@ -31,7 +32,9 @@ namespace com.csutil.tests.model.mtvmtv {
             Assert.Equal("String", profilePicVm.properties["dir"].type);
             Assert.Equal("String", profilePicVm.properties["url"].type);
 
-            Assert.Equal("name", vm.required.First());
+            Assert.Contains("id", vm.required);
+            Assert.Contains("name", vm.required);
+            Assert.Equal(2, vm.required.Count);
 
             Assert.Equal("Array", vm.properties["tags"].type);
             Assert.Equal("String", vm.properties["tags"].items.First().type);
@@ -158,7 +161,8 @@ namespace com.csutil.tests.model.mtvmtv {
 #pragma warning disable 0649 // Variable is never assigned to, and will always have its default value
         private class MyUserModel {
 
-            public string id { get; private set; }
+            [JsonProperty(Required = Required.Always)]
+            public string id { get; private set; } = Guid.NewGuid().ToString();
 
             [Required]
             public string name;
