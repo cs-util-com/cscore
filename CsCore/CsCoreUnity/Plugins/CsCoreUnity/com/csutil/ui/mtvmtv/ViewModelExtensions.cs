@@ -1,6 +1,5 @@
 ﻿using com.csutil.datastructures;
 using com.csutil.model.mtvmtv;
-using com.csutil.ui.viewstack;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -68,16 +67,27 @@ namespace com.csutil.ui.mtvmtv {
 
         public static bool LinkToJsonModel(this FieldView self, JObject root) {
             string name = self.fieldName;
-            var model = self.GetChildJObjFrom(root);
+            JObject model = self.GetChildJObjFrom(root);
+            JToken value = model?[name];
+            if (self is EnumFieldView e && value?.Type == JTokenType.Integer) {
+                int posInEnum = int.Parse("" + value);
+                var enumValues = self.field.contentEnum;
+                e.LinkToModel(enumValues[posInEnum], newVal => {
+                    var newPosInEnum = Array.FindIndex(enumValues, x => x == newVal);
+                    self.CreateChildJObjIfNeeded(root);
+                    self.GetChildJObjFrom(root)[name] = new JValue(newPosInEnum);
+                });
+                return true;
+            }
             if (self is InputFieldView i) {
-                i.LinkToModel("" + model?[name], newVal => {
+                i.LinkToModel("" + value, newVal => {
                     self.CreateChildJObjIfNeeded(root);
                     self.GetChildJObjFrom(root)[name] = self.field.ParseToJValue(newVal);
                 });
                 return true;
             }
             if (self is BoolFieldView b) {
-                bool val = (model?[name] as JValue)?.Value<bool>() == true;
+                bool val = (value as JValue)?.Value<bool>() == true;
                 b.LinkToModel(val, newB => {
                     self.CreateChildJObjIfNeeded(root);
                     self.GetChildJObjFrom(root)[name] = new JValue(newB);
@@ -85,7 +95,7 @@ namespace com.csutil.ui.mtvmtv {
                 return true;
             }
             if (self.field.readOnly == true) {
-                self.LinkToModel("" + model?[name]);
+                self.LinkToModel("" + value);
                 return true;
             }
             return false;
