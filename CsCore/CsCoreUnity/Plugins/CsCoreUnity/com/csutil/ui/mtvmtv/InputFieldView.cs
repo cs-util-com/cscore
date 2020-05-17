@@ -1,4 +1,5 @@
-﻿using com.csutil.model.mtvmtv;
+﻿using com.csutil.model;
+using com.csutil.model.mtvmtv;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
@@ -12,18 +13,25 @@ namespace com.csutil.ui.mtvmtv {
         protected override Task Setup(string fieldName, string fullPath) {
             input.interactable = field.readOnly != true;
             SetupForContentType(input, field);
-            if (!field.pattern.IsNullOrEmpty()) { SetupRegexValidator(); }
+            if (field.required == true || !field.pattern.IsNullOrEmpty()) {
+                SetupRegexValidator();
+            }
             return Task.FromResult(true);
         }
 
         private void SetupRegexValidator() {
             var regexValidator = GetComponent<RegexValidator>();
-            if (regexValidator?.errorText != null) {
+            if (regexValidator == null) {
+                Log.w($"Can't enforce regex, no validator found in FieldView {this}", gameObject);
+                return;
+            }
+            if (regexValidator.errorText != null) {
                 var errorText = $"Invalid {field.title}!";
                 if (!field.description.IsNullOrEmpty()) { errorText += " Valid: " + field.description; }
                 regexValidator.errorText.textLocalized(errorText);
             }
-            regexValidator?.EnforceRegex(field.pattern);
+            regexValidator.isInputRequired = field.required == true;
+            regexValidator.EnforceRegex(field.pattern);
         }
 
         private static void SetupForContentType(InputField self, ViewModel.Field field) {

@@ -93,6 +93,7 @@ namespace com.csutil.tests {
                 var map = targetView.GetFieldViewMap();
                 map.LinkViewToModel("id", u.id);
                 map.LinkViewToModel("name", u.name, newVal => u.name = newVal);
+                map.LinkViewToModel("lastName", u.lastName, newVal => u.lastName = newVal);
                 map.LinkViewToModel("email", u.email, newVal => u.email = newVal);
                 map.LinkViewToModel("password", u.password, newVal => u.password = newVal);
                 map.LinkViewToModel("age", "" + u.age, newVal => u.age = int.Parse(newVal));
@@ -140,8 +141,12 @@ namespace com.csutil.tests {
             public string id { get; private set; } = Guid.NewGuid().ToString();
 
             [Regex(2, 30)]
-            [Content(ContentType.Name, "e.g. Tom Riddle")]
+            [Content(ContentType.Name, "e.g. Tom")]
             public string name;
+
+            [Required]
+            [Content(ContentType.Name, "e.g. Riddle")]
+            public string lastName;
 
             [Content(ContentType.Email, "e.g. tom@email.com")]
             [Regex(RegexTemplates.EMAIL_ADDRESS)]

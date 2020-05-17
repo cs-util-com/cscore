@@ -23,7 +23,7 @@ namespace com.csutil.ui.mtvmtv {
             self.input.AddOnValueChangedActionThrottled(newValue => {
                 if (self.IsDestroyed()) { return; }
                 var regexValidator = self.GetComponent<RegexValidator>();
-                if (regexValidator != null && !regexValidator.IsCurrentInputValid()) { return; }
+                if (regexValidator != null && !regexValidator.CheckIfCurrentInputValid()) { return; }
                 if (changeTracker.SetNewValue(newValue)) { onValueChanged(newValue); }
             });
         }
