@@ -21,9 +21,9 @@ namespace com.csutil.model.mtvmtv {
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
     public class RegexAttribute : Attribute {
 
-        public string[] regex;
+        public string regex;
 
-        public RegexAttribute(params string[] regex) { this.regex = regex; }
+        public RegexAttribute(params string[] regex) { this.regex = RegexUtil.CombineViaAnd(regex); }
 
         public RegexAttribute(int minChars, params string[] regex) {
             SetRegex(regex, "^.{" + minChars + ",}$");
@@ -35,22 +35,31 @@ namespace com.csutil.model.mtvmtv {
 
         private void SetRegex(string[] regex, string s) {
             var minMaxRegex = new string[1] { s };
-            this.regex = minMaxRegex.Union(regex).ToArray();
+            this.regex = RegexUtil.CombineViaAnd(minMaxRegex.Union(regex).ToArray());
         }
 
     }
 
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
     public class ContentAttribute : DescriptionAttribute {
+
         public ContentType type;
+
         public ContentAttribute(ContentType type, string description) : base(description) { this.type = type; }
+
     }
 
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
     public class EnumAttribute : DescriptionAttribute {
+
         public string[] names;
+        /// <summary> Controls whether it's valid to have additional items in the array </summary>
+        public bool additionalItems = false;
+
         public EnumAttribute(string description, params string[] names) : base(description) { this.names = names; }
+
         public EnumAttribute(string description, Type enumType) : base(description) { names = Enum.GetNames(enumType); }
+
     }
 
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]

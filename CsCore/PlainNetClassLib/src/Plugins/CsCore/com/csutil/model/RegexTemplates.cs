@@ -1,4 +1,4 @@
-using System;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace com.csutil.model {
@@ -29,13 +29,29 @@ namespace com.csutil.model {
         public const string HAS_NUMBER = @".*\d.*";
         public const string HAS_SPECIAL_CHAR = @".*\W.*";
 
+    }
+
+    public static class RegexUtil {
+
         private static Regex camelCaseSplitter = new Regex(@"(\B[A-Z]+?(?=[A-Z][^A-Z])|\B[A-Z]+?(?=[^A-Z]))");
-
-
 
         public static string SplitCamelCaseString(string camelCaseString) {
             return camelCaseSplitter.Replace(camelCaseString, " $1").ToFirstCharUpperCase();
         }
 
+        /// <summary> Combines multiple regex via AND </summary>
+        public static string CombineViaOr(params string[] regex) {
+            if (regex.Length == 1) { return regex.Single(); }
+            return regex.Map(r => "(" + r + ")").ToStringV2("^", "$", "|");
+        }
+
+        /// <summary> Combines multiple regex via AND </summary>
+        public static string CombineViaAnd(params string[] regex) {
+            if (regex.Length == 1) { return regex.Single(); }
+            // See https://stackoverflow.com/a/470602/165106
+            return regex.Reduce("^", (res, r) => res + "(?=.*" + r + ")") + ".*$";
+        }
+
     }
+
 }

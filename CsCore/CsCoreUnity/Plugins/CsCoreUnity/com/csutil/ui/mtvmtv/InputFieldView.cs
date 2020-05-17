@@ -12,7 +12,7 @@ namespace com.csutil.ui.mtvmtv {
         protected override Task Setup(string fieldName, string fullPath) {
             input.interactable = field.readOnly != true;
             SetupForContentType(input, field.contentType);
-            if (!field.regex.IsNullOrEmpty()) { SetupRegexValidator(); }
+            if (!field.pattern.IsNullOrEmpty()) { SetupRegexValidator(); }
             return Task.FromResult(true);
         }
 
@@ -23,7 +23,7 @@ namespace com.csutil.ui.mtvmtv {
                 if (!field.description.IsNullOrEmpty()) { errorText += " Valid: " + field.description; }
                 regexValidator.errorText.textLocalized(errorText);
             }
-            regexValidator?.EnforceRegex(field.regex);
+            regexValidator?.EnforceRegex(field.pattern);
         }
 
         private static void SetupForContentType(InputField self, string fieldContentType) {

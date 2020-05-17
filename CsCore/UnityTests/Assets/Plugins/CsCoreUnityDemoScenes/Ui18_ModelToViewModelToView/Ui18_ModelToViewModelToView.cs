@@ -101,6 +101,8 @@ namespace com.csutil.tests {
                 map.LinkViewToModel("description", u.description, newVal => u.description = newVal);
                 map.LinkViewToModel("homepage", u.homepage, newVal => u.homepage = newVal);
                 map.LinkViewToModel("hasMoney", u.hasMoney, newVal => u.hasMoney = newVal);
+                map.LinkViewToModel("exp1", u.exp1, newVal => u.exp1 = newVal);
+                map.LinkViewToModel("exp2", "" + u.exp2, newVal => u.exp2 = MyUserModel.Experience.Avg.TryParse(newVal));
 
                 map.LinkViewToModel("bestFriend.name", u.bestFriend.name, newVal => u.bestFriend.name = newVal);
                 map.LinkViewToModel("profilePic.url", u.profilePic.url, newVal => u.profilePic.url = newVal);
@@ -155,12 +157,11 @@ namespace com.csutil.tests {
             public float money;
 
             public enum Experience { Beginner, Avg, Expert }
-            //[Enum("Level of experience", "Beginner", "Avg.", "Expert")]
-            [Enum("Level of experience", typeof(Experience))]
-            public string experience;
+            [Enum("Level of experience 1", typeof(Experience), additionalItems = true)]
+            public string exp1;
 
             [Description("Level of experience 2")]
-            public Experience experience2;
+            public Experience exp2;
 
             [Description("Checked if there is any money")]
             public bool hasMoney;

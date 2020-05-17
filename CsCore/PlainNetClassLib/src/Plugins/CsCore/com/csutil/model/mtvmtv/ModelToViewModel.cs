@@ -100,12 +100,13 @@ namespace com.csutil.model.mtvmtv {
             ViewModel.Field newField = new ViewModel.Field() { type = "" + jTokenType, title = ToTitle(name) };
             ExtractFieldDocu(newField, model, modelType, jTokenType, pInstance, jpInstance);
             if (model != null) {
-                if (model.TryGetCustomAttributes(out IEnumerable<RegexAttribute> attr)) {
-                    newField.regex = attr.Filter(x => x?.regex != null).SelectMany(x => x.regex).ToArray();
-                }
                 if (!model.CanWriteTo()) { newField.readOnly = true; }
-                if (model.TryGetCustomAttribute(out ContentAttribute content)) { newField.contentType = "" + content.type; }
-                if (model.TryGetCustomAttribute(out EnumAttribute e)) { newField.contentEnum = e.names; }
+                if (model.TryGetCustomAttribute(out RegexAttribute attr)) { newField.pattern = attr.regex; }
+                if (model.TryGetCustomAttribute(out ContentAttribute c)) { newField.contentType = "" + c.type; }
+                if (model.TryGetCustomAttribute(out EnumAttribute e)) {
+                    newField.contentEnum = e.names;
+                    newField.additionalItems = e.additionalItems;
+                }
                 if (model.TryGetCustomAttribute(out RequiredAttribute r)) { newField.required = true; }
                 if (modelType.IsEnum) { newField.contentEnum = Enum.GetNames(modelType); }
             }
@@ -186,7 +187,7 @@ namespace com.csutil.model.mtvmtv {
         }
 
         private string ToTitle(string varName) {
-            return RegexTemplates.SplitCamelCaseString(varName);
+            return RegexUtil.SplitCamelCaseString(varName);
         }
 
         private Type GetListElementType(Type listType) {
