@@ -57,7 +57,7 @@ namespace com.csutil.model.mtvmtv {
             viewModel.properties = new Dictionary<string, ViewModel>();
             if (model != null) {
                 AssertV2.IsTrue(modelType == model.GetType(), $"modelType ({modelType}) != model.type ({model.GetType()})");
-                AddFieldsViaJson(viewModel, model);
+                AddFieldsViaJson(viewModel, model, ToJsonModel(model));
             } else {
                 AddFieldsViaReflection(viewModel, modelType);
             }
@@ -73,7 +73,6 @@ namespace com.csutil.model.mtvmtv {
             return viewModel;
         }
 
-
         private void AddFieldsViaReflection(ViewModel viewModel, Type modelType) {
             viewModel.order = new List<string>();
             foreach (var member in modelType.GetMembers()) {
@@ -83,10 +82,6 @@ namespace com.csutil.model.mtvmtv {
                     viewModel.properties.Add(fieldName, NewField(fieldName, modelType));
                 }
             }
-        }
-
-        private void AddFieldsViaJson(ViewModel viewModel, object model) {
-            AddFieldsViaJson(viewModel, model, ToJsonModel(model));
         }
 
         private void AddFieldsViaJson(ViewModel viewModel, object model, IEnumerable<KeyValuePair<string, JToken>> jsonModel) {
@@ -130,7 +125,7 @@ namespace com.csutil.model.mtvmtv {
 
                 } else {
                     var modelInstance = pInstance != null ? model.GetValue(pInstance) : null;
-                    NewInnerViewModel(newField, modelType, modelInstance);
+                    SetupInnerViewModel(newField, modelType, modelInstance);
                 }
             }
             if (jTokenType == JTokenType.Array) {
@@ -145,13 +140,13 @@ namespace com.csutil.model.mtvmtv {
                         if (childrenInstances == null || AllChildrenHaveSameType(childrenInstances)) {
                             var firstChildInstance = childrenInstances?.FirstOrDefault();
                             var childVm = new ViewModel() { type = "" + arrayElemJType };
-                            NewInnerViewModel(childVm, listElemType, firstChildInstance);
+                            SetupInnerViewModel(childVm, listElemType, firstChildInstance);
                             newField.items = new List<ViewModel>() { childVm };
                         } else {
                             newField.items = new List<ViewModel>();
                             foreach (var child in childrenInstances) {
                                 var childVm = new ViewModel() { type = "" + arrayElemJType };
-                                NewInnerViewModel(childVm, child.GetType(), child);
+                                SetupInnerViewModel(childVm, child.GetType(), child);
                                 newField.items.Add(childVm);
                             }
                             AssertV2.AreEqual(childrenInstances.Length, newField.items.Count);
@@ -163,8 +158,6 @@ namespace com.csutil.model.mtvmtv {
             }
             return newField;
         }
-
-
 
         public virtual bool ExtractFieldDocu(ViewModel field, MemberInfo m, Type modelType, JTokenType t, object pInstance, JToken jpInstance) {
             var descrAttr = m?.GetCustomAttribute<DescriptionAttribute>(true);
@@ -198,9 +191,7 @@ namespace com.csutil.model.mtvmtv {
             return false;
         }
 
-        private string ToTitle(string varName) {
-            return RegexUtil.SplitCamelCaseString(varName);
-        }
+        private string ToTitle(string varName) { return RegexUtil.SplitCamelCaseString(varName); }
 
         private Type GetListElementType(Type listType) {
             if (listType == null) { return null; }
@@ -244,7 +235,7 @@ namespace com.csutil.model.mtvmtv {
             return childrenInstances.All(c => c.GetType() == childrenType);
         }
 
-        private void NewInnerViewModel(ViewModel viewModel, Type modelType, object model = null) {
+        private void SetupInnerViewModel(ViewModel viewModel, Type modelType, object model = null) {
             if (GetExistingViewModelFor(modelType, out ViewModel vm)) {
                 // ViewModel already generated for this type, so dont traverse modelType:
                 viewModel.modelType = ToTypeString(modelType);
