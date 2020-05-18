@@ -44,7 +44,7 @@ namespace com.csutil.ui.mtvmtv {
             return Task.FromResult(child);
         }
 
-        public override async Task<GameObject> NewObjectFieldView(ViewModel.Field field) {
+        public override async Task<GameObject> NewObjectFieldView(ViewModel field) {
             return await LoadFieldViewPrefab(objectFieldPrefab);
         }
 
@@ -52,26 +52,26 @@ namespace com.csutil.ui.mtvmtv {
             return Task.FromResult(containerView.GetComponentInChildren<FieldView>().mainLink.gameObject);
         }
 
-        public override async Task<GameObject> NewBoolFieldView(ViewModel.Field field) {
+        public override async Task<GameObject> NewBoolFieldView(ViewModel field) {
             return await LoadFieldViewPrefab(boolFieldPrefab);
         }
 
-        public override async Task<GameObject> NewIntegerFieldView(ViewModel.Field field) {
+        public override async Task<GameObject> NewIntegerFieldView(ViewModel field) {
             if (field.readOnly == true) { return await LoadFieldViewPrefab(readOnlyTextFieldPrefab); }
             return await LoadFieldViewPrefab(integerFieldPrefab);
         }
 
-        public override async Task<GameObject> NewFloatFieldView(ViewModel.Field field) {
+        public override async Task<GameObject> NewFloatFieldView(ViewModel field) {
             if (field.readOnly == true) { return await LoadFieldViewPrefab(readOnlyTextFieldPrefab); }
             return await LoadFieldViewPrefab(floatFieldPrefab);
         }
 
-        public override async Task<GameObject> NewStringFieldView(ViewModel.Field field) {
+        public override async Task<GameObject> NewStringFieldView(ViewModel field) {
             if (field.readOnly == true) { return await LoadFieldViewPrefab(readOnlyTextFieldPrefab); }
             return await LoadFieldViewPrefab(stringFieldPrefab);
         }
 
-        public override async Task<GameObject> NewEnumFieldView(ViewModel.Field field) {
+        public override async Task<GameObject> NewEnumFieldView(ViewModel field) {
             if (field.readOnly == true) { return await LoadFieldViewPrefab(readOnlyTextFieldPrefab); }
             return await LoadFieldViewPrefab(enumFieldPrefab);
         }
@@ -80,7 +80,7 @@ namespace com.csutil.ui.mtvmtv {
             return Task.FromResult(ResourcesV2.LoadPrefab(prefabFolder + prefabName));
         }
 
-        public override async Task InitChild(GameObject view, string fieldName, ViewModel.Field field) {
+        public override async Task InitChild(GameObject view, string fieldName, ViewModel field) {
             var fieldView = view.GetComponentInChildren<FieldView>();
             fieldView.field = field;
             fieldView.fieldName = fieldName;
@@ -92,7 +92,7 @@ namespace com.csutil.ui.mtvmtv {
             await fieldView.OnViewCreated(fieldName, fullPath);
         }
 
-        public override async Task HandleRecursiveViewModel(GameObject parent, string fieldName, ViewModel.Field field, ViewModel recursiveViewModel) {
+        public override async Task HandleRecursiveViewModel(GameObject parent, string fieldName, ViewModel field, ViewModel recursiveViewModel) {
             var view = await AddChild(parent, await LoadFieldViewPrefab(recursiveViewModelPrefab));
             SetViewModel(view, recursiveViewModel);
             await InitChild(view, fieldName, field);
@@ -104,15 +104,15 @@ namespace com.csutil.ui.mtvmtv {
             viewModelFieldView.recursiveViewModel = viewModel;
         }
 
-        public override Task HandleSimpleArray(GameObject parent, string fieldName, ViewModel.Field field, JTokenType arrayType) {
+        public override Task HandleSimpleArray(GameObject parent, string fieldName, ViewModel field, JTokenType arrayType) {
             throw new NotImplementedException();
         }
 
-        public override Task HandleMixedObjectArray(GameObject parent, string fieldName, ViewModel.Field field) {
+        public override Task HandleMixedObjectArray(GameObject parent, string fieldName, ViewModel field) {
             throw new NotImplementedException();
         }
 
-        public override Task HandleObjectArray(GameObject parent, string fieldName, ViewModel.Field field, ViewModel entryViewModel) {
+        public override Task HandleObjectArray(GameObject parent, string fieldName, ViewModel field, ViewModel entryViewModel) {
             throw new NotImplementedException();
         }
 

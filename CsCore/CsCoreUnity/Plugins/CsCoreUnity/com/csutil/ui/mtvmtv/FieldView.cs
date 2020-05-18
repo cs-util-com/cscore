@@ -12,7 +12,7 @@ namespace com.csutil.ui.mtvmtv {
         public Link mainLink;
 
         [SerializeField]
-        public ViewModel.Field field;
+        public ViewModel field;
         public string fieldName;
         public string fullPath;
 

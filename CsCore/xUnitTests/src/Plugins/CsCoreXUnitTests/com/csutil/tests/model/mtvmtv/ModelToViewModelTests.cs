@@ -25,10 +25,10 @@ namespace com.csutil.tests.model.mtvmtv {
             };
 
             var mtvm = new ModelToViewModel();
-            ViewModel vm = mtvm.ToViewModel("MyUserModel", user1);
+            var vm = mtvm.ToViewModel("MyUserModel", user1);
             Log.d("viewModel: " + JsonWriter.AsPrettyString(vm));
 
-            ViewModel profilePicVm = vm.properties["profilePic"].objVm;
+            var profilePicVm = vm.properties["profilePic"];
             Assert.Equal("String", profilePicVm.properties["dir"].type);
             Assert.Equal("String", profilePicVm.properties["url"].type);
 
@@ -48,15 +48,15 @@ namespace com.csutil.tests.model.mtvmtv {
             // Contacts ViewModel already resolve as part of the bestFried field, so here no properties are included:
             Assert.Null(vm.properties["contacts"].items.First().properties);
 
-            ViewModel entryVm = vm.properties["contacts"].items.First();
+            var entryVm = vm.properties["contacts"].items.First();
             Assert.Equal("" + typeof(MyUserModel.UserContact), entryVm.modelType);
             Assert.Null(entryVm.properties);
 
-            Assert.Equal("" + typeof(MyUserModel.UserContact), vm.properties["bestFriend"].objVm.modelType);
+            Assert.Equal("" + typeof(MyUserModel.UserContact), vm.properties["bestFriend"].modelType);
 
             Assert.Equal("" + ContentType.Password, vm.properties["password"].contentType);
 
-            ViewModel userVmInUserContactClass = vm.properties["bestFriend"].objVm.properties["user"].objVm;
+            var userVmInUserContactClass = vm.properties["bestFriend"].properties["user"];
             Assert.Equal("" + typeof(MyUserModel), userVmInUserContactClass.modelType);
             // The other fields of this ViewModel are null since it was already defined:
             Assert.Null(userVmInUserContactClass.properties);
@@ -72,10 +72,9 @@ namespace com.csutil.tests.model.mtvmtv {
                 }
             };
             var mtvm = new ModelToViewModel();
-            ViewModel vm = mtvm.ToViewModel("UserContact", userContact1);
-            var userVm = vm.properties["user"].objVm;
-            var userContactVm = userVm.properties["bestFriend"].objVm;
-            Assert.Equal("" + typeof(MyUserModel.UserContact), userContactVm.modelType);
+            var vm = mtvm.ToViewModel("UserContact", userContact1);
+            var bestFriendVm = vm.properties["user"].properties["bestFriend"];
+            Assert.Equal("" + typeof(MyUserModel.UserContact), bestFriendVm.modelType);
 
         }
 
@@ -84,14 +83,14 @@ namespace com.csutil.tests.model.mtvmtv {
             {
                 var user = new MyUserModel.UserContact();
                 var mtvm = new ModelToViewModel();
-                ViewModel vm = mtvm.ToViewModel("UserContact", user);
+                var vm = mtvm.ToViewModel("UserContact", user);
                 Assert.Null(user.user); // The model field is null
-                Assert.NotNull(vm.properties["user"].objVm); // The viewmodel info is still defined
+                Assert.NotEmpty(vm.properties["user"].properties); // The viewmodel info is still defined
             }
             {
                 var mtvm = new ModelToViewModel();
-                ViewModel vm = mtvm.ToViewModel("UserContact", typeof(MyUserModel.UserContact));
-                Assert.NotNull(vm.properties["user"].objVm); // The viewmodel info is still defined
+                var vm = mtvm.ToViewModel("UserContact", typeof(MyUserModel.UserContact));
+                Assert.NotEmpty(vm.properties["user"].properties); // The viewmodel info is still defined
             }
         }
 
@@ -109,11 +108,11 @@ namespace com.csutil.tests.model.mtvmtv {
             Log.d("json=" + json);
 
             var mtvm = new ModelToViewModel();
-            ViewModel vm = mtvm.ToViewModel("MyUserModel", json);
+            var vm = mtvm.ToViewModel("MyUserModel", json);
 
             Log.d(JsonWriter.AsPrettyString(vm));
 
-            Assert.Equal("Age", vm.properties["user"].objVm.properties["age"].title);
+            Assert.Equal("Age", vm.properties["user"].properties["age"].title);
             Assert.Equal("Integer", vm.properties["phoneNumbers"].items.First().type);
 
         }
@@ -124,9 +123,9 @@ namespace com.csutil.tests.model.mtvmtv {
             var user = new MyUserModel() { phoneNumber = 12345 };
             string json = JsonWriter.GetWriter().Write(user);
 
-            ViewModel vm1 = new ModelToViewModel().ToViewModel("FromClassInstance", user);
-            ViewModel vm2 = new ModelToViewModel().ToViewModel("FromJson", json);
-            ViewModel vm3 = new ModelToViewModel().ToViewModel("FromClassType", typeof(MyUserModel));
+            var vm1 = new ModelToViewModel().ToViewModel("FromClassInstance", user);
+            var vm2 = new ModelToViewModel().ToViewModel("FromJson", json);
+            var vm3 = new ModelToViewModel().ToViewModel("FromClassType", typeof(MyUserModel));
 
             var n1 = vm1.properties["phoneNumber"];
             var n2 = vm2.properties["phoneNumber"];
@@ -142,7 +141,7 @@ namespace com.csutil.tests.model.mtvmtv {
         [Fact]
         public void TestEnum() {
 
-            ViewModel vm = new ModelToViewModel().ToViewModel("FromClassType", typeof(UserStats));
+            var vm = new ModelToViewModel().ToViewModel("FromClassType", typeof(UserStats));
             var e1 = vm.properties["experience1"];
             var e2 = vm.properties["experience2"];
             var e3 = vm.properties["experience3"];

@@ -22,7 +22,7 @@ namespace com.csutil.model.mtvmtv {
 
         public async Task ToView(ViewModel viewModel, V parentView) {
             foreach (var fieldName in viewModel.order) {
-                ViewModel.Field field = viewModel.properties[fieldName];
+                ViewModel field = viewModel.properties[fieldName];
                 JTokenType type = field.GetJTokenType();
                 if (type == JTokenType.Boolean) {
                     await InitChild(await AddChild(parentView, await NewBoolFieldView(field)), fieldName, field);
@@ -45,12 +45,12 @@ namespace com.csutil.model.mtvmtv {
                     }
                 }
                 if (type == JTokenType.Object) {
-                    if (field.objVm.properties == null) {
-                        await HandleRecursiveViewModel(parentView, fieldName, field, mtvm.viewModels.GetValue(field.objVm.modelType, null));
+                    if (field.properties == null) {
+                        await HandleRecursiveViewModel(parentView, fieldName, field, mtvm.viewModels.GetValue(field.modelType, null));
                     } else {
                         var objectFieldView = await NewObjectFieldView(field);
                         await InitChild(await AddChild(parentView, objectFieldView), fieldName, field);
-                        await ToView(field.objVm, await SelectInnerViewContainerFromObjectFieldView(objectFieldView));
+                        await ToView(field, await SelectInnerViewContainerFromObjectFieldView(objectFieldView));
                     }
                 }
                 if (type == JTokenType.Array) {
@@ -73,23 +73,23 @@ namespace com.csutil.model.mtvmtv {
         }
 
         public abstract Task<V> AddChild(V parentView, V child);
-        public abstract Task InitChild(V view, string fieldName, ViewModel.Field field);
+        public abstract Task InitChild(V view, string fieldName, ViewModel field);
 
         public abstract Task<V> NewRootContainerView(ViewModel rootViewModel);
 
         public abstract Task<V> SelectInnerViewContainerFromObjectFieldView(V objectFieldView);
 
-        public abstract Task<V> NewBoolFieldView(ViewModel.Field field);
-        public abstract Task<V> NewStringFieldView(ViewModel.Field field);
-        public abstract Task<V> NewFloatFieldView(ViewModel.Field field);
-        public abstract Task<V> NewIntegerFieldView(ViewModel.Field field);
-        public abstract Task<V> NewEnumFieldView(ViewModel.Field field);
-        public abstract Task<V> NewObjectFieldView(ViewModel.Field field);
+        public abstract Task<V> NewBoolFieldView(ViewModel field);
+        public abstract Task<V> NewStringFieldView(ViewModel field);
+        public abstract Task<V> NewFloatFieldView(ViewModel field);
+        public abstract Task<V> NewIntegerFieldView(ViewModel field);
+        public abstract Task<V> NewEnumFieldView(ViewModel field);
+        public abstract Task<V> NewObjectFieldView(ViewModel field);
 
-        public abstract Task HandleRecursiveViewModel(V parentView, string fieldName, ViewModel.Field field, ViewModel recursiveViewModel);
-        public abstract Task HandleSimpleArray(V parentView, string fieldName, ViewModel.Field field, JTokenType arrayType);
-        public abstract Task HandleObjectArray(V parentView, string fieldName, ViewModel.Field field, ViewModel entryViewModel);
-        public abstract Task HandleMixedObjectArray(V parentView, string fieldName, ViewModel.Field field);
+        public abstract Task HandleRecursiveViewModel(V parentView, string fieldName, ViewModel field, ViewModel recursiveViewModel);
+        public abstract Task HandleSimpleArray(V parentView, string fieldName, ViewModel field, JTokenType arrayType);
+        public abstract Task HandleObjectArray(V parentView, string fieldName, ViewModel field, ViewModel entryViewModel);
+        public abstract Task HandleMixedObjectArray(V parentView, string fieldName, ViewModel field);
 
     }
 

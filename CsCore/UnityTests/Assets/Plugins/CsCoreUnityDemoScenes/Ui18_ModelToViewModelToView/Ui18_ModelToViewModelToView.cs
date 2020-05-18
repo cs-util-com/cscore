@@ -26,7 +26,7 @@ namespace com.csutil.tests {
             var t = typeof(MyUserModel);
 
             var mtvm = new ModelToViewModel();
-            ViewModel viewModel = mtvm.ToViewModel("" + t, t);
+            var viewModel = mtvm.ToViewModel("" + t, t);
             Log.d(JsonWriter.AsPrettyString(viewModel));
 
             await LoadModelIntoGeneratedView(viewStack, mtvm, viewModel);

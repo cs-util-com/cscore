@@ -13,7 +13,7 @@ namespace com.csutil.ui.mtvmtv {
         protected override Task Setup(string fieldName, string fullPath) {
             input.interactable = field.readOnly != true;
             SetupForContentType(input, field);
-            if (field.required == true || !field.pattern.IsNullOrEmpty()) {
+            if (field.mandatory == true || !field.pattern.IsNullOrEmpty()) {
                 SetupRegexValidator();
             }
             return Task.FromResult(true);
@@ -30,11 +30,11 @@ namespace com.csutil.ui.mtvmtv {
                 if (!field.description.IsNullOrEmpty()) { errorText += " Valid: " + field.description; }
                 regexValidator.errorText.textLocalized(errorText);
             }
-            regexValidator.isInputRequired = field.required == true;
+            regexValidator.isInputRequired = field.mandatory == true;
             regexValidator.EnforceRegex(field.pattern);
         }
 
-        private static void SetupForContentType(InputField self, ViewModel.Field field) {
+        private static void SetupForContentType(InputField self, ViewModel field) {
             if (EnumUtil.TryParse(field.contentType, out ContentType contentType)) {
                 switch (contentType) {
                     case ContentType.Alphanumeric:

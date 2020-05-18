@@ -11,7 +11,7 @@ namespace com.csutil.ui.mtvmtv {
         public string rootPrefabName = ViewModelToView.CONTAINER3;
 
         public async Task<GameObject> NewViewFromViewModel() {
-            return await NewViewFromViewModel(recursiveViewModel != null ? recursiveViewModel : field.objVm);
+            return await NewViewFromViewModel(recursiveViewModel != null ? recursiveViewModel : field);
         }
 
         public async Task<GameObject> NewViewFromViewModel(ViewModel viewModel) {

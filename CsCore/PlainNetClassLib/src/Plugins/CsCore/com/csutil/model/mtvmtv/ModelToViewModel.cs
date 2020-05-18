@@ -47,26 +47,32 @@ namespace com.csutil.model.mtvmtv {
         }
 
         private ViewModel NewViewModel(string modelName, Type modelType, object model = null) {
-            var viewModel = new ViewModel() { title = modelName, type = "" + JTokenType.Object, modelType = ToTypeString(modelType) };
+            var viewModel = new ViewModel() { title = modelName, type = "" + JTokenType.Object };
+            return SetupViewModel(viewModel, modelType, model);
+        }
+
+        private ViewModel SetupViewModel(ViewModel viewModel, Type modelType, object model) {
+            viewModel.modelType = ToTypeString(modelType);
             viewModels.Add(viewModel.modelType, viewModel);
-            viewModel.properties = new Dictionary<string, ViewModel.Field>();
+            viewModel.properties = new Dictionary<string, ViewModel>();
             if (model != null) {
                 AssertV2.IsTrue(modelType == model.GetType(), $"modelType ({modelType}) != model.type ({model.GetType()})");
                 AddFieldsViaJson(viewModel, model);
             } else {
                 AddFieldsViaReflection(viewModel, modelType);
             }
-            var req = viewModel.properties.Filter(f => f.Value.required == true).Map(f => f.Key);
+            var req = viewModel.properties.Filter(f => f.Value.mandatory == true).Map(f => f.Key);
             if (!req.IsNullOrEmpty()) { viewModel.required = req.ToList(); }
             return viewModel;
         }
 
         private ViewModel NewViewModel(string modelName, JObject jObject) {
             var viewModel = new ViewModel() { title = modelName, type = "" + JTokenType.Object };
-            viewModel.properties = new Dictionary<string, ViewModel.Field>();
+            viewModel.properties = new Dictionary<string, ViewModel>();
             AddFieldsViaJson(viewModel, null, jObject);
             return viewModel;
         }
+
 
         private void AddFieldsViaReflection(ViewModel viewModel, Type modelType) {
             viewModel.order = new List<string>();
@@ -92,12 +98,12 @@ namespace com.csutil.model.mtvmtv {
 
         public JObject ToJsonModel(object model) { return JObject.FromObject(model, jsonSerializer); }
 
-        public virtual ViewModel.Field NewField(string name, Type parentType, object pInstance = null, JToken jpInstance = null) {
+        public virtual ViewModel NewField(string name, Type parentType, object pInstance = null, JToken jpInstance = null) {
             MemberInfo model = parentType?.GetMember(name).First();
             Type modelType = GetModelType(model);
             JTokenType jTokenType = ToJTokenType(modelType, jpInstance);
             AssertV2.NotNull(jTokenType, "jTokenType");
-            ViewModel.Field newField = new ViewModel.Field() { type = "" + jTokenType, title = ToTitle(name) };
+            ViewModel newField = new ViewModel() { type = "" + jTokenType, title = ToTitle(name) };
             ExtractFieldDocu(newField, model, modelType, jTokenType, pInstance, jpInstance);
             if (model != null) {
                 if (!model.CanWriteTo()) { newField.readOnly = true; }
@@ -107,10 +113,10 @@ namespace com.csutil.model.mtvmtv {
                     newField.contentEnum = e.names;
                     newField.additionalItems = e.additionalItems;
                 }
-                if (model.TryGetCustomAttribute(out RequiredAttribute r)) { newField.required = true; }
+                if (model.TryGetCustomAttribute(out RequiredAttribute r)) { newField.mandatory = true; }
                 if (model.TryGetCustomAttribute(out JsonPropertyAttribute p)) {
                     if (p.Required == Required.Always || p.Required == Required.DisallowNull) {
-                        newField.required = true;
+                        newField.mandatory = true;
                     }
                 }
 
@@ -118,10 +124,13 @@ namespace com.csutil.model.mtvmtv {
             }
             if (jTokenType == JTokenType.Object) {
                 if (modelType == null) {
-                    newField.objVm = NewViewModel(name, jpInstance as JObject);
+
+                    newField.properties = new Dictionary<string, ViewModel>();
+                    AddFieldsViaJson(newField, null, jpInstance as JObject);
+
                 } else {
                     var modelInstance = pInstance != null ? model.GetValue(pInstance) : null;
-                    newField.objVm = NewInnerViewModel(name, modelType, modelInstance);
+                    NewInnerViewModel(newField, modelType, modelInstance);
                 }
             }
             if (jTokenType == JTokenType.Array) {
@@ -132,7 +141,21 @@ namespace com.csutil.model.mtvmtv {
                 }
                 if (arrayElemJType != JTokenType.Null) {
                     if (!IsSimpleType(arrayElemJType)) {
-                        SetupFieldAsArray(newField, listElemType, GetChildrenArray(pInstance, jpInstance, model));
+                        var childrenInstances = GetChildrenArray(pInstance, jpInstance, model);
+                        if (childrenInstances == null || AllChildrenHaveSameType(childrenInstances)) {
+                            var firstChildInstance = childrenInstances?.FirstOrDefault();
+                            var childVm = new ViewModel() { type = "" + arrayElemJType };
+                            NewInnerViewModel(childVm, listElemType, firstChildInstance);
+                            newField.items = new List<ViewModel>() { childVm };
+                        } else {
+                            newField.items = new List<ViewModel>();
+                            foreach (var child in childrenInstances) {
+                                var childVm = new ViewModel() { type = "" + arrayElemJType };
+                                NewInnerViewModel(childVm, child.GetType(), child);
+                                newField.items.Add(childVm);
+                            }
+                            AssertV2.AreEqual(childrenInstances.Length, newField.items.Count);
+                        }
                     } else {
                         newField.items = new List<ViewModel>() { new ViewModel() { type = "" + arrayElemJType } };
                     }
@@ -141,26 +164,9 @@ namespace com.csutil.model.mtvmtv {
             return newField;
         }
 
-        private void SetupFieldAsArray(ViewModel.Field field, Type arrayElemType, object[] childrenInstances) {
-            if (childrenInstances == null || AllChildrenHaveSameType(childrenInstances)) {
-                var firstChildInstance = childrenInstances?.FirstOrDefault();
-                var childVm = NewInnerViewModel(modelName: "EntryType", arrayElemType, firstChildInstance);
-                field.items = new List<ViewModel>() { childVm };
-            } else {
-                AddAllChildrenViewModels(field, childrenInstances);
-            }
-        }
 
-        private void AddAllChildrenViewModels(ViewModel.Field arrayField, object[] childrenInstances) {
-            arrayField.items = new List<ViewModel>();
-            for (int i = 0; i < childrenInstances.Length; i++) {
-                var child = childrenInstances[i];
-                arrayField.items.Add(NewInnerViewModel("" + i, child.GetType(), child));
-            }
-            AssertV2.AreEqual(childrenInstances.Length, arrayField.items.Count);
-        }
 
-        public virtual bool ExtractFieldDocu(ViewModel.Field field, MemberInfo m, Type modelType, JTokenType t, object pInstance, JToken jpInstance) {
+        public virtual bool ExtractFieldDocu(ViewModel field, MemberInfo m, Type modelType, JTokenType t, object pInstance, JToken jpInstance) {
             var descrAttr = m?.GetCustomAttribute<DescriptionAttribute>(true);
             if (descrAttr != null) {
                 field.description = descrAttr.description;
@@ -238,17 +244,20 @@ namespace com.csutil.model.mtvmtv {
             return childrenInstances.All(c => c.GetType() == childrenType);
         }
 
-        private ViewModel NewInnerViewModel(string modelName, Type modelType, object model = null) {
+        private void NewInnerViewModel(ViewModel viewModel, Type modelType, object model = null) {
             if (GetExistingViewModelFor(modelType, out ViewModel vm)) {
                 // ViewModel already generated for this type, so dont traverse modelType:
-                return new ViewModel() { type = "" + JTokenType.Object, modelType = ToTypeString(modelType) };
+                viewModel.modelType = ToTypeString(modelType);
+                return;
+
             }
             if (modelType.IsSystemType()) {
                 // ViewModel for System types (e.g. Dictionary) not traversed:
-                return new ViewModel() { type = "" + JTokenType.Object, modelType = ToTypeString(modelType) };
+                viewModel.modelType = ToTypeString(modelType);
+                return;
             }
-            if (namespaceBacklist != null && namespaceBacklist.Contains(modelType.Namespace)) { return null; }
-            return NewViewModel(modelName, modelType, model);
+            if (namespaceBacklist != null && namespaceBacklist.Contains(modelType.Namespace)) { return; }
+            SetupViewModel(viewModel, modelType, model);
         }
 
         private string ToTypeString(Type type) { return type.ToString(); }
