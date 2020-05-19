@@ -1,7 +1,5 @@
 # ☄️ The cscore Library
 
-`cscore` is a lightweight library providing commonly used helpers & patterns for your C# projects like events, injection logic, logging and much more (examples below). It can be used in both pure **C#** and **Unity** projects.
-All components are loosly coupled so that components can be used individually when needed without deep knowledge about the full cscore library required. 
 
 [**Website**](https://www.csutil.com/projects/cscore) 
 **•**
@@ -11,9 +9,16 @@ All components are loosly coupled so that components can be used individually wh
 **•**
 [**Getting started**](#-getting-started)
 
+`cscore` is a lightweight library providing commonly used helpers & patterns for both your pure `C#` and `Unity` projects.
+
+Fewer 3rd party libraries and dependencies included in a project means fewer code and complexity which in the end leads to less bugs. On the other hand having zero dependencies very likely means that a few fundamental concepts and patterns you will have to implement over and over for each new project. This repo tries to provide a single source for a few simple to extend features to make sure these work great together and build up on each other. Some things like logging, communication of components, dependency and state management, easy to use IO and similar fundamental challenges in software are things all applications benefit from. 
+
+This is why I think it makes sense to put this into a single compact `core` library with great test coverage and great documentation. And these two can go hand in hand, well written tests can serve as a easy to understand documentation + usage examples, which automatically stay up to date since they have to change with the code over time. That's how the unit tests in this project ensure all features are well tested and documented. **See below** for some extracts from these tests.
+
+All components are loosly coupled so that components can be used individually when needed without deep knowledge about the full cscore library required. 
+
 #  Overview 
 The following summary gives a quick overview of all library features:
-
 
 ### Pure C# Components
 The aim of the cscore package as to stay is slim/minimal as possible while including the feature and functionality typical projects would benefit from.
@@ -44,10 +49,13 @@ The aim of the cscore package as to stay is slim/minimal as possible while inclu
 * [PlayerPrefsV2](#playerprefsv2) - Adds `SetBool`, `SetStringEncrypted` and more, see PlayerPrefsV2Tests.cs for all examples
 * [Running xUnit tests in Unity](#Running-xUnit-tests-in-Unity) - Execute your xUnit tests in Unity even in the built application to ensure everything works as expected in the production runtime
 
+
 ### Status
 ![](https://img.shields.io/badge/Maintained%3F-yes-green.svg?style=flat-square)
+![](https://img.shields.io/nuget/v/com.csutil.cscore.svg?colorB=006400&style=flat-square)
 ![](https://img.shields.io/github/last-commit/cs-util-com/cscore.svg?colorB=4267b2&style=flat-square)
 ![](https://img.shields.io/github/issues-closed/cs-util-com/cscore.svg?colorB=006400&style=flat-square)
+![](https://img.shields.io/github/commit-activity/y/cs-util-com/cscore.svg?colorB=006400&style=flat-square)
 [![](https://badge.waffle.io/cs-util-com/cscore.svg?columns=all&style=flat-square)](https://waffle.io/cs-util-com/cscore)
 
 * To get started, see the [installation instructions](#-getting-started) below.
@@ -59,6 +67,7 @@ The aim of the cscore package as to stay is slim/minimal as possible while inclu
 
 # 💡 Usage & Examples
 See below for a full usage overview to explain the APIs with simple examples.
+
 
 
 ## Logging
@@ -103,6 +112,8 @@ The used logging-adapter can be set via `Log.instance = new MyCustomLogImpl();`
 
 Through this abstraction it becomes easy to later switch to more complex logging backends, e.g. the [Serilog logging library](https://github.com/serilog/serilog), while keeping your code unchanged. 
 
+
+
 ### AssertV2
 
 - `AssertV2` can be used anywhere in your code 
@@ -116,6 +127,8 @@ AssertV2.IsTrue(1 + 1 == 3, "This assertion will fail");
 ```
 See [here](https://github.com/cs-util-com/cscore/blob/master/CsCore/xUnitTests/src/Plugins/CsCoreXUnitTests/com/csutil/tests/LogTests.cs#L63) for more examples.
 
+
+
 ### Log.MethodEntered & Log.MethodDone
 
 - Simple monitoring of method calls and method-timings to detect abnormal behavior
@@ -125,7 +138,7 @@ See [here](https://github.com/cs-util-com/cscore/blob/master/CsCore/xUnitTests/s
 
 ```cs
 private void SomeExampleMethod1(string s, int i) {
-    Stopwatch timing = Log.MethodEntered("s=" + s, "i=" + i);
+    Stopwatch timing = Log.MethodEnteredWith("s=" + s, "i=" + i);
     
     { // .. here would be some method logic ..
         Thread.Sleep(3);
@@ -178,8 +191,8 @@ __Rule of thumb__: Only use an `EventBus` if you can't exactly tell who will lis
 ## Injection Logic
 
 - A simple inversion of control pattern with the main call being `MyClass1 x = IoC.inject.Get<MyClass1>(this);` where `this` is the requesting entity
-- Relies on the EventBus system, so its **very fast** with **minimal memory footprint** as well!
-- Free of any magic via anotations (at least for now;) - I tried to keep the injection API as simple as possible, existing libraries often tend to overcomplicate things in my opinion
+- Relies on the EventBus system, so its fast with minimal memory footprint as well (got about a million injections in ~3 sec).
+- Free of any unpredicable magic via anotations - I tried to keep the injection API as simple as possible, existing libraries often tend to overcomplicate things in my opinion
 - Lazy loading, singletons and transient types (every inject request creates a new instance) are all easily implementable via `.RegisterInjector`, see examples below:
 
 ```cs
@@ -237,13 +250,13 @@ var filter1 = Transducers.NewFilter<int>(x => x > 4);
 var filter2 = Transducers.NewFilter<int>(x => x % 2 != 0);
 {
     List<int> result = testData.FilterToList(Transducers.Compose(filter1, filter2));
-    Assert.Equal(2, result.Count()); // 6 and 8 will be left
+    Assert.Equal(2, result.Count()); // 5 and 7 will be left
     Assert.Equal(5, result.First());
     Assert.Equal(7, result.Last());
 }
 { // without Transducers.Compose the filters have to be chained manually:
     List<int> result = testData.FilterToList(x => (filter1(filter2(x))));
-    Assert.Equal(2, result.Count()); // 6 and 8 will be left
+    Assert.Equal(2, result.Count()); // 5 and 7 will be left
     Assert.Equal(5, result.First());
     Assert.Equal(7, result.Last());
 }
@@ -288,33 +301,6 @@ Assert.Equal(x1.myString2, x2.myString2);
 ```
 
 
-## REST Extensions 
-```cs
-// The property names are based on the https://httpbin.org/get json response:
-class HttpBinGetResp { 
-    public string origin { get; set; }
-    public Dictionary<string, object> headers { get; set; }
-}
-
-RestRequest request = new Uri("https://httpbin.org/get").SendGET();
-
-// Send the request and parse the response into the HttpBinGetResp class:
-HttpBinGetResp response = await request.GetResult<HttpBinGetResp>();
-Log.d("Your external IP is " + response.origin);
-```
-
-A more complex REST example can be found in the `WeatherReportExamples` test class. It uses your IP to detect
-the city name you are located in and then sends a weather report request to MetaWeather.com:
-```cs
-var ipLookupResult = await IpApiCom.GetResponse();
-string yourCity = ipLookupResult.city;
-var cityLookupResult = await MetaWeatherLocationLookup.GetLocation(yourCity);
-int whereOnEarthIDOfYourCity = cityLookupResult.First().woeid;
-var weatherReports = await MetaWeatherReport.GetReport(whereOnEarthIDOfYourCity);
-var currentWeather = weatherReports.consolidated_weather.Map(r => r.weather_state_name);
-Log.d("The weather today in " + yourCity + " is: " + currentWeather.ToStringV2());
-```
-
 
 ## Directory & File Extensions 
 The [DirectoryInfo](https://docs.microsoft.com/en-us/dotnet/api/system.io.directoryinfo) and [FileInfo](https://docs.microsoft.com/en-us/dotnet/api/system.io.fileinfo) classes already provide helpful interfaces to files and directories and the following extensions improve the usability if these classes:
@@ -348,6 +334,8 @@ Assert.True(childDir.DeleteV2()); // (Deleting non-existing directories would re
 Assert.False(childDir.IsNotNullAndExists());
 ```
 
+
+
 ## StateMachines 
 A statemachine in it's simplest form is a current state and a set of allowed state transitions. Transitioning from state 1 to 2 can be done in a single short [method](https://github.com/cs-util-com/cscore/blob/master/CsCore/PlainNetClassLib/src/Plugins/CsCore/com/csutil/datastructures/StateMachine.cs#L14) on the set of allowed transitions. Here an example statemachine: 
 
@@ -380,6 +368,8 @@ Assert.Throws<InvalidOperationException>(() => {
 ```
 
 More [statemachine examples can be found here](https://github.com/cs-util-com/cscore/blob/master/CsCore/xUnitTests/src/Plugins/CsCoreXUnitTests/com/csutil/tests/StateMachineTests.cs#L17).
+
+
 
 ## KeyValueStore
 Provides an async chainable key value store (get & set) that can be used for simple persistent settings but also for remote server/DB access. Different store implementations are included for some common use cases:
@@ -417,6 +407,8 @@ Assert.Equal(x1.myString2, x2.myString2);
 
 More examples [can be found here](https://github.com/cs-util-com/cscore/blob/master/CsCore/xUnitTests/src/Plugins/CsCoreXUnitTests/com/csutil/tests/datastructures/KeyValueStoreTests.cs).
 
+
+
 ## Immutable DataStore
 * It uses the Redux syntax and core principles to not reinvent a matured and well proven wheel
 * Enables undo/redo of all dispatched actions out of the box without any additional work 
@@ -426,6 +418,8 @@ More examples [can be found here](https://github.com/cs-util-com/cscore/blob/mas
 See [this example for a first introduction](https://github.com/cs-util-com/cscore/blob/master/CsCore/xUnitTests/src/Plugins/CsCoreXUnitTests/com/csutil/tests/model/immutable/DataStoreExample1.cs#L11) including an example datamodel, example actions and some listeners that are informed when the datamodel changes.
 
 See [here for additional more complex examples](https://github.com/cs-util-com/cscore/tree/master/CsCore/xUnitTests/src/Plugins/CsCoreXUnitTests/com/csutil/tests/model/immutable) which include the other features like undo/redo, middlewares and server synchronization. 
+
+
 
 ## JsonMerger
 [Json merging and diffing logic](https://github.com/cs-util-com/cscore/blob/master/CsCore/xUnitTests/src/Plugins/CsCoreXUnitTests/com/csutil/tests/json/JsonDiffAndMergeTests.cs#L14) that helps to update an instance of a class using a [Three-way merge](https://en.wikipedia.org/wiki/Merge_(version_control)#Three-way_merge). Here an example:
@@ -453,8 +447,40 @@ Assert.Equal(copy2.myString2, mergeResult1.myString2);
 ```
 
 
+
+## REST Extensions 
+```cs
+// The property names are based on the https://httpbin.org/get json response:
+class HttpBinGetResp { 
+    public string origin { get; set; }
+    public Dictionary<string, object> headers { get; set; }
+}
+
+RestRequest request = new Uri("https://httpbin.org/get").SendGET();
+
+// Send the request and parse the response into the HttpBinGetResp class:
+HttpBinGetResp response = await request.GetResult<HttpBinGetResp>();
+Log.d("Your external IP is " + response.origin);
+```
+
+A more complex REST example can be found in the `WeatherReportExamples` test class. It uses your IP to detect
+the city name you are located in and then sends a weather report request to MetaWeather.com:
+```cs
+var ipLookupResult = await IpApiCom.GetResponse();
+string yourCity = ipLookupResult.city;
+var cityLookupResult = await MetaWeatherLocationLookup.GetLocation(yourCity);
+int whereOnEarthIDOfYourCity = cityLookupResult.First().woeid;
+var weatherReports = await MetaWeatherReport.GetReport(whereOnEarthIDOfYourCity);
+var currentWeather = weatherReports.consolidated_weather.Map(r => r.weather_state_name);
+Log.d("The weather today in " + yourCity + " is: " + currentWeather.ToStringV2());
+```
+
+
+
+
 # Unity Component Examples
 There are additional components specifically created for Unity, that will be explained below:
+
 
 ## `GameObject` and `MonoBehaviour` Extensions
 
@@ -483,6 +509,8 @@ myGo.Destroy(); // Destroy the gameobject
 Assert.IsTrue(myGo.IsDestroyed()); // Check if it was destroyed
 ```
 
+
+
 ## `GameObject.Subscribe` & `MonoBehaviour.Subscribe`
 
 There are extension methods for both `GameObjects` and `Behaviours` which internally handle the lifecycle of their subscribers correctly. If a `GameObject` for example is currently not active or was destroyed the published events will not reach it.
@@ -503,6 +531,7 @@ myExampleMono.Subscribe("MyEvent1", () => {
 // The broadcast will reach both the GameObject and the MonoBehaviour:
 EventBus.instance.Publish("MyEvent1");
 ```
+
 
 
 ## MonoBehaviour Injection & Singletons
@@ -530,6 +559,8 @@ Calling `GetOrAddComponentSingleton` will create a singleton. The parent gameobj
 
 This way all created singletons will be created and grouped together in the `"Singletons" GameObject` and accessible like any other MonoBehaviour as well.
 
+
+
 ### Scriptable Object Injection & Singletons
 Scriptable objects are ment as data containers created not at runtime but at editor time to store configuration data and use it in the editor UI or load it during runtime. 
 * The scriptable object consists of the class that extends `ScriptableObject` and the instance file that typically is created via the [CreateAssetMenu](https://docs.unity3d.com/ScriptReference/CreateAssetMenuAttribute.html) annotation or via an editor script (see [ScriptableObject.CreateInstance](https://docs.unity3d.com/ScriptReference/ScriptableObject.CreateInstance.html)).
@@ -547,6 +578,7 @@ IoC.inject.SetSingleton(x1);
 MyExampleScriptableObject x2 = IoC.inject.Get<MyExampleScriptableObject>(this);
 Assert.AreSame(x1, x2);
 ```
+
 
 
 ## The `Link` Pattern
@@ -576,6 +608,8 @@ links.Get<Toggle>("Toggle 1").SetOnValueChangedAction((isNowChecked) => {
     return true;
 });
 ```
+
+
 
 ## The `ViewStack` Pattern
 The ``ViewStack`` Pattern uses GameObjects as separate views stacked in a parent GameObject. A ``ViewStack`` controller attached to this parent object controls switching between views. Views can be hidden or shown through the ``ViewStack`` and new views can be loaded. The main function of the ``ViewStack`` controller is to represent where the root of the ``ViewStack`` can be found, which is especially relevant if multiple ``ViewStack``s are stacked on top of each other. A simple example for stacking multiple ``ViewStack``s would be a main ``ViewStack`` that controls the normal application flow and a second vie stack that is loaded together with one of the view prefabs that represents a temporary tutorial or FUE that the user has to click through. 
@@ -610,6 +644,7 @@ Assert.IsTrue(view2.IsDestroyed());
 // Now view 1 is active and visible again:
 Assert.IsTrue(view1.activeInHierarchy);
 ```
+
 
 
 ## `MonoBehaviour.ExecuteDelayed` & `MonoBehaviour.ExecuteRepeated`
@@ -687,6 +722,8 @@ Assert.AreEqual(myObjectToSave.myInt, objLoadedAgain.myInt);
 
 ```
 
+
+
 ## Running xUnit tests in Unity
 
 Initially I created this test runner to ensure that the xUnit tests I wrote for the pure C# components also were all working when running them on an actual build application, especially on platforms like WebGL this showed a few challanges with the async await Task syntax and some other edgecases. The basic idea was simple:
@@ -704,6 +741,9 @@ The outcome works pretty well and I managed to make all tests run correctly in W
 Additionally in your nUnit tests you can also use the xUnitTestRunner, e.g. if you want writing all your unit tests with xUnit and use the nUnit tests only to trigger them. See the [XunitTestRunnerTests.cs](https://github.com/cs-util-com/cscore/blob/master/CsCore/UnityTests/Assets/Plugins/CsCoreUnityTests/xUnitMocks/XunitTestRunnerTests.cs#L12) to understand how to use the xUnitTestRunner via code.
 
 
+
+
+
 # 📦 Getting started
 
 cscore can be used in **Unity** projects but also in pure **C#/.net** projects (see below):
@@ -715,6 +755,7 @@ The cscore project has some components that are only usable in Unity projects. T
 ### Download the Unity package here:
 * From the [Asset Store (https://assetstore.unity.com/packages/tools/integration/cscore-138254)](https://assetstore.unity.com/packages/tools/integration/cscore-138254) 
 * From the [/CsCore/UnityPackages folder](https://github.com/cs-util-com/cscore/raw/master/CsCore/UnityPackages/) 
+* From the `master` branch, you will have to link the `src` folders to your Unity project, see e.g. the linking bat script in `cscore\CsCore\PlainNetClassLib\src\linkThisIntoAUnityProject.bat`. This option makes sense e.g. if you want to submit pull requests to cscore. See also the section about **Sym Links** below.
 
 **Important:** If you use `.net 3.5` you will need to extract the ZIP file in the `CsCoreNet3.5Compat` folder, it contains the classes that are missing for `.net 3.5`:
 ![Step 1](https://i.imgur.com/1DyQ4q1.png)
@@ -722,6 +763,8 @@ The cscore project has some components that are only usable in Unity projects. T
 ### Optional experimental Unity features
 
 Some of the included features are disabled by default via the `CSCORE_EXPERIMENTAL` compile time define, to enable these features, go to _Player Settings_ -> _Other Settings_ -> _Scripting Define Symbols_ and add `CSCORE_EXPERIMENTAL` there. See the notes about [Scripting Define Symbols in the Unity Docs](https://docs.unity3d.com/Manual/PlatformDependentCompilation.html) for more details how this works. 
+
+
 
 ## Install via NuGet (For pure C#/.net projects)
 
@@ -772,7 +815,7 @@ See current features in development here: https://github.com/cs-util-com/cscore/
 ## How to get in contact
 
 [![Twitter](https://img.shields.io/twitter/follow/csutil_com.svg?style=for-the-badge&logo=twitter)](https://twitter.com/intent/follow?screen_name=csutil_com)
--- [![Discord](https://img.shields.io/discord/518684359667089409.svg?logo=discord&label=chat%20on%20discord&style=for-the-badge)](https://discord.gg/UCqJjEU)
+-- [![Discord](https://img.shields.io/discord/518684359667089409.svg?logo=discord&label=ask%20on%20discord&style=for-the-badge)](https://discord.gg/UCqJjEU)
 -- [![Gitter](https://img.shields.io/gitter/room/csutil-com/community.svg?style=for-the-badge&logo=gitter-white)](https://gitter.im/csutil-com)
 
 To stay updated via Email see https://www.csutil.com/updates
