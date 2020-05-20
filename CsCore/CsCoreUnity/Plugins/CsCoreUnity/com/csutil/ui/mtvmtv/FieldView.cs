@@ -19,7 +19,7 @@ namespace com.csutil.ui.mtvmtv {
         /// <summary> Will be called by the ViewModelToView logic when the view created </summary>
         public virtual Task OnViewCreated(string fieldName, string fullPath) {
             if (field != null) {
-                title.textLocalized(field.title);
+                title.textLocalized(GetFieldTitle());
                 if (!field.description.IsNullOrEmpty()) {
                     if (description == null) {
                         Log.w("No description UI set for the field view", gameObject);
@@ -30,6 +30,10 @@ namespace com.csutil.ui.mtvmtv {
             }
             mainLink.id = fullPath;
             return Setup(fieldName, fullPath);
+        }
+
+        public virtual string GetFieldTitle() {
+            return field.title != null ? field.title : ViewModel.ToTitle(fieldName);
         }
 
         protected virtual Task Setup(string fieldName, string fullPath) {

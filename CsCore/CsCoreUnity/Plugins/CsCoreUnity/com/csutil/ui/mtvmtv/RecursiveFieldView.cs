@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace com.csutil.ui.mtvmtv {
 
-    public class RecursiveModelField : ViewModelFieldView {
+    public class RecursiveFieldView : ViewModelFieldView {
 
         public Button openButton;
         public string rootPrefabName = ViewModelToView.CONTAINER3;

@@ -23,13 +23,21 @@ namespace com.csutil.tests {
         }
 
         private static async Task GenerateAndShowViewFor(ViewStack viewStack) {
-            var t = typeof(MyUserModel);
 
-            var mtvm = new ModelToViewModel();
-            var viewModel = mtvm.ToViewModel("" + t, t);
-            Log.d(JsonWriter.AsPrettyString(viewModel));
+            
+            { // This time load the viewModel from an external JSON schema:
+                var mtvm = new ModelToViewModel();
+                ViewModel viewModel = JsonReader.GetReader().Read<ViewModel>(SomeJsonSchemaExamples.jsonSchema1);
+                await LoadJsonModelIntoGeneratedJsonSchemaView(viewStack, mtvm, viewModel);
+            }
 
-            await LoadModelIntoGeneratedView(viewStack, mtvm, viewModel);
+            {
+                var mtvm = new ModelToViewModel();
+                var userModelType = typeof(MyUserModel);
+                var viewModel = mtvm.ToViewModel("" + userModelType, userModelType);
+                Log.d(JsonWriter.AsPrettyString(viewModel));
+                await LoadModelIntoGeneratedView(viewStack, mtvm, viewModel);
+            }
 
         }
 
@@ -60,6 +68,27 @@ namespace com.csutil.tests {
                 Log.d("Model BEFORE changes: " + JsonWriter.AsPrettyString(model));
                 MyUserModel changedModel = await presenter.LoadViaJsonIntoView(model, SetupConfirmButton(generatedView));
                 Log.d("Model AFTER changes: " + JsonWriter.AsPrettyString(changedModel));
+
+                viewStack.SwitchBackToLastView(generatedView);
+                var changedFields = MergeJson.GetDiff(model, changedModel);
+                Log.d("Fields changed: " + changedFields?.ToPrettyString());
+            }
+        }
+
+        private static async Task LoadJsonModelIntoGeneratedJsonSchemaView(ViewStack viewStack, ModelToViewModel mtvm, ViewModel viewModel) {
+            JObject model = JsonReader.GetReader().Read<JObject>(SomeJsonSchemaExamples.json1);
+
+            {
+                GameObject generatedView = await GenerateViewFromViewModel(mtvm, viewModel);
+                viewStack.ShowView(generatedView);
+
+                var presenter = new JObjectPresenter();
+                presenter.targetView = generatedView;
+
+                Log.d("Model BEFORE changes: " + model.ToPrettyString());
+                var changedModel = await presenter.LoadModelIntoView(model.DeepClone() as JObject);
+                await SetupConfirmButton(generatedView);
+                Log.d("Model AFTER changes: " + changedModel.ToPrettyString());
 
                 viewStack.SwitchBackToLastView(generatedView);
                 var changedFields = MergeJson.GetDiff(model, changedModel);

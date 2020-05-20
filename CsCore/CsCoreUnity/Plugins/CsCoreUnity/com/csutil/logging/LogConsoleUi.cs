@@ -88,12 +88,12 @@ namespace com.csutil.logging {
             bool d = ToggleShowDebugs().isOn;
             bool w = ToggleShowWarngs().isOn;
             bool e = ToggleShowErrors().isOn;
-            string s = SearchInputField().text.ToLower();
+            string s = SearchInputField().text.ToLowerInvariant();
             return (logEntry) => {
                 if (!d && logEntry.type == "d") { return false; }
                 if (!w && logEntry.type == "w") { return false; }
                 if (!e && logEntry.type == "e") { return false; }
-                if (!s.IsNullOrEmpty() && !logEntry.message.ToLower().Contains(s)) { return false; }
+                if (!s.IsNullOrEmpty() && !logEntry.message.ToLowerInvariant().Contains(s)) { return false; }
                 return true;
             };
         }

@@ -10,7 +10,7 @@ namespace com.csutil {
         public string id;
 
         private void OnValidate() {
-            if (id.IsNullOrEmpty() && !name.ToLower().Contains("gameobject")) { id = name; }
+            if (id.IsNullOrEmpty() && !name.ToLowerInvariant().Contains("gameobject")) { id = name; }
         }
 
     }

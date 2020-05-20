@@ -118,9 +118,9 @@ namespace com.csutil.ui {
             }
 
             public virtual bool IsInSearchResults(string searchString) {
-                searchString = searchString.ToLower();
-                if (name.ToLower().Contains(searchString)) { return true; }
-                if (descr != null && descr.ToLower().Contains(searchString)) { return true; }
+                searchString = searchString.ToLowerInvariant();
+                if (name.ToLowerInvariant().Contains(searchString)) { return true; }
+                if (descr != null && descr.ToLowerInvariant().Contains(searchString)) { return true; }
                 return false;
             }
 

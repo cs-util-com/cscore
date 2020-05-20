@@ -33,7 +33,6 @@ namespace com.csutil.ui.mtvmtv {
         }
 
         public async Task<GameObject> NewRootContainerView(ViewModel rootViewModel, string rootPrefabName) {
-            var name = rootViewModel.title;
             var rootView = await LoadFieldViewPrefab(rootPrefabName);
             SetViewModel(rootView, rootViewModel);
             return rootView;
@@ -104,15 +103,15 @@ namespace com.csutil.ui.mtvmtv {
             viewModelFieldView.recursiveViewModel = viewModel;
         }
 
-        public override Task HandleSimpleArray(GameObject parent, string fieldName, ViewModel field, JTokenType arrayType) {
+        public override async Task HandleSimpleArray(GameObject parent, string fieldName, ViewModel field, JTokenType arrayType) {
             throw new NotImplementedException();
         }
 
-        public override Task HandleMixedObjectArray(GameObject parent, string fieldName, ViewModel field) {
+        public override async Task HandleMixedObjectArray(GameObject parent, string fieldName, ViewModel field) {
             throw new NotImplementedException();
         }
 
-        public override Task HandleObjectArray(GameObject parent, string fieldName, ViewModel field, ViewModel entryViewModel) {
+        public override async Task HandleObjectArray(GameObject parent, string fieldName, ViewModel field, ViewModel entryViewModel) {
             throw new NotImplementedException();
         }
 

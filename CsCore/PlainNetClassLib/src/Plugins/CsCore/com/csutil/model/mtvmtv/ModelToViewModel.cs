@@ -47,9 +47,11 @@ namespace com.csutil.model.mtvmtv {
         }
 
         private ViewModel NewViewModel(string modelName, Type modelType, object model = null) {
-            var viewModel = new ViewModel() { title = modelName, type = "" + JTokenType.Object };
+            var viewModel = new ViewModel() { title = modelName, type = JTokenType.Object.ToJsonSchemaType() };
             return SetupViewModel(viewModel, modelType, model);
         }
+
+
 
         private ViewModel SetupViewModel(ViewModel viewModel, Type modelType, object model) {
             viewModel.modelType = ToTypeString(modelType);
@@ -67,7 +69,7 @@ namespace com.csutil.model.mtvmtv {
         }
 
         private ViewModel NewViewModel(string modelName, JObject jObject) {
-            var viewModel = new ViewModel() { title = modelName, type = "" + JTokenType.Object };
+            var viewModel = new ViewModel() { title = modelName, type = JTokenType.Object.ToJsonSchemaType() };
             viewModel.properties = new Dictionary<string, ViewModel>();
             AddFieldsViaJson(viewModel, null, jObject);
             return viewModel;
@@ -98,7 +100,7 @@ namespace com.csutil.model.mtvmtv {
             Type modelType = GetModelType(model);
             JTokenType jTokenType = ToJTokenType(modelType, jpInstance);
             AssertV2.NotNull(jTokenType, "jTokenType");
-            ViewModel newField = new ViewModel() { type = "" + jTokenType, title = ToTitle(name) };
+            ViewModel newField = new ViewModel() { type = jTokenType.ToJsonSchemaType(), title = ViewModel.ToTitle(name) };
             ExtractFieldDocu(newField, model, modelType, jTokenType, pInstance, jpInstance);
             if (model != null) {
                 if (!model.CanWriteTo()) { newField.readOnly = true; }
@@ -139,20 +141,20 @@ namespace com.csutil.model.mtvmtv {
                         var childrenInstances = GetChildrenArray(pInstance, jpInstance, model);
                         if (childrenInstances == null || AllChildrenHaveSameType(childrenInstances)) {
                             var firstChildInstance = childrenInstances?.FirstOrDefault();
-                            var childVm = new ViewModel() { type = "" + arrayElemJType };
+                            var childVm = new ViewModel() { type = arrayElemJType.ToJsonSchemaType() };
                             SetupInnerViewModel(childVm, listElemType, firstChildInstance);
                             newField.items = new List<ViewModel>() { childVm };
                         } else {
                             newField.items = new List<ViewModel>();
                             foreach (var child in childrenInstances) {
-                                var childVm = new ViewModel() { type = "" + arrayElemJType };
+                                var childVm = new ViewModel() { type = arrayElemJType.ToJsonSchemaType() };
                                 SetupInnerViewModel(childVm, child.GetType(), child);
                                 newField.items.Add(childVm);
                             }
                             AssertV2.AreEqual(childrenInstances.Length, newField.items.Count);
                         }
                     } else {
-                        newField.items = new List<ViewModel>() { new ViewModel() { type = "" + arrayElemJType } };
+                        newField.items = new List<ViewModel>() { new ViewModel() { type = arrayElemJType.ToJsonSchemaType() } };
                     }
                 }
             }
@@ -190,8 +192,6 @@ namespace com.csutil.model.mtvmtv {
             }
             return false;
         }
-
-        private string ToTitle(string varName) { return RegexUtil.SplitCamelCaseString(varName); }
 
         private Type GetListElementType(Type listType) {
             if (listType == null) { return null; }

@@ -77,26 +77,30 @@ namespace com.csutil.ui.mtvmtv {
             string name = self.fieldName;
             JObject model = self.GetChildJObjFrom(root);
             JToken value = model?[name];
-            if (self is EnumFieldView e && value?.Type == JTokenType.Integer) {
+            if (self is EnumFieldView enumFieldView && value?.Type == JTokenType.Integer) {
                 int posInEnum = int.Parse("" + value);
                 var enumValues = self.field.contentEnum;
-                e.LinkToModel(enumValues[posInEnum], newVal => {
+                enumFieldView.LinkToModel(enumValues[posInEnum], newVal => {
                     var newPosInEnum = Array.FindIndex(enumValues, x => x == newVal);
                     self.CreateChildJObjIfNeeded(root);
                     self.GetChildJObjFrom(root)[name] = new JValue(newPosInEnum);
                 });
                 return true;
             }
-            if (self is InputFieldView i) {
-                i.LinkToModel("" + value, newVal => {
-                    self.CreateChildJObjIfNeeded(root);
-                    self.GetChildJObjFrom(root)[name] = self.field.ParseToJValue(newVal);
+            if (self is InputFieldView inputFieldView) {
+                inputFieldView.LinkToModel("" + value, newVal => {
+                    try {
+                        var newJVal = self.field.ParseToJValue(newVal);
+                        self.CreateChildJObjIfNeeded(root);
+                        self.GetChildJObjFrom(root)[name] = newJVal;
+                    } // Ignore errors like e.g. FormatException when "" is parsed to int:
+                    catch (Exception e) { Log.w("" + e, self.gameObject); }
                 });
                 return true;
             }
-            if (self is BoolFieldView b) {
+            if (self is BoolFieldView boolFieldView) {
                 bool val = (value as JValue)?.Value<bool>() == true;
-                b.LinkToModel(val, newB => {
+                boolFieldView.LinkToModel(val, newB => {
                     self.CreateChildJObjIfNeeded(root);
                     self.GetChildJObjFrom(root)[name] = new JValue(newB);
                 });
@@ -109,7 +113,7 @@ namespace com.csutil.ui.mtvmtv {
             return false;
         }
 
-        public static void ShowChildModelInNewScreen(this RecursiveModelField self, JObject root, GameObject currentScreen) {
+        public static void ShowChildModelInNewScreen(this RecursiveFieldView self, JObject root, GameObject currentScreen) {
             self.openButton.SetOnClickAction(async delegate {
                 var newScreen = await self.NewViewFromViewModel();
                 var viewStack = currentScreen.GetViewStack();

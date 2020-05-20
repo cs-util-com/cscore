@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
@@ -21,7 +22,7 @@ namespace com.csutil.model.mtvmtv {
         }
 
         public async Task ToView(ViewModel viewModel, V parentView) {
-            foreach (var fieldName in viewModel.order) {
+            foreach (var fieldName in viewModel.GetOrder()) {
                 ViewModel field = viewModel.properties[fieldName];
                 JTokenType type = field.GetJTokenType();
                 if (type == JTokenType.Boolean) {
@@ -57,13 +58,13 @@ namespace com.csutil.model.mtvmtv {
                     var e = field.items;
                     if (e.Count == 1) {
                         ViewModel item = e.First();
-                        var ct = EnumUtil.Parse<JTokenType>(item.type);
-                        if (mtvm.IsSimpleType(ct)) {
-                            await HandleSimpleArray(parentView, fieldName, field, ct);
-                        } else if (ct == JTokenType.Object) {
+                        var childJType = item.GetJTokenType();
+                        if (mtvm.IsSimpleType(childJType)) {
+                            await HandleSimpleArray(parentView, fieldName, field, childJType);
+                        } else if (childJType == JTokenType.Object) {
                             await HandleObjectArray(parentView, fieldName, field, item);
                         } else {
-                            throw new NotImplementedException("Array handling not impl. for type " + ct);
+                            throw new NotImplementedException("Array handling not impl. for type " + item.type);
                         }
                     } else {
                         await HandleMixedObjectArray(parentView, fieldName, field);

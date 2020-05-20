@@ -88,7 +88,12 @@ namespace com.csutil {
 
         public static string ToFirstCharUpperCase(this string self) {
             if (self.IsNullOrEmpty()) { return self; }
-            return self.Substring(0, 1).ToUpper() + self.Substring(1);
+            return self.Substring(0, 1).ToUpperInvariant() + self.Substring(1);
+        }
+
+        public static string ToFirstCharLowerCase(this string self) {
+            if (self.IsNullOrEmpty()) { return self; }
+            return self.Substring(0, 1).ToLowerInvariant() + self.Substring(1);
         }
 
     }

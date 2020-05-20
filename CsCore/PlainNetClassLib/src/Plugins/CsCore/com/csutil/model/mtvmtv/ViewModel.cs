@@ -18,6 +18,7 @@ namespace com.csutil.model.mtvmtv {
 
         public string title;
         public string description;
+
         [JsonProperty("default")]
         public string defaultVal;
 
@@ -38,6 +39,8 @@ namespace com.csutil.model.mtvmtv {
         /// <summary> Indicates that the field can only have descrete values </summary>
         [JsonProperty("enum")]
         public string[] contentEnum;
+
+        public static string ToTitle(string varName) { return RegexUtil.SplitCamelCaseString(varName); }
 
     }
 
