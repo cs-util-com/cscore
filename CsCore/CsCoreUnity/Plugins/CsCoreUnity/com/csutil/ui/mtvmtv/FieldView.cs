@@ -17,7 +17,7 @@ namespace com.csutil.ui.mtvmtv {
         public string fullPath;
 
         /// <summary> Will be called by the ViewModelToView logic when the view created </summary>
-        public virtual Task OnViewCreated(string fieldName, string fullPath) {
+        public Task OnViewCreated(string fieldName, string fullPath) {
             if (field != null) {
                 title.textLocalized(GetFieldTitle());
                 if (!field.description.IsNullOrEmpty()) {

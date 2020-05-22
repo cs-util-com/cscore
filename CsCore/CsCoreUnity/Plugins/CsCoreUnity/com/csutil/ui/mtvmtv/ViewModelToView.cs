@@ -24,6 +24,8 @@ namespace com.csutil.ui.mtvmtv {
         public string readOnlyTextFieldPrefab = "ReadOnlyTextField";
         public string recursiveViewModelPrefab = "RecursiveViewModelUi";
 
+        public string listFieldPrefab = "ListField";
+
         public ViewModelToView(ModelToViewModel mtvm, string prefabFolder = "mtvmtv1/") : base(mtvm) {
             this.prefabFolder = prefabFolder;
         }
@@ -103,15 +105,17 @@ namespace com.csutil.ui.mtvmtv {
             viewModelFieldView.recursiveViewModel = viewModel;
         }
 
-        public override async Task HandleSimpleArray(GameObject parent, string fieldName, ViewModel field, JTokenType arrayType) {
-            throw new NotImplementedException();
-        }
-
-        public override async Task HandleMixedObjectArray(GameObject parent, string fieldName, ViewModel field) {
+        public override Task HandleSimpleArray(GameObject parent, string fieldName, ViewModel field, JTokenType arrayType) {
             throw new NotImplementedException();
         }
 
         public override async Task HandleObjectArray(GameObject parent, string fieldName, ViewModel field, ViewModel entryViewModel) {
+            var view = await AddChild(parent, await LoadFieldViewPrefab(listFieldPrefab));
+            await InitChild(view, fieldName, field);
+            view.GetComponent<ListFieldView>().OnObjectArray(entryViewModel);
+        }
+
+        public override Task HandleMixedObjectArray(GameObject parent, string fieldName, ViewModel field) {
             throw new NotImplementedException();
         }
 
