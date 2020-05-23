@@ -74,7 +74,7 @@ namespace com.csutil.ui.mtvmtv {
         public static bool IsInChildObject(this FieldView self) { return self.fieldName != self.fullPath; }
 
         public static bool LinkToJsonModel(this FieldView self, JObject root) {
-            JToken value = GetFieldJModel(self, root);
+            JToken value = self.GetFieldJModel(root);
             if (self is EnumFieldView enumFieldView && value?.Type == JTokenType.Integer) {
                 int posInEnum = int.Parse("" + value);
                 var enumValues = self.field.contentEnum;
@@ -109,18 +109,18 @@ namespace com.csutil.ui.mtvmtv {
         }
 
         private static JToken GetFieldJModel(this FieldView self, JObject root) {
-            JToken model = self.GetJParent(root);
-            if (model is JArray) { return model[int.Parse(self.fieldName)]; }
-            return model?[self.fieldName];
+            JToken jParent = self.GetJParent(root);
+            if (jParent is JArray) { return jParent[int.Parse(self.fieldName)]; }
+            return jParent?[self.fieldName];
         }
 
         private static void SetNewJValueInModel(this FieldView self, JObject root, JValue newJVal) {
             self.CreateJParentsIfNeeded(root);
-            var parent = self.GetJParent(root);
-            if (parent is JArray) {
-                parent[int.Parse(self.fieldName)] = newJVal;
+            var jParent = self.GetJParent(root);
+            if (jParent is JArray) {
+                jParent[int.Parse(self.fieldName)] = newJVal;
             } else {
-                parent[self.fieldName] = newJVal;
+                jParent[self.fieldName] = newJVal;
             }
         }
 
@@ -129,9 +129,9 @@ namespace com.csutil.ui.mtvmtv {
                 var newScreen = await self.NewViewFromViewModel();
                 var viewStack = currentScreen.GetViewStack();
                 viewStack.ShowView(newScreen, currentScreen);
-                var p = new JObjectPresenter(self.viewModelToView);
-                p.targetView = newScreen;
-                await p.LoadModelIntoView(self.GetFieldJModel(root) as JObject);
+                var presenter = new JObjectPresenter(self.viewModelToView);
+                presenter.targetView = newScreen;
+                await presenter.LoadModelIntoView(self.GetFieldJModel(root) as JObject);
             }).LogOnError();
         }
 
@@ -139,23 +139,34 @@ namespace com.csutil.ui.mtvmtv {
             JArray modelArray = self.GetFieldJModel(root) as JArray;
             AssertV2.IsNotNull(modelArray, "modelArray");
             for (int i = 0; i < modelArray.Count; i++) {
-                JToken modelEntry = modelArray[i];
-                ViewModel newEntryVm = GetMatchingViewModel(modelEntry, self.field.items);
-                GameObject childView = await AddView(self, vmtv, i, newEntryVm);
-
-                childView.GetComponentInChildren<FieldView>().LinkToJsonModel(root);
+                await CreateChildEtryView(self, root, vmtv, modelArray, i);
             }
+            // Setup buttons
+            self.add.SetOnClickAction(async delegate {
+                modelArray.Add(self.field.items.First().NewDefaultJValue());
+                await CreateChildEtryView(self, root, vmtv, modelArray, modelArray.Count - 1);
+            });
         }
 
-        private static async Task<GameObject> AddView(ListFieldView self, ViewModelToView vmtv, int i, ViewModel entryVm) {
+        private static async Task CreateChildEtryView(
+                         ListFieldView self, JObject root, ViewModelToView vmtv, JArray modelArray, int i) {
+            JToken modelEntry = modelArray[i];
+            ViewModel newEntryVm = GetMatchingViewModel(modelEntry, self.field.items);
+            GameObject childView = await AddChildEntryView(self, vmtv, i, newEntryVm);
+            childView.GetComponentInChildren<FieldView>().LinkToJsonModel(root);
+        }
+
+        private static async Task<GameObject> AddChildEntryView(
+                                       ListFieldView self, ViewModelToView vmtv, int i, ViewModel entryVm) {
             var parentView = self.mainLink.gameObject;
             var fieldName = "" + i;
             if (CanBeShownInListViewEntry(entryVm.GetJTokenType())) {
                 var c = await vmtv.AddChild(parentView, await vmtv.NewListViewEntry());
                 await vmtv.InitChild(c, fieldName, entryVm);
                 return c;
+            } else {
+                return await vmtv.AddViewForFieldViewModel(parentView, entryVm, fieldName);
             }
-            return await vmtv.AddViewForFieldViewModel(parentView, entryVm, fieldName);
         }
 
         private static bool CanBeShownInListViewEntry(JTokenType jType) {
