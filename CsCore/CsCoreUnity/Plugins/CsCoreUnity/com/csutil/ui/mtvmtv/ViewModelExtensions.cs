@@ -80,7 +80,8 @@ namespace com.csutil.ui.mtvmtv {
                 var enumValues = self.field.contentEnum;
                 enumFieldView.LinkToModel(enumValues[posInEnum], newVal => {
                     var newPosInEnum = Array.FindIndex(enumValues, x => x == newVal);
-                    SetNewJValueInModel(self, root, new JValue(newPosInEnum));
+                    self.CreateJParentsIfNeeded(root);
+                    (value as JValue).Value = newPosInEnum;
                 });
                 return true;
             }
@@ -88,7 +89,8 @@ namespace com.csutil.ui.mtvmtv {
                 inputFieldView.LinkToModel("" + value, newVal => {
                     try {
                         var newJVal = self.field.ParseToJValue(newVal);
-                        SetNewJValueInModel(self, root, newJVal);
+                        self.CreateJParentsIfNeeded(root);
+                        (value as JValue).Value = newJVal.Value;
                     } // Ignore errors like e.g. FormatException when "" is parsed to int:
                     catch (FormatException e) { Log.w("" + e, self.gameObject); }
                 });
@@ -97,7 +99,8 @@ namespace com.csutil.ui.mtvmtv {
             if (self is BoolFieldView boolFieldView) {
                 bool val = (value as JValue)?.Value<bool>() == true;
                 boolFieldView.LinkToModel(val, newB => {
-                    SetNewJValueInModel(self, root, new JValue(newB));
+                    self.CreateJParentsIfNeeded(root);
+                    (value as JValue).Value = newB;
                 });
                 return true;
             }
@@ -112,16 +115,6 @@ namespace com.csutil.ui.mtvmtv {
             JToken jParent = self.GetJParent(root);
             if (jParent is JArray) { return jParent[int.Parse(self.fieldName)]; }
             return jParent?[self.fieldName];
-        }
-
-        private static void SetNewJValueInModel(this FieldView self, JObject root, JValue newJVal) {
-            self.CreateJParentsIfNeeded(root);
-            var jParent = self.GetJParent(root);
-            if (jParent is JArray) {
-                jParent[int.Parse(self.fieldName)] = newJVal;
-            } else {
-                jParent[self.fieldName] = newJVal;
-            }
         }
 
         public static void ShowChildModelInNewScreen(this RecursiveFieldView self, JObject root, GameObject currentScreen) {
@@ -148,12 +141,12 @@ namespace com.csutil.ui.mtvmtv {
             });
         }
 
-        private static async Task CreateChildEtryView(
+        private static async Task<bool> CreateChildEtryView(
                          ListFieldView self, JObject root, ViewModelToView vmtv, JArray modelArray, int i) {
             JToken modelEntry = modelArray[i];
             ViewModel newEntryVm = GetMatchingViewModel(modelEntry, self.field.items);
             GameObject childView = await AddChildEntryView(self, vmtv, i, newEntryVm);
-            childView.GetComponentInChildren<FieldView>().LinkToJsonModel(root);
+            return childView.GetComponentInChildren<FieldView>().LinkToJsonModel(root);
         }
 
         private static async Task<GameObject> AddChildEntryView(
@@ -188,7 +181,7 @@ namespace com.csutil.ui.mtvmtv {
                     string parent = parents.ElementAt(i);
                     var child = GetChildJToken(rootModel, parent);
                     if (child == null) {
-                        if (int.TryParse(parents.ElementAt(i + 1), out int nr)) {
+                        if (int.TryParse(parents.ElementAt(i + 1), out int _)) {
                             rootModel[parent] = new JArray();
                         } else {
                             rootModel[parent] = new JObject();
