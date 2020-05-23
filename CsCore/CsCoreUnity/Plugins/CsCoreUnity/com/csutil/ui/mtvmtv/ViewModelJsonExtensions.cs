@@ -67,22 +67,69 @@ namespace com.csutil.ui.mtvmtv {
         public static async Task LoadModelList(this ListFieldView self, JObject root, ViewModelToView vmtv) {
             JArray modelArray = self.GetFieldJModel(root) as JArray;
             AssertV2.IsNotNull(modelArray, "modelArray");
+            var map = new Dictionary<FieldView, JToken>();
             for (int i = 0; i < modelArray.Count; i++) {
-                await CreateChildEtryView(self, root, vmtv, modelArray, i);
+                var fieldName = "" + i;
+                var entry = modelArray[i];
+                var fv = await CreateChildEtryView(self, root, vmtv, entry, fieldName);
+                map.Add(fv, entry);
             }
-            // Setup buttons
+            SetupButtons(self, root, vmtv, modelArray, map);
+        }
+
+        private static void SetupButtons(ListFieldView self, JObject root, ViewModelToView vmtv, JArray modelArray, Dictionary<FieldView, JToken> map) {
             self.add.SetOnClickAction(async delegate {
-                modelArray.Add(self.field.items.First().NewDefaultJValue());
-                await CreateChildEtryView(self, root, vmtv, modelArray, modelArray.Count - 1);
+                var entry = self.field.items.First().NewDefaultJValue();
+                modelArray.Add(entry);
+                var fieldName = "" + (modelArray.Count - 1);
+                var fv = await CreateChildEtryView(self, root, vmtv, entry, fieldName);
+                map.Add(fv, entry);
+            });
+            self.up.SetOnClickAction(delegate {
+                foreach (var v in GetSelectedViews(self)) {
+                    var selectedData = map[v];
+                    var index = modelArray.IndexOf(selectedData);
+                    if (index > 0) {
+                        modelArray.RemoveAt(index);
+                        modelArray.Insert(index - 1, selectedData);
+                        v.transform.SetSiblingIndex(v.transform.GetSiblingIndex() - 1);
+                    }
+                }
+            });
+            self.down.SetOnClickAction(delegate {
+                foreach (var v in GetSelectedViews(self).Reverse()) {
+                    var selectedData = map[v];
+                    var index = modelArray.IndexOf(selectedData);
+                    if (index < modelArray.Count - 1) {
+                        modelArray.RemoveAt(index);
+                        modelArray.Insert(index + 1, selectedData);
+                        v.transform.SetSiblingIndex(v.transform.GetSiblingIndex() + 1);
+                    }
+                }
+            });
+            self.delete.SetOnClickAction(delegate {
+                foreach (var v in GetSelectedViews(self)) {
+                    var selectedData = map[v];
+                    modelArray.Remove(selectedData);
+                    v.gameObject.Destroy();
+                }
             });
         }
 
-        private static async Task<bool> CreateChildEtryView(
-                         ListFieldView self, JObject root, ViewModelToView vmtv, JArray modelArray, int i) {
-            JToken modelEntry = modelArray[i];
+        private static IEnumerable<ListEntryView> GetSelectedViews(ListFieldView self) {
+            var entries = self.gameObject.GetComponentsInChildren<ListEntryView>();
+            var checkedEntries = entries.Filter(x => x.checkmark.isOn);
+            if (checkedEntries.IsNullOrEmpty()) { Toast.Show("No entries selected"); }
+            return checkedEntries;
+        }
+
+        private static async Task<FieldView> CreateChildEtryView(
+                ListFieldView self, JObject root, ViewModelToView vmtv, JToken modelEntry, string fieldName) {
             ViewModel newEntryVm = GetMatchingViewModel(modelEntry, self.field.items);
-            GameObject childView = await AddChildEntryView(self, vmtv, i, newEntryVm);
-            return childView.GetComponentInChildren<FieldView>().LinkToJsonModel(root, modelEntry);
+            GameObject childView = await AddChildEntryView(self, vmtv, fieldName, newEntryVm);
+            var fieldView = childView.GetComponentInChildren<FieldView>();
+            fieldView.LinkToJsonModel(root, modelEntry);
+            return fieldView;
         }
 
         private static ViewModel GetMatchingViewModel(JToken modelEntry, List<ViewModel> viewModels) {
@@ -91,9 +138,8 @@ namespace com.csutil.ui.mtvmtv {
         }
 
         private static async Task<GameObject> AddChildEntryView(
-                                       ListFieldView self, ViewModelToView vmtv, int i, ViewModel entryVm) {
+                    ListFieldView self, ViewModelToView vmtv, string fieldName, ViewModel entryVm) {
             var parentView = self.mainLink.gameObject;
-            var fieldName = "" + i;
             if (CanBeShownInListViewEntry(entryVm.GetJTokenType())) {
                 var c = await vmtv.AddChild(parentView, await vmtv.NewListViewEntry());
                 await vmtv.InitChild(c, fieldName, entryVm);
