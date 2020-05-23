@@ -12,9 +12,10 @@ namespace com.csutil.ui.mtvmtv {
 
         public async Task OnLoad(JObject root) {
             foreach (var fieldView in targetView.GetFieldViewMap().Values) {
-                if (!fieldView.LinkToJsonModel(root)) {
+                var value = fieldView.GetFieldJModel(root);
+                if (!fieldView.LinkToJsonModel(root, value)) {
                     if (fieldView is RecursiveFieldView r) {
-                        r.ShowChildModelInNewScreen(root, targetView);
+                        r.ShowChildModelInNewScreen(targetView, value as JObject);
                     } else if (fieldView is ObjectFieldView) {
                         // Do nothing (object fields are individually set up themselves)
                     } else if (fieldView is ListFieldView l) {

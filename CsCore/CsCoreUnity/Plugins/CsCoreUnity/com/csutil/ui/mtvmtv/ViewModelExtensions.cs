@@ -73,8 +73,7 @@ namespace com.csutil.ui.mtvmtv {
 
         public static bool IsInChildObject(this FieldView self) { return self.fieldName != self.fullPath; }
 
-        public static bool LinkToJsonModel(this FieldView self, JObject root) {
-            JToken value = self.GetFieldJModel(root);
+        public static bool LinkToJsonModel(this FieldView self, JObject root, JToken value) {
             if (self is EnumFieldView enumFieldView && value?.Type == JTokenType.Integer) {
                 int posInEnum = int.Parse("" + value);
                 var enumValues = self.field.contentEnum;
@@ -111,20 +110,20 @@ namespace com.csutil.ui.mtvmtv {
             return false;
         }
 
-        private static JToken GetFieldJModel(this FieldView self, JObject root) {
+        public static JToken GetFieldJModel(this FieldView self, JObject root) {
             JToken jParent = self.GetJParent(root);
             if (jParent is JArray) { return jParent[int.Parse(self.fieldName)]; }
             return jParent?[self.fieldName];
         }
 
-        public static void ShowChildModelInNewScreen(this RecursiveFieldView self, JObject root, GameObject currentScreen) {
+        public static void ShowChildModelInNewScreen(this RecursiveFieldView self, GameObject currentScreen, JObject jObj) {
             self.openButton.SetOnClickAction(async delegate {
                 var newScreen = await self.NewViewFromViewModel();
                 var viewStack = currentScreen.GetViewStack();
                 viewStack.ShowView(newScreen, currentScreen);
                 var presenter = new JObjectPresenter(self.viewModelToView);
                 presenter.targetView = newScreen;
-                await presenter.LoadModelIntoView(self.GetFieldJModel(root) as JObject);
+                await presenter.LoadModelIntoView(jObj);
             }).LogOnError();
         }
 
@@ -146,7 +145,7 @@ namespace com.csutil.ui.mtvmtv {
             JToken modelEntry = modelArray[i];
             ViewModel newEntryVm = GetMatchingViewModel(modelEntry, self.field.items);
             GameObject childView = await AddChildEntryView(self, vmtv, i, newEntryVm);
-            return childView.GetComponentInChildren<FieldView>().LinkToJsonModel(root);
+            return childView.GetComponentInChildren<FieldView>().LinkToJsonModel(root, modelEntry);
         }
 
         private static async Task<GameObject> AddChildEntryView(
