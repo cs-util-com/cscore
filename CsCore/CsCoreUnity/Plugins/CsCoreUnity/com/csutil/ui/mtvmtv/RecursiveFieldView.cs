@@ -19,7 +19,7 @@ namespace com.csutil.ui.mtvmtv {
             AssertV2.NotNull(viewModel.properties, "viewModel.fields");
             GameObject rootContainerView = await viewModelToView.NewRootContainerView(viewModel, rootPrefabName);
             var innerContainer = await viewModelToView.SelectInnerViewContainerFromObjectFieldView(rootContainerView);
-            await viewModelToView.ToView(viewModel, innerContainer);
+            await viewModelToView.ObjectViewModelToView(viewModel, innerContainer);
             return rootContainerView;
         }
     }

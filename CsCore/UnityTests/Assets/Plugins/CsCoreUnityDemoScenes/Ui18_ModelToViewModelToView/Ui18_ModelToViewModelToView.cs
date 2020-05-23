@@ -24,11 +24,16 @@ namespace com.csutil.tests {
 
         private static async Task GenerateAndShowViewFor(ViewStack viewStack) {
 
-            
+            { // This time load the viewModel from an external JSON schema:
+                var mtvm = new ModelToViewModel();
+                ViewModel viewModel = JsonReader.GetReader().Read<ViewModel>(SomeJsonSchemaExamples.jsonSchema2);
+                await LoadJsonModelIntoGeneratedJsonSchemaView(viewStack, mtvm, viewModel, SomeJsonSchemaExamples.json2);
+            }
+
             { // This time load the viewModel from an external JSON schema:
                 var mtvm = new ModelToViewModel();
                 ViewModel viewModel = JsonReader.GetReader().Read<ViewModel>(SomeJsonSchemaExamples.jsonSchema1);
-                await LoadJsonModelIntoGeneratedJsonSchemaView(viewStack, mtvm, viewModel);
+                await LoadJsonModelIntoGeneratedJsonSchemaView(viewStack, mtvm, viewModel, SomeJsonSchemaExamples.json1);
             }
 
             {
@@ -45,7 +50,8 @@ namespace com.csutil.tests {
             MyUserModel model = NewExampleUserInstance();
 
             { // First an example to connect the model to a generated view via a manual presenter "MyManualPresenter1":
-                GameObject generatedView = await GenerateViewFromViewModel(mtvm, viewModel);
+                var vmtv = NewViewModelToView(mtvm);
+                GameObject generatedView = await vmtv.ToView(viewModel);
                 viewStack.ShowView(generatedView);
 
                 var presenter = new MyManualPresenter1();
@@ -59,10 +65,11 @@ namespace com.csutil.tests {
 
             }
             { // The second option is to use a generic JObjectPresenter to connect the model to the generated view:
-                GameObject generatedView = await GenerateViewFromViewModel(mtvm, viewModel);
+                var vmtv = NewViewModelToView(mtvm);
+                GameObject generatedView = await vmtv.ToView(viewModel);
                 viewStack.ShowView(generatedView);
 
-                var presenter = new JObjectPresenter();
+                var presenter = new JObjectPresenter(vmtv);
                 presenter.targetView = generatedView;
 
                 Log.d("Model BEFORE changes: " + JsonWriter.AsPrettyString(model));
@@ -75,14 +82,16 @@ namespace com.csutil.tests {
             }
         }
 
-        private static async Task LoadJsonModelIntoGeneratedJsonSchemaView(ViewStack viewStack, ModelToViewModel mtvm, ViewModel viewModel) {
-            JObject model = JsonReader.GetReader().Read<JObject>(SomeJsonSchemaExamples.json1);
+        private static async Task LoadJsonModelIntoGeneratedJsonSchemaView(ViewStack viewStack, ModelToViewModel mtvm, ViewModel viewModel, string jsonModel) {
+            JObject model = JsonReader.GetReader().Read<JObject>(jsonModel);
 
             {
-                GameObject generatedView = await GenerateViewFromViewModel(mtvm, viewModel);
+                ViewModelToView vmtv = NewViewModelToView(mtvm);
+                GameObject generatedView = await vmtv.ToView(viewModel);
+
                 viewStack.ShowView(generatedView);
 
-                var presenter = new JObjectPresenter();
+                var presenter = new JObjectPresenter(vmtv);
                 presenter.targetView = generatedView;
 
                 Log.d("Model BEFORE changes: " + model.ToPrettyString());
@@ -96,6 +105,10 @@ namespace com.csutil.tests {
             }
         }
 
+        private static ViewModelToView NewViewModelToView(ModelToViewModel mtvm) {
+            return new ViewModelToView(mtvm, prefabFolder) { rootContainerPrefab = ViewModelToView.CONTAINER2 };
+        }
+
         private static async Task SetupConfirmButton(GameObject targetView) {
             do {
                 await ConfirmButtonClicked(targetView);
@@ -107,11 +120,6 @@ namespace com.csutil.tests {
                 Toast.Show("Saving..");
                 await TaskV2.Delay(500); // Wait for potential pending throttled actions to update the model
             });
-        }
-
-        private static async Task<GameObject> GenerateViewFromViewModel(ModelToViewModel mtvm, ViewModel viewModel) {
-            var vmtv = new ViewModelToView(mtvm, prefabFolder) { rootContainerPrefab = ViewModelToView.CONTAINER2 };
-            return await vmtv.ToView(viewModel);
         }
 
         private class MyManualPresenter1 : Presenter<MyUserModel> {

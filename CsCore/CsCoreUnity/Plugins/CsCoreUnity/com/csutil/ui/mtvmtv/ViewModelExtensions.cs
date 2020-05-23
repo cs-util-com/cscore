@@ -74,16 +74,13 @@ namespace com.csutil.ui.mtvmtv {
         public static bool IsInChildObject(this FieldView self) { return self.fieldName != self.fullPath; }
 
         public static bool LinkToJsonModel(this FieldView self, JObject root) {
-            string name = self.fieldName;
-            JObject model = self.GetChildJObjFrom(root);
-            JToken value = model?[name];
+            JToken value = GetFieldJModel(self, root);
             if (self is EnumFieldView enumFieldView && value?.Type == JTokenType.Integer) {
                 int posInEnum = int.Parse("" + value);
                 var enumValues = self.field.contentEnum;
                 enumFieldView.LinkToModel(enumValues[posInEnum], newVal => {
                     var newPosInEnum = Array.FindIndex(enumValues, x => x == newVal);
-                    self.CreateChildJObjIfNeeded(root);
-                    self.GetChildJObjFrom(root)[name] = new JValue(newPosInEnum);
+                    SetNewJValueInModel(self, root, new JValue(newPosInEnum));
                 });
                 return true;
             }
@@ -91,18 +88,16 @@ namespace com.csutil.ui.mtvmtv {
                 inputFieldView.LinkToModel("" + value, newVal => {
                     try {
                         var newJVal = self.field.ParseToJValue(newVal);
-                        self.CreateChildJObjIfNeeded(root);
-                        self.GetChildJObjFrom(root)[name] = newJVal;
+                        SetNewJValueInModel(self, root, newJVal);
                     } // Ignore errors like e.g. FormatException when "" is parsed to int:
-                    catch (Exception e) { Log.w("" + e, self.gameObject); }
+                    catch (FormatException e) { Log.w("" + e, self.gameObject); }
                 });
                 return true;
             }
             if (self is BoolFieldView boolFieldView) {
                 bool val = (value as JValue)?.Value<bool>() == true;
                 boolFieldView.LinkToModel(val, newB => {
-                    self.CreateChildJObjIfNeeded(root);
-                    self.GetChildJObjFrom(root)[name] = new JValue(newB);
+                    SetNewJValueInModel(self, root, new JValue(newB));
                 });
                 return true;
             }
@@ -113,38 +108,90 @@ namespace com.csutil.ui.mtvmtv {
             return false;
         }
 
+        private static JToken GetFieldJModel(this FieldView self, JObject root) {
+            JToken model = self.GetJParent(root);
+            if (model is JArray) { return model[int.Parse(self.fieldName)]; }
+            return model?[self.fieldName];
+        }
+
+        private static void SetNewJValueInModel(this FieldView self, JObject root, JValue newJVal) {
+            self.CreateJParentsIfNeeded(root);
+            var parent = self.GetJParent(root);
+            if (parent is JArray) {
+                parent[int.Parse(self.fieldName)] = newJVal;
+            } else {
+                parent[self.fieldName] = newJVal;
+            }
+        }
+
         public static void ShowChildModelInNewScreen(this RecursiveFieldView self, JObject root, GameObject currentScreen) {
             self.openButton.SetOnClickAction(async delegate {
                 var newScreen = await self.NewViewFromViewModel();
                 var viewStack = currentScreen.GetViewStack();
                 viewStack.ShowView(newScreen, currentScreen);
-                var p = new JObjectPresenter();
+                var p = new JObjectPresenter(self.viewModelToView);
                 p.targetView = newScreen;
-                var model = self.GetChildJObjFrom(root)[self.fieldName] as JObject;
-                AssertV2.NotNull(model, "model");
-                await p.LoadModelIntoView(model);
+                await p.LoadModelIntoView(self.GetFieldJModel(root) as JObject);
             }).LogOnError();
         }
 
-        private static void CreateChildJObjIfNeeded(this FieldView self, JObject rootModel) {
+        public static async Task LoadModelList(this ListFieldView self, JObject root, ViewModelToView vmtv) {
+            JArray modelArray = self.GetFieldJModel(root) as JArray;
+            AssertV2.IsNotNull(modelArray, "modelArray");
+            for (int i = 0; i < modelArray.Count; i++) {
+                JToken modelEntry = modelArray[i];
+                ViewModel newEntryVm = GetMatchingViewModel(modelEntry, self.field.items);
+                var childView = await vmtv.AddViewForFieldViewModel(self.mainLink.gameObject, newEntryVm, "" + i);
+                childView.GetComponentInChildren<FieldView>().LinkToJsonModel(root);
+            }
+        }
+
+        private static ViewModel GetMatchingViewModel(JToken modelEntry, List<ViewModel> viewModels) {
+            foreach (var vm in viewModels) { if (vm.GetJTokenType() == modelEntry.Type) { return vm; } }
+            return null;
+        }
+
+        private static void CreateJParentsIfNeeded(this FieldView self, JToken rootModel) {
             if (self.IsInChildObject()) { // Navigate down to the correct child JObject
                 string[] parents = self.fullPath.Split(".");
-                foreach (var p in parents.Take(parents.Length - 1)) {
-                    if (rootModel[p] == null) { rootModel[p] = new JObject(); }
-                    rootModel = rootModel[p] as JObject;
-                    AssertV2.NotNull(rootModel, $"rootModel (p={p}");
+                for (int i = 0; i < parents.Length - 1; i++) {
+                    string parent = parents.ElementAt(i);
+                    var child = GetChildJToken(rootModel, parent);
+                    if (child == null) {
+                        if (int.TryParse(parents.ElementAt(i + 1), out int nr)) {
+                            rootModel[parent] = new JArray();
+                        } else {
+                            rootModel[parent] = new JObject();
+                        }
+                    }
+                    rootModel = child;
+                    AssertV2.NotNull(rootModel, $"rootModel (p='{parent}', child={child}");
                 }
             }
         }
 
-        public static JObject GetChildJObjFrom(this FieldView self, JObject rootModel) {
+        public static JToken GetJParent(this FieldView self, JToken rootModel) {
             if (self.IsInChildObject()) { // Navigate down to the correct child JObject
                 string[] parents = self.fullPath.Split(".");
-                foreach (var p in parents.Take(parents.Length - 1)) {
-                    rootModel = rootModel[p] as JObject;
+                foreach (string parent in parents.Take(parents.Length - 1)) {
+                    rootModel = GetChildJToken(rootModel, parent);
                 }
             }
             return rootModel;
+        }
+
+        private static JToken GetChildJToken(JToken self, string entry) {
+            if (int.TryParse(entry, out int i)) { // e.g. "user.friends.2.name"
+                if (self is IEnumerable<JToken> list) {
+                    return list.ElementAt(i);
+                } else if (self is IEnumerable<KeyValuePair<string, JToken>> dict) {
+                    return dict.ElementAt(i).Value;
+                } else {
+                    throw new NotImplementedException($"Could not get elem at pos {i} from {self}");
+                }
+            } else {
+                return self[entry];
+            }
         }
     }
 

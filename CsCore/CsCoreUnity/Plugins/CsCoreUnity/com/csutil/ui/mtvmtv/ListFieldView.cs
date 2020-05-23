@@ -7,14 +7,17 @@ namespace com.csutil.ui.mtvmtv {
 
     public class ListFieldView : FieldView {
 
+        public Button selectAll;
+        public Button add;
+        public Button up;
+        public Button down;
+        public Button delete;
+        public Button search;
+
         protected override Task Setup(string fieldName, string fullPath) {
-            throw new NotImplementedException();
             return Task.FromResult(true);
         }
 
-        internal void OnObjectArray(ViewModel entryViewModel) {
-            throw new NotImplementedException();
-        }
     }
 
 }

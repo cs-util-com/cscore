@@ -121,6 +121,70 @@
                                             	}
                                             }";
 
+
+        public const string json2 = @"{
+                                        'a1': [ 'Abc','de','f' ],
+                                        'a2': [ 1,2,3,4,5,6 ],
+                                        'a3': [ {
+                                            'type': 'dog',
+                                            'name': 'Walter'
+                                          } ]
+                                      }";
+
+        public const string jsonSchema2 = @"{
+                                            	'title': 'Person',
+                                            	'type': 'object',
+                                            	'required': [
+                                            		'a1',
+                                            		'a2',
+                                            		'a3'
+                                            	],
+                                            	'properties': {
+                                            		'a1': {
+                                            			'type': 'array',
+                                            			'title': 'Pets 1',
+                                            			'uniqueItems': true,
+                                            			'items': [{
+                                            				'type': 'string'
+                                            			}]
+                                            		},
+													'a2': {
+                                            			'type': 'array',
+                                            			'title': 'Pets 2',
+                                            			'uniqueItems': true,
+                                            			'items': [{
+                                            				'type': 'integer'
+                                            			}]
+                                            		},
+                                            		'a3': {
+                                            			'type': 'array',
+                                            			'format': 'table',
+                                            			'title': 'Pets 3',
+                                            			'uniqueItems': true,
+                                            			'items': [{
+                                            				'type': 'object',
+                                            				'title': 'Pet',
+                                            				'properties': {
+                                            					'type': {
+                                            						'type': 'string',
+                                            						'enum': [
+                                            							'cat',
+                                            							'dog',
+                                            							'bird',
+                                            							'reptile',
+                                            							'other'
+                                            						],
+                                            						'default': 'dog'
+                                            					},
+                                            					'name': {
+                                            						'type': 'string'
+                                            					}
+                                            				}
+                                            			}]
+                                            		}
+                                            	}
+                                            }";
+
     }
 
 }

@@ -17,60 +17,79 @@ namespace com.csutil.model.mtvmtv {
         public async Task<V> ToView(ViewModel rootViewModel) {
             var rootView = await NewRootContainerView(rootViewModel);
             await InitChild(rootView, null, null);
-            await ToView(rootViewModel, await SelectInnerViewContainerFromObjectFieldView(rootView));
+            await ObjectViewModelToView(rootViewModel, await SelectInnerViewContainerFromObjectFieldView(rootView));
             return rootView;
         }
 
-        public async Task ToView(ViewModel viewModel, V parentView) {
+        public async Task ObjectViewModelToView(ViewModel viewModel, V parentView) {
             foreach (var fieldName in viewModel.GetOrder()) {
                 ViewModel field = viewModel.properties[fieldName];
-                JTokenType type = field.GetJTokenType();
-                if (type == JTokenType.Boolean) {
-                    await InitChild(await AddChild(parentView, await NewBoolFieldView(field)), fieldName, field);
-                }
-                if (type == JTokenType.Integer) {
-                    if (!field.contentEnum.IsNullOrEmpty()) {
-                        await InitChild(await AddChild(parentView, await NewEnumFieldView(field)), fieldName, field);
-                    } else {
-                        await InitChild(await AddChild(parentView, await NewIntegerFieldView(field)), fieldName, field);
-                    }
-                }
-                if (type == JTokenType.Float) {
-                    await InitChild(await AddChild(parentView, await NewFloatFieldView(field)), fieldName, field);
-                }
-                if (type == JTokenType.String) {
-                    if (!field.contentEnum.IsNullOrEmpty()) {
-                        await InitChild(await AddChild(parentView, await NewEnumFieldView(field)), fieldName, field);
-                    } else {
-                        await InitChild(await AddChild(parentView, await NewStringFieldView(field)), fieldName, field);
-                    }
-                }
-                if (type == JTokenType.Object) {
-                    if (field.properties == null) {
-                        await HandleRecursiveViewModel(parentView, fieldName, field, mtvm.viewModels.GetValue(field.modelType, null));
-                    } else {
-                        var objectFieldView = await NewObjectFieldView(field);
-                        await InitChild(await AddChild(parentView, objectFieldView), fieldName, field);
-                        await ToView(field, await SelectInnerViewContainerFromObjectFieldView(objectFieldView));
-                    }
-                }
-                if (type == JTokenType.Array) {
-                    var e = field.items;
-                    if (e.Count == 1) {
-                        ViewModel item = e.First();
-                        var childJType = item.GetJTokenType();
-                        if (mtvm.IsSimpleType(childJType)) {
-                            await HandleSimpleArray(parentView, fieldName, field, childJType);
-                        } else if (childJType == JTokenType.Object) {
-                            await HandleObjectArray(parentView, fieldName, field, item);
-                        } else {
-                            throw new NotImplementedException("Array handling not impl. for type " + item.type);
-                        }
-                    } else {
-                        await HandleMixedObjectArray(parentView, fieldName, field);
-                    }
+                await AddViewForFieldViewModel(parentView, field, fieldName);
+            }
+        }
+
+        public async Task<V> AddViewForFieldViewModel(V parentView, ViewModel field, string fieldName) {
+            JTokenType type = field.GetJTokenType();
+            if (type == JTokenType.Boolean) {
+                var c = await AddChild(parentView, await NewBoolFieldView(field));
+                await InitChild(c, fieldName, field);
+                return c;
+            }
+            if (type == JTokenType.Integer) {
+                if (!field.contentEnum.IsNullOrEmpty()) {
+                    var c = await AddChild(parentView, await NewEnumFieldView(field));
+                    await InitChild(c, fieldName, field);
+                    return c;
+
+                } else {
+                    var c = await AddChild(parentView, await NewIntegerFieldView(field));
+                    await InitChild(c, fieldName, field);
+                    return c;
                 }
             }
+            if (type == JTokenType.Float) {
+                var c = await AddChild(parentView, await NewFloatFieldView(field));
+                await InitChild(c, fieldName, field);
+                return c;
+            }
+            if (type == JTokenType.String) {
+                if (!field.contentEnum.IsNullOrEmpty()) {
+                    var c = await AddChild(parentView, await NewEnumFieldView(field));
+                    await InitChild(c, fieldName, field);
+                    return c;
+                } else {
+                    var c = await AddChild(parentView, await NewStringFieldView(field));
+                    await InitChild(c, fieldName, field);
+                    return c;
+                }
+            }
+            if (type == JTokenType.Object) {
+                if (field.properties == null) {
+                    return await HandleRecursiveViewModel(parentView, fieldName, field, mtvm.viewModels.GetValue(field.modelType, null));
+                } else {
+                    var objectFieldView = await NewObjectFieldView(field);
+                    await InitChild(await AddChild(parentView, objectFieldView), fieldName, field);
+                    await ObjectViewModelToView(field, await SelectInnerViewContainerFromObjectFieldView(objectFieldView));
+                    return objectFieldView;
+                }
+            }
+            if (type == JTokenType.Array) {
+                var e = field.items;
+                if (e.Count == 1) {
+                    ViewModel item = e.First();
+                    var childJType = item.GetJTokenType();
+                    if (mtvm.IsSimpleType(childJType)) {
+                        return await HandleSimpleArray(parentView, fieldName, field);
+                    } else if (childJType == JTokenType.Object) {
+                        return await HandleObjectArray(parentView, fieldName, field);
+                    } else {
+                        throw new NotImplementedException("Array handling not impl. for type " + item.type);
+                    }
+                } else {
+                    return await HandleMixedObjectArray(parentView, fieldName, field);
+                }
+            }
+            throw new NotImplementedException($"Did not handle field {field.title} of type={type}");
         }
 
         public abstract Task<V> AddChild(V parentView, V child);
@@ -87,10 +106,10 @@ namespace com.csutil.model.mtvmtv {
         public abstract Task<V> NewEnumFieldView(ViewModel field);
         public abstract Task<V> NewObjectFieldView(ViewModel field);
 
-        public abstract Task HandleRecursiveViewModel(V parentView, string fieldName, ViewModel field, ViewModel recursiveViewModel);
-        public abstract Task HandleSimpleArray(V parentView, string fieldName, ViewModel field, JTokenType arrayType);
-        public abstract Task HandleObjectArray(V parentView, string fieldName, ViewModel field, ViewModel entryViewModel);
-        public abstract Task HandleMixedObjectArray(V parentView, string fieldName, ViewModel field);
+        public abstract Task<V> HandleRecursiveViewModel(V parentView, string fieldName, ViewModel field, ViewModel recursiveViewModel);
+        public abstract Task<V> HandleSimpleArray(V parentView, string fieldName, ViewModel field);
+        public abstract Task<V> HandleObjectArray(V parentView, string fieldName, ViewModel field);
+        public abstract Task<V> HandleMixedObjectArray(V parentView, string fieldName, ViewModel field);
 
     }
 

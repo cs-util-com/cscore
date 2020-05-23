@@ -93,10 +93,11 @@ namespace com.csutil.ui.mtvmtv {
             await fieldView.OnViewCreated(fieldName, fullPath);
         }
 
-        public override async Task HandleRecursiveViewModel(GameObject parent, string fieldName, ViewModel field, ViewModel recursiveViewModel) {
+        public override async Task<GameObject> HandleRecursiveViewModel(GameObject parent, string fieldName, ViewModel field, ViewModel recursiveViewModel) {
             var view = await AddChild(parent, await LoadFieldViewPrefab(recursiveViewModelPrefab));
             SetViewModel(view, recursiveViewModel);
             await InitChild(view, fieldName, field);
+            return view;
         }
 
         private void SetViewModel(GameObject view, ViewModel viewModel) {
@@ -105,17 +106,19 @@ namespace com.csutil.ui.mtvmtv {
             viewModelFieldView.recursiveViewModel = viewModel;
         }
 
-        public override Task HandleSimpleArray(GameObject parent, string fieldName, ViewModel field, JTokenType arrayType) {
-            throw new NotImplementedException();
-        }
-
-        public override async Task HandleObjectArray(GameObject parent, string fieldName, ViewModel field, ViewModel entryViewModel) {
+        public override async Task<GameObject> HandleSimpleArray(GameObject parent, string fieldName, ViewModel field) {
             var view = await AddChild(parent, await LoadFieldViewPrefab(listFieldPrefab));
             await InitChild(view, fieldName, field);
-            view.GetComponent<ListFieldView>().OnObjectArray(entryViewModel);
+            return view;
         }
 
-        public override Task HandleMixedObjectArray(GameObject parent, string fieldName, ViewModel field) {
+        public override async Task<GameObject> HandleObjectArray(GameObject parent, string fieldName, ViewModel field) {
+            var view = await AddChild(parent, await LoadFieldViewPrefab(listFieldPrefab));
+            await InitChild(view, fieldName, field);
+            return view;
+        }
+
+        public override Task<GameObject> HandleMixedObjectArray(GameObject parent, string fieldName, ViewModel field) {
             throw new NotImplementedException();
         }
 
