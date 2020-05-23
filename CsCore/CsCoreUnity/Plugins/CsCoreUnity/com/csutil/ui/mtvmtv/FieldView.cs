@@ -19,7 +19,7 @@ namespace com.csutil.ui.mtvmtv {
         /// <summary> Will be called by the ViewModelToView logic when the view created </summary>
         public Task OnViewCreated(string fieldName, string fullPath) {
             if (field != null) {
-                title.textLocalized(GetFieldTitle());
+                title?.textLocalized(GetFieldTitle());
                 if (!field.description.IsNullOrEmpty()) {
                     if (description == null) {
                         Log.w("No description UI set for the field view", gameObject);

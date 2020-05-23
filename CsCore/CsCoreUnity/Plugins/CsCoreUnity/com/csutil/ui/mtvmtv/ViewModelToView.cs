@@ -25,6 +25,7 @@ namespace com.csutil.ui.mtvmtv {
         public string recursiveViewModelPrefab = "RecursiveViewModelUi";
 
         public string listFieldPrefab = "ListField";
+        public string listViewEntryPrefab = "ListFieldEntry";
 
         public ViewModelToView(ModelToViewModel mtvm, string prefabFolder = "mtvmtv1/") : base(mtvm) {
             this.prefabFolder = prefabFolder;
@@ -75,6 +76,10 @@ namespace com.csutil.ui.mtvmtv {
         public override async Task<GameObject> NewEnumFieldView(ViewModel field) {
             if (field.readOnly == true) { return await LoadFieldViewPrefab(readOnlyTextFieldPrefab); }
             return await LoadFieldViewPrefab(enumFieldPrefab);
+        }
+
+        internal Task<GameObject> NewListViewEntry() {
+            return LoadFieldViewPrefab(listViewEntryPrefab);
         }
 
         public virtual Task<GameObject> LoadFieldViewPrefab(string prefabName) {

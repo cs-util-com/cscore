@@ -141,9 +141,28 @@ namespace com.csutil.ui.mtvmtv {
             for (int i = 0; i < modelArray.Count; i++) {
                 JToken modelEntry = modelArray[i];
                 ViewModel newEntryVm = GetMatchingViewModel(modelEntry, self.field.items);
-                var childView = await vmtv.AddViewForFieldViewModel(self.mainLink.gameObject, newEntryVm, "" + i);
+                GameObject childView = await AddView(self, vmtv, i, newEntryVm);
+
                 childView.GetComponentInChildren<FieldView>().LinkToJsonModel(root);
             }
+        }
+
+        private static async Task<GameObject> AddView(ListFieldView self, ViewModelToView vmtv, int i, ViewModel entryVm) {
+            var parentView = self.mainLink.gameObject;
+            var fieldName = "" + i;
+            if (CanBeShownInListViewEntry(entryVm.GetJTokenType())) {
+                var c = await vmtv.AddChild(parentView, await vmtv.NewListViewEntry());
+                await vmtv.InitChild(c, fieldName, entryVm);
+                return c;
+            }
+            return await vmtv.AddViewForFieldViewModel(parentView, entryVm, fieldName);
+        }
+
+        private static bool CanBeShownInListViewEntry(JTokenType jType) {
+            if (jType == JTokenType.Integer) { return true; }
+            if (jType == JTokenType.Float) { return true; }
+            if (jType == JTokenType.String) { return true; }
+            return false;
         }
 
         private static ViewModel GetMatchingViewModel(JToken modelEntry, List<ViewModel> viewModels) {

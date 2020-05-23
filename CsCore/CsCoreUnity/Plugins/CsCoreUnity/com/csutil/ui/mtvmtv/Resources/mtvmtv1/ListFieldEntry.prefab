@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1082713880711047418}
   - component: {fileID: 6555855123756460441}
-  - component: {fileID: 7874086225294754121}
+  - component: {fileID: 601862497333160391}
   m_Layer: 0
   m_Name: ListFieldEntry
   m_TagString: Untagged
@@ -64,7 +64,7 @@ MonoBehaviour:
   m_ChildControlHeight: 1
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
---- !u!114 &7874086225294754121
+--- !u!114 &601862497333160391
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -73,10 +73,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 59642784373676624}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 228dfbc241db90e4eb77cfc79434360e, type: 3}
+  m_Script: {fileID: 11500000, guid: 468d1a36358335a499dfb04908b5d754, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  title: {fileID: 1010006347648628241}
+  title: {fileID: 0}
   description: {fileID: 6577278895321275722}
   mainLink: {fileID: 3176493211169210783}
   field:
@@ -94,6 +94,7 @@ MonoBehaviour:
   fieldName: 
   fullPath: 
   input: {fileID: 7131927257260523519}
+  checkmark: {fileID: 6339414751821096536}
 --- !u!1 &180875498723217869
 GameObject:
   m_ObjectHideFlags: 0
@@ -367,7 +368,6 @@ GameObject:
   - component: {fileID: 1010006347648628241}
   - component: {fileID: 7651673912942909161}
   - component: {fileID: 6339414751821096536}
-  - component: {fileID: 7194771136408929597}
   m_Layer: 0
   m_Name: MaterialIcon
   m_TagString: Untagged
@@ -502,19 +502,6 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_IsOn: 0
---- !u!114 &7194771136408929597
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6988727784777297152}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 544358e3651005141809e3fd767a8a71, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  id: Toggle
 --- !u!1001 &8973790733050979253
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -529,17 +516,17 @@ PrefabInstance:
     - target: {fileID: 2193531391076097098, guid: dbe80deaafbcf4d4f8d7d2af96148088,
         type: 3}
       propertyPath: m_ContentType
-      value: 2
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2193531391076097098, guid: dbe80deaafbcf4d4f8d7d2af96148088,
         type: 3}
       propertyPath: m_KeyboardType
-      value: 4
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2193531391076097098, guid: dbe80deaafbcf4d4f8d7d2af96148088,
         type: 3}
       propertyPath: m_CharacterValidation
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2439507927762018716, guid: dbe80deaafbcf4d4f8d7d2af96148088,
         type: 3}
@@ -559,7 +546,7 @@ PrefabInstance:
     - target: {fileID: 2868370126669774591, guid: dbe80deaafbcf4d4f8d7d2af96148088,
         type: 3}
       propertyPath: m_Text
-      value: e.g. 99
+      value: e.g. Abcd
       objectReference: {fileID: 0}
     - target: {fileID: 8650711650397742012, guid: dbe80deaafbcf4d4f8d7d2af96148088,
         type: 3}
