@@ -14,8 +14,15 @@ namespace com.csutil.model.mtvmtv {
             return ("" + self).ToFirstCharLowerCase();
         }
 
-        public static JValue NewDefaultJValue(this ViewModel self) {
+        public static JToken NewDefaultJInstance(this ViewModel self) {
+            if (self.GetJTokenType() == JTokenType.Object) { return NewDefaultJObject(self); }
             return self.ParseToJValue(self.defaultVal);
+        }
+
+        private static JToken NewDefaultJObject(ViewModel self) {
+            JObject jObject = new JObject();
+            foreach (var p in self.properties) { jObject.Add(p.Key, p.Value.NewDefaultJInstance()); }
+            return jObject;
         }
 
         public static JValue ParseToJValue(this ViewModel self, string newVal) {

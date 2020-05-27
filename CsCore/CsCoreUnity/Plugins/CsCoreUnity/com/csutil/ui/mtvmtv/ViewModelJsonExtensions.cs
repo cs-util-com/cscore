@@ -79,7 +79,7 @@ namespace com.csutil.ui.mtvmtv {
 
         private static void SetupButtons(ListFieldView listView, JObject root, ViewModelToView vmtv, JArray modelArray, Dictionary<FieldView, JToken> map) {
             listView.add.SetOnClickAction(async delegate {
-                JValue entry = listView.field.items.First().NewDefaultJValue();
+                JToken entry = listView.field.items.First().NewDefaultJInstance();
                 modelArray.Add(entry);
                 var fieldName = "" + (modelArray.Count - 1);
                 var fv = await CreateChildEntryView(listView, root, vmtv, entry, fieldName);
