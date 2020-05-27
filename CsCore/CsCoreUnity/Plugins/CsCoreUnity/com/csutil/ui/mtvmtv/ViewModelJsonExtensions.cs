@@ -71,22 +71,22 @@ namespace com.csutil.ui.mtvmtv {
             for (int i = 0; i < modelArray.Count; i++) {
                 var fieldName = "" + i;
                 var entry = modelArray[i];
-                var fv = await CreateChildEtryView(self, root, vmtv, entry, fieldName);
+                var fv = await CreateChildEntryView(self, root, vmtv, entry, fieldName);
                 map.Add(fv, entry);
             }
             SetupButtons(self, root, vmtv, modelArray, map);
         }
 
-        private static void SetupButtons(ListFieldView self, JObject root, ViewModelToView vmtv, JArray modelArray, Dictionary<FieldView, JToken> map) {
-            self.add.SetOnClickAction(async delegate {
-                var entry = self.field.items.First().NewDefaultJValue();
+        private static void SetupButtons(ListFieldView listView, JObject root, ViewModelToView vmtv, JArray modelArray, Dictionary<FieldView, JToken> map) {
+            listView.add.SetOnClickAction(async delegate {
+                JValue entry = listView.field.items.First().NewDefaultJValue();
                 modelArray.Add(entry);
                 var fieldName = "" + (modelArray.Count - 1);
-                var fv = await CreateChildEtryView(self, root, vmtv, entry, fieldName);
+                var fv = await CreateChildEntryView(listView, root, vmtv, entry, fieldName);
                 map.Add(fv, entry);
             });
-            self.up.SetOnClickAction(delegate {
-                foreach (var v in GetSelectedViews(self)) {
+            listView.up.SetOnClickAction(delegate {
+                foreach (var v in GetSelectedViews(listView)) {
                     var selectedData = map[v];
                     var index = modelArray.IndexOf(selectedData);
                     if (index > 0) {
@@ -96,8 +96,8 @@ namespace com.csutil.ui.mtvmtv {
                     }
                 }
             });
-            self.down.SetOnClickAction(delegate {
-                foreach (var v in GetSelectedViews(self).Reverse()) {
+            listView.down.SetOnClickAction(delegate {
+                foreach (var v in GetSelectedViews(listView).Reverse()) {
                     var selectedData = map[v];
                     var index = modelArray.IndexOf(selectedData);
                     if (index < modelArray.Count - 1) {
@@ -107,8 +107,8 @@ namespace com.csutil.ui.mtvmtv {
                     }
                 }
             });
-            self.delete.SetOnClickAction(delegate {
-                foreach (var v in GetSelectedViews(self)) {
+            listView.delete.SetOnClickAction(delegate {
+                foreach (var v in GetSelectedViews(listView)) {
                     var selectedData = map[v];
                     modelArray.Remove(selectedData);
                     v.gameObject.Destroy();
@@ -123,7 +123,7 @@ namespace com.csutil.ui.mtvmtv {
             return checkedEntries;
         }
 
-        private static async Task<FieldView> CreateChildEtryView(
+        private static async Task<FieldView> CreateChildEntryView(
                 ListFieldView self, JObject root, ViewModelToView vmtv, JToken modelEntry, string fieldName) {
             ViewModel newEntryVm = GetMatchingViewModel(modelEntry, self.field.items);
             GameObject childView = await AddChildEntryView(self, vmtv, fieldName, newEntryVm);
@@ -141,9 +141,9 @@ namespace com.csutil.ui.mtvmtv {
                     ListFieldView self, ViewModelToView vmtv, string fieldName, ViewModel entryVm) {
             var parentView = self.mainLink.gameObject;
             if (CanBeShownInListViewEntry(entryVm.GetJTokenType())) {
-                var c = await vmtv.AddChild(parentView, await vmtv.NewListViewEntry());
-                await vmtv.InitChild(c, fieldName, entryVm);
-                return c;
+                GameObject childGo = await vmtv.AddChild(parentView, await vmtv.NewListViewEntry());
+                await vmtv.InitChild(childGo, fieldName, entryVm);
+                return childGo;
             } else {
                 return await vmtv.AddViewForFieldViewModel(parentView, entryVm, fieldName);
             }
