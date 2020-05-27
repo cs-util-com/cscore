@@ -40,28 +40,43 @@ namespace com.csutil {
         }
 
         public static Task<T> AddOnClickAction<T>(this Button self, Func<GameObject, T> onClickFunc) {
+            if (onClickFunc == null) { throw new ArgumentNullException("Passed onClickFunc was null"); }
             var tcs = new TaskCompletionSource<T>();
-            if (onClickFunc != null) {
-                var originTrace = new StackTrace();
-                self.onClick.AddListener(() => {
-                    EventBus.instance.Publish(UiEvents.BUTTON_CLICKED, self);
-                    try {
-                        T res = onClickFunc(self.gameObject);
-                        if (res is Task<T> asyncT) {
-                            asyncT.ForwardResultTo(tcs);
-                        } else if (res is Task t) {
-                            t.ForwardResultTo(tcs);
-                        } else {
-                            tcs.TrySetResult(res);
-                        }
+            var originTrace = new StackTrace();
+            self.onClick.AddListener(() => {
+                EventBus.instance.Publish(UiEvents.BUTTON_CLICKED, self);
+                try {
+                    T res = onClickFunc(self.gameObject);
+                    if (res is Task<T> asyncT) {
+                        WaitForTaskSuccess(asyncT, originTrace, tcs).ContinueWith(wasSuccess => {
+                            if (wasSuccess.Result) { tcs.TrySetResult(asyncT.Result); }
+                        });
+                    } else if (res is Task t) {
+                        WaitForTaskSuccess(t, originTrace, tcs).ContinueWith(wasSuccess => {
+                            if (wasSuccess.Result) { tcs.TrySetResult((T)(object)t); }
+                        });
+                    } else {
+                        tcs.TrySetResult(res);
                     }
-                    catch (Exception e) {
-                        Log.e(e + " at " + originTrace);
-                        tcs.TrySetException(e);
-                    }
-                });
-            }
+                }
+                catch (Exception e) {
+                    tcs.TrySetException(e);
+                }
+            });
             return tcs.Task;
+        }
+
+        private static async Task<bool> WaitForTaskSuccess<T>(Task task, StackTrace originTrace, TaskCompletionSource<T> tcs) {
+            try {
+                await task;
+                return true;
+            }
+            catch (Exception e) {
+                Log.e(e + "\n by Button: \n\n" + originTrace);
+                if (task.IsCanceled) { tcs.TrySetCanceled(); }
+                if (task.IsFaulted) { tcs.TrySetException(task.Exception); }
+            }
+            return false;
         }
 
         public static UnityAction<bool> SetOnValueChangedAction(this Toggle self, Func<bool, bool> onValueChanged) {
