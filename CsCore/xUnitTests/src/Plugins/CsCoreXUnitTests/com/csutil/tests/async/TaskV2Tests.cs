@@ -15,7 +15,7 @@ namespace com.csutil.tests.async {
             Log.d("Now testing TaskV2.Run");
             await TaskV2.Run(() => {
                 var t = Log.MethodEntered("1");
-                TaskV2.Delay(100).ContinueWith(delegate {
+                TaskV2.Delay(100).ContinueWithSameContext(delegate {
                     Log.MethodDone(t);
                 });
             });

@@ -48,11 +48,11 @@ namespace com.csutil {
                 try {
                     T res = onClickFunc(self.gameObject);
                     if (res is Task<T> asyncT) {
-                        WaitForTaskSuccess(asyncT, originTrace, tcs).ContinueWith(wasSuccess => {
+                        WaitForTaskSuccess(asyncT, originTrace, tcs).ContinueWithSameContext(wasSuccess => {
                             if (wasSuccess.Result) { tcs.TrySetResult(asyncT.Result); }
                         });
                     } else if (res is Task t) {
-                        WaitForTaskSuccess(t, originTrace, tcs).ContinueWith(wasSuccess => {
+                        WaitForTaskSuccess(t, originTrace, tcs).ContinueWithSameContext(wasSuccess => {
                             if (wasSuccess.Result) { tcs.TrySetResult((T)(object)t); }
                         });
                     } else {

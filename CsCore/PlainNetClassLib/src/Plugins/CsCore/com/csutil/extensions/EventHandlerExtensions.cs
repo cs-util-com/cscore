@@ -56,7 +56,7 @@ namespace com.csutil {
                 }
             };
             return (sender, eventArgs) => {
-                asyncEventHandler(sender, eventArgs).ContinueWith(finishedTask => {
+                asyncEventHandler(sender, eventArgs).ContinueWithSameContext(finishedTask => {
                     // A failed task cant be awaited but it can be logged
                     if (finishedTask.Exception != null) { Log.e(finishedTask.Exception); }
                 });

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using com.csutil.model.mtvmtv;
+﻿using System.Threading.Tasks;
 using UnityEngine.UI;
 
 namespace com.csutil.ui.mtvmtv {
@@ -14,9 +12,7 @@ namespace com.csutil.ui.mtvmtv {
         public Button delete;
         public Button search;
 
-        protected override Task Setup(string fieldName, string fullPath) {
-            return Task.FromResult(true);
-        }
+        protected override Task Setup(string fieldName, string fullPath) { return Task.FromResult(true); }
 
     }
 
