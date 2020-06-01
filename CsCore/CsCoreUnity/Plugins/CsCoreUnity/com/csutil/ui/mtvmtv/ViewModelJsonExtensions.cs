@@ -33,8 +33,13 @@ namespace com.csutil.ui.mtvmtv {
                 var enumValues = self.field.contentEnum;
                 enumFieldView.LinkToModel(enumValues[posInEnum], newVal => {
                     var newPosInEnum = Array.FindIndex(enumValues, x => x == newVal);
-                    self.CreateJParentsIfNeeded(root);
-                    (value as JValue).Value = newPosInEnum;
+                    var jValueParent = self.CreateJValueParentsIfNeeded(root);
+                    if (value is JValue v) {
+                        v.Value = newPosInEnum;
+                    } else {
+                        value = new JValue(newPosInEnum);
+                        jValueParent[self.fieldName] = value;
+                    }
                 });
                 return true;
             }
@@ -42,8 +47,13 @@ namespace com.csutil.ui.mtvmtv {
                 inputFieldView.LinkToModel("" + value, newVal => {
                     try {
                         var newJVal = self.field.ParseToJValue(newVal);
-                        self.CreateJParentsIfNeeded(root);
-                        (value as JValue).Value = newJVal.Value;
+                        var jValueParent = self.CreateJValueParentsIfNeeded(root);
+                        if (value is JValue v) {
+                            v.Value = newJVal.Value;
+                        } else {
+                            value = newJVal;
+                            jValueParent[self.fieldName] = value;
+                        }
                     } // Ignore errors like e.g. FormatException when "" is parsed to int:
                     catch (FormatException e) { Log.w("" + e, self.gameObject); }
                 });
@@ -52,8 +62,13 @@ namespace com.csutil.ui.mtvmtv {
             if (self is BoolFieldView boolFieldView) {
                 bool val = (value as JValue)?.Value<bool>() == true;
                 boolFieldView.LinkToModel(val, newB => {
-                    self.CreateJParentsIfNeeded(root);
-                    (value as JValue).Value = newB;
+                    var jValueParent = self.CreateJValueParentsIfNeeded(root);
+                    if (value is JValue v) {
+                        v.Value = newB;
+                    } else {
+                        value = new JValue(newB);
+                        jValueParent[self.fieldName] = value;
+                    }
                 });
                 return true;
             }
@@ -172,23 +187,24 @@ namespace com.csutil.ui.mtvmtv {
             return false;
         }
 
-        private static void CreateJParentsIfNeeded(this FieldView self, JToken rootModel) {
+        private static JToken CreateJValueParentsIfNeeded(this FieldView self, JToken currentLevel) {
             if (self.IsInChildObject()) { // Navigate down to the correct child JObject
                 string[] parents = self.fullPath.Split(".");
                 for (int i = 0; i < parents.Length - 1; i++) {
-                    string parent = parents.ElementAt(i);
-                    var child = GetChildJToken(rootModel, parent);
+                    string fieldName = parents.ElementAt(i);
+                    var child = GetChildJToken(currentLevel, fieldName);
                     if (child == null) {
                         if (int.TryParse(parents.ElementAt(i + 1), out int _)) {
-                            rootModel[parent] = new JArray();
+                            currentLevel[fieldName] = new JArray();
                         } else {
-                            rootModel[parent] = new JObject();
+                            currentLevel[fieldName] = new JObject();
                         }
                     }
-                    rootModel = child;
-                    AssertV2.NotNull(rootModel, $"rootModel (p='{parent}', child={child}");
+                    currentLevel = child;
+                    AssertV2.NotNull(currentLevel, $"rootModel (p='{fieldName}', child={child}");
                 }
             }
+            return currentLevel;
         }
 
         public static JToken GetJParent(this FieldView self, JToken rootModel) {

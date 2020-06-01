@@ -73,7 +73,7 @@ namespace com.csutil.tests {
                 presenter.targetView = generatedView;
 
                 Log.d("Model BEFORE changes: " + JsonWriter.AsPrettyString(model));
-                MyUserModel changedModel = await presenter.LoadViaJsonIntoView(model, SetupConfirmButton(generatedView));
+                MyUserModel changedModel = await presenter.LoadViaJsonIntoView(model, VmtvContainerUtil.ChangesSavedViaConfirmButton(generatedView));
                 Log.d("Model AFTER changes: " + JsonWriter.AsPrettyString(changedModel));
 
                 viewStack.SwitchBackToLastView(generatedView);
@@ -96,7 +96,7 @@ namespace com.csutil.tests {
 
                 Log.d("Model BEFORE changes: " + model.ToPrettyString());
                 var changedModel = await presenter.LoadModelIntoView(model.DeepClone() as JObject);
-                await SetupConfirmButton(generatedView);
+                await VmtvContainerUtil.ChangesSavedViaConfirmButton(generatedView);
                 Log.d("Model AFTER changes: " + changedModel.ToPrettyString());
 
                 viewStack.SwitchBackToLastView(generatedView);
@@ -107,19 +107,6 @@ namespace com.csutil.tests {
 
         private static ViewModelToView NewViewModelToView(ModelToViewModel mtvm) {
             return new ViewModelToView(mtvm, prefabFolder) { rootContainerPrefab = ViewModelToView.CONTAINER2 };
-        }
-
-        private static async Task SetupConfirmButton(GameObject targetView) {
-            do {
-                await ConfirmButtonClicked(targetView);
-            } while (!RegexValidator.IsAllInputCurrentlyValid(targetView));
-        }
-
-        private static Task ConfirmButtonClicked(GameObject targetView) {
-            return targetView.GetLinkMap().Get<Button>("ConfirmButton").SetOnClickAction(async delegate {
-                Toast.Show("Saving..");
-                await TaskV2.Delay(500); // Wait for potential pending throttled actions to update the model
-            });
         }
 
         private class MyManualPresenter1 : Presenter<MyUserModel> {
@@ -145,12 +132,12 @@ namespace com.csutil.tests {
                 map.LinkViewToModel("bestFriend.name", u.bestFriend.name, newVal => u.bestFriend.name = newVal);
                 map.LinkViewToModel("profilePic.url", u.profilePic.url, newVal => u.profilePic.url = newVal);
 
-                await SetupConfirmButton(targetView);
+                await VmtvContainerUtil.ChangesSavedViaConfirmButton(targetView);
             }
 
         }
 
-        private static MyUserModel NewExampleUserInstance() {
+        internal static MyUserModel NewExampleUserInstance() {
             return new MyUserModel() {
                 name = "Tom",
                 email = "a@b.com",
@@ -172,7 +159,7 @@ namespace com.csutil.tests {
             };
         }
 
-        private class MyUserModel {
+        internal class MyUserModel {
 
             [JsonProperty(Required = Required.Always)]
             public string id { get; private set; } = Guid.NewGuid().ToString();
@@ -239,7 +226,7 @@ namespace com.csutil.tests {
 
         }
 
-        private class FileRef : IFileRef {
+        internal class FileRef : IFileRef {
 
             [Regex(RegexTemplates.URL)]
             public string url { get; set; }

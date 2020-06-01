@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using com.csutil.model.mtvmtv;
-using Newtonsoft.Json.Linq;
 using UnityEngine;
 
 namespace com.csutil.ui.mtvmtv {
@@ -27,7 +25,13 @@ namespace com.csutil.ui.mtvmtv {
         public string listFieldPrefab = "ListField";
         public string listViewEntryPrefab = "ListFieldEntry";
 
-        public ViewModelToView(ModelToViewModel mtvm, string prefabFolder = "mtvmtv1/") : base(mtvm) {
+        /// <summary> If set to true the prefab reference will be kept, important when 
+        /// generating UIs in editor time (and not dynamically during runtime) </summary>
+        public bool keepReferenceToEditorPrefab = false;
+
+        /// <summary> Creates a generator instance that can generate views from view models vie ViewModelToView.ToView(..) </summary>
+        /// <param name="prefabFolder"> The folder path where all the view generation related prefabs are located, e.g. "mtvmtv1/" </param>
+        public ViewModelToView(ModelToViewModel mtvm, string prefabFolder) : base(mtvm) {
             this.prefabFolder = prefabFolder;
         }
 
@@ -83,7 +87,7 @@ namespace com.csutil.ui.mtvmtv {
         }
 
         public virtual Task<GameObject> LoadFieldViewPrefab(string prefabName) {
-            return Task.FromResult(ResourcesV2.LoadPrefab(prefabFolder + prefabName));
+            return Task.FromResult(ResourcesV2.LoadPrefab(prefabFolder + prefabName, keepReferenceToEditorPrefab));
         }
 
         public override async Task InitChild(GameObject view, string fieldName, ViewModel field) {

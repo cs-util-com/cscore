@@ -1,4 +1,5 @@
 ﻿using com.csutil.datastructures;
+using com.csutil.model.mtvmtv;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -10,6 +11,21 @@ using UnityEngine.UI;
 namespace com.csutil.ui.mtvmtv {
 
     public static class ViewModelExtensions {
+
+        /// <summary> Can be used to generate a view directly from a model, if the viewModel does not have to be customized, e.g. 
+        /// because the model uses Annotations this is the easiest way to generate a fully usable UI from any class </summary>
+        /// <typeparam name="T"> The type of the model </typeparam>
+        /// <param name="keepReferenceToEditorPrefab"> If the view is generated during editor time this should be set to 
+        /// true so that the used prefabs in the view are still linked correctly. </param>
+        /// <returns> The generated view which can be used to load a model instance into it </returns>
+        public static async Task<GameObject> GenerateViewFrom<T>(this ViewModelToView vmtv, bool keepReferenceToEditorPrefab = false) {
+            var modelType = typeof(T);
+            ViewModel viewModel = vmtv.mtvm.ToViewModel(modelType.Name, modelType);
+            vmtv.keepReferenceToEditorPrefab = keepReferenceToEditorPrefab;
+            var view = await vmtv.ToView(viewModel);
+            view.name = viewModel.title;
+            return view;
+        }
 
         public static Dictionary<string, FieldView> GetFieldViewMap(this GameObject self) {
             return self.GetComponentsInChildren<FieldView>().Filter(x => !x.fullPath.IsNullOrEmpty()).ToDictionary(x => x.fullPath, x => x);

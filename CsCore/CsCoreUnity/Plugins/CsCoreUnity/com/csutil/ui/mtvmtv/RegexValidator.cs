@@ -43,7 +43,7 @@ namespace com.csutil.ui.mtvmtv {
 
         /// <summary> Updates the state of the validator based on the new input </summary>
         private void EvalNewValue(string newValue) {
-            isInputValid = regex == null || newValue.IsRegexMatch(regex);
+            isInputValid = regex.IsNullOrEmpty() || newValue.IsRegexMatch(regex);
             RefreshErrorUi();
         }
 
