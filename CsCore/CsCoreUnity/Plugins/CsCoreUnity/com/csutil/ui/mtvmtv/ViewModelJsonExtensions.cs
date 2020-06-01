@@ -10,6 +10,23 @@ namespace com.csutil.ui.mtvmtv {
 
     public static class ViewModelJsonExtensions {
 
+        public static async Task LinkToJsonModel(this GameObject targetView, JObject root, ViewModelToView vmtv) {
+            foreach (var fieldView in targetView.GetFieldViewMap().Values) {
+                var value = fieldView.GetFieldJModel(root);
+                if (!fieldView.LinkToJsonModel(root, value)) {
+                    if (fieldView is RecursiveFieldView r) {
+                        r.ShowChildModelInNewScreen(targetView, value as JObject);
+                    } else if (fieldView is ObjectFieldView) {
+                        // Do nothing (object fields are individually set up themselves)
+                    } else if (fieldView is ListFieldView l) {
+                        await l.LoadModelList(root, vmtv);
+                    } else {
+                        Log.e($"Did not link {fieldView.GetType()}: {fieldView.fullPath}");
+                    }
+                }
+            }
+        }
+
         public static bool LinkToJsonModel(this FieldView self, JObject root, JToken value) {
             if (self is EnumFieldView enumFieldView && value?.Type == JTokenType.Integer) {
                 int posInEnum = int.Parse("" + value);
@@ -70,7 +87,7 @@ namespace com.csutil.ui.mtvmtv {
             var map = new Dictionary<FieldView, JToken>();
             for (int i = 0; i < modelArray.Count; i++) {
                 var fieldName = "" + i;
-                var entry = modelArray[i];
+                JToken entry = modelArray[i];
                 var fv = await CreateChildEntryView(self, root, vmtv, entry, fieldName);
                 map.Add(fv, entry);
             }
@@ -127,9 +144,8 @@ namespace com.csutil.ui.mtvmtv {
                 ListFieldView self, JObject root, ViewModelToView vmtv, JToken modelEntry, string fieldName) {
             ViewModel newEntryVm = GetMatchingViewModel(modelEntry, self.field.items);
             GameObject childView = await AddChildEntryView(self, vmtv, fieldName, newEntryVm);
-            var fieldView = childView.GetComponentInChildren<FieldView>();
-            fieldView.LinkToJsonModel(root, modelEntry);
-            return fieldView;
+            await childView.LinkToJsonModel(root, vmtv);
+            return childView.GetComponentInChildren<FieldView>();
         }
 
         private static ViewModel GetMatchingViewModel(JToken modelEntry, List<ViewModel> viewModels) {

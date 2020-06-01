@@ -10,22 +10,7 @@ namespace com.csutil.ui.mtvmtv {
 
         public JObjectPresenter(ViewModelToView vmtv) { this.vmtv = vmtv; }
 
-        public async Task OnLoad(JObject root) {
-            foreach (var fieldView in targetView.GetFieldViewMap().Values) {
-                var value = fieldView.GetFieldJModel(root);
-                if (!fieldView.LinkToJsonModel(root, value)) {
-                    if (fieldView is RecursiveFieldView r) {
-                        r.ShowChildModelInNewScreen(targetView, value as JObject);
-                    } else if (fieldView is ObjectFieldView) {
-                        // Do nothing (object fields are individually set up themselves)
-                    } else if (fieldView is ListFieldView l) {
-                        await l.LoadModelList(root, vmtv);
-                    } else {
-                        Log.e($"Did not link {fieldView.GetType()}: {fieldView.fullPath}");
-                    }
-                }
-            }
-        }
+        public async Task OnLoad(JObject root) { await targetView.LinkToJsonModel(root, vmtv); }
 
     }
 

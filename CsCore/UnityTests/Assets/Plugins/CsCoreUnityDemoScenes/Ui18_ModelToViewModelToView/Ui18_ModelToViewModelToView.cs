@@ -24,7 +24,7 @@ namespace com.csutil.tests {
 
         private static async Task GenerateAndShowViewFor(ViewStack viewStack) {
 
-            { // This time load the viewModel from an external JSON schema:
+            { // Testing arrays / lists:
                 var mtvm = new ModelToViewModel();
                 ViewModel viewModel = JsonReader.GetReader().Read<ViewModel>(SomeJsonSchemaExamples.jsonSchema2);
                 await LoadJsonModelIntoGeneratedJsonSchemaView(viewStack, mtvm, viewModel, SomeJsonSchemaExamples.json2);
