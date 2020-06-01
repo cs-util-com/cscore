@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using com.csutil.io;
 using com.csutil.model;
 using Xunit;
 using Zio;
@@ -90,6 +91,25 @@ namespace com.csutil.tests.model {
             Assert.Null(f.fileName);
             Assert.Null(f.dir);
             Log.d("FileRef: " + JsonWriter.AsPrettyString(f));
+
+        }
+
+        [Fact]
+        public async Task TestImageFileRef() {
+
+            var dir = EnvironmentV2.instance.GetOrAddTempFolder("TestImageFileWithThumbnail");
+
+            var imgRef = new FileRef() { url = "https://picsum.photos/1024/512" };
+            await imgRef.DownloadTo(dir);
+            Log.d("FileRef: " + JsonWriter.AsPrettyString(imgRef));
+            Assert.NotNull(imgRef.url);
+            Assert.NotNull(imgRef.fileName);
+            Assert.NotNull(imgRef.dir);
+
+            FileEntry imgEntry = imgRef.GetFileEntry(dir.FileSystem);
+            var img = await ImageLoader.LoadImageInBackground(imgEntry);
+            Assert.Equal(1024, img.Width);
+            Assert.Equal(512, img.Height);
 
         }
 

@@ -21,6 +21,10 @@ namespace com.csutil.model {
             self.fileName = value.GetName();
         }
 
+        public static FileEntry GetFileEntry(this IFileRef self, IFileSystem fs) {
+            return fs.GetFileEntry(self.GetPath());
+        }
+
         public static async Task<bool> DownloadTo(this IFileRef self, DirectoryEntry targetDirectory, Action<float> onProgress = null) {
             self.AssertValidDirectory(targetDirectory);
             RestRequest request = new Uri(self.url).SendGET();
