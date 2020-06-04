@@ -11,11 +11,13 @@ namespace com.csutil.ui.mtvmtv {
     public static class ViewModelJsonExtensions {
 
         public static async Task LinkToJsonModel(this GameObject targetView, JObject root, ViewModelToView vmtv) {
+
+            vmtv.SetupViewModelMap(targetView.GetComponentsInChildren<ViewModelFieldView>());
             foreach (var fieldView in targetView.GetFieldViewMap().Values) {
                 var value = fieldView.GetFieldJModel(root);
                 if (!fieldView.LinkToJsonModel(root, value)) {
                     if (fieldView is RecursiveFieldView r) {
-                        r.ShowChildModelInNewScreen(targetView, value as JObject);
+                        r.ShowChildModelInNewScreen(vmtv, targetView, value as JObject);
                     } else if (fieldView is ObjectFieldView) {
                         // Do nothing (object fields are individually set up themselves)
                     } else if (fieldView is ListFieldView l) {
@@ -23,6 +25,42 @@ namespace com.csutil.ui.mtvmtv {
                     } else {
                         Log.e($"Did not link {fieldView.GetType()}: {fieldView.fullPath}");
                     }
+                }
+            }
+        }
+
+        private static void SetupViewModelMap(this ViewModelToView vmtv, ViewModelFieldView[] vmFieldViews) {
+            foreach (var fieldView in vmFieldViews) {
+                RestorePropertiesFromChildrenGOs(fieldView);
+
+                ViewModel viewModel = fieldView.field;
+                AssertV2.IsNotNull(viewModel, "viewModel");
+                AssertV2.IsNotNull(viewModel.modelType, "viewModel.modelType");
+                if (!viewModel.properties.IsNullOrEmpty()) {
+                    // After the fieldView properties are reconstructed correctly again fill the mtvm fieldView map to have a central lookup location
+                    if (!vmtv.mtvm.viewModels.ContainsKey(viewModel.modelType)) {
+                        vmtv.mtvm.viewModels.Add(viewModel.modelType, viewModel);
+                    }
+                    //var allFoundViewModels = fieldViews.Values.Map(f => f.field);
+                    //foreach (var vm in allFoundViewModels) { vmtv.mtvm.SetupViewModelMap(vm); }
+                } else {
+                    Log.d($"Will skip {viewModel.title} since it seems to be a partly unresolved type");
+                }
+            }
+        }
+
+        /// <summary> Since the rootFieldView.properties are not correctly serialized by unity, this Dictionary has to be reconstructed from the
+        /// FieldViews in the children GameObjects.So first fill the properties of the rootFieldView again with the fields of the 
+        /// direct children GameObjects.And do this recursively for all found ObjectFieldViews </summary>
+        private static void RestorePropertiesFromChildrenGOs(ViewModelFieldView targetFieldView) {
+            if (targetFieldView.field.properties.IsNullOrEmpty()) {
+                var children = targetFieldView.mainLink.gameObject.GetChildren().Map(c => c.GetComponent<FieldView>()).Filter(x => x != null);
+                if (children.IsNullOrEmpty()) {
+                    Log.w(targetFieldView.fieldName + " had no children fieldViews");
+                } else {
+                    foreach (var vm in children.OfType<ViewModelFieldView>()) { RestorePropertiesFromChildrenGOs(vm); }
+                    var fieldDict = children.ToDictionary(x => x.fieldName, x => x.field);
+                    if (!fieldDict.IsNullOrEmpty()) { targetFieldView.field.properties = fieldDict; }
                 }
             }
         }
@@ -85,12 +123,12 @@ namespace com.csutil.ui.mtvmtv {
             return jParent?[self.fieldName];
         }
 
-        public static void ShowChildModelInNewScreen(this RecursiveFieldView self, GameObject currentScreen, JObject jObj) {
+        public static void ShowChildModelInNewScreen(this RecursiveFieldView self, ViewModelToView viewModelToView, GameObject currentScreen, JObject jObj) {
             self.openButton.SetOnClickAction(async delegate {
-                var newScreen = await self.NewViewFromViewModel();
+                var newScreen = await self.NewViewFromViewModel(viewModelToView);
                 var viewStack = currentScreen.GetViewStack();
                 viewStack.ShowView(newScreen, currentScreen);
-                var presenter = new JObjectPresenter(self.viewModelToView);
+                var presenter = new JObjectPresenter(viewModelToView);
                 presenter.targetView = newScreen;
                 await presenter.LoadModelIntoView(jObj);
             }).LogOnError();
@@ -201,7 +239,7 @@ namespace com.csutil.ui.mtvmtv {
                         }
                     }
                     currentLevel = child;
-                    AssertV2.NotNull(currentLevel, $"rootModel (p='{fieldName}', child={child}");
+                    AssertV2.IsNotNull(currentLevel, $"rootModel (p='{fieldName}', child={child}");
                 }
             }
             return currentLevel;

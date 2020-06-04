@@ -14,6 +14,10 @@ namespace com.csutil.ui.mtvmtv {
         protected override async Task Setup(string fieldName, string fullPath) {
             await base.Setup(fieldName, fullPath);
             input.interactable = field.additionalItems == true;
+        }
+
+        private void Start() {
+            AssertV2.IsNotNull(field, "field", gameObject);
             CreateMenuEntryUis();
         }
 

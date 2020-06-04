@@ -111,8 +111,7 @@ namespace com.csutil.ui.mtvmtv {
 
         private void SetViewModel(GameObject view, ViewModel viewModel) {
             var viewModelFieldView = view.GetComponentInChildren<ViewModelFieldView>();
-            viewModelFieldView.viewModelToView = this;
-            viewModelFieldView.recursiveViewModel = viewModel;
+            viewModelFieldView.field = viewModel;
         }
 
         public override async Task<GameObject> HandleSimpleArray(GameObject parent, string fieldName, ViewModel field) {
