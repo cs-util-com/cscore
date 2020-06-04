@@ -70,7 +70,7 @@ namespace com.csutil.ui {
         }
 
         private void LoadImageFromUrl(Image targetImage, string urlToLoad) {
-            AssertV2.NotNull(targetImage, "targetImage");
+            AssertV2.IsNotNull(targetImage, "targetImage");
             var isUrlEmpty = urlToLoad.IsNullOrEmpty();
             targetImage.gameObject.GetParent().SetActiveV2(!isUrlEmpty);
             if (!isUrlEmpty) { targetImage.LoadFromUrl(urlToLoad).OnError(LogImageLoadError); }

@@ -51,8 +51,6 @@ namespace com.csutil.model.mtvmtv {
             return SetupViewModel(viewModel, modelType, model);
         }
 
-
-
         private ViewModel SetupViewModel(ViewModel viewModel, Type modelType, object model) {
             viewModel.modelType = ToTypeString(modelType);
             viewModels.Add(viewModel.modelType, viewModel);
@@ -99,7 +97,7 @@ namespace com.csutil.model.mtvmtv {
             MemberInfo model = parentType?.GetMember(name).First();
             Type modelType = GetModelType(model);
             JTokenType jTokenType = ToJTokenType(modelType, jpInstance);
-            AssertV2.NotNull(jTokenType, "jTokenType");
+            AssertV2.IsNotNull(jTokenType, "jTokenType");
             ViewModel newField = new ViewModel() { type = jTokenType.ToJsonSchemaType(), title = ViewModel.ToTitle(name) };
             ExtractFieldDocu(newField, model, modelType, jTokenType, pInstance, jpInstance);
             if (model != null) {

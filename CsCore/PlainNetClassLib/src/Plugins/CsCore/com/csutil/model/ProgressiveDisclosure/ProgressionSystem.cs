@@ -16,7 +16,7 @@ namespace com.csutil.model {
 
         public ProgressionSystem(LocalAnalytics analytics, FeatureFlagManager<T> featureFlagManager) {
             // Make sure the FeatureFlag system was set up too:
-            AssertV2.NotNull(FeatureFlagManager<T>.instance, "FeatureFlagManager.instance");
+            AssertV2.IsNotNull(FeatureFlagManager<T>.instance, "FeatureFlagManager.instance");
             this.analytics = analytics;
             this.featureFlagManager = featureFlagManager;
         }

@@ -25,7 +25,7 @@ namespace com.csutil.tests.ui {
             AssertV2.AreEqual(1, testTracker.recordedEvents.Count(x => x.action.Contains("DataStore")));
 
             var store = MyDataModel.GetStore();
-            AssertV2.NotNull(store, "store");
+            AssertV2.IsNotNull(store, "store");
             store.Dispatch(new ActionSetBool1() { newB = true });
             store.Dispatch(new ActionSetString1 { newS = "abc" });
             AssertV2.AreEqual(true, store.GetState().subSection1.bool1);

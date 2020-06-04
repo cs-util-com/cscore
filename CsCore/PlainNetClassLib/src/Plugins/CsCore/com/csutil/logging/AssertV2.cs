@@ -68,12 +68,6 @@ namespace com.csutil {
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
-        public static void NotNull(object o, string varName, params object[] args) {
-            string errorMsg = $"Assert.NotNull({varName}) FAILED";
-            Assert(o != null, errorMsg, args);
-        }
-
-        [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         public static void AreEqual(bool expected, bool actual, string varName = "", params object[] args) {
             var errorMsg = $"Assert.AreEqual() FAILED: expected bool {varName}= {expected} NOT equal to actual {varName}= {actual}";
             Assert(expected == actual, errorMsg, args);

@@ -40,7 +40,7 @@ namespace com.csutil.tests {
         private async Task ShowModelInstanceInView() {
             // Get the previously created view (see above)
             var uiView = gameObject.GetChild(0);
-            AssertV2.NotNull(uiView, "uiView");
+            AssertV2.IsNotNull(uiView, "uiView");
             // Create some example model instance:
             var modelInstance = Ui18_ModelToViewModelToView.NewExampleUserInstance();
 

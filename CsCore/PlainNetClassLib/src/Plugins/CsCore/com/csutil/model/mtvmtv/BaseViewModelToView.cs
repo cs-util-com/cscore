@@ -16,7 +16,7 @@ namespace com.csutil.model.mtvmtv {
 
         public async Task<V> ToView(ViewModel rootViewModel) {
             var rootView = await NewRootContainerView(rootViewModel);
-            await InitChild(rootView, null, null);
+            await InitChild(rootView, null, rootViewModel);
             await ObjectViewModelToView(rootViewModel, await SelectInnerViewContainerFromObjectFieldView(rootView));
             return rootView;
         }

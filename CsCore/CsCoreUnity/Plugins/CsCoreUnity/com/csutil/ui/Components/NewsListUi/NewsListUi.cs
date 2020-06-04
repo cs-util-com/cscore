@@ -17,7 +17,7 @@ namespace com.csutil.ui {
         public NewsManager newsManager; // protected because its accessed by the list entries
 
         public async Task LoadNews() {
-            AssertV2.NotNull(newsManager, "newsManager");
+            AssertV2.IsNotNull(newsManager, "newsManager");
             var allNews = showOnlyUnread ? await newsManager.GetAllUnreadNews() : await newsManager.GetAllNews();
             this.CellData = allNews.ToList(); // This will trigger showing the list entries
         }
