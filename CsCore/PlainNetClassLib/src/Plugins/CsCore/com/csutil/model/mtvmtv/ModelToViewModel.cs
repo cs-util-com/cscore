@@ -104,6 +104,10 @@ namespace com.csutil.model.mtvmtv {
                 if (!model.CanWriteTo()) { newField.readOnly = true; }
                 if (model.TryGetCustomAttribute(out RegexAttribute attr)) { newField.pattern = attr.regex; }
                 if (model.TryGetCustomAttribute(out ContentAttribute c)) { newField.contentType = "" + c.type; }
+                if (model.TryGetCustomAttribute(out MinMaxRangeAttribute ra)) {
+                    newField.minimum = ra.minimum;
+                    newField.maximum = ra.maximum;
+                }
                 if (model.TryGetCustomAttribute(out EnumAttribute e)) {
                     newField.contentEnum = e.names;
                     newField.additionalItems = e.additionalItems;

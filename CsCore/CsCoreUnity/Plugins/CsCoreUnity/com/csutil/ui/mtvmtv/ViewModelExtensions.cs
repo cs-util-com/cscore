@@ -47,8 +47,12 @@ namespace com.csutil.ui.mtvmtv {
 
         public static void LinkToModel(this FieldView self, string text) { self.mainLink.Get<Text>().text = text; }
 
-        public static InputFieldView LinkViewToModel(this Dictionary<string, FieldView> self, string key, string val, Action<string> onNewVal) {
-            return self.Get<InputFieldView>(key).LinkToModel(val, onNewVal);
+        public static FieldView LinkViewToModel(this Dictionary<string, FieldView> self, string key, string val, Action<string> onNewVal) {
+            var fv = self.Get<FieldView>(key);
+            if (fv == null) { throw new ArgumentException("Cant link view to model, key not found: " + key); }
+            if (fv is InputFieldView ifv) { return ifv.LinkToModel(val, onNewVal); }
+            if (fv is SliderFieldView sfv) { return sfv.LinkToModel(float.Parse(val), nv => onNewVal("" + nv)); }
+            throw new NotImplementedException("Cant link view to model, unhandled field view type " + fv.GetType());
         }
 
         public static InputFieldView LinkToModel(this InputFieldView self, string val, Action<string> onNewVal) {
@@ -67,6 +71,19 @@ namespace com.csutil.ui.mtvmtv {
                 onNewVal(newVal);
                 return true;
             });
+            return self;
+        }
+
+        public static SliderFieldView LinkToModel(this SliderFieldView self, float val, Action<float> onNewVal) {
+            self.slider.value = val;
+            self.valueDisplay.text = "" + val;
+            self.slider.AddOnValueChangedAction(newVal => {
+                self.valueDisplay.text = "" + newVal;
+                return true;
+            });
+            self.slider.AddOnValueChangedActionThrottled(newVal => {
+                onNewVal(newVal);
+            }, 100);
             return self;
         }
 

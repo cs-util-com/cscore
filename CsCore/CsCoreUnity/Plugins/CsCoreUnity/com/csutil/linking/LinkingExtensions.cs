@@ -12,6 +12,9 @@ namespace com.csutil {
             var linkArray = self.GetComponentsInChildren<Link>(includeInactive);
             var linkMap = new Dictionary<string, Link>();
             foreach (var link in linkArray) {
+                if (link.id.IsNullOrEmpty()) {
+                    throw Log.e("Link with empty id string found: " + link.gameObject, link.gameObject);
+                }
                 if (linkMap.ContainsKey(link.id)) {
                     var e = Log.e("Multiple links with same id=" + link.id, link.gameObject);
                     var obj1 = linkMap[link.id].gameObject;

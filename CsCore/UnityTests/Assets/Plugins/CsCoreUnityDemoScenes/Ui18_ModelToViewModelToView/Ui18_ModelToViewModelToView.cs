@@ -181,6 +181,7 @@ namespace com.csutil.tests {
             public string password;
 
             [Description("e.g. 99")]
+            [MinMaxRange(0,130)]
             public int? age;
 
             public float money;

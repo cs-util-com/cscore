@@ -17,6 +17,7 @@ namespace com.csutil.ui.mtvmtv {
         public string boolFieldPrefab = "BoolField";
         public string integerFieldPrefab = "IntegerField";
         public string floatFieldPrefab = "FloatField";
+        public string sliderFieldPrefab = "SliderField";
         public string stringFieldPrefab = "StringField";
         public string enumFieldPrefab = "EnumField";
         public string readOnlyTextFieldPrefab = "ReadOnlyTextField";
@@ -36,10 +37,10 @@ namespace com.csutil.ui.mtvmtv {
         }
 
         public override async Task<GameObject> NewRootContainerView() {
-            return await NewRootContainerView( rootContainerPrefab);
+            return await NewRootContainerView(rootContainerPrefab);
         }
 
-        public async Task<GameObject> NewRootContainerView( string rootPrefabName) {
+        public async Task<GameObject> NewRootContainerView(string rootPrefabName) {
             return await LoadFieldViewPrefab(rootPrefabName);
         }
 
@@ -62,11 +63,13 @@ namespace com.csutil.ui.mtvmtv {
 
         public override async Task<GameObject> NewIntegerFieldView(ViewModel field) {
             if (field.readOnly == true) { return await LoadFieldViewPrefab(readOnlyTextFieldPrefab); }
+            if (field.minimum != null && field.maximum != null) { return await LoadFieldViewPrefab(sliderFieldPrefab); }
             return await LoadFieldViewPrefab(integerFieldPrefab);
         }
 
         public override async Task<GameObject> NewFloatFieldView(ViewModel field) {
             if (field.readOnly == true) { return await LoadFieldViewPrefab(readOnlyTextFieldPrefab); }
+            if (field.minimum != null && field.maximum != null) { return await LoadFieldViewPrefab(sliderFieldPrefab); }
             return await LoadFieldViewPrefab(floatFieldPrefab);
         }
 

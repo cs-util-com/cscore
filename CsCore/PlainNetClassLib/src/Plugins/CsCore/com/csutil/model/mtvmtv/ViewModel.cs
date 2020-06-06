@@ -7,7 +7,7 @@ namespace com.csutil.model.mtvmtv {
     [Serializable]
     public class ViewModel {
 
-        /// <summary> Will contain the type like "Object", "Integer", "Array", .. </summary>
+        /// <summary> Will contain the type like "object", "integer", "array", .. </summary>
         public string type;
         /// <summary> This will contain the concrete name of the model if type is an "Object" </summary>
         public string modelType;
@@ -21,11 +21,13 @@ namespace com.csutil.model.mtvmtv {
 
         [JsonProperty("default")]
         public string defaultVal;
+        public float? minimum;
+        public float? maximum;
 
         public bool? readOnly;
         public bool? writeOnly;
         public bool? mandatory; // Not part of JSON schema and redundant with required list above
-                                /// <summary> Regex pattern that has to be matched by the field value to be valid</summary>
+        /// <summary> Regex pattern that has to be matched by the field value to be valid</summary>
         public string pattern;
         public string contentType;
         /// <summary> If the field is an object it has a view model itself </summary>

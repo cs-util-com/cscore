@@ -28,7 +28,7 @@ namespace com.csutil.ui.mtvmtv {
                     }
                 }
             }
-            mainLink.id = fullPath;
+            if (!fullPath.IsNullOrEmpty()) { mainLink.SetId(fullPath); }
             return Setup(fieldName, fullPath);
         }
 

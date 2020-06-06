@@ -61,6 +61,9 @@ namespace com.csutil.tests.model.mtvmtv {
             // The other fields of this ViewModel are null since it was already defined:
             Assert.Null(userVmInUserContactClass.properties);
 
+            Assert.Equal(0, vm.properties["age"].minimum);
+            Assert.Equal(130, vm.properties["age"].maximum);
+
         }
 
         [Fact]
@@ -169,6 +172,7 @@ namespace com.csutil.tests.model.mtvmtv {
             [Content(ContentType.Password, "A secure password")]
             public string password;
 
+            [MinMaxRange(min: 0, max: 130)]
             public int age;
             public float money;
             public FileRef profilePic;

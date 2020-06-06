@@ -36,10 +36,15 @@ namespace com.csutil.ui.mtvmtv {
         }
 
         private static void AddToViewModelMap(ViewModelToView vmtv, ObjectFieldView fieldView) {
+            if (fieldView == null) {
+                Log.w("Passed fieldView was null, will skip AddToViewModelMap process");
+                return;
+            }
             RestorePropertiesFromChildrenGOs(fieldView);
             ViewModel viewModel = fieldView.field;
             if (viewModel.modelType.IsNullOrEmpty()) {
-                throw Log.e("Missing viewModel.modelType in passsed ObjectFieldView.field", fieldView.gameObject);
+                Log.w("Missing viewModel.modelType in passsed ObjectFieldView.field", fieldView.gameObject);
+                return;
             }
             if (!viewModel.properties.IsNullOrEmpty()) {
                 // After the fieldView properties are reconstructed correctly again fill the mtvm fieldView map to have a central lookup location
@@ -57,6 +62,7 @@ namespace com.csutil.ui.mtvmtv {
         /// FieldViews in the children GameObjects.So first fill the properties of the rootFieldView again with the fields of the 
         /// direct children GameObjects.And do this recursively for all found ObjectFieldViews </summary>
         private static void RestorePropertiesFromChildrenGOs(ObjectFieldView targetFieldView) {
+            AssertV2.IsNotNull(targetFieldView, "targetFieldView");
             if (targetFieldView.field.properties.IsNullOrEmpty()) {
                 var children = targetFieldView.mainLink.gameObject.GetChildren().Map(c => c.GetComponent<FieldView>()).Filter(x => x != null);
                 if (children.IsNullOrEmpty()) {
@@ -103,12 +109,26 @@ namespace com.csutil.ui.mtvmtv {
             }
             if (self is BoolFieldView boolFieldView) {
                 bool val = (value as JValue)?.Value<bool>() == true;
-                boolFieldView.LinkToModel(val, newB => {
+                boolFieldView.LinkToModel(val, newVal => {
                     var jValueParent = self.CreateJValueParentsIfNeeded(root);
                     if (value is JValue v) {
-                        v.Value = newB;
+                        v.Value = newVal;
                     } else {
-                        value = new JValue(newB);
+                        value = new JValue(newVal);
+                        jValueParent[self.fieldName] = value;
+                    }
+                });
+                return true;
+            }
+            if (self is SliderFieldView sliderFieldView) {
+                float val = float.Parse("" + value);
+                sliderFieldView.LinkToModel(val, newVal => {
+                    var jValueParent = self.CreateJValueParentsIfNeeded(root);
+                    bool isInt = sliderFieldView.field.GetJTokenType() == JTokenType.Integer;
+                    if (value is JValue v) {
+                        v.Value = isInt ? (int)newVal : newVal;
+                    } else {
+                        value = isInt ? new JValue((int)newVal) : new JValue(newVal);
                         jValueParent[self.fieldName] = value;
                     }
                 });
