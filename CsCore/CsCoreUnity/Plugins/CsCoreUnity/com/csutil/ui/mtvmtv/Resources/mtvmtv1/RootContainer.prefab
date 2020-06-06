@@ -14,7 +14,8 @@ GameObject:
   - component: {fileID: 1935818411742671122}
   - component: {fileID: 6067949241598098611}
   - component: {fileID: 8739528813001655081}
-  - component: {fileID: 5495245882116747286}
+  - component: {fileID: 8852097687907598957}
+  - component: {fileID: 2130405293735192506}
   m_Layer: 0
   m_Name: RootContainer
   m_TagString: Untagged
@@ -129,7 +130,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e828ead2ff4673e46849db75f726fd3e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &5495245882116747286
+--- !u!114 &8852097687907598957
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -138,32 +139,39 @@ MonoBehaviour:
   m_GameObject: {fileID: 658342378479606442}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a107d27414857044aa42b40317e3193b, type: 3}
+  m_Script: {fileID: 11500000, guid: faf1cfdc9460518449ba5620b9e6216a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   title: {fileID: 0}
   description: {fileID: 0}
   mainLink: {fileID: 6913192624083032473}
   field:
-    text:
-      name: 
-      descr: 
     type: 
-    regex: []
-    contentType: 
-    objVm:
-      modelName: 
-      modelType: 
-      order: []
-    children:
-      type: 
-      entries: []
-  fieldName: 
-  fullPath: 
-  recursiveViewModel:
-    modelName: 
     modelType: 
     order: []
+    required: []
+    title: 
+    description: 
+    defaultVal: 
+    pattern: 
+    contentType: 
+    items: []
+    contentEnum: []
+  fieldName: 
+  fullPath: 
+  canvasGroup: {fileID: 2130405293735192506}
+--- !u!225 &2130405293735192506
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 658342378479606442}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!114 &4644940934940156758
 MonoBehaviour:
   m_ObjectHideFlags: 0

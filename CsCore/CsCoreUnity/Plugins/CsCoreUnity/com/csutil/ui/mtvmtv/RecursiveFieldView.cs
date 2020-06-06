@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace com.csutil.ui.mtvmtv {
 
-    public class RecursiveFieldView : ViewModelFieldView {
+    public class RecursiveFieldView : FieldView {
 
         public Button openButton;
         public string rootPrefabName = ViewModelToView.CONTAINER3;
@@ -26,7 +26,8 @@ namespace com.csutil.ui.mtvmtv {
                 }
             }
             AssertV2.IsNotNull(viewModel.properties, "viewModel.fields");
-            GameObject rootContainerView = await viewModelToView.NewRootContainerView(viewModel, rootPrefabName);
+            GameObject rootContainerView = await viewModelToView.NewRootContainerView(rootPrefabName);
+            rootContainerView.GetComponentInChildren<FieldView>().field = viewModel;
             var innerContainer = await viewModelToView.SelectInnerViewContainerFromObjectFieldView(rootContainerView);
             await viewModelToView.ObjectViewModelToView(viewModel, innerContainer);
             return rootContainerView;

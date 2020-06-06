@@ -29,22 +29,22 @@ namespace com.csutil.tests.model.mtvmtv {
             Log.d("viewModel: " + JsonWriter.AsPrettyString(vm));
 
             var profilePicVm = vm.properties["profilePic"];
-            Assert.Equal("String", profilePicVm.properties["dir"].type);
-            Assert.Equal("String", profilePicVm.properties["url"].type);
+            Assert.Equal("string", profilePicVm.properties["dir"].type);
+            Assert.Equal("string", profilePicVm.properties["url"].type);
 
             Assert.Contains("id", vm.required);
             Assert.Contains("name", vm.required);
             Assert.Equal(2, vm.required.Count);
 
-            Assert.Equal("Array", vm.properties["tags"].type);
-            Assert.Equal("String", vm.properties["tags"].items.First().type);
+            Assert.Equal("array", vm.properties["tags"].type);
+            Assert.Equal("string", vm.properties["tags"].items.First().type);
             Assert.Null(vm.properties["tags"].items.First().properties);
 
-            Assert.Equal("Array", vm.properties["contacts"].type);
+            Assert.Equal("array", vm.properties["contacts"].type);
             Assert.True(vm.properties["id"].readOnly.Value); // id has private setter
             Assert.True(vm.properties["contacts"].readOnly.Value); // contacts has only a getter
 
-            Assert.Equal("Object", vm.properties["contacts"].items.First().type);
+            Assert.Equal("object", vm.properties["contacts"].items.First().type);
             // Contacts ViewModel already resolve as part of the bestFried field, so here no properties are included:
             Assert.Null(vm.properties["contacts"].items.First().properties);
 
@@ -113,7 +113,7 @@ namespace com.csutil.tests.model.mtvmtv {
             Log.d(JsonWriter.AsPrettyString(vm));
 
             Assert.Equal("Age", vm.properties["user"].properties["age"].title);
-            Assert.Equal("Integer", vm.properties["phoneNumbers"].items.First().type);
+            Assert.Equal("integer", vm.properties["phoneNumbers"].items.First().type);
 
         }
 

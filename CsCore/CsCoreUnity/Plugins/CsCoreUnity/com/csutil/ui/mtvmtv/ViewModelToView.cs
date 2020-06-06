@@ -35,14 +35,12 @@ namespace com.csutil.ui.mtvmtv {
             this.prefabFolder = prefabFolder;
         }
 
-        public override async Task<GameObject> NewRootContainerView(ViewModel rootViewModel) {
-            return await NewRootContainerView(rootViewModel, rootContainerPrefab);
+        public override async Task<GameObject> NewRootContainerView() {
+            return await NewRootContainerView( rootContainerPrefab);
         }
 
-        public async Task<GameObject> NewRootContainerView(ViewModel rootViewModel, string rootPrefabName) {
-            var rootView = await LoadFieldViewPrefab(rootPrefabName);
-            SetViewModel(rootView, rootViewModel);
-            return rootView;
+        public async Task<GameObject> NewRootContainerView( string rootPrefabName) {
+            return await LoadFieldViewPrefab(rootPrefabName);
         }
 
         public override Task<GameObject> AddChild(GameObject parent, GameObject child) {
@@ -104,14 +102,8 @@ namespace com.csutil.ui.mtvmtv {
 
         public override async Task<GameObject> HandleRecursiveViewModel(GameObject parent, string fieldName, ViewModel field, ViewModel recursiveViewModel) {
             var view = await AddChild(parent, await LoadFieldViewPrefab(recursiveViewModelPrefab));
-            SetViewModel(view, recursiveViewModel);
             await InitChild(view, fieldName, field);
             return view;
-        }
-
-        private void SetViewModel(GameObject view, ViewModel viewModel) {
-            var viewModelFieldView = view.GetComponentInChildren<ViewModelFieldView>();
-            viewModelFieldView.field = viewModel;
         }
 
         public override async Task<GameObject> HandleSimpleArray(GameObject parent, string fieldName, ViewModel field) {

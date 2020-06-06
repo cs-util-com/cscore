@@ -12,7 +12,7 @@ namespace com.csutil.tests {
 
         /// <summary> Has to be triggered by the develper via the Unity editor UI to start the 
         /// view generation. See the infos in GenerateViewFromClass() below </summary>
-        public bool GenerateUiNow; 
+        public bool GenerateUiNow;
 
         private void OnEnable() { ShowModelInstanceInView().LogOnError(); }
 
@@ -32,8 +32,7 @@ namespace com.csutil.tests {
         /// </summary>
         private async Task GenerateViewFromClass<T>() {
             GameObject generatedView = await NewViewModelToView().GenerateViewFrom<T>(true);
-            AssertV2.AreEqual(0, gameObject.GetChildCount());
-            foreach (var c in gameObject.GetChildren()) { c.Destroy(); } // Clear prev. children
+            AssertV2.IsTrue(gameObject.GetChildCount() == 0, "Please delete previous generated views");
             gameObject.AddChild(generatedView);
         }
 

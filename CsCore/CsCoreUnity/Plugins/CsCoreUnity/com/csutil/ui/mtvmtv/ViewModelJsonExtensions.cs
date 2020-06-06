@@ -12,7 +12,8 @@ namespace com.csutil.ui.mtvmtv {
 
         public static async Task LinkToJsonModel(this GameObject targetView, JObject root, ViewModelToView vmtv) {
 
-            vmtv.SetupViewModelMap(targetView.GetComponentsInChildren<ViewModelFieldView>());
+            vmtv.SetupViewModelMap(targetView);
+
             foreach (var fieldView in targetView.GetFieldViewMap().Values) {
                 var value = fieldView.GetFieldJModel(root);
                 if (!fieldView.LinkToJsonModel(root, value)) {
@@ -29,36 +30,39 @@ namespace com.csutil.ui.mtvmtv {
             }
         }
 
-        private static void SetupViewModelMap(this ViewModelToView vmtv, ViewModelFieldView[] vmFieldViews) {
-            foreach (var fieldView in vmFieldViews) {
-                RestorePropertiesFromChildrenGOs(fieldView);
+        private static void SetupViewModelMap(this ViewModelToView vmtv, GameObject targetView) {
+            AddToViewModelMap(vmtv, targetView.GetComponent<ObjectFieldView>());
+            foreach (var fieldView in targetView.GetComponentsInChildren<ObjectFieldView>()) { AddToViewModelMap(vmtv, fieldView); }
+        }
 
-                ViewModel viewModel = fieldView.field;
-                AssertV2.IsNotNull(viewModel, "viewModel");
-                AssertV2.IsNotNull(viewModel.modelType, "viewModel.modelType");
-                if (!viewModel.properties.IsNullOrEmpty()) {
-                    // After the fieldView properties are reconstructed correctly again fill the mtvm fieldView map to have a central lookup location
-                    if (!vmtv.mtvm.viewModels.ContainsKey(viewModel.modelType)) {
-                        vmtv.mtvm.viewModels.Add(viewModel.modelType, viewModel);
-                    }
-                    //var allFoundViewModels = fieldViews.Values.Map(f => f.field);
-                    //foreach (var vm in allFoundViewModels) { vmtv.mtvm.SetupViewModelMap(vm); }
-                } else {
-                    Log.d($"Will skip {viewModel.title} since it seems to be a partly unresolved type");
+        private static void AddToViewModelMap(ViewModelToView vmtv, ObjectFieldView fieldView) {
+            RestorePropertiesFromChildrenGOs(fieldView);
+            ViewModel viewModel = fieldView.field;
+            if (viewModel.modelType.IsNullOrEmpty()) {
+                throw Log.e("Missing viewModel.modelType in passsed ObjectFieldView.field", fieldView.gameObject);
+            }
+            if (!viewModel.properties.IsNullOrEmpty()) {
+                // After the fieldView properties are reconstructed correctly again fill the mtvm fieldView map to have a central lookup location
+                if (!vmtv.mtvm.viewModels.ContainsKey(viewModel.modelType)) {
+                    vmtv.mtvm.viewModels.Add(viewModel.modelType, viewModel);
                 }
+                //var allFoundViewModels = fieldViews.Values.Map(f => f.field);
+                //foreach (var vm in allFoundViewModels) { vmtv.mtvm.SetupViewModelMap(vm); }
+            } else {
+                Log.d($"Will skip {viewModel.title} since it seems to be a partly unresolved type");
             }
         }
 
         /// <summary> Since the rootFieldView.properties are not correctly serialized by unity, this Dictionary has to be reconstructed from the
         /// FieldViews in the children GameObjects.So first fill the properties of the rootFieldView again with the fields of the 
         /// direct children GameObjects.And do this recursively for all found ObjectFieldViews </summary>
-        private static void RestorePropertiesFromChildrenGOs(ViewModelFieldView targetFieldView) {
+        private static void RestorePropertiesFromChildrenGOs(ObjectFieldView targetFieldView) {
             if (targetFieldView.field.properties.IsNullOrEmpty()) {
                 var children = targetFieldView.mainLink.gameObject.GetChildren().Map(c => c.GetComponent<FieldView>()).Filter(x => x != null);
                 if (children.IsNullOrEmpty()) {
                     Log.w(targetFieldView.fieldName + " had no children fieldViews");
                 } else {
-                    foreach (var vm in children.OfType<ViewModelFieldView>()) { RestorePropertiesFromChildrenGOs(vm); }
+                    foreach (var vm in children.OfType<ObjectFieldView>()) { RestorePropertiesFromChildrenGOs(vm); }
                     var fieldDict = children.ToDictionary(x => x.fieldName, x => x.field);
                     if (!fieldDict.IsNullOrEmpty()) { targetFieldView.field.properties = fieldDict; }
                 }

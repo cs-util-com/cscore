@@ -15,7 +15,7 @@ namespace com.csutil.model.mtvmtv {
         }
 
         public async Task<V> ToView(ViewModel rootViewModel) {
-            var rootView = await NewRootContainerView(rootViewModel);
+            var rootView = await NewRootContainerView();
             await InitChild(rootView, null, rootViewModel);
             await ObjectViewModelToView(rootViewModel, await SelectInnerViewContainerFromObjectFieldView(rootView));
             return rootView;
@@ -95,7 +95,7 @@ namespace com.csutil.model.mtvmtv {
         public abstract Task<V> AddChild(V parentView, V child);
         public abstract Task InitChild(V view, string fieldName, ViewModel field);
 
-        public abstract Task<V> NewRootContainerView(ViewModel rootViewModel);
+        public abstract Task<V> NewRootContainerView();
 
         public abstract Task<V> SelectInnerViewContainerFromObjectFieldView(V objectFieldView);
 
