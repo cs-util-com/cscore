@@ -26,18 +26,18 @@ namespace com.csutil.model.mtvmtv {
             jsonSerializer = JsonSerializer.Create(jsonSettings);
         }
 
-        public JsonSchema ToViewModel(string modelName, object model) {
+        public JsonSchema ToJsonSchema(string modelName, object model) {
             var modelType = model.GetType();
             if (GetExistingViewModelFor(modelType, out JsonSchema vm)) { return vm; }
             return NewViewModel(modelName, modelType, model);
         }
 
-        public JsonSchema ToViewModel(string modelName, Type modelType) {
+        public JsonSchema ToJsonSchema(string modelName, Type modelType) {
             if (GetExistingViewModelFor(modelType, out JsonSchema vm)) { return vm; }
             return NewViewModel(modelName, modelType);
         }
 
-        public JsonSchema ToViewModel(string modelName, string json) {
+        public JsonSchema ToJsonSchema(string modelName, string json) {
             if (viewModels.TryGetValue(modelName, out JsonSchema vm)) { return vm; }
             return NewViewModel(modelName, JsonReader.GetReader().Read<JObject>(json));
         }

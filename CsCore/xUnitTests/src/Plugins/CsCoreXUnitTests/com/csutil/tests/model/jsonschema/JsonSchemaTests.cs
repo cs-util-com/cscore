@@ -24,60 +24,60 @@ namespace com.csutil.tests.model.mtvmtv {
                 tags = new List<string>() { "tag1" }
             };
 
-            var mtvm = new ModelToJsonSchema();
-            var vm = mtvm.ToViewModel("MyUserModel", user1);
-            Log.d("viewModel: " + JsonWriter.AsPrettyString(vm));
+            var schemaGenerator = new ModelToJsonSchema();
+            JsonSchema schema = schemaGenerator.ToJsonSchema("MyUserModel", user1);
+            Log.d("viewModel: " + JsonWriter.AsPrettyString(schema));
 
-            var profilePicVm = vm.properties["profilePic"];
+            var profilePicVm = schema.properties["profilePic"];
             Assert.Equal("string", profilePicVm.properties["dir"].type);
             Assert.Equal("string", profilePicVm.properties["url"].type);
 
-            Assert.Contains("id", vm.required);
-            Assert.Contains("name", vm.required);
-            Assert.Equal(2, vm.required.Count);
+            Assert.Contains("id", schema.required);
+            Assert.Contains("name", schema.required);
+            Assert.Equal(2, schema.required.Count);
 
-            Assert.Equal("array", vm.properties["tags"].type);
-            Assert.Equal("string", vm.properties["tags"].items.First().type);
-            Assert.Null(vm.properties["tags"].items.First().properties);
+            Assert.Equal("array", schema.properties["tags"].type);
+            Assert.Equal("string", schema.properties["tags"].items.First().type);
+            Assert.Null(schema.properties["tags"].items.First().properties);
 
-            Assert.Equal("array", vm.properties["contacts"].type);
-            Assert.True(vm.properties["id"].readOnly.Value); // id has private setter
-            Assert.True(vm.properties["contacts"].readOnly.Value); // contacts has only a getter
+            Assert.Equal("array", schema.properties["contacts"].type);
+            Assert.True(schema.properties["id"].readOnly.Value); // id has private setter
+            Assert.True(schema.properties["contacts"].readOnly.Value); // contacts has only a getter
 
-            Assert.Equal("object", vm.properties["contacts"].items.First().type);
+            Assert.Equal("object", schema.properties["contacts"].items.First().type);
             // Contacts ViewModel already resolve as part of the bestFried field, so here no properties are included:
-            Assert.Null(vm.properties["contacts"].items.First().properties);
+            Assert.Null(schema.properties["contacts"].items.First().properties);
 
-            var entryVm = vm.properties["contacts"].items.First();
-            Assert.Equal("" + typeof(MyUserModel.UserContact), entryVm.modelType);
-            Assert.Null(entryVm.properties);
+            var entrySchema = schema.properties["contacts"].items.First();
+            Assert.Equal("" + typeof(MyUserModel.UserContact), entrySchema.modelType);
+            Assert.Null(entrySchema.properties);
 
-            Assert.Equal("" + typeof(MyUserModel.UserContact), vm.properties["bestFriend"].modelType);
+            Assert.Equal("" + typeof(MyUserModel.UserContact), schema.properties["bestFriend"].modelType);
 
-            Assert.Equal("" + ContentType.Password, vm.properties["password"].contentType);
+            Assert.Equal("" + ContentType.Password, schema.properties["password"].contentType);
 
-            var userVmInUserContactClass = vm.properties["bestFriend"].properties["user"];
-            Assert.Equal("" + typeof(MyUserModel), userVmInUserContactClass.modelType);
-            // The other fields of this ViewModel are null since it was already defined:
-            Assert.Null(userVmInUserContactClass.properties);
+            var userSchemaInUserContactClass = schema.properties["bestFriend"].properties["user"];
+            Assert.Equal("" + typeof(MyUserModel), userSchemaInUserContactClass.modelType);
+            // The other fields of this json schema are null since it was already defined:
+            Assert.Null(userSchemaInUserContactClass.properties);
 
-            Assert.Equal(0, vm.properties["age"].minimum);
-            Assert.Equal(130, vm.properties["age"].maximum);
+            Assert.Equal(0, schema.properties["age"].minimum);
+            Assert.Equal(130, schema.properties["age"].maximum);
 
         }
 
         [Fact]
         public void TestRecursiveModel() {
 
-            var userContact1 = new MyUserModel.UserContact() {
+            var exampleUserContact1 = new MyUserModel.UserContact() {
                 user = new MyUserModel() {
                     bestFriend = new MyUserModel.UserContact()
                 }
             };
-            var mtvm = new ModelToJsonSchema();
-            var vm = mtvm.ToViewModel("UserContact", userContact1);
-            var bestFriendVm = vm.properties["user"].properties["bestFriend"];
-            Assert.Equal("" + typeof(MyUserModel.UserContact), bestFriendVm.modelType);
+            var schemaGenerator = new ModelToJsonSchema();
+            JsonSchema schema = schemaGenerator.ToJsonSchema("UserContact", exampleUserContact1);
+            var bestFriendSchema = schema.properties["user"].properties["bestFriend"];
+            Assert.Equal("" + typeof(MyUserModel.UserContact), bestFriendSchema.modelType);
 
         }
 
@@ -85,20 +85,20 @@ namespace com.csutil.tests.model.mtvmtv {
         public void TestNullObjectResolved() {
             {
                 var user = new MyUserModel.UserContact();
-                var mtvm = new ModelToJsonSchema();
-                var vm = mtvm.ToViewModel("UserContact", user);
+                var schemaGenerator = new ModelToJsonSchema();
+                JsonSchema schema = schemaGenerator.ToJsonSchema("UserContact", user);
                 Assert.Null(user.user); // The model field is null
-                Assert.NotEmpty(vm.properties["user"].properties); // The viewmodel info is still defined
+                Assert.NotEmpty(schema.properties["user"].properties); // The schema info is still defined
             }
             {
-                var mtvm = new ModelToJsonSchema();
-                var vm = mtvm.ToViewModel("UserContact", typeof(MyUserModel.UserContact));
-                Assert.NotEmpty(vm.properties["user"].properties); // The viewmodel info is still defined
+                var schemaGenerator = new ModelToJsonSchema();
+                var schema = schemaGenerator.ToJsonSchema("UserContact", typeof(MyUserModel.UserContact));
+                Assert.NotEmpty(schema.properties["user"].properties); // The schema info is still defined
             }
         }
 
         [Fact]
-        public void TestJsonToViewModel() {
+        public void TestJsonToJsonSchema() {
 
             string json = JsonWriter.GetWriter().Write(new MyUserModel.UserContact() {
                 phoneNumbers = new int[1] { 123 },
@@ -110,13 +110,13 @@ namespace com.csutil.tests.model.mtvmtv {
             });
             Log.d("json=" + json);
 
-            var mtvm = new ModelToJsonSchema();
-            var vm = mtvm.ToViewModel("MyUserModel", json);
+            var schemaGenerator = new ModelToJsonSchema();
+            var schema = schemaGenerator.ToJsonSchema("MyUserModel", json);
 
-            Log.d(JsonWriter.AsPrettyString(vm));
+            Log.d(JsonWriter.AsPrettyString(schema));
 
-            Assert.Equal("Age", vm.properties["user"].properties["age"].title);
-            Assert.Equal("integer", vm.properties["phoneNumbers"].items.First().type);
+            Assert.Equal("Age", schema.properties["user"].properties["age"].title);
+            Assert.Equal("integer", schema.properties["phoneNumbers"].items.First().type);
 
         }
 
@@ -126,31 +126,31 @@ namespace com.csutil.tests.model.mtvmtv {
             var user = new MyUserModel() { phoneNumber = 12345 };
             string json = JsonWriter.GetWriter().Write(user);
 
-            var vm1 = new ModelToJsonSchema().ToViewModel("FromClassInstance", user);
-            var vm2 = new ModelToJsonSchema().ToViewModel("FromJson", json);
-            var vm3 = new ModelToJsonSchema().ToViewModel("FromClassType", typeof(MyUserModel));
+            JsonSchema schema1 = new ModelToJsonSchema().ToJsonSchema("FromClassInstance", user);
+            JsonSchema schema2 = new ModelToJsonSchema().ToJsonSchema("FromJson", json);
+            JsonSchema schema3 = new ModelToJsonSchema().ToJsonSchema("FromClassType", typeof(MyUserModel));
 
-            var n1 = vm1.properties["phoneNumber"];
-            var n2 = vm2.properties["phoneNumber"];
-            var n3 = vm3.properties["phoneNumber"];
+            var phoneNumber1 = schema1.properties["phoneNumber"];
+            var phoneNumber2 = schema2.properties["phoneNumber"];
+            var phoneNumber3 = schema3.properties["phoneNumber"];
 
-            Assert.Equal(n1.type, n2.type);
-            Assert.Equal(n2.type, n3.type);
-            Assert.Equal(n1.title, n2.title);
-            Assert.Equal(n2.title, n3.title);
+            Assert.Equal(phoneNumber1.type, phoneNumber2.type);
+            Assert.Equal(phoneNumber2.type, phoneNumber3.type);
+            Assert.Equal(phoneNumber1.title, phoneNumber2.title);
+            Assert.Equal(phoneNumber2.title, phoneNumber3.title);
 
         }
 
         [Fact]
         public void TestEnum() {
 
-            var vm = new ModelToJsonSchema().ToViewModel("FromClassType", typeof(UserStats));
-            var e1 = vm.properties["experience1"];
-            var e2 = vm.properties["experience2"];
-            var e3 = vm.properties["experience3"];
-            var e4 = vm.properties["experience4"];
-            var e5 = vm.properties["experience5"];
-            Log.d(JsonWriter.AsPrettyString(vm));
+            var schema = new ModelToJsonSchema().ToJsonSchema("FromClassType", typeof(UserStats));
+            var e1 = schema.properties["experience1"];
+            var e2 = schema.properties["experience2"];
+            var e3 = schema.properties["experience3"];
+            var e4 = schema.properties["experience4"];
+            var e5 = schema.properties["experience5"];
+            Log.d(JsonWriter.AsPrettyString(schema));
 
             Assert.Equal(Enum.GetNames(typeof(UserStats.Experience)), e1.contentEnum);
             Assert.Equal(e1.contentEnum, e2.contentEnum);

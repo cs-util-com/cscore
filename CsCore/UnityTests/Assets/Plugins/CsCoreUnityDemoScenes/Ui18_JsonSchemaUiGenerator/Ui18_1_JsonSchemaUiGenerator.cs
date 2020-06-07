@@ -7,10 +7,8 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace com.csutil.tests {
 
@@ -23,35 +21,31 @@ namespace com.csutil.tests {
         }
 
         private static async Task GenerateAndShowViewFor(ViewStack viewStack) {
-
-            { // Testing arrays / lists:
+            {
                 var mtvm = new ModelToJsonSchema();
-                JsonSchema viewModel = JsonReader.GetReader().Read<JsonSchema>(SomeJsonSchemaExamples.jsonSchema2);
-                await LoadJsonModelIntoGeneratedJsonSchemaView(viewStack, mtvm, viewModel, SomeJsonSchemaExamples.json2);
+                var userModelType = typeof(MyUserModel);
+                var viewModel = mtvm.ToJsonSchema("" + userModelType, userModelType);
+                Log.d(JsonWriter.AsPrettyString(viewModel));
+                await LoadModelIntoGeneratedView(viewStack, mtvm, viewModel);
             }
-
             { // This time load the viewModel from an external JSON schema:
                 var mtvm = new ModelToJsonSchema();
                 JsonSchema viewModel = JsonReader.GetReader().Read<JsonSchema>(SomeJsonSchemaExamples.jsonSchema1);
                 await LoadJsonModelIntoGeneratedJsonSchemaView(viewStack, mtvm, viewModel, SomeJsonSchemaExamples.json1);
             }
-
-            {
+            { // Testing arrays / lists:
                 var mtvm = new ModelToJsonSchema();
-                var userModelType = typeof(MyUserModel);
-                var viewModel = mtvm.ToViewModel("" + userModelType, userModelType);
-                Log.d(JsonWriter.AsPrettyString(viewModel));
-                await LoadModelIntoGeneratedView(viewStack, mtvm, viewModel);
+                JsonSchema viewModel = JsonReader.GetReader().Read<JsonSchema>(SomeJsonSchemaExamples.jsonSchema2);
+                await LoadJsonModelIntoGeneratedJsonSchemaView(viewStack, mtvm, viewModel, SomeJsonSchemaExamples.json2);
             }
-
         }
 
-        private static async Task LoadModelIntoGeneratedView(ViewStack viewStack, ModelToJsonSchema mtvm, JsonSchema viewModel) {
+        private static async Task LoadModelIntoGeneratedView(ViewStack viewStack, ModelToJsonSchema schemaGenerator, JsonSchema schema) {
             MyUserModel model = NewExampleUserInstance();
 
             { // First an example to connect the model to a generated view via a manual presenter "MyManualPresenter1":
-                var vmtv = NewViewModelToView(mtvm);
-                GameObject generatedView = await vmtv.ToView(viewModel);
+                var viewGenerator = NewViewGenerator(schemaGenerator);
+                GameObject generatedView = await viewGenerator.ToView(schema);
                 viewStack.ShowView(generatedView);
 
                 var presenter = new MyManualPresenter1();
@@ -62,11 +56,10 @@ namespace com.csutil.tests {
                 Log.d("Model AFTER changes: " + JsonWriter.AsPrettyString(model));
 
                 viewStack.SwitchBackToLastView(generatedView);
-
             }
             { // The second option is to use a generic JObjectPresenter to connect the model to the generated view:
-                var vmtv = NewViewModelToView(mtvm);
-                GameObject generatedView = await vmtv.ToView(viewModel);
+                var vmtv = NewViewGenerator(schemaGenerator);
+                GameObject generatedView = await vmtv.ToView(schema);
                 viewStack.ShowView(generatedView);
 
                 var presenter = new JsonSchemaPresenter(vmtv);
@@ -84,9 +77,8 @@ namespace com.csutil.tests {
 
         private static async Task LoadJsonModelIntoGeneratedJsonSchemaView(ViewStack viewStack, ModelToJsonSchema mtvm, JsonSchema viewModel, string jsonModel) {
             JObject model = JsonReader.GetReader().Read<JObject>(jsonModel);
-
             {
-                JsonSchemaToView vmtv = NewViewModelToView(mtvm);
+                JsonSchemaToView vmtv = NewViewGenerator(mtvm);
                 GameObject generatedView = await vmtv.ToView(viewModel);
 
                 viewStack.ShowView(generatedView);
@@ -105,15 +97,17 @@ namespace com.csutil.tests {
             }
         }
 
-        private static JsonSchemaToView NewViewModelToView(ModelToJsonSchema mtvm) {
-            return new JsonSchemaToView(mtvm, prefabFolder) { rootContainerPrefab = JsonSchemaToView.CONTAINER2 };
+        private static JsonSchemaToView NewViewGenerator(ModelToJsonSchema schemaGenerator) {
+            return new JsonSchemaToView(schemaGenerator, prefabFolder) {
+                rootContainerPrefab = JsonSchemaToView.CONTAINER2
+            };
         }
 
         private class MyManualPresenter1 : Presenter<MyUserModel> {
+
             public GameObject targetView { get; set; }
 
             public async Task OnLoad(MyUserModel u) {
-
                 var map = targetView.GetFieldViewMap();
                 map.LinkViewToModel("id", u.id);
                 map.LinkViewToModel("name", u.name, newVal => u.name = newVal);
@@ -146,7 +140,7 @@ namespace com.csutil.tests {
                 money = 0f,
                 hasMoney = false,
                 phoneNumber = "+1 234 5678 90",
-                profilePic = new FileRef() { url = "https://picsum.photos/50/50" },
+                profilePic = new MyUserModel.FileRef() { url = "https://picsum.photos/50/50" },
                 bestFriend = new MyUserModel.UserContact() {
                     name = "Bella",
                     user = new MyUserModel() {
@@ -181,7 +175,7 @@ namespace com.csutil.tests {
             public string password;
 
             [Description("e.g. 99")]
-            [MinMaxRange(0,130)]
+            [MinMaxRange(0, 130)]
             public int? age;
 
             public float money;
@@ -225,17 +219,17 @@ namespace com.csutil.tests {
 
             }
 
-        }
+            internal class FileRef : IFileRef {
 
-        internal class FileRef : IFileRef {
+                [Regex(RegexTemplates.URL)]
+                public string url { get; set; }
 
-            [Regex(RegexTemplates.URL)]
-            public string url { get; set; }
+                public string dir { get; set; }
+                public string fileName { get; set; }
+                public Dictionary<string, object> checksums { get; set; }
+                public string mimeType { get; set; }
 
-            public string dir { get; set; }
-            public string fileName { get; set; }
-            public Dictionary<string, object> checksums { get; set; }
-            public string mimeType { get; set; }
+            }
 
         }
 #pragma warning restore 0649 // Variable is never assigned to, and will always have its default value
