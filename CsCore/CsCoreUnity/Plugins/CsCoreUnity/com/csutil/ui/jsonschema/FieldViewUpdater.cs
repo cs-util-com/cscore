@@ -6,13 +6,17 @@ namespace com.csutil.ui.jsonschema {
     /// Some operations like removing or adding fields are not performed automatically but only logged instead </summary>
     public static class FieldViewUpdater {
 
-        public static void UpdateFieldViews(GameObject targetView, GameObject newGeneratedView) {
+        public static void UpdateFieldViews(GameObject targetView, GameObject newGeneratedView, bool retriggerOnViewCreated = true) {
             var oldFieldViews = targetView.GetFieldViewMap();
             var newFieldViews = newGeneratedView.GetFieldViewMap();
             foreach (var item in oldFieldViews.IntersectKeys(newFieldViews)) {
+                var oldFieldView = item.Value;
                 var newFieldView = newFieldViews[item.Key];
-                item.Value.field = newFieldView.field.DeepCopy();
+                oldFieldView.field = newFieldView.field.DeepCopy();
                 AssertV2.AreEqual(item.Value.fieldName, newFieldView.fieldName);
+                if (retriggerOnViewCreated) {
+                    oldFieldView.OnViewCreated(oldFieldView.fieldName, oldFieldView.fullPath);
+                }
             }
             foreach (var missing in newFieldViews.ExceptKeys(oldFieldViews)) {
                 Log.e($"The field {missing.Key} was added to the model and has to be added to the UI", missing.Value.gameObject);
