@@ -8,9 +8,9 @@ using Xunit;
 
 namespace com.csutil.tests.model.mtvmtv {
 
-    public class ModelToViewModelTests {
+    public class JsonSchemaTests {
 
-        public ModelToViewModelTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
+        public JsonSchemaTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
         [Fact]
         public void ExampleUsage1() {
