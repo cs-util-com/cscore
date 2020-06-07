@@ -36,8 +36,8 @@ namespace com.csutil.ui.jsonschema {
             return view;
         }
 
-        public static Dictionary<string, FieldView> GetFieldViewMap(this GameObject self) {
-            return self.GetComponentsInChildren<FieldView>().Filter(x => !x.fullPath.IsNullOrEmpty()).ToDictionary(x => x.fullPath, x => x);
+        public static Dictionary<string, FieldView> GetFieldViewMap(this GameObject self, bool includeInactive = true) {
+            return self.GetComponentsInChildren<FieldView>(includeInactive).Filter(x => !x.fullPath.IsNullOrEmpty()).ToDictionary(x => x.fullPath, x => x);
         }
 
         public static T Get<T>(this Dictionary<string, FieldView> map, string name) where T : FieldView { return map[name] as T; }

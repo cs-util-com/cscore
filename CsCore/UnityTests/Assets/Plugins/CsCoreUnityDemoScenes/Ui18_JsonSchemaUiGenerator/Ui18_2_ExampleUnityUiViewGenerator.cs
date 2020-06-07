@@ -1,5 +1,6 @@
 ﻿using com.csutil.model.jsonschema;
 using com.csutil.ui.jsonschema;
+using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -32,8 +33,12 @@ namespace com.csutil.tests.jsonschema {
         /// </summary>
         private async Task GenerateViewFromClass<T>() {
             GameObject generatedView = await NewViewGenerator().GenerateViewFrom<T>(true);
-            AssertV2.IsTrue(gameObject.GetChildCount() == 0, "Please delete previous generated views");
+
             gameObject.AddChild(generatedView);
+            if (gameObject.GetChildCount() != 1) {
+                var viewToUpdate = gameObject.GetChildren().First();
+                FieldViewUpdater.UpdateFieldViews(viewToUpdate, generatedView);
+            }
         }
 
         private async Task ShowModelInstanceInView() {

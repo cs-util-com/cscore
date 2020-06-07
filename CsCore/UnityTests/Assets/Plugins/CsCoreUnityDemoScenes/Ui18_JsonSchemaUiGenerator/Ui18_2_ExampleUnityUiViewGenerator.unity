@@ -345,7 +345,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e92004bd96defd2438f713425190b5b1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  prefabFolder: mtvmtv1/
+  prefabFolder: jsonSchemaViewsV1/
   containerPrefabToUse: RootContainer2
   GenerateUiNow: 0
 --- !u!224 &447770916

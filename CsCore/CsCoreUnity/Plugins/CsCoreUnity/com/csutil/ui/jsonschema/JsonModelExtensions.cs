@@ -57,7 +57,9 @@ namespace com.csutil.ui.jsonschema {
         /// <summary> fills the schema dictionary of the generator with the schemas found in the target view </summary>
         private static void SetupSchemaDictionary(this JsonSchemaToView self, GameObject targetView) {
             AddToSchemaDictionary(self, targetView.GetComponent<ObjectFieldView>());
-            foreach (var fieldView in targetView.GetComponentsInChildren<ObjectFieldView>()) { AddToSchemaDictionary(self, fieldView); }
+            foreach (var fieldView in targetView.GetComponentsInChildren<ObjectFieldView>(includeInactive: true)) {
+                AddToSchemaDictionary(self, fieldView);
+            }
         }
 
         private static void AddToSchemaDictionary(JsonSchemaToView self, ObjectFieldView objectFieldView) {
@@ -234,7 +236,7 @@ namespace com.csutil.ui.jsonschema {
         }
 
         private static IEnumerable<ListEntryView> GetSelectedViews(ListFieldView self) {
-            var entries = self.gameObject.GetComponentsInChildren<ListEntryView>();
+            var entries = self.gameObject.GetComponentsInChildren<ListEntryView>(includeInactive: false);
             var checkedEntries = entries.Filter(x => x.checkmark.isOn);
             if (checkedEntries.IsNullOrEmpty()) { Toast.Show("No entries selected"); }
             return checkedEntries;
