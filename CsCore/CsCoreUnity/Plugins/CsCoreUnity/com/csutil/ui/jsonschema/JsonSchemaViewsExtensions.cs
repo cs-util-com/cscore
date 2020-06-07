@@ -1,6 +1,5 @@
 ﻿using com.csutil.datastructures;
 using com.csutil.model.mtvmtv;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +9,8 @@ using UnityEngine.UI;
 
 namespace com.csutil.ui.mtvmtv {
 
-    public static class JsonSchemaExtensions {
+    /// <summary> Methods that help setting up views that where generated via a Json schema </summary>
+    public static class JsonSchemaViewsExtensions {
 
         /// <summary> Can be used to generate a view directly from a model, if the viewModel does not have to be customized, e.g. 
         /// because the model uses Annotations this is the easiest way to generate a fully usable UI from any class </summary>
@@ -85,22 +85,6 @@ namespace com.csutil.ui.mtvmtv {
                 onNewVal(newVal);
             }, 100);
             return self;
-        }
-
-        /// <summary> 
-        /// Converts the passed model to JSON, lets the user edit it and returned a parsed back clone with all changes 
-        /// made by the user, so that this new state can be stored or the changed fields can be calculated via MergeJson.GetDiff()
-        /// </summary>
-        /// <param name="model"> The model that should be shown in the UI (has to fit the loaded view model UI) </param>
-        /// <param name="userSavedChanges"> 
-        /// A task that should be set to completed once the user is finished with the UI, e.g. when he presses the save button 
-        /// </param>
-        /// <returns> The modified model after the passed userSavedChanges-Task is completed </returns>
-        public static async Task<T> LoadViaJsonIntoView<T>(this Presenter<JObject> self, T model, Task userSavedChanges) {
-            JObject json = JObject.Parse(JsonWriter.GetWriter().Write(model));
-            await self.LoadModelIntoView(json);
-            await userSavedChanges;
-            return JsonReader.GetReader().Read<T>(json.ToString());
         }
 
         public static bool IsInChildObject(this FieldView self) { return self.fieldName != self.fullPath; }
