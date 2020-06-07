@@ -86,7 +86,7 @@ namespace com.csutil.tests {
             JObject model = JsonReader.GetReader().Read<JObject>(jsonModel);
 
             {
-                ViewModelToView vmtv = NewViewModelToView(mtvm);
+                JsonSchemaToView vmtv = NewViewModelToView(mtvm);
                 GameObject generatedView = await vmtv.ToView(viewModel);
 
                 viewStack.ShowView(generatedView);
@@ -105,8 +105,8 @@ namespace com.csutil.tests {
             }
         }
 
-        private static ViewModelToView NewViewModelToView(ModelToJsonSchema mtvm) {
-            return new ViewModelToView(mtvm, prefabFolder) { rootContainerPrefab = ViewModelToView.CONTAINER2 };
+        private static JsonSchemaToView NewViewModelToView(ModelToJsonSchema mtvm) {
+            return new JsonSchemaToView(mtvm, prefabFolder) { rootContainerPrefab = JsonSchemaToView.CONTAINER2 };
         }
 
         private class MyManualPresenter1 : Presenter<MyUserModel> {

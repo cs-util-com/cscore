@@ -18,7 +18,7 @@ namespace com.csutil.ui.mtvmtv {
         /// <param name="keepReferenceToEditorPrefab"> If the view is generated during editor time this should be set to 
         /// true so that the used prefabs in the view are still linked correctly. </param>
         /// <returns> The generated view which can be used to load a model instance into it </returns>
-        public static async Task<GameObject> GenerateViewFrom<T>(this ViewModelToView vmtv, bool keepReferenceToEditorPrefab = false) {
+        public static async Task<GameObject> GenerateViewFrom<T>(this JsonSchemaToView vmtv, bool keepReferenceToEditorPrefab = false) {
             var modelType = typeof(T);
             JsonSchema viewModel = vmtv.mtvm.ToViewModel(modelType.Name, modelType);
             vmtv.keepReferenceToEditorPrefab = keepReferenceToEditorPrefab;

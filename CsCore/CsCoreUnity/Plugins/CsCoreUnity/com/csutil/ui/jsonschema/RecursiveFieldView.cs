@@ -8,13 +8,13 @@ namespace com.csutil.ui.mtvmtv {
     public class RecursiveFieldView : FieldView {
 
         public Button openButton;
-        public string rootPrefabName = ViewModelToView.CONTAINER3;
+        public string rootPrefabName = JsonSchemaToView.CONTAINER3;
 
-        public async Task<GameObject> NewViewFromViewModel(ViewModelToView viewModelToView) {
+        public async Task<GameObject> NewViewFromViewModel(JsonSchemaToView viewModelToView) {
             return await NewViewFromViewModel(field, viewModelToView);
         }
 
-        public async Task<GameObject> NewViewFromViewModel(JsonSchema viewModel, ViewModelToView viewModelToView) {
+        public async Task<GameObject> NewViewFromViewModel(JsonSchema viewModel, JsonSchemaToView viewModelToView) {
             AssertV2.IsNotNull(viewModel, "viewModel");
             AssertV2.IsNotNull(viewModelToView, "viewModelToView");
             if (viewModel.properties == null) {

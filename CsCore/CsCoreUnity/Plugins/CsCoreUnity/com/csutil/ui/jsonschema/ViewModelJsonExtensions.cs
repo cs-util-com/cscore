@@ -10,7 +10,7 @@ namespace com.csutil.ui.mtvmtv {
 
     public static class ViewModelJsonExtensions {
 
-        public static async Task LinkToJsonModel(this GameObject targetView, JObject root, ViewModelToView vmtv) {
+        public static async Task LinkToJsonModel(this GameObject targetView, JObject root, JsonSchemaToView vmtv) {
 
             vmtv.SetupViewModelMap(targetView);
 
@@ -30,12 +30,12 @@ namespace com.csutil.ui.mtvmtv {
             }
         }
 
-        private static void SetupViewModelMap(this ViewModelToView vmtv, GameObject targetView) {
+        private static void SetupViewModelMap(this JsonSchemaToView vmtv, GameObject targetView) {
             AddToViewModelMap(vmtv, targetView.GetComponent<ObjectFieldView>());
             foreach (var fieldView in targetView.GetComponentsInChildren<ObjectFieldView>()) { AddToViewModelMap(vmtv, fieldView); }
         }
 
-        private static void AddToViewModelMap(ViewModelToView vmtv, ObjectFieldView fieldView) {
+        private static void AddToViewModelMap(JsonSchemaToView vmtv, ObjectFieldView fieldView) {
             if (fieldView == null) {
                 Log.w("Passed fieldView was null, will skip AddToViewModelMap process");
                 return;
@@ -147,7 +147,7 @@ namespace com.csutil.ui.mtvmtv {
             return jParent?[self.fieldName];
         }
 
-        public static void ShowChildModelInNewScreen(this RecursiveFieldView self, ViewModelToView viewModelToView, GameObject currentScreen, JObject jObj) {
+        public static void ShowChildModelInNewScreen(this RecursiveFieldView self, JsonSchemaToView viewModelToView, GameObject currentScreen, JObject jObj) {
             self.openButton.SetOnClickAction(async delegate {
                 var newScreen = await self.NewViewFromViewModel(viewModelToView);
                 var viewStack = currentScreen.GetViewStack();
@@ -158,7 +158,7 @@ namespace com.csutil.ui.mtvmtv {
             }).LogOnError();
         }
 
-        public static async Task LoadModelList(this ListFieldView self, JObject root, ViewModelToView vmtv) {
+        public static async Task LoadModelList(this ListFieldView self, JObject root, JsonSchemaToView vmtv) {
             JArray modelArray = self.GetFieldJModel(root) as JArray;
             AssertV2.IsNotNull(modelArray, "modelArray");
             var map = new Dictionary<FieldView, JToken>();
@@ -171,7 +171,7 @@ namespace com.csutil.ui.mtvmtv {
             SetupButtons(self, root, vmtv, modelArray, map);
         }
 
-        private static void SetupButtons(ListFieldView listView, JObject root, ViewModelToView vmtv, JArray modelArray, Dictionary<FieldView, JToken> map) {
+        private static void SetupButtons(ListFieldView listView, JObject root, JsonSchemaToView vmtv, JArray modelArray, Dictionary<FieldView, JToken> map) {
             listView.add.SetOnClickAction(async delegate {
                 JToken entry = listView.field.items.First().NewDefaultJInstance();
                 modelArray.Add(entry);
@@ -218,7 +218,7 @@ namespace com.csutil.ui.mtvmtv {
         }
 
         private static async Task<FieldView> CreateChildEntryView(
-                ListFieldView self, JObject root, ViewModelToView vmtv, JToken modelEntry, string fieldName) {
+                ListFieldView self, JObject root, JsonSchemaToView vmtv, JToken modelEntry, string fieldName) {
             JsonSchema newEntryVm = GetMatchingViewModel(modelEntry, self.field.items);
             GameObject childView = await AddChildEntryView(self, vmtv, fieldName, newEntryVm);
             await childView.LinkToJsonModel(root, vmtv);
@@ -231,7 +231,7 @@ namespace com.csutil.ui.mtvmtv {
         }
 
         private static async Task<GameObject> AddChildEntryView(
-                    ListFieldView self, ViewModelToView vmtv, string fieldName, JsonSchema entryVm) {
+                    ListFieldView self, JsonSchemaToView vmtv, string fieldName, JsonSchema entryVm) {
             var parentView = self.mainLink.gameObject;
             if (CanBeShownInListViewEntry(entryVm.GetJTokenType())) {
                 GameObject childGo = await vmtv.AddChild(parentView, await vmtv.NewListViewEntry());

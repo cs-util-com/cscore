@@ -8,7 +8,7 @@ namespace com.csutil.tests {
     class Ui18_2_ExampleUnityUiViewGenerator : MonoBehaviour {
 
         public string prefabFolder = "mtvmtv1/";
-        public string containerPrefabToUse = ViewModelToView.CONTAINER2;
+        public string containerPrefabToUse = JsonSchemaToView.CONTAINER2;
 
         /// <summary> Has to be triggered by the develper via the Unity editor UI to start the 
         /// view generation. See the infos in GenerateViewFromClass() below </summary>
@@ -52,8 +52,8 @@ namespace com.csutil.tests {
             Log.d("Fields changed: " + changedFields?.ToPrettyString());
         }
 
-        private ViewModelToView NewViewModelToView() {
-            return new ViewModelToView(new ModelToJsonSchema(), prefabFolder) { rootContainerPrefab = containerPrefabToUse };
+        private JsonSchemaToView NewViewModelToView() {
+            return new JsonSchemaToView(new ModelToJsonSchema(), prefabFolder) { rootContainerPrefab = containerPrefabToUse };
         }
 
     }

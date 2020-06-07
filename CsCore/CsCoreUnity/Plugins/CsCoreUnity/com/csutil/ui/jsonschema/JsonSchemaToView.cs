@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace com.csutil.ui.mtvmtv {
 
-    public class ViewModelToView : BaseJsonSchemaToView<GameObject> {
+    public class JsonSchemaToView : BaseJsonSchemaToView<GameObject> {
 
         public const string CONTAINER1 = "RootContainer";
         public const string CONTAINER2 = "RootContainer2";
@@ -32,7 +32,7 @@ namespace com.csutil.ui.mtvmtv {
 
         /// <summary> Creates a generator instance that can generate views from view models vie ViewModelToView.ToView(..) </summary>
         /// <param name="prefabFolder"> The folder path where all the view generation related prefabs are located, e.g. "mtvmtv1/" </param>
-        public ViewModelToView(ModelToJsonSchema mtvm, string prefabFolder) : base(mtvm) {
+        public JsonSchemaToView(ModelToJsonSchema mtvm, string prefabFolder) : base(mtvm) {
             this.prefabFolder = prefabFolder;
         }
 
