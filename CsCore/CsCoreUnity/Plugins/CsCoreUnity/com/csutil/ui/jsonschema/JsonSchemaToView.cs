@@ -38,30 +38,22 @@ namespace com.csutil.ui.jsonschema {
             this.prefabFolder = prefabFolder;
         }
 
-        public override async Task<GameObject> NewRootContainerView() {
-            return await NewRootContainerView(rootContainerPrefab);
-        }
+        public override async Task<GameObject> NewRootContainerView() { return await NewRootContainerView(rootContainerPrefab); }
 
-        public async Task<GameObject> NewRootContainerView(string rootPrefabName) {
-            return await LoadFieldViewPrefab(rootPrefabName);
-        }
+        public async Task<GameObject> NewRootContainerView(string rootPrefabName) { return await LoadFieldViewPrefab(rootPrefabName); }
 
         public override Task<GameObject> AddChild(GameObject parent, GameObject child) {
             parent.AddChild(child);
             return Task.FromResult(child);
         }
 
-        public override async Task<GameObject> NewObjectFieldView(JsonSchema field) {
-            return await LoadFieldViewPrefab(objectFieldPrefab);
-        }
+        public override async Task<GameObject> NewObjectFieldView(JsonSchema field) { return await LoadFieldViewPrefab(objectFieldPrefab); }
 
         public override Task<GameObject> SelectInnerViewContainerFromObjectFieldView(GameObject containerView) {
             return Task.FromResult(containerView.GetComponentInChildren<FieldView>().mainLink.gameObject);
         }
 
-        public override async Task<GameObject> NewBoolFieldView(JsonSchema field) {
-            return await LoadFieldViewPrefab(boolFieldPrefab);
-        }
+        public override async Task<GameObject> NewBoolFieldView(JsonSchema field) { return await LoadFieldViewPrefab(boolFieldPrefab); }
 
         public override async Task<GameObject> NewIntegerFieldView(JsonSchema field) {
             if (field.readOnly == true) { return await LoadFieldViewPrefab(readOnlyTextFieldPrefab); }
@@ -85,9 +77,7 @@ namespace com.csutil.ui.jsonschema {
             return await LoadFieldViewPrefab(enumFieldPrefab);
         }
 
-        internal Task<GameObject> NewListViewEntry() {
-            return LoadFieldViewPrefab(listViewEntryPrefab);
-        }
+        internal Task<GameObject> NewListViewEntry() { return LoadFieldViewPrefab(listViewEntryPrefab); }
 
         public virtual Task<GameObject> LoadFieldViewPrefab(string prefabName) {
             return Task.FromResult(ResourcesV2.LoadPrefab(prefabFolder + prefabName, keepReferenceToEditorPrefab));
