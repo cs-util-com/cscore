@@ -7,7 +7,7 @@ namespace com.csutil.tests.jsonschema {
 
     class Ui18_2_ExampleUnityUiViewGenerator : MonoBehaviour {
 
-        public string prefabFolder = "mtvmtv1/";
+        public string prefabFolder = "jsonSchemaViewsV1/";
         public string containerPrefabToUse = JsonSchemaToView.CONTAINER2;
 
         /// <summary> Has to be triggered by the develper via the Unity editor UI to start the 

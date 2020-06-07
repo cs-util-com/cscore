@@ -14,7 +14,7 @@ namespace com.csutil.tests.jsonschema {
 
     public class Ui18_1_JsonSchemaUiGenerator : UnitTestMono {
 
-        public static string prefabFolder = "mtvmtv1/";
+        public static string prefabFolder = "jsonSchemaViewsV1/";
 
         public override IEnumerator RunTest() {
             yield return GenerateAndShowViewFor(gameObject.GetViewStack()).AsCoroutine();
