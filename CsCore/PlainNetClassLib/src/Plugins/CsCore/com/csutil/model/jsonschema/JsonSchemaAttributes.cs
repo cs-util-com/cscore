@@ -35,9 +35,9 @@ namespace com.csutil.model.mtvmtv {
 
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
     public class ContentAttribute : DescriptionAttribute {
-        public ContentType type;
+        public ContentFormat type;
 
-        public ContentAttribute(ContentType type, string description) : base(description) { this.type = type; }
+        public ContentAttribute(ContentFormat type, string description) : base(description) { this.type = type; }
     }
 
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]

@@ -158,18 +158,18 @@ namespace com.csutil.tests {
             public string id { get; private set; } = Guid.NewGuid().ToString();
 
             [Regex(2, 30)]
-            [Content(ContentType.Name, "e.g. Tom")]
+            [Content(ContentFormat.name, "e.g. Tom")]
             public string name;
 
             [Required]
-            [Content(ContentType.Name, "e.g. Riddle")]
+            [Content(ContentFormat.name, "e.g. Riddle")]
             public string lastName;
 
-            [Content(ContentType.Email, "e.g. tom@email.com")]
+            [Content(ContentFormat.email, "e.g. tom@email.com")]
             [Regex(RegexTemplates.EMAIL_ADDRESS)]
             public string email;
 
-            [Content(ContentType.Password, "Lenght >= 6 & has A-Z a-z 0-9 ?!..")]
+            [Content(ContentFormat.password, "Lenght >= 6 & has A-Z a-z 0-9 ?!..")]
             [Regex(6, RegexTemplates.HAS_UPPERCASE, RegexTemplates.HAS_LOWERCASE, RegexTemplates.HAS_NUMBER, RegexTemplates.HAS_SPECIAL_CHAR)]
             public string password;
 
@@ -197,7 +197,7 @@ namespace com.csutil.tests {
 
             public UserContact bestFriend;
 
-            [Content(ContentType.Essay, "A detailed description")]
+            [Content(ContentFormat.essay, "A detailed description")]
             public string description;
 
             [Regex(RegexTemplates.URL)]
@@ -210,7 +210,7 @@ namespace com.csutil.tests {
 #pragma warning disable 0649 // Variable is never assigned to, and will always have its default value
             public class UserContact {
 
-                [Content(ContentType.Name, "e.g. Barbara")]
+                [Content(ContentFormat.name, "e.g. Barbara")]
                 public string name;
                 public MyUserModel user;
 

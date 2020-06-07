@@ -100,7 +100,7 @@ namespace com.csutil.model.mtvmtv {
             if (model != null) {
                 if (!model.CanWriteTo()) { newField.readOnly = true; }
                 if (model.TryGetCustomAttribute(out RegexAttribute attr)) { newField.pattern = attr.regex; }
-                if (model.TryGetCustomAttribute(out ContentAttribute c)) { newField.contentType = "" + c.type; }
+                if (model.TryGetCustomAttribute(out ContentAttribute c)) { newField.format = "" + c.type; }
                 if (model.TryGetCustomAttribute(out MinMaxRangeAttribute ra)) {
                     newField.minimum = ra.minimum;
                     newField.maximum = ra.maximum;

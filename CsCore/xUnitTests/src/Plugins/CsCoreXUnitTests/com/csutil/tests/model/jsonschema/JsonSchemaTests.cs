@@ -54,7 +54,7 @@ namespace com.csutil.tests.model.mtvmtv {
 
             Assert.Equal("" + typeof(MyUserModel.UserContact), schema.properties["bestFriend"].modelType);
 
-            Assert.Equal("" + ContentType.Password, schema.properties["password"].contentType);
+            Assert.Equal("" + ContentFormat.password, schema.properties["password"].format);
 
             var userSchemaInUserContactClass = schema.properties["bestFriend"].properties["user"];
             Assert.Equal("" + typeof(MyUserModel), userSchemaInUserContactClass.modelType);
@@ -169,7 +169,7 @@ namespace com.csutil.tests.model.mtvmtv {
             [Required]
             public string name;
 
-            [Content(ContentType.Password, "A secure password")]
+            [Content(ContentFormat.password, "A secure password")]
             public string password;
 
             [MinMaxRange(min: 0, max: 130)]

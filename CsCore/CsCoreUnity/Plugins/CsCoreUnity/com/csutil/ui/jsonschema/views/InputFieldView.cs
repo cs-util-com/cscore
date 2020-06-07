@@ -34,30 +34,30 @@ namespace com.csutil.ui.mtvmtv {
         }
 
         private static void SetupForContentType(InputField self, JsonSchema field) {
-            if (EnumUtil.TryParse(field.contentType, out ContentType contentType)) {
+            if (EnumUtil.TryParse(field.format, out ContentFormat contentType)) {
                 switch (contentType) {
-                    case ContentType.Alphanumeric:
+                    case ContentFormat.alphanumeric:
                         self.contentType = InputField.ContentType.Alphanumeric;
                         break;
-                    case ContentType.Name:
+                    case ContentFormat.name:
                         self.contentType = InputField.ContentType.Name;
                         break;
-                    case ContentType.Email:
+                    case ContentFormat.email:
                         self.contentType = InputField.ContentType.EmailAddress;
                         break;
-                    case ContentType.Password:
+                    case ContentFormat.password:
                         self.contentType = InputField.ContentType.Password;
                         break;
-                    case ContentType.Pin:
+                    case ContentFormat.pin:
                         self.contentType = InputField.ContentType.Pin;
                         break;
-                    case ContentType.Essay:
+                    case ContentFormat.essay:
                         self.contentType = InputField.ContentType.Autocorrected;
                         self.lineType = InputField.LineType.MultiLineNewline;
                         ForceRecalculateNeededHeightOfInputField(self);
                         break;
                     default:
-                        Log.e($"Content type ignored for field {field.title}: {field.contentType}");
+                        Log.e($"Content type ignored for field {field.title}: {field.format}");
                         break;
                 }
             }
