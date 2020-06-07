@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace com.csutil.ui.mtvmtv {
 
@@ -15,6 +16,19 @@ namespace com.csutil.ui.mtvmtv {
         public JsonSchemaPresenter(JsonSchemaToView vmtv) { this.vmtv = vmtv; }
 
         public async Task OnLoad(JObject root) { await targetView.LinkToJsonModel(root, vmtv); }
+
+        public static async Task ChangesSavedViaConfirmButton(GameObject targetView, string confirmButtonId = "ConfirmButton") {
+            do {
+                await ConfirmButtonClicked(targetView, confirmButtonId);
+            } while (!RegexValidator.IsAllInputCurrentlyValid(targetView));
+        }
+
+        private static Task ConfirmButtonClicked(GameObject targetView, string confirmButtonId) {
+            return targetView.GetLinkMap().Get<Button>(confirmButtonId).SetOnClickAction(async delegate {
+                Toast.Show("Saving..");
+                await TaskV2.Delay(500); // Wait for potential pending throttled actions to update the model
+            });
+        }
 
     }
 

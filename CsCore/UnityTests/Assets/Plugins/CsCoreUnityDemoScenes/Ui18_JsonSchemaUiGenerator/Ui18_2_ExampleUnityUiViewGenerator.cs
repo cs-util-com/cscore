@@ -45,7 +45,7 @@ namespace com.csutil.tests {
 
             JsonSchemaPresenter p = new JsonSchemaPresenter(NewViewModelToView());
             p.targetView = uiView;
-            var changedInstance = await p.LoadViaJsonIntoView(modelInstance, VmtvContainerUtil.ChangesSavedViaConfirmButton(uiView));
+            var changedInstance = await p.LoadViaJsonIntoView(modelInstance);
             uiView.Destroy(); // "Close" the view after the user clicked confirm
 
             var changedFields = MergeJson.GetDiff(modelInstance, changedInstance);

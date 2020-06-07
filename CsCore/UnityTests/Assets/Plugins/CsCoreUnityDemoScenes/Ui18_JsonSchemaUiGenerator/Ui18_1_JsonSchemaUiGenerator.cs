@@ -73,7 +73,7 @@ namespace com.csutil.tests {
                 presenter.targetView = generatedView;
 
                 Log.d("Model BEFORE changes: " + JsonWriter.AsPrettyString(model));
-                MyUserModel changedModel = await presenter.LoadViaJsonIntoView(model, VmtvContainerUtil.ChangesSavedViaConfirmButton(generatedView));
+                MyUserModel changedModel = await presenter.LoadViaJsonIntoView(model);
                 Log.d("Model AFTER changes: " + JsonWriter.AsPrettyString(changedModel));
 
                 viewStack.SwitchBackToLastView(generatedView);
@@ -96,7 +96,7 @@ namespace com.csutil.tests {
 
                 Log.d("Model BEFORE changes: " + model.ToPrettyString());
                 var changedModel = await presenter.LoadModelIntoView(model.DeepClone() as JObject);
-                await VmtvContainerUtil.ChangesSavedViaConfirmButton(generatedView);
+                await JsonSchemaPresenter.ChangesSavedViaConfirmButton(generatedView);
                 Log.d("Model AFTER changes: " + changedModel.ToPrettyString());
 
                 viewStack.SwitchBackToLastView(generatedView);
@@ -132,7 +132,7 @@ namespace com.csutil.tests {
                 map.LinkViewToModel("bestFriend.name", u.bestFriend.name, newVal => u.bestFriend.name = newVal);
                 map.LinkViewToModel("profilePic.url", u.profilePic.url, newVal => u.profilePic.url = newVal);
 
-                await VmtvContainerUtil.ChangesSavedViaConfirmButton(targetView);
+                await JsonSchemaPresenter.ChangesSavedViaConfirmButton(targetView);
             }
 
         }
