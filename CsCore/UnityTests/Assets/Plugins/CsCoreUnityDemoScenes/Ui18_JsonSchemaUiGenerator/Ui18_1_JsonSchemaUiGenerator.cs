@@ -21,19 +21,25 @@ namespace com.csutil.tests.jsonschema {
         }
 
         private static async Task GenerateAndShowViewFor(ViewStack viewStack) {
-            { // Test generating a view for a normal C# class MyUserModel:
+            {
+                await Dialog.ShowInfoDialog("Generating UIs from C# classes", "The next examples will show generating" +
+                    " views from normal C# classes. In this example MyUserModel is passed to the generator", "Show example");
                 var schemaGenerator = new ModelToJsonSchema();
                 var userModelType = typeof(MyUserModel);
                 JsonSchema schema = schemaGenerator.ToJsonSchema("" + userModelType, userModelType);
                 Log.d(JsonWriter.AsPrettyString(schema));
                 await LoadModelIntoGeneratedView(viewStack, schemaGenerator, schema);
             }
-            { // This time load the json schema from an external JSON schema:
+            {
+                await Dialog.ShowInfoDialog("Generating UIs from JSON schemas",
+                    "This time the json schema is loaded from an JSON schema string", "Show example");
                 var schemaGenerator = new ModelToJsonSchema();
                 JsonSchema schema = JsonReader.GetReader().Read<JsonSchema>(SomeJsonSchemaExamples.jsonSchema1);
                 await LoadJsonModelIntoGeneratedJsonSchemaView(viewStack, schemaGenerator, schema, SomeJsonSchemaExamples.json1);
             }
-            { // Testing arrays / lists:
+            {
+                await Dialog.ShowInfoDialog("Editing arrays & lists:",
+                    "Both primitave lists but also List<MyClass1> can be shown and edited", "Show list example");
                 var schemaGenerator = new ModelToJsonSchema();
                 JsonSchema schema = JsonReader.GetReader().Read<JsonSchema>(SomeJsonSchemaExamples.jsonSchema2);
                 await LoadJsonModelIntoGeneratedJsonSchemaView(viewStack, schemaGenerator, schema, SomeJsonSchemaExamples.json2);
@@ -42,8 +48,9 @@ namespace com.csutil.tests.jsonschema {
 
         private static async Task LoadModelIntoGeneratedView(ViewStack viewStack, ModelToJsonSchema schemaGenerator, JsonSchema schema) {
             MyUserModel model = NewExampleUserInstance();
-
-            { // First an example to connect the model to a generated view via a manual presenter "MyManualPresenter1":
+            {
+                await Dialog.ShowInfoDialog("Manually connecting the model instance to the view", "First an example to connect the " +
+                    "model to a generated view via a manual presenter 'MyManualPresenter1'", "Show manual presenter example");
                 var viewGenerator = NewViewGenerator(schemaGenerator);
                 GameObject generatedView = await viewGenerator.ToView(schema);
                 viewStack.ShowView(generatedView);
@@ -56,7 +63,10 @@ namespace com.csutil.tests.jsonschema {
                 viewStack.SwitchBackToLastView(generatedView);
                 Log.d("Model AFTER changes: " + JsonWriter.AsPrettyString(model));
             }
-            { // The second option is to use a generic JObjectPresenter to connect the model to the generated view:
+            {
+                await Dialog.ShowInfoDialog("Using JsonSchemaPresenter to autmatically connect the model instance and view",
+                    "The second option is to use a generic JObjectPresenter to connect the model to the generated view",
+                    "Show JsonSchemaPresenter example");
                 var viewGenerator = NewViewGenerator(schemaGenerator);
                 GameObject generatedView = await viewGenerator.ToView(schema);
                 viewStack.ShowView(generatedView);

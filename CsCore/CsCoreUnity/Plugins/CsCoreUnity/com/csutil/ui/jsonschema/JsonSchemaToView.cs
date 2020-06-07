@@ -14,7 +14,7 @@ namespace com.csutil.ui.jsonschema {
         public const string CONTAINER3 = "RootContainer3";
 
         public string prefabFolder;
-        public string rootContainerPrefab = CONTAINER1;
+        public string rootContainerPrefab = CONTAINER2;
         public string objectFieldPrefab = "ObjectField";
         public string boolFieldPrefab = "BoolField";
         public string integerFieldPrefab = "IntegerField";

@@ -46,7 +46,7 @@ namespace com.csutil.tests.jsonschema {
             JsonSchemaPresenter p = new JsonSchemaPresenter(NewViewGenerator());
             p.targetView = uiView;
             var changedInstance = await p.LoadViaJsonIntoView(modelInstance);
-            uiView.Destroy(); // "Close" the view after the user clicked confirm
+            uiView.Destroy(); // Close the view by destroying it after the user done with it
 
             var changedFields = MergeJson.GetDiff(modelInstance, changedInstance);
             Log.d("Fields changed: " + changedFields?.ToPrettyString());
