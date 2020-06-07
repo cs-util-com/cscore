@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace com.csutil.model.mtvmtv {
 
     [Serializable]
-    public class ViewModel {
+    public class JsonSchema {
 
         /// <summary> Will contain the type like "object", "integer", "array", .. </summary>
         public string type;
@@ -14,7 +14,7 @@ namespace com.csutil.model.mtvmtv {
 
         public List<string> order;
         public List<string> required;
-        public Dictionary<string, ViewModel> properties;
+        public Dictionary<string, JsonSchema> properties;
 
         public string title;
         public string description;
@@ -32,7 +32,7 @@ namespace com.csutil.model.mtvmtv {
         public string contentType;
         /// <summary> If the field is an object it has a view model itself </summary>
 
-        public List<ViewModel> items;
+        public List<JsonSchema> items;
         /// <summary> If true items is a set so it can only contain unique items </summary>
         public bool? uniqueItems;
         /// <summary> Controls whether it's valid to have additional items in the array </summary>

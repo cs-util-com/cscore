@@ -20,7 +20,7 @@ namespace com.csutil.ui.mtvmtv {
         /// <returns> The generated view which can be used to load a model instance into it </returns>
         public static async Task<GameObject> GenerateViewFrom<T>(this ViewModelToView vmtv, bool keepReferenceToEditorPrefab = false) {
             var modelType = typeof(T);
-            ViewModel viewModel = vmtv.mtvm.ToViewModel(modelType.Name, modelType);
+            JsonSchema viewModel = vmtv.mtvm.ToViewModel(modelType.Name, modelType);
             vmtv.keepReferenceToEditorPrefab = keepReferenceToEditorPrefab;
             var view = await vmtv.ToView(viewModel);
             view.name = viewModel.title;

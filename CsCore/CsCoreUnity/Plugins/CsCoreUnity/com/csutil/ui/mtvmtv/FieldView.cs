@@ -12,7 +12,7 @@ namespace com.csutil.ui.mtvmtv {
         public Link mainLink;
 
         [SerializeField]
-        public ViewModel field;
+        public JsonSchema field;
         public string fieldName;
         public string fullPath;
 
@@ -33,7 +33,7 @@ namespace com.csutil.ui.mtvmtv {
         }
 
         public virtual string GetFieldTitle() {
-            return field.title != null ? field.title : ViewModel.ToTitle(fieldName);
+            return field.title != null ? field.title : JsonSchema.ToTitle(fieldName);
         }
 
         protected virtual Task Setup(string fieldName, string fullPath) {

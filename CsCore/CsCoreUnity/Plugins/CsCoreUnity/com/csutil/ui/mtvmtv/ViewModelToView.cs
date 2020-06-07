@@ -49,7 +49,7 @@ namespace com.csutil.ui.mtvmtv {
             return Task.FromResult(child);
         }
 
-        public override async Task<GameObject> NewObjectFieldView(ViewModel field) {
+        public override async Task<GameObject> NewObjectFieldView(JsonSchema field) {
             return await LoadFieldViewPrefab(objectFieldPrefab);
         }
 
@@ -57,28 +57,28 @@ namespace com.csutil.ui.mtvmtv {
             return Task.FromResult(containerView.GetComponentInChildren<FieldView>().mainLink.gameObject);
         }
 
-        public override async Task<GameObject> NewBoolFieldView(ViewModel field) {
+        public override async Task<GameObject> NewBoolFieldView(JsonSchema field) {
             return await LoadFieldViewPrefab(boolFieldPrefab);
         }
 
-        public override async Task<GameObject> NewIntegerFieldView(ViewModel field) {
+        public override async Task<GameObject> NewIntegerFieldView(JsonSchema field) {
             if (field.readOnly == true) { return await LoadFieldViewPrefab(readOnlyTextFieldPrefab); }
             if (field.minimum != null && field.maximum != null) { return await LoadFieldViewPrefab(sliderFieldPrefab); }
             return await LoadFieldViewPrefab(integerFieldPrefab);
         }
 
-        public override async Task<GameObject> NewFloatFieldView(ViewModel field) {
+        public override async Task<GameObject> NewFloatFieldView(JsonSchema field) {
             if (field.readOnly == true) { return await LoadFieldViewPrefab(readOnlyTextFieldPrefab); }
             if (field.minimum != null && field.maximum != null) { return await LoadFieldViewPrefab(sliderFieldPrefab); }
             return await LoadFieldViewPrefab(floatFieldPrefab);
         }
 
-        public override async Task<GameObject> NewStringFieldView(ViewModel field) {
+        public override async Task<GameObject> NewStringFieldView(JsonSchema field) {
             if (field.readOnly == true) { return await LoadFieldViewPrefab(readOnlyTextFieldPrefab); }
             return await LoadFieldViewPrefab(stringFieldPrefab);
         }
 
-        public override async Task<GameObject> NewEnumFieldView(ViewModel field) {
+        public override async Task<GameObject> NewEnumFieldView(JsonSchema field) {
             if (field.readOnly == true) { return await LoadFieldViewPrefab(readOnlyTextFieldPrefab); }
             return await LoadFieldViewPrefab(enumFieldPrefab);
         }
@@ -91,7 +91,7 @@ namespace com.csutil.ui.mtvmtv {
             return Task.FromResult(ResourcesV2.LoadPrefab(prefabFolder + prefabName, keepReferenceToEditorPrefab));
         }
 
-        public override async Task InitChild(GameObject view, string fieldName, ViewModel field) {
+        public override async Task InitChild(GameObject view, string fieldName, JsonSchema field) {
             var fieldView = view.GetComponentInChildren<FieldView>();
             fieldView.field = field;
             fieldView.fieldName = fieldName;
@@ -103,25 +103,25 @@ namespace com.csutil.ui.mtvmtv {
             await fieldView.OnViewCreated(fieldName, fullPath);
         }
 
-        public override async Task<GameObject> HandleRecursiveViewModel(GameObject parent, string fieldName, ViewModel field, ViewModel recursiveViewModel) {
+        public override async Task<GameObject> HandleRecursiveViewModel(GameObject parent, string fieldName, JsonSchema field, JsonSchema recursiveViewModel) {
             var view = await AddChild(parent, await LoadFieldViewPrefab(recursiveViewModelPrefab));
             await InitChild(view, fieldName, field);
             return view;
         }
 
-        public override async Task<GameObject> HandleSimpleArray(GameObject parent, string fieldName, ViewModel field) {
+        public override async Task<GameObject> HandleSimpleArray(GameObject parent, string fieldName, JsonSchema field) {
             var view = await AddChild(parent, await LoadFieldViewPrefab(listFieldPrefab));
             await InitChild(view, fieldName, field);
             return view;
         }
 
-        public override async Task<GameObject> HandleObjectArray(GameObject parent, string fieldName, ViewModel field) {
+        public override async Task<GameObject> HandleObjectArray(GameObject parent, string fieldName, JsonSchema field) {
             var view = await AddChild(parent, await LoadFieldViewPrefab(listFieldPrefab));
             await InitChild(view, fieldName, field);
             return view;
         }
 
-        public override Task<GameObject> HandleMixedObjectArray(GameObject parent, string fieldName, ViewModel field) {
+        public override Task<GameObject> HandleMixedObjectArray(GameObject parent, string fieldName, JsonSchema field) {
             throw new NotImplementedException();
         }
 

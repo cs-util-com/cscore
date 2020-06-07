@@ -6,7 +6,7 @@ namespace com.csutil.model.mtvmtv {
 
     public static class ViewModelExtensions {
 
-        public static JTokenType GetJTokenType(this ViewModel self) {
+        public static JTokenType GetJTokenType(this JsonSchema self) {
             return EnumUtil.Parse<JTokenType>(self.type.ToFirstCharUpperCase());
         }
 
@@ -14,18 +14,18 @@ namespace com.csutil.model.mtvmtv {
             return ("" + self).ToFirstCharLowerCase();
         }
 
-        public static JToken NewDefaultJInstance(this ViewModel self) {
+        public static JToken NewDefaultJInstance(this JsonSchema self) {
             if (self.GetJTokenType() == JTokenType.Object) { return NewDefaultJObject(self); }
             return self.ParseToJValue(self.defaultVal);
         }
 
-        private static JToken NewDefaultJObject(ViewModel self) {
+        private static JToken NewDefaultJObject(JsonSchema self) {
             JObject jObject = new JObject();
             foreach (var p in self.properties) { jObject.Add(p.Key, p.Value.NewDefaultJInstance()); }
             return jObject;
         }
 
-        public static JValue ParseToJValue(this ViewModel self, string newVal) {
+        public static JValue ParseToJValue(this JsonSchema self, string newVal) {
             switch (self.GetJTokenType()) {
                 case JTokenType.Boolean:
                     if (newVal == null) { return new JValue(false); }
@@ -43,7 +43,7 @@ namespace com.csutil.model.mtvmtv {
             throw new NotImplementedException("Cant handle type " + self.type);
         }
 
-        public static IEnumerable<string> GetOrder(this ViewModel self) {
+        public static IEnumerable<string> GetOrder(this JsonSchema self) {
             return self.order != null ? self.order : self.properties.Map(x => x.Key);
         }
 

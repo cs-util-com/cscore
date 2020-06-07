@@ -33,7 +33,7 @@ namespace com.csutil.ui.mtvmtv {
             regexValidator.EnforceRegex(field.pattern);
         }
 
-        private static void SetupForContentType(InputField self, ViewModel field) {
+        private static void SetupForContentType(InputField self, JsonSchema field) {
             if (EnumUtil.TryParse(field.contentType, out ContentType contentType)) {
                 switch (contentType) {
                     case ContentType.Alphanumeric:

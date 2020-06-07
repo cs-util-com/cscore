@@ -41,7 +41,7 @@ namespace com.csutil.ui.mtvmtv {
                 return;
             }
             RestorePropertiesFromChildrenGOs(fieldView);
-            ViewModel viewModel = fieldView.field;
+            JsonSchema viewModel = fieldView.field;
             if (viewModel.modelType.IsNullOrEmpty()) {
                 Log.w("Missing viewModel.modelType in passsed ObjectFieldView.field", fieldView.gameObject);
                 return;
@@ -219,19 +219,19 @@ namespace com.csutil.ui.mtvmtv {
 
         private static async Task<FieldView> CreateChildEntryView(
                 ListFieldView self, JObject root, ViewModelToView vmtv, JToken modelEntry, string fieldName) {
-            ViewModel newEntryVm = GetMatchingViewModel(modelEntry, self.field.items);
+            JsonSchema newEntryVm = GetMatchingViewModel(modelEntry, self.field.items);
             GameObject childView = await AddChildEntryView(self, vmtv, fieldName, newEntryVm);
             await childView.LinkToJsonModel(root, vmtv);
             return childView.GetComponentInChildren<FieldView>();
         }
 
-        private static ViewModel GetMatchingViewModel(JToken modelEntry, List<ViewModel> viewModels) {
+        private static JsonSchema GetMatchingViewModel(JToken modelEntry, List<JsonSchema> viewModels) {
             foreach (var vm in viewModels) { if (vm.GetJTokenType() == modelEntry.Type) { return vm; } }
             return null;
         }
 
         private static async Task<GameObject> AddChildEntryView(
-                    ListFieldView self, ViewModelToView vmtv, string fieldName, ViewModel entryVm) {
+                    ListFieldView self, ViewModelToView vmtv, string fieldName, JsonSchema entryVm) {
             var parentView = self.mainLink.gameObject;
             if (CanBeShownInListViewEntry(entryVm.GetJTokenType())) {
                 GameObject childGo = await vmtv.AddChild(parentView, await vmtv.NewListViewEntry());

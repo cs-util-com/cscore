@@ -14,21 +14,21 @@ namespace com.csutil.model.mtvmtv {
             this.mtvm = mtvm;
         }
 
-        public async Task<V> ToView(ViewModel rootViewModel) {
+        public async Task<V> ToView(JsonSchema rootViewModel) {
             var rootView = await NewRootContainerView();
             await InitChild(rootView, null, rootViewModel);
             await ObjectViewModelToView(rootViewModel, await SelectInnerViewContainerFromObjectFieldView(rootView));
             return rootView;
         }
 
-        public async Task ObjectViewModelToView(ViewModel viewModel, V parentView) {
+        public async Task ObjectViewModelToView(JsonSchema viewModel, V parentView) {
             foreach (var fieldName in viewModel.GetOrder()) {
-                ViewModel field = viewModel.properties[fieldName];
+                JsonSchema field = viewModel.properties[fieldName];
                 await AddViewForFieldViewModel(parentView, field, fieldName);
             }
         }
 
-        public async Task<V> AddViewForFieldViewModel(V parentView, ViewModel field, string fieldName) {
+        public async Task<V> AddViewForFieldViewModel(V parentView, JsonSchema field, string fieldName) {
             JTokenType type = field.GetJTokenType();
             if (type == JTokenType.Boolean) {
                 var c = await AddChild(parentView, await NewBoolFieldView(field));
@@ -76,7 +76,7 @@ namespace com.csutil.model.mtvmtv {
             if (type == JTokenType.Array) {
                 var e = field.items;
                 if (e.Count == 1) {
-                    ViewModel item = e.First();
+                    JsonSchema item = e.First();
                     var childJType = item.GetJTokenType();
                     if (mtvm.IsSimpleType(childJType)) {
                         return await HandleSimpleArray(parentView, fieldName, field);
@@ -93,23 +93,23 @@ namespace com.csutil.model.mtvmtv {
         }
 
         public abstract Task<V> AddChild(V parentView, V child);
-        public abstract Task InitChild(V view, string fieldName, ViewModel field);
+        public abstract Task InitChild(V view, string fieldName, JsonSchema field);
 
         public abstract Task<V> NewRootContainerView();
 
         public abstract Task<V> SelectInnerViewContainerFromObjectFieldView(V objectFieldView);
 
-        public abstract Task<V> NewBoolFieldView(ViewModel field);
-        public abstract Task<V> NewStringFieldView(ViewModel field);
-        public abstract Task<V> NewFloatFieldView(ViewModel field);
-        public abstract Task<V> NewIntegerFieldView(ViewModel field);
-        public abstract Task<V> NewEnumFieldView(ViewModel field);
-        public abstract Task<V> NewObjectFieldView(ViewModel field);
+        public abstract Task<V> NewBoolFieldView(JsonSchema field);
+        public abstract Task<V> NewStringFieldView(JsonSchema field);
+        public abstract Task<V> NewFloatFieldView(JsonSchema field);
+        public abstract Task<V> NewIntegerFieldView(JsonSchema field);
+        public abstract Task<V> NewEnumFieldView(JsonSchema field);
+        public abstract Task<V> NewObjectFieldView(JsonSchema field);
 
-        public abstract Task<V> HandleRecursiveViewModel(V parentView, string fieldName, ViewModel field, ViewModel recursiveViewModel);
-        public abstract Task<V> HandleSimpleArray(V parentView, string fieldName, ViewModel field);
-        public abstract Task<V> HandleObjectArray(V parentView, string fieldName, ViewModel field);
-        public abstract Task<V> HandleMixedObjectArray(V parentView, string fieldName, ViewModel field);
+        public abstract Task<V> HandleRecursiveViewModel(V parentView, string fieldName, JsonSchema field, JsonSchema recursiveViewModel);
+        public abstract Task<V> HandleSimpleArray(V parentView, string fieldName, JsonSchema field);
+        public abstract Task<V> HandleObjectArray(V parentView, string fieldName, JsonSchema field);
+        public abstract Task<V> HandleMixedObjectArray(V parentView, string fieldName, JsonSchema field);
 
     }
 

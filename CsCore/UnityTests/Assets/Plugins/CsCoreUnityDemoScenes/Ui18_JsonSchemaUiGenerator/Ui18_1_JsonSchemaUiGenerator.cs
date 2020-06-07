@@ -26,13 +26,13 @@ namespace com.csutil.tests {
 
             { // Testing arrays / lists:
                 var mtvm = new ModelToViewModel();
-                ViewModel viewModel = JsonReader.GetReader().Read<ViewModel>(SomeJsonSchemaExamples.jsonSchema2);
+                JsonSchema viewModel = JsonReader.GetReader().Read<JsonSchema>(SomeJsonSchemaExamples.jsonSchema2);
                 await LoadJsonModelIntoGeneratedJsonSchemaView(viewStack, mtvm, viewModel, SomeJsonSchemaExamples.json2);
             }
 
             { // This time load the viewModel from an external JSON schema:
                 var mtvm = new ModelToViewModel();
-                ViewModel viewModel = JsonReader.GetReader().Read<ViewModel>(SomeJsonSchemaExamples.jsonSchema1);
+                JsonSchema viewModel = JsonReader.GetReader().Read<JsonSchema>(SomeJsonSchemaExamples.jsonSchema1);
                 await LoadJsonModelIntoGeneratedJsonSchemaView(viewStack, mtvm, viewModel, SomeJsonSchemaExamples.json1);
             }
 
@@ -46,7 +46,7 @@ namespace com.csutil.tests {
 
         }
 
-        private static async Task LoadModelIntoGeneratedView(ViewStack viewStack, ModelToViewModel mtvm, ViewModel viewModel) {
+        private static async Task LoadModelIntoGeneratedView(ViewStack viewStack, ModelToViewModel mtvm, JsonSchema viewModel) {
             MyUserModel model = NewExampleUserInstance();
 
             { // First an example to connect the model to a generated view via a manual presenter "MyManualPresenter1":
@@ -82,7 +82,7 @@ namespace com.csutil.tests {
             }
         }
 
-        private static async Task LoadJsonModelIntoGeneratedJsonSchemaView(ViewStack viewStack, ModelToViewModel mtvm, ViewModel viewModel, string jsonModel) {
+        private static async Task LoadJsonModelIntoGeneratedJsonSchemaView(ViewStack viewStack, ModelToViewModel mtvm, JsonSchema viewModel, string jsonModel) {
             JObject model = JsonReader.GetReader().Read<JObject>(jsonModel);
 
             {
