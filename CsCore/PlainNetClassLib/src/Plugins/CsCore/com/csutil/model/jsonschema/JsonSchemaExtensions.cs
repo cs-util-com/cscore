@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace com.csutil.model.mtvmtv {
+namespace com.csutil.model.jsonschema {
 
     public static class JsonSchemaExtensions {
 

@@ -1,9 +1,9 @@
-﻿using com.csutil.model.mtvmtv;
-using com.csutil.ui.mtvmtv;
+﻿using com.csutil.model.jsonschema;
+using com.csutil.ui.jsonschema;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace com.csutil.tests {
+namespace com.csutil.tests.jsonschema {
 
     class Ui18_2_ExampleUnityUiViewGenerator : MonoBehaviour {
 

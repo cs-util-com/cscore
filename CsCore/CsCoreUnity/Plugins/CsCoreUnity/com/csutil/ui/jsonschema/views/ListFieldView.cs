@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using UnityEngine.UI;
 
-namespace com.csutil.ui.mtvmtv {
+namespace com.csutil.ui.jsonschema {
 
     public class ListFieldView : FieldView {
 

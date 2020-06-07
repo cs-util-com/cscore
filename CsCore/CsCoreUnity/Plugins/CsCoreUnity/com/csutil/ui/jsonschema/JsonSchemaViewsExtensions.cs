@@ -1,5 +1,5 @@
 ﻿using com.csutil.datastructures;
-using com.csutil.model.mtvmtv;
+using com.csutil.model.jsonschema;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace com.csutil.ui.mtvmtv {
+namespace com.csutil.ui.jsonschema {
 
     /// <summary> Methods that help setting up views that where generated via a Json schema </summary>
     public static class JsonSchemaViewsExtensions {

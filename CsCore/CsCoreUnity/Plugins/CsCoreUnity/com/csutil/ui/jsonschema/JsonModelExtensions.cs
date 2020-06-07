@@ -1,4 +1,4 @@
-﻿using com.csutil.model.mtvmtv;
+﻿using com.csutil.model.jsonschema;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace com.csutil.ui.mtvmtv {
+namespace com.csutil.ui.jsonschema {
 
     /// <summary> Meothds that help connecting a JSON model instance to their schema views during runtime </summary>
     public static class JsonModelExtensions {

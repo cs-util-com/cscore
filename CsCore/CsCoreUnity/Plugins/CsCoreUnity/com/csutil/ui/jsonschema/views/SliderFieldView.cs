@@ -1,9 +1,9 @@
-﻿using com.csutil.model.mtvmtv;
+﻿using com.csutil.model.jsonschema;
 using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
 using UnityEngine.UI;
 
-namespace com.csutil.ui.mtvmtv {
+namespace com.csutil.ui.jsonschema {
 
     public class SliderFieldView : FieldView {
 

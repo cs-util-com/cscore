@@ -2,11 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using com.csutil.model;
-using com.csutil.model.mtvmtv;
+using com.csutil.model.jsonschema;
 using Newtonsoft.Json;
 using Xunit;
 
-namespace com.csutil.tests.model.mtvmtv {
+namespace com.csutil.tests.model.jsonschema {
 
     public class JsonSchemaTests {
 

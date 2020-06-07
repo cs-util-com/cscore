@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
-using com.csutil.model.mtvmtv;
+using com.csutil.model.jsonschema;
 using UnityEngine;
 
-namespace com.csutil.ui.mtvmtv {
+namespace com.csutil.ui.jsonschema {
 
     /// <summary> A view generator for Unity that takes an input json schema and generates a 
     /// Unity UI from it using prefabs. This can be done on runtime or during editor time </summary>

@@ -2,7 +2,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 
-namespace com.csutil.model.mtvmtv {
+namespace com.csutil.model.jsonschema {
 
     /// <summary> A C# class that can hold a JSON schema, see 
     /// https://json-schema.org/understanding-json-schema/reference/index.html for specifics 

@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
-namespace com.csutil.ui.mtvmtv {
+namespace com.csutil.ui.jsonschema {
 
     /// <summary> A regex validator that evaluates a target input field and informs the user if 
     /// the entered data does not comply with its regex </summary>

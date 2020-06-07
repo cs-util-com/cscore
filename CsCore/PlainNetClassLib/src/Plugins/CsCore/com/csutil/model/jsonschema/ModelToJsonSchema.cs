@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace com.csutil.model.mtvmtv {
+namespace com.csutil.model.jsonschema {
 
     public class ModelToJsonSchema {
 

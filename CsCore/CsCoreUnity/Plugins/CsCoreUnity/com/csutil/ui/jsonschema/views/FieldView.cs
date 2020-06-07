@@ -1,9 +1,9 @@
 ﻿using System.Threading.Tasks;
-using com.csutil.model.mtvmtv;
+using com.csutil.model.jsonschema;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace com.csutil.ui.mtvmtv {
+namespace com.csutil.ui.jsonschema {
 
     public class FieldView : MonoBehaviour {
 

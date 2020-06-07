@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 
-namespace com.csutil.model.mtvmtv {
+namespace com.csutil.model.jsonschema {
 
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
     public class DescriptionAttribute : Attribute {

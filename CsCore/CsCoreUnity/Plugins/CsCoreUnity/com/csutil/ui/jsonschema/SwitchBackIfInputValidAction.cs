@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-namespace com.csutil.ui.mtvmtv {
+namespace com.csutil.ui.jsonschema {
 
     /// <summary> This action attached to a button and ensures that all RegexValidators of the current screen report that they did
     /// not detect any regex violations in the users input </summary>

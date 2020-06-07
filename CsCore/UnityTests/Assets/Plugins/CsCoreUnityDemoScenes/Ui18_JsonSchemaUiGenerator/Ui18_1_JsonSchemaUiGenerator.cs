@@ -1,7 +1,7 @@
 ﻿using com.csutil.model;
-using com.csutil.model.mtvmtv;
+using com.csutil.model.jsonschema;
 using com.csutil.ui;
-using com.csutil.ui.mtvmtv;
+using com.csutil.ui.jsonschema;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace com.csutil.tests {
+namespace com.csutil.tests.jsonschema {
 
     public class Ui18_1_JsonSchemaUiGenerator : UnitTestMono {
 

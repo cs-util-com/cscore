@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
-namespace com.csutil.model.mtvmtv {
+namespace com.csutil.model.jsonschema {
 
     /// <summary> An abstract generator that can create a view from an input json schema </summary>
     /// <typeparam name="V">The view type, in Unity views for example are made out of GameObjects </typeparam>
