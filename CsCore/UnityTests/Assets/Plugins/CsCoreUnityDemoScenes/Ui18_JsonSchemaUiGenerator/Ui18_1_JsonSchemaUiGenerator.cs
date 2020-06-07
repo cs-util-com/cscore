@@ -53,9 +53,8 @@ namespace com.csutil.tests {
 
                 Log.d("Model BEFORE changes: " + JsonWriter.AsPrettyString(model));
                 await presenter.LoadModelIntoView(model);
-                Log.d("Model AFTER changes: " + JsonWriter.AsPrettyString(model));
-
                 viewStack.SwitchBackToLastView(generatedView);
+                Log.d("Model AFTER changes: " + JsonWriter.AsPrettyString(model));
             }
             { // The second option is to use a generic JObjectPresenter to connect the model to the generated view:
                 var vmtv = NewViewGenerator(schemaGenerator);
@@ -67,9 +66,9 @@ namespace com.csutil.tests {
 
                 Log.d("Model BEFORE changes: " + JsonWriter.AsPrettyString(model));
                 MyUserModel changedModel = await presenter.LoadViaJsonIntoView(model);
-                Log.d("Model AFTER changes: " + JsonWriter.AsPrettyString(changedModel));
-
                 viewStack.SwitchBackToLastView(generatedView);
+
+                Log.d("Model AFTER changes: " + JsonWriter.AsPrettyString(changedModel));
                 var changedFields = MergeJson.GetDiff(model, changedModel);
                 Log.d("Fields changed: " + changedFields?.ToPrettyString());
             }

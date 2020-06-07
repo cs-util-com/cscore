@@ -4,13 +4,17 @@ using System.Collections.Generic;
 
 namespace com.csutil.model.mtvmtv {
 
+    /// <summary> A C# class that can hold a JSON schema, see 
+    /// https://json-schema.org/understanding-json-schema/reference/index.html for specifics 
+    /// of the structure of the schema. In summary its a recursive structure which describes each property 
+    /// of a target model like the type and name of each property/field </summary>
     [Serializable]
     public class JsonSchema {
 
         /// <summary> Will contain the type like "object", "integer", "array", .. </summary>
         public string type;
         /// <summary> This will contain the concrete name of the model if type is an "Object" </summary>
-        public string modelType;
+        public string modelType; // Not part of official schema
 
         public List<string> order;
         public List<string> required;
