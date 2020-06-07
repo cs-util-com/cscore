@@ -14,7 +14,7 @@ using UnityEngine.UI;
 
 namespace com.csutil.tests {
 
-    public class Ui18_ModelToViewModelToView : UnitTestMono {
+    public class Ui18_1_JsonSchemaUiGenerator : UnitTestMono {
 
         public static string prefabFolder = "mtvmtv1/";
 

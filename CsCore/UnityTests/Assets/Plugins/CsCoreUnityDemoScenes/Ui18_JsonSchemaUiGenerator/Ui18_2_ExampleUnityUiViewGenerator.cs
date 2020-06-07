@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace com.csutil.tests {
 
-    class Ui18_ExampleUnityUiViewGenerator : MonoBehaviour {
+    class Ui18_2_ExampleUnityUiViewGenerator : MonoBehaviour {
 
         public string prefabFolder = "mtvmtv1/";
         public string containerPrefabToUse = ViewModelToView.CONTAINER2;
@@ -19,7 +19,7 @@ namespace com.csutil.tests {
         private void OnValidate() {
             if (GenerateUiNow) {
                 GenerateUiNow = false;
-                GenerateViewFromClass<Ui18_ModelToViewModelToView.MyUserModel>().LogOnError();
+                GenerateViewFromClass<Ui18_1_JsonSchemaUiGenerator.MyUserModel>().LogOnError();
             }
         }
 
@@ -41,7 +41,7 @@ namespace com.csutil.tests {
             var uiView = gameObject.GetChild(0);
             AssertV2.IsNotNull(uiView, "uiView");
             // Create some example model instance:
-            var modelInstance = Ui18_ModelToViewModelToView.NewExampleUserInstance();
+            var modelInstance = Ui18_1_JsonSchemaUiGenerator.NewExampleUserInstance();
 
             JObjectPresenter p = new JObjectPresenter(NewViewModelToView());
             p.targetView = uiView;
