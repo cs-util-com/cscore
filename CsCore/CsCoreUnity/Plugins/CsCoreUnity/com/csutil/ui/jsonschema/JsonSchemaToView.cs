@@ -5,6 +5,8 @@ using UnityEngine;
 
 namespace com.csutil.ui.mtvmtv {
 
+    /// <summary> A view generator for Unity that takes an input json schema and generates a 
+    /// Unity UI from it using prefabs. This can be done on runtime or during editor time </summary>
     public class JsonSchemaToView : BaseJsonSchemaToView<GameObject> {
 
         public const string CONTAINER1 = "RootContainer";

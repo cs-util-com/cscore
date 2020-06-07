@@ -1,11 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
 namespace com.csutil.model.mtvmtv {
 
+    /// <summary> An abstract generator that can create a view from an input json schema </summary>
+    /// <typeparam name="V">The view type, in Unity views for example are made out of GameObjects </typeparam>
     public abstract class BaseJsonSchemaToView<V> {
 
         public ModelToJsonSchema mtvm;
