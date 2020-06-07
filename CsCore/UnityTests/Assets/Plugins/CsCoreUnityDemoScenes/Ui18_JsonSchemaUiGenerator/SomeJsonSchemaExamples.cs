@@ -1,4 +1,4 @@
-﻿namespace com.csutil.tests {
+﻿namespace com.csutil.tests.jsonschema {
 
     public static class SomeJsonSchemaExamples {
 

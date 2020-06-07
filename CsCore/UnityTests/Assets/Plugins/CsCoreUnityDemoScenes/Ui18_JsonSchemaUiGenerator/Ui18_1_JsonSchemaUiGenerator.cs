@@ -21,22 +21,22 @@ namespace com.csutil.tests.jsonschema {
         }
 
         private static async Task GenerateAndShowViewFor(ViewStack viewStack) {
-            {
-                var mtvm = new ModelToJsonSchema();
+            { // Test generating a view for a normal C# class MyUserModel:
+                var schemaGenerator = new ModelToJsonSchema();
                 var userModelType = typeof(MyUserModel);
-                var viewModel = mtvm.ToJsonSchema("" + userModelType, userModelType);
-                Log.d(JsonWriter.AsPrettyString(viewModel));
-                await LoadModelIntoGeneratedView(viewStack, mtvm, viewModel);
+                JsonSchema schema = schemaGenerator.ToJsonSchema("" + userModelType, userModelType);
+                Log.d(JsonWriter.AsPrettyString(schema));
+                await LoadModelIntoGeneratedView(viewStack, schemaGenerator, schema);
             }
             { // This time load the viewModel from an external JSON schema:
-                var mtvm = new ModelToJsonSchema();
-                JsonSchema viewModel = JsonReader.GetReader().Read<JsonSchema>(SomeJsonSchemaExamples.jsonSchema1);
-                await LoadJsonModelIntoGeneratedJsonSchemaView(viewStack, mtvm, viewModel, SomeJsonSchemaExamples.json1);
+                var schemaGenerator = new ModelToJsonSchema();
+                JsonSchema schema = JsonReader.GetReader().Read<JsonSchema>(SomeJsonSchemaExamples.jsonSchema1);
+                await LoadJsonModelIntoGeneratedJsonSchemaView(viewStack, schemaGenerator, schema, SomeJsonSchemaExamples.json1);
             }
             { // Testing arrays / lists:
-                var mtvm = new ModelToJsonSchema();
-                JsonSchema viewModel = JsonReader.GetReader().Read<JsonSchema>(SomeJsonSchemaExamples.jsonSchema2);
-                await LoadJsonModelIntoGeneratedJsonSchemaView(viewStack, mtvm, viewModel, SomeJsonSchemaExamples.json2);
+                var schemaGenerator = new ModelToJsonSchema();
+                JsonSchema schema = JsonReader.GetReader().Read<JsonSchema>(SomeJsonSchemaExamples.jsonSchema2);
+                await LoadJsonModelIntoGeneratedJsonSchemaView(viewStack, schemaGenerator, schema, SomeJsonSchemaExamples.json2);
             }
         }
 
@@ -57,11 +57,11 @@ namespace com.csutil.tests.jsonschema {
                 Log.d("Model AFTER changes: " + JsonWriter.AsPrettyString(model));
             }
             { // The second option is to use a generic JObjectPresenter to connect the model to the generated view:
-                var vmtv = NewViewGenerator(schemaGenerator);
-                GameObject generatedView = await vmtv.ToView(schema);
+                var viewGenerator = NewViewGenerator(schemaGenerator);
+                GameObject generatedView = await viewGenerator.ToView(schema);
                 viewStack.ShowView(generatedView);
 
-                var presenter = new JsonSchemaPresenter(vmtv);
+                var presenter = new JsonSchemaPresenter(viewGenerator);
                 presenter.targetView = generatedView;
 
                 Log.d("Model BEFORE changes: " + JsonWriter.AsPrettyString(model));
@@ -74,26 +74,27 @@ namespace com.csutil.tests.jsonschema {
             }
         }
 
-        private static async Task LoadJsonModelIntoGeneratedJsonSchemaView(ViewStack viewStack, ModelToJsonSchema mtvm, JsonSchema viewModel, string jsonModel) {
+        private static async Task LoadJsonModelIntoGeneratedJsonSchemaView(
+                                ViewStack viewStack, ModelToJsonSchema schemaGenerator, JsonSchema schema, string jsonModel) {
+
             JObject model = JsonReader.GetReader().Read<JObject>(jsonModel);
-            {
-                JsonSchemaToView vmtv = NewViewGenerator(mtvm);
-                GameObject generatedView = await vmtv.ToView(viewModel);
+            JsonSchemaToView viewGenerator = NewViewGenerator(schemaGenerator);
+            GameObject generatedView = await viewGenerator.ToView(schema);
 
-                viewStack.ShowView(generatedView);
+            viewStack.ShowView(generatedView);
 
-                var presenter = new JsonSchemaPresenter(vmtv);
-                presenter.targetView = generatedView;
+            var presenter = new JsonSchemaPresenter(viewGenerator);
+            presenter.targetView = generatedView;
 
-                Log.d("Model BEFORE changes: " + model.ToPrettyString());
-                var changedModel = await presenter.LoadModelIntoView(model.DeepClone() as JObject);
-                await JsonSchemaPresenter.ChangesSavedViaConfirmButton(generatedView);
-                Log.d("Model AFTER changes: " + changedModel.ToPrettyString());
+            Log.d("Model BEFORE changes: " + model.ToPrettyString());
+            var changedModel = await presenter.LoadModelIntoView(model.DeepClone() as JObject);
+            await JsonSchemaPresenter.ChangesSavedViaConfirmButton(generatedView);
+            Log.d("Model AFTER changes: " + changedModel.ToPrettyString());
 
-                viewStack.SwitchBackToLastView(generatedView);
-                var changedFields = MergeJson.GetDiff(model, changedModel);
-                Log.d("Fields changed: " + changedFields?.ToPrettyString());
-            }
+            viewStack.SwitchBackToLastView(generatedView);
+            var changedFields = MergeJson.GetDiff(model, changedModel);
+            Log.d("Fields changed: " + changedFields?.ToPrettyString());
+
         }
 
         private static JsonSchemaToView NewViewGenerator(ModelToJsonSchema schemaGenerator) {

@@ -34,7 +34,7 @@ namespace com.csutil.ui.jsonschema {
 
         /// <summary> Creates a generator instance that can generate views from view models vie ViewModelToView.ToView(..) </summary>
         /// <param name="prefabFolder"> The folder path where all the view generation related prefabs are located, e.g. "mtvmtv1/" </param>
-        public JsonSchemaToView(ModelToJsonSchema mtvm, string prefabFolder) : base(mtvm) {
+        public JsonSchemaToView(ModelToJsonSchema schemaGenerator, string prefabFolder) : base(schemaGenerator) {
             this.prefabFolder = prefabFolder;
         }
 

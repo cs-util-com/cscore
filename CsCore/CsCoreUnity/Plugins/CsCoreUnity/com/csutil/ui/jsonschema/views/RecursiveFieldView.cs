@@ -18,8 +18,8 @@ namespace com.csutil.ui.jsonschema {
             AssertV2.IsNotNull(viewModel, "viewModel");
             AssertV2.IsNotNull(viewModelToView, "viewModelToView");
             if (viewModel.properties == null) {
-                AssertV2.IsFalse(viewModelToView.mtvm.viewModels.IsNullOrEmpty(), "viewModels map is emtpy!");
-                if (viewModelToView.mtvm.viewModels.TryGetValue(viewModel.modelType, out JsonSchema vm)) {
+                AssertV2.IsFalse(viewModelToView.schemaGenerator.viewModels.IsNullOrEmpty(), "viewModels map is emtpy!");
+                if (viewModelToView.schemaGenerator.viewModels.TryGetValue(viewModel.modelType, out JsonSchema vm)) {
                     viewModel = vm;
                 } else {
                     Log.e($"No ViewModel found for viewModel.modelType={viewModel.modelType}");

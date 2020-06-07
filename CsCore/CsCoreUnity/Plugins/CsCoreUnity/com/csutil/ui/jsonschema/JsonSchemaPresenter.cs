@@ -11,11 +11,11 @@ namespace com.csutil.ui.jsonschema {
     public class JsonSchemaPresenter : Presenter<JObject> {
 
         public GameObject targetView { get; set; }
-        public JsonSchemaToView vmtv;
+        public JsonSchemaToView viewGenerator;
 
-        public JsonSchemaPresenter(JsonSchemaToView vmtv) { this.vmtv = vmtv; }
+        public JsonSchemaPresenter(JsonSchemaToView viewGenerator) { this.viewGenerator = viewGenerator; }
 
-        public async Task OnLoad(JObject root) { await targetView.LinkToJsonModel(root, vmtv); }
+        public async Task OnLoad(JObject root) { await targetView.LinkToJsonModel(root, viewGenerator); }
 
         public static async Task ChangesSavedViaConfirmButton(GameObject targetView, string confirmButtonId = "ConfirmButton") {
             do {

@@ -9,10 +9,10 @@ namespace com.csutil.model.jsonschema {
     /// <typeparam name="V">The view type, in Unity views for example are made out of GameObjects </typeparam>
     public abstract class BaseJsonSchemaToView<V> {
 
-        public ModelToJsonSchema mtvm;
+        public ModelToJsonSchema schemaGenerator;
 
-        public BaseJsonSchemaToView(ModelToJsonSchema mtvm) {
-            this.mtvm = mtvm;
+        public BaseJsonSchemaToView(ModelToJsonSchema schemaGenerator) {
+            this.schemaGenerator = schemaGenerator;
         }
 
         public async Task<V> ToView(JsonSchema rootViewModel) {
@@ -66,7 +66,7 @@ namespace com.csutil.model.jsonschema {
             }
             if (type == JTokenType.Object) {
                 if (field.properties == null) {
-                    return await HandleRecursiveViewModel(parentView, fieldName, field, mtvm.viewModels.GetValue(field.modelType, null));
+                    return await HandleRecursiveViewModel(parentView, fieldName, field, schemaGenerator.viewModels.GetValue(field.modelType, null));
                 } else {
                     var objectFieldView = await NewObjectFieldView(field);
                     await InitChild(await AddChild(parentView, objectFieldView), fieldName, field);
@@ -79,7 +79,7 @@ namespace com.csutil.model.jsonschema {
                 if (e.Count == 1) {
                     JsonSchema item = e.First();
                     var childJType = item.GetJTokenType();
-                    if (mtvm.IsSimpleType(childJType)) {
+                    if (schemaGenerator.IsSimpleType(childJType)) {
                         return await HandleSimpleArray(parentView, fieldName, field);
                     } else if (childJType == JTokenType.Object) {
                         return await HandleObjectArray(parentView, fieldName, field);

@@ -34,19 +34,19 @@ namespace com.csutil.ui.jsonschema {
             return JsonReader.GetReader().Read<T>(json.ToString());
         }
 
-        public static async Task LinkToJsonModel(this GameObject targetView, JObject root, JsonSchemaToView vmtv) {
+        public static async Task LinkToJsonModel(this GameObject targetView, JObject root, JsonSchemaToView viewGenerator) {
 
-            vmtv.SetupViewModelMap(targetView);
+            viewGenerator.SetupViewModelMap(targetView);
 
             foreach (var fieldView in targetView.GetFieldViewMap().Values) {
                 var value = fieldView.GetFieldJModel(root);
                 if (!fieldView.LinkToJsonModel(root, value)) {
                     if (fieldView is RecursiveFieldView r) {
-                        r.ShowChildModelInNewScreen(vmtv, targetView, value as JObject);
+                        r.ShowChildModelInNewScreen(viewGenerator, targetView, value as JObject);
                     } else if (fieldView is ObjectFieldView) {
                         // Do nothing (object fields are individually set up themselves)
                     } else if (fieldView is ListFieldView l) {
-                        await l.LoadModelList(root, vmtv);
+                        await l.LoadModelList(root, viewGenerator);
                     } else {
                         Log.e($"Did not link {fieldView.GetType()}: {fieldView.fullPath}");
                     }
@@ -54,12 +54,12 @@ namespace com.csutil.ui.jsonschema {
             }
         }
 
-        private static void SetupViewModelMap(this JsonSchemaToView vmtv, GameObject targetView) {
-            AddToViewModelMap(vmtv, targetView.GetComponent<ObjectFieldView>());
-            foreach (var fieldView in targetView.GetComponentsInChildren<ObjectFieldView>()) { AddToViewModelMap(vmtv, fieldView); }
+        private static void SetupViewModelMap(this JsonSchemaToView self, GameObject targetView) {
+            AddToViewModelMap(self, targetView.GetComponent<ObjectFieldView>());
+            foreach (var fieldView in targetView.GetComponentsInChildren<ObjectFieldView>()) { AddToViewModelMap(self, fieldView); }
         }
 
-        private static void AddToViewModelMap(JsonSchemaToView vmtv, ObjectFieldView fieldView) {
+        private static void AddToViewModelMap(JsonSchemaToView self, ObjectFieldView fieldView) {
             if (fieldView == null) {
                 Log.w("Passed fieldView was null, will skip AddToViewModelMap process");
                 return;
@@ -71,12 +71,10 @@ namespace com.csutil.ui.jsonschema {
                 return;
             }
             if (!viewModel.properties.IsNullOrEmpty()) {
-                // After the fieldView properties are reconstructed correctly again fill the mtvm fieldView map to have a central lookup location
-                if (!vmtv.mtvm.viewModels.ContainsKey(viewModel.modelType)) {
-                    vmtv.mtvm.viewModels.Add(viewModel.modelType, viewModel);
+                // After the fieldView properties are reconstructed correctly again fill the schemaGenerator fieldView map to have a central lookup location
+                if (!self.schemaGenerator.viewModels.ContainsKey(viewModel.modelType)) {
+                    self.schemaGenerator.viewModels.Add(viewModel.modelType, viewModel);
                 }
-                //var allFoundViewModels = fieldViews.Values.Map(f => f.field);
-                //foreach (var vm in allFoundViewModels) { vmtv.mtvm.SetupViewModelMap(vm); }
             } else {
                 Log.d($"Will skip {viewModel.title} since it seems to be a partly unresolved type");
             }
@@ -182,25 +180,25 @@ namespace com.csutil.ui.jsonschema {
             }).LogOnError();
         }
 
-        public static async Task LoadModelList(this ListFieldView self, JObject root, JsonSchemaToView vmtv) {
+        public static async Task LoadModelList(this ListFieldView self, JObject root, JsonSchemaToView viewGenerator) {
             JArray modelArray = self.GetFieldJModel(root) as JArray;
             AssertV2.IsNotNull(modelArray, "modelArray");
             var map = new Dictionary<FieldView, JToken>();
             for (int i = 0; i < modelArray.Count; i++) {
                 var fieldName = "" + i;
                 JToken entry = modelArray[i];
-                var fv = await CreateChildEntryView(self, root, vmtv, entry, fieldName);
+                var fv = await CreateChildEntryView(self, root, viewGenerator, entry, fieldName);
                 map.Add(fv, entry);
             }
-            SetupButtons(self, root, vmtv, modelArray, map);
+            SetupButtons(self, root, viewGenerator, modelArray, map);
         }
 
-        private static void SetupButtons(ListFieldView listView, JObject root, JsonSchemaToView vmtv, JArray modelArray, Dictionary<FieldView, JToken> map) {
+        private static void SetupButtons(ListFieldView listView, JObject root, JsonSchemaToView viewGenerator, JArray modelArray, Dictionary<FieldView, JToken> map) {
             listView.add.SetOnClickAction(async delegate {
                 JToken entry = listView.field.items.First().NewDefaultJInstance();
                 modelArray.Add(entry);
                 var fieldName = "" + (modelArray.Count - 1);
-                var fv = await CreateChildEntryView(listView, root, vmtv, entry, fieldName);
+                var fv = await CreateChildEntryView(listView, root, viewGenerator, entry, fieldName);
                 map.Add(fv, entry);
             });
             listView.up.SetOnClickAction(delegate {
@@ -242,10 +240,10 @@ namespace com.csutil.ui.jsonschema {
         }
 
         private static async Task<FieldView> CreateChildEntryView(
-                ListFieldView self, JObject root, JsonSchemaToView vmtv, JToken modelEntry, string fieldName) {
+                ListFieldView self, JObject root, JsonSchemaToView viewGenerator, JToken modelEntry, string fieldName) {
             JsonSchema newEntryVm = GetMatchingViewModel(modelEntry, self.field.items);
-            GameObject childView = await AddChildEntryView(self, vmtv, fieldName, newEntryVm);
-            await childView.LinkToJsonModel(root, vmtv);
+            GameObject childView = await AddChildEntryView(self, viewGenerator, fieldName, newEntryVm);
+            await childView.LinkToJsonModel(root, viewGenerator);
             return childView.GetComponentInChildren<FieldView>();
         }
 
@@ -255,14 +253,14 @@ namespace com.csutil.ui.jsonschema {
         }
 
         private static async Task<GameObject> AddChildEntryView(
-                    ListFieldView self, JsonSchemaToView vmtv, string fieldName, JsonSchema entryVm) {
+                    ListFieldView self, JsonSchemaToView viewGenerator, string fieldName, JsonSchema entryVm) {
             var parentView = self.mainLink.gameObject;
             if (CanBeShownInListViewEntry(entryVm.GetJTokenType())) {
-                GameObject childGo = await vmtv.AddChild(parentView, await vmtv.NewListViewEntry());
-                await vmtv.InitChild(childGo, fieldName, entryVm);
+                GameObject childGo = await viewGenerator.AddChild(parentView, await viewGenerator.NewListViewEntry());
+                await viewGenerator.InitChild(childGo, fieldName, entryVm);
                 return childGo;
             } else {
-                return await vmtv.AddViewForFieldViewModel(parentView, entryVm, fieldName);
+                return await viewGenerator.AddViewForFieldViewModel(parentView, entryVm, fieldName);
             }
         }
 
