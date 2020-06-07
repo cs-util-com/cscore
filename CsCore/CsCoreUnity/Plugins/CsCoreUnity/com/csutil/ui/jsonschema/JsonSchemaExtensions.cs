@@ -10,7 +10,7 @@ using UnityEngine.UI;
 
 namespace com.csutil.ui.mtvmtv {
 
-    public static class ViewModelExtensions {
+    public static class JsonSchemaExtensions {
 
         /// <summary> Can be used to generate a view directly from a model, if the viewModel does not have to be customized, e.g. 
         /// because the model uses Annotations this is the easiest way to generate a fully usable UI from any class </summary>
