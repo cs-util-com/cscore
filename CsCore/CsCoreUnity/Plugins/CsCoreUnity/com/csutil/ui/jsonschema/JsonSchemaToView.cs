@@ -23,7 +23,7 @@ namespace com.csutil.ui.jsonschema {
         public string stringFieldPrefab = "StringField";
         public string enumFieldPrefab = "EnumField";
         public string readOnlyTextFieldPrefab = "ReadOnlyTextField";
-        public string recursiveSchemaPrefab = "RecursiveViewModelUi";
+        public string recursiveSchemaPrefab = "RecursiveJsonSchemaUi";
 
         public string listFieldPrefab = "ListField";
         public string listViewEntryPrefab = "ListFieldEntry";
