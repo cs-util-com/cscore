@@ -74,18 +74,15 @@ namespace com.csutil.model.mtvmtv {
         }
 
         private void AddFieldsViaReflection(JsonSchema viewModel, Type modelType) {
-            viewModel.order = new List<string>();
             foreach (var member in modelType.GetMembers()) {
                 if (member is FieldInfo || member is PropertyInfo) {
                     var fieldName = member.Name;
-                    viewModel.order.Add(fieldName);
                     viewModel.properties.Add(fieldName, NewField(fieldName, modelType));
                 }
             }
         }
 
         private void AddFieldsViaJson(JsonSchema viewModel, object model, IEnumerable<KeyValuePair<string, JToken>> jsonModel) {
-            viewModel.order = jsonModel.Map(property => property.Key).ToList();
             foreach (var property in jsonModel) {
                 viewModel.properties.Add(property.Key, NewField(property.Key, model?.GetType(), model, property.Value));
             }

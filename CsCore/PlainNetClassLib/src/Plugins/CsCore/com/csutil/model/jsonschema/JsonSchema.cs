@@ -16,7 +16,6 @@ namespace com.csutil.model.mtvmtv {
         /// <summary> This will contain the concrete name of the model if type is an "Object" </summary>
         public string modelType; // Not part of official schema
 
-        public List<string> order;
         public List<string> required;
         public Dictionary<string, JsonSchema> properties;
 

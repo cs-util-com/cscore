@@ -43,9 +43,7 @@ namespace com.csutil.model.mtvmtv {
             throw new NotImplementedException("Cant handle type " + self.type);
         }
 
-        public static IEnumerable<string> GetOrder(this JsonSchema self) {
-            return self.order != null ? self.order : self.properties.Map(x => x.Key);
-        }
+        public static IEnumerable<string> GetOrder(this JsonSchema self) { return self.properties.Map(x => x.Key); }
 
     }
 
