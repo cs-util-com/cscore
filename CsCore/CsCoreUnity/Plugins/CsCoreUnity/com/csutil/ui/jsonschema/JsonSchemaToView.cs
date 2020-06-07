@@ -77,6 +77,10 @@ namespace com.csutil.ui.jsonschema {
             return await LoadFieldViewPrefab(enumFieldPrefab);
         }
 
+        public override Task<GameObject> NewRecursiveSchemaView(JsonSchema field) { return LoadFieldViewPrefab(recursiveSchemaPrefab); }
+
+        public override Task<GameObject> NewListFieldView(JsonSchema field) { return LoadFieldViewPrefab(listFieldPrefab); }
+
         internal Task<GameObject> NewListViewEntry() { return LoadFieldViewPrefab(listViewEntryPrefab); }
 
         public virtual Task<GameObject> LoadFieldViewPrefab(string prefabName) {
@@ -93,24 +97,6 @@ namespace com.csutil.ui.jsonschema {
             view.name = fullPath;
             fieldView.fullPath = fullPath;
             await fieldView.OnViewCreated(fieldName, fullPath);
-        }
-
-        public override async Task<GameObject> HandleRecursiveSchema(GameObject parent, string fieldName, JsonSchema field, JsonSchema recursiveSchema) {
-            var view = await AddChild(parent, await LoadFieldViewPrefab(recursiveSchemaPrefab));
-            await InitChild(view, fieldName, field);
-            return view;
-        }
-
-        public override async Task<GameObject> HandleSimpleArray(GameObject parent, string fieldName, JsonSchema field) {
-            var view = await AddChild(parent, await LoadFieldViewPrefab(listFieldPrefab));
-            await InitChild(view, fieldName, field);
-            return view;
-        }
-
-        public override async Task<GameObject> HandleObjectArray(GameObject parent, string fieldName, JsonSchema field) {
-            var view = await AddChild(parent, await LoadFieldViewPrefab(listFieldPrefab));
-            await InitChild(view, fieldName, field);
-            return view;
         }
 
         public override Task<GameObject> HandleMixedObjectArray(GameObject parent, string fieldName, JsonSchema field) {

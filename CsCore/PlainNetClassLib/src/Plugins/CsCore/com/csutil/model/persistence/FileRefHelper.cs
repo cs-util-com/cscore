@@ -55,7 +55,7 @@ namespace com.csutil.model {
                 var onlineMD5 = headers.GetMD5Checksum();
                 if (!onlineMD5.IsNullOrEmpty()) {
                     if (self.HasMatchingChecksum(onlineMD5)) { return true; }
-                    if (onlineMD5 == CalcLocalMd5Hash(targetFile)) { return true; }
+                    if (onlineMD5 == CalcFileMd5Hash(targetFile)) { return true; }
                 }
                 // Cancel download if local file with the exact last-write timestamp exists:
                 if (headers.GetRawLastModifiedString() != null) {
@@ -111,7 +111,7 @@ namespace com.csutil.model {
         private static bool CheckMD5AfterDownload(this IFileRef self, Headers headers, FileEntry targetFile) {
             var onlineMD5 = headers.GetMD5Checksum();
             if (onlineMD5.IsNullOrEmpty()) { return false; }
-            string localMD5 = CalcLocalMd5Hash(targetFile);
+            string localMD5 = targetFile.CalcFileMd5Hash();
             if (localMD5 == onlineMD5) {
                 throw new InvalidDataException($"Missmatch in MD5 hashes, local={localMD5} & online={onlineMD5}");
             }
@@ -119,9 +119,10 @@ namespace com.csutil.model {
             return true;
         }
 
-        private static string CalcLocalMd5Hash(FileEntry targetFile) {
+        public static string CalcFileMd5Hash(this FileEntry targetFile) {
             using (var fileStream = targetFile.OpenForRead()) { return fileStream.GetMD5Hash(); }
         }
+
     }
 
 }
