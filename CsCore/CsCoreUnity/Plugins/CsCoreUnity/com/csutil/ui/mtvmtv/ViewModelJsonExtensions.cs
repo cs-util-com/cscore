@@ -121,12 +121,12 @@ namespace com.csutil.ui.mtvmtv {
                 return true;
             }
             if (self is SliderFieldView sliderFieldView) {
+                bool isInt = sliderFieldView.field.GetJTokenType() == JTokenType.Integer;
                 float val = float.Parse("" + value);
                 sliderFieldView.LinkToModel(val, newVal => {
                     var jValueParent = self.CreateJValueParentsIfNeeded(root);
-                    bool isInt = sliderFieldView.field.GetJTokenType() == JTokenType.Integer;
                     if (value is JValue v) {
-                        v.Value = isInt ? (int)newVal : newVal;
+                        if (isInt) { v.Value = (long)newVal; } else { v.Value = newVal; }
                     } else {
                         value = isInt ? new JValue((int)newVal) : new JValue(newVal);
                         jValueParent[self.fieldName] = value;
