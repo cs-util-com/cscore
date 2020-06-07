@@ -32,7 +32,7 @@ namespace com.csutil.ui.mtvmtv {
 
         /// <summary> Creates a generator instance that can generate views from view models vie ViewModelToView.ToView(..) </summary>
         /// <param name="prefabFolder"> The folder path where all the view generation related prefabs are located, e.g. "mtvmtv1/" </param>
-        public ViewModelToView(ModelToViewModel mtvm, string prefabFolder) : base(mtvm) {
+        public ViewModelToView(ModelToJsonSchema mtvm, string prefabFolder) : base(mtvm) {
             this.prefabFolder = prefabFolder;
         }
 

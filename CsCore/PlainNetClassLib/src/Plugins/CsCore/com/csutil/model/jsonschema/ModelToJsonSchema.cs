@@ -9,7 +9,7 @@ using System.Reflection;
 
 namespace com.csutil.model.mtvmtv {
 
-    public class ModelToViewModel {
+    public class ModelToJsonSchema {
 
         public JsonSerializer jsonSerializer;
         /// <summary>
@@ -20,7 +20,7 @@ namespace com.csutil.model.mtvmtv {
         public Dictionary<string, JsonSchema> viewModels = new Dictionary<string, JsonSchema>();
         public ISet<string> namespaceBacklist = null;
 
-        public ModelToViewModel() {
+        public ModelToJsonSchema() {
             var jsonSettings = JsonNetSettings.defaultSettings;
             jsonSettings.NullValueHandling = NullValueHandling.Include;
             jsonSerializer = JsonSerializer.Create(jsonSettings);

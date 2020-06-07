@@ -24,7 +24,7 @@ namespace com.csutil.tests.model.mtvmtv {
                 tags = new List<string>() { "tag1" }
             };
 
-            var mtvm = new ModelToViewModel();
+            var mtvm = new ModelToJsonSchema();
             var vm = mtvm.ToViewModel("MyUserModel", user1);
             Log.d("viewModel: " + JsonWriter.AsPrettyString(vm));
 
@@ -74,7 +74,7 @@ namespace com.csutil.tests.model.mtvmtv {
                     bestFriend = new MyUserModel.UserContact()
                 }
             };
-            var mtvm = new ModelToViewModel();
+            var mtvm = new ModelToJsonSchema();
             var vm = mtvm.ToViewModel("UserContact", userContact1);
             var bestFriendVm = vm.properties["user"].properties["bestFriend"];
             Assert.Equal("" + typeof(MyUserModel.UserContact), bestFriendVm.modelType);
@@ -85,13 +85,13 @@ namespace com.csutil.tests.model.mtvmtv {
         public void TestNullObjectResolved() {
             {
                 var user = new MyUserModel.UserContact();
-                var mtvm = new ModelToViewModel();
+                var mtvm = new ModelToJsonSchema();
                 var vm = mtvm.ToViewModel("UserContact", user);
                 Assert.Null(user.user); // The model field is null
                 Assert.NotEmpty(vm.properties["user"].properties); // The viewmodel info is still defined
             }
             {
-                var mtvm = new ModelToViewModel();
+                var mtvm = new ModelToJsonSchema();
                 var vm = mtvm.ToViewModel("UserContact", typeof(MyUserModel.UserContact));
                 Assert.NotEmpty(vm.properties["user"].properties); // The viewmodel info is still defined
             }
@@ -110,7 +110,7 @@ namespace com.csutil.tests.model.mtvmtv {
             });
             Log.d("json=" + json);
 
-            var mtvm = new ModelToViewModel();
+            var mtvm = new ModelToJsonSchema();
             var vm = mtvm.ToViewModel("MyUserModel", json);
 
             Log.d(JsonWriter.AsPrettyString(vm));
@@ -126,9 +126,9 @@ namespace com.csutil.tests.model.mtvmtv {
             var user = new MyUserModel() { phoneNumber = 12345 };
             string json = JsonWriter.GetWriter().Write(user);
 
-            var vm1 = new ModelToViewModel().ToViewModel("FromClassInstance", user);
-            var vm2 = new ModelToViewModel().ToViewModel("FromJson", json);
-            var vm3 = new ModelToViewModel().ToViewModel("FromClassType", typeof(MyUserModel));
+            var vm1 = new ModelToJsonSchema().ToViewModel("FromClassInstance", user);
+            var vm2 = new ModelToJsonSchema().ToViewModel("FromJson", json);
+            var vm3 = new ModelToJsonSchema().ToViewModel("FromClassType", typeof(MyUserModel));
 
             var n1 = vm1.properties["phoneNumber"];
             var n2 = vm2.properties["phoneNumber"];
@@ -144,7 +144,7 @@ namespace com.csutil.tests.model.mtvmtv {
         [Fact]
         public void TestEnum() {
 
-            var vm = new ModelToViewModel().ToViewModel("FromClassType", typeof(UserStats));
+            var vm = new ModelToJsonSchema().ToViewModel("FromClassType", typeof(UserStats));
             var e1 = vm.properties["experience1"];
             var e2 = vm.properties["experience2"];
             var e3 = vm.properties["experience3"];

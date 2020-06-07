@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace com.csutil.model.mtvmtv {
 
-    public static class ViewModelExtensions {
+    public static class JsonSchemaExtensions {
 
         public static JTokenType GetJTokenType(this JsonSchema self) {
             return EnumUtil.Parse<JTokenType>(self.type.ToFirstCharUpperCase());

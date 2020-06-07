@@ -8,9 +8,9 @@ namespace com.csutil.model.mtvmtv {
 
     public abstract class BaseViewModelToView<V> {
 
-        public ModelToViewModel mtvm;
+        public ModelToJsonSchema mtvm;
 
-        public BaseViewModelToView(ModelToViewModel mtvm) {
+        public BaseViewModelToView(ModelToJsonSchema mtvm) {
             this.mtvm = mtvm;
         }
 

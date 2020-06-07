@@ -53,7 +53,7 @@ namespace com.csutil.tests {
         }
 
         private ViewModelToView NewViewModelToView() {
-            return new ViewModelToView(new ModelToViewModel(), prefabFolder) { rootContainerPrefab = containerPrefabToUse };
+            return new ViewModelToView(new ModelToJsonSchema(), prefabFolder) { rootContainerPrefab = containerPrefabToUse };
         }
 
     }
