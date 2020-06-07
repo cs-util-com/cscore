@@ -169,7 +169,7 @@ namespace com.csutil.ui.mtvmtv {
                 var newScreen = await self.NewViewFromViewModel(viewModelToView);
                 var viewStack = currentScreen.GetViewStack();
                 viewStack.ShowView(newScreen, currentScreen);
-                var presenter = new JObjectPresenter(viewModelToView);
+                var presenter = new JsonSchemaPresenter(viewModelToView);
                 presenter.targetView = newScreen;
                 await presenter.LoadModelIntoView(jObj);
             }).LogOnError();

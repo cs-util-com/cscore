@@ -43,7 +43,7 @@ namespace com.csutil.tests {
             // Create some example model instance:
             var modelInstance = Ui18_1_JsonSchemaUiGenerator.NewExampleUserInstance();
 
-            JObjectPresenter p = new JObjectPresenter(NewViewModelToView());
+            JsonSchemaPresenter p = new JsonSchemaPresenter(NewViewModelToView());
             p.targetView = uiView;
             var changedInstance = await p.LoadViaJsonIntoView(modelInstance, VmtvContainerUtil.ChangesSavedViaConfirmButton(uiView));
             uiView.Destroy(); // "Close" the view after the user clicked confirm

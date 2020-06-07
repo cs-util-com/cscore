@@ -69,7 +69,7 @@ namespace com.csutil.tests {
                 GameObject generatedView = await vmtv.ToView(viewModel);
                 viewStack.ShowView(generatedView);
 
-                var presenter = new JObjectPresenter(vmtv);
+                var presenter = new JsonSchemaPresenter(vmtv);
                 presenter.targetView = generatedView;
 
                 Log.d("Model BEFORE changes: " + JsonWriter.AsPrettyString(model));
@@ -91,7 +91,7 @@ namespace com.csutil.tests {
 
                 viewStack.ShowView(generatedView);
 
-                var presenter = new JObjectPresenter(vmtv);
+                var presenter = new JsonSchemaPresenter(vmtv);
                 presenter.targetView = generatedView;
 
                 Log.d("Model BEFORE changes: " + model.ToPrettyString());
