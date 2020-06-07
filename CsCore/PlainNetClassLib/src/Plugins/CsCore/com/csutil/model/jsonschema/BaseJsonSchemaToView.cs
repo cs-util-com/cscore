@@ -6,11 +6,11 @@ using Newtonsoft.Json.Linq;
 
 namespace com.csutil.model.mtvmtv {
 
-    public abstract class BaseViewModelToView<V> {
+    public abstract class BaseJsonSchemaToView<V> {
 
         public ModelToJsonSchema mtvm;
 
-        public BaseViewModelToView(ModelToJsonSchema mtvm) {
+        public BaseJsonSchemaToView(ModelToJsonSchema mtvm) {
             this.mtvm = mtvm;
         }
 

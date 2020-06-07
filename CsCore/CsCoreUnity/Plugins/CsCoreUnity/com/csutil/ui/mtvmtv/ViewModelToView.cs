@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace com.csutil.ui.mtvmtv {
 
-    public class ViewModelToView : BaseViewModelToView<GameObject> {
+    public class ViewModelToView : BaseJsonSchemaToView<GameObject> {
 
         public const string CONTAINER1 = "RootContainer";
         public const string CONTAINER2 = "RootContainer2";
