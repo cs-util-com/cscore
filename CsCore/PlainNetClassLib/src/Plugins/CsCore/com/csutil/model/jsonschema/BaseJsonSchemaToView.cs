@@ -15,21 +15,21 @@ namespace com.csutil.model.jsonschema {
             this.schemaGenerator = schemaGenerator;
         }
 
-        public async Task<V> ToView(JsonSchema rootViewModel) {
+        public async Task<V> ToView(JsonSchema rootSchema) {
             var rootView = await NewRootContainerView();
-            await InitChild(rootView, null, rootViewModel);
-            await ObjectViewModelToView(rootViewModel, await SelectInnerViewContainerFromObjectFieldView(rootView));
+            await InitChild(rootView, null, rootSchema);
+            await ObjectJsonSchemaToView(rootSchema, await SelectInnerViewContainerFromObjectFieldView(rootView));
             return rootView;
         }
 
-        public async Task ObjectViewModelToView(JsonSchema viewModel, V parentView) {
-            foreach (var fieldName in viewModel.GetOrder()) {
-                JsonSchema field = viewModel.properties[fieldName];
-                await AddViewForFieldViewModel(parentView, field, fieldName);
+        public async Task ObjectJsonSchemaToView(JsonSchema schema, V parentView) {
+            foreach (var fieldName in schema.GetOrder()) {
+                JsonSchema field = schema.properties[fieldName];
+                await AddViewForJsonSchemaField(parentView, field, fieldName);
             }
         }
 
-        public async Task<V> AddViewForFieldViewModel(V parentView, JsonSchema field, string fieldName) {
+        public async Task<V> AddViewForJsonSchemaField(V parentView, JsonSchema field, string fieldName) {
             JTokenType type = field.GetJTokenType();
             if (type == JTokenType.Boolean) {
                 var c = await AddChild(parentView, await NewBoolFieldView(field));
@@ -66,11 +66,11 @@ namespace com.csutil.model.jsonschema {
             }
             if (type == JTokenType.Object) {
                 if (field.properties == null) {
-                    return await HandleRecursiveViewModel(parentView, fieldName, field, schemaGenerator.viewModels.GetValue(field.modelType, null));
+                    return await HandleRecursiveSchema(parentView, fieldName, field, schemaGenerator.schemas.GetValue(field.modelType, null));
                 } else {
                     var objectFieldView = await NewObjectFieldView(field);
                     await InitChild(await AddChild(parentView, objectFieldView), fieldName, field);
-                    await ObjectViewModelToView(field, await SelectInnerViewContainerFromObjectFieldView(objectFieldView));
+                    await ObjectJsonSchemaToView(field, await SelectInnerViewContainerFromObjectFieldView(objectFieldView));
                     return objectFieldView;
                 }
             }
@@ -107,7 +107,7 @@ namespace com.csutil.model.jsonschema {
         public abstract Task<V> NewEnumFieldView(JsonSchema field);
         public abstract Task<V> NewObjectFieldView(JsonSchema field);
 
-        public abstract Task<V> HandleRecursiveViewModel(V parentView, string fieldName, JsonSchema field, JsonSchema recursiveViewModel);
+        public abstract Task<V> HandleRecursiveSchema(V parentView, string fieldName, JsonSchema field, JsonSchema recursiveSchema);
         public abstract Task<V> HandleSimpleArray(V parentView, string fieldName, JsonSchema field);
         public abstract Task<V> HandleObjectArray(V parentView, string fieldName, JsonSchema field);
         public abstract Task<V> HandleMixedObjectArray(V parentView, string fieldName, JsonSchema field);

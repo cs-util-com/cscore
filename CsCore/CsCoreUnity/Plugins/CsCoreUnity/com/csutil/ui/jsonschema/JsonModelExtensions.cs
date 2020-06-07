@@ -36,7 +36,7 @@ namespace com.csutil.ui.jsonschema {
 
         public static async Task LinkToJsonModel(this GameObject targetView, JObject root, JsonSchemaToView viewGenerator) {
 
-            viewGenerator.SetupViewModelMap(targetView);
+            viewGenerator.SetupSchemaDictionary(targetView);
 
             foreach (var fieldView in targetView.GetFieldViewMap().Values) {
                 var value = fieldView.GetFieldJModel(root);
@@ -54,29 +54,30 @@ namespace com.csutil.ui.jsonschema {
             }
         }
 
-        private static void SetupViewModelMap(this JsonSchemaToView self, GameObject targetView) {
-            AddToViewModelMap(self, targetView.GetComponent<ObjectFieldView>());
-            foreach (var fieldView in targetView.GetComponentsInChildren<ObjectFieldView>()) { AddToViewModelMap(self, fieldView); }
+        /// <summary> fills the schema dictionary of the generator with the schemas found in the target view </summary>
+        private static void SetupSchemaDictionary(this JsonSchemaToView self, GameObject targetView) {
+            AddToSchemaDictionary(self, targetView.GetComponent<ObjectFieldView>());
+            foreach (var fieldView in targetView.GetComponentsInChildren<ObjectFieldView>()) { AddToSchemaDictionary(self, fieldView); }
         }
 
-        private static void AddToViewModelMap(JsonSchemaToView self, ObjectFieldView fieldView) {
-            if (fieldView == null) {
-                Log.w("Passed fieldView was null, will skip AddToViewModelMap process");
+        private static void AddToSchemaDictionary(JsonSchemaToView self, ObjectFieldView objectFieldView) {
+            if (objectFieldView == null) {
+                Log.w("Passed fieldView was null, will skip AddToSchemaDictionary process");
                 return;
             }
-            RestorePropertiesFromChildrenGOs(fieldView);
-            JsonSchema viewModel = fieldView.field;
-            if (viewModel.modelType.IsNullOrEmpty()) {
-                Log.w("Missing viewModel.modelType in passsed ObjectFieldView.field", fieldView.gameObject);
+            RestorePropertiesFromChildrenGOs(objectFieldView);
+            JsonSchema schema = objectFieldView.field;
+            if (schema.modelType.IsNullOrEmpty()) {
+                Log.w("Missing schema.modelType in passsed ObjectFieldView.field", objectFieldView.gameObject);
                 return;
             }
-            if (!viewModel.properties.IsNullOrEmpty()) {
+            if (!schema.properties.IsNullOrEmpty()) {
                 // After the fieldView properties are reconstructed correctly again fill the schemaGenerator fieldView map to have a central lookup location
-                if (!self.schemaGenerator.viewModels.ContainsKey(viewModel.modelType)) {
-                    self.schemaGenerator.viewModels.Add(viewModel.modelType, viewModel);
+                if (!self.schemaGenerator.schemas.ContainsKey(schema.modelType)) {
+                    self.schemaGenerator.schemas.Add(schema.modelType, schema);
                 }
             } else {
-                Log.d($"Will skip {viewModel.title} since it seems to be a partly unresolved type");
+                Log.d($"Will skip {schema.title} since it seems to be a partly unresolved type");
             }
         }
 
@@ -169,12 +170,12 @@ namespace com.csutil.ui.jsonschema {
             return jParent?[self.fieldName];
         }
 
-        public static void ShowChildModelInNewScreen(this RecursiveFieldView self, JsonSchemaToView viewModelToView, GameObject currentScreen, JObject jObj) {
+        public static void ShowChildModelInNewScreen(this RecursiveFieldView self, JsonSchemaToView viewGenerator, GameObject currentScreen, JObject jObj) {
             self.openButton.SetOnClickAction(async delegate {
-                var newScreen = await self.NewViewFromViewModel(viewModelToView);
+                var newScreen = await self.NewViewFromSchema(viewGenerator);
                 var viewStack = currentScreen.GetViewStack();
                 viewStack.ShowView(newScreen, currentScreen);
-                var presenter = new JsonSchemaPresenter(viewModelToView);
+                var presenter = new JsonSchemaPresenter(viewGenerator);
                 presenter.targetView = newScreen;
                 await presenter.LoadModelIntoView(jObj);
             }).LogOnError();
@@ -241,14 +242,14 @@ namespace com.csutil.ui.jsonschema {
 
         private static async Task<FieldView> CreateChildEntryView(
                 ListFieldView self, JObject root, JsonSchemaToView viewGenerator, JToken modelEntry, string fieldName) {
-            JsonSchema newEntryVm = GetMatchingViewModel(modelEntry, self.field.items);
+            JsonSchema newEntryVm = GetMatchingSchema(modelEntry, self.field.items);
             GameObject childView = await AddChildEntryView(self, viewGenerator, fieldName, newEntryVm);
             await childView.LinkToJsonModel(root, viewGenerator);
             return childView.GetComponentInChildren<FieldView>();
         }
 
-        private static JsonSchema GetMatchingViewModel(JToken modelEntry, List<JsonSchema> viewModels) {
-            foreach (var vm in viewModels) { if (vm.GetJTokenType() == modelEntry.Type) { return vm; } }
+        private static JsonSchema GetMatchingSchema(JToken modelEntry, List<JsonSchema> schemas) {
+            foreach (var s in schemas) { if (s.GetJTokenType() == modelEntry.Type) { return s; } }
             return null;
         }
 
@@ -260,7 +261,7 @@ namespace com.csutil.ui.jsonschema {
                 await viewGenerator.InitChild(childGo, fieldName, entryVm);
                 return childGo;
             } else {
-                return await viewGenerator.AddViewForFieldViewModel(parentView, entryVm, fieldName);
+                return await viewGenerator.AddViewForJsonSchemaField(parentView, entryVm, fieldName);
             }
         }
 

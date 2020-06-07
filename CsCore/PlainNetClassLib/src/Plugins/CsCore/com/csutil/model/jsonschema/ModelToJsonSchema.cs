@@ -17,7 +17,8 @@ namespace com.csutil.model.jsonschema {
         /// the default will be set to the value of the instance field.
         /// </summary>
         public bool useInstanceValAsDefault = false;
-        public Dictionary<string, JsonSchema> viewModels = new Dictionary<string, JsonSchema>();
+        /// <summary> A dict. of all schenams known to the generator </summary>
+        public Dictionary<string, JsonSchema> schemas = new Dictionary<string, JsonSchema>();
         public ISet<string> namespaceBacklist = null;
 
         public ModelToJsonSchema() {
@@ -28,63 +29,63 @@ namespace com.csutil.model.jsonschema {
 
         public JsonSchema ToJsonSchema(string modelName, object model) {
             var modelType = model.GetType();
-            if (GetExistingViewModelFor(modelType, out JsonSchema vm)) { return vm; }
-            return NewViewModel(modelName, modelType, model);
+            if (GetExistingSchemaFor(modelType, out JsonSchema vm)) { return vm; }
+            return NewJsonSchema(modelName, modelType, model);
         }
 
         public JsonSchema ToJsonSchema(string modelName, Type modelType) {
-            if (GetExistingViewModelFor(modelType, out JsonSchema vm)) { return vm; }
-            return NewViewModel(modelName, modelType);
+            if (GetExistingSchemaFor(modelType, out JsonSchema vm)) { return vm; }
+            return NewJsonSchema(modelName, modelType);
         }
 
         public JsonSchema ToJsonSchema(string modelName, string json) {
-            if (viewModels.TryGetValue(modelName, out JsonSchema vm)) { return vm; }
-            return NewViewModel(modelName, JsonReader.GetReader().Read<JObject>(json));
+            if (schemas.TryGetValue(modelName, out JsonSchema vm)) { return vm; }
+            return NewJsonSchema(modelName, JsonReader.GetReader().Read<JObject>(json));
         }
 
-        private bool GetExistingViewModelFor(Type modelType, out JsonSchema vm) {
-            return viewModels.TryGetValue(ToTypeString(modelType), out vm);
+        private bool GetExistingSchemaFor(Type modelType, out JsonSchema vm) {
+            return schemas.TryGetValue(ToTypeString(modelType), out vm);
         }
 
-        private JsonSchema NewViewModel(string modelName, Type modelType, object model = null) {
-            var viewModel = new JsonSchema() { title = modelName, type = JTokenType.Object.ToJsonSchemaType() };
-            return SetupViewModel(viewModel, modelType, model);
+        private JsonSchema NewJsonSchema(string modelName, Type modelType, object model = null) {
+            var schema = new JsonSchema() { title = modelName, type = JTokenType.Object.ToJsonSchemaType() };
+            return SetupJsonSchema(schema, modelType, model);
         }
 
-        private JsonSchema SetupViewModel(JsonSchema viewModel, Type modelType, object model) {
-            viewModel.modelType = ToTypeString(modelType);
-            viewModels.Add(viewModel.modelType, viewModel);
-            viewModel.properties = new Dictionary<string, JsonSchema>();
+        private JsonSchema SetupJsonSchema(JsonSchema schema, Type modelType, object model) {
+            schema.modelType = ToTypeString(modelType);
+            schemas.Add(schema.modelType, schema);
+            schema.properties = new Dictionary<string, JsonSchema>();
             if (model != null) {
                 AssertV2.IsTrue(modelType == model.GetType(), $"modelType ({modelType}) != model.type ({model.GetType()})");
-                AddFieldsViaJson(viewModel, model, ToJsonModel(model));
+                AddFieldsViaJson(schema, model, ToJsonModel(model));
             } else {
-                AddFieldsViaReflection(viewModel, modelType);
+                AddFieldsViaReflection(schema, modelType);
             }
-            var req = viewModel.properties.Filter(f => f.Value.mandatory == true).Map(f => f.Key);
-            if (!req.IsNullOrEmpty()) { viewModel.required = req.ToList(); }
-            return viewModel;
+            var req = schema.properties.Filter(f => f.Value.mandatory == true).Map(f => f.Key);
+            if (!req.IsNullOrEmpty()) { schema.required = req.ToList(); }
+            return schema;
         }
 
-        private JsonSchema NewViewModel(string modelName, JObject jObject) {
-            var viewModel = new JsonSchema() { title = modelName, type = JTokenType.Object.ToJsonSchemaType() };
-            viewModel.properties = new Dictionary<string, JsonSchema>();
-            AddFieldsViaJson(viewModel, null, jObject);
-            return viewModel;
+        private JsonSchema NewJsonSchema(string modelName, JObject jObject) {
+            var schema = new JsonSchema() { title = modelName, type = JTokenType.Object.ToJsonSchemaType() };
+            schema.properties = new Dictionary<string, JsonSchema>();
+            AddFieldsViaJson(schema, null, jObject);
+            return schema;
         }
 
-        private void AddFieldsViaReflection(JsonSchema viewModel, Type modelType) {
+        private void AddFieldsViaReflection(JsonSchema schema, Type modelType) {
             foreach (var member in modelType.GetMembers()) {
                 if (member is FieldInfo || member is PropertyInfo) {
                     var fieldName = member.Name;
-                    viewModel.properties.Add(fieldName, NewField(fieldName, modelType));
+                    schema.properties.Add(fieldName, NewField(fieldName, modelType));
                 }
             }
         }
 
-        private void AddFieldsViaJson(JsonSchema viewModel, object model, IEnumerable<KeyValuePair<string, JToken>> jsonModel) {
+        private void AddFieldsViaJson(JsonSchema schema, object model, IEnumerable<KeyValuePair<string, JToken>> jsonModel) {
             foreach (var property in jsonModel) {
-                viewModel.properties.Add(property.Key, NewField(property.Key, model?.GetType(), model, property.Value));
+                schema.properties.Add(property.Key, NewField(property.Key, model?.GetType(), model, property.Value));
             }
         }
 
@@ -126,7 +127,7 @@ namespace com.csutil.model.jsonschema {
 
                 } else {
                     var modelInstance = pInstance != null ? model.GetValue(pInstance) : null;
-                    SetupInnerViewModel(newField, modelType, modelInstance);
+                    SetupInnerJsonSchema(newField, modelType, modelInstance);
                 }
             }
             if (jTokenType == JTokenType.Array) {
@@ -141,13 +142,13 @@ namespace com.csutil.model.jsonschema {
                         if (childrenInstances == null || AllChildrenHaveSameType(childrenInstances)) {
                             var firstChildInstance = childrenInstances?.FirstOrDefault();
                             var childVm = new JsonSchema() { type = arrayElemJType.ToJsonSchemaType() };
-                            SetupInnerViewModel(childVm, listElemType, firstChildInstance);
+                            SetupInnerJsonSchema(childVm, listElemType, firstChildInstance);
                             newField.items = new List<JsonSchema>() { childVm };
                         } else {
                             newField.items = new List<JsonSchema>();
                             foreach (var child in childrenInstances) {
                                 var childVm = new JsonSchema() { type = arrayElemJType.ToJsonSchemaType() };
-                                SetupInnerViewModel(childVm, child.GetType(), child);
+                                SetupInnerJsonSchema(childVm, child.GetType(), child);
                                 newField.items.Add(childVm);
                             }
                             AssertV2.AreEqual(childrenInstances.Length, newField.items.Count);
@@ -234,20 +235,19 @@ namespace com.csutil.model.jsonschema {
             return childrenInstances.All(c => c.GetType() == childrenType);
         }
 
-        private void SetupInnerViewModel(JsonSchema viewModel, Type modelType, object model = null) {
-            if (GetExistingViewModelFor(modelType, out JsonSchema vm)) {
-                // ViewModel already generated for this type, so dont traverse modelType:
-                viewModel.modelType = ToTypeString(modelType);
+        private void SetupInnerJsonSchema(JsonSchema innerSchema, Type modelType, object model = null) {
+            if (GetExistingSchemaFor(modelType, out JsonSchema vm)) {
+                // Schema already generated for this type, so dont traverse modelType:
+                innerSchema.modelType = ToTypeString(modelType);
                 return;
-
             }
             if (modelType.IsSystemType()) {
-                // ViewModel for System types (e.g. Dictionary) not traversed:
-                viewModel.modelType = ToTypeString(modelType);
+                // Schema for System types (e.g. Dictionary) not traversed:
+                innerSchema.modelType = ToTypeString(modelType);
                 return;
             }
             if (namespaceBacklist != null && namespaceBacklist.Contains(modelType.Namespace)) { return; }
-            SetupViewModel(viewModel, modelType, model);
+            SetupJsonSchema(innerSchema, modelType, model);
         }
 
         private string ToTypeString(Type type) { return type.ToString(); }

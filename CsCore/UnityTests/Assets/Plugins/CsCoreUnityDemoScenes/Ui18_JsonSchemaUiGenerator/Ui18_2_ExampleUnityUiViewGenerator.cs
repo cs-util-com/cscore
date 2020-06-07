@@ -31,7 +31,7 @@ namespace com.csutil.tests.jsonschema {
         /// runtime when the actual instance of the model T should be shown in it. 
         /// </summary>
         private async Task GenerateViewFromClass<T>() {
-            GameObject generatedView = await NewViewModelToView().GenerateViewFrom<T>(true);
+            GameObject generatedView = await NewViewGenerator().GenerateViewFrom<T>(true);
             AssertV2.IsTrue(gameObject.GetChildCount() == 0, "Please delete previous generated views");
             gameObject.AddChild(generatedView);
         }
@@ -43,7 +43,7 @@ namespace com.csutil.tests.jsonschema {
             // Create some example model instance:
             var modelInstance = Ui18_1_JsonSchemaUiGenerator.NewExampleUserInstance();
 
-            JsonSchemaPresenter p = new JsonSchemaPresenter(NewViewModelToView());
+            JsonSchemaPresenter p = new JsonSchemaPresenter(NewViewGenerator());
             p.targetView = uiView;
             var changedInstance = await p.LoadViaJsonIntoView(modelInstance);
             uiView.Destroy(); // "Close" the view after the user clicked confirm
@@ -52,7 +52,7 @@ namespace com.csutil.tests.jsonschema {
             Log.d("Fields changed: " + changedFields?.ToPrettyString());
         }
 
-        private JsonSchemaToView NewViewModelToView() {
+        private JsonSchemaToView NewViewGenerator() {
             return new JsonSchemaToView(new ModelToJsonSchema(), prefabFolder) { rootContainerPrefab = containerPrefabToUse };
         }
 

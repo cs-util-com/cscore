@@ -23,7 +23,7 @@ namespace com.csutil.ui.jsonschema {
         public string stringFieldPrefab = "StringField";
         public string enumFieldPrefab = "EnumField";
         public string readOnlyTextFieldPrefab = "ReadOnlyTextField";
-        public string recursiveViewModelPrefab = "RecursiveViewModelUi";
+        public string recursiveSchemaPrefab = "RecursiveViewModelUi";
 
         public string listFieldPrefab = "ListField";
         public string listViewEntryPrefab = "ListFieldEntry";
@@ -32,7 +32,7 @@ namespace com.csutil.ui.jsonschema {
         /// generating UIs in editor time (and not dynamically during runtime) </summary>
         public bool keepReferenceToEditorPrefab = false;
 
-        /// <summary> Creates a generator instance that can generate views from view models vie ViewModelToView.ToView(..) </summary>
+        /// <summary> Creates a generator instance that can generate views from view models vie JsonSchemaToView.ToView(..) </summary>
         /// <param name="prefabFolder"> The folder path where all the view generation related prefabs are located, e.g. "jsonSchemaViewsV1/" </param>
         public JsonSchemaToView(ModelToJsonSchema schemaGenerator, string prefabFolder) : base(schemaGenerator) {
             this.prefabFolder = prefabFolder;
@@ -105,8 +105,8 @@ namespace com.csutil.ui.jsonschema {
             await fieldView.OnViewCreated(fieldName, fullPath);
         }
 
-        public override async Task<GameObject> HandleRecursiveViewModel(GameObject parent, string fieldName, JsonSchema field, JsonSchema recursiveViewModel) {
-            var view = await AddChild(parent, await LoadFieldViewPrefab(recursiveViewModelPrefab));
+        public override async Task<GameObject> HandleRecursiveSchema(GameObject parent, string fieldName, JsonSchema field, JsonSchema recursiveSchema) {
+            var view = await AddChild(parent, await LoadFieldViewPrefab(recursiveSchemaPrefab));
             await InitChild(view, fieldName, field);
             return view;
         }

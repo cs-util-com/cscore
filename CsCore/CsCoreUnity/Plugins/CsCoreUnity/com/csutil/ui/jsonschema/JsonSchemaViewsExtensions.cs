@@ -12,18 +12,27 @@ namespace com.csutil.ui.jsonschema {
     /// <summary> Methods that help setting up views that where generated via a Json schema </summary>
     public static class JsonSchemaViewsExtensions {
 
-        /// <summary> Can be used to generate a view directly from a model, if the viewModel does not have to be customized, e.g. 
+        /// <summary> Can be used to generate a view directly from a model, if the json schema does not have to be customized, e.g. 
         /// because the model uses Annotations this is the easiest way to generate a fully usable UI from any class </summary>
         /// <typeparam name="T"> The type of the model </typeparam>
         /// <param name="keepReferenceToEditorPrefab"> If the view is generated during editor time this should be set to 
         /// true so that the used prefabs in the view are still linked correctly. </param>
         /// <returns> The generated view which can be used to load a model instance into it </returns>
-        public static async Task<GameObject> GenerateViewFrom<T>(this JsonSchemaToView viewGenerator, bool keepReferenceToEditorPrefab = false) {
-            var modelType = typeof(T);
-            JsonSchema viewModel = viewGenerator.schemaGenerator.ToJsonSchema(modelType.Name, modelType);
-            viewGenerator.keepReferenceToEditorPrefab = keepReferenceToEditorPrefab;
-            var view = await viewGenerator.ToView(viewModel);
-            view.name = viewModel.title;
+        public static async Task<GameObject> GenerateViewFrom<T>(this JsonSchemaToView self, bool keepReferenceToEditorPrefab = false) {
+            return await self.GenerateViewFrom(typeof(T), keepReferenceToEditorPrefab);
+        }
+
+        /// <summary> Can be used to generate a view directly from a model, if the json schema does not have to be customized, e.g. 
+        /// because the model uses Annotations this is the easiest way to generate a fully usable UI from any class </summary>
+        /// true so that the used prefabs in the view are still linked correctly. </param>
+        /// <param name="modelType"> The type of the model </param>
+        /// <param name="keepReferenceToEditorPrefab"> If the view is generated during editor time this should be set to 
+        /// <returns> The generated view which can be used to load a model instance into it </returns>
+        private static async Task<GameObject> GenerateViewFrom(this JsonSchemaToView self, Type modelType, bool keepReferenceToEditorPrefab = false) {
+            JsonSchema schema = self.schemaGenerator.ToJsonSchema(modelType.Name, modelType);
+            self.keepReferenceToEditorPrefab = keepReferenceToEditorPrefab;
+            var view = await self.ToView(schema);
+            view.name = schema.title;
             return view;
         }
 

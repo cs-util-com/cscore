@@ -16,7 +16,7 @@ namespace com.csutil.ui.jsonschema {
         public string fieldName;
         public string fullPath;
 
-        /// <summary> Will be called by the ViewModelToView logic when the view created </summary>
+        /// <summary> Will be called by the JsonSchemaToView logic when the view created </summary>
         public Task OnViewCreated(string fieldName, string fullPath) {
             if (field != null) {
                 title?.textLocalized(GetFieldTitle());

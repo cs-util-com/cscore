@@ -28,7 +28,7 @@ namespace com.csutil.tests.jsonschema {
                 Log.d(JsonWriter.AsPrettyString(schema));
                 await LoadModelIntoGeneratedView(viewStack, schemaGenerator, schema);
             }
-            { // This time load the viewModel from an external JSON schema:
+            { // This time load the json schema from an external JSON schema:
                 var schemaGenerator = new ModelToJsonSchema();
                 JsonSchema schema = JsonReader.GetReader().Read<JsonSchema>(SomeJsonSchemaExamples.jsonSchema1);
                 await LoadJsonModelIntoGeneratedJsonSchemaView(viewStack, schemaGenerator, schema, SomeJsonSchemaExamples.json1);

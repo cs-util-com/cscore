@@ -26,7 +26,7 @@ namespace com.csutil.tests.model.jsonschema {
 
             var schemaGenerator = new ModelToJsonSchema();
             JsonSchema schema = schemaGenerator.ToJsonSchema("MyUserModel", user1);
-            Log.d("viewModel: " + JsonWriter.AsPrettyString(schema));
+            Log.d("schema: " + JsonWriter.AsPrettyString(schema));
 
             var profilePicVm = schema.properties["profilePic"];
             Assert.Equal("string", profilePicVm.properties["dir"].type);
@@ -45,7 +45,7 @@ namespace com.csutil.tests.model.jsonschema {
             Assert.True(schema.properties["contacts"].readOnly.Value); // contacts has only a getter
 
             Assert.Equal("object", schema.properties["contacts"].items.First().type);
-            // Contacts ViewModel already resolve as part of the bestFried field, so here no properties are included:
+            // Contacts schema already resolve as part of the bestFried field, so here no properties are included:
             Assert.Null(schema.properties["contacts"].items.First().properties);
 
             var entrySchema = schema.properties["contacts"].items.First();

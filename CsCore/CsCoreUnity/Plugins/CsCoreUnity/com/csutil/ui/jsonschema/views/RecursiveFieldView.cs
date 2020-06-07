@@ -10,26 +10,26 @@ namespace com.csutil.ui.jsonschema {
         public Button openButton;
         public string rootPrefabName = JsonSchemaToView.CONTAINER3;
 
-        public async Task<GameObject> NewViewFromViewModel(JsonSchemaToView viewModelToView) {
-            return await NewViewFromViewModel(field, viewModelToView);
+        public async Task<GameObject> NewViewFromSchema(JsonSchemaToView generator) {
+            return await NewViewFromSchema(field, generator);
         }
 
-        public async Task<GameObject> NewViewFromViewModel(JsonSchema viewModel, JsonSchemaToView viewModelToView) {
-            AssertV2.IsNotNull(viewModel, "viewModel");
-            AssertV2.IsNotNull(viewModelToView, "viewModelToView");
-            if (viewModel.properties == null) {
-                AssertV2.IsFalse(viewModelToView.schemaGenerator.viewModels.IsNullOrEmpty(), "viewModels map is emtpy!");
-                if (viewModelToView.schemaGenerator.viewModels.TryGetValue(viewModel.modelType, out JsonSchema vm)) {
-                    viewModel = vm;
+        public async Task<GameObject> NewViewFromSchema(JsonSchema schema, JsonSchemaToView generator) {
+            AssertV2.IsNotNull(schema, "schema");
+            AssertV2.IsNotNull(generator, "generator");
+            if (schema.properties == null) {
+                AssertV2.IsFalse(generator.schemaGenerator.schemas.IsNullOrEmpty(), "generator.schema dict is emtpy!");
+                if (generator.schemaGenerator.schemas.TryGetValue(schema.modelType, out JsonSchema vm)) {
+                    schema = vm;
                 } else {
-                    Log.e($"No ViewModel found for viewModel.modelType={viewModel.modelType}");
+                    Log.e($"No Schema found for schema.modelType={schema.modelType}");
                 }
             }
-            AssertV2.IsNotNull(viewModel.properties, "viewModel.fields");
-            GameObject rootContainerView = await viewModelToView.NewRootContainerView(rootPrefabName);
-            rootContainerView.GetComponentInChildren<FieldView>().field = viewModel;
-            var innerContainer = await viewModelToView.SelectInnerViewContainerFromObjectFieldView(rootContainerView);
-            await viewModelToView.ObjectViewModelToView(viewModel, innerContainer);
+            AssertV2.IsNotNull(schema.properties, "schema.properties");
+            GameObject rootContainerView = await generator.NewRootContainerView(rootPrefabName);
+            rootContainerView.GetComponentInChildren<FieldView>().field = schema;
+            var innerContainer = await generator.SelectInnerViewContainerFromObjectFieldView(rootContainerView);
+            await generator.ObjectJsonSchemaToView(schema, innerContainer);
             return rootContainerView;
         }
     }
