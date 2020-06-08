@@ -5,16 +5,19 @@ using UnityEngine.UI;
 
 namespace com.csutil.ui.jsonschema {
 
-    public class FieldView : MonoBehaviour {
+    public class FieldView : MonoBehaviour, ISerializationCallbackReceiver {
 
         public Text title;
         public Text description;
         public Link mainLink;
 
-        [SerializeField]
-        public JsonSchema field;
         public string fieldName;
         public string fullPath;
+
+        public string fieldAsJson;
+        public JsonSchema field;
+        public void OnBeforeSerialize() { fieldAsJson = JsonWriter.GetWriter().Write(field); }
+        public void OnAfterDeserialize() { field = JsonReader.GetReader().Read<JsonSchema>(fieldAsJson); }
 
         /// <summary> Will be called by the JsonSchemaToView logic when the view created </summary>
         public Task OnViewCreated(string fieldName, string fullPath) {

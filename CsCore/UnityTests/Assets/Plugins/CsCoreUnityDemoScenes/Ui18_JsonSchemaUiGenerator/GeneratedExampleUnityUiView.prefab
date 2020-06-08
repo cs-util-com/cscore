@@ -237,17 +237,17 @@ PrefabInstance:
     - target: {fileID: 1806779937426488689, guid: e0935ad6467ac3347bec30d66cb39c15,
         type: 3}
       propertyPath: field.required.Array.size
-      value: 2
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1806779937426488689, guid: e0935ad6467ac3347bec30d66cb39c15,
         type: 3}
       propertyPath: field.type
-      value: object
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 1806779937426488689, guid: e0935ad6467ac3347bec30d66cb39c15,
         type: 3}
       propertyPath: field.modelType
-      value: com.csutil.tests.Ui18_ModelToViewModelToView+MyUserModel
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 1806779937426488689, guid: e0935ad6467ac3347bec30d66cb39c15,
         type: 3}
@@ -337,7 +337,7 @@ PrefabInstance:
     - target: {fileID: 1806779937426488689, guid: e0935ad6467ac3347bec30d66cb39c15,
         type: 3}
       propertyPath: field.title
-      value: MyUserModel
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 2517378409817159762, guid: e0935ad6467ac3347bec30d66cb39c15,
         type: 3}
@@ -507,7 +507,7 @@ PrefabInstance:
     - target: {fileID: 7703664251315774902, guid: e0935ad6467ac3347bec30d66cb39c15,
         type: 3}
       propertyPath: m_Name
-      value: MyUserModel
+      value: GeneratedExampleUnityUiView
       objectReference: {fileID: 0}
     - target: {fileID: 7766469953695812942, guid: e0935ad6467ac3347bec30d66cb39c15,
         type: 3}
@@ -688,6 +688,12 @@ PrefabInstance:
         type: 3}
       propertyPath: fullPath
       value: exp2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4431747173284772126, guid: 3833a50d7093eee44847035b8c454aac,
+        type: 3}
+      propertyPath: fieldAsJson
+      value: '{"type":"integer","title":"Exp2","description":"Level of experience
+        2","enum":["Beginner","Avg","Expert"]}'
       objectReference: {fileID: 0}
     - target: {fileID: 5828324642458435823, guid: 3833a50d7093eee44847035b8c454aac,
         type: 3}
@@ -1022,6 +1028,11 @@ PrefabInstance:
         type: 3}
       propertyPath: fullPath
       value: age
+      objectReference: {fileID: 0}
+    - target: {fileID: 3313323719077181646, guid: 1754cdf9f3b0fa64aba2176400e4d6ce,
+        type: 3}
+      propertyPath: fieldAsJson
+      value: '{"type":"integer","title":"Age","description":"e.g. 99","minimum":0.0,"maximum":130.0}'
       objectReference: {fileID: 0}
     - target: {fileID: 4479281503989940152, guid: 1754cdf9f3b0fa64aba2176400e4d6ce,
         type: 3}
@@ -1372,6 +1383,11 @@ PrefabInstance:
       propertyPath: fullPath
       value: profilePic.dir
       objectReference: {fileID: 0}
+    - target: {fileID: 7540429219252201415, guid: b14d1cd08a4535344bee18f601cacb16,
+        type: 3}
+      propertyPath: fieldAsJson
+      value: '{"type":"string","title":"Dir"}'
+      objectReference: {fileID: 0}
     - target: {fileID: 7821786845561081590, guid: b14d1cd08a4535344bee18f601cacb16,
         type: 3}
       propertyPath: m_AnchorMin.y
@@ -1610,6 +1626,11 @@ PrefabInstance:
         type: 3}
       propertyPath: fullPath
       value: profilePic.mimeType
+      objectReference: {fileID: 0}
+    - target: {fileID: 7540429219252201415, guid: b14d1cd08a4535344bee18f601cacb16,
+        type: 3}
+      propertyPath: fieldAsJson
+      value: '{"type":"string","title":"Mime Type"}'
       objectReference: {fileID: 0}
     - target: {fileID: 7821786845561081590, guid: b14d1cd08a4535344bee18f601cacb16,
         type: 3}
@@ -1880,6 +1901,16 @@ PrefabInstance:
       propertyPath: fullPath
       value: lastName
       objectReference: {fileID: 0}
+    - target: {fileID: 7540429219252201415, guid: b14d1cd08a4535344bee18f601cacb16,
+        type: 3}
+      propertyPath: fieldAsJson
+      value: '{"type":"string","title":"Last Name","description":"e.g. Riddle","mandatory":true,"format":"name"}'
+      objectReference: {fileID: 0}
+    - target: {fileID: 7540429219252201415, guid: b14d1cd08a4535344bee18f601cacb16,
+        type: 3}
+      propertyPath: field.format
+      value: name
+      objectReference: {fileID: 0}
     - target: {fileID: 7821786845561081590, guid: b14d1cd08a4535344bee18f601cacb16,
         type: 3}
       propertyPath: m_AnchorMin.y
@@ -2134,6 +2165,11 @@ PrefabInstance:
       propertyPath: fullPath
       value: profilePic.fileName
       objectReference: {fileID: 0}
+    - target: {fileID: 7540429219252201415, guid: b14d1cd08a4535344bee18f601cacb16,
+        type: 3}
+      propertyPath: fieldAsJson
+      value: '{"type":"string","title":"File Name"}'
+      objectReference: {fileID: 0}
     - target: {fileID: 7821786845561081590, guid: b14d1cd08a4535344bee18f601cacb16,
         type: 3}
       propertyPath: m_AnchorMin.y
@@ -2307,6 +2343,11 @@ PrefabInstance:
         type: 3}
       propertyPath: fullPath
       value: profilePic.checksums
+      objectReference: {fileID: 0}
+    - target: {fileID: 3095502471476532378, guid: a6ddfd6f15c88c5428b6f6dcc3d4998e,
+        type: 3}
+      propertyPath: fieldAsJson
+      value: '{"type":"object","modelType":"System.Collections.Generic.Dictionary`2[System.String,System.Object]","title":"Checksums"}'
       objectReference: {fileID: 0}
     - target: {fileID: 5182895795914394200, guid: a6ddfd6f15c88c5428b6f6dcc3d4998e,
         type: 3}
@@ -2562,6 +2603,16 @@ PrefabInstance:
       propertyPath: fullPath
       value: description
       objectReference: {fileID: 0}
+    - target: {fileID: 7540429219252201415, guid: b14d1cd08a4535344bee18f601cacb16,
+        type: 3}
+      propertyPath: fieldAsJson
+      value: '{"type":"string","title":"Description","description":"A detailed description","format":"essay"}'
+      objectReference: {fileID: 0}
+    - target: {fileID: 7540429219252201415, guid: b14d1cd08a4535344bee18f601cacb16,
+        type: 3}
+      propertyPath: field.format
+      value: essay
+      objectReference: {fileID: 0}
     - target: {fileID: 7821786845561081590, guid: b14d1cd08a4535344bee18f601cacb16,
         type: 3}
       propertyPath: m_AnchorMin.y
@@ -2816,6 +2867,12 @@ PrefabInstance:
       propertyPath: fullPath
       value: phoneNumber
       objectReference: {fileID: 0}
+    - target: {fileID: 7540429219252201415, guid: b14d1cd08a4535344bee18f601cacb16,
+        type: 3}
+      propertyPath: fieldAsJson
+      value: '{"type":"string","title":"Phone Number","description":"e.g. +1 234
+        5678 90","pattern":"^\\+?[\\d\\s]{3,}$"}'
+      objectReference: {fileID: 0}
     - target: {fileID: 7821786845561081590, guid: b14d1cd08a4535344bee18f601cacb16,
         type: 3}
       propertyPath: m_AnchorMin.y
@@ -2988,7 +3045,7 @@ PrefabInstance:
     - target: {fileID: 3095502471476532378, guid: a6ddfd6f15c88c5428b6f6dcc3d4998e,
         type: 3}
       propertyPath: field.modelType
-      value: com.csutil.tests.Ui18_ModelToViewModelToView+MyUserModel
+      value: com.csutil.tests.jsonschema.Ui18_1_JsonSchemaUiGenerator+MyUserModel
       objectReference: {fileID: 0}
     - target: {fileID: 3095502471476532378, guid: a6ddfd6f15c88c5428b6f6dcc3d4998e,
         type: 3}
@@ -3004,6 +3061,11 @@ PrefabInstance:
         type: 3}
       propertyPath: fullPath
       value: bestFriend.user
+      objectReference: {fileID: 0}
+    - target: {fileID: 3095502471476532378, guid: a6ddfd6f15c88c5428b6f6dcc3d4998e,
+        type: 3}
+      propertyPath: fieldAsJson
+      value: '{"type":"object","modelType":"com.csutil.tests.jsonschema.Ui18_1_JsonSchemaUiGenerator+MyUserModel","title":"User"}'
       objectReference: {fileID: 0}
     - target: {fileID: 5182895795914394200, guid: a6ddfd6f15c88c5428b6f6dcc3d4998e,
         type: 3}
@@ -3163,6 +3225,12 @@ PrefabInstance:
         type: 3}
       propertyPath: fullPath
       value: hasMoney
+      objectReference: {fileID: 0}
+    - target: {fileID: 7631307063684339755, guid: 3351eb41e67d41a4e9e072f77a927465,
+        type: 3}
+      propertyPath: fieldAsJson
+      value: '{"type":"boolean","title":"Has Money","description":"Checked if there
+        is any money"}'
       objectReference: {fileID: 0}
     - target: {fileID: 8007981361079516903, guid: 3351eb41e67d41a4e9e072f77a927465,
         type: 3}
@@ -3411,6 +3479,16 @@ PrefabInstance:
     - target: {fileID: 7540429219252201415, guid: b14d1cd08a4535344bee18f601cacb16,
         type: 3}
       propertyPath: fullPath
+      value: email
+      objectReference: {fileID: 0}
+    - target: {fileID: 7540429219252201415, guid: b14d1cd08a4535344bee18f601cacb16,
+        type: 3}
+      propertyPath: fieldAsJson
+      value: '{"type":"string","title":"Email","description":"e.g. tom@email.com","pattern":"^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$","format":"email"}'
+      objectReference: {fileID: 0}
+    - target: {fileID: 7540429219252201415, guid: b14d1cd08a4535344bee18f601cacb16,
+        type: 3}
+      propertyPath: field.format
       value: email
       objectReference: {fileID: 0}
     - target: {fileID: 7821786845561081590, guid: b14d1cd08a4535344bee18f601cacb16,
@@ -3702,6 +3780,16 @@ PrefabInstance:
       propertyPath: fullPath
       value: name
       objectReference: {fileID: 0}
+    - target: {fileID: 7540429219252201415, guid: b14d1cd08a4535344bee18f601cacb16,
+        type: 3}
+      propertyPath: fieldAsJson
+      value: '{"type":"string","title":"Name","description":"e.g. Tom","pattern":"^.{2,30}$","format":"name"}'
+      objectReference: {fileID: 0}
+    - target: {fileID: 7540429219252201415, guid: b14d1cd08a4535344bee18f601cacb16,
+        type: 3}
+      propertyPath: field.format
+      value: name
+      objectReference: {fileID: 0}
     - target: {fileID: 7821786845561081590, guid: b14d1cd08a4535344bee18f601cacb16,
         type: 3}
       propertyPath: m_AnchorMin.y
@@ -3986,6 +4074,17 @@ PrefabInstance:
       propertyPath: fullPath
       value: password
       objectReference: {fileID: 0}
+    - target: {fileID: 7540429219252201415, guid: b14d1cd08a4535344bee18f601cacb16,
+        type: 3}
+      propertyPath: fieldAsJson
+      value: '{"type":"string","title":"Password","description":"Lenght >= 6 & has
+        A-Z a-z 0-9 ?!..","pattern":"^(?=.*^.{6,}$)(?=.*.*[A-Z].*)(?=.*.*[a-z].*)(?=.*.*\\d.*)(?=.*.*\\W.*).*$","format":"password"}'
+      objectReference: {fileID: 0}
+    - target: {fileID: 7540429219252201415, guid: b14d1cd08a4535344bee18f601cacb16,
+        type: 3}
+      propertyPath: field.format
+      value: password
+      objectReference: {fileID: 0}
     - target: {fileID: 7821786845561081590, guid: b14d1cd08a4535344bee18f601cacb16,
         type: 3}
       propertyPath: m_AnchorMin.y
@@ -4149,6 +4248,12 @@ PrefabInstance:
         type: 3}
       propertyPath: fullPath
       value: exp1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4431747173284772126, guid: 3833a50d7093eee44847035b8c454aac,
+        type: 3}
+      propertyPath: fieldAsJson
+      value: '{"type":"string","title":"Exp1","description":"Level of experience
+        1","additionalItems":true,"enum":["Beginner","Avg","Expert"]}'
       objectReference: {fileID: 0}
     - target: {fileID: 5828324642458435823, guid: 3833a50d7093eee44847035b8c454aac,
         type: 3}
@@ -4519,6 +4624,12 @@ PrefabInstance:
       propertyPath: fullPath
       value: homepage
       objectReference: {fileID: 0}
+    - target: {fileID: 7540429219252201415, guid: b14d1cd08a4535344bee18f601cacb16,
+        type: 3}
+      propertyPath: fieldAsJson
+      value: '{"type":"string","title":"Homepage","pattern":"^(https?:\\/\\/)?([\\da-z\\.-]+)\\.([a-z\\.]{2,6})([\\/\\w
+        \\.-]*)*\\/?$"}'
+      objectReference: {fileID: 0}
     - target: {fileID: 7821786845561081590, guid: b14d1cd08a4535344bee18f601cacb16,
         type: 3}
       propertyPath: m_AnchorMin.y
@@ -4778,6 +4889,12 @@ PrefabInstance:
       propertyPath: fullPath
       value: profilePic.url
       objectReference: {fileID: 0}
+    - target: {fileID: 7540429219252201415, guid: b14d1cd08a4535344bee18f601cacb16,
+        type: 3}
+      propertyPath: fieldAsJson
+      value: '{"type":"string","title":"Url","pattern":"^(https?:\\/\\/)?([\\da-z\\.-]+)\\.([a-z\\.]{2,6})([\\/\\w
+        \\.-]*)*\\/?$"}'
+      objectReference: {fileID: 0}
     - target: {fileID: 7821786845561081590, guid: b14d1cd08a4535344bee18f601cacb16,
         type: 3}
       propertyPath: m_AnchorMin.y
@@ -5001,6 +5118,11 @@ PrefabInstance:
         type: 3}
       propertyPath: fullPath
       value: id
+      objectReference: {fileID: 0}
+    - target: {fileID: 5683537145538645218, guid: aacfca8886f9d474e9584fe7fe482d0d,
+        type: 3}
+      propertyPath: fieldAsJson
+      value: '{"type":"string","title":"Id","readOnly":true,"mandatory":true}'
       objectReference: {fileID: 0}
     - target: {fileID: 5816067181118087745, guid: aacfca8886f9d474e9584fe7fe482d0d,
         type: 3}
@@ -5271,6 +5393,16 @@ PrefabInstance:
       propertyPath: fullPath
       value: bestFriend.name
       objectReference: {fileID: 0}
+    - target: {fileID: 7540429219252201415, guid: b14d1cd08a4535344bee18f601cacb16,
+        type: 3}
+      propertyPath: fieldAsJson
+      value: '{"type":"string","title":"Name","description":"e.g. Barbara","format":"name"}'
+      objectReference: {fileID: 0}
+    - target: {fileID: 7540429219252201415, guid: b14d1cd08a4535344bee18f601cacb16,
+        type: 3}
+      propertyPath: field.format
+      value: name
+      objectReference: {fileID: 0}
     - target: {fileID: 7821786845561081590, guid: b14d1cd08a4535344bee18f601cacb16,
         type: 3}
       propertyPath: m_AnchorMin.y
@@ -5458,7 +5590,7 @@ PrefabInstance:
     - target: {fileID: 2849593712979545763, guid: 9d367135b84aced45a166e493c9c0f5a,
         type: 3}
       propertyPath: field.modelType
-      value: com.csutil.tests.Ui18_ModelToViewModelToView+MyUserModel+UserContact
+      value: com.csutil.tests.jsonschema.Ui18_1_JsonSchemaUiGenerator+MyUserModel+UserContact
       objectReference: {fileID: 0}
     - target: {fileID: 2849593712979545763, guid: 9d367135b84aced45a166e493c9c0f5a,
         type: 3}
@@ -5484,6 +5616,13 @@ PrefabInstance:
         type: 3}
       propertyPath: fullPath
       value: bestFriend
+      objectReference: {fileID: 0}
+    - target: {fileID: 2849593712979545763, guid: 9d367135b84aced45a166e493c9c0f5a,
+        type: 3}
+      propertyPath: fieldAsJson
+      value: '{"type":"object","modelType":"com.csutil.tests.jsonschema.Ui18_1_JsonSchemaUiGenerator+MyUserModel+UserContact","properties":{"name":{"type":"string","title":"Name","description":"e.g.
+        Barbara","format":"name"},"user":{"type":"object","modelType":"com.csutil.tests.jsonschema.Ui18_1_JsonSchemaUiGenerator+MyUserModel","title":"User"}},"title":"Best
+        Friend"}'
       objectReference: {fileID: 0}
     - target: {fileID: 3524853479230494940, guid: 9d367135b84aced45a166e493c9c0f5a,
         type: 3}
@@ -5668,7 +5807,7 @@ PrefabInstance:
     - target: {fileID: 2849593712979545763, guid: 9d367135b84aced45a166e493c9c0f5a,
         type: 3}
       propertyPath: field.modelType
-      value: com.csutil.tests.Ui18_ModelToViewModelToView+FileRef
+      value: com.csutil.tests.jsonschema.Ui18_1_JsonSchemaUiGenerator+MyUserModel+FileRef
       objectReference: {fileID: 0}
     - target: {fileID: 2849593712979545763, guid: 9d367135b84aced45a166e493c9c0f5a,
         type: 3}
@@ -5709,6 +5848,14 @@ PrefabInstance:
         type: 3}
       propertyPath: fullPath
       value: profilePic
+      objectReference: {fileID: 0}
+    - target: {fileID: 2849593712979545763, guid: 9d367135b84aced45a166e493c9c0f5a,
+        type: 3}
+      propertyPath: fieldAsJson
+      value: '{"type":"object","modelType":"com.csutil.tests.jsonschema.Ui18_1_JsonSchemaUiGenerator+MyUserModel+FileRef","properties":{"url":{"type":"string","title":"Url","pattern":"^(https?:\\/\\/)?([\\da-z\\.-]+)\\.([a-z\\.]{2,6})([\\/\\w
+        \\.-]*)*\\/?$"},"dir":{"type":"string","title":"Dir"},"fileName":{"type":"string","title":"File
+        Name"},"checksums":{"type":"object","modelType":"System.Collections.Generic.Dictionary`2[System.String,System.Object]","title":"Checksums"},"mimeType":{"type":"string","title":"Mime
+        Type"}},"title":"Profile Pic"}'
       objectReference: {fileID: 0}
     - target: {fileID: 3524853479230494940, guid: 9d367135b84aced45a166e493c9c0f5a,
         type: 3}
@@ -5949,6 +6096,11 @@ PrefabInstance:
         type: 3}
       propertyPath: fullPath
       value: money
+      objectReference: {fileID: 0}
+    - target: {fileID: 7743991987919546891, guid: 7182a93092e14ac489bc848ad267744e,
+        type: 3}
+      propertyPath: fieldAsJson
+      value: '{"type":"float","title":"Money","description":"e.g. 1,23"}'
       objectReference: {fileID: 0}
     - target: {fileID: 8020984001031783226, guid: 7182a93092e14ac489bc848ad267744e,
         type: 3}
