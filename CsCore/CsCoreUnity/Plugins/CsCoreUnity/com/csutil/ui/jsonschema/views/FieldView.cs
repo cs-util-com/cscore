@@ -16,8 +16,15 @@ namespace com.csutil.ui.jsonschema {
 
         public string fieldAsJson;
         public JsonSchema field;
-        public void OnBeforeSerialize() { fieldAsJson = JsonWriter.GetWriter().Write(field); }
-        public void OnAfterDeserialize() { field = JsonReader.GetReader().Read<JsonSchema>(fieldAsJson); }
+
+        public void OnBeforeSerialize() {
+            if (field == null) { fieldAsJson = null; return; }
+            fieldAsJson = JsonWriter.GetWriter().Write(field);
+        }
+
+        public void OnAfterDeserialize() {
+            if (!fieldAsJson.IsNullOrEmpty()) { field = JsonReader.GetReader().Read<JsonSchema>(fieldAsJson); }
+        }
 
         /// <summary> Will be called by the JsonSchemaToView logic when the view created </summary>
         public Task OnViewCreated(string fieldName, string fullPath) {

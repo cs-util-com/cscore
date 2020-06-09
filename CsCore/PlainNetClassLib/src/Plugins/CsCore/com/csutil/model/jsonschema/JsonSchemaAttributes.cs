@@ -20,12 +20,6 @@ namespace com.csutil.model.jsonschema {
         public string regex;
 
         public RegexAttribute(params string[] regex) { this.regex = RegexUtil.CombineViaAnd(regex); }
-        public RegexAttribute(int minChars, params string[] regex) {
-            SetRegex(regex, "^.{" + minChars + ",}$");
-        }
-        public RegexAttribute(int minChars, int maxChars, params string[] regex) {
-            SetRegex(regex, "^.{" + minChars + "," + maxChars + "}$");
-        }
 
         private void SetRegex(string[] regex, string s) {
             var minMaxRegex = new string[1] { s };
@@ -61,6 +55,17 @@ namespace com.csutil.model.jsonschema {
         public MinMaxRangeAttribute(float min) { minimum = min; }
         public MinMaxRangeAttribute(float max, bool exclusiveMaximum = false) { maximum = exclusiveMaximum ? max + float.Epsilon : max; }
         public MinMaxRangeAttribute(float min, float max) { minimum = min; maximum = max; }
+    }
+
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
+    public class InputLengthAttribute : Attribute {
+        /// <summary> If set to 0 will be ingored </summary>
+        public int minLength;
+        /// <summary> If set to 0 will be ingored </summary>
+        public int maxLength;
+
+        public InputLengthAttribute(int max) { maxLength = max; }
+        public InputLengthAttribute(int min, int max = 0) { minLength = min; maxLength = max; }
     }
 
 }

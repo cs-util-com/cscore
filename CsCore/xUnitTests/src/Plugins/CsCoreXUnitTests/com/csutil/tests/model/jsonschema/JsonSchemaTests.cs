@@ -44,6 +44,9 @@ namespace com.csutil.tests.model.jsonschema {
             Assert.True(schema.properties["id"].readOnly.Value); // id has private setter
             Assert.True(schema.properties["contacts"].readOnly.Value); // contacts has only a getter
 
+            Assert.Equal(2, schema.properties["name"].minLength);
+            Assert.Equal(30, schema.properties["name"].maxLength);
+
             Assert.Equal("object", schema.properties["contacts"].items.First().type);
             // Contacts schema already resolve as part of the bestFried field, so here no properties are included:
             Assert.Null(schema.properties["contacts"].items.First().properties);
@@ -167,6 +170,7 @@ namespace com.csutil.tests.model.jsonschema {
             public string id { get; private set; } = Guid.NewGuid().ToString();
 
             [Required]
+            [InputLength(2, 30)]
             public string name;
 
             [Content(ContentFormat.password, "A secure password")]

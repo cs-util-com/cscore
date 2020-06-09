@@ -106,6 +106,10 @@ namespace com.csutil.model.jsonschema {
                     newField.minimum = ra.minimum;
                     newField.maximum = ra.maximum;
                 }
+                if (model.TryGetCustomAttribute(out InputLengthAttribute ila)) {
+                    if (ila.minLength > 0) { newField.minLength = ila.minLength; }
+                    if (ila.maxLength > 0) { newField.maxLength = ila.maxLength; }
+                }
                 if (model.TryGetCustomAttribute(out EnumAttribute e)) {
                     newField.contentEnum = e.names;
                     newField.additionalItems = e.additionalItems;

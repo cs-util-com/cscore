@@ -52,6 +52,14 @@ namespace com.csutil.model {
             return regex.Reduce("^", (res, r) => res + "(?=.*" + r + ")") + ".*$";
         }
 
+        /// <summary> Generates a regex that enforces a minimum input length </summary>
+        public static string MinLengthRegex(int minChars) { return "^.{" + minChars + ",}$"; }
+
+        /// <summary> Generates a regex that enforces a minimum and maximum input length </summary>
+        public static string MinAndMaxLengthRegex(int minChars, int maxChars) {
+            return "^.{" + minChars + "," + maxChars + "}$";
+        }
+
     }
 
 }

@@ -168,7 +168,7 @@ namespace com.csutil.tests.jsonschema {
             [JsonProperty(Required = Required.Always)]
             public string id { get; private set; } = Guid.NewGuid().ToString();
 
-            [Regex(2, 30)]
+            [InputLength(2, 30)]
             [Content(ContentFormat.name, "e.g. Tom")]
             public string name;
 
@@ -181,7 +181,8 @@ namespace com.csutil.tests.jsonschema {
             public string email;
 
             [Content(ContentFormat.password, "Lenght >= 6 & has A-Z a-z 0-9 ?!..")]
-            [Regex(6, RegexTemplates.HAS_UPPERCASE, RegexTemplates.HAS_LOWERCASE, RegexTemplates.HAS_NUMBER, RegexTemplates.HAS_SPECIAL_CHAR)]
+            [InputLength(min: 6)]
+            [Regex(RegexTemplates.HAS_UPPERCASE, RegexTemplates.HAS_LOWERCASE, RegexTemplates.HAS_NUMBER, RegexTemplates.HAS_SPECIAL_CHAR)]
             public string password;
 
             [Description("e.g. 99")]

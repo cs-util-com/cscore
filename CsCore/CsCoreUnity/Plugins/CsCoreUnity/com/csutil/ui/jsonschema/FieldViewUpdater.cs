@@ -17,13 +17,13 @@ namespace com.csutil.ui.jsonschema {
                 if (oldFieldView.fieldAsJson != newFieldValue) {
                     StartModificationOf(oldFieldView);
                     oldFieldView.fieldAsJson = newFieldValue;
-                    oldFieldView.field = JsonReader.GetReader().Read<JsonSchema>(newFieldValue);
+                    oldFieldView.OnAfterDeserialize();
                     if (retriggerOnViewCreated) {
                         oldFieldView.OnViewCreated(oldFieldView.fieldName, oldFieldView.fullPath);
                     }
+                    MarkPrefabAsModified(oldFieldView);
                 }
                 AssertV2.AreEqual(item.Value.fieldName, newFieldView.fieldName);
-                MarkPrefabAsModified(oldFieldView);
             }
 
             foreach (var missing in newFieldViews.ExceptKeys(oldFieldViews)) {

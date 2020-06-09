@@ -12,9 +12,10 @@ namespace com.csutil.ui.jsonschema {
         protected override Task Setup(string fieldName, string fullPath) {
             input.interactable = field.readOnly != true;
             SetupForContentType(input, field);
-            if (field.mandatory == true || !field.pattern.IsNullOrEmpty()) {
+            if (field.mandatory == true || !field.pattern.IsNullOrEmpty() || field.minLength != null) {
                 SetupRegexValidator();
             }
+            if (field.maxLength != null) { input.characterLimit = field.maxLength.Value; }
             return Task.FromResult(true);
         }
 
@@ -29,7 +30,8 @@ namespace com.csutil.ui.jsonschema {
                 if (!field.description.IsNullOrEmpty()) { errorText += " Valid: " + field.description; }
                 regexValidator.errorText.textLocalized(errorText);
             }
-            regexValidator.isInputRequired = field.mandatory == true;
+            regexValidator.isInputRequired = field.mandatory == true || field.minLength != null;
+            if (field.minLength != null) { regexValidator.minLength = field.minLength.Value; }
             regexValidator.EnforceRegex(field.pattern);
         }
 
