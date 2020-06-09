@@ -32,13 +32,20 @@ namespace com.csutil.tests.jsonschema {
         /// runtime when the actual instance of the model T should be shown in it. 
         /// </summary>
         private async Task GenerateViewFromClass<T>() {
-            GameObject generatedView = await NewViewGenerator().GenerateViewFrom<T>(true);
 
-            gameObject.AddChild(generatedView);
-            if (gameObject.GetChildCount() != 1) {
+            var generatedView = gameObject.AddChild(await NewViewGenerator().GenerateViewFrom<T>(true));
+            var newFieldViews = generatedView.GetFieldViewMap();
+
+            if (gameObject.GetChildCount() > 0) {
                 var viewToUpdate = gameObject.GetChildren().First();
-                FieldViewUpdater.UpdateFieldViews(viewToUpdate, generatedView);
+
+                // First only log out the field views that changed in a fresh generated UI:
+                viewToUpdate.GetFieldViewMap().LogAnyDiffToNewFieldViews(newFieldViews);
+
+                // Then also fix them automatically:
+                viewToUpdate.GetFieldViewMap().UpdateFieldViews(newFieldViews, autoDeleteRemovedFields: true);
             }
+
         }
 
         private async Task ShowModelInstanceInView() {
