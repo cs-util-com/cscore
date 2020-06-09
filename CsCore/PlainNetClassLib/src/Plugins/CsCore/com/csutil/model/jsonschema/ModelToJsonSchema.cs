@@ -112,7 +112,7 @@ namespace com.csutil.model.jsonschema {
                 }
                 if (model.TryGetCustomAttribute(out EnumAttribute e)) {
                     newField.contentEnum = e.names;
-                    newField.additionalItems = e.additionalItems;
+                    newField.additionalItems = e.allowOtherInput;
                 }
                 if (model.TryGetCustomAttribute(out RequiredAttribute r)) { newField.mandatory = true; }
                 if (model.TryGetCustomAttribute(out JsonPropertyAttribute p)) {

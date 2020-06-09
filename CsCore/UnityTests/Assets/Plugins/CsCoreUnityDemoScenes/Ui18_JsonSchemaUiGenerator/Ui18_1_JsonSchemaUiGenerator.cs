@@ -192,7 +192,7 @@ namespace com.csutil.tests.jsonschema {
             public float money;
 
             public enum Experience { Beginner, Avg, Expert }
-            [Enum("Level of experience 1", typeof(Experience), additionalItems = true)]
+            [Enum("Level of experience 1", typeof(Experience), allowOtherInput = true)]
             public string exp1;
 
             [Description("Level of experience 2")]

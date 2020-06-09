@@ -8,6 +8,13 @@ namespace com.csutil {
 
     public static class LocalizationExtensions {
 
+        public static void textLocalized(this InputField self, string key, params object[] args) {
+            I18n i18n = I18n.instance(self);
+            if (i18n == null) { i18n = SetupDefaultI18nInstance(self).Result; }
+            var localizedText = i18n.Get(key, args);
+            if (localizedText != self.text) { self.text = localizedText; }
+        }
+
         public static void textLocalized(this Text self, string key, params object[] args) {
             I18n i18n = I18n.instance(self);
             if (i18n == null) { i18n = SetupDefaultI18nInstance(self).Result; }

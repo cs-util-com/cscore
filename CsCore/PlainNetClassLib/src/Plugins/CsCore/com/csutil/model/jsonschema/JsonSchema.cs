@@ -71,7 +71,8 @@ namespace com.csutil.model.jsonschema {
         public bool? uniqueItems;
 
         /// <summary> Controls whether it's valid to have additional items in the array, see also
-        /// https://json-schema.org/understanding-json-schema/reference/array.html#items </summary>
+        /// https://json-schema.org/understanding-json-schema/reference/array.html#items and
+        /// https://json-schema.org/understanding-json-schema/reference/array.html#tuple-validation </summary>
         public bool? additionalItems;
 
         /// <summary> Indicates that the field can only have descrete values, see also

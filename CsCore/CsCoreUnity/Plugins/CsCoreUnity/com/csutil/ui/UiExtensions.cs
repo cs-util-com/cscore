@@ -214,9 +214,9 @@ namespace com.csutil {
             self.ActivateInputField();
         }
 
-        public static void SetTextWithNotify(this InputField self, string text) {
+        public static void SetTextLocalizedWithNotify(this InputField self, string text) {
             self.SelectV2(); // Without this the change listeners are not triggered
-            self.text = text;
+            self.textLocalized(text);
         }
 
         public static void SubscribeToStateChanges<T, V>(this Behaviour self, IDataStore<T> store, Func<T, V> getSubState, Action<V> updateUi) {
