@@ -53,8 +53,13 @@ namespace com.csutil.ui.jsonschema {
         public static bool LogAnyDiffToNewFieldViews(this Dictionary<string, FieldView> self, Dictionary<string, FieldView> newFieldViews) {
             // First compare all field views that are found both in the list of old and new views and print out the changes:
             self.CheckIntersectingFieldViewsForChanges(newFieldViews, (oldFieldView, newFieldView, _) => {
-                var diff = MergeJson.GetDiff(oldFieldView.field, newFieldView.field).ToPrettyString();
-                Log.e($"Detected changed field view '{oldFieldView.fullPath}' that needs UI update! Detected changes: {diff}", oldFieldView.gameObject);
+                AssertV2.IsNotNull(oldFieldView.field, "oldFieldView.field");
+                AssertV2.IsNotNull(newFieldView.field, "newFieldView.field");
+                var diff = MergeJson.GetDiff(oldFieldView.field, newFieldView.field);
+                if (!diff.IsNullOrEmpty()) {
+                    Log.e($"Detected changed field view '{oldFieldView.fullPath}' that needs UI update! " +
+                        $"Detected changes: {diff.ToPrettyString()}", oldFieldView.gameObject);
+                }
             });
 
             // Second the list of views that have to be removed from the old UI is listed (and auto deleted if desired):

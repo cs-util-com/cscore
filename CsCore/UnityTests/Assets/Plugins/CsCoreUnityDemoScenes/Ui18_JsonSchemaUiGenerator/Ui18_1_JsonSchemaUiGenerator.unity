@@ -1779,17 +1779,17 @@ PrefabInstance:
     - target: {fileID: 1563565918505903974, guid: 9d367135b84aced45a166e493c9c0f5a,
         type: 3}
       propertyPath: m_AnchorMin.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1563565918505903974, guid: 9d367135b84aced45a166e493c9c0f5a,
         type: 3}
       propertyPath: m_AnchorMax.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1563565918505903974, guid: 9d367135b84aced45a166e493c9c0f5a,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 61.158466
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1563565918505903974, guid: 9d367135b84aced45a166e493c9c0f5a,
         type: 3}
@@ -1799,7 +1799,7 @@ PrefabInstance:
     - target: {fileID: 1563565918505903974, guid: 9d367135b84aced45a166e493c9c0f5a,
         type: 3}
       propertyPath: m_SizeDelta.x
-      value: 106.31693
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1563565918505903974, guid: 9d367135b84aced45a166e493c9c0f5a,
         type: 3}
@@ -3703,7 +3703,7 @@ PrefabInstance:
     - target: {fileID: 6593187902589497678, guid: e0935ad6467ac3347bec30d66cb39c15,
         type: 3}
       propertyPath: m_AnchorMin.x
-      value: 0.054187194
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6593187902589497678, guid: e0935ad6467ac3347bec30d66cb39c15,
         type: 3}
@@ -3713,7 +3713,7 @@ PrefabInstance:
     - target: {fileID: 6593187902589497678, guid: e0935ad6467ac3347bec30d66cb39c15,
         type: 3}
       propertyPath: m_AnchorMax.x
-      value: 0.9458128
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6593187902589497678, guid: e0935ad6467ac3347bec30d66cb39c15,
         type: 3}
@@ -4002,6 +4002,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0, g: 0, b: 0, a: 1}
   m_RaycastTarget: 1
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -4977,6 +4978,12 @@ PrefabInstance:
         type: 3}
       propertyPath: m_SizeDelta.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4431747173284772126, guid: 3833a50d7093eee44847035b8c454aac,
+        type: 3}
+      propertyPath: fieldAsJson
+      value: '{"type":"string","title":"Exp1","description":"Level of experience
+        1","additionalItems":true,"enum":["Beginner","Avg","Expert"]}'
       objectReference: {fileID: 0}
     - target: {fileID: 5828324642458435823, guid: 3833a50d7093eee44847035b8c454aac,
         type: 3}
