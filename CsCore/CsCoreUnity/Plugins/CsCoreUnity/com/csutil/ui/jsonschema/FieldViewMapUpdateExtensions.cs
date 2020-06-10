@@ -38,10 +38,14 @@ namespace com.csutil.ui.jsonschema {
             Log.e($"The field '{removed.Key}' was removed from the model and HAS TO BE DELETED from the UI", removed.Value.gameObject);
         }
 
-        public static async Task LogAnyDiffToNewGeneratedUi<T>(this Dictionary<string, FieldView> self, JsonSchemaToView generator) {
-            GameObject generatedUi = await generator.GenerateViewFrom<T>(keepReferenceToEditorPrefab: true);
+        public static async Task LogAnyDiffToNewGeneratedUi<T>(this Dictionary<string, FieldView> self, JsonSchemaToView generator, bool forceAlwaysDelete) {
+            await LogAnyDiffToNewGeneratedUi(self, typeof(T), generator, forceAlwaysDelete);
+        }
+
+        public static async Task LogAnyDiffToNewGeneratedUi(this Dictionary<string, FieldView> self, Type modelType, JsonSchemaToView generator, bool forceAlwaysDelete) {
+            GameObject generatedUi = await generator.GenerateViewFrom(modelType, keepReferenceToEditorPrefab: true);
             generatedUi.name = "Delete me";
-            if (!LogAnyDiffToNewFieldViews(self, generatedUi.GetFieldViewMap())) {
+            if (!LogAnyDiffToNewFieldViews(self, generatedUi.GetFieldViewMap()) || forceAlwaysDelete) {
                 generatedUi.Destroy(); // If there are no additions in the new UI it can be destroyed right away again after logging is done
             }
         }

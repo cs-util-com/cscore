@@ -32,7 +32,7 @@ namespace com.csutil.ui.jsonschema {
                 title?.textLocalized(GetFieldTitle());
                 if (!field.description.IsNullOrEmpty()) {
                     if (description == null) {
-                        Log.w("No description UI set for the field view", gameObject);
+                        Log.w($"No description UI set for field view '{fullPath}'", gameObject);
                     } else {
                         description.textLocalized(field.description);
                     }

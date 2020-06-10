@@ -28,11 +28,13 @@ namespace com.csutil.ui.jsonschema {
         /// <param name="modelType"> The type of the model </param>
         /// <param name="keepReferenceToEditorPrefab"> If the view is generated during editor time this should be set to 
         /// <returns> The generated view which can be used to load a model instance into it </returns>
-        private static async Task<GameObject> GenerateViewFrom(this JsonSchemaToView self, Type modelType, bool keepReferenceToEditorPrefab = false) {
+        public static async Task<GameObject> GenerateViewFrom(this JsonSchemaToView self, Type modelType, bool keepReferenceToEditorPrefab = false) {
+            var timing = Log.MethodEnteredWith(modelType);
             JsonSchema schema = self.schemaGenerator.ToJsonSchema(modelType.Name, modelType);
             self.keepReferenceToEditorPrefab = keepReferenceToEditorPrefab;
             var view = await self.ToView(schema);
             view.name = schema.title;
+            Log.MethodDone(timing);
             return view;
         }
 

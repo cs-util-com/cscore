@@ -2,6 +2,7 @@
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -16,8 +17,8 @@ namespace com.csutil.ui.jsonschema {
         /// stored or the changed fields can be calculated via MergeJson.GetDiff() </summary>
         /// <param name="model"> The model that should be shown in the UI (has to fit the loaded view model UI) </param>
         /// <returns> The modified model after the passed userSavedChanges-Task is completed </returns>
-        public static async Task<T> LoadViaJsonIntoView<T>(this Presenter<JObject> self, T model) {
-            return await LoadViaJsonIntoView(self, model, JsonSchemaPresenter.ChangesSavedViaConfirmButton(self.targetView));
+        public static async Task<T> LoadViaJsonIntoView<T>(this Presenter<JObject> self, T model, bool autoCheckUiVsLatestModel = true) {
+            return await LoadViaJsonIntoView(self, model, JsonSchemaPresenter.ChangesSavedViaConfirmButton(self.targetView), autoCheckUiVsLatestModel);
         }
 
         /// <summary> Converts the passed model to JSON, lets the user edit it and returned a 
@@ -27,11 +28,22 @@ namespace com.csutil.ui.jsonschema {
         /// <param name="userSavedChanges">  A task that should be set to completed once the user is finished with 
         /// the UI, e.g. when he presses the save button </param>
         /// <returns> The modified model after the passed userSavedChanges-Task is completed </returns>
-        public static async Task<T> LoadViaJsonIntoView<T>(this Presenter<JObject> self, T model, Task userSavedChanges) {
+        public static async Task<T> LoadViaJsonIntoView<T>(this Presenter<JObject> self, T model, Task userSavedChanges, bool autoCheckUiVsLatestModel = true) {
+#if UNITY_EDITOR
+            await self.LogAnyDiffToNewGeneratedUi<T>(autoCheckUiVsLatestModel);
+#endif
             JObject json = JObject.Parse(JsonWriter.GetWriter().Write(model));
             await self.LoadModelIntoView(json);
             await userSavedChanges;
             return JsonReader.GetReader().Read<T>(json.ToString());
+        }
+
+        /// <summary> Log out the field views that changed in a fresh generated UI. Should only be performed in Unity editor since it will 
+        /// be quite expensive to generate a full new UI and compare it to the UI shown by the presenter </summary>
+        private static async Task LogAnyDiffToNewGeneratedUi<T>(this Presenter<JObject> self, bool autoCheckUiVsLatestModel = true) {
+            if (autoCheckUiVsLatestModel && self is JsonSchemaPresenter jsp) {
+                await self.targetView.GetFieldViewMap().LogAnyDiffToNewGeneratedUi<T>(jsp.viewGenerator, forceAlwaysDelete: true);
+            }
         }
 
         public static async Task LinkToJsonModel(this GameObject targetView, JObject root, JsonSchemaToView viewGenerator) {
