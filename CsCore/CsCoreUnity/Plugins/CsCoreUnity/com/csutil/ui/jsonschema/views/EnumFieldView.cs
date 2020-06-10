@@ -1,5 +1,4 @@
-﻿using com.csutil.model.jsonschema;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,6 +10,7 @@ namespace com.csutil.ui.jsonschema {
         public GameObject menuGo;
         public GameObject menuEntriesContainer;
         public GameObject menuEntryPrefab;
+        public ToggleGoVisibility menuOnClickVisibilityToggle;
 
         protected override async Task Setup(string fieldName, string fullPath) {
             await base.Setup(fieldName, fullPath);
@@ -35,16 +35,32 @@ namespace com.csutil.ui.jsonschema {
             if (field.additionalItems == true) { // If free text input possible, enable autocomplete
                 // Collect all searchable UI text to filter entries when user types:
                 var searchCache = menuEntriesContainer.GetChildrenIEnumerable()
-                    .ToDictionary(x => x.GetComponentInChildren<Text>().text.ToLowerInvariant(), x => x);
-                input.AddOnValueChangedAction(entered => {
+                    .ToDictionary(x => x.GetComponentInChildren<Text>().text, x => x);
+                input.AddOnValueChangedAction(entered => { // Filter suggestions for each entered char:
                     entered = entered.ToLowerInvariant();
-                    // Filter the suggestion array with each new char entered:
-                    foreach (var child in searchCache) { child.Value.SetActiveV2(child.Key.Contains(entered)); }
+                    foreach (var child in searchCache) {
+                        child.Value.SetActiveV2(child.Key.ToLowerInvariant().Contains(entered));
+                    }
                     return true;
+                });
+                input.onEndEdit.AddListener(_ => {
+                    var x = searchCache.Filter(xx => xx.Value != null && xx.Value.activeSelf);
+                    if (x.Count() == 1) {
+                        input.text = x.First().Key;
+                        ToggleMenuVisibility();
+                    }
                 });
             }
 
         }
+
+        private void ToggleMenuVisibility() { menuOnClickVisibilityToggle.ToggleVisibilityOfTarget(); }
+
+        public void ShowAllDropDownMenuEntries() {
+            foreach (var c in menuEntriesContainer.GetChildren()) { c.SetActiveV2(true); }
+        }
+
+        public void OnMenuToggled(bool isOpen) { if (isOpen) { ShowAllDropDownMenuEntries(); } }
 
     }
 
