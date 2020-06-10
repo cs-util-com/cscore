@@ -31,19 +31,7 @@ namespace com.csutil {
             Debug.Log("BeforeSceneLoad");
             SystemConsoleToUnityLogRedirector.Setup();
             try { DestroyExistingMainThreadIfNeeded(); } catch (Exception e) { Debug.Log(e); }
-        }
-
-        private static void DestroyExistingMainThreadIfNeeded() {
-            var mt = IoC.inject.Get<MainThread>(null, false);
-            if (mt != null) { mt.gameObject.Destroy(); }
-            InjectorExtensionsForUnity.GetOrAddGameObject(InjectorExtensionsForUnity.DEFAULT_SINGLETON_NAME).Destroy();
-        }
-
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-        static void AfterSceneLoad() {
-            Debug.Log("AfterSceneLoad");
             SetupDefaultSingletonsIfNeeded();
-            EventBus.instance.Publish(UNITY_SETUP_DONE);
         }
 
         public static void SetupDefaultSingletonsIfNeeded() {
@@ -57,8 +45,15 @@ namespace com.csutil {
             }
         }
 
+        private static void DestroyExistingMainThreadIfNeeded() {
+            var mt = IoC.inject.Get<MainThread>(null, false);
+            if (mt != null) { mt.gameObject.Destroy(); }
+            InjectorExtensionsForUnity.GetOrAddGameObject(InjectorExtensionsForUnity.DEFAULT_SINGLETON_NAME).Destroy();
+        }
+
+        /// <summary> This will be called after all components in the scene already triggered their initialization logic </summary>
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-        static void OnAfterSceneLoaded() { Log.d("Now the scene finished loading"); }
+        static void AfterSceneLoad() { EventBus.instance.Publish(UNITY_SETUP_DONE); }
 
         /// <summary> 
         /// Ensures that the callback is invoked either directly if the UnitySetup already ran or 
