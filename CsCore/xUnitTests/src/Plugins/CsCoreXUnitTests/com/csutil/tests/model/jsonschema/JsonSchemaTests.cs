@@ -216,7 +216,7 @@ namespace com.csutil.tests.model.jsonschema {
             [Enum("Level of experience 1", typeof(Experience))]
             public string experience1;
 
-            [Enum("Level of experience 2", allowOtherInput: true, "Beginner", "Avg", "Expert")]
+            [Enum("Level of experience 2", true, "Beginner", "Avg", "Expert")]
             public string experience2;
 
             public Experience experience3;
