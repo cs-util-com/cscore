@@ -19,6 +19,18 @@
     <RootNamespace>com.csutil</RootNamespace>
     <AssemblyName>cscore</AssemblyName>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+
+    <!-- Adding a custom constant "MyCSharpVersion" to allow developer to enable the developer to
+    enable language version specific features in cscore, currently C# 7.0 is the default latest major
+    version, and cscore will stay compatible with that version but has optional extensions, see also
+    https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/configure-language-version and
+    https://docs.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-version-history -->
+    <MyCSharpVersion>7.0</MyCSharpVersion>
+    <DefineConstants Condition="'$(MyCSharpVersion)' == '7.1'"> CSHARP_7_1 </DefineConstants>
+    <DefineConstants Condition="'$(MyCSharpVersion)' == '7.2'"> CSHARP_7_1, CSHARP_7_2 </DefineConstants>
+    <DefineConstants Condition="'$(MyCSharpVersion)' == '7.3'"> CSHARP_7_1, CSHARP_7_2, CSHARP_7_3 </DefineConstants>
+    <DefineConstants Condition="'$(MyCSharpVersion)' == '8.0'"> CSHARP_7_1, CSHARP_7_2, CSHARP_7_3, CSHARP_8_0 </DefineConstants>
+
   </PropertyGroup>
 
   <!-- https://www.nuget.org/packages/Newtonsoft.Json -->
