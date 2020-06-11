@@ -55,7 +55,7 @@ namespace com.csutil {
             return ((Enum)(object)self).HasFlag((Enum)(object)flag);
         }
 
-        public static string GetName<T>(this T entry) where T : struct
+        public static string GetEntryName<T>(this T entry) where T : struct
 #if CSHARP_7_3 // Using Enum as a generic type constraint is only available in C# 7.3+
             , Enum 
 #endif
@@ -66,7 +66,7 @@ namespace com.csutil {
 
         [Conditional("DEBUG")]
         private static void EnforceMustBeEnum<T>([CallerMemberName] string methodName = null) where T : struct {
-            if (!(typeof(T).IsCastableTo(typeof(Enum)))) { throw Log.e($"Method '{methodName}' must only be used with enums!"); }
+            if (!IsEnum<T>()) { throw Log.e($"Method '{methodName}' must only be used with enums!"); }
         }
 
     }

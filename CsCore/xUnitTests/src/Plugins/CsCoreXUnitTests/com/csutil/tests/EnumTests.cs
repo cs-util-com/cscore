@@ -19,8 +19,8 @@ namespace com.csutil.tests.extensions {
 
         [Fact]
         public void TestGetName() {
-            Assert.Equal("state1", EnumUtil.GetName(MyEnum123.state1));
-            Assert.Equal("state2", EnumUtil.GetName(MyEnum123.state2));
+            Assert.Equal("state1", MyEnum123.state1.GetEntryName());
+            Assert.Equal("state2", MyEnum123.state2.GetEntryName());
         }
 
         [Fact]
