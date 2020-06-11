@@ -1,5 +1,6 @@
 using com.csutil.keyvaluestore;
 using com.csutil.system;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
@@ -33,6 +34,7 @@ namespace com.csutil.tests.system {
                 Assert.Single(matchingEntries);
                 var instructions = matchingEntries.First().GetUpdateInstructions();
                 Assert.Equal("https://github.com/cs-util-com/cscore", instructions.url);
+                Assert.Equal(new DateTime(2011, 03, 22, 1, 26, 0, DateTimeKind.Utc), instructions.GetReleaseDate());
                 Log.d("instructions: " + JsonWriter.AsPrettyString(instructions));
             } else {
                 Log.e("Test cant be fully done on current system: "

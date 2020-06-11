@@ -8,26 +8,28 @@ namespace com.csutil.ui {
 
         public string caption;
         public string message;
+        public string confirmText;
 
-        public Dialog(string caption, string message) {
+        public Dialog(string caption, string message, string confirmText) {
             this.caption = caption;
             this.message = message;
+            this.confirmText = confirmText;
         }
 
-        public static Task ShowInfoDialog(string caption, string message, string dialogPrefabName = "Dialogs/InfoDialog1") {
-            return Show(caption, message, dialogPrefabName);
+        public static Task ShowInfoDialog(string caption, string message, string confirmText, string dialogPrefabName = "Dialogs/InfoDialog1") {
+            return Show(caption, message, confirmText, dialogPrefabName);
         }
 
-        public static Task ShowWarningDialog(string caption, string message, string dialogPrefabName = "Dialogs/WarningDialog1") {
-            return Show(caption, message, dialogPrefabName);
+        public static Task ShowWarningDialog(string caption, string message, string confirmText, string dialogPrefabName = "Dialogs/WarningDialog1") {
+            return Show(caption, message, confirmText, dialogPrefabName);
         }
 
-        public static Task ShowErrorDialog(string caption, string message, string dialogPrefabName = "Dialogs/ErrorDialog1") {
-            return Show(caption, message, dialogPrefabName);
+        public static Task ShowErrorDialog(string caption, string message, string confirmText, string dialogPrefabName = "Dialogs/ErrorDialog1") {
+            return Show(caption, message, confirmText, dialogPrefabName);
         }
 
-        private static Task Show(string caption, string message, string dialogPrefabName) {
-            var dialog = new DialogLoader<Dialog>(new Dialog(caption, message));
+        private static Task Show(string caption, string message, string confirmText, string dialogPrefabName) {
+            var dialog = new DialogLoader<Dialog>(new Dialog(caption, message, confirmText));
             GameObject dialogUi = dialog.LoadDialogPrefab(new DefaultPresenter(), dialogPrefabName);
             RootCanvas.GetOrAddRootCanvas().gameObject.AddChild(dialogUi); // Add dialog UI in a canvas
             return dialog.ShowDialogAsync();
@@ -39,9 +41,13 @@ namespace com.csutil.ui {
 
             public Task OnLoad(Dialog dialogData) {
                 var links = targetView.GetLinkMap();
-                links.Get<Text>("Caption").text = dialogData.caption;
-                links.Get<Text>("Message").text = dialogData.message;
-                return links.Get<Button>("ConfirmButton").SetOnClickAction(delegate { });
+                links.Get<Text>("Caption").textLocalized(dialogData.caption);
+                links.Get<Text>("Message").textLocalized(dialogData.message);
+                Button confirmButton = links.Get<Button>("ConfirmButton");
+                if (!dialogData.confirmText.IsNullOrEmpty()) {
+                    confirmButton.GetComponentInChildren<Text>().textLocalized(dialogData.confirmText);
+                }
+                return confirmButton.SetOnClickAction(delegate { }); // Wait for the user to click
             }
 
         }

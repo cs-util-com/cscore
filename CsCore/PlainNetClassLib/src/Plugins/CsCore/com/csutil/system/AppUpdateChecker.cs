@@ -60,6 +60,11 @@ namespace com.csutil.system {
 
         public abstract Task<IEnumerable<UpdateEntry>> DownloadAllUpdateEntries();
 
+        /// <summary> 
+        /// An update entry is an arbitrary list of conditions that have to be met by the client plus a mandatory
+        /// string field "updateInstructions" that contains a JSON string with all the update instructions,
+        /// and this JSON can be parsed into the UpdateInstructions type to get access to all its fields.
+        /// </summary>
         public class UpdateEntry : Dictionary<string, object> {
             public UpdateInstructions GetUpdateInstructions() {
                 return Mapper.Map<UpdateInstructions>(this["updateInstructions"]);
@@ -73,6 +78,10 @@ namespace com.csutil.system {
             public string title { get; set; }
             public string notes { get; set; }
             public bool mandatory { get; set; }
+            public string releaseDate { get; set; }
+
+            public DateTime GetReleaseDate() { return DateTimeV2.ParseUtc(releaseDate); }
+
         }
 
     }

@@ -25,19 +25,19 @@ namespace com.csutil.tests.ui {
         }
 
         private async Task ShowInfoDialog() {
-            var showDialogTask = Dialog.ShowInfoDialog("I am an info dialog", "Please close me now to continue with the next dialog example");
+            var showDialogTask = Dialog.ShowInfoDialog("I am an info dialog", "Please close me now to continue with the next dialog example", "Close");
             await SimulateConfirmButtonClick();
             await showDialogTask; // Wait until the dialog is closed
         }
 
         private async Task ShowWarningDialog() {
-            var showDialogTask = Dialog.ShowWarningDialog("I am a warning", "Please close me now to continue with the next dialog example");
+            var showDialogTask = Dialog.ShowWarningDialog("I am a warning", "Please close me now to continue with the next dialog example", "Oook");
             await SimulateConfirmButtonClick();
             await showDialogTask; // Wait until the dialog is closed
         }
 
         private async Task ShowErrorDialog() {
-            var showDialogTask = Dialog.ShowErrorDialog("I am an error", "Please close me now to continue with the next dialog example");
+            var showDialogTask = Dialog.ShowErrorDialog("I am an error", "Please close me now to continue with the next dialog example", "Oh noo!");
             await SimulateConfirmButtonClick();
             await showDialogTask; // Wait until the dialog is closed
         }

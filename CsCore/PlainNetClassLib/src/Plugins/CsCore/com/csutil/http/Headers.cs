@@ -11,11 +11,11 @@ namespace com.csutil.http {
         private Dictionary<string, IEnumerable<string>> headers = new Dictionary<string, IEnumerable<string>>();
 
         public Headers(IEnumerable<KeyValuePair<string, string>> headers) {
-            foreach (var e in headers) { this.headers.Add(e.Key.ToLower(), new string[] { e.Value }); }
+            foreach (var e in headers) { this.headers.Add(e.Key.ToLowerInvariant(), new string[] { e.Value }); }
         }
 
         public Headers(IEnumerable<KeyValuePair<string, IEnumerable<string>>> headers) {
-            foreach (var e in headers) { this.headers.Add(e.Key.ToLower(), e.Value); }
+            foreach (var e in headers) { this.headers.Add(e.Key.ToLowerInvariant(), e.Value); }
         }
 
         public string GetFileNameOnServer() {
@@ -63,14 +63,14 @@ namespace com.csutil.http {
         public string GetRawLastModifiedString() { return GetHeaderValue("last-modified", null); }
 
         public IEnumerable<string> GetHeaderValues(string headerName) {
-            return headers.GetValue(headerName.ToLower(), null);
+            return headers.GetValue(headerName.ToLowerInvariant(), null);
         }
 
         public string GetHeaderValue(string headerName, string fallbackValue, bool allowFuzzyHeaderName = true) {
             var headerValues = GetHeaderValues(headerName);
             if (headerValues == null && allowFuzzyHeaderName) {
                 // Google names it "x-goog-stored-content-length" instead of "content-length"
-                var similar = headers.Filter(x => x.Key.Contains(headerName.ToLower()));
+                var similar = headers.Filter(x => x.Key.Contains(headerName.ToLowerInvariant()));
                 // If there is exactly 1 header that matches the fuzzy search, use that one:
                 if (similar.Count() == 1) { headerValues = similar.First().Value; }
             }

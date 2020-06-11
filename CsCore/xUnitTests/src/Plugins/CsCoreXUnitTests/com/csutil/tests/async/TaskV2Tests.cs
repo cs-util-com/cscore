@@ -15,7 +15,7 @@ namespace com.csutil.tests.async {
             Log.d("Now testing TaskV2.Run");
             await TaskV2.Run(() => {
                 var t = Log.MethodEntered("1");
-                TaskV2.Delay(100).ContinueWith(delegate {
+                TaskV2.Delay(100).ContinueWithSameContext(delegate {
                     Log.MethodDone(t);
                 });
             });
@@ -128,6 +128,36 @@ namespace com.csutil.tests.async {
             await t1;
         }
 
+        [Fact]
+        public async Task TestOnError() {
+            {
+                var errorHandled = false;
+                await SomeAsyncFailingTask1().OnError(async _ => {
+                    await TaskV2.Delay(5);
+                    errorHandled = true; // error can be rethrown here
+                });
+                Assert.True(errorHandled);
+            }
+            {
+                var errorHandled = false;
+                var result = await SomeAsyncFailingTask2().OnError(async _ => {
+                    await TaskV2.Delay(5);
+                    errorHandled = true;
+                    return "handled";
+                });
+                Assert.Equal("handled", result);
+                Assert.True(errorHandled);
+            }
+            { // The error can be rethrown in OnError handler after reacting to it:
+                await Assert.ThrowsAsync<AggregateException>(async () => {
+                    await SomeAsyncFailingTask1().OnError(async error => {
+                        await TaskV2.Delay(5);
+                        throw error;
+                    });
+                });
+            }
+        }
+
         private async Task SomeAsyncTask1() {
             var t = Log.MethodEntered();
             await TaskV2.Delay(500);
@@ -139,6 +169,18 @@ namespace com.csutil.tests.async {
             await TaskV2.Delay(5);
             Log.MethodDone(t);
             return "Some string result";
+        }
+
+        private async Task SomeAsyncFailingTask1() {
+            var t = Log.MethodEntered();
+            await TaskV2.Delay(5);
+            throw new Exception("task failed as requested");
+        }
+
+        private async Task<string> SomeAsyncFailingTask2() {
+            var t = Log.MethodEntered();
+            await TaskV2.Delay(5);
+            throw new Exception("task failed as requested");
         }
 
     }

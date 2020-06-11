@@ -30,7 +30,7 @@ namespace com.csutil {
                 float totalBytes = (await self.GetResultHeaders()).GetFileSizeInBytesOnServer();
                 var progressInPercent = new ChangeTracker<float>(0);
                 await targetFile.SaveStreamAsync(stream, (savedBytes) => {
-                    if (progressInPercent.setNewValue(100 * savedBytes / totalBytes)) {
+                    if (progressInPercent.SetNewValue(100 * savedBytes / totalBytes)) {
                         self.onProgress?.Invoke(progressInPercent.value);
                     }
                 });

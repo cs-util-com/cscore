@@ -1,4 +1,5 @@
 ﻿using com.csutil;
+using com.csutil.math;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -10,9 +11,11 @@ namespace Xunit {
     public class AssertException : Exception {
         public AssertException() { }
         public AssertException(string message) : base(message) { }
+        public AssertException(string message, Exception innerException) : base(message, innerException) {
+        }
     }
 
-    public class Assert {
+    public static class Assert {
 
         public static void True(bool b, string msg = null) {
             if (!b) { throw (msg != null) ? new AssertException(msg) : new AssertException(); }
@@ -36,14 +39,9 @@ namespace Xunit {
 
         private static bool Eq(object objA, object objB) {
             if (ReferenceEquals(objA, objB)) { return true; }
-            if (IsNumber(objA) && IsNumber(objB)) { return Convert.ToDouble(objA) == Convert.ToDouble(objB); }
+            if (Numbers.HasNumberType(objA) && Numbers.HasNumberType(objB)) { return Convert.ToDouble(objA) == Convert.ToDouble(objB); }
             if (objA is IComparable c1 && objB is IComparable c2) { return c1.CompareTo(c2) == 0; }
             return objA == objB || Equals(objA, objB);
-        }
-
-        public static bool IsNumber(object v) {
-            return v is sbyte || v is byte || v is short || v is ushort || v is int || v is uint
-                      || v is long || v is ulong || v is float || v is double || v is decimal;
         }
 
         public static void NotEqual(object objA, object objB) {
@@ -51,7 +49,7 @@ namespace Xunit {
         }
 
         public static void IsType<T>(object obj) where T : class {
-            True((obj as T) != null, "Not Type " + typeof(T) + ": " + obj);
+            True(obj is T, "Not Type " + typeof(T) + ": " + obj);
         }
 
         public static void Throws<T>(Action a) where T : Exception {

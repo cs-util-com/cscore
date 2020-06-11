@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 namespace com.csutil {
 
@@ -23,6 +24,14 @@ namespace com.csutil {
 
         public static V GetValue<T, V>(this IDictionary<T, V> self, T key, V fallback) {
             return self.TryGetValue(key, out V value) ? value : fallback;
+        }
+
+        public static IDictionary<T, V> ExceptKeys<T, V>(this IDictionary<T, V> self, IDictionary<T, V> otherDict) {
+            return self.Keys.Except(otherDict.Keys).ToDictionary(k => k, k => self[k]);
+        }
+
+        public static IDictionary<T, V> IntersectKeys<T, V>(this IDictionary<T, V> self, IDictionary<T, V> otherDict) {
+            return self.Keys.Intersect(otherDict.Keys).ToDictionary(k => k, k => self[k]);
         }
 
     }

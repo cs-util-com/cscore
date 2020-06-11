@@ -21,19 +21,15 @@ namespace com.csutil.tests.ui16 {
             var map = gameObject.GetLinkMap();
 
             Task showForm1 = map.Get<Button>("ShowForm1").SetOnClickAction(async delegate {
-                var viewStack = gameObject.GetViewStack();
-                var formUi1 = gameObject.GetViewStack().ShowView("Ui16_MyForm1");
                 MyFormPresenter presenter = new MyFormPresenter();
-                presenter.targetView = formUi1;
+                presenter.targetView = gameObject.GetViewStack().ShowView("Ui16_MyForm1");
                 presenter.simulateUserInput = simulateUserInput;
                 await presenter.LoadModelIntoView(store);
             });
 
             Task showForm2 = map.Get<Button>("ShowForm2").SetOnClickAction(async delegate {
-                var viewStack = gameObject.GetViewStack();
-                GameObject formUi1 = viewStack.ShowView("Ui16_MyForm1");
                 MyFormPresenter presenter = new MyFormPresenter();
-                presenter.targetView = formUi1;
+                presenter.targetView = gameObject.GetViewStack().ShowView("Ui16_MyForm2");
                 presenter.simulateUserInput = simulateUserInput;
                 var fork = store.NewFork();
                 await presenter.LoadModelIntoView(fork);

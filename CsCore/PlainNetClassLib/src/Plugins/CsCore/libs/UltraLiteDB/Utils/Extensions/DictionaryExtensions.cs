@@ -111,7 +111,7 @@ namespace UltraLiteDB
 
             var num = Convert.ToInt64(match.Groups[1].Value);
 
-            switch (match.Groups[2].Value.ToLower())
+            switch (match.Groups[2].Value.ToLowerInvariant())
             {
                 case "t": return num * 1024L * 1024L * 1024L * 1024L;
                 case "g": return num * 1024L * 1024L * 1024L;

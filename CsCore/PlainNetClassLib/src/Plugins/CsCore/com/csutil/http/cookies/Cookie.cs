@@ -27,7 +27,7 @@ namespace com.csutil.http.cookies {
                 try {
                     var parsedKey = match.Groups[1].Value;
                     var parsedValue = match.Groups[2].Value;
-                    switch (parsedKey.ToLower()) {
+                    switch (parsedKey.ToLowerInvariant()) {
                         case "httponly":
                             this.scriptAccessible = false;
                             break;

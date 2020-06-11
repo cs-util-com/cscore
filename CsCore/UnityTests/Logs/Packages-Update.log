@@ -110,3 +110,20 @@ Update Mode: updateDependencies
 The following packages were updated:
   com.unity.mobile.android-logcat from version 1.0.0 to 1.1.1
   com.unity.test-framework from version 1.1.11 to 1.1.13
+
+=== Tue Jun  9 19:07:28 2020
+
+Packages were changed.
+Update Mode: updateDependencies
+
+The following packages were updated:
+  com.unity.ide.vscode from version 1.1.4 to 1.2.0
+  com.unity.test-framework from version 1.1.13 to 1.1.14
+
+=== Tue Jun  9 20:31:53 2020
+
+Packages were changed.
+Update Mode: updateDependencies
+
+The following packages were updated:
+  com.unity.multiplayer-hlapi from version 1.0.4 to 1.0.6

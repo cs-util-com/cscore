@@ -23,10 +23,36 @@ namespace com.csutil {
         }
 
         public static bool HasAttribute<T>(this MemberInfo self, bool inherit = false) where T : Attribute {
-            return self.GetCustomAttributes(typeof(T), inherit).Any();
+            return self.IsDefined(typeof(T), inherit);
         }
 
-        public static string ToStringV2(this MemberInfo m) { return m.DeclaringType.Name + "." + m.Name; }
+        public static bool TryGetCustomAttribute<T>(this MemberInfo self, out T attr, bool inherit = false) where T : Attribute {
+            attr = self.GetCustomAttribute<T>(inherit);
+            return attr != null;
+        }
+
+        public static bool TryGetCustomAttributes<T>(this MemberInfo self, out IEnumerable<T> attr, bool inherit = false) where T : Attribute {
+            attr = self.GetCustomAttributes<T>(inherit);
+            return !attr.IsNullOrEmpty();
+        }
+
+        public static bool CanWriteTo(this MemberInfo self) {
+            if (self is FieldInfo f) { return !f.Attributes.ContainsFlag(FieldAttributes.InitOnly); }
+            if (self is PropertyInfo p) { return p.CanWrite && p.GetSetMethod(nonPublic: true).IsPublic; }
+            return false;
+        }
+
+        public static object GetValue(this MemberInfo self, object obj) {
+            if (self is PropertyInfo p) { return p.GetValue(obj); }
+            if (self is FieldInfo f) { return f.GetValue(obj); }
+            if (self is MethodInfo m) { return m.Invoke(obj, null); }
+            return null;
+        }
+
+        public static string ToStringV2(this MemberInfo m) {
+            if (m.DeclaringType == null) { return m.Name; }
+            return m.DeclaringType.Name + "." + m.Name;
+        }
 
     }
 }

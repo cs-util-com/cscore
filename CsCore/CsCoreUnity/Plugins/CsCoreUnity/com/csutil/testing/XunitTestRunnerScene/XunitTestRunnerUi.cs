@@ -50,9 +50,9 @@ namespace com.csutil.testing {
 
         private void UpdateSearchFilter(Dictionary<string, Link> links) {
             var newSearchText = links.Get<InputField>("SearchInput").text;
-            newSearchText = newSearchText.ToLower();
+            newSearchText = newSearchText.ToLowerInvariant();
             if (allTests.IsNullOrEmpty()) { return; }
-            CellData = allTests.Filter(t => t.name.ToLower().Contains(newSearchText)).ToList();
+            CellData = allTests.Filter(t => t.name.ToLowerInvariant().Contains(newSearchText)).ToList();
         }
 
         private void CollectTests(IEnumerable<Assembly> assembliesToTest, Dictionary<string, Link> links) {

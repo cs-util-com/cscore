@@ -50,7 +50,7 @@ namespace com.csutil {
         public static void IsEqualToPersisted(string id, object o, params object[] args) {
             args = new StackTrace(1, true).AddTo(args);
             var persisted = IoC.inject.GetOrAddSingleton<PersistedRegression>(o);
-            persisted.AssertEqualToPersisted(id, o).ContinueWith((Task t) => {
+            persisted.AssertEqualToPersisted(id, o).ContinueWithSameContext((Task t) => {
                 if (t.Exception != null) { Fail(t.Exception.Message, args); }
             });
         }
@@ -64,12 +64,6 @@ namespace com.csutil {
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         public static void IsNotNull(object o, string varName, params object[] args) {
             string errorMsg = $"Assert.IsNotNull({varName}) FAILED";
-            Assert(o != null, errorMsg, args);
-        }
-
-        [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
-        public static void NotNull(object o, string varName, params object[] args) {
-            string errorMsg = $"Assert.NotNull({varName}) FAILED";
             Assert(o != null, errorMsg, args);
         }
 

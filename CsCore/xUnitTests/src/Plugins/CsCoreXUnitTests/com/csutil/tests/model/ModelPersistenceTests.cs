@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using com.csutil.io;
 using com.csutil.model;
 using Xunit;
 using Zio;
@@ -19,7 +20,7 @@ namespace com.csutil.tests.model {
             var file1 = root.GetChildDir("SubDir1").GetChildDir("SubSubDir1").GetChild("child1.txt");
             var savedText = "Test 123";
             file1.SaveAsText(savedText);
-            FileRef x1 = new MyFileRef();
+            IFileRef x1 = new FileRef();
             x1.SetPath(file1);
 
             var x2 = x1.DeepCopyViaJson();
@@ -43,19 +44,19 @@ namespace com.csutil.tests.model {
 
             {
                 // Url from https://gist.github.com/jsturgis/3b19447b304616f18657
-                FileRef f = new MyFileRef() { url = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4" };
+                IFileRef f = new FileRef() { url = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4" };
                 Assert.True(await TestDownloadTo(f, dir));
                 Log.d("FileRef: " + JsonWriter.AsPrettyString(f));
                 Assert.False(await TestDownloadTo(f, dir)); // Second time its already cached
             }
             {
-                FileRef f = new MyFileRef() { url = "https://picsum.photos/50/50" };
+                IFileRef f = new FileRef() { url = "https://picsum.photos/50/50" };
                 Assert.True(await TestDownloadTo(f, dir));
                 Log.d("FileRef: " + JsonWriter.AsPrettyString(f));
                 Assert.True(await TestDownloadTo(f, dir)); // Every time a different image so has to be redownloaded
             }
             {
-                FileRef f = new MyFileRef() { url = "https://raw.githubusercontent.com/cs-util-com/cscore/master/LICENSE" };
+                IFileRef f = new FileRef() { url = "https://raw.githubusercontent.com/cs-util-com/cscore/master/LICENSE" };
                 Assert.True(await TestDownloadTo(f, dir));
                 Log.d("FileRef: " + JsonWriter.AsPrettyString(f));
                 Assert.False(await TestDownloadTo(f, dir)); // Second time its already cached
@@ -63,7 +64,7 @@ namespace com.csutil.tests.model {
 
         }
 
-        private static async Task<bool> TestDownloadTo(FileRef f, DirectoryEntry targetDirectory) {
+        private static async Task<bool> TestDownloadTo(IFileRef f, DirectoryEntry targetDirectory) {
             var t = Log.MethodEntered("Download", f.url, targetDirectory.GetFullFileSystemPath());
             var downloadWasNeeded = await f.DownloadTo(targetDirectory);
             Log.MethodDone(t);
@@ -79,7 +80,7 @@ namespace com.csutil.tests.model {
             var dir = EnvironmentV2.instance.GetOrAddTempFolder("TestLargeFileDownloadWithProgress");
 
             // Url from https://gist.github.com/jsturgis/3b19447b304616f18657
-            var f = new MyFileRef() { url = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" };
+            var f = new FileRef() { url = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" };
             await Assert.ThrowsAsync<TaskCanceledException>(async () => {
                 await f.DownloadTo(dir, downloadProgress => {
                     if (downloadProgress > 5) { throw new TaskCanceledException("Download canceled after 5%"); }
@@ -93,7 +94,26 @@ namespace com.csutil.tests.model {
 
         }
 
-        private class MyFileRef : FileRef {
+        [Fact]
+        public async Task TestImageFileRef() {
+
+            var dir = EnvironmentV2.instance.GetOrAddTempFolder("TestImageFileWithThumbnail");
+
+            var imgRef = new FileRef() { url = "https://picsum.photos/1024/512" };
+            await imgRef.DownloadTo(dir);
+            Log.d("FileRef: " + JsonWriter.AsPrettyString(imgRef));
+            Assert.NotNull(imgRef.url);
+            Assert.NotNull(imgRef.fileName);
+            Assert.NotNull(imgRef.dir);
+
+            FileEntry imgEntry = imgRef.GetFileEntry(dir.FileSystem);
+            var img = await ImageLoader.LoadImageInBackground(imgEntry);
+            Assert.Equal(1024, img.Width);
+            Assert.Equal(512, img.Height);
+
+        }
+
+        private class FileRef : IFileRef {
             public string dir { get; set; }
             public string fileName { get; set; }
             public string url { get; set; }

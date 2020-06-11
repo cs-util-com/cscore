@@ -30,6 +30,8 @@ namespace com.csutil {
             return i.IsPrimitive || i.IsEnum || t.Equals(typeof(string)) || t.Equals(typeof(decimal));
         }
 
+        public static bool IsSystemType(this Type type) { return type.Assembly == typeof(object).Assembly; }
+
     }
 
     public static class TypeCheck {

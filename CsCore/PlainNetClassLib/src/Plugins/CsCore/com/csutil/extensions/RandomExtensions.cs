@@ -63,10 +63,8 @@ namespace com.csutil.random {
                 }
                 genertorInstruction = genertorInstruction.Substring(1);
             }
-            return ToFirstCharUpperCase(generatedName);
+            return generatedName.ToFirstCharUpperCase();
         }
-
-        private static String ToFirstCharUpperCase(string s) { return s.Substring(0, 1).ToUpper() + s.Substring(1); }
 
         private static T NextRandomListEntry<T>(this Random self, List<T> list) { return list[self.Next(0, list.Count - 1)]; }
 

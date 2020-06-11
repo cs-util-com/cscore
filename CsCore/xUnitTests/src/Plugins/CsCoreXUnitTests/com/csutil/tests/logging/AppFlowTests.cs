@@ -59,7 +59,7 @@ namespace com.csutil.tests {
                 IKeyValueStore store = new InMemoryKeyValueStore();
                 AppFlowToStore appFlow = new AppFlowToStore(store.GetTypeAdapter<AppFlowEvent>());
                 await TestAppFlowWithStore(eventCount, appFlow); // Run the tests
-                Log.MethodDone(s1, maxAllowedTimeInMs: 200);
+                Log.MethodDone(s1, maxAllowedTimeInMs: 1000);
             }
             var s2 = Log.MethodEntered("InMemory FileSystem");
             {

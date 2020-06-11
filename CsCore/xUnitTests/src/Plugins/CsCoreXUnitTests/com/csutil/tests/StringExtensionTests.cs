@@ -63,12 +63,65 @@ namespace com.csutil.tests {
             Assert.True("YES".IsRegexMatch("(YES|MAYBE|NO)"));
 
             Assert.True("anna123".IsRegexMatch(RegexTemplates.USERNAME));
+            Assert.True("Anna_123".IsRegexMatch(RegexTemplates.USERNAME));
             Assert.True("aa@bb.com".IsRegexMatch(RegexTemplates.EMAIL_ADDRESS));
             Assert.False("a@a@bb.com".IsRegexMatch(RegexTemplates.EMAIL_ADDRESS));
 
+            Assert.False("".IsRegexMatch(RegexTemplates.NON_EMPTY_STRING));
+            Assert.False(" ".IsRegexMatch(RegexTemplates.NON_EMPTY_STRING));
+            Assert.False("  ".IsRegexMatch(RegexTemplates.NON_EMPTY_STRING));
+            Assert.True("x".IsRegexMatch(RegexTemplates.NON_EMPTY_STRING));
+            Assert.True(" x".IsRegexMatch(RegexTemplates.NON_EMPTY_STRING));
+            Assert.True("x ".IsRegexMatch(RegexTemplates.NON_EMPTY_STRING));
+            Assert.True(" x ".IsRegexMatch(RegexTemplates.NON_EMPTY_STRING));
+
             string nullString = null;
-            Assert.False("x".IsRegexMatch(nullString));
             Assert.False(nullString.IsRegexMatch("x"));
+            Assert.Throws<ArgumentException>(() => { "x".IsRegexMatch(nullString); });
+            Assert.Throws<ArgumentException>(() => { "x".IsRegexMatch(""); });
+
+
+            const string minMaxCharLength = "^.{2,4}$";
+            Assert.False("a".IsRegexMatch(minMaxCharLength));
+            Assert.True("ab".IsRegexMatch(minMaxCharLength));
+            Assert.True("abcd".IsRegexMatch(minMaxCharLength));
+            Assert.False("abcde".IsRegexMatch(minMaxCharLength));
+
+            string and1 = RegexUtil.CombineViaAnd(
+                RegexTemplates.HAS_NUMBER,
+                RegexTemplates.HAS_UPPERCASE);
+            Assert.False("a".IsRegexMatch(and1));
+            Assert.False("A".IsRegexMatch(and1));
+            Assert.False("1".IsRegexMatch(and1));
+            Assert.True("1A".IsRegexMatch(and1));
+            Assert.True("A1".IsRegexMatch(and1));
+
+            string and2 = RegexUtil.CombineViaAnd(
+                RegexTemplates.HAS_NUMBER,
+                RegexTemplates.HAS_LOWERCASE,
+                RegexTemplates.HAS_SPECIAL_CHAR,
+                RegexTemplates.HAS_UPPERCASE);
+            Assert.False("Aa1".IsRegexMatch(and2));
+            Assert.False("!1A".IsRegexMatch(and2));
+            Assert.True("Aa1!".IsRegexMatch(and2));
+            Assert.True("!a1A".IsRegexMatch(and2));
+
+            string and3 = RegexUtil.CombineViaAnd(
+                            RegexTemplates.EMAIL_ADDRESS,
+                            RegexTemplates.HAS_LOWERCASE);
+            Assert.False("a@b".IsRegexMatch(and3));
+            Assert.True("a@b.com".IsRegexMatch(and3));
+            Assert.False("A@B.COM".IsRegexMatch(and3));
+            Assert.False("a@b.com@c".IsRegexMatch(and3));
+
+            string or1 = RegexUtil.CombineViaOr(and1, and2, and3);
+            Log.d("or regex: " + or1);
+            Assert.False("a@b".IsRegexMatch(or1));
+            Assert.False("a@b1".IsRegexMatch(or1));
+            Assert.True("a@b.com".IsRegexMatch(or1)); //and3
+            Assert.True("a@bA1".IsRegexMatch(or1)); // and2
+            Assert.True("abbA1".IsRegexMatch(or1)); // and1
+            Assert.False("abb1".IsRegexMatch(or1));
 
         }
 

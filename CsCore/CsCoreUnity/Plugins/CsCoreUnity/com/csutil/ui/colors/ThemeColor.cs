@@ -19,8 +19,8 @@ namespace com.csutil.ui {
 
         [ShowPropertyInInspector]
         public ColorNames colorNameSuggestion {
-            get { return ColorNames.custom.ParseOrFallback(colorName); }
-            set { if (ColorNames.custom != value) { colorName = value.GetName(); } }
+            get { return ColorNames.custom.TryParse(colorName); }
+            set { if (ColorNames.custom != value) { colorName = value.GetEntryName(); } }
         }
 
         [SerializeField]

@@ -22,6 +22,7 @@ namespace com.csutil {
         /// <returns> A task that can be awaited on, that returns the fully setup presenter </returns>
         public static async Task<T> LoadModelIntoView<T>(this Presenter<T> self, T model) {
             AssertV2.IsNotNull(self.targetView, "presenter.targetView");
+            AssertV2.IsNotNull(model, $"model (type={typeof(T)})");
             var name = self.GetType().Name + "_((" + model.GetType().Name + "))";
             EventBus.instance.Publish(EventConsts.catPresenter + EventConsts.LOAD_START, name, self, model);
             await self.OnLoad(model);

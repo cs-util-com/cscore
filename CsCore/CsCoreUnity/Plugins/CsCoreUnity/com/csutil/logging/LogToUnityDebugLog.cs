@@ -7,20 +7,27 @@ namespace com.csutil.logging {
 
     public class LogToUnityDebugLog : LogDefaultImpl {
 
-        protected override void PrintDebugMessage(string debugLogMsg, object[] args) {
-            Debug.Log(debugLogMsg, GetGoFrom(args));
+        protected override void PrintDebugMessage(string debugLogMsg, params object[] args) {
+            Debug.Log(IsEditMode() + debugLogMsg, GetGoFrom(args));
         }
 
-        protected override void PrintWarningMessage(string warningMsg, object[] args) {
-            Debug.LogWarning(warningMsg, GetGoFrom(args));
+        protected override void PrintWarningMessage(string warningMsg, params object[] args) {
+            Debug.LogWarning(IsEditMode() + warningMsg, GetGoFrom(args));
         }
 
-        protected override void PrintErrorMessage(string errorMsg, object[] args) {
-            Debug.LogError(errorMsg, GetGoFrom(args));
+        protected override void PrintErrorMessage(string errorMsg, params object[] args) {
+            Debug.LogError(IsEditMode() + errorMsg, GetGoFrom(args));
         }
 
-        protected override void PrintException(Exception e, object[] args) {
+        protected override void PrintException(Exception e, params object[] args) {
             Debug.LogException(e, GetGoFrom(args));
+        }
+
+        private string IsEditMode() {
+#if UNITY_EDITOR
+            if (!Application.isPlaying) { return "[ EDIT MODE ]  "; }
+#endif
+            return "";
         }
 
         protected override string ArgToString(object arg) {

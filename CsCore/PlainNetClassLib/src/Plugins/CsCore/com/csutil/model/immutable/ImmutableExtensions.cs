@@ -96,12 +96,6 @@ namespace com.csutil.model.immutable {
             }
         }
 
-        public static T DeepCopy<T>(this T objectToDeepCopy, Action<T> onCopy) {
-            var copy = objectToDeepCopy.DeepCopyViaJson();
-            onCopy(copy);
-            return copy;
-        }
-
         public static ForkedStore<T> NewFork<T>(this DataStore<T> s) {
             return new ForkedStore<T>(s, s.reducer);
         }

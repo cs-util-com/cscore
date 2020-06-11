@@ -60,7 +60,7 @@ namespace com.csutil.keyvaluestore {
         public static async Task WaitLatestFallbackGetTime<T>(this IKeyValueStore self, Stopwatch s, Task<T> fallbackGet, float multFactor = 2f) {
             if (self.fallbackStore != null && s != null) {
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-                fallbackGet.ContinueWith(_ => { // Use average of the last 2 requests:
+                fallbackGet.ContinueWithSameContext(_ => { // Use average of the last 2 requests:
                     self.latestFallbackGetTimingInMs = (self.latestFallbackGetTimingInMs + s.ElapsedMilliseconds) / 2;
                 });
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
