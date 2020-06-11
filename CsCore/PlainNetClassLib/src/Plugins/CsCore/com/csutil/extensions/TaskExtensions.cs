@@ -27,17 +27,19 @@ namespace com.csutil {
         }
 
         public static Task OnError(this Task self, Func<Exception, Task> onError) {
-            return self.ContinueWith(t => {
-                if (t.IsFaulted) { return onError(t.Exception); }
-                return t;
-            }, TaskScheduler.FromCurrentSynchronizationContext()).Unwrap();
+            try { // Catch in case current sync context is not allowed to be used as a scheduler (e.g in xUnit)
+                return self.ContinueWith(HandleIfError(onError), TaskScheduler.FromCurrentSynchronizationContext()).Unwrap();
+            } catch (Exception) { return self.ContinueWith(HandleIfError(onError)).Unwrap(); }
         }
 
         public static Task<T> OnError<T>(this Task<T> self, Func<Exception, Task<T>> onError) {
-            return self.ContinueWith(t => {
-                if (t.IsFaulted) { return onError(t.Exception); }
-                return t;
-            }, TaskScheduler.FromCurrentSynchronizationContext()).Unwrap();
+            try { // Catch in case current sync context is not allowed to be used as a scheduler (e.g in xUnit)
+                return self.ContinueWith(HandleIfError(onError), TaskScheduler.FromCurrentSynchronizationContext()).Unwrap();
+            } catch (Exception) { return self.ContinueWith(HandleIfError(onError)).Unwrap(); }
+        }
+
+        private static Func<T, T> HandleIfError<T>(Func<Exception, T> onError) where T : Task {
+            return task => { if (task.IsFaulted) { return onError(task.Exception); } else { return task; } };
         }
 
         public static Task LogOnError(this Task self) {
@@ -46,12 +48,16 @@ namespace com.csutil {
 
         /// <summary> Ensures that the continuation action is called on the same syncr. context </summary>
         public static Task ContinueWithSameContext(this Task self, Action<Task> continuationAction) {
-            return self.ContinueWith(continuationAction, TaskScheduler.FromCurrentSynchronizationContext());
+            try { // Catch in case current sync context is not allowed to be used as a scheduler (e.g in xUnit)
+                return self.ContinueWith(continuationAction, TaskScheduler.FromCurrentSynchronizationContext());
+            } catch (Exception) { return self.ContinueWith(continuationAction); }
         }
 
         /// <summary> Ensures that the continuation action is called on the same syncr. context </summary>
         public static Task ContinueWithSameContext<T>(this Task<T> self, Action<Task<T>> continuationAction) {
-            return self.ContinueWith(continuationAction, TaskScheduler.FromCurrentSynchronizationContext());
+            try {
+                return self.ContinueWith(continuationAction, TaskScheduler.FromCurrentSynchronizationContext());
+            } catch (Exception) { return self.ContinueWith(continuationAction); }
         }
 
     }
