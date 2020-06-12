@@ -49,10 +49,16 @@
     <PackageReference Include="SharpZipLib" Version="1.2.0" />
   </ItemGroup>
 
-<!-- https://www.nuget.org/packages/Zio/ --> 
+  <!-- https://www.nuget.org/packages/Zio/ --> 
   <ItemGroup>
     <PackageReference Include="Zio" Version="0.7.6" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- https://www.nuget.org/packages/Magick.NET-Q8-AnyCPU/ --> 
+    <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="7.19.0" />
+    <!-- https://www.nuget.org/packages/Magick.NET.Core/ --> 
+    <PackageReference Include="Magick.NET.Core" Version="2.0.0" />
+  </ItemGroup>
 
 </Project>
