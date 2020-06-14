@@ -1,4 +1,4 @@
-# ☄️ The cscore Library
+# The cscore Library
 
 
 [**Website**](https://www.csutil.com/projects/cscore) 
