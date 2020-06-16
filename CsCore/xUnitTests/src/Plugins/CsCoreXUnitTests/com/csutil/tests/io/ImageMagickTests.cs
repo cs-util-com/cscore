@@ -7,36 +7,6 @@ using Zio;
 
 namespace com.csutil.tests {
 
-    public static class MagickImageExtensions {
-        public static void SaveToFileEntry(this MagickImage self, FileEntry f) {
-            using (Stream outStream = f.OpenOrCreateForWrite()) { self.Write(outStream); }
-        }
-
-        public static void LoadFromFileEntry(this MagickImage self, FileEntry f) {
-            using (Stream inputStream = f.OpenForRead()) { self.Read(inputStream); }
-        }
-
-        public static double Compare(this MagickImage self, MagickImage newImg, out MagickImage diffImg, ErrorMetric errorMetric = ErrorMetric.MeanSquared) {
-            diffImg = new MagickImage();
-            return self.Compare(newImg, new CompareSettings() { Metric = errorMetric }, diffImg);
-        }
-
-        public static void Compare(this MagickImage self, FileEntry imgFile, double MAX_ALLOWED_DIFF = 0.001) {
-            using (MagickImage oldImg = new MagickImage()) {
-                oldImg.LoadFromFileEntry(imgFile);
-                FileEntry diffFile = imgFile.Parent.GetChild(imgFile.NameWithoutExtension + "_diff" + imgFile.ExtensionWithDot);
-                if (oldImg.Compare(self, out MagickImage imgWithDifferences) > MAX_ALLOWED_DIFF) {
-                    Log.e("Detected high difference vs old image, see diffFile: " + diffFile);
-                } else {
-                    self.SaveToFileEntry(imgFile);
-                }
-                imgWithDifferences.SaveToFileEntry(diffFile);
-                imgWithDifferences.Dispose();
-            }
-        }
-
-    }
-
     public class ImageMagickTests {
 
         public ImageMagickTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
@@ -73,7 +43,8 @@ namespace com.csutil.tests {
 
             using (MagickImage newImg = new MagickImage()) {
                 newImg.LoadFromFileEntry(imFileToDiff_modified);
-                newImg.Compare(imFileToDiff_original);
+                var diff = newImg.Compare(imFileToDiff_original, 0.000001);
+                Assert.NotNull(diff);
             }
 
             Log.MethodDone(t);
