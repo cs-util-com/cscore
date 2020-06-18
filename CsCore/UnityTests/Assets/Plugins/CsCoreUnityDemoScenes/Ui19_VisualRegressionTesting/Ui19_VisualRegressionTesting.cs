@@ -45,7 +45,7 @@ namespace com.csutil.tests.ui19 {
 
         private static AssertVisually NewAssertVisuallyInstance(string folderName) {
             var folderToStoreImagesIn = EnvironmentV2.instance.GetCurrentDirectory().GetChildDir(folderName);
-            folderToStoreImagesIn.DeleteV2(deleteAlsoIfNotEmpty: true);
+            folderToStoreImagesIn.DeleteV2();
             return new AssertVisually(folderToStoreImagesIn);
         }
 
