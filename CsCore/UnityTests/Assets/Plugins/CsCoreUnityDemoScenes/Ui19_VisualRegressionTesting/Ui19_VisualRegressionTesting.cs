@@ -1,5 +1,4 @@
 ﻿using com.csutil.ui.jsonschema;
-using System;
 using System.Collections;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -9,24 +8,50 @@ namespace com.csutil.tests.ui19 {
     public class Ui19_VisualRegressionTesting : UnitTestMono {
 
         public override IEnumerator RunTest() {
+            yield return ExampleUsage1().AsCoroutine();
+            yield return RunVisualRegressionErrorExample().AsCoroutine();
+        }
 
-            yield return ShowSomeUi<MyUserModelv1>().AsCoroutine();
+        private async Task ExampleUsage1() {
 
-            var folderToStoreImagesIn = EnvironmentV2.instance.GetCurrentDirectory().GetChildDir("VisualRegressionTesting");
-            var visualRegressionTester = new PersistedImageRegression(folderToStoreImagesIn);
-            yield return visualRegressionTester.AssertEqualToPersisted("UserUiScreen");
+            // First create a default instance and pass it as a singleton to the injection logic:
+            AssertVisually.SetupDefaultAssertVisuallySingleton();
 
-            Toast.Show("Will now load a slightly different UI to cause a visual regression error..");
-            yield return new WaitForSeconds(4);
-
-            // Now load MyUserModelv2 which creates a slightly different UI compared to MyUserModelv1:
-            yield return ShowSomeUi<MyUserModelv2>().AsCoroutine();
-            yield return visualRegressionTester.AssertEqualToPersisted("UserUiScreen");
+            // Create and show a UI based on the fields in MyUserModelv1:
+            gameObject.AddChild(await NewUiFor<MyUserModelv1>());
+            await AssertVisually.AssertNoVisualChange("Ui for MyUserModelv1");
 
         }
 
-        private async Task ShowSomeUi<T>() { // Generate a UI from the passed class:
-            gameObject.AddChild(await JsonSchemaToView.NewViewGenerator().GenerateViewFrom<T>());
+
+
+        private async Task RunVisualRegressionErrorExample() {
+
+            // Create an AssertVisually instance for testing:
+            AssertVisually assertVisually = NewAssertVisuallyInstance("Ui19_RunVisualRegressionErrorExample");
+
+            // Create and show a UI based on the fields in MyUserModelv1:
+            gameObject.AddChild(await NewUiFor<MyUserModelv1>());
+            await assertVisually.AssertNoVisualChange("UserUiScreen");
+
+            Toast.Show("Will now load a slightly different UI to cause a visual regression error..");
+            await TaskV2.Delay(4000);
+
+            // Now load MyUserModelv2 which creates a slightly different UI compared to MyUserModelv1:
+            gameObject.AddChild(await NewUiFor<MyUserModelv2>());
+            await assertVisually.AssertNoVisualChange("UserUiScreen");
+
+        }
+
+        private static AssertVisually NewAssertVisuallyInstance(string folderName) {
+            var folderToStoreImagesIn = EnvironmentV2.instance.GetCurrentDirectory().GetChildDir(folderName);
+            folderToStoreImagesIn.DeleteV2(deleteAlsoIfNotEmpty: true);
+            return new AssertVisually(folderToStoreImagesIn);
+        }
+
+        /// <summary> Generate a UI from the passed arbitrary class </summary>
+        private static async Task<GameObject> NewUiFor<T>() {
+            return await JsonSchemaToView.NewViewGenerator().GenerateViewFrom<T>();
         }
 
         private class MyUserModelv1 {
