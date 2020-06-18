@@ -37,7 +37,7 @@ namespace com.csutil {
         private IEnumerator AssertNoVisualRegressionCoroutine(string id) {
 
             var idFolder = folder.GetChildDir(id);
-            var oldImg = idFolder.GetChild(id + "_regression.jpg");
+            var oldImg = idFolder.GetChild(id + ".regression.jpg");
             var newImg = idFolder.GetChild(id + ".jpg");
 
             yield return new WaitForEndOfFrame();
@@ -73,7 +73,7 @@ namespace com.csutil {
                     }
                 }
             } else {
-                newImg.Rename(oldImg.Name, out newImg);
+                newImg.CopyToV2(oldImg, false);
             }
             return null;
         }
