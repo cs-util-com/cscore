@@ -1,7 +1,6 @@
 ﻿using ImageMagick;
 using System;
 using System.Collections;
-using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using UnityEngine;
 using Zio;
@@ -49,6 +48,7 @@ namespace com.csutil {
             var idFolder = folder.GetChildDir(id);
             var oldImg = idFolder.GetChild(id + ".regression.jpg");
             var newImg = idFolder.GetChild(id + ".jpg");
+            var backup = idFolder.GetChild(id + ".jpg.backup");
 
             var configFile = idFolder.GetChild(configFileName);
             Config config = this.config;
@@ -63,6 +63,8 @@ namespace com.csutil {
             Texture2D screenShot = ScreenCapture.CaptureScreenshotAsTexture();
             //Camera c = Camera.main;
             //Texture2D screenShot = c.CaptureScreenshot(400); // Would not capture UI?
+
+            if (newImg.Exists) { newImg.CopyToV2(backup, replaceExisting: false); }
 
             screenShot.SaveToFile(newImg, config.screenshotQuality);
             screenShot.Destroy();
@@ -82,7 +84,15 @@ namespace com.csutil {
                     diffImg.Parent.OpenInExternalApp();
                     diffImg.OpenInExternalApp();
                 }
+            } else { // No difference between oldImg and newImg
+                // To prevent git from detecting invalid file changes: 
+                if (backup.Exists) { // If there is a backup of newImg..
+                    newImg.DeleteV2(); // Remove the newly generated version ..
+                    backup.Rename(newImg.Name, out FileEntry _); // and replace it with the backup
+                }
             }
+            backup.DeleteV2(); // If a backup file was created during the process delete it
+            AssertV2.IsTrue(newImg.Exists, "newImg did not exist after AssertNoVisualChange done");
 
         }
 
@@ -94,12 +104,11 @@ namespace com.csutil {
                     if (diff != null) {
                         return diff;
                     } else {
-                        oldImg.DeleteV2();
-                        newImg.Rename(oldImg.Name, out newImg);
+                        newImg.CopyToV2(oldImg, replaceExisting: true);
                     }
                 }
             } else {
-                newImg.CopyToV2(oldImg, false);
+                newImg.CopyToV2(oldImg, replaceExisting: false);
             }
             return null;
         }
