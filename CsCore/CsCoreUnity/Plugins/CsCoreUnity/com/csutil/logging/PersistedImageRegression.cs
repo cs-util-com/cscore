@@ -35,7 +35,7 @@ namespace com.csutil {
         }
 
         /// <summary> This will if building in debug mode set up the AssertVisually system and in production do nothing </summary>
-        [Conditional("DEBUG")] 
+        [Conditional("DEBUG")]
         public static void SetupDefaultSingletonInDebugMode() {
             IoC.inject.GetOrAddSingleton(null, () => new AssertVisually(EnvironmentV2.instance.GetCurrentDirectory().GetChildDir("Visual_Assertions")));
         }
@@ -43,10 +43,11 @@ namespace com.csutil {
         public AssertVisually(DirectoryEntry folderToStoreImagesIn) { folder = folderToStoreImagesIn; }
 
         public Task AssertNoVisualChange(string id) {
-            return MainThread.instance.StartCoroutineAsTask(AssertNoVisualRegressionCoroutine(id));
+            StackTrace stacktrace = new StackTrace(skipFrames: 2, fNeedFileInfo: true);
+            return MainThread.instance.StartCoroutineAsTask(AssertNoVisualRegressionCoroutine(id, stacktrace));
         }
 
-        private IEnumerator AssertNoVisualRegressionCoroutine(string id) {
+        private IEnumerator AssertNoVisualRegressionCoroutine(string id, StackTrace stacktrace) {
             id = EnvironmentV2.SanatizeToFileName(id);
             if (id.IsNullOrEmpty()) { throw new ArgumentNullException("Invalid ID passed"); }
 
@@ -78,10 +79,11 @@ namespace com.csutil {
             if (diffImg != null) {
                 var e = $"Visual diff to previous '{id}' detected! To approve an allowed visual change, delete '{oldImg.Name}'";
                 if (!config.customErrorMessage.IsNullOrEmpty()) { e = config.customErrorMessage + "/n" + e; }
+                var exeption = new ExceptionWithCustomStack(e, stacktrace);
                 if (config.throwAssertException) {
-                    throw new VisualAssertException(e);
+                    throw exeption;
                 } else if (config.logAsError) {
-                    Log.e(e);
+                    Log.e(exeption);
                 } else if (config.logAsWarning) {
                     Log.w(e);
                 }
@@ -118,9 +120,6 @@ namespace com.csutil {
             return null;
         }
 
-        public class VisualAssertException : Exception { public VisualAssertException(string message) : base(message) { } }
-
     }
-
 
 }
