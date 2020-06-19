@@ -52,7 +52,13 @@ namespace com.csutil {
             }
         }
 
-        public static void SaveAsJson<T>(this FileEntry self, T objectToSave) {
+        public static void SaveAsJson<T>(this FileEntry self, T objectToSave, bool asPrettyString = false) {
+
+            if (asPrettyString) {
+                SaveAsText(self, JsonWriter.AsPrettyString(objectToSave));
+                return;
+            }
+
             using (var stream = self.OpenOrCreateForWrite()) {
                 stream.SetLength(0); // Reset the stream in case it was opened
                 using (StreamWriter streamWriter = new StreamWriter(stream)) {
@@ -104,7 +110,8 @@ namespace com.csutil {
         public static T LoadAsEncyptedJson<T>(this FileInfo self, string jsonEncrKey, Func<T> getDefaultValue) {
             try {
                 return JsonReader.GetReader().Read<T>(self.LoadAs<string>().Decrypt(jsonEncrKey));
-            } catch (Exception e) { Log.w("" + e); return getDefaultValue(); }
+            }
+            catch (Exception e) { Log.w("" + e); return getDefaultValue(); }
         }
 
         public static void SaveAsEncryptedJson<T>(this FileInfo self, T objectToSave, string jsonEncrKey) {

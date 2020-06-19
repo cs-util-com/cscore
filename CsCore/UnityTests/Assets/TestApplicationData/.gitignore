@@ -1,3 +1,4 @@
 *.meta
 *.regression.jpg
 *.diff.jpg
+*.example

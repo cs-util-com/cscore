@@ -1,5 +1,7 @@
 ﻿using ImageMagick;
+using System;
 using System.Collections;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using UnityEngine;
 using Zio;
@@ -8,11 +10,19 @@ namespace com.csutil {
 
     public class AssertVisually {
 
-        public bool openExternallyOnAssertFail = true;
-        public bool throwAssertException = false;
-        public int screenshotQuality = 70;
-        public double maxAllowedDiff = 0.0005;
+        public class Config {
+            public bool throwAssertException = false;
+            public bool logAsError = true;
+            public bool logAsWarning = true;
+            public bool openExternallyOnAssertFail = true;
+            public int screenshotQuality = 70;
+            public double maxAllowedDiff = 0.0005;
+            public string customErrorMessage = "";
+        }
+
+        public Config config = new Config();
         public DirectoryEntry folder;
+        public string configFileName = "config.txt";
 
         public static Task AssertNoVisualChange(string id, object caller = null) {
             var i = IoC.inject.Get<AssertVisually>(caller);
@@ -40,19 +50,35 @@ namespace com.csutil {
             var oldImg = idFolder.GetChild(id + ".regression.jpg");
             var newImg = idFolder.GetChild(id + ".jpg");
 
+            var configFile = idFolder.GetChild(configFileName);
+            Config config = this.config;
+            if (configFile.IsNotNullAndExists()) {
+                config = configFile.LoadAs<Config>();
+            } else {
+                idFolder.CreateV2().GetChild(configFileName + ".example").SaveAsJson(config, asPrettyString: true);
+            }
+
+
             yield return new WaitForEndOfFrame();
             Texture2D screenShot = ScreenCapture.CaptureScreenshotAsTexture();
             //Camera c = Camera.main;
             //Texture2D screenShot = c.CaptureScreenshot(400); // Would not capture UI?
 
-            screenShot.SaveToFile(newImg, screenshotQuality);
+            screenShot.SaveToFile(newImg, config.screenshotQuality);
             screenShot.Destroy();
 
-            var diffImg = CalculateDiffImage(oldImg, newImg, maxAllowedDiff);
+            var diffImg = CalculateDiffImage(oldImg, newImg, config.maxAllowedDiff);
             if (diffImg != null) {
-                var e = Log.e($"Visual diff to previous '{id}' detected! To approve an allowed visual change, delete '{oldImg.Name}'");
-                if (throwAssertException) { throw e; }
-                if (openExternallyOnAssertFail) {
+                var e = $"Visual diff to previous '{id}' detected! To approve an allowed visual change, delete '{oldImg.Name}'";
+                if (!config.customErrorMessage.IsNullOrEmpty()) { e = config.customErrorMessage + "/n" + e; }
+                if (config.throwAssertException) {
+                    throw new AssertException(e);
+                } else if (config.logAsError) {
+                    Log.e(e);
+                } else if (config.logAsWarning) {
+                    Log.w(e);
+                }
+                if (config.openExternallyOnAssertFail) {
                     diffImg.Parent.OpenInExternalApp();
                     diffImg.OpenInExternalApp();
                 }
@@ -78,6 +104,9 @@ namespace com.csutil {
             return null;
         }
 
+        public class AssertException : Exception { public AssertException(string message) : base(message) { } }
+
     }
+
 
 }
