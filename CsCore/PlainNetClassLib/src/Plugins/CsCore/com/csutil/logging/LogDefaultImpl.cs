@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Linq;
 
 namespace com.csutil.logging {
 
@@ -19,6 +20,12 @@ namespace com.csutil.logging {
         }
 
         public Exception LogError(string error, params object[] args) {
+            var stack = args.FirstOrDefault(a => a is StackTrace);
+            if (stack != null) {
+                var e = new Error(error, stack as StackTrace);
+                PrintException(e, args);
+                return e;
+            }
             PrintErrorString(">>> ERROR: " + error, args);
             return new Exception(error);
         }

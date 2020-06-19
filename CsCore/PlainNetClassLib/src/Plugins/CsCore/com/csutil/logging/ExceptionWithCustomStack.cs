@@ -3,11 +3,11 @@ using System.Diagnostics;
 
 namespace com.csutil {
 
-    public class ExceptionWithCustomStack : Exception {
+    public class Error : Exception {
 
         public StackTrace stack;
 
-        public ExceptionWithCustomStack(string message, StackTrace stacktrace) : base(message) {
+        public Error(string message, StackTrace stacktrace) : base(message) {
             stack = stacktrace;
         }
 

@@ -79,7 +79,7 @@ namespace com.csutil {
             if (diffImg != null) {
                 var e = $"Visual diff to previous '{id}' detected! To approve an allowed visual change, delete '{oldImg.Name}'";
                 if (!config.customErrorMessage.IsNullOrEmpty()) { e = config.customErrorMessage + "/n" + e; }
-                var exeption = new ExceptionWithCustomStack(e, stacktrace);
+                var exeption = new Error(e, stacktrace);
                 if (config.throwAssertException) {
                     throw exeption;
                 } else if (config.logAsError) {
