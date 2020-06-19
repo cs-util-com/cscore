@@ -1,6 +1,7 @@
 ﻿using ImageMagick;
 using System;
 using System.Collections;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using UnityEngine;
 using Zio;
@@ -26,14 +27,16 @@ namespace com.csutil {
         public static Task AssertNoVisualChange(string id, object caller = null) {
             var i = IoC.inject.Get<AssertVisually>(caller);
             if (i == null) {
-                Log.w($"No visual regression instance injected, AssertVisually.SetupDefaultAssertVisuallySingleton()" +
+                Log.d($"No visual regression instance injected, AssertVisually.SetupDefaultSingletonInDebugMode()" +
                     $" not called? Will skip AssertNoVisualChange check for '{id}'");
                 return Task.FromResult(false);
             }
             return i.AssertNoVisualChange(id);
         }
 
-        public static void SetupDefaultAssertVisuallySingleton() {
+        /// <summary> This will if building in debug mode set up the AssertVisually system and in production do nothing </summary>
+        [Conditional("DEBUG")] 
+        public static void SetupDefaultSingletonInDebugMode() {
             IoC.inject.GetOrAddSingleton(null, () => new AssertVisually(EnvironmentV2.instance.GetCurrentDirectory().GetChildDir("Visual_Assertions")));
         }
 
@@ -44,6 +47,8 @@ namespace com.csutil {
         }
 
         private IEnumerator AssertNoVisualRegressionCoroutine(string id) {
+            id = EnvironmentV2.SanatizeToFileName(id);
+            if (id.IsNullOrEmpty()) { throw new ArgumentNullException("Invalid ID passed"); }
 
             var idFolder = folder.GetChildDir(id);
             var oldImg = idFolder.GetChild(id + ".regression.jpg");
@@ -74,7 +79,7 @@ namespace com.csutil {
                 var e = $"Visual diff to previous '{id}' detected! To approve an allowed visual change, delete '{oldImg.Name}'";
                 if (!config.customErrorMessage.IsNullOrEmpty()) { e = config.customErrorMessage + "/n" + e; }
                 if (config.throwAssertException) {
-                    throw new AssertException(e);
+                    throw new VisualAssertException(e);
                 } else if (config.logAsError) {
                     Log.e(e);
                 } else if (config.logAsWarning) {
@@ -113,7 +118,7 @@ namespace com.csutil {
             return null;
         }
 
-        public class AssertException : Exception { public AssertException(string message) : base(message) { } }
+        public class VisualAssertException : Exception { public VisualAssertException(string message) : base(message) { } }
 
     }
 

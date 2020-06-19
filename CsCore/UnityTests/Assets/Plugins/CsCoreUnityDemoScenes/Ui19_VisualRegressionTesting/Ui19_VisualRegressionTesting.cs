@@ -15,7 +15,7 @@ namespace com.csutil.tests.ui19 {
         private async Task ExampleUsage1() {
 
             // First create a default instance and pass it as a singleton to the injection logic:
-            AssertVisually.SetupDefaultAssertVisuallySingleton();
+            AssertVisually.SetupDefaultSingletonInDebugMode();
 
             // Create and show a UI based on the fields in MyUserModelv1:
             gameObject.AddChild(await NewUiFor<MyUserModelv1>());
@@ -54,6 +54,7 @@ namespace com.csutil.tests.ui19 {
             return await JsonSchemaToView.NewViewGenerator().GenerateViewFrom<T>();
         }
 
+#pragma warning disable 0649 // Variable is never assigned to, and will always have its default value
         private class MyUserModelv1 {
             public string name;
             public string email;
@@ -65,6 +66,7 @@ namespace com.csutil.tests.ui19 {
             public string email;
             public int age;
         }
+#pragma warning restore 0649 // Variable is never assigned to, and will always have its default value
 
     }
 
