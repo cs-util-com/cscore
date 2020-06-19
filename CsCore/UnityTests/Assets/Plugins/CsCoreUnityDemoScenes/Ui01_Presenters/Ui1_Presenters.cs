@@ -11,7 +11,7 @@ namespace com.csutil.tests.ui {
         public override IEnumerator RunTest() {
 
             MyUserUi userUiPresenter = new MyUserUi();
-            userUiPresenter.targetView = gameObject;
+            userUiPresenter.targetView = gameObject.GetViewStack().ShowView("MyUserUi1");
 
             { // Load a first user into the UI by passing it through the presenter:
                 var user1 = new MyUserModel() { userName = "Carl", userAge = 4 };
@@ -20,7 +20,7 @@ namespace com.csutil.tests.ui {
                 AssertV2.AreEqual("4", userUiPresenter.AgeInputField().text);
             }
 
-            yield return new WaitForSeconds(0.5f); // Load another user into the UI:
+            yield return new WaitForSeconds(1f); // Load another user into the UI:
 
             { // Example of loading a second user in a separate asyn method "LoadUser2": 
                 yield return LoadUser2(userUiPresenter).AsCoroutine();
