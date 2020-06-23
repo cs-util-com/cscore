@@ -19,7 +19,7 @@ namespace com.csutil.tests.ui {
             // Create a presenter that connectes the model with the view (the Unity UI):
             var currentUserPresenter = new MyUserUi3();
             // Set the target view by loading it from a prefab and setting the root GO:
-            currentUserPresenter.targetView = ResourcesV2.LoadPrefab("MyUserUi1");
+            currentUserPresenter.targetView = gameObject.GetViewStack().ShowView("MyUserUi1");
             // Connect the model changes with the presenter:
             currentUserPresenter.ListenToStoreUpdates(store, state => state.currentUser);
 
@@ -37,7 +37,7 @@ namespace com.csutil.tests.ui {
                 newValues = new MyUser3("Paul", 0)
             });
             // Delay needed since the UI update simulates a delay too:
-            yield return new WaitForSeconds(0.1f);
+            yield return new WaitForSeconds(2f);
             // Check that the UI was automatically updated:
             AssertV2.AreEqual("Paul", currentUserPresenter.NameUi().text);
             AssertV2.AreEqual("0", currentUserPresenter.AgeUi().text);
@@ -61,6 +61,7 @@ namespace com.csutil.tests.ui {
             private Dictionary<string, Link> links;
 
             public async Task OnLoad(MyUser3 model) {
+                Log.MethodEnteredWith(model);
                 await TaskV2.Delay(10); // Simulate a 10ms delay in the UI update
                 links = targetView.GetLinkMap();
                 NameUi().text = model.name;
