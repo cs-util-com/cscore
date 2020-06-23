@@ -29,6 +29,7 @@ namespace com.csutil.ui {
 
         public virtual void OnItemClicked(News clickedItem) {
             Application.OpenURL(clickedItem.detailsUrl);
+            MarkAsRead(clickedItem).LogOnError();
         }
 
         [Serializable]
@@ -50,7 +51,10 @@ namespace com.csutil.ui {
             return colors;
         }
 
-        internal async Task MarkAsRead(News news) { await newsManager.MarkNewsAsRead(news); }
+        internal async Task MarkAsRead(News news) {
+            await newsManager.MarkNewsAsRead(news);
+            ReloadData();
+        }
     }
 
 }
