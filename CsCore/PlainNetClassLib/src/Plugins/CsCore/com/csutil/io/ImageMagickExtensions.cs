@@ -1,7 +1,9 @@
-﻿using System;
+﻿#if ENABLE_IMAGE_MAGICK
+
+using System;
 using System.IO;
-using ImageMagick;
 using Zio;
+using ImageMagick;
 
 namespace com.csutil {
 
@@ -57,3 +59,5 @@ namespace com.csutil {
     }
 
 }
+
+#endif

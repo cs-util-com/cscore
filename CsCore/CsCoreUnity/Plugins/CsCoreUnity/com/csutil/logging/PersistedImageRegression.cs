@@ -1,5 +1,4 @@
-﻿using ImageMagick;
-using System;
+﻿using System;
 using System.Collections;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -105,7 +104,8 @@ namespace com.csutil {
 
         private static FileEntry CalculateDiffImage(FileEntry oldImg, FileEntry newImg, double maxAllowedDiff) {
             if (oldImg.Exists) {
-                using (MagickImage original = new MagickImage()) {
+#if ENABLE_IMAGE_MAGICK
+                using (ImageMagick.MagickImage original = new ImageMagick.MagickImage()) {
                     original.LoadFromFileEntry(oldImg);
                     var diff = original.Compare(newImg, maxAllowedDiff);
                     if (diff != null) {
@@ -114,6 +114,9 @@ namespace com.csutil {
                         newImg.CopyToV2(oldImg, replaceExisting: true);
                     }
                 }
+#else
+                Log.w("ENABLE_IMAGE_MAGICK define not active, see instructions 'readme Image Magick Unity Installation Instructions.txt'");
+#endif
             } else {
                 newImg.CopyToV2(oldImg, replaceExisting: false);
             }

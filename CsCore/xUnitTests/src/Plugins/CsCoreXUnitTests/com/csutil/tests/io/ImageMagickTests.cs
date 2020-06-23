@@ -1,3 +1,5 @@
+#if ENABLE_IMAGE_MAGICK
+
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -75,3 +77,5 @@ namespace com.csutil.tests {
     }
 
 }
+
+#endif
