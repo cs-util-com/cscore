@@ -13,7 +13,8 @@ namespace com.csutil.ui.jsonschema {
         public const string CONTAINER2 = "RootContainer2";
         public const string CONTAINER3 = "RootContainer3";
 
-        public string prefabFolder;
+        /// <summary> The folder path where all the view generation related prefabs are located, e.g. "jsonSchemaViewsV1/" </summary>
+        public string prefabFolder = "jsonSchemaViewsV1/";
         public string rootContainerPrefab = CONTAINER2;
         public string objectFieldPrefab = "ObjectField";
         public string boolFieldPrefab = "BoolField";
@@ -32,11 +33,10 @@ namespace com.csutil.ui.jsonschema {
         /// generating UIs in editor time (and not dynamically during runtime) </summary>
         public bool keepReferenceToEditorPrefab = false;
 
+        public static JsonSchemaToView NewViewGenerator() { return new JsonSchemaToView(new ModelToJsonSchema()); }
+
         /// <summary> Creates a generator instance that can generate views from view models vie JsonSchemaToView.ToView(..) </summary>
-        /// <param name="prefabFolder"> The folder path where all the view generation related prefabs are located, e.g. "jsonSchemaViewsV1/" </param>
-        public JsonSchemaToView(ModelToJsonSchema schemaGenerator, string prefabFolder) : base(schemaGenerator) {
-            this.prefabFolder = prefabFolder;
-        }
+        public JsonSchemaToView(ModelToJsonSchema schemaGenerator) : base(schemaGenerator) { }
 
         public override async Task<GameObject> NewRootContainerView() { return await NewRootContainerView(rootContainerPrefab); }
 

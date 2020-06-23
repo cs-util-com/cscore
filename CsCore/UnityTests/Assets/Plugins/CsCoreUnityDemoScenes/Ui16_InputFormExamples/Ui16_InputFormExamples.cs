@@ -29,7 +29,7 @@ namespace com.csutil.tests.ui16 {
 
             Task showForm2 = map.Get<Button>("ShowForm2").SetOnClickAction(async delegate {
                 MyFormPresenter presenter = new MyFormPresenter();
-                presenter.targetView = gameObject.GetViewStack().ShowView("Ui16_MyForm2");
+                presenter.targetView = gameObject.GetViewStack().ShowView("Ui16_MyForm1");
                 presenter.simulateUserInput = simulateUserInput;
                 var fork = store.NewFork();
                 await presenter.LoadModelIntoView(fork);

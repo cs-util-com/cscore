@@ -41,10 +41,13 @@ namespace com.csutil.ui {
 
             SetText(detailsUrlText, item.detailsUrlText);
 
-            detailsUrlButton.gameObject.SetActiveV2(!item.detailsUrl.IsNullOrEmpty());
-            if (!item.detailsUrl.IsNullOrEmpty()) {
+            var hasDetailsUrl = item.detailsUrl.IsNullOrEmpty();
+            detailsUrlButton.gameObject.SetActiveV2(!hasDetailsUrl);
+            if (!hasDetailsUrl) {
                 detailsUrlButton.SetOnClickAction(_ => newsListUi.OnItemClicked(item));
                 titleButton.SetOnClickAction(_ => newsListUi.OnItemClicked(item));
+            } else { // No URL so only mark as read when clicked:
+                titleButton.SetOnClickAction(_ => newsListUi.MarkAsRead(item));
             }
 
             var isItemRead = item.localData != null && item.localData.isRead;

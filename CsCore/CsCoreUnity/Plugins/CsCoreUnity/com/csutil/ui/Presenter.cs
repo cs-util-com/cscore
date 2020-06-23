@@ -23,7 +23,15 @@ namespace com.csutil {
         public static async Task<T> LoadModelIntoView<T>(this Presenter<T> self, T model) {
             AssertV2.IsNotNull(self.targetView, "presenter.targetView");
             AssertV2.IsNotNull(model, $"model (type={typeof(T)})");
-            var name = self.GetType().Name + "_((" + model.GetType().Name + "))";
+
+            var presenterName = self.GetType().Name;
+            var modelName = model.GetType().Name;
+            var viewName = self.targetView.name;
+            var name = $"{presenterName}({modelName})--{viewName}";
+
+#if UNITY_EDITOR // In the Unity editor always try to use the Visual Assert system by default:
+            await AssertVisually.AssertNoVisualChange(name);
+#endif
             EventBus.instance.Publish(EventConsts.catPresenter + EventConsts.LOAD_START, name, self, model);
             await self.OnLoad(model);
             EventBus.instance.Publish(EventConsts.catPresenter + EventConsts.LOAD_DONE, name, self, model);

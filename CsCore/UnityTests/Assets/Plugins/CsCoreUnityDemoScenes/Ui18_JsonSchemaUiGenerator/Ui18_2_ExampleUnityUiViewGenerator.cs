@@ -8,9 +8,6 @@ namespace com.csutil.tests.jsonschema {
 
     class Ui18_2_ExampleUnityUiViewGenerator : MonoBehaviour {
 
-        public string prefabFolder = "jsonSchemaViewsV1/";
-        public string containerPrefabToUse = JsonSchemaToView.CONTAINER2;
-
         /// <summary> Has to be triggered by the develper via the Unity editor UI to start the 
         /// view generation. See the infos in GenerateViewFromClass() below </summary>
         public bool GenerateUiNow;
@@ -33,7 +30,7 @@ namespace com.csutil.tests.jsonschema {
         /// </summary>
         private async Task GenerateViewFromClass<T>() {
 
-            var generatedView = gameObject.AddChild(await NewViewGenerator().GenerateViewFrom<T>(true));
+            var generatedView = gameObject.AddChild(await JsonSchemaToView.NewViewGenerator().GenerateViewFrom<T>(true));
             var newFieldViews = generatedView.GetFieldViewMap();
 
             if (gameObject.GetChildCount() > 0) {
@@ -55,17 +52,13 @@ namespace com.csutil.tests.jsonschema {
             // Create some example model instance:
             var modelInstance = Ui18_1_JsonSchemaUiGenerator.NewExampleUserInstance();
 
-            JsonSchemaPresenter p = new JsonSchemaPresenter(NewViewGenerator());
+            JsonSchemaPresenter p = new JsonSchemaPresenter(JsonSchemaToView.NewViewGenerator());
             p.targetView = uiView;
             var changedInstance = await p.LoadViaJsonIntoView(modelInstance);
             uiView.Destroy(); // Close the view by destroying it after the user done with it
 
             var changedFields = MergeJson.GetDiff(modelInstance, changedInstance);
             Log.d("Fields changed: " + changedFields?.ToPrettyString());
-        }
-
-        private JsonSchemaToView NewViewGenerator() {
-            return new JsonSchemaToView(new ModelToJsonSchema(), prefabFolder) { rootContainerPrefab = containerPrefabToUse };
         }
 
     }

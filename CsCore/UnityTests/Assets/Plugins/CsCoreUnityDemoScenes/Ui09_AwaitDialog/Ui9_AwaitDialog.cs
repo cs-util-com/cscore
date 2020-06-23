@@ -10,6 +10,9 @@ namespace com.csutil.tests.ui {
         public int waitDurationPerDialogInMS = 500;
 
         public override IEnumerator RunTest() {
+
+            AssertVisually.SetupDefaultSingletonInDebugMode();
+
             yield return ShowCancelConfirmDialog().AsCoroutine();
             yield return ShowInfoDialog().AsCoroutine();
             yield return ShowWarningDialog().AsCoroutine();

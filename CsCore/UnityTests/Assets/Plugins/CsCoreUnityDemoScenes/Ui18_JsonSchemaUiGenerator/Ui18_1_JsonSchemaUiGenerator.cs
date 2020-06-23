@@ -14,8 +14,6 @@ namespace com.csutil.tests.jsonschema {
 
     public class Ui18_1_JsonSchemaUiGenerator : UnitTestMono {
 
-        public static string prefabFolder = "jsonSchemaViewsV1/";
-
         public override IEnumerator RunTest() {
             yield return GenerateAndShowViewFor(gameObject.GetViewStack()).AsCoroutine();
         }
@@ -51,7 +49,7 @@ namespace com.csutil.tests.jsonschema {
             {
                 await Dialog.ShowInfoDialog("Manually connecting the model instance to the view", "First an example to connect the " +
                     "model to a generated view via a manual presenter 'MyManualPresenter1'", "Show manual presenter example");
-                var viewGenerator = NewViewGenerator(schemaGenerator);
+                var viewGenerator = new JsonSchemaToView(schemaGenerator);
                 GameObject generatedView = await viewGenerator.ToView(schema);
                 viewStack.ShowView(generatedView);
 
@@ -67,7 +65,7 @@ namespace com.csutil.tests.jsonschema {
                 await Dialog.ShowInfoDialog("Using JsonSchemaPresenter to autmatically connect the model instance and view",
                     "The second option is to use a generic JObjectPresenter to connect the model to the generated view",
                     "Show JsonSchemaPresenter example");
-                var viewGenerator = NewViewGenerator(schemaGenerator);
+                var viewGenerator = new JsonSchemaToView(schemaGenerator);
                 GameObject generatedView = await viewGenerator.ToView(schema);
                 viewStack.ShowView(generatedView);
 
@@ -88,7 +86,7 @@ namespace com.csutil.tests.jsonschema {
                                 ViewStack viewStack, ModelToJsonSchema schemaGenerator, JsonSchema schema, string jsonModel) {
 
             JObject model = JsonReader.GetReader().Read<JObject>(jsonModel);
-            JsonSchemaToView viewGenerator = NewViewGenerator(schemaGenerator);
+            JsonSchemaToView viewGenerator = new JsonSchemaToView(schemaGenerator);
             GameObject generatedView = await viewGenerator.ToView(schema);
 
             viewStack.ShowView(generatedView);
@@ -105,12 +103,6 @@ namespace com.csutil.tests.jsonschema {
             var changedFields = MergeJson.GetDiff(model, changedModel);
             Log.d("Fields changed: " + changedFields?.ToPrettyString());
 
-        }
-
-        private static JsonSchemaToView NewViewGenerator(ModelToJsonSchema schemaGenerator) {
-            return new JsonSchemaToView(schemaGenerator, prefabFolder) {
-                rootContainerPrefab = JsonSchemaToView.CONTAINER2
-            };
         }
 
         private class MyManualPresenter1 : Presenter<MyUserModel> {

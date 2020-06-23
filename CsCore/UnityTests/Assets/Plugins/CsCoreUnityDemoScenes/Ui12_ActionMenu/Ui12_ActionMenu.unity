@@ -518,7 +518,7 @@ MonoBehaviour:
   m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 700, y: 700}
+  m_ReferenceResolution: {x: 600, y: 600}
   m_ScreenMatchMode: 0
   m_MatchWidthOrHeight: 0.5
   m_PhysicalUnit: 3
@@ -578,7 +578,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cd15b66475c42ba44a02598d096f8922, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  referenceResolution: 700
+  referenceResolution: 600
 --- !u!222 &1477266815
 CanvasRenderer:
   m_ObjectHideFlags: 0

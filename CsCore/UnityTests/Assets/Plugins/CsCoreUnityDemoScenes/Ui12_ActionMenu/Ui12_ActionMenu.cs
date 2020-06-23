@@ -20,7 +20,7 @@ namespace com.csutil.tests.ui {
                 menu1.entries.Add(new ActionMenu.Entry(id: 2, icon: "", name: "Delete"));
 
                 var selectedEntry = await gameObject.GetViewStack().ShowActionMenu(menu1);
-                Log.d("User selected entry '" + selectedEntry?.name + "'");
+                Toast.Show("User selected entry '" + selectedEntry?.name + "'");
 
             });
 
@@ -44,7 +44,7 @@ namespace com.csutil.tests.ui {
                 });
 
                 var selectedEntry = await gameObject.GetViewStack().ShowActionMenu(menu2);
-                Log.d("User selected entry '" + selectedEntry?.name + "'");
+                Toast.Show("User selected entry '" + selectedEntry?.name + "'");
 
             });
 
