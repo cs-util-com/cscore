@@ -85,8 +85,8 @@ namespace com.csutil.tests.model.immutable {
             Assert.Equal(2, firstContactWasModifiedCounter);
 
             // Test that the reducers throw errors for invalid actions being dispatched (max age is 99 and name must not be emtpy):
-            Assert.Throws<Exception>(() => { store.Dispatch(new ActionOnUser.ChangeAge() { targetUser = "Peter", newAge = 100 }); });
-            Assert.Throws<Exception>(() => { store.Dispatch(new ActionOnUser.ChangeName() { targetUser = "Peter", newName = "" }); });
+            Assert.Throws<Error>(() => { store.Dispatch(new ActionOnUser.ChangeAge() { targetUser = "Peter", newAge = 100 }); });
+            Assert.Throws<Error>(() => { store.Dispatch(new ActionOnUser.ChangeName() { targetUser = "Peter", newName = "" }); });
 
             store.Dispatch(new ActionLogoutUser());
             Assert.Null(store.GetState().user);

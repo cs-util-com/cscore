@@ -3,6 +3,7 @@ using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
+using com.csutil.json;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Bson;
 
@@ -20,6 +21,12 @@ namespace com.csutil {
             var copy = objectToDeepCopy.DeepCopyViaJson();
             onCopy?.Invoke(copy);
             return copy;
+        }
+
+        public static T DeepCopyViaTypedJson<T>(this T objectToDeepCopy) {
+            if (objectToDeepCopy == null) { return objectToDeepCopy; }
+            var json = TypedJsonHelper.NewTypedJsonWriter().Write(objectToDeepCopy);
+            return TypedJsonHelper.NewTypedJsonReader().Read<T>(json);
         }
 
         public static T DeepCopyViaJson<T>(this T objectToDeepCopy) {

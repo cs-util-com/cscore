@@ -45,7 +45,7 @@ namespace com.csutil.model.immutable {
                     Log.e("Invalid action: " + asJson(action.GetType().Name, action));
                 }
                 // If the action is a delegate it will be handled by thunk and cant be copied:
-                var actionBeforeDispatch = action is Delegate ? null : action.DeepCopy();
+                var actionBeforeDispatch = action is Delegate ? null : action.DeepCopyViaTypedJson();
                 T previousState = store.GetState();
                 var returnedAction = innerDispatcher(action);
                 T newState = store.GetState();

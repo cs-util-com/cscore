@@ -31,7 +31,10 @@ namespace com.csutil {
         }
 
         public static JToken GetDiff<T>(T a, T b) {
-            var s = JsonSerializer.Create(JsonNetSettings.defaultSettings);
+            return GetDiff(a, b, JsonSerializer.Create(JsonNetSettings.defaultSettings));
+        }
+
+        public static JToken GetDiff<T>(T a, T b, JsonSerializer s) {
             return new JsonDiffPatch().Diff(JToken.FromObject(a, s), JToken.FromObject(b, s));
         }
 

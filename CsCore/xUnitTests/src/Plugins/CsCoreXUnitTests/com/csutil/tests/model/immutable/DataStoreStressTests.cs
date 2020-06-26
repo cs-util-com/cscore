@@ -45,7 +45,7 @@ namespace com.csutil.tests.model.immutable {
                 // Make sure the additional listeners did not make the Dispatch slower:
                 float t1t2Ratio = (float)t1.ElapsedMilliseconds / (float)t2.ElapsedMilliseconds;
                 Log.d("t1t2Ratio=" + t1t2Ratio);
-                Assert.True(0.5f < t1t2Ratio && t1t2Ratio < 1.5f, "t1t2Ratio=" + t1t2Ratio);
+                Assert.True(0.3f < t1t2Ratio && t1t2Ratio < 3f, "t1t2Ratio=" + t1t2Ratio);
             }
             { // Now add the listeners directly to the store which slows down the Dispatches:
                 var counterA2 = 0;
@@ -70,15 +70,15 @@ namespace com.csutil.tests.model.immutable {
                 // Make sure the additional listeners make Dispatching much slower:
                 float t1t3Ratio = (float)t3.ElapsedMilliseconds / (float)t1.ElapsedMilliseconds;
                 Log.d("t1t3Ratio=" + t1t3Ratio);
-                Assert.True(2.5f < t1t3Ratio, "t1t3Ratio=" + t1t3Ratio);
+                Assert.True(1.5f < t1t3Ratio, "t1t3Ratio=" + t1t3Ratio);
 
                 float t1t4Ratio = (float)t4.ElapsedMilliseconds / (float)t1.ElapsedMilliseconds;
                 Log.d("t1t4Ratio=" + t1t4Ratio);
-                Assert.True(2.5f < t1t4Ratio, "t1t4Ratio=" + t1t4Ratio);
+                Assert.True(2f < t1t4Ratio, "t1t4Ratio=" + t1t4Ratio);
 
                 float t3t4Ratio = (float)t3.ElapsedMilliseconds / (float)t4.ElapsedMilliseconds;
                 Log.d("t3t4Ratio=" + t3t4Ratio);
-                Assert.True(0.9f < t3t4Ratio && t3t4Ratio < 1.1f, "t3t4Ratio=" + t3t4Ratio);
+                Assert.True(0.5f < t3t4Ratio && t3t4Ratio < 2f, "t3t4Ratio=" + t3t4Ratio);
 
             }
         }
