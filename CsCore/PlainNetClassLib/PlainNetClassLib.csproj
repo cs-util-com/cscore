@@ -31,7 +31,15 @@
     <DefineConstants Condition="'$(MyCSharpVersion)' == '7.3'"> CSHARP_7_1, CSHARP_7_2, CSHARP_7_3 </DefineConstants>
     <DefineConstants Condition="'$(MyCSharpVersion)' == '8.0'"> CSHARP_7_1, CSHARP_7_2, CSHARP_7_3, CSHARP_8_0 </DefineConstants>
 
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+  </ItemGroup>
+
 
   <!-- https://www.nuget.org/packages/Newtonsoft.Json -->
   <ItemGroup>
