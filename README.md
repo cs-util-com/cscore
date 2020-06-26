@@ -5,6 +5,7 @@
 [![](https://img.shields.io/github/issues-pr-closed/cs-util-com/cscore.svg?colorB=green&style=flat-square)](https://github.com/cs-util-com/cscore/pulls?q=is%3Aclosed)
 [![](https://img.shields.io/github/issues-closed/cs-util-com/cscore.svg?colorB=006400&style=flat-square)](https://github.com/cs-util-com/cscore/issues)
 [![](https://img.shields.io/github/commit-activity/y/cs-util-com/cscore.svg?colorB=006400&style=flat-square)](https://github.com/cs-util-com/cscore/graphs/contributors)
+[![](https://img.shields.io/github/v/release/cs-util-com/cscore?label=Show%20Releases&style=flat-square)](https://github.com/cs-util-com/cscore/releases)
 [![](https://img.shields.io/twitter/follow/csutil_com?label=Show%20News&style=social)](https://twitter.com/csutil_com)
 
 [**Website**](https://cs-util-com.github.io/cscore/) 
