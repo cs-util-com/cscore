@@ -7,7 +7,7 @@
 [![](https://img.shields.io/github/commit-activity/y/cs-util-com/cscore.svg?colorB=006400&style=flat-square)](https://github.com/cs-util-com/cscore/graphs/contributors)
 [![](https://img.shields.io/twitter/follow/csutil_com?label=Show%20News&style=social)](https://twitter.com/csutil_com)
 
-[**Website**](https://www.csutil.com/projects/cscore) 
+[**Website**](https://cs-util-com.github.io/cscore/) 
 **•**
 [**GitHub**](https://github.com/cs-util-com/cscore) 
 **•**
