@@ -1,5 +1,12 @@
 # The cscore Library
-
+[![](https://img.shields.io/badge/Maintained%3F-yes-green.svg?style=flat-square)](https://github.com/cs-util)
+[![](https://img.shields.io/nuget/v/com.csutil.cscore.svg?colorB=006400&style=flat-square)](https://www.nuget.org/packages/com.csutil.cscore)
+[![](https://img.shields.io/github/last-commit/cs-util-com/cscore.svg?colorB=4267b2&style=flat-square)](https://github.com/cs-util-com/cscore/commits)
+[![](https://img.shields.io/github/issues-pr-closed/cs-util-com/cscore.svg?colorB=green&style=flat-square)](https://github.com/cs-util-com/cscore/pulls?q=is%3Aclosed)
+[![](https://img.shields.io/github/issues-closed/cs-util-com/cscore.svg?colorB=006400&style=flat-square)](https://github.com/cs-util-com/cscore/issues)
+[![](https://img.shields.io/github/commit-activity/y/cs-util-com/cscore.svg?colorB=006400&style=flat-square)](https://github.com/cs-util-com/cscore/graphs/contributors)
+![](https://badge.waffle.io/cs-util-com/cscore.svg?columns=all&style=flat-square)
+[![](https://img.shields.io/twitter/follow/csutil_com?label=Show%20News&style=social)](https://twitter.com/csutil_com)
 
 [**Website**](https://www.csutil.com/projects/cscore) 
 **•**
@@ -13,9 +20,11 @@
 
 Fewer 3rd party libraries and dependencies included in a project means fewer code and complexity which in the end leads to less bugs. On the other hand having zero dependencies very likely means that a few fundamental concepts and patterns you will have to implement over and over for each new project. This repo tries to provide a single source for a few simple to extend features to make sure these work great together and build up on each other. Some things like logging, communication of components, dependency and state management, easy to use IO and similar fundamental challenges in software are things all applications benefit from. 
 
-This is why I think it makes sense to put this into a single compact `core` library with great test coverage and great documentation. And these two can go hand in hand, well written tests can serve as a easy to understand documentation + usage examples, which automatically stay up to date since they have to change with the code over time. That's how the unit tests in this project ensure all features are well tested and documented. **See below** for some extracts from these tests.
+This is why I think it makes sense to put this into a single compact `core` library with great test coverage and great documentation. And these two can go hand in hand, well written tests can serve as a easy to understand documentation + usage examples, which automatically stay up to date since they have to change with the code over time. That's how the unit tests in this project ensure all features are well tested and documented. **See below** for some extracts from these tests. To ensure full test coverage mutation testing is used (thanks to [Stryker](https://github.com/stryker-mutator/stryker-net)!)
 
 All components are loosly coupled so that components can be used individually when needed without deep knowledge about the full cscore library required. 
+
+
 
 #  Overview 
 The following summary gives a quick overview of all library features:
@@ -48,22 +57,6 @@ The aim of the cscore package as to stay is slim/minimal as possible while inclu
 * [UnityWebRequest.SendV2](#unitywebrequestsendv2) - UnityWebRequest extension methods
 * [PlayerPrefsV2](#playerprefsv2) - Adds `SetBool`, `SetStringEncrypted` and more, see PlayerPrefsV2Tests.cs for all examples
 * [Running xUnit tests in Unity](#Running-xUnit-tests-in-Unity) - Execute your xUnit tests in Unity even in the built application to ensure everything works as expected in the production runtime
-
-
-### Status
-![](https://img.shields.io/badge/Maintained%3F-yes-green.svg?style=flat-square)
-![](https://img.shields.io/nuget/v/com.csutil.cscore.svg?colorB=006400&style=flat-square)
-![](https://img.shields.io/github/last-commit/cs-util-com/cscore.svg?colorB=4267b2&style=flat-square)
-![](https://img.shields.io/github/issues-closed/cs-util-com/cscore.svg?colorB=006400&style=flat-square)
-![](https://img.shields.io/github/commit-activity/y/cs-util-com/cscore.svg?colorB=006400&style=flat-square)
-[![](https://badge.waffle.io/cs-util-com/cscore.svg?columns=all&style=flat-square)](https://waffle.io/cs-util-com/cscore)
-
-* To get started, see the [installation instructions](#-getting-started) below.
-* To ensure full test coverage mutation testing is used (thanks to [Stryker](https://github.com/stryker-mutator/stryker-net)!)
-* To get in contact and stay updated [see the links below](#How-to-get-in-contact)
-
-
-
 
 # 💡 Usage & Examples
 See below for a full usage overview to explain the APIs with simple examples.
@@ -789,7 +782,6 @@ Or you manually add the following lines to the your `.csproj` file:
 ```
 
 After adding the references, install the packages by executing `dotnet restore` inside the project folder.
-
 
 # 💚 Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
