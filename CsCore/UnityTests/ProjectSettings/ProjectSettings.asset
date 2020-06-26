@@ -677,6 +677,7 @@ PlayerSettings:
   webGLThreadsSupport: 0
   webGLWasmStreaming: 0
   scriptingDefineSymbols:
+    1: ENABLE_IMAGE_MAGICK
     13: CSCORE_EXPERIMENTAL
   platformArchitecture: {}
   scriptingBackend: {}
