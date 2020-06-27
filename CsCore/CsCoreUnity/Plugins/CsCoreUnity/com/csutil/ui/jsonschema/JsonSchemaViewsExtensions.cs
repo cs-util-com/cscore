@@ -87,9 +87,9 @@ namespace com.csutil.ui.jsonschema {
 
         public static SliderFieldView LinkToModel(this SliderFieldView self, float val, Action<float> onNewVal) {
             self.slider.value = val;
-            self.valueDisplay.text = "" + val;
+            self.valueDisplay.text = val + " / " + self.field.maximum;
             self.slider.AddOnValueChangedAction(newVal => {
-                self.valueDisplay.text = "" + newVal;
+                self.valueDisplay.text = newVal + " / " + self.field.maximum;
                 return true;
             });
             self.slider.AddOnValueChangedActionThrottled(newVal => {

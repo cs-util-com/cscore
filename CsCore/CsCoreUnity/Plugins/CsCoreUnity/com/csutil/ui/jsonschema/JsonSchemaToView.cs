@@ -21,6 +21,7 @@ namespace com.csutil.ui.jsonschema {
         public string integerFieldPrefab = "IntegerField";
         public string floatFieldPrefab = "FloatField";
         public string sliderFieldPrefab = "SliderField";
+        public string progressFieldPrefab = "ProgressField";
         public string stringFieldPrefab = "StringField";
         public string enumFieldPrefab = "EnumField";
         public string readOnlyTextFieldPrefab = "ReadOnlyTextField";
@@ -56,14 +57,20 @@ namespace com.csutil.ui.jsonschema {
         public override async Task<GameObject> NewBoolFieldView(JsonSchema field) { return await LoadFieldViewPrefab(boolFieldPrefab); }
 
         public override async Task<GameObject> NewIntegerFieldView(JsonSchema field) {
+            if (field.minimum != null && field.maximum != null) {
+                if (field.readOnly == true) { return await LoadFieldViewPrefab(progressFieldPrefab); }
+                return await LoadFieldViewPrefab(sliderFieldPrefab);
+            }
             if (field.readOnly == true) { return await LoadFieldViewPrefab(readOnlyTextFieldPrefab); }
-            if (field.minimum != null && field.maximum != null) { return await LoadFieldViewPrefab(sliderFieldPrefab); }
             return await LoadFieldViewPrefab(integerFieldPrefab);
         }
 
         public override async Task<GameObject> NewFloatFieldView(JsonSchema field) {
+            if (field.minimum != null && field.maximum != null) {
+                if (field.readOnly == true) { return await LoadFieldViewPrefab(progressFieldPrefab); }
+                return await LoadFieldViewPrefab(sliderFieldPrefab);
+            }
             if (field.readOnly == true) { return await LoadFieldViewPrefab(readOnlyTextFieldPrefab); }
-            if (field.minimum != null && field.maximum != null) { return await LoadFieldViewPrefab(sliderFieldPrefab); }
             return await LoadFieldViewPrefab(floatFieldPrefab);
         }
 

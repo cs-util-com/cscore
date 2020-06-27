@@ -181,6 +181,10 @@ namespace com.csutil.tests.jsonschema {
             [MinMaxRange(0, 130)]
             public int? age;
 
+            [Description("e.g. 99")]
+            [MinMaxRange(0, 160)]
+            public int? progress { get; private set; } = 60;
+
             public float money;
 
             public enum Experience { Beginner, Avg, Expert }
