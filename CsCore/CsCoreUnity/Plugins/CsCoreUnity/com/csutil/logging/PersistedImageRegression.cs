@@ -63,11 +63,9 @@ namespace com.csutil {
                 idFolder.CreateV2().GetChild(configFileName + ".example").SaveAsJson(config, asPrettyString: true);
             }
 
-
             yield return new WaitForEndOfFrame();
             Texture2D screenShot = ScreenCapture.CaptureScreenshotAsTexture();
-            //Camera c = Camera.main;
-            //Texture2D screenShot = c.CaptureScreenshot(400); // Would not capture UI?
+            // Texture2D screenShot = Camera.allCameras.CaptureScreenshot(); // Does not capture UI 
 
             if (newImg.Exists) { newImg.CopyToV2(backup, replaceExisting: false); }
 

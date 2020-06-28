@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using Zio;
@@ -21,18 +23,29 @@ namespace com.csutil {
             targetFile.SaveStream(new MemoryStream(self.EncodeToJPG(quality)));
         }
 
-        public static Texture2D CaptureScreenshot(this Camera self, int width) {
-            return self.CaptureScreenshot(width, (ScreenV2.height / ScreenV2.width) * width);
+        [Obsolete("Does not capture UI, consider using ScreenCapture.CaptureScreenshotAsTexture instead")]
+        public static Texture2D CaptureScreenshot(this Camera self, int width = 0, int height = 0) {
+            return CaptureScreenshot(new Camera[] { self }, width, height);
         }
 
-        public static Texture2D CaptureScreenshot(this Camera self, int width, int height) {
-            RenderTexture renderTexture = new RenderTexture(width, height, 24);
-            self.targetTexture = renderTexture;
+        [Obsolete("Does not capture UI, consider using ScreenCapture.CaptureScreenshotAsTexture instead")]
+        public static Texture2D CaptureScreenshot(this Camera[] cameras, int width = 0, int height = 0) {
+            if (width == 0) { width = ScreenV2.width; }
+            if (height == 0) { height = width * ScreenV2.height / ScreenV2.width; }
             Texture2D texture2d = new Texture2D(width, height, TextureFormat.RGB24, false);
-            self.Render();
+            RenderTexture renderTexture = new RenderTexture(texture2d.width, texture2d.height, 24);
+
+            foreach (Camera self in cameras) {
+                RenderTexture prev = self.targetTexture;
+                self.targetTexture = renderTexture;
+                self.Render();
+                self.targetTexture = prev;
+            }
+
             RenderTexture.active = renderTexture;
-            texture2d.ReadPixels(new Rect(0, 0, width, height), 0, 0);
-            self.targetTexture = null;
+            texture2d.ReadPixels(new Rect(0, 0, texture2d.width, texture2d.height), 0, 0);
+            texture2d.Apply();
+
             RenderTexture.active = null;
             renderTexture.Destroy();
             return texture2d;
