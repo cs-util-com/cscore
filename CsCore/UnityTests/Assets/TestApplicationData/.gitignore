@@ -2,3 +2,4 @@
 *.regression.jpg
 *.diff.jpg
 *.example
+CachedAssetDependencyGraph.bin
