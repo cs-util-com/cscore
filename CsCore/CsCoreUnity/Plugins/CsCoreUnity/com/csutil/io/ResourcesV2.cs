@@ -32,6 +32,9 @@ namespace com.csutil {
         }
 
         public static T LoadV2<T>(string pathInResourcesFolder) {
+            if (pathInResourcesFolder.IsNullOrEmpty()) {
+                throw new ArgumentNullException("pathInResourcesFolder null or emtpy");
+            }
             pathInResourcesFolder = RemoveExtensionIfNeeded(pathInResourcesFolder, ".prefab");
             pathInResourcesFolder = RemoveExtensionIfNeeded(pathInResourcesFolder, ".asset");
             if ((typeof(T).IsCastableTo<string>())) {
