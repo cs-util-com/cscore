@@ -8,19 +8,19 @@ namespace com.csutil.logging {
     public class LogToUnityDebugLog : LogDefaultImpl {
 
         protected override void PrintDebugMessage(string debugLogMsg, params object[] args) {
-            Debug.Log(IsEditMode() + debugLogMsg, GetGoFrom(args));
+            Debug.Log(IsEditMode() + debugLogMsg, GetUnityObjFrom(args));
         }
 
         protected override void PrintWarningMessage(string warningMsg, params object[] args) {
-            Debug.LogWarning(IsEditMode() + warningMsg, GetGoFrom(args));
+            Debug.LogWarning(IsEditMode() + warningMsg, GetUnityObjFrom(args));
         }
 
         protected override void PrintErrorMessage(string errorMsg, params object[] args) {
-            Debug.LogError(IsEditMode() + errorMsg, GetGoFrom(args));
+            Debug.LogError(IsEditMode() + errorMsg, GetUnityObjFrom(args));
         }
 
         protected override void PrintException(Exception e, params object[] args) {
-            Debug.LogException(e, GetGoFrom(args));
+            Debug.LogException(e, GetUnityObjFrom(args));
         }
 
         private string IsEditMode() {
@@ -35,8 +35,8 @@ namespace com.csutil.logging {
             return base.ArgToString(arg);
         }
 
-        private static GameObject GetGoFrom(object[] args) {
-            return args.Filter(x => x is GameObject).FirstOrDefault() as GameObject;
+        private static UnityEngine.Object GetUnityObjFrom(object[] args) {
+            return args.Filter(x => x is UnityEngine.Object).FirstOrDefault() as UnityEngine.Object;
         }
 
         public override StopwatchV2 LogMethodEntered(string methodName, object[] args) {
