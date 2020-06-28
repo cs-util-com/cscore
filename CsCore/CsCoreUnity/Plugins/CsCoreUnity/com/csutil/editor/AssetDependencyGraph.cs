@@ -14,7 +14,7 @@ namespace com.csutil.editor {
         private static Dictionary<string, List<string>> _dict;
         private static Dictionary<string, List<string>> Dict => _dict ?? LoadDependencyGraphFromFile() ?? RebuildDependencyGraph();
 
-        [MenuItem("Window/CsUtil/Force Rebuild Of Asset Dependency Graph")]
+        [MenuItem("Window/CsUtil/CsCore/Force Rebuild Of Asset Dependency Graph")]
         static Dictionary<string, List<string>> RebuildDependencyGraph() {
             try {
                 var t = Log.MethodEntered();
