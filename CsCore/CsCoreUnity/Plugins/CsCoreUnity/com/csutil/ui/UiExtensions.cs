@@ -60,6 +60,7 @@ namespace com.csutil {
                     }
                 }
                 catch (Exception e) {
+                    Log.e(e);
                     tcs.TrySetException(e);
                 }
             });
