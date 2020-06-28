@@ -15,6 +15,7 @@ namespace com.csutil {
             public bool logAsWarning = true;
             public bool openExternallyOnAssertFail = true;
             public int screenshotQuality = 70;
+            public int screenshotUpscaleFactor = 1;
             public double maxAllowedDiff = 0.0005;
             public string customErrorMessage = "";
         }
@@ -64,7 +65,7 @@ namespace com.csutil {
             }
 
             yield return new WaitForEndOfFrame();
-            Texture2D screenShot = ScreenCapture.CaptureScreenshotAsTexture();
+            Texture2D screenShot = ScreenCapture.CaptureScreenshotAsTexture(config.screenshotUpscaleFactor);
             // Texture2D screenShot = Camera.allCameras.CaptureScreenshot(); // Does not capture UI 
 
             if (newImg.Exists) { newImg.CopyToV2(backup, replaceExisting: false); }
