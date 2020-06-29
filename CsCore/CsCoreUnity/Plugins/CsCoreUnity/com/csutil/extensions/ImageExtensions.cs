@@ -65,13 +65,14 @@ namespace com.csutil {
             return target;
         }
 
-        public static bool ResizeV2(this Texture2D self, int width, int height = 0, bool hasMipMap = true, FilterMode filter = FilterMode.Bilinear) {
+        public static bool ResizeV2(this Texture2D self, float width, float height = 0, bool hasMipMap = true, FilterMode filter = FilterMode.Bilinear,
+                                                               float horCropCenter = 0.5f, float vertCropCenter = 0.5f, float horF = 1, float vertF = 1) {
 
             if (width == 0 && height == 0) { throw new ArgumentException("Either height or width have to be set, both 0"); }
             var aspect = self.width / (float)self.height;
-            if (width == 0) { width = (int)(height * aspect); }
+            if (width == 0) { width = (height * aspect); }
             var width2 = width;
-            var height2 = (int)(width / aspect);
+            var height2 = (width / aspect);
             if (height == 0) { height = height2; }
             if (width2 < width) {
                 height2 = height2 * (width / width2);
@@ -82,19 +83,20 @@ namespace com.csutil {
                 height2 = height;
             }
 
-            RenderTexture tempRenderTex = RenderTexture.GetTemporary(width2, height2, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default);
+            width2 = (width2 / horF);
+            height2 = (height2 / vertF);
+
+            RenderTexture tempRenderTex = RenderTexture.GetTemporary((int)width2, (int)height2, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default);
             try {
                 RenderTexture.active = tempRenderTex;
                 Graphics.Blit(self, tempRenderTex);
                 self.filterMode = filter;
-                if (!self.Resize(width, height, self.format, hasMipMap)) { return false; }
+                if (!self.Resize((int)width, (int)height, self.format, hasMipMap)) { return false; }
 
-                var wCenter = width2 / 2;
-                var wStartPoint = wCenter - width / 2;
+                var wStartPoint = (width2 - width / horF) * horCropCenter;
                 if (wStartPoint < 0) { wStartPoint = 0; }
 
-                var hCenter = height2 / 2;
-                var hStartPoint = hCenter - height / 2;
+                var hStartPoint = (height2 - height / horF) * vertCropCenter;
                 if (hStartPoint < 0) { hStartPoint = 0; }
 
                 self.ReadPixels(new Rect(wStartPoint, hStartPoint, width2, height2), 0, 0);
@@ -103,7 +105,6 @@ namespace com.csutil {
             }
             finally { RenderTexture.ReleaseTemporary(tempRenderTex); }
         }
-
     }
 
 }
