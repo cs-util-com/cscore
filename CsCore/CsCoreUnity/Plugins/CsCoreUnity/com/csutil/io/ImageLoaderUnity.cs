@@ -42,18 +42,23 @@ namespace com.csutil {
         /// thumbnail as a placeholder which is especially helpful when loading larger images </summary>
         /// <param name="imgRef"> The IFileRef that contains the url and target dir </param>
         /// <param name="targetDir"> The directory that should be used to download to </param>
-        /// <param name="thumbnailPixelWidth"> The pixel width of the automatic thumbnail, e.g 64 </param>
+        /// <param name="thumbnailPixelWidth"> The pixel width of the automatic thumbnail, e.g 256 </param>
         /// <returns> The loaded Texture2D of the image </returns>
         public static async Task<Texture2D> LoadAndPersistTo(this Image self, IFileRef imgRef, DirectoryEntry targetDir, int thumbnailPixelWidth) {
+            Texture2D tempThumbTexture = null;
+            if (imgRef.fileName != null) { // Try load local thumbnail as quick as possible:
+                var i = targetDir.GetChild(imgRef.fileName);
+                var t = i.Parent.GetChild(i.NameWithoutExtension + ".thm");
+                tempThumbTexture = await LoadThumbnailIfFound(self, t, tempThumbTexture);
+            }
+
             var fileWasDownloaded = await imgRef.DownloadTo(targetDir);
 
             var imageFile = imgRef.GetFileEntry(targetDir.FileSystem);
             var thumbnailFile = imageFile.Parent.GetChild(imageFile.NameWithoutExtension + ".thm");
-            Texture2D tempThumbTexture = null;
-            if (!fileWasDownloaded && thumbnailFile.Exists) {
-                // If there was no new file downloaded and the thumbnail is available load it:
-                tempThumbTexture = await thumbnailFile.LoadTexture2D();
-                self.sprite = tempThumbTexture.ToSprite();
+            if (!fileWasDownloaded && tempThumbTexture == null) {
+                // If there was no new file downloaded and the thumbnail is available and not loaded yet:
+                tempThumbTexture = await LoadThumbnailIfFound(self, thumbnailFile, tempThumbTexture);
             }
             if (!imageFile.Exists) { return null; }
 
@@ -68,8 +73,16 @@ namespace com.csutil {
                 thumbnail.SaveToJpgFile(thumbnailFile);
                 thumbnail.Destroy(true);
             }
-
             return texture2d;
+        }
+
+        private static async Task<Texture2D> LoadThumbnailIfFound(Image self, FileEntry thumbnailFile, Texture2D tempThumbTexture) {
+            if (thumbnailFile.Exists) {
+                if (tempThumbTexture != null) { tempThumbTexture.Destroy(true); }
+                tempThumbTexture = await thumbnailFile.LoadTexture2D();
+                self.sprite = tempThumbTexture.ToSprite();
+            }
+            return tempThumbTexture;
         }
     }
 
