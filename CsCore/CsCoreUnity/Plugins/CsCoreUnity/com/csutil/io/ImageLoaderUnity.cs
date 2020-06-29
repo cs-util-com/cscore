@@ -1,10 +1,12 @@
 ﻿using com.csutil.io;
+using com.csutil.model;
 using com.csutil.ui.Components;
 using StbImageLib;
 using System;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
+using Zio;
 
 namespace com.csutil {
 
@@ -36,6 +38,39 @@ namespace com.csutil {
             return texture2d;
         }
 
+        /// <summary> Downloads and shows the passed IFileRef and if a local thumbnail exists first loads the 
+        /// thumbnail as a placeholder which is especially helpful when loading larger images </summary>
+        /// <param name="imgRef"> The IFileRef that contains the url and target dir </param>
+        /// <param name="targetDir"> The directory that should be used to download to </param>
+        /// <param name="thumbnailPixelWidth"> The pixel width of the automatic thumbnail, e.g 64 </param>
+        /// <returns> The loaded Texture2D of the image </returns>
+        public static async Task<Texture2D> LoadAndPersistTo(this Image self, IFileRef imgRef, DirectoryEntry targetDir, int thumbnailPixelWidth) {
+            var fileWasDownloaded = await imgRef.DownloadTo(targetDir);
+
+            var imageFile = imgRef.GetFileEntry(targetDir.FileSystem);
+            var thumbnailFile = imageFile.Parent.GetChild(imageFile.NameWithoutExtension + ".thm");
+            Texture2D tempThumbTexture = null;
+            if (!fileWasDownloaded && thumbnailFile.Exists) {
+                // If there was no new file downloaded and the thumbnail is available load it:
+                tempThumbTexture = await thumbnailFile.LoadTexture2D();
+                self.sprite = tempThumbTexture.ToSprite();
+            }
+            if (!imageFile.Exists) { return null; }
+
+            // Load the full image as a texture and show it in the UI:
+            Texture2D texture2d = await imageFile.LoadTexture2D();
+            self.sprite = texture2d.ToSprite();
+            if (tempThumbTexture != null) { tempThumbTexture.Destroy(true); }
+
+            if (fileWasDownloaded || !thumbnailFile.Exists) { // Store a thumbnail file if needed:
+                Texture2D thumbnail = texture2d.CopyTexture();
+                thumbnail.ResizeV2(thumbnailPixelWidth);
+                thumbnail.SaveToJpgFile(thumbnailFile);
+                thumbnail.Destroy(true);
+            }
+
+            return texture2d;
+        }
     }
 
 }

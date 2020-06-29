@@ -21,8 +21,13 @@ namespace com.csutil.model {
             self.fileName = value.GetName();
         }
 
+        public static DirectoryEntry GetDirectoryEntry(this IFileRef self, IFileSystem fs) {
+            if (self.dir.IsNullOrEmpty()) { throw new InvalidDataException("IFileRef.dir not set"); }
+            return new DirectoryEntry(fs, self.dir);
+        }
+
         public static FileEntry GetFileEntry(this IFileRef self, IFileSystem fs) {
-            return fs.GetFileEntry(self.GetPath());
+            return self.GetDirectoryEntry(fs).GetChild(self.fileName);
         }
 
         public static async Task<bool> DownloadTo(this IFileRef self, DirectoryEntry targetDirectory, Action<float> onProgress = null) {
@@ -49,6 +54,7 @@ namespace com.csutil.model {
 
         private static bool IsAlreadyDownloaded(this IFileRef self, Headers headers, FileEntry targetFile) {
             if (targetFile.Exists) {
+                AssertV2.IsFalse(self.checksums.IsNullOrEmpty(), "targetFile.Exists but no checksums stored");
                 // Cancel download if etag header matches the locally stored one:
                 if (self.HasMatchingChecksum(headers.GetEtagHeader())) { return true; }
                 // Cancel download if local file with the same MD5 hash exists:

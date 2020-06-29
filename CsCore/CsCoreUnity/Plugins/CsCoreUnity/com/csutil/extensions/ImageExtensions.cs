@@ -18,7 +18,7 @@ namespace com.csutil {
             return await ImageLoaderUnity.ToTexture2D(self.ReadAllBytes());
         }
 
-        public static void SaveToFile(this Texture2D self, FileEntry targetFile, int quality = 90) {
+        public static void SaveToJpgFile(this Texture2D self, FileEntry targetFile, int quality = 90) {
             if (!targetFile.Parent.Exists) { targetFile.Parent.CreateV2(); }
             targetFile.SaveStream(new MemoryStream(self.EncodeToJPG(quality)));
         }

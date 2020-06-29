@@ -70,7 +70,7 @@ namespace com.csutil {
 
             if (newImg.Exists) { newImg.CopyToV2(backup, replaceExisting: false); }
 
-            screenShot.SaveToFile(newImg, config.screenshotQuality);
+            screenShot.SaveToJpgFile(newImg, config.screenshotQuality);
             screenShot.Destroy();
 
             var diffImg = CalculateDiffImage(oldImg, newImg, config.maxAllowedDiff);
