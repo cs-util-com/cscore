@@ -83,8 +83,8 @@ namespace com.csutil {
                 height2 = height;
             }
 
-            width2 = (width2 / horF);
-            height2 = (height2 / vertF);
+            width2 /= horF;
+            height2 /= vertF;
 
             RenderTexture tempRenderTex = RenderTexture.GetTemporary((int)width2, (int)height2, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default);
             try {
@@ -93,10 +93,10 @@ namespace com.csutil {
                 self.filterMode = filter;
                 if (!self.Resize((int)width, (int)height, self.format, hasMipMap)) { return false; }
 
-                var wStartPoint = (width2 - width / horF) * horCropCenter;
+                var wStartPoint = (width2 - width) * horCropCenter;
                 if (wStartPoint < 0) { wStartPoint = 0; }
 
-                var hStartPoint = (height2 - height / horF) * vertCropCenter;
+                var hStartPoint = (height2 - height) * vertCropCenter;
                 if (hStartPoint < 0) { hStartPoint = 0; }
 
                 self.ReadPixels(new Rect(wStartPoint, hStartPoint, width2, height2), 0, 0);

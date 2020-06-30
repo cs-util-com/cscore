@@ -36,7 +36,12 @@ namespace com.csutil.tests {
 
             map.Get<Button>("Button4").SetOnClickAction(async delegate {
                 Texture2D image = await LoadImage();
-                image.ResizeV2(width, height, horCropCenter: 1, vertCropCenter: 1, horF: 0.4f, vertF: 0.4f);
+
+                //image.ResizeV2(width, height, horCropCenter: 0f, vertCropCenter: 0f, horF: 0.2f, vertF: 0.2f); // E0
+                //image.ResizeV2(width, height, horCropCenter: 1f, vertCropCenter: 0f, horF: 0.2f, vertF: 0.2f); // E9 
+                image.ResizeV2(width, height, horCropCenter: 1f, vertCropCenter: 1f, horF: 0.2f, vertF: 0.2f); // A9
+                //image.ResizeV2(width, height, horCropCenter: 0f, vertCropCenter: 1f, horF: 0.2f, vertF: 0.2f); // A0
+
                 map.Get<Image>("Image4").sprite = image.ToSprite();
             });
 
