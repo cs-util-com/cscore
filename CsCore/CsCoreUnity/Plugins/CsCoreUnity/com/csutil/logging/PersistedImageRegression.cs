@@ -138,7 +138,8 @@ namespace com.csutil {
                 }
             } while (noDiffCounter < consecutiveNoDiffNeeded);
 #else
-                Log.w("ENABLE_IMAGE_MAGICK define not active, see instructions 'readme Image Magick Unity Installation Instructions.txt'");
+            Log.w("ENABLE_IMAGE_MAGICK define not active, see instructions 'readme Image Magick Unity Installation Instructions.txt'");
+            yield return null;
 #endif
         }
 
