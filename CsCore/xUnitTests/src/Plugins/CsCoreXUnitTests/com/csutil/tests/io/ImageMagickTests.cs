@@ -45,7 +45,7 @@ namespace com.csutil.tests {
 
             using (MagickImage newImg = new MagickImage()) {
                 newImg.LoadFromFileEntry(imFileToDiff_modified);
-                var diff = newImg.Compare(imFileToDiff_original, 0.000001);
+                var diff = newImg.Compare(imFileToDiff_original, ErrorMetric.MeanSquared, 0.000001);
                 Assert.NotNull(diff);
             }
 

@@ -18,6 +18,11 @@ namespace com.csutil {
             public int screenshotUpscaleFactor = 1;
             public double maxAllowedDiff = 0.0005;
             public string customErrorMessage = "";
+            /// <summary> Any of the ImageMagick.ErrorMetric enum entry names </summary>
+            public string errorMetric = "MeanSquared";
+            public float minReqMsWithNoVisualChange = 1000;
+            public float msBetweenVisualChangeDetectCaptures = 200;
+            public long maxMsToWaitForNoVisualChange = 5000;
         }
 
         public Config config = new Config();
@@ -51,29 +56,22 @@ namespace com.csutil {
             id = EnvironmentV2.SanatizeToFileName(id);
             if (id.IsNullOrEmpty()) { throw new ArgumentNullException("Invalid ID passed"); }
 
-            var idFolder = folder.GetChildDir(id);
+            var idFolder = GetFolderFor(id);
             var oldImg = idFolder.GetChild(id + ".regression.jpg");
             var newImg = idFolder.GetChild(id + ".jpg");
             var backup = idFolder.GetChild(id + ".jpg.backup");
 
-            var configFile = idFolder.GetChild(configFileName);
-            Config config = this.config;
-            if (configFile.IsNotNullAndExists()) {
-                config = configFile.LoadAs<Config>();
-            } else {
-                idFolder.CreateV2().GetChild(configFileName + ".example").SaveAsJson(config, asPrettyString: true);
-            }
+            Config config = LoadConfigFor(id);
 
             yield return new WaitForEndOfFrame();
             Texture2D screenShot = ScreenCapture.CaptureScreenshotAsTexture(config.screenshotUpscaleFactor);
             // Texture2D screenShot = Camera.allCameras.CaptureScreenshot(); // Does not capture UI 
 
             if (newImg.Exists) { newImg.CopyToV2(backup, replaceExisting: false); }
-
             screenShot.SaveToJpgFile(newImg, config.screenshotQuality);
             screenShot.Destroy();
 
-            var diffImg = CalculateDiffImage(oldImg, newImg, config.maxAllowedDiff);
+            var diffImg = CalculateDiffImage(oldImg, newImg, config.maxAllowedDiff, config.errorMetric);
             if (diffImg != null) {
                 var e = $"Visual diff to previous '{id}' detected! To approve an allowed visual change, delete '{oldImg.Name}'";
                 if (!config.customErrorMessage.IsNullOrEmpty()) { e = config.customErrorMessage + "/n" + e; }
@@ -101,12 +99,72 @@ namespace com.csutil {
 
         }
 
-        private static FileEntry CalculateDiffImage(FileEntry oldImg, FileEntry newImg, double maxAllowedDiff) {
+        private Config LoadConfigFor(string id) {
+            var configFile = GetFolderFor(id).GetChild(configFileName);
+            Config config = this.config;
+            if (configFile.IsNotNullAndExists()) {
+                config = configFile.LoadAs<Config>();
+            } else {
+                GetFolderFor(id).GetChild(configFileName + ".example").SaveAsJson(config, asPrettyString: true);
+            }
+            return config;
+        }
+
+        private DirectoryEntry GetFolderFor(string id) { return folder.GetChildDir(id).CreateV2(); }
+
+        public Task WaitForNoVisualChangeInScene(Config config = null) {
+            if (config == null) { config = this.config; }
+            StackTrace stacktrace = new StackTrace(skipFrames: 2, fNeedFileInfo: true);
+            return MainThread.instance.StartCoroutineAsTask(WaitForNoVisualChangeCoroutine(config));
+        }
+
+        private IEnumerator WaitForNoVisualChangeCoroutine(Config config) {
+#if ENABLE_IMAGE_MAGICK
+            var consecutiveNoDiffNeeded = config.minReqMsWithNoVisualChange / config.msBetweenVisualChangeDetectCaptures;
+            var noDiffCounter = 0;
+            var timer = Stopwatch.StartNew();
+            do {
+                yield return new WaitForEndOfFrame();
+                Texture2D screenShot = ScreenCapture.CaptureScreenshotAsTexture(config.screenshotUpscaleFactor);
+                yield return new WaitForSeconds(config.msBetweenVisualChangeDetectCaptures / 1000f);
+                yield return new WaitForEndOfFrame();
+                Texture2D screenShot2 = ScreenCapture.CaptureScreenshotAsTexture(config.screenshotUpscaleFactor);
+                var visualDiffDetected = AreVisuallyDifferent(screenShot, screenShot2, config);
+                if (!visualDiffDetected) { noDiffCounter++; } else { noDiffCounter = 0; }
+                screenShot.Destroy();
+                screenShot2.Destroy();
+                if (timer.ElapsedMilliseconds > config.maxMsToWaitForNoVisualChange) {
+                    throw new TimeoutException($"WaitForNoVisualChange not done after {config.maxMsToWaitForNoVisualChange}ms");
+                }
+            } while (noDiffCounter < consecutiveNoDiffNeeded);
+#else
+                Log.w("ENABLE_IMAGE_MAGICK define not active, see instructions 'readme Image Magick Unity Installation Instructions.txt'");
+#endif
+        }
+
+#if ENABLE_IMAGE_MAGICK
+        private bool AreVisuallyDifferent(Texture2D img1, Texture2D img2, Config config) {
+            using (ImageMagick.MagickImage s1 = new ImageMagick.MagickImage()) {
+                s1.Read(img1.EncodeToJPG(config.screenshotQuality));
+                using (ImageMagick.MagickImage s2 = new ImageMagick.MagickImage()) {
+                    s2.Read(img2.EncodeToJPG(config.screenshotQuality));
+                    var errorMetric = EnumUtil.Parse<ImageMagick.ErrorMetric>(config.errorMetric);
+                    var diffValue = s1.CompareV2(s2, errorMetric, out ImageMagick.MagickImage diffImg);
+                    if (diffValue < config.maxAllowedDiff) { return false; }
+                    diffImg.Dispose();
+                }
+            }
+            return true;
+        }
+#endif
+
+        private static FileEntry CalculateDiffImage(FileEntry oldImg, FileEntry newImg, double maxAllowedDiff, string errorMetric) {
             if (oldImg.Exists) {
 #if ENABLE_IMAGE_MAGICK
                 using (ImageMagick.MagickImage original = new ImageMagick.MagickImage()) {
                     original.LoadFromFileEntry(oldImg);
-                    var diff = original.Compare(newImg, maxAllowedDiff);
+                    ImageMagick.ErrorMetric eM = EnumUtil.Parse<ImageMagick.ErrorMetric>(errorMetric);
+                    var diff = original.Compare(newImg, eM, maxAllowedDiff);
                     if (diff != null) {
                         return diff;
                     } else {
