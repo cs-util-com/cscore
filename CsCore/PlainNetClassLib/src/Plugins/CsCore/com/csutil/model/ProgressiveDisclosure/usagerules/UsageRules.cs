@@ -23,23 +23,11 @@ namespace com.csutil.model.usagerules {
         public string featureId;
         public int? days;
         public int? timesUsed;
+        public AppRule[] andRules;
 
         public AppRule(string ruleType) { this.ruleType = ruleType; }
 
         public Func<Task<bool>> isTrue { get; set; }
-    }
-
-    public class ConcatRule : AppRule {
-
-        public AppRule[] andRules;
-
-        public ConcatRule(params AppRule[] andRules) : base(AppRule.ConcatRule) {
-            this.andRules = andRules;
-            isTrue = async () => {
-                foreach (var rule in andRules) { if (!await rule.isTrue()) { return false; } }
-                return true;
-            };
-        }
 
     }
 

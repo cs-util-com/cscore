@@ -29,60 +29,44 @@ namespace com.csutil.tests.model {
                 Assert.Equal(100, allStartEvents.Count());
             }
             {
-                var self = new AppRule(AppRule.FeatureUsedXDays) { featureId = featureId, days = days };
-                self.SetupUsing(analytics);
+                AppRule self = analytics.NewFeatureUsedXDaysRule(featureId, days);
                 Assert.False(await self.isTrue());
             }
             {
-                var self = new AppRule(AppRule.FeatureUsedXDays) { featureId = featureId, days = days };
-                self.SetupUsing(analytics);
-                Assert.False(await self.isTrue());
-            }
-            {
-                var self = new AppRule(AppRule.FeatureNotUsedXDays) { featureId = featureId, days = days };
-                self.SetupUsing(analytics);
-
+                AppRule self = analytics.NewFeatureNotUsedXDaysRule(featureId, days);
                 Assert.True(await self.isTrue());
             }
             {
-                var self = new AppRule(AppRule.AppNotUsedXDays) { days = days };
-                self.SetupUsing(analytics);
+                AppRule self = analytics.NewAppNotUsedXDaysRule(days);
                 Assert.True(await self.isTrue());
             }
             {
-                var rule1 = new AppRule(AppRule.AppUsedXDays) { days = days };
-                rule1.SetupUsing(analytics);
+                AppRule rule1 = analytics.NewAppUsedXDaysRule(days);
                 Assert.False(await rule1.isTrue());
 
-                var rule2 = new AppRule(AppRule.FeatureUsedXTimes) { featureId = featureId, timesUsed = times };
-                rule2.SetupUsing(analytics);
+                AppRule rule2 = analytics.NewFeatureUsedXTimesRule(featureId, times);
                 Assert.True(await rule2.isTrue());
 
-                var rule3 = new AppRule(AppRule.FeatureNotUsedInTheLastXDays) { featureId = featureId, days = days };
-                rule3.SetupUsing(analytics);
+                AppRule rule3 = analytics.NewFeatureNotUsedInTheLastXDaysRule(featureId, days);
                 Assert.False(await rule3.isTrue());
 
-                var featureNotUsedAnymoreRule = new ConcatRule(rule1, rule2, rule3);
+                AppRule featureNotUsedAnymoreRule = analytics.NewConcatRule(rule1, rule2, rule3);
                 Assert.False(await featureNotUsedAnymoreRule.isTrue());
             }
             {
-                var self = new AppRule(AppRule.FeatureNotUsedXTimes) { featureId = featureId, timesUsed = times };
-                self.SetupUsing(analytics);
+                AppRule self = analytics.NewFeatureNotUsedXTimesRule(featureId, times);
                 Assert.False(await self.isTrue());
             }
             {
-                var self = new AppRule(AppRule.AppUsedInTheLastXDays) { days = days };
-                self.SetupUsing(analytics);
+                AppRule self = analytics.NewAppUsedInTheLastXDaysRule(days);
                 Assert.True(await self.isTrue());
             }
             {
-                var self = new AppRule(AppRule.AppNotUsedInTheLastXDays) { days = days };
-                self.SetupUsing(analytics);
+                AppRule self = analytics.NewAppNotUsedInTheLastXDaysRule(days);
                 Assert.False(await self.isTrue());
             }
             {
-                var self = new AppRule(AppRule.FeatureUsedInTheLastXDays) { featureId = featureId, days = days };
-                self.SetupUsing(analytics);
+                AppRule self = analytics.NewFeatureUsedInTheLastXDaysRule(featureId, days);
                 Assert.True(await self.isTrue());
             }
         }
