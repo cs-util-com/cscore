@@ -2,7 +2,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using com.csutil.keyvaluestore;
 using com.csutil.logging.analytics;
-using com.csutil.model;
 using com.csutil.model.usagerules;
 using Xunit;
 
@@ -21,13 +20,8 @@ namespace com.csutil.tests.model {
 
             var analytics = SetupLocalAnalyticsSystem();
             await SimulateFeatureUsage(featureId, eventCount: 100);
-            {
-                var featureEventStore = analytics.categoryStores[featureId];
-                var allFeatureEvents = await featureEventStore.GetAll();
-                Assert.Equal(100, allFeatureEvents.Count());
-                var allStartEvents = allFeatureEvents.Filter(x => x.action == EventConsts.START);
-                Assert.Equal(100, allStartEvents.Count());
-            }
+            await AssertFeatureUsageDetected(analytics, featureId);
+
             {
                 UsageRule rule = analytics.NewFeatureUsedXDaysRule(featureId, days);
                 Assert.False(await rule.isTrue());
@@ -81,42 +75,18 @@ namespace com.csutil.tests.model {
         }
 
         private static async Task SimulateFeatureUsage(string featureId, int eventCount) {
-            // Simulate User progression by causing analytics events:
             for (int i = 0; i < eventCount; i++) {
                 AppFlow.TrackEvent(featureId, EventConsts.START);
-                await TaskV2.Delay(1);
+                await TaskV2.Delay(1); // Delay 1ms so that events cant have the same timestamp
             }
         }
 
-        [Fact]
-        public async Task ExampleUsage2() {
-
-            var testStore = new TestFeatureStore();
-            var mngr = new FeatureFlagManager<TestFeature>(testStore);
-            var f1 = await mngr.GetFeatureFlag("f1");
-            Assert.Null(f1);
-
-            // var xpSystem = new TestXpSystem();
-
-        }
-
-        // private class TestXpSystem : IProgressionSystem<TestFeature> {
-        //     public Task<IEnumerable<TestFeature>> GetLockedFeatures() { throw new System.NotImplementedException(); }
-        //     public Task<IEnumerable<TestFeature>> GetUnlockedFeatures() { throw new System.NotImplementedException(); }
-        //     public Task<bool> IsFeatureUnlocked(TestFeature featureFlag) { throw new System.NotImplementedException(); }
-        // }
-
-
-        private class TestFeatureStore : BaseFeatureFlagStore<TestFeature, IFeatureFlagLocalState> {
-            public TestFeatureStore() : base(new InMemoryKeyValueStore(), new InMemoryKeyValueStore()) { }
-            protected override string GenerateFeatureKey(string featureId) { return featureId; }
-        }
-
-        private class TestFeature : IFeatureFlag {
-            public string id { get; set; }
-            public int rolloutPercentage { get; set; }
-            public int requiredXp { get; set; }
-            public IFeatureFlagLocalState localState { get; set; } = new FeatureFlagLocalState();
+        private static async Task AssertFeatureUsageDetected(LocalAnalytics analytics, string featureId) {
+            var featureEventStore = analytics.categoryStores[featureId];
+            var allFeatureEvents = await featureEventStore.GetAll();
+            Assert.Equal(100, allFeatureEvents.Count());
+            var allStartEvents = allFeatureEvents.Filter(x => x.action == EventConsts.START);
+            Assert.Equal(100, allStartEvents.Count());
         }
 
     }
