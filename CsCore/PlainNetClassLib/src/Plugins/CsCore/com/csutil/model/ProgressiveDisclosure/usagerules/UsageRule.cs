@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace com.csutil.model.usagerules {
 
-    public class AppRule {
+    public class UsageRule {
 
         public const string ConcatRule = "ConcatRule";
 
@@ -23,9 +23,9 @@ namespace com.csutil.model.usagerules {
         public string featureId;
         public int? days;
         public int? timesUsed;
-        public AppRule[] andRules;
+        public UsageRule[] andRules;
 
-        public AppRule(string ruleType) { this.ruleType = ruleType; }
+        public UsageRule(string ruleType) { this.ruleType = ruleType; }
 
         public Func<Task<bool>> isTrue { get; set; }
 
