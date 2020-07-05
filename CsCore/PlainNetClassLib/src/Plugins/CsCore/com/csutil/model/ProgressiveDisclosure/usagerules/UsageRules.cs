@@ -18,50 +18,18 @@ namespace com.csutil.model.usagerules {
         }
     }
 
-    public abstract class AppDays : AppRule {
+    public class AppDaysRule : AppRule {
         public int? days;
-
-        public static TimeSpan GetTimeSpanSinceLatestLaunch() {
-            return DateTimeV2.UtcNow - EnvironmentV2.instance.systemInfo.GetLatestLaunchDate();
-        }
     }
 
-    public abstract class FeatureDays : AppRule {
+    public class FeatureDaysRule : AppRule {
         public string featureId;
         public int? days;
     }
 
-    public abstract class FeatureTimes : AppRule {
+    public class FeatureCounterRule : AppRule {
         public string featureId;
         public int? timesUsed;
     }
-
-    public class AppUsedXDays : AppDays { }
-
-    public class AppNotUsedXDays : AppDays { }
-
-    public class FeatureUsedXDays : FeatureDays { }
-
-    public class FeatureNotUsedXDays : FeatureDays { }
-
-    public class AppUsedInTheLastXDays : AppDays {
-        public AppUsedInTheLastXDays() {
-            isTrue = () => Task.FromResult(GetTimeSpanSinceLatestLaunch().Days < days);
-        }
-    }
-
-    public class AppNotUsedInTheLastXDays : AppDays {
-        public AppNotUsedInTheLastXDays() {
-            isTrue = () => Task.FromResult(GetTimeSpanSinceLatestLaunch().Days > days);
-        }
-    }
-
-    public class FeatureUsedInTheLastXDays : FeatureDays { }
-
-    public class FeatureNotUsedInTheLastXDays : FeatureDays { }
-
-    public class FeatureUsedXTimes : FeatureTimes { }
-
-    public class FeatureNotUsedXTimes : FeatureTimes { }
 
 }

@@ -32,61 +32,33 @@ namespace com.csutil.tests.model {
             }
 
             {
-                var featureUsedXDays = new FeatureUsedXDays() { featureId = id, days = days };
-                featureUsedXDays.isTrue = async () => {
-                    var all = await analytics.categoryStores[featureUsedXDays.featureId].GetAll();
-                    var dayGroups = all.GroupBy(x => x.GetDateTimeUtc().Date, x => x);
-                    return dayGroups.Count() >= featureUsedXDays.days;
-                };
+                var featureUsedXDays = new FeatureDaysRule() { featureId = id, days = days };
+                featureUsedXDays.isTrue = async () => await UsedXDays(featureUsedXDays, analytics);
                 Assert.False(await featureUsedXDays.isTrue());
             }
 
             {
-                var featureNotUsedXDays = new FeatureNotUsedXDays() { featureId = id, days = days };
-                featureNotUsedXDays.isTrue = async () => {
-                    var all = await analytics.categoryStores[featureNotUsedXDays.featureId].GetAll();
-                    var dayGroups = all.GroupBy(x => x.GetDateTimeUtc().Date, x => x);
-                    return dayGroups.Count() < featureNotUsedXDays.days;
-                };
+                var featureNotUsedXDays = new FeatureDaysRule() { featureId = id, days = days };
+                featureNotUsedXDays.isTrue = async () => !await UsedXDays(featureNotUsedXDays, analytics);
                 Assert.True(await featureNotUsedXDays.isTrue());
             }
 
             {
-                var appNotUsedXDays = new AppNotUsedXDays() { days = days };
-                appNotUsedXDays.isTrue = async () => {
-                    var all = await analytics.GetAll();
-                    var dayGroups = all.GroupBy(x => x.GetDateTimeUtc().Date, x => x);
-                    return dayGroups.Count() < appNotUsedXDays.days;
-                };
+                var appNotUsedXDays = new AppDaysRule() { days = days };
+                appNotUsedXDays.isTrue = async () => !await AppUsedXDays(appNotUsedXDays, analytics);
                 Assert.True(await appNotUsedXDays.isTrue());
             }
-
             {
-                var appUsedXDays = new AppUsedXDays() { days = days };
-                appUsedXDays.isTrue = async () => {
-                    var all = await analytics.GetAll();
-                    var dayGroups = all.GroupBy(x => x.GetDateTimeUtc().Date, x => x);
-                    return dayGroups.Count() >= appUsedXDays.days;
-                };
+                var appUsedXDays = new AppDaysRule() { days = days };
+                appUsedXDays.isTrue = async () => await AppUsedXDays(appUsedXDays, analytics);
                 Assert.False(await appUsedXDays.isTrue());
 
-                var featureUsedXTimes = new FeatureUsedXTimes() { featureId = id, timesUsed = times };
-                featureUsedXTimes.isTrue = async () => {
-                    var featureEventStore = analytics.categoryStores[featureUsedXTimes.featureId];
-                    var allFeatureEvents = await featureEventStore.GetAll();
-                    var startEvents = allFeatureEvents.Filter(x => x.action == EventConsts.START);
-                    Log.d("startEvents.Count=" + startEvents.Count());
-                    return startEvents.Count() >= featureUsedXTimes.timesUsed.Value;
-                };
+                var featureUsedXTimes = new FeatureCounterRule() { featureId = id, timesUsed = times };
+                featureUsedXTimes.isTrue = async () => await FeatureUsedXTimes(featureUsedXTimes, analytics);
                 Assert.True(await featureUsedXTimes.isTrue());
 
-                var featureNotUsedInTheLastXDays = new FeatureNotUsedInTheLastXDays() { featureId = id, days = days };
-                featureNotUsedInTheLastXDays.isTrue = async () => {
-                    var featureEventStore = analytics.categoryStores[featureUsedXTimes.featureId];
-                    DateTime lastEvent = (await featureEventStore.GetAll()).Last().GetDateTimeUtc();
-                    TimeSpan lastEventVsNow = DateTimeV2.UtcNow - lastEvent;
-                    return lastEventVsNow.Days > featureNotUsedInTheLastXDays.days;
-                };
+                var featureNotUsedInTheLastXDays = new FeatureDaysRule() { featureId = id, days = days };
+                featureNotUsedInTheLastXDays.isTrue = async () => !await FeatureUsedInTheLastXDays(featureNotUsedInTheLastXDays, analytics);
                 Assert.False(await featureNotUsedInTheLastXDays.isTrue());
 
                 var featureNotUsedAnymoreRule = new RuleConcat(appUsedXDays, featureUsedXTimes, featureNotUsedInTheLastXDays);
@@ -94,36 +66,59 @@ namespace com.csutil.tests.model {
             }
 
             {
-                var featureNotUsedXTimes = new FeatureNotUsedXTimes() { featureId = id, timesUsed = times };
-                featureNotUsedXTimes.isTrue = async () => {
-                    var featureEventStore = analytics.categoryStores[featureNotUsedXTimes.featureId];
-                    var allFeatureEvents = await featureEventStore.GetAll();
-                    allFeatureEvents = allFeatureEvents.Filter(x => x.action == EventConsts.START);
-                    return allFeatureEvents.Count() < featureNotUsedXTimes.timesUsed.Value;
-                };
+                var featureNotUsedXTimes = new FeatureCounterRule() { featureId = id, timesUsed = times };
+                featureNotUsedXTimes.isTrue = async () => !await FeatureUsedXTimes(featureNotUsedXTimes, analytics);
                 Assert.False(await featureNotUsedXTimes.isTrue());
             }
 
             {
-                var appUsedInTheLastXDays = new AppUsedInTheLastXDays() { days = days };
+                var appUsedInTheLastXDays = new AppDaysRule() { days = days };
+                appUsedInTheLastXDays.isTrue = () => Task.FromResult(AppUsedInTheLastXDays(appUsedInTheLastXDays));
                 Assert.True(await appUsedInTheLastXDays.isTrue());
             }
             {
-                var appNotUsedInTheLastXDays = new AppNotUsedInTheLastXDays() { days = days };
+                var appNotUsedInTheLastXDays = new AppDaysRule() { days = days };
+                appNotUsedInTheLastXDays.isTrue = () => Task.FromResult(!AppUsedInTheLastXDays(appNotUsedInTheLastXDays));
                 Assert.False(await appNotUsedInTheLastXDays.isTrue());
             }
 
             {
-                var featureUsedInTheLastXDays = new FeatureUsedInTheLastXDays() { featureId = id, days = days };
-                featureUsedInTheLastXDays.isTrue = async () => {
-                    var featureEventStore = analytics.categoryStores[featureUsedInTheLastXDays.featureId];
-                    DateTime lastEvent = (await featureEventStore.GetAll()).Last().GetDateTimeUtc();
-                    TimeSpan lastEventVsNow = DateTimeV2.UtcNow - lastEvent;
-                    return lastEventVsNow.Days < featureUsedInTheLastXDays.days;
-                };
+                var featureUsedInTheLastXDays = new FeatureDaysRule() { featureId = id, days = days };
+                featureUsedInTheLastXDays.isTrue = async () => await FeatureUsedInTheLastXDays(featureUsedInTheLastXDays, analytics);
                 Assert.True(await featureUsedInTheLastXDays.isTrue());
             }
 
+        }
+
+        public static bool AppUsedInTheLastXDays(AppDaysRule self) {
+            var tSinceLatestLaunch = DateTimeV2.UtcNow - EnvironmentV2.instance.systemInfo.GetLatestLaunchDate();
+            return tSinceLatestLaunch.Days < self.days;
+        }
+
+        private static async Task<bool> FeatureUsedInTheLastXDays(FeatureDaysRule self, LocalAnalytics analytics) {
+            var featureEventStore = analytics.categoryStores[self.featureId];
+            DateTime lastEvent = (await featureEventStore.GetAll()).Last().GetDateTimeUtc();
+            TimeSpan lastEventVsNow = DateTimeV2.UtcNow - lastEvent;
+            return lastEventVsNow.Days <= self.days;
+        }
+
+        private static async Task<bool> FeatureUsedXTimes(FeatureCounterRule self, LocalAnalytics analytics) {
+            var featureEventStore = analytics.categoryStores[self.featureId];
+            var allFeatureEvents = await featureEventStore.GetAll();
+            var startEvents = allFeatureEvents.Filter(x => x.action == EventConsts.START);
+            return startEvents.Count() >= self.timesUsed.Value;
+        }
+
+        private static async Task<bool> AppUsedXDays(AppDaysRule self, LocalAnalytics analytics) {
+            var allAppEvents = await analytics.GetAll();
+            var dayGroups = allAppEvents.GroupBy(x => x.GetDateTimeUtc().Date, x => x);
+            return dayGroups.Count() >= self.days;
+        }
+
+        private static async Task<bool> UsedXDays(FeatureDaysRule self, LocalAnalytics analytics) {
+            var all = await analytics.categoryStores[self.featureId].GetAll();
+            var dayGroups = all.GroupBy(x => x.GetDateTimeUtc().Date, x => x);
+            return dayGroups.Count() >= self.days;
         }
 
         private static LocalAnalytics SetupLocalAnalyticsSystem() {
