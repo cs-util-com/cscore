@@ -39,6 +39,20 @@ namespace com.csutil {
 
         public static bool IsUtc(this DateTime self) { return self.Kind == DateTimeKind.Utc; }
 
+        public static DateTime GetLatestLaunchDate(this EnvironmentV2.ISystemInfo self) {
+            return DateTimeV2.NewDateTimeFromUnixTimestamp(self.latestLaunchDate);
+        }
+
+        public static DateTime? GetFirstLaunchDate(this EnvironmentV2.ISystemInfo self) {
+            if (self.firstLaunchDate == null) { return null; }
+            return DateTimeV2.NewDateTimeFromUnixTimestamp(self.firstLaunchDate.Value);
+        }
+
+        public static DateTime? GetLastUpdateDate(this EnvironmentV2.ISystemInfo self) {
+            if (self.lastUpdateDate == null) { return null; }
+            return DateTimeV2.NewDateTimeFromUnixTimestamp(self.lastUpdateDate.Value);
+        }
+
     }
 
 }

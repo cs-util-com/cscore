@@ -9,7 +9,7 @@ namespace com.csutil.model {
 
     public class ProgressionSystem<T> : IProgressionSystem<T> where T : IFeatureFlag {
 
-        public readonly Dictionary<string, float> xpFactors = InitXpFactors();
+        public readonly Dictionary<string, float> xpFactors = InitDefaultXpFactors();
         public readonly Dictionary<string, int> cachedCategoryCounts = new Dictionary<string, int>();
         public readonly LocalAnalytics analytics;
         public readonly FeatureFlagManager<T> featureFlagManager;
@@ -21,7 +21,7 @@ namespace com.csutil.model {
             this.featureFlagManager = featureFlagManager;
         }
 
-        private static Dictionary<string, float> InitXpFactors() {
+        private static Dictionary<string, float> InitDefaultXpFactors() {
             var res = new Dictionary<string, float>();
             res.Add(EventConsts.catMutation, 1);
             res.Add(EventConsts.catView, 0.5f);
