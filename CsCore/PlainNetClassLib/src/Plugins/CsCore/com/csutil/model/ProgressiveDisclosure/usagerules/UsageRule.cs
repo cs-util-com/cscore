@@ -14,7 +14,7 @@ namespace com.csutil.model.usagerules {
         public const string FeatureUsedXTimes = "FeatureUsedXTimes";
         public const string FeatureUsedInTheLastXDays = "FeatureUsedInTheLastXDays";
 
-        public const string AppNotUsedXDays = "ApNotpUsedXDays";
+        public const string AppNotUsedXDays = "AppNotUsedXDays";
         public const string AppNotUsedInTheLastXDays = "AppNotUsedInTheLastXDays";
         public const string FeatureNotUsedXDays = "FeatureNotUsedXDays";
         public const string FeatureNotUsedXTimes = "FeatureNotUsedXTimes";

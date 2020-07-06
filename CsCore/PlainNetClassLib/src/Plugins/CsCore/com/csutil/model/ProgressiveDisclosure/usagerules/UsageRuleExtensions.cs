@@ -47,14 +47,15 @@ namespace com.csutil.model.usagerules {
         }
 
         public static async Task<bool> IsFeatureUsedInTheLastXDays(this UsageRule self, LocalAnalytics analytics) {
-            var allFeatureEvents = await analytics.categoryStores[self.featureId].GetAll();
+            var allFeatureEvents = await analytics.GetAllFeatureEvents(self.featureId);
+            if (allFeatureEvents.IsNullOrEmpty()) { return false; }
             DateTime lastEvent = allFeatureEvents.Last().GetDateTimeUtc();
             TimeSpan lastEventVsNow = DateTimeV2.UtcNow - lastEvent;
             return lastEventVsNow.Days <= self.days;
         }
 
         public static async Task<bool> IsFeatureUsedXTimes(this UsageRule self, LocalAnalytics analytics) {
-            var allFeatureEvents = await analytics.categoryStores[self.featureId].GetAll();
+            var allFeatureEvents = await analytics.GetAllFeatureEvents(self.featureId);
             var startEvents = allFeatureEvents.Filter(x => x.action == EventConsts.START);
             return startEvents.Count() >= self.timesUsed.Value;
         }
@@ -69,10 +70,14 @@ namespace com.csutil.model.usagerules {
         }
 
         public static async Task<bool> IsFeatureUsedXDays(this UsageRule self, LocalAnalytics analytics) {
-            var allFeatureEvents = await analytics.categoryStores[self.featureId].GetAll();
+            var allFeatureEvents = await analytics.GetAllFeatureEvents(self.featureId);
             return allFeatureEvents.GroupByDay().Count() >= self.days;
         }
 
+        private static async Task<IEnumerable<AppFlowEvent>> GetAllFeatureEvents(this LocalAnalytics self, string featureId) {
+            if (!self.categoryStores.ContainsKey(featureId)) { return Enumerable.Empty<AppFlowEvent>(); }
+            return await self.categoryStores[featureId].GetAll();
+        }
     }
 
 }

@@ -91,6 +91,7 @@ namespace com.csutil.tests.model {
                 UsageRule clone = featureNotUsedAnymoreRule.DeepCopyViaJson();
                 clone.SetupUsing(analytics);
                 Assert.False(await clone.isTrue());
+
             }
         }
 
@@ -142,6 +143,27 @@ namespace com.csutil.tests.model {
                 Assert.True(await clone.isTrue());
 
             }
+        }
+
+        [Fact]
+        public async Task ExampleUsage2() {
+            // Get your key from https://console.developers.google.com/apis/credentials
+            var apiKey = "AIzaSyCtcFQMgRIUHhSuXggm4BtXT4eZvUrBWN0";
+            // https://docs.google.com/spreadsheets/d/1rl1vi-LUhOgoY_QrMJsm2UE0SdiL4EbOtLwfNPsavxQ contains the sheetId:
+            var sheetId = "1rl1vi-LUhOgoY_QrMJsm2UE0SdiL4EbOtLwfNPsavxQ";
+            var sheetName = "UsageRules1"; // Has to match the sheet name
+            var googleSheetsStore = new GoogleSheetsKeyValueStore(new InMemoryKeyValueStore(), apiKey, sheetId, sheetName);
+
+            var analytics = CreateLocalAnalyticsSystem();
+
+            var rules = await googleSheetsStore.GetAll<UsageRule>();
+            foreach (var rule in rules) {
+                if (rule.isTrue == null) { rule.SetupUsing(analytics); }
+                if (await rule.isTrue()) {
+                    Log.d(JsonWriter.AsPrettyString(rule)); // TODO
+                }
+            }
+
         }
 
         private static LocalAnalytics CreateLocalAnalyticsSystem() {
