@@ -87,9 +87,14 @@ namespace com.csutil.tests.model {
                     appUsedXDays, featureUsedXTimes, featureNotUsedInTheLastXDays
                 );
                 Assert.False(await featureNotUsedAnymoreRule.isTrue());
+
+                UsageRule clone = featureNotUsedAnymoreRule.DeepCopyViaJson();
+                clone.SetupUsing(analytics);
+                Assert.False(await clone.isTrue());
             }
         }
 
+        /// <summary> Same rules as in TestAllRules1 but inverted assertions </summary>
         async Task TestAllRules2(LocalAnalytics analytics, string featureId) {
 
             var daysUsed = 20;
@@ -131,6 +136,11 @@ namespace com.csutil.tests.model {
                     appUsedXDays, featureUsedXTimes, featureNotUsedInTheLastXDays
                 );
                 Assert.True(await featureNotUsedAnymoreRule.isTrue());
+
+                UsageRule clone = featureNotUsedAnymoreRule.DeepCopyViaJson();
+                clone.SetupUsing(analytics);
+                Assert.True(await clone.isTrue());
+
             }
         }
 

@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using System;
 using System.Threading.Tasks;
 
@@ -27,6 +28,7 @@ namespace com.csutil.model.usagerules {
 
         public UsageRule(string ruleType) { this.ruleType = ruleType; }
 
+        [JsonIgnore]
         public Func<Task<bool>> isTrue { get; set; }
 
     }

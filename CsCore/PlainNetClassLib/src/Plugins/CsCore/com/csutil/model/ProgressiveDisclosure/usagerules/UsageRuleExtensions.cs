@@ -26,7 +26,10 @@ namespace com.csutil.model.usagerules {
                     case UsageRule.FeatureNotUsedXTimes: return !await self.IsFeatureUsedXTimes(analytics);
 
                     case UsageRule.ConcatRule:
-                        foreach (var rule in self.andRules) { if (!await rule.isTrue()) { return false; } }
+                        foreach (var rule in self.andRules) {
+                            if (rule.isTrue == null) { rule.SetupUsing(analytics); }
+                            if (!await rule.isTrue()) { return false; }
+                        }
                         return true;
 
                     default:
