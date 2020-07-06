@@ -8,9 +8,7 @@ namespace com.csutil.logging.analytics {
         public string action { get; set; }
         public object[] args { get; set; }
 
-        public DateTime GetDateTimeUtc() {
-            return DateTimeV2.NewDateTimeFromUnixTimestamp(time);
-        }
+        public DateTime GetDateTimeUtc() { return DateTimeV2.NewDateTimeFromUnixTimestamp(time); }
 
     }
 

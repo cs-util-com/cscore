@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using com.csutil.logging.analytics;
@@ -46,29 +47,30 @@ namespace com.csutil.model.usagerules {
         }
 
         public static async Task<bool> IsFeatureUsedInTheLastXDays(this UsageRule self, LocalAnalytics analytics) {
-            var featureEventStore = analytics.categoryStores[self.featureId];
-            DateTime lastEvent = (await featureEventStore.GetAll()).Last().GetDateTimeUtc();
+            var allFeatureEvents = await analytics.categoryStores[self.featureId].GetAll();
+            DateTime lastEvent = allFeatureEvents.Last().GetDateTimeUtc();
             TimeSpan lastEventVsNow = DateTimeV2.UtcNow - lastEvent;
             return lastEventVsNow.Days <= self.days;
         }
 
         public static async Task<bool> IsFeatureUsedXTimes(this UsageRule self, LocalAnalytics analytics) {
-            var featureEventStore = analytics.categoryStores[self.featureId];
-            var allFeatureEvents = await featureEventStore.GetAll();
+            var allFeatureEvents = await analytics.categoryStores[self.featureId].GetAll();
             var startEvents = allFeatureEvents.Filter(x => x.action == EventConsts.START);
             return startEvents.Count() >= self.timesUsed.Value;
         }
 
+        public static IEnumerable<IGrouping<DateTime, AppFlowEvent>> GroupByDay(this IEnumerable<AppFlowEvent> self) {
+            return self.GroupBy(x => x.GetDateTimeUtc().Date, x => x);
+        }
+
         public static async Task<bool> IsAppUsedXDays(this UsageRule self, LocalAnalytics analytics) {
-            var allAppEvents = await analytics.GetAll();
-            var dayGroups = allAppEvents.GroupBy(x => x.GetDateTimeUtc().Date, x => x);
-            return dayGroups.Count() >= self.days;
+            var allEvents = await analytics.GetAll();
+            return allEvents.GroupByDay().Count() >= self.days;
         }
 
         public static async Task<bool> IsFeatureUsedXDays(this UsageRule self, LocalAnalytics analytics) {
-            var all = await analytics.categoryStores[self.featureId].GetAll();
-            var dayGroups = all.GroupBy(x => x.GetDateTimeUtc().Date, x => x);
-            return dayGroups.Count() >= self.days;
+            var allFeatureEvents = await analytics.categoryStores[self.featureId].GetAll();
+            return allFeatureEvents.GroupByDay().Count() >= self.days;
         }
 
     }
