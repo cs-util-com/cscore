@@ -5,9 +5,7 @@ namespace com.csutil.model.usagerules {
     public static class UsageRuleFactory {
 
         public static UsageRule NewConcatRule(this LocalAnalytics self, params UsageRule[] andRules) {
-            var featureNotUsedAnymoreRule = new UsageRule(UsageRule.ConcatRule) { andRules = andRules };
-            featureNotUsedAnymoreRule.SetupUsing(self);
-            return featureNotUsedAnymoreRule;
+            return new UsageRule(UsageRule.ConcatRule) { andRules = andRules }.SetupUsing(self);
         }
 
 
@@ -15,10 +13,8 @@ namespace com.csutil.model.usagerules {
             return new UsageRule(UsageRule.FeatureUsedInTheLastXDays) { featureId = featureId, days = days }.SetupUsing(self);
         }
 
-        public static UsageRule NewAppNotUsedInTheLastXDaysRule(this LocalAnalytics analytics, int days) {
-            var self = new UsageRule(UsageRule.AppNotUsedInTheLastXDays) { days = days };
-            self.SetupUsing(analytics);
-            return self;
+        public static UsageRule NewAppNotUsedInTheLastXDaysRule(this LocalAnalytics self, int days) {
+            return new UsageRule(UsageRule.AppNotUsedInTheLastXDays) { days = days }.SetupUsing(self);
         }
 
 
