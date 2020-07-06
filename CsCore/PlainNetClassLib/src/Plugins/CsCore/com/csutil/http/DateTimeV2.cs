@@ -24,6 +24,8 @@ namespace com.csutil {
             return result;
         }
 
+        /// <summary> Parses a date string to a DateTime object </summary>
+        /// <param name="utcTime"> e.g. "22.03.2011 01:26:00" </param>
         public static DateTime ParseUtc(string utcTime) {
             if (long.TryParse(utcTime, out long unixTimeInMs)) { return NewDateTimeFromUnixTimestamp(unixTimeInMs); }
             if (utcTime.Contains("GMT")) {
@@ -57,12 +59,12 @@ namespace com.csutil {
             } catch (Exception e) { Log.e("Error when processing server utc date from " + uri, e); }
         }
 
-        public DateTime GetUtcNow() {
+        public virtual DateTime GetUtcNow() {
             if (diffOfLocalToServer != null) { return DateTime.UtcNow + diffOfLocalToServer.Value; }
             return DateTime.UtcNow;
         }
 
-        public DateTime GetNow() {
+        public virtual DateTime GetNow() {
             if (diffOfLocalToServer != null) { return DateTime.Now + diffOfLocalToServer.Value; }
             return DateTime.Now;
         }
