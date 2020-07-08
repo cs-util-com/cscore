@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using com.csutil.keyvaluestore;
 using com.csutil.logging.analytics;
 
 namespace com.csutil.model.usagerules {
@@ -78,6 +79,21 @@ namespace com.csutil.model.usagerules {
             if (!self.categoryStores.ContainsKey(featureId)) { return Enumerable.Empty<AppFlowEvent>(); }
             return await self.categoryStores[featureId].GetAll();
         }
+
+        public static async Task<IEnumerable<UsageRule>> GetRulesInitialized(this KeyValueStoreTypeAdapter<UsageRule> self, LocalAnalytics analytics) {
+            var rules = await self.GetAll();
+            foreach (var rule in rules) {
+                if (!rule.concatRuleIds.IsNullOrEmpty()) {
+                    rule.andRules = new List<UsageRule>();
+                    foreach (var id in rule.concatRuleIds) {
+                        rule.andRules.Add(await self.Get(id, null));
+                    }
+                }
+                if (rule.isTrue == null) { rule.SetupUsing(analytics); }
+            }
+            return rules;
+        }
+
     }
 
 }

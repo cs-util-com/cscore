@@ -1,11 +1,12 @@
-﻿using com.csutil.logging.analytics;
+﻿using System.Linq;
+using com.csutil.logging.analytics;
 
 namespace com.csutil.model.usagerules {
 
     public static class UsageRuleFactory {
 
         public static UsageRule NewConcatRule(this LocalAnalytics self, params UsageRule[] andRules) {
-            return new UsageRule(UsageRule.ConcatRule) { andRules = andRules }.SetupUsing(self);
+            return new UsageRule(UsageRule.ConcatRule) { andRules = andRules.ToList() }.SetupUsing(self);
         }
 
 

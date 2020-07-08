@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using com.csutil.keyvaluestore;
@@ -152,17 +153,17 @@ namespace com.csutil.tests.model {
             // https://docs.google.com/spreadsheets/d/1rl1vi-LUhOgoY_QrMJsm2UE0SdiL4EbOtLwfNPsavxQ contains the sheetId:
             var sheetId = "1rl1vi-LUhOgoY_QrMJsm2UE0SdiL4EbOtLwfNPsavxQ";
             var sheetName = "UsageRules1"; // Has to match the sheet name
-            var googleSheetsStore = new GoogleSheetsKeyValueStore(new InMemoryKeyValueStore(), apiKey, sheetId, sheetName);
+            var source = new GoogleSheetsKeyValueStore(new InMemoryKeyValueStore(), apiKey, sheetId, sheetName);
+            var store = source.GetTypeAdapter<UsageRule>();
 
             var analytics = CreateLocalAnalyticsSystem();
-
-            var rules = await googleSheetsStore.GetAll<UsageRule>();
+            IEnumerable<UsageRule> rules = await store.GetRulesInitialized(analytics);
             foreach (var rule in rules) {
-                if (rule.isTrue == null) { rule.SetupUsing(analytics); }
                 if (await rule.isTrue()) {
                     Log.d(JsonWriter.AsPrettyString(rule)); // TODO
                 }
             }
+            Assert.Single(rules.Filter(r => !r.andRules.IsNullOrEmpty()));
 
         }
 

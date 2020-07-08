@@ -1,5 +1,6 @@
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace com.csutil.model.usagerules {
@@ -24,7 +25,10 @@ namespace com.csutil.model.usagerules {
         public string featureId;
         public int? days;
         public int? timesUsed;
-        public UsageRule[] andRules;
+
+        /// <summary> Used to compose the and rules when rules loaded from a key value store </summary>
+        public List<string> concatRuleIds;
+        public List<UsageRule> andRules;
 
         public UsageRule(string ruleType) { this.ruleType = ruleType; }
 
