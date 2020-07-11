@@ -11,7 +11,7 @@ namespace com.csutil.model.usagerules {
 
 
         public static UsageRule NewFeatureUsedInTheLastXDaysRule(this LocalAnalytics self, string featureId, int days) {
-            return new UsageRule(UsageRule.FeatureUsedInTheLastXDays) { featureId = featureId, days = days }.SetupUsing(self);
+            return new UsageRule(UsageRule.FeatureUsedInTheLastXDays) { categoryId = featureId, days = days }.SetupUsing(self);
         }
 
         public static UsageRule NewAppNotUsedInTheLastXDaysRule(this LocalAnalytics self, int days) {
@@ -20,11 +20,11 @@ namespace com.csutil.model.usagerules {
 
 
         public static UsageRule NewFeatureUsedXTimesRule(this LocalAnalytics self, string featureId, int times) {
-            return new UsageRule(UsageRule.FeatureUsedXTimes) { featureId = featureId, timesUsed = times }.SetupUsing(self);
+            return new UsageRule(UsageRule.FeatureUsedXTimes) { categoryId = featureId, timesUsed = times }.SetupUsing(self);
         }
 
         public static UsageRule NewFeatureNotUsedXTimesRule(this LocalAnalytics self, string featureId, int times) {
-            return new UsageRule(UsageRule.FeatureNotUsedXTimes) { featureId = featureId, timesUsed = times }.SetupUsing(self);
+            return new UsageRule(UsageRule.FeatureNotUsedXTimes) { categoryId = featureId, timesUsed = times }.SetupUsing(self);
         }
 
 
@@ -33,7 +33,7 @@ namespace com.csutil.model.usagerules {
         }
 
         public static UsageRule NewFeatureNotUsedInTheLastXDaysRule(this LocalAnalytics self, string featureId, int days) {
-            return new UsageRule(UsageRule.FeatureNotUsedInTheLastXDays) { featureId = featureId, days = days }.SetupUsing(self);
+            return new UsageRule(UsageRule.FeatureNotUsedInTheLastXDays) { categoryId = featureId, days = days }.SetupUsing(self);
         }
 
 
@@ -45,13 +45,16 @@ namespace com.csutil.model.usagerules {
             return new UsageRule(UsageRule.AppNotUsedXDays) { days = days }.SetupUsing(self);
         }
 
+        public static UsageRule NewNotificationMinXDaysOldRule(this LocalAnalytics self, string notificationId, int days) {
+            return new UsageRule(UsageRule.NotificationMinXDaysOld) { categoryId = notificationId, days = days }.SetupUsing(self);
+        }
 
         public static UsageRule NewFeatureUsedXDaysRule(this LocalAnalytics self, string featureId, int days) {
-            return new UsageRule(UsageRule.FeatureUsedXDays) { featureId = featureId, days = days }.SetupUsing(self);
+            return new UsageRule(UsageRule.FeatureUsedXDays) { categoryId = featureId, days = days }.SetupUsing(self);
         }
 
         public static UsageRule NewFeatureNotUsedXDaysRule(this LocalAnalytics self, string featureId, int days) {
-            return new UsageRule(UsageRule.FeatureNotUsedXDays) { featureId = featureId, days = days }.SetupUsing(self);
+            return new UsageRule(UsageRule.FeatureNotUsedXDays) { categoryId = featureId, days = days }.SetupUsing(self);
         }
 
     }

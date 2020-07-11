@@ -79,7 +79,9 @@ namespace com.csutil.ui {
             if (!isUrlEmpty) { targetImage.LoadFromUrl(urlToLoad).OnError(LogImageLoadError); }
         }
 
-        private Task LogImageLoadError(Exception e) { Log.w("Image Load Error: " + e); return Task.FromException(e); }
+        private Task LogImageLoadError(Exception e) {
+            Log.w("Image Load Error: " + e); return Task.FromException(e);
+        }
 
         private static void SetText(Text target, string text) {
             if (target == null) { return; }

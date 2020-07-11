@@ -45,6 +45,29 @@ namespace com.csutil.tests.model {
             t.mockUtcNow = DateTimeV2.ParseUtc("01.03.2011");
             await TestAllRules2(analytics, featureId);
 
+            { // Simulate that a usage notification is shown and test the related rule:
+                var notificationId = "notification1";
+                var daysAgo = 20;
+
+                t.mockUtcNow = DateTimeV2.ParseUtc("01.03.2011");
+                // Simulate that notification1 is shown to the user (e.g. by the usageRule system):
+                AppFlow.TrackEvent(EventConsts.catUsage, EventConsts.SHOW + "_" + notificationId);
+
+                t.mockUtcNow = DateTimeV2.ParseUtc("02.03.2011"); // Simulate a day passing by
+                UsageRule notificationMinXDaysOld = analytics.NewNotificationMinXDaysOldRule(notificationId, daysAgo);
+                Assert.False(await notificationMinXDaysOld.isTrue());
+                Assert.False(await notificationMinXDaysOld.IsNotificationMinXDaysOld(analytics));
+
+                t.mockUtcNow = DateTimeV2.ParseUtc("25.03.2011"); // Simulate more time passing by
+                Assert.True(await notificationMinXDaysOld.IsNotificationMinXDaysOld(analytics));
+                Assert.True(await notificationMinXDaysOld.isTrue());
+
+                // Simulate a second show of the notification:
+                AppFlow.TrackEvent(EventConsts.catUsage, EventConsts.SHOW + "_" + notificationId);
+                Assert.True(await notificationMinXDaysOld.IsNotificationMinXDaysOld(analytics));
+                Assert.True(await notificationMinXDaysOld.isTrue());
+            }
+
         }
 
         async Task TestAllRules1(LocalAnalytics analytics, string featureId) {
@@ -144,6 +167,7 @@ namespace com.csutil.tests.model {
                 Assert.True(await clone.isTrue());
 
             }
+
         }
 
         [Fact]

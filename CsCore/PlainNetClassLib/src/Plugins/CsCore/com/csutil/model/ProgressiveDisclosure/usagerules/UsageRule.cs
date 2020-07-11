@@ -20,9 +20,10 @@ namespace com.csutil.model.usagerules {
         public const string FeatureNotUsedXDays = "FeatureNotUsedXDays";
         public const string FeatureNotUsedXTimes = "FeatureNotUsedXTimes";
         public const string FeatureNotUsedInTheLastXDays = "FeatureNotUsedInTheLastXDays";
+        public const string NotificationMinXDaysOld = "NotificationMinXDaysOld";
 
         public string ruleType;
-        public string featureId;
+        public string categoryId;
         public int? days;
         public int? timesUsed;
 

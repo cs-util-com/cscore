@@ -14,18 +14,21 @@ namespace com.csutil.model.usagerules {
                 switch (self.ruleType) {
 
                     case UsageRule.AppUsedXDays: return await self.IsAppUsedXDays(analytics);
-                    case UsageRule.AppUsedInTheLastXDays: return self.IsAppUsedInTheLastXDays();
-
                     case UsageRule.AppNotUsedXDays: return !await self.IsAppUsedXDays(analytics);
+
+                    case UsageRule.AppUsedInTheLastXDays: return self.IsAppUsedInTheLastXDays();
                     case UsageRule.AppNotUsedInTheLastXDays: return !self.IsAppUsedInTheLastXDays();
 
                     case UsageRule.FeatureUsedInTheLastXDays: return await self.IsFeatureUsedInTheLastXDays(analytics);
-                    case UsageRule.FeatureUsedXDays: return await self.IsFeatureUsedXDays(analytics);
-                    case UsageRule.FeatureUsedXTimes: return await self.IsFeatureUsedXTimes(analytics);
-
                     case UsageRule.FeatureNotUsedInTheLastXDays: return !await self.IsFeatureUsedInTheLastXDays(analytics);
+
+                    case UsageRule.FeatureUsedXDays: return await self.IsFeatureUsedXDays(analytics);
                     case UsageRule.FeatureNotUsedXDays: return !await self.IsFeatureUsedXDays(analytics);
+
+                    case UsageRule.FeatureUsedXTimes: return await self.IsFeatureUsedXTimes(analytics);
                     case UsageRule.FeatureNotUsedXTimes: return !await self.IsFeatureUsedXTimes(analytics);
+
+                    case UsageRule.NotificationMinXDaysOld: return await self.IsNotificationMinXDaysOld(analytics);
 
                     case UsageRule.ConcatRule:
                         foreach (var rule in self.andRules) {
@@ -48,17 +51,21 @@ namespace com.csutil.model.usagerules {
         }
 
         public static async Task<bool> IsFeatureUsedInTheLastXDays(this UsageRule self, LocalAnalytics analytics) {
-            var allFeatureEvents = await analytics.GetAllFeatureEvents(self.featureId);
-            if (allFeatureEvents.IsNullOrEmpty()) { return false; }
-            DateTime lastEvent = allFeatureEvents.Last().GetDateTimeUtc();
+            var allEvents = await analytics.GetAllEventsForCategory(self.categoryId);
+            if (allEvents.IsNullOrEmpty()) { return false; }
+            DateTime lastEvent = allEvents.Last().GetDateTimeUtc();
             TimeSpan lastEventVsNow = DateTimeV2.UtcNow - lastEvent;
             return lastEventVsNow.Days <= self.days;
         }
 
         public static async Task<bool> IsFeatureUsedXTimes(this UsageRule self, LocalAnalytics analytics) {
-            var allFeatureEvents = await analytics.GetAllFeatureEvents(self.featureId);
-            var startEvents = allFeatureEvents.Filter(x => x.action == EventConsts.START);
+            var startEvents = await analytics.GetStartEvents(self.categoryId);
             return startEvents.Count() >= self.timesUsed.Value;
+        }
+
+        public static async Task<IEnumerable<AppFlowEvent>> GetStartEvents(this LocalAnalytics self, string categoryId) {
+            var allEvents = await self.GetAllEventsForCategory(categoryId);
+            return allEvents.Filter(x => x.action == EventConsts.START);
         }
 
         public static IEnumerable<IGrouping<DateTime, AppFlowEvent>> GroupByDay(this IEnumerable<AppFlowEvent> self) {
@@ -71,13 +78,22 @@ namespace com.csutil.model.usagerules {
         }
 
         public static async Task<bool> IsFeatureUsedXDays(this UsageRule self, LocalAnalytics analytics) {
-            var allFeatureEvents = await analytics.GetAllFeatureEvents(self.featureId);
-            return allFeatureEvents.GroupByDay().Count() >= self.days;
+            var allEvents = await analytics.GetAllEventsForCategory(self.categoryId);
+            return allEvents.GroupByDay().Count() >= self.days;
         }
 
-        private static async Task<IEnumerable<AppFlowEvent>> GetAllFeatureEvents(this LocalAnalytics self, string featureId) {
-            if (!self.categoryStores.ContainsKey(featureId)) { return Enumerable.Empty<AppFlowEvent>(); }
-            return await self.categoryStores[featureId].GetAll();
+        public static async Task<bool> IsNotificationMinXDaysOld(this UsageRule self, LocalAnalytics analytics) {
+            var allEvents = await analytics.GetAllEventsForCategory(EventConsts.catUsage);
+            var showEvents = allEvents.Filter(x => x.action == EventConsts.SHOW + "_" + self.categoryId);
+            if (showEvents.IsNullOrEmpty()) { return false; }
+            DateTime firstShownEvent = showEvents.First().GetDateTimeUtc();
+            TimeSpan firstShownVsNow = DateTimeV2.UtcNow - firstShownEvent;
+            return firstShownVsNow.Days >= self.days;
+        }
+
+        private static async Task<IEnumerable<AppFlowEvent>> GetAllEventsForCategory(this LocalAnalytics self, string categoryId) {
+            if (!self.categoryStores.ContainsKey(categoryId)) { return Enumerable.Empty<AppFlowEvent>(); }
+            return await self.categoryStores[categoryId].GetAll();
         }
 
         public static async Task<IEnumerable<UsageRule>> GetRulesInitialized(this KeyValueStoreTypeAdapter<UsageRule> self, LocalAnalytics analytics) {

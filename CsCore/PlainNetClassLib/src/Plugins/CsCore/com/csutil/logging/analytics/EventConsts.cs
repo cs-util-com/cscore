@@ -7,6 +7,7 @@ namespace com.csutil {
         public const string catMutation = "mutation";
         public const string catSystem = "system";
         public const string catInjection = "injection";
+        public const string catUsage = "usage";
 
         public const string catUi = "ui";
         public const string catView = "view";
