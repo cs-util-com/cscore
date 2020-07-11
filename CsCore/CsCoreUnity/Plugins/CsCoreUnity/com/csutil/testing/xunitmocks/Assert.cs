@@ -88,6 +88,11 @@ namespace Xunit {
             throw new AssertException("Not found in " + e + ":" + obj);
         }
 
+        public static void Contains<T>(IEnumerable<T> e, Func<T, bool> f) {
+            foreach (var i in e) { if (f(i)) { return; } }
+            throw new AssertException("Not found in " + e);
+        }
+
         public static void Contains(string subString, string fullString) {
             if (!fullString.Contains(subString)) {
                 throw new AssertException("'" + subString + "' not substring of '" + fullString + "'");
