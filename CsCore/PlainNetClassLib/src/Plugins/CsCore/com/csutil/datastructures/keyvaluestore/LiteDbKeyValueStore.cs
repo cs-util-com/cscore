@@ -96,7 +96,7 @@ namespace com.csutil.keyvaluestore {
 
         public async Task<IEnumerable<string>> GetAllKeys() {
             var result = collection.FindAll().Map(x => GetKeyFromBsonDoc(x));
-            return await fallbackStore.ConcatAllKeys(result);
+            return await fallbackStore.ConcatWithKeys(result);
         }
 
         private static string GetKeyFromBsonDoc(BsonDocument x) {
