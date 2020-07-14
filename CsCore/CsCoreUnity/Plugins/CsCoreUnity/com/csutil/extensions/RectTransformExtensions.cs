@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Assertions;
+using UnityEngine.EventSystems;
 
 namespace com.csutil {
 
@@ -79,6 +80,15 @@ namespace com.csutil {
             var totalHeightInPixels = ScreenV2.height + prtBounds.extents.y * 2;
             var progressInPixels = Mathf.Min(Mathf.Max(0, bottomCorner.y), totalHeightInPixels);
             return progressInPixels / totalHeightInPixels;
+        }
+
+        public static bool GetLocalPointOnRt(this RectTransform self, PointerEventData e, out Vector2 res) {
+            if (RectTransformUtility.ScreenPointToLocalPointInRectangle(self, e.position, e.pressEventCamera, out Vector2 p)) {
+                res = new Vector2(p.x * self.lossyScale.x, p.y * self.lossyScale.y);
+                return true;
+            }
+            res = Vector2.zero;
+            return false;
         }
 
     }
