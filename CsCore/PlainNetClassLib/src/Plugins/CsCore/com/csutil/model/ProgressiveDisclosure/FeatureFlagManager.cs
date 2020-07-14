@@ -31,11 +31,13 @@ namespace com.csutil.model {
         }
 
         private async Task<T> ReturnInitializedFlag(T flag) {
-            AssertV2.IsNotNull(flag.localState, "flag.localState");
-            if (flag != null && flag.localState.randomPercentage == 0) {
-                // if the server decided its a staged rollout no rnd % generated yet so do it:
-                flag.localState.randomPercentage = new Random().Next(1, 100);
-                await featureFlagStore.Set(flag.id, flag); // save in local store
+            if (flag != null) {
+                AssertV2.IsNotNull(flag.localState, "flag.localState");
+                if (flag.localState.randomPercentage == 0) {
+                    // if the server decided its a staged rollout no rnd % generated yet so do it:
+                    flag.localState.randomPercentage = new Random().Next(1, 100);
+                    await featureFlagStore.Set(flag.id, flag); // save in local store
+                }
             }
             return flag;
         }

@@ -59,13 +59,13 @@ namespace com.csutil {
         }
 
         public static void ActivatePresenterTracking(this IAppFlow self) {
-            EventBus.instance.Subscribe(self, EventConsts.catPresenter + EventConsts.LOAD_START,
+            EventBus.instance.Subscribe(self, EventConsts.catPresenter + EventConsts.START,
                 (string name, object presenter, object model) => {
-                    self.TrackEvent(EventConsts.catPresenter, EventConsts.LOAD_START + name, presenter, model);
+                    self.TrackEvent(EventConsts.catPresenter, EventConsts.START + name, presenter, model);
                 });
-            EventBus.instance.Subscribe(self, EventConsts.catPresenter + EventConsts.LOAD_DONE,
+            EventBus.instance.Subscribe(self, EventConsts.catPresenter + EventConsts.DONE,
                 (string name, object presenter, object model) => {
-                    self.TrackEvent(EventConsts.catPresenter, EventConsts.LOAD_DONE + name, presenter, model);
+                    self.TrackEvent(EventConsts.catPresenter, EventConsts.DONE + name, presenter, model);
                 });
         }
 

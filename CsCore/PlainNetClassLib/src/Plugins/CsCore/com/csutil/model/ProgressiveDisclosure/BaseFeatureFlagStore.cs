@@ -4,9 +4,10 @@ using System.Threading.Tasks;
 
 namespace com.csutil.model {
 
-    public abstract class BaseFeatureFlagStore<T, V> : KeyValueStoreTypeAdapter<T>, IDisposable where T : IFeatureFlag where V : IFeatureFlagLocalState {
+    public abstract class BaseFeatureFlagStore<T, V> : KeyValueStoreTypeAdapter<T>, IDisposable
+                                            where T : IFeatureFlag where V : IFeatureFlagLocalState {
 
-        private IKeyValueStore localStore;
+        private readonly IKeyValueStore localStore;
 
         public BaseFeatureFlagStore(IKeyValueStore localStore, IKeyValueStore remoteStore) : base(remoteStore) {
             this.localStore = localStore;
@@ -25,8 +26,9 @@ namespace com.csutil.model {
         }
 
         public override async Task<T> Set(string featureId, T value) {
+            // Only the localState is stored to the local store, the rest skipped
             await localStore.Set(featureId, value.localState);
-            return default(T);
+            return default(T); // No update of value so nothing old to return 
         }
 
         public void Dispose() {

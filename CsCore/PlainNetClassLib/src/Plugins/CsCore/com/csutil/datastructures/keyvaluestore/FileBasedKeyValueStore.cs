@@ -94,8 +94,8 @@ namespace com.csutil.keyvaluestore {
 
         public async Task<IEnumerable<string>> GetAllKeys() {
             if (!folderForAllFiles.Exists) { return Enumerable.Empty<string>(); }
-            var result = folderForAllFiles.GetFiles().Map(x => x.Name);
-            return await fallbackStore.ConcatAllKeys(result);
+            var fileNames = folderForAllFiles.GetFiles().Map(x => x.Name);
+            return await fallbackStore.ConcatWithKeys(fileNames);
         }
 
     }

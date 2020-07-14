@@ -7,6 +7,7 @@ namespace com.csutil {
         public const string catMutation = "mutation";
         public const string catSystem = "system";
         public const string catInjection = "injection";
+        public const string catUsage = "usage";
 
         public const string catUi = "ui";
         public const string catView = "view";
@@ -14,8 +15,8 @@ namespace com.csutil {
         public const string catPresenter = "presenter";
         public const string catTemplate = "template";
 
-        public const string LOAD_START = "LoadStart";
-        public const string LOAD_DONE = "LoadDone";
+        public const string START = "Start";
+        public const string DONE = "Done";
 
         public const string SHOW = "Show";
         public const string ADDED = "Added";

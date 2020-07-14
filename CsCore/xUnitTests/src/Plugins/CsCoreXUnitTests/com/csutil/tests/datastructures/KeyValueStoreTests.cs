@@ -98,12 +98,10 @@ namespace com.csutil.tests.keyvaluestore {
             await TestIKeyValueStoreImplementation(new ExceptionWrapperKeyValueStore(new InMemoryKeyValueStore()));
             await TestIKeyValueStoreImplementation(new MockDelayKeyValueStore(new InMemoryKeyValueStore()));
             await TestIKeyValueStoreImplementation(NewFileBasedKeyValueStore("TestAllIKeyValueStoreImplementations_FileDB"));
+            await TestIKeyValueStoreImplementation(NewLiteDbStoreForTesting("TestAllIKeyValueStoreImplementations_LiteDB"));
+            await TestIKeyValueStoreImplementation(new DualStore(new InMemoryKeyValueStore(), new InMemoryKeyValueStore()));
         }
 
-        [Fact]
-        public async Task TestDiteDBKeyValueStoreImplementation() {
-            await TestIKeyValueStoreImplementation(NewLiteDbStoreForTesting("TestAllIKeyValueStoreImplementations_LiteDB"));
-        }
 
         private static FileBasedKeyValueStore NewFileBasedKeyValueStore(string storeFolderName) {
             var dbFolder = EnvironmentV2.instance.GetOrAddTempFolder("KeyValueStoreTests").GetChildDir(storeFolderName);
@@ -382,6 +380,41 @@ namespace com.csutil.tests.keyvaluestore {
             Assert.Null(entry2.myObj1);
             Assert.Equal(0, entry2.myInt1);
             Assert.Equal(0, entry2.myDouble1);
+
+        }
+
+        [Fact]
+        public async Task TestDualStore() {
+
+            var firstStore = new InMemoryKeyValueStore();
+            var secondStor = new InMemoryKeyValueStore();
+
+            var dualStore = new DualStore(firstStore, secondStor);
+
+            var key1 = "key1";
+            var key2 = "key2";
+            var value1 = "v1";
+            var fallb1 = "f1";
+
+            Assert.False(await dualStore.ContainsKey(key1));
+            Assert.Null(await dualStore.Set(key1, value1));
+            Assert.True(await dualStore.ContainsKey(key1));
+            Assert.True(await firstStore.ContainsKey(key1));
+            Assert.False(await secondStor.ContainsKey(key1));
+
+            Assert.Single(await dualStore.GetAllKeys());
+            Assert.Single(await firstStore.GetAllKeys());
+            Assert.Empty(await secondStor.GetAllKeys());
+
+            Assert.Equal(value1, await dualStore.Get(key1, fallb1));
+            Assert.Equal(value1, await firstStore.Get(key1, fallb1));
+            Assert.Equal(fallb1, await secondStor.Get(key1, fallb1));
+            Assert.Equal(fallb1, await dualStore.Get(key2, fallb1));
+
+            Assert.True(await dualStore.Remove(key1));
+            Assert.Equal(fallb1, await dualStore.Get(key1, fallb1));
+            Assert.Equal(fallb1, await firstStore.Get(key1, fallb1));
+            Assert.False(await dualStore.Remove(key2));
 
         }
 

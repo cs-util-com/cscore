@@ -57,7 +57,7 @@ namespace com.csutil.keyvaluestore {
             return false;
         }
 
-        public async Task<IEnumerable<string>> GetAllKeys() { return await fallbackStore.ConcatAllKeys(store.Keys); }
+        public async Task<IEnumerable<string>> GetAllKeys() { return await fallbackStore.ConcatWithKeys(store.Keys); }
 
     }
 

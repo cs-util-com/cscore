@@ -28,15 +28,16 @@ namespace com.csutil.keyvaluestore {
             return res;
         }
 
-        public static async Task<IEnumerable<string>> ConcatAllKeys(this IKeyValueStore self, IEnumerable<string> result) {
+        /// <summary> Concats/combines the keys in the store with the passed keys </summary>
+        public static async Task<IEnumerable<string>> ConcatWithKeys(this IKeyValueStore self, IEnumerable<string> keys) {
             if (self != null) {
                 var storeKeys = await self.GetAllKeys();
                 if (storeKeys != null) {
-                    var filteredStoreKeys = (storeKeys).Filter(e => !result.Contains(e));
-                    result = result.Concat(filteredStoreKeys);
+                    var filteredStoreKeys = (storeKeys).Filter(e => !keys.Contains(e));
+                    keys = keys.Concat(filteredStoreKeys);
                 }
             }
-            return result;
+            return keys;
         }
 
         public static async Task<object> Set(this IKeyValueStore self, string key, object newValue, object oldValue) {

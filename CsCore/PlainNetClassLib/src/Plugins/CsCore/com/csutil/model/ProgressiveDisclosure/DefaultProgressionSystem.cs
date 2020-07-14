@@ -27,7 +27,8 @@ namespace com.csutil.model {
 
     public class FeatureFlagStore : BaseFeatureFlagStore<FeatureFlag, FeatureFlagLocalState> {
 
-        public FeatureFlagStore(IKeyValueStore l, IKeyValueStore r) : base(l, r) { }
+        public FeatureFlagStore(IKeyValueStore localStore, IKeyValueStore remoteStore)
+                                                        : base(localStore, remoteStore) { }
 
         // By default just return the featureId:
         protected override string GenerateFeatureKey(string featureId) { return featureId; }

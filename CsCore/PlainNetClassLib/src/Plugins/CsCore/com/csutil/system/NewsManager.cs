@@ -8,11 +8,14 @@ namespace com.csutil.system {
 
     public class NewsManager {
 
-        public static NewsManager NewManagerViaGSheets(string apiKey, string sheetId, string sheetName) {
+        public static NewsManager NewManagerViaGSheets(string apiKey, string sheetId, string sheetName, IKeyValueStore onDeviceEventsStore) {
             var newsDir = EnvironmentV2.instance.GetOrAddTempFolder("NewsManagerCache");
             var gSheetsCache = new FileBasedKeyValueStore(newsDir.GetChildDir("GSheetsData"));
             var newsLocalDataCache = new FileBasedKeyValueStore(newsDir.GetChildDir("LocalData"));
             IKeyValueStore newsStore = new GoogleSheetsKeyValueStore(gSheetsCache, apiKey, sheetId, sheetName);
+            if (onDeviceEventsStore != null) {
+                newsStore = new DualStore(newsStore, onDeviceEventsStore);
+            }
             return new NewsManager(newsLocalDataCache.GetTypeAdapter<News.LocalData>(), newsStore.GetTypeAdapter<News>());
         }
 
@@ -47,6 +50,20 @@ namespace com.csutil.system {
     }
 
     public class News {
+
+        public static News NewLocalNewsEvent(string title, string descr, string url, string urlText, NewsType type = News.NewsType.New, string id = null) {
+            var utcNow = "" + DateTimeV2.UtcNow.ToUnixTimestampUtc();
+            if (id == null) { id = Guid.NewGuid().ToString(); }
+            return new News() {
+                key = id,
+                title = title,
+                description = descr,
+                detailsUrl = url,
+                detailsUrlText = urlText,
+                date = utcNow,
+                type = EnumUtil.GetEntryName(type)
+            };
+        }
 
         public string key { get; set; }
         public string title { get; set; }
