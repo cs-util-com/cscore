@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -34,10 +35,12 @@ namespace com.csutil.http {
         }
 
         public async Task<T> GetResult<T>() {
-            var c = (await request).Content;
-            if (TypeCheck.AreEqual<T, Stream>()) { return (T)(object)await c.ReadAsStreamAsync(); }
-            if (TypeCheck.AreEqual<T, byte[]>()) { return (T)(object)await c.ReadAsByteArrayAsync(); }
-            var respText = await c.ReadAsStringAsync();
+            HttpResponseMessage resp = await request;
+            AssertV2.IsTrue(HttpStatusCode.OK == resp.StatusCode, "response.StatusCode=" + resp.StatusCode);
+            HttpContent content = resp.Content;
+            if (TypeCheck.AreEqual<T, Stream>()) { return (T)(object)await content.ReadAsStreamAsync(); }
+            if (TypeCheck.AreEqual<T, byte[]>()) { return (T)(object)await content.ReadAsByteArrayAsync(); }
+            var respText = await content.ReadAsStringAsync();
             if (typeof(T) == typeof(string)) { return (T)(object)respText; }
             AssertV2.IsNotNull(respText, "respText");
             AssertV2.IsNotNull(respText.IsNullOrEmpty(), "respText.IsNullOrEmpty");
