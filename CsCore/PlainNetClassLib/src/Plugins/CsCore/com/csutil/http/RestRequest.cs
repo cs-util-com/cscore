@@ -8,7 +8,7 @@ namespace com.csutil.http {
     public interface RestRequest {
 
         Uri uri { get; }
-        HttpMethod httpMethod { get; }
+        string httpMethod { get; }
 
         /// <summary> Adds a text content to the request (typically in form of UTF8 encoded json) </summary>
         /// <param name="textContent"> e.g. a json string </param>

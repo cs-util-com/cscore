@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -9,8 +10,10 @@ namespace com.csutil.http {
 
     public class UnityRestRequest : RestRequest {
 
+        public Uri uri => request.uri;
         private UnityWebRequest request;
         private Headers requestHeaders;
+        public string httpMethod => request.method;
 
         /// <summary> A value between 0 and 100 </summary>
         public Action<float> onProgress { get; set; }

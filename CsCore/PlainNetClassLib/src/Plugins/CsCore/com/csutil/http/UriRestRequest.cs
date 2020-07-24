@@ -16,7 +16,7 @@ namespace com.csutil.http {
         public HttpCompletionOption sendAsyncCompletedAfter = HttpCompletionOption.ResponseHeadersRead;
 
         public Uri uri { get; }
-        public HttpMethod httpMethod { get; private set; }
+        public string httpMethod { get; private set; }
         private Headers requestHeaders = new Headers(new Dictionary<string, string>());
         private Task<HttpResponseMessage> request;
         private HttpClient client;
@@ -58,7 +58,7 @@ namespace com.csutil.http {
         }
 
         public RestRequest Send(HttpMethod method) {
-            httpMethod = method;
+            httpMethod = "" + method;
             request = SendAsync(method);
             return this;
         }
@@ -66,7 +66,7 @@ namespace com.csutil.http {
         public async Task<HttpResponseMessage> SendAsync(HttpMethod method) {
             client = new HttpClient();
             await TaskV2.Delay(5); // Wait so that the created RestRequest can be modified before its sent
-            httpMethod = method;
+            httpMethod = "" + method;
             client.AddRequestHeaders(requestHeaders);
             var message = new HttpRequestMessage(method, uri);
             if (httpContent != null) { message.Content = httpContent; }
