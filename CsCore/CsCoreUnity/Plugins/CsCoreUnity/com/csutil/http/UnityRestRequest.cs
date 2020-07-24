@@ -50,7 +50,7 @@ namespace com.csutil.http {
         }
 
         public RestRequest WithRequestHeaders(Headers requestHeaders) {
-            this.requestHeaders = requestHeaders;
+            this.requestHeaders = new Headers(this.requestHeaders.AddRangeViaUnion(requestHeaders));
             return this;
         }
 

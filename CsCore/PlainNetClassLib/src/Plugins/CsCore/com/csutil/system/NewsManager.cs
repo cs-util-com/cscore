@@ -38,7 +38,7 @@ namespace com.csutil.system {
                 news.localData = await localCache.Get(news.key, null);
                 return news;
             });
-            allNews = allNews.OrderByDescending(x => x.GetDate());
+            allNews = allNews.OrderByDescending(x => x.GetDate(true));
             return allNews;
         }
 
@@ -52,7 +52,6 @@ namespace com.csutil.system {
     public class News {
 
         public static News NewLocalNewsEvent(string title, string descr, string url, string urlText, NewsType type = News.NewsType.New, string id = null) {
-            var utcNow = "" + DateTimeV2.UtcNow.ToUnixTimestampUtc();
             if (id == null) { id = Guid.NewGuid().ToString(); }
             return new News() {
                 key = id,
@@ -60,7 +59,7 @@ namespace com.csutil.system {
                 description = descr,
                 detailsUrl = url,
                 detailsUrlText = urlText,
-                date = utcNow,
+                date = "" + DateTimeV2.UtcNow.ToReadableString_ISO8601(),
                 type = EnumUtil.GetEntryName(type)
             };
         }
@@ -82,7 +81,10 @@ namespace com.csutil.system {
 
         public NewsType GetNewsType() { return EnumUtil.TryParse(type, NewsType.Unknown); }
 
-        public DateTime GetDate() { return DateTimeV2.ParseUtc(date); }
+        public DateTime GetDate(bool returnUtcNowIfDateNull) {
+            if (returnUtcNowIfDateNull && date == null) { return DateTimeV2.UtcNow; }
+            return DateTimeV2.ParseUtc(date);
+        }
 
         public class LocalData {
             public bool isRead { get; set; }

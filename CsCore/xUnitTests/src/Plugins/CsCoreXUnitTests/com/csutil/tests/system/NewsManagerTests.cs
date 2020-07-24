@@ -29,7 +29,7 @@ namespace com.csutil.tests.system {
             Assert.NotNull(news1);
             Assert.Equal("Coming Soon", news1.type);
             Assert.Equal(News.NewsType.ComingSoon, news1.GetNewsType());
-            Assert.True(news1.GetDate().IsUtc());
+            Assert.True(news1.GetDate(false).IsUtc());
 
             // Mark that the user has read the news:
             await manager.MarkNewsAsRead(news1);
