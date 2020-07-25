@@ -27,8 +27,8 @@ namespace com.csutil {
                 resp.duration = Stopwatch.StartNew();
                 self.ApplyAllCookiesToRequest();
                 if (self.downloadHandler == null) { self.downloadHandler = resp.createDownloadHandler(); }
-                resp.debugInfo = self.method + " " + self.url + " with cookies=[" + self.GetRequestHeader("Cookie") + "]";
-                Log.d("Sending: " + resp);
+                resp.debugInfo = self.method + " " + self.url;
+                // Log.d("Sending: " + resp);
             }
             catch (Exception ex) { resp.onError(self, ex); throw; }
             var req = self.SendWebRequest();
@@ -95,12 +95,8 @@ namespace com.csutil {
         private static void HandleResult<T>(UnityWebRequest self, Response<T> resp) {
             if (self.isNetworkError || self.isHttpError) {
                 resp.onError.InvokeIfNotNull(self, new Exception("[" + self.responseCode + "] " + self.error));
-            } else {
-                try {
-                    if (resp.onResult != null) { resp.onResult(self.GetResult<T>()); } else {
-                        Log.d("resp.onResult was null, resp.GetResult has to be called manually");
-                    }
-                }
+            } else { // .onResult is only informed if there was no network or http error:
+                try { resp.onResult?.Invoke(self.GetResult<T>()); }
                 catch (Exception e) { resp.onError.InvokeIfNotNull(self, e); }
             }
         }
