@@ -37,7 +37,11 @@ namespace com.csutil.http {
         public async Task<T> GetResult<T>() {
             HttpResponseMessage resp = await request;
             AssertV2.IsTrue(HttpStatusCode.OK == resp.StatusCode, "response.StatusCode=" + resp.StatusCode);
+            if (TypeCheck.AreEqual<T, HttpResponseMessage>()) { return (T)(object)resp; }
+            if (TypeCheck.AreEqual<T, HttpStatusCode>()) { return (T)(object)resp.StatusCode; }
+            if (TypeCheck.AreEqual<T, Headers>()) { return (T)(object)await GetResultHeaders(); }
             HttpContent content = resp.Content;
+            if (TypeCheck.AreEqual<T, HttpContent>()) { return (T)(object)content; }
             if (TypeCheck.AreEqual<T, Stream>()) { return (T)(object)await content.ReadAsStreamAsync(); }
             if (TypeCheck.AreEqual<T, byte[]>()) { return (T)(object)await content.ReadAsByteArrayAsync(); }
             var respText = await content.ReadAsStringAsync();

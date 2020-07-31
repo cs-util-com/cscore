@@ -11,9 +11,9 @@ namespace com.csutil.http.apis {
 
         public static async Task<HashSet<string>> GetAlternativesRecursively(string searchTerm) {
             var t = Log.MethodEntered("Recursive alternatives for " + searchTerm);
-            IEnumerable<string> alternativesToStarWars = await GetAlternatives(searchTerm);
+            IEnumerable<string> alternativesToSearchTerm = await GetAlternatives(searchTerm);
             HashSet<string> all = new HashSet<string>();
-            foreach (var a in alternativesToStarWars) { // Repeat on all direct alternatives:
+            foreach (var a in alternativesToSearchTerm) { // Repeat on all direct alternatives:
                 foreach (var r in await GetAlternatives(a)) { all.Add(r); }
             }
             Log.MethodDone(t);

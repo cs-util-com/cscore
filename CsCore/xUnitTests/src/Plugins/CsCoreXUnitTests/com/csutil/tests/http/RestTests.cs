@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using com.csutil.http;
@@ -112,6 +113,10 @@ namespace com.csutil.tests.http {
             Assert.NotNull(response);
             Log.d("Your external IP is " + response.origin);
             Assert.NotNull(response.origin);
+
+            Assert.Equal(HttpStatusCode.OK, await request.GetResult<HttpStatusCode>());
+            Assert.NotEmpty(await request.GetResultHeaders());
+            Assert.NotEmpty(await request.GetResult<Headers>());
 
             Log.d("response.headers contain the following elements:");
             foreach (var h in response.headers) { Log.d(" > " + h.Key + " (with value " + h.Value + ")"); }
