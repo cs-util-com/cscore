@@ -111,6 +111,7 @@ namespace com.csutil {
                 var h = (DownloadHandlerTexture)self.downloadHandler;
                 return (T)(object)h.texture;
             }
+            if (TypeCheck.AreEqual<T, HttpStatusCode>()) { return (T)(object)self.HttpStatusCode; }
             if (TypeCheck.AreEqual<T, Stream>()) { return (T)(object)new MemoryStream(self.downloadHandler.data); }
             if (TypeCheck.AreEqual<T, byte[]>()) { return (T)(object)self.downloadHandler.data; }
             if (TypeCheck.AreEqual<T, Headers>()) { return (T)(object)self.GetResponseHeadersV2(); }
