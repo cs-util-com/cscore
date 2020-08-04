@@ -47,7 +47,9 @@ namespace com.csutil {
         }
 
         private async Task<bool> RunInternetCheck() {
-            await SetHasInet(await RestFactory.instance.HasInternet());
+            var newState = await RestFactory.instance.HasInternet();
+            await SetHasInet(newState);
+            AssertV2.AreEqual(HasInet, newState);
             return HasInet;
         }
 

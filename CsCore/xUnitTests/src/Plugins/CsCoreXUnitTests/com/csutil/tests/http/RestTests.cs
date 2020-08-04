@@ -151,7 +151,7 @@ namespace com.csutil.tests.http {
             InternetStateManager.AddListener(this);
             Assert.False(InternetStateManager.Instance(this).HasInet);
             Assert.False(hasInet);
-            await InternetStateManager.Instance(this).HasInetAsync;
+            Assert.True(await InternetStateManager.Instance(this).HasInetAsync);
             Assert.True(InternetStateManager.Instance(this).HasInet);
             Assert.True(hasInet);
 
