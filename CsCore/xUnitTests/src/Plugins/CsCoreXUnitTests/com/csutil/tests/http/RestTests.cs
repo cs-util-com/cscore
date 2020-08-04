@@ -25,7 +25,9 @@ namespace com.csutil.tests.http {
         }
 
         public class HttpBinGetResp { // The https://httpbin.org/get json as a class
+            public string url { get; set; }
             public string origin { get; set; }
+            public Dictionary<string, object> args { get; set; }
             public Dictionary<string, object> headers { get; set; }
         }
 
@@ -131,7 +133,7 @@ namespace com.csutil.tests.http {
         public async Task TestGetCurrentPing() {
             var pingInMs = await RestFactory.instance.GetCurrentPing();
             Assert.NotEqual(-1, pingInMs);
-            Assert.True(0 <= pingInMs && pingInMs < 500, "pingInMs=" + pingInMs);
+            Assert.True(0 <= pingInMs && pingInMs < 1000, "pingInMs=" + pingInMs);
 
             var hasInet = false;
             var hasNoInet = false;
