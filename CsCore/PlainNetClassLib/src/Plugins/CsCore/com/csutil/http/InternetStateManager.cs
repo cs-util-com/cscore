@@ -19,13 +19,17 @@ namespace com.csutil {
 
         public static InternetStateManager Instance(object caller) { return IoC.inject.GetOrAddSingleton<InternetStateManager>(caller); }
 
-        public static void AddListener(IHasInternetListener l) { Instance(l).listeners.Add(l); }
-        public static bool RemoveListener(IHasInternetListener l) { return Instance(l).listeners.Remove(l); }
+        public static void AddListener(IHasInternetListener l) {
+            Instance(l).listeners.Add(l);
+        }
+        public static bool RemoveListener(IHasInternetListener l) {
+            return Instance(l).listeners.Remove(l);
+        }
 
         public bool HasInet { get; private set; } = false;
         public Task<bool> HasInetAsync { get; private set; }
 
-        public readonly List<IHasInternetListener> listeners = new List<IHasInternetListener>();
+        public readonly ISet<IHasInternetListener> listeners = new HashSet<IHasInternetListener>();
         public readonly CancellationTokenSource cancelToken = new CancellationTokenSource();
 
         public InternetStateManager() {
@@ -56,7 +60,9 @@ namespace com.csutil {
         private async Task SetHasInet(bool hasInet) {
             this.HasInet = hasInet;
             foreach (var l in listeners) {
-                try { await l.OnHasInternet(hasInet); } catch (Exception e) { Log.e(e); }
+                try {
+                    await l.OnHasInternet(hasInet);
+                } catch (Exception e) { Log.e(e); }
             }
         }
 

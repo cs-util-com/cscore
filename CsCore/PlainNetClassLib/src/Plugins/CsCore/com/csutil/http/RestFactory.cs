@@ -22,7 +22,13 @@ namespace com.csutil.http {
 
         public async Task<bool> HasInternet(Action hasInet = null, Action noInet = null, string ip = "8.8.8.8", int timeoutMs = 1000) {
             var ping = await GetCurrentPing(ip, timeoutMs);
-            if (ping >= 0) { hasInet.InvokeIfNotNull(); return true; } else { noInet.InvokeIfNotNull(); return false; }
+            if (ping >= 0) {
+                hasInet.InvokeIfNotNull();
+                return true;
+            } else {
+                noInet.InvokeIfNotNull();
+                return false;
+            }
         }
 
     }

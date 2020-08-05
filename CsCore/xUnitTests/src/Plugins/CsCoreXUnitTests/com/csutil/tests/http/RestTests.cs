@@ -141,7 +141,6 @@ namespace com.csutil.tests.http {
             Assert.True(hasInet || hasNoInet); // Any of the 2 callbacks was triggered
         }
 
-
     }
 
     public class HasInternetTests : IHasInternetListener {
@@ -149,17 +148,28 @@ namespace com.csutil.tests.http {
         private bool hasInet;
 
         [Fact]
-        public async Task TestInternetStateListener() {
+        public async Task TestInternetStateListenerOnce() {
             InternetStateManager.AddListener(this);
-            Assert.False(InternetStateManager.Instance(this).HasInet);
-            Assert.False(hasInet);
+            Assert.True(await RestFactory.instance.HasInternet());
             Assert.True(await InternetStateManager.Instance(this).HasInetAsync);
             Assert.True(InternetStateManager.Instance(this).HasInet);
             Assert.True(hasInet);
-
+            InternetStateManager.RemoveListener(this);
         }
 
-        Task IHasInternetListener.OnHasInternet(bool hasInet) { this.hasInet = hasInet; return Task.FromResult(true); }
+        [Fact]
+        public async Task TestInternetStateListener20Times() {
+            Assert.False(InternetStateManager.Instance(this).HasInet);
+            for (int i = 0; i < 20; i++) {
+                await TestInternetStateListenerOnce();
+            }
+        }
+
+        Task IHasInternetListener.OnHasInternet(bool hasInet) {
+            this.hasInet = hasInet;
+            Assert.True(hasInet);
+            return Task.FromResult(true);
+        }
 
     }
 
