@@ -1,10 +1,14 @@
 using System;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace com.csutil.http {
 
     public interface RestRequest {
+
+        Uri uri { get; }
+        string httpMethod { get; }
 
         /// <summary> Adds a text content to the request (typically in form of UTF8 encoded json) </summary>
         /// <param name="textContent"> e.g. a json string </param>

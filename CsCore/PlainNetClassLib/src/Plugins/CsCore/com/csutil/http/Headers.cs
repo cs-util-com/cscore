@@ -41,6 +41,10 @@ namespace com.csutil.http {
             return GetHeaderValue("Last-Modified", "") + GetHeaderValue("Content-Length", "") + GetContentMimeType("");
         }
 
+        public bool TryGetValue(string key, out IEnumerable<string> value) {
+            return headers.TryGetValue(key, out value);
+        }
+
         public string GetMD5Checksum() { return GetHeaderValue("content-md5", null); }
 
         public string GetEtagHeader() { return GetHeaderValue("etag", null); }
@@ -106,6 +110,7 @@ namespace com.csutil.http {
         public IEnumerator<KeyValuePair<string, IEnumerable<string>>> GetEnumerator() { return headers.GetEnumerator(); }
 
         IEnumerator IEnumerable.GetEnumerator() { return headers.GetEnumerator(); }
+
     }
 
 }

@@ -5,6 +5,7 @@ using UnityEngine.EventSystems;
 
 namespace com.csutil.ui {
 
+    /// <summary> Sets a target gameobject active/inactive when clicked by the user </summary>
     public class ToggleGoVisibility : MonoBehaviour, IPointerClickHandler {
 
         public Transform target;

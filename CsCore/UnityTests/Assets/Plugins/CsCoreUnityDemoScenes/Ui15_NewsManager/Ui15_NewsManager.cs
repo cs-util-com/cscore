@@ -40,7 +40,7 @@ namespace com.csutil.tests {
             var urlText = "Show details..";
 
             if (await appUsed1DayRule.isTrue()) {
-                var n = News.NewLocalNewsEvent("Achivement Unlocked", "You used the app 1 day", url, urlText);
+                var n = News.NewLocalNewsEvent("Achievement Unlocked", "You used the app 1 day", url, urlText);
                 await onDeviceEventsStore.Set(n.key, n);
             }
             if (await featureNeverUsedRule.isTrue()) {

@@ -35,7 +35,7 @@ namespace com.csutil.ui {
             LoadImageFromUrl(image, item.imageUrl);
             LoadImageFromUrl(thumbnail, item.thumbnailUrl);
 
-            SetText(dateText, item.GetDate().ToLocalUiString());
+            SetText(dateText, item.GetDate(true).ToLocalUiString());
             SetText(titleText, item.title);
             SetText(descrText, item.description);
 

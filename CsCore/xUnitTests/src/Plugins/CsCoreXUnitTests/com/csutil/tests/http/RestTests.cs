@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using com.csutil.http;
@@ -24,7 +25,9 @@ namespace com.csutil.tests.http {
         }
 
         public class HttpBinGetResp { // The https://httpbin.org/get json as a class
+            public string url { get; set; }
             public string origin { get; set; }
+            public Dictionary<string, object> args { get; set; }
             public Dictionary<string, object> headers { get; set; }
         }
 
@@ -113,6 +116,10 @@ namespace com.csutil.tests.http {
             Log.d("Your external IP is " + response.origin);
             Assert.NotNull(response.origin);
 
+            Assert.Equal(HttpStatusCode.OK, await request.GetResult<HttpStatusCode>());
+            Assert.NotEmpty(await request.GetResultHeaders());
+            Assert.NotEmpty(await request.GetResult<Headers>());
+
             Log.d("response.headers contain the following elements:");
             foreach (var h in response.headers) { Log.d(" > " + h.Key + " (with value " + h.Value + ")"); }
 
@@ -126,14 +133,13 @@ namespace com.csutil.tests.http {
         public async Task TestGetCurrentPing() {
             var pingInMs = await RestFactory.instance.GetCurrentPing();
             Assert.NotEqual(-1, pingInMs);
-            Assert.True(0 <= pingInMs && pingInMs < 500, "pingInMs=" + pingInMs);
+            Assert.True(0 <= pingInMs && pingInMs < 1000, "pingInMs=" + pingInMs);
 
             var hasInet = false;
             var hasNoInet = false;
             await RestFactory.instance.HasInternet(() => { hasInet = true; }, () => { hasNoInet = true; });
             Assert.True(hasInet || hasNoInet); // Any of the 2 callbacks was triggered
         }
-
 
     }
 
@@ -142,17 +148,28 @@ namespace com.csutil.tests.http {
         private bool hasInet;
 
         [Fact]
-        public async Task TestInternetStateListener() {
+        public async Task TestInternetStateListenerOnce() {
             InternetStateManager.AddListener(this);
-            Assert.False(InternetStateManager.Instance(this).HasInet);
-            Assert.False(hasInet);
-            await InternetStateManager.Instance(this).HasInetAsync;
+            Assert.True(await RestFactory.instance.HasInternet());
+            Assert.True(await InternetStateManager.Instance(this).HasInetAsync);
             Assert.True(InternetStateManager.Instance(this).HasInet);
             Assert.True(hasInet);
-
+            InternetStateManager.RemoveListener(this);
         }
 
-        Task IHasInternetListener.OnHasInternet(bool hasInet) { this.hasInet = hasInet; return Task.FromResult(true); }
+        [Fact]
+        public async Task TestInternetStateListener20Times() {
+            Assert.False(InternetStateManager.Instance(this).HasInet);
+            for (int i = 0; i < 20; i++) {
+                await TestInternetStateListenerOnce();
+            }
+        }
+
+        Task IHasInternetListener.OnHasInternet(bool hasInet) {
+            this.hasInet = hasInet;
+            Assert.True(hasInet);
+            return Task.FromResult(true);
+        }
 
     }
 

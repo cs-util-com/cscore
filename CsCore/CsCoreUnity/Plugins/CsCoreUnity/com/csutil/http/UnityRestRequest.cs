@@ -1,5 +1,7 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -9,8 +11,10 @@ namespace com.csutil.http {
 
     public class UnityRestRequest : RestRequest {
 
+        public Uri uri => request.uri;
         private UnityWebRequest request;
-        private Headers requestHeaders;
+        private Headers requestHeaders = new Headers(new Dictionary<string, IEnumerable<string>>());
+        public string httpMethod => request.method;
 
         /// <summary> A value between 0 and 100 </summary>
         public Action<float> onProgress { get; set; }
@@ -27,8 +31,7 @@ namespace com.csutil.http {
 
         private async Task<T> SendRequest<T>(Response<T> resp) {
             resp.WithProgress(onProgress);
-            var runningResTask = WebRequestRunner.GetInstance(this).StartCoroutineAsTask(prepareRequest(resp), () => resp.getResult());
-            return await WrapWithResponseErrorHandling(resp, runningResTask);
+            return await WebRequestRunner.GetInstance(this).StartCoroutineAsTask(PrepareRequest(resp), () => resp.getResult());
         }
 
         public static async Task<T> WrapWithResponseErrorHandling<T>(Response<T> response, Task<T> runningResTask) {
@@ -37,7 +40,7 @@ namespace com.csutil.http {
             return await Task.WhenAny<T>(runningResTask, onErrorTask.Task).Unwrap();
         }
 
-        private IEnumerator prepareRequest<T>(Response<T> response) {
+        private IEnumerator PrepareRequest<T>(Response<T> response) {
             yield return new WaitForSeconds(0.05f); // wait 5ms so that headers etc can be set
             request.SetRequestHeaders(requestHeaders);
             yield return request.SendWebRequestV2(response);
@@ -50,7 +53,7 @@ namespace com.csutil.http {
         }
 
         public RestRequest WithRequestHeaders(Headers requestHeaders) {
-            this.requestHeaders = requestHeaders;
+            this.requestHeaders = new Headers(this.requestHeaders.AddRangeViaUnion(requestHeaders));
             return this;
         }
 

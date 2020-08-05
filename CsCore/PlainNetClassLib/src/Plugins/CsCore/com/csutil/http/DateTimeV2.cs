@@ -13,7 +13,7 @@ namespace com.csutil {
 
         public static DateTime NewDateTimeFromUnixTimestamp(long unixTimeInMs, bool autoCorrectIfPassedInSeconds = true) {
             AssertV2.IsTrue(unixTimeInMs > 0, "NewDateTimeFromUnixTimestamp: unixTimeInMs was " + unixTimeInMs);
-            System.DateTime dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
+            System.DateTime dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
             var result = dtDateTime.AddMilliseconds(unixTimeInMs);
             if (autoCorrectIfPassedInSeconds && result.Year == 1970) {
                 var correctedDate = NewDateTimeFromUnixTimestamp(unixTimeInMs * 1000, false);
