@@ -26,11 +26,11 @@ namespace com.csutil.editor {
         [MenuItem(DIR + "CsCore/Report a problem")]
         static void ReportCsCoreProblem() { Application.OpenURL("https://github.com/cs-util-com/cscore/issues"); }
 
-        [MenuItem(DIR + "CsCore/Install default packages")]
+        [MenuItem(DIR + "CsCore/Install default packages")] 
         static void InstallDefaultPackages() {
             UnityPackageInstaller.AddToProjectViaPackageManager("com.unity.build-report-inspector", "0.1.2-preview");
             UnityPackageInstaller.AddToProjectViaPackageManager("com.unity.device-simulator", "2.0.0-preview");
-            UnityPackageInstaller.AddToProjectViaPackageManager("com.unity.mobile.android-logcat", "1.0.0");
+            UnityPackageInstaller.AddToProjectViaPackageManager("com.unity.mobile.android-logcat", "1.1.1");
             // UnityPackageInstaller.AddToProjectViaPackageManager("com.unity.nuget.newtonsoft-json", "2.0.0-preview");
             // UnityPackageInstaller.AddToProjectViaPackageManager("com.unity.vectorgraphics", "2.0.0-preview.11");
         }

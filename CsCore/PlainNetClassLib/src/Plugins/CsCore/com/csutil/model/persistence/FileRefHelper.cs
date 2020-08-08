@@ -80,7 +80,7 @@ namespace com.csutil.model {
         }
 
         private static void AddCheckSum(this IFileRef self, string type, string hash) {
-            if (hash == null) { throw new ArgumentNullException($"The passed {type}-hash was null"); }
+            hash.ThrowErrorIfNull($"The passed {type}-hash was null");
             if (self.checksums == null) { self.checksums = new Dictionary<string, object>(); }
             self.checksums.Add(type, hash);
         }

@@ -37,10 +37,10 @@ namespace com.csutil {
 
         public static Task AddOnClickAction(this Button self, Action<GameObject> onClickAction) {
             return AddOnClickAction(self, (go) => { onClickAction(go); return true; });
-        }
+        } 
 
         public static Task<T> AddOnClickAction<T>(this Button self, Func<GameObject, T> onClickFunc) {
-            if (onClickFunc == null) { throw new ArgumentNullException("Passed onClickFunc was null"); }
+            onClickFunc.ThrowErrorIfNull("Passed onClickFunc was null");
             var tcs = new TaskCompletionSource<T>();
             var originTrace = new StackTrace();
             self.onClick.AddListener(() => {

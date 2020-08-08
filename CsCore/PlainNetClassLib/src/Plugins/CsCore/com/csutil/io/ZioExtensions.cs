@@ -69,10 +69,12 @@ namespace com.csutil {
         }
 
         public static bool OpenInExternalApp(this FileSystemEntry self) {
+            self.ThrowErrorIfNull("FileSystemEntry");
             try {
                 System.Diagnostics.Process.Start(GetFullFileSystemPath(self));
                 return true;
-            } catch (Exception e) { Log.e(e); }
+            }
+            catch (Exception e) { Log.w("" + e); }
             return false;
         }
 
