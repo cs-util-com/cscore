@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace com.csutil {
 
@@ -18,7 +19,7 @@ namespace com.csutil {
 #elif UNITY_STANDALONE_OSX
                  return RuntimePlatform.OSXPlayer;
 #elif UNITY_STANDALONE_WIN
-                 return RuntimePlatform.WindowsPlayer;
+                return RuntimePlatform.WindowsPlayer;
 #elif UNITY_WEBGL
                 return RuntimePlatform.WebGLPlayer;
 #else
@@ -51,6 +52,14 @@ namespace com.csutil {
             set { Application.targetFrameRate = value; }
             get { return Application.targetFrameRate; }
 #endif
+        }
+
+        private static bool _isPlaying = true;
+        public static bool isPlaying {
+            get {
+                try { _isPlaying = Application.isPlaying; } catch (Exception e) { Debug.LogWarning(e); }
+                return _isPlaying;
+            }
         }
 
     }
