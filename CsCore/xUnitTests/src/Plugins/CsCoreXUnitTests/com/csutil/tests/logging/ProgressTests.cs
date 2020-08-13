@@ -1,5 +1,5 @@
-
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using com.csutil.progress;
 using Xunit;
@@ -14,13 +14,17 @@ namespace com.csutil.tests {
         public void ExampleUsage1() {
             using (IProgress progress = new ProgressV2(id: "Download Progress 1", totalCount: 10)) {
                 Assert.Equal(10, progress.totalCount);
-                progress.SetCount(7);
+
+                progress.SetCount(7); // 7/10 will be complete
                 Assert.Equal(70, progress.percent);
-                progress.IncrementCount();
+
+                progress.IncrementCount(); // 8/10 will be complete
                 Assert.Equal(80, progress.percent);
-                progress.percent = 90;
+
+                progress.percent = 90; // 9/10 will be complete
                 Assert.Equal(9, progress.GetCount());
-                progress.SetComplete();
+
+                progress.SetComplete(); // 10/10 will be complete
                 Assert.True(progress.IsComplete());
                 Assert.Equal(100, progress.percent);
             }
@@ -78,6 +82,16 @@ namespace com.csutil.tests {
             Assert.Throws<ObjectDisposedException>(() => progress.percent = 1);
             Assert.Throws<ObjectDisposedException>(() => progress.SetCount(2));
             Assert.Throws<ObjectDisposedException>(() => ((IProgress<double>)progress).Report(3));
+        }
+
+        [Fact]
+        public void TestProgressManager() {
+            ProgressManager m = new ProgressManager();
+            var p1 = m.GetOrAddProgress("p1", 10, createIfNull: true);
+            Assert.Same(p1, m.GetOrAddProgress("p1", 0, createIfNull: true));
+            Assert.NotSame(p1, m.GetOrAddProgress("p2", 0, createIfNull: true));
+            Assert.Same(p1, IoC.inject.Get<IProgress>("p1"));
+            Assert.Same(p1, IoC.inject.Get<IProgress>(new KeyValuePair<string, double>("p1", 1)));
         }
 
     }

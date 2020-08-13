@@ -24,13 +24,17 @@ namespace com.csutil.progress {
         public double percent {
             get { return _percent; }
             set {
-                AssertV2.IsTrue(_percent <= value, $"Warning: current {_percent}% > new {value}%");
+                AssertV2.IsTrue((int)_percent <= (int)value, $"Warning: current {_percent}% > new {value}%");
                 if (disposed) { throw new ObjectDisposedException($"Progress {id} already disposed!"); }
                 if (value != _percent) {
                     _percent = value;
                     ((IProgress<double>)this).Report(this.GetCount());
                 }
             }
+        }
+
+        public override string ToString() {
+            return $"{id} at {Math.Round(percent, 2)}% ({this.GetCount()}/{totalCount})";
         }
 
         public ProgressV2(string id, double totalCount) {

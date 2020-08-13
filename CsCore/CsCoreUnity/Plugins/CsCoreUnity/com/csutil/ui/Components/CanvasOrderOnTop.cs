@@ -10,6 +10,10 @@ namespace com.csutil.ui {
     [RequireComponent(typeof(Canvas))]
     class CanvasOrderOnTop : MonoBehaviour {
 
+        /// <summary> If true canvas.CalcCurrentMaxSortingOrderInLayer will not
+        /// include this canvas in the calculation of the max order </summary>
+        public bool excludeFromOrderCalc = false;
+
         private void OnEnable() { SetCanvasSortingOrderOnTop(); }
 
         private void Start() { SetCanvasSortingOrderOnTop(); }
@@ -17,7 +21,10 @@ namespace com.csutil.ui {
         private void SetCanvasSortingOrderOnTop() {
             var canvas = GetComponent<Canvas>();
             canvas.overrideSorting = true;
-            canvas.sortingOrder = canvas.CalcCurrentMaxSortingOrderInLayer() + 1;
+            var maxOrderOfAnyCanvasFound = canvas.CalcCurrentMaxSortingOrderInLayer();
+            if (maxOrderOfAnyCanvasFound > canvas.sortingOrder) {
+                canvas.sortingOrder = maxOrderOfAnyCanvasFound + 1;
+            }
             gameObject.GetOrAddComponent<GraphicRaycaster>();
         }
 

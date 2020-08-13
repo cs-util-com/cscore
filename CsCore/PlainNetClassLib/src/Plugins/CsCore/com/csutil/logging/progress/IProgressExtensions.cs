@@ -12,7 +12,7 @@ namespace com.csutil.progress {
         public static void SetCount(this IProgress self, double current) {
             if (self.totalCount == 0) { throw new DivideByZeroException("progress.totalCount not set"); }
             self.percent = 100d * current / self.totalCount;
-            AssertV2.IsTrue(0 <= self.percent && self.percent <= 100, "self.percent=" + self.percent);
+            AssertV2.IsTrue(0 <= self.percent && self.percent <= 100, "" + self);
         }
 
         public static void IncrementCount(this IProgress self, int incrementStep = 1) {
@@ -21,6 +21,10 @@ namespace com.csutil.progress {
 
         public static double GetCount(this IProgress self) {
             return self.totalCount * self.percent / 100d;
+        }
+
+        public static double GetCappedPercent(this IProgress self) {
+            return Math.Min(100d, self.percent);
         }
 
         public static bool IsComplete(this IProgress self) { return self.percent >= 100; }

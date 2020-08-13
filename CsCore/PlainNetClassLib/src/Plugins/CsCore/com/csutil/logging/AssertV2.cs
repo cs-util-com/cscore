@@ -80,6 +80,12 @@ namespace com.csutil {
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
+        public static void AreEqual(double expected, double actual, string varName = "", params object[] args) {
+            var errorMsg = $"Assert.AreEqual() FAILED: expected number {varName}= {expected} NOT equal to actual {varName}= {actual}";
+            Assert(expected == actual, errorMsg, args);
+        }
+
+        [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         public static void AreEqual<T>(IEnumerable<T> expected, IEnumerable<T> actual, string varName = "", params object[] args) {
             if (!expected.Equals(actual)) {
                 string errorMsg = $"Assert.AreEqual() FAILED for {varName}: {CalcMultiLineUnequalText(expected, actual)}";
