@@ -82,6 +82,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dfffc504ed7df954f9bc50e07ee2f064, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  excludeFromOrderCalc: 0
 --- !u!114 &4860956704357201538
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -104,7 +105,7 @@ CanvasGroup:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1884616365230340966}
   m_Enabled: 1
-  m_Alpha: 0.72
+  m_Alpha: 0.69
   m_Interactable: 0
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0

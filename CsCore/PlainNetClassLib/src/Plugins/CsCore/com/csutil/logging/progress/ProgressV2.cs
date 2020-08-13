@@ -28,7 +28,7 @@ namespace com.csutil.progress {
                 if (disposed) { throw new ObjectDisposedException($"Progress {id} already disposed!"); }
                 if (value != _percent) {
                     _percent = value;
-                    ((IProgress<double>)this).Report(this.GetCount());
+                    if (totalCount > 0) { ((IProgress<double>)this).Report(this.GetCount()); }
                 }
             }
         }

@@ -72,6 +72,7 @@ namespace com.csutil.testing {
         }
 
         private static void ResetStaticInstances() {
+            AssertV2.throwExeptionIfAssertionFails = false;
             DisposeAllInjectors();
             EventBus.instance = new EventBus();
             IoC.inject = new injection.Injector();

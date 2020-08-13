@@ -6,6 +6,7 @@ using System.Linq;
 using ReuseScroller;
 using System.Reflection;
 using System;
+using com.csutil.progress;
 
 namespace com.csutil.testing {
 
@@ -19,6 +20,7 @@ namespace com.csutil.testing {
             "com.csutil.tests.MathTests, CsCoreXUnitTests"
         };
         private List<XunitTestRunner.Test> allTests;
+        private ProgressManager pm;
 
         protected override void Start() {
             base.Start();
@@ -26,10 +28,17 @@ namespace com.csutil.testing {
             var assembliesToTest = anyTypeInTargetAssembly.Map(typeString => {
                 try { return Type.GetType(typeString).Assembly; }
                 catch (Exception) {
-                    Log.e("Could not find type for string '" + typeString + "'");
+                    Log.e("Please check the XunitTestRunnerUi.anyTypeInTargetAssembly " +
+                        "list in your scene UI, it if's configured correctly. Could " +
+                        "not find type for string '" + typeString + "'", gameObject);
                     return null;
                 }
             });
+
+            pm = new ProgressManager();
+            var progressUis = ResourcesV2.FindAllInScene<ProgressUi>();
+            AssertV2.IsFalse(progressUis.IsNullOrEmpty(), "progressUi");
+            foreach (var progrUi in progressUis) { progrUi.progressManager = pm; }
 
             // On the parent canvas level collect all links:
             var links = GetComponentInParent<Canvas>().gameObject.GetLinkMap();
@@ -75,7 +84,12 @@ namespace com.csutil.testing {
         private IEnumerator ShowAllFoundTests(List<XunitTestRunner.Test> allTests) {
             this.CellData = allTests;
             if (autoRunAllTests) {
-                foreach (var test in allTests) { yield return RunTestCoroutine(test); }
+                using (var progress = pm.GetOrAddProgress("RunAllTests", allTests.Count, true)) {
+                    foreach (var test in allTests) {
+                        progress.IncrementCount();
+                        yield return RunTestCoroutine(test);
+                    }
+                }
                 AssertV2.AreEqual(0, allTests.Filter(t => t.testTask.IsFaulted).Count());
             }
         }
