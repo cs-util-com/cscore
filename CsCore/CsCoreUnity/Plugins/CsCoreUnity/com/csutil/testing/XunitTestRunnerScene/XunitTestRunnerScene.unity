@@ -307,6 +307,11 @@ PrefabInstance:
       propertyPath: m_AnchorMax.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4860956704357201538, guid: a617aba489e1cf24e8fa31eb4b69d92d,
+        type: 3}
+      propertyPath: isProgressParentFading
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6894139544682256505, guid: a617aba489e1cf24e8fa31eb4b69d92d,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -590,7 +595,7 @@ PrefabInstance:
     - target: {fileID: 2617795274691063149, guid: d22a6d07ff5f40440ae89c78e80d770f,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -0.000012459644
+      value: 0.020082735
       objectReference: {fileID: 0}
     - target: {fileID: 3715324971116741019, guid: d22a6d07ff5f40440ae89c78e80d770f,
         type: 3}

@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 7018348361040364337}
   - component: {fileID: 4860956704357201538}
   - component: {fileID: 6404171905344588556}
+  - component: {fileID: 5832009087394772109}
   m_Layer: 0
   m_Name: GlobalProgressOverlay1
   m_TagString: Untagged
@@ -109,6 +110,20 @@ CanvasGroup:
   m_Interactable: 0
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!114 &5832009087394772109
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1884616365230340966}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9eae20b964183f479c138c76c6c393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  alpha: 0
+  currentVelocity: 0
 --- !u!1001 &1588031564293505781
 PrefabInstance:
   m_ObjectHideFlags: 0

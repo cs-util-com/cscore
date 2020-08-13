@@ -533,6 +533,16 @@ PrefabInstance:
       propertyPath: m_AnchorMax.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5832009087394772109, guid: a617aba489e1cf24e8fa31eb4b69d92d,
+        type: 3}
+      propertyPath: delayInMsBetweenIterations
+      value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 5832009087394772109, guid: a617aba489e1cf24e8fa31eb4b69d92d,
+        type: 3}
+      propertyPath: fadeSpeed
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 6894139544682256505, guid: a617aba489e1cf24e8fa31eb4b69d92d,
         type: 3}
       propertyPath: m_LocalPosition.x

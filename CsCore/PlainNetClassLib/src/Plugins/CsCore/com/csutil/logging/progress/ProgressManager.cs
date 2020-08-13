@@ -46,7 +46,7 @@ namespace com.csutil.progress {
                 if (p.percent >= 100) { finishedTasksCounter++; }
             }
             totalTasks = trackedProgress.Count;
-            combinedAvgPercent = percentSum / totalTasks;
+            combinedAvgPercent = totalTasks > 0 ? percentSum / totalTasks : 0;
             combinedCount = countSum;
             combinedTotalCount = totalCountSum;
             combinedPercent = 100d * combinedCount / combinedTotalCount;

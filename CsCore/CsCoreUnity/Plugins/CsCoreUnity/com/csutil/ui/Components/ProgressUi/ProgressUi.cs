@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System;
+using com.csutil.ui;
 
 namespace com.csutil.progress {
 
@@ -9,6 +10,9 @@ namespace com.csutil.progress {
         public Slider progress;
         public Text progressText;
         public ProgressManager progressManager;
+
+        public bool enableProgressUiFading = true;
+        private CanvasGroupFader canvasGroupFader;
 
         private void OnEnable() {
             AssertV2.AreEqual(100, progress.maxValue, "progress.maxValue");
@@ -32,6 +36,19 @@ namespace com.csutil.progress {
             if (progressText != null) {
                 progressText.text = $"{percent}% ({progressManager.combinedCount}/{progressManager.combinedTotalCount})";
             }
+
+            // Handle progress UI fading:
+            if (enableProgressUiFading) {
+                if (canvasGroupFader == null) {
+                    canvasGroupFader = progress.GetComponentInParent<CanvasGroupFader>();
+                }
+                if (percent == 0 || percent >= 100) {
+                    canvasGroupFader.targetAlpha = 0;
+                } else {
+                    canvasGroupFader.targetAlpha = canvasGroupFader.initialAlpha;
+                }
+            }
+
         }
 
     }
