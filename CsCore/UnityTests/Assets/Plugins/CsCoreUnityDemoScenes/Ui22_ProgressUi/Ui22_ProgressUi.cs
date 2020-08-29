@@ -1,5 +1,9 @@
 ﻿using com.csutil.progress;
+using com.csutil.ui;
+using System;
 using System.Collections;
+using System.Threading.Tasks;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace com.csutil.tests {
@@ -11,7 +15,7 @@ namespace com.csutil.tests {
         public override IEnumerator RunTest() {
             SetupGlobalProgressUi();
             SetupLocalProgressButton();
-            yield return null;
+            yield return SetupBlockingProgressButton().AsCoroutine();
         }
 
         /// <summary> THe first example here demonstrates how a progress manager can be 
@@ -46,6 +50,21 @@ namespace com.csutil.tests {
             button.SetOnClickAction(delegate {
                 // Get the progress object (or create a new one if not found) and increment it:
                 pm2.GetOrAddProgress("Progress on Button UI", 10, true).IncrementCount();
+            });
+        }
+
+        /// <summary> Displays a progress UI that is blocking so that the user cant do input 
+        /// while the progress is showing, useful for loading screens etc </summary>
+        private async Task SetupBlockingProgressButton() {
+            await gameObject.GetLinkMap().Get<Button>("BlockingProgressButton").SetOnClickAction(async delegate {
+                ProgressManager prManager = new ProgressManager();
+                var blockingView = gameObject.GetViewStack().ShowBlockingProgressUiFor(prManager);
+                IProgress progress = prManager.GetOrAddProgress("DemoLoadingProgress", 200, true);
+                for (int i = 0; i < progress.totalCount; i++) {
+                    progress.IncrementCount();
+                    await TaskV2.Delay(15);
+                }
+                AssertV2.IsTrue(blockingView.IsDestroyed(), "Blocking progress not destroyed after it completed");
             });
         }
 

@@ -2,6 +2,7 @@
 using UnityEngine.UI;
 using System;
 using com.csutil.ui;
+using UnityEngine.Events;
 
 namespace com.csutil.progress {
 
@@ -14,6 +15,8 @@ namespace com.csutil.progress {
         /// <summary> After this delay the finished progress will be cleared once all progresses are 100 so 
         /// that a clean start can be visualized once the next wave of progresses happen. Disabled if < 0 </summary>
         public int delayInMsBeforeProgressCleanup = 2000;
+
+        public UnityAction onProgressUiComplete;
 
         /// <summary> The progress manage the UI will use as the source, will try to inject if not set manually </summary>
         public ProgressManager progressManager;
@@ -57,6 +60,7 @@ namespace com.csutil.progress {
 
             if (percent >= 100 && delayInMsBeforeProgressCleanup >= 0) {
                 this.ExecuteDelayed(ResetProgressManagerIfAllFinished, delayInMsBeforeProgressCleanup);
+                onProgressUiComplete?.Invoke();
             }
         }
 
