@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace com.csutil.progress {
 
@@ -32,6 +33,15 @@ namespace com.csutil.progress {
             if (caller is string id) { return GetOrAddProgress(id, 0, createIfNull); }
             if (caller is KeyValuePair<string, double> p) { return GetOrAddProgress(p.Key, p.Value, createIfNull); }
             throw new ArgumentException($"Cant handle caller='{caller}'");
+        }
+
+        public void RemoveProcesses(IEnumerable<KeyValuePair<string, IProgress>> processes) {
+            foreach (var p in processes) { trackedProgress.Remove(p); }
+            OnProgressChanged(null);
+        }
+
+        public IEnumerable<KeyValuePair<string, IProgress>> GetCompletedProgresses() {
+            return trackedProgress.Filter(x => x.Value.IsComplete()).ToList();
         }
 
         public void CalcLatestStats() {
@@ -72,7 +82,8 @@ namespace com.csutil.progress {
 
         private void OnProgressChanged(IProgress progressThatJustChanged) {
             latestChangeTime = DateTimeV2.UtcNow;
-            latestUpdatedProgress = progressThatJustChanged;
+            if (progressThatJustChanged != null) { latestUpdatedProgress = progressThatJustChanged; }
+            CalcLatestStats();
             OnProgressUpdate?.Invoke(this, progressThatJustChanged);
         }
 

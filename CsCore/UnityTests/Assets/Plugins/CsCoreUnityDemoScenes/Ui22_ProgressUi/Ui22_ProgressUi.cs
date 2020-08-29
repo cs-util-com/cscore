@@ -40,13 +40,12 @@ namespace com.csutil.tests {
         /// on any UI element that has an image set up using the images fill amount </summary>
         private void SetupLocalProgressButton() {
             // Create a second independent progress manager to be only shown on the button
-            var pm2 = new ProgressManager(); 
+            var pm2 = new ProgressManager();
             var button = gameObject.GetLinkMap().Get<Button>("ProgressButton");
             button.GetComponentInChildren<ProgressUiViaImage>().progressManager = pm2;
-            // Create a single progress that will be shown on the button once the user clicks it:
-            IProgress progress = pm2.GetOrAddProgress("Progress on Button UI", 10, true);
             button.SetOnClickAction(delegate {
-                progress.IncrementCount();
+                // Get the progress object (or create a new one if not found) and increment it:
+                pm2.GetOrAddProgress("Progress on Button UI", 10, true).IncrementCount();
             });
         }
 
