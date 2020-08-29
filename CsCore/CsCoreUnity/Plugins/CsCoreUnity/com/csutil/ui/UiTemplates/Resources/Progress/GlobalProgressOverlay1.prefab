@@ -12,9 +12,9 @@ GameObject:
   - component: {fileID: 488402722882557445}
   - component: {fileID: 7823020895288653941}
   - component: {fileID: 7018348361040364337}
-  - component: {fileID: 4860956704357201538}
   - component: {fileID: 6404171905344588556}
   - component: {fileID: 5832009087394772109}
+  - component: {fileID: 8853956591636216660}
   m_Layer: 0
   m_Name: GlobalProgressOverlay1
   m_TagString: Untagged
@@ -64,12 +64,12 @@ Canvas:
   m_PlaneDistance: 100
   m_PixelPerfect: 0
   m_ReceivesEvents: 1
-  m_OverrideSorting: 0
+  m_OverrideSorting: 1
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_AdditionalShaderChannelsFlag: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 999
   m_TargetDisplay: 0
 --- !u!114 &7018348361040364337
 MonoBehaviour:
@@ -83,21 +83,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dfffc504ed7df954f9bc50e07ee2f064, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  excludeFromOrderCalc: 0
---- !u!114 &4860956704357201538
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1884616365230340966}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f64b102b33febb54e9953c85f2a700a5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  progress: {fileID: 4341238499772110342}
-  progressText: {fileID: 4800759638447099300}
+  excludeFromOrderCalc: 1
 --- !u!225 &6404171905344588556
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -122,8 +108,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e9eae20b964183f479c138c76c6c393a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  alpha: 0
-  currentVelocity: 0
+  initialAlpha: 0
+  targetAlpha: 0
+  fadeSpeed: 10
+  delayInMsBetweenIterations: 20
+--- !u!114 &8853956591636216660
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1884616365230340966}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ec4619f7276ad4458bb9d0482d8ffe9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  progressText: {fileID: 4800759638447099300}
+  enableProgressUiFading: 1
+  progress: {fileID: 4341238499772110342}
 --- !u!1001 &1588031564293505781
 PrefabInstance:
   m_ObjectHideFlags: 0

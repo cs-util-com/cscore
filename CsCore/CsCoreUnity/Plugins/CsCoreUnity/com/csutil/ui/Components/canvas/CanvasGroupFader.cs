@@ -7,8 +7,8 @@ namespace com.csutil.ui {
 
         public float initialAlpha;
         public float targetAlpha;
-        public float fadeSpeed = 5;
-        public int delayInMsBetweenIterations = 30;
+        public float fadeSpeed = 10;
+        public int delayInMsBetweenIterations = 20;
 
         private CanvasGroup canvasGroup;
         private float currentVelocity;
