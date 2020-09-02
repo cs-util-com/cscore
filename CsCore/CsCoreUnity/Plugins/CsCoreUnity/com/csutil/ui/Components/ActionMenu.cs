@@ -117,7 +117,8 @@ namespace com.csutil.ui {
                 this.descr = descr;
             }
 
-            public virtual bool IsInSearchResults(string searchString) {
+            public virtual bool IsInSearchResults(string searchString, bool showOnlyFavorites) {
+                if (showOnlyFavorites && !this.isFavorite) { return false; }
                 searchString = searchString.ToLowerInvariant();
                 if (name.ToLowerInvariant().Contains(searchString)) { return true; }
                 if (descr != null && descr.ToLowerInvariant().Contains(searchString)) { return true; }
@@ -132,14 +133,16 @@ namespace com.csutil.ui {
                 button.interactable = entry.isEnabled;
                 iconGo.GetComponentInChildren<CanvasGroup>().enabled = !entry.isEnabled;
                 button.SetOnClickAction(btnGo => {
-                    menu.clickedEntry = entry;
-                    taskComplSource.TrySetResult(entry);
+                    if (menu.entries.Contains(entry)) {
+                        menu.clickedEntry = entry;
+                        taskComplSource.TrySetResult(entry);
+                    }
                     entry.onClicked.InvokeIfNotNull(btnGo);
                 });
                 return iconGo;
             }
 
-            public virtual GameObject CreateListEntryUi(ActionMenu menu, TaskCompletionSource<Entry> taskComplSource) {
+            public virtual GameObject CreateListEntryUi(ActionMenu menu, bool showOnlyFavs, TaskCompletionSource<Entry> taskComplSource) {
                 var entry = this;
                 var listEntryUiGo = ResourcesV2.LoadPrefab(entry.listModeEntryPrefabName);
                 var map = listEntryUiGo.GetLinkMap();
@@ -152,12 +155,14 @@ namespace com.csutil.ui {
                 button.interactable = entry.isEnabled;
                 map.Get<CanvasGroup>("ActionSelected").enabled = !entry.isEnabled;
                 button.SetOnClickAction(go => {
-                    menu.clickedEntry = entry;
-                    taskComplSource.TrySetResult(entry);
+                    if (menu.entries.Contains(entry)) {
+                        menu.clickedEntry = entry;
+                        taskComplSource.TrySetResult(entry);
+                    }
                     entry.onClicked.InvokeIfNotNull(go);
                 });
                 var onFavorite = map.Get<Toggle>("FavoriteToggle");
-                onFavorite.gameObject.SetActiveV2(entry.onFavoriteToggled != null);
+                onFavorite.gameObject.SetActiveV2(!showOnlyFavs && entry.onFavoriteToggled != null);
                 onFavorite.isOn = entry.isFavorite;
                 onFavorite.SetOnValueChangedAction(entry.onFavoriteToggled);
                 return listEntryUiGo;
@@ -168,6 +173,7 @@ namespace com.csutil.ui {
         public class Presenter : Presenter<ActionMenu> {
 
             public GameObject targetView { get; set; }
+            public bool showOnlyFavorites = false;
             private Dictionary<string, Link> map;
             private TaskCompletionSource<Entry> taskComplSource;
 
@@ -176,6 +182,12 @@ namespace com.csutil.ui {
                 taskComplSource = new TaskCompletionSource<Entry>();
                 map = targetView.GetLinkMap();
                 menu.viewMode = await menu.persistedSettings.Get(menu.menuId + " viewMode", menu.viewMode);
+
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                menu.SetupFavoriteLogic();
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+
+                showOnlyFavorites = menu.entries.Any(x => x.isFavorite);
                 SetupForViewMode(menu);
                 await taskComplSource.Task;
             }
@@ -189,9 +201,7 @@ namespace com.csutil.ui {
                 map.Get<Button>("Backdrop").SetOnClickAction(delegate {
                     if (menu.onCancel()) { taskComplSource.SetCanceled(); }
                 });
-#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-                menu.SetupFavoriteLogic();
-#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+
                 var isIconMode = menu.viewMode == ViewMode.iconsOnly;
                 map.Get<GameObject>("IconGridContainer").SetActiveV2(isIconMode);
                 map.Get<GameObject>("EntryList").SetActiveV2(!isIconMode);
@@ -228,12 +238,21 @@ namespace com.csutil.ui {
                     titleMap.Get<Text>("TitleText").text = menu.title;
                 }
                 var sortedEntries = new List<Entry>(menu.entries);
+                if (showOnlyFavorites) {
+                    var showMore = new Entry(-1, "", "More", "Show all actions");
+                    showMore.isFavorite = true;
+                    showMore.onClicked = delegate {
+                        showOnlyFavorites = false; // Turn off fav. only mode
+                        SetupForViewMode(menu); // Force UI to rebuild
+                    };
+                    sortedEntries.Add(showMore);
+                }
                 sortedEntries.Sort(menu.SortMenuEntries);
                 return sortedEntries.ToDictionary(entry => entry, entry => {
                     if (menu.viewMode == ViewMode.iconsOnly) {
                         return parentUi.AddChild(entry.CreateIconEntryUi(menu, taskComplSource));
                     } else {
-                        return parentUi.AddChild(entry.CreateListEntryUi(menu, taskComplSource));
+                        return parentUi.AddChild(entry.CreateListEntryUi(menu, showOnlyFavorites, taskComplSource));
                     }
                 });
             }
@@ -250,7 +269,7 @@ namespace com.csutil.ui {
             }
 
             private void SetEntryUisActiveBasedOnSearchString(string searchString, Dictionary<Entry, GameObject> entryUis, Button clearSearchBtn) {
-                foreach (var ui in entryUis) { ui.Value.SetActiveV2(ui.Key.IsInSearchResults(searchString)); }
+                foreach (var ui in entryUis) { ui.Value.SetActiveV2(ui.Key.IsInSearchResults(searchString, showOnlyFavorites)); }
                 clearSearchBtn.gameObject.SetActiveV2(!searchString.IsNullOrEmpty());
             }
 
