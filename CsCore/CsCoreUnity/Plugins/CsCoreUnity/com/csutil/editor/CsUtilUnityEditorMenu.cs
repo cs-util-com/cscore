@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -20,13 +19,16 @@ namespace com.csutil.editor {
         [MenuItem(DIR + "Fonts/Open FontAwesome Icon Overview")]
         static void OpenFontAwesomeIcons() { Application.OpenURL("https://fontawesome.com/cheatsheet"); }
 
+        [MenuItem(DIR + "Fonts/.OTF & .TTF Font Viewer")] // A generic viewer to manually load any otf or ttf file
+        static void OpenFontViewer() { Application.OpenURL("http://mathew-kurian.github.io/CharacterMap/"); }
+
         [MenuItem(DIR + "CsCore/Open GitHub page (Documentation)")]
         static void CsCoreGithubPage() { Application.OpenURL("https://github.com/cs-util-com/cscore"); }
 
         [MenuItem(DIR + "CsCore/Report a problem")]
         static void ReportCsCoreProblem() { Application.OpenURL("https://github.com/cs-util-com/cscore/issues"); }
 
-        [MenuItem(DIR + "CsCore/Install default packages")] 
+        [MenuItem(DIR + "CsCore/Install default packages")]
         static void InstallDefaultPackages() {
             UnityPackageInstaller.AddToProjectViaPackageManager("com.unity.build-report-inspector", "0.1.2-preview");
             UnityPackageInstaller.AddToProjectViaPackageManager("com.unity.device-simulator", "2.0.0-preview");
