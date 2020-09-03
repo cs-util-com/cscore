@@ -40,7 +40,7 @@ namespace com.csutil {
         }
 
         public static Task<T> AddOnClickAction<T>(this Button self, Func<GameObject, T> onClickFunc) {
-            if (onClickFunc == null) { throw new ArgumentNullException("Passed onClickFunc was null"); }
+            onClickFunc.ThrowErrorIfNull("Passed onClickFunc was null");
             var tcs = new TaskCompletionSource<T>();
             var originTrace = new StackTrace();
             self.onClick.AddListener(() => {
@@ -245,9 +245,15 @@ namespace com.csutil {
         }
 
         public static int CalcCurrentMaxSortingOrderInLayer(this Canvas self) {
-            var l = ResourcesV2.FindAllInScene<Canvas>().Filter(x =>
-                x.gameObject.activeInHierarchy && x.enabled && x != self && x.sortingLayerID == self.sortingLayerID
-            );
+            var l = ResourcesV2.FindAllInScene<Canvas>().Filter(x => {
+                if (x == self) { return false; } // Skip the input canvas
+                if (!x.enabled) { return false; } // Only include currently active ones
+                if (!x.gameObject.activeInHierarchy) { return false; }
+                if (x.sortingLayerID != self.sortingLayerID) { return false; }
+                var o = x.GetComponent<CanvasOrderOnTop>();
+                if (o != null && o.excludeFromOrderCalc) { return false; }
+                return true;
+            });
             return l.Max(x => x.sortingOrder);
         }
 

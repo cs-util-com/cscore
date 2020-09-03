@@ -20,7 +20,7 @@ namespace com.csutil {
         private ConcurrentQueue<Action> actionsForMainThread = new ConcurrentQueue<Action>();
 
         private void Awake() {
-            UnityEngine.Debug.Log($"MainThread_{GetHashCode()}.Awake (while Application.isPlaying={Application.isPlaying})", gameObject);
+            UnityEngine.Debug.Log($"MainThread_{GetHashCode()}.Awake (while Application.isPlaying={ApplicationV2.isPlaying})", gameObject);
             if (mainThreadRef != null) { throw Log.e("There is already a MainThread"); }
             mainThreadRef = Thread.CurrentThread;
         }
@@ -31,7 +31,7 @@ namespace com.csutil {
         }
 
         private void OnDestroy() {
-            UnityEngine.Debug.Log($"MainThread_{GetHashCode()}.OnDestroy (while Application.isPlaying={Application.isPlaying})", gameObject);
+            UnityEngine.Debug.Log($"MainThread_{GetHashCode()}.OnDestroy (while Application.isPlaying={ApplicationV2.isPlaying})", gameObject);
             mainThreadRef = null;
         }
 
@@ -54,10 +54,10 @@ namespace com.csutil {
         public static void Invoke(Action a) { instance.ExecuteOnMainThread(a); }
 
         public void ExecuteOnMainThread(Action a) {
-            if (Application.isPlaying) { AssertV2.IsNotNull(mainThreadRef, "mainThreadRef"); }
+            if (ApplicationV2.isPlaying) { AssertV2.IsNotNull(mainThreadRef, "mainThreadRef"); }
             if (WasInitializedWhilePlaying) {
                 actionsForMainThread.Enqueue(a);
-            } else if (!Application.isPlaying) {
+            } else if (!ApplicationV2.isPlaying) {
                 Log.d("ExecuteOnMainThread: Application not playing, action will be instantly executed now");
                 a();
             } else {

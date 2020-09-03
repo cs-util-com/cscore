@@ -44,7 +44,8 @@ namespace com.csutil.tests {
             Assert.Equal(firstStart, prefs.GetFirstStartDate());
             Assert.Equal(lastUpdate, prefs.GetLastUpdateDate());
 
-            var sysInfo = EnvironmentV2.instance.systemInfo as EnvironmentV2.SystemInfo;
+            EnvironmentV2.ISystemInfo sysInfo = EnvironmentV2.instance.systemInfo;
+            Assert.NotNull(sysInfo);
 
             Assert.True(DateTime.UtcNow.ToUnixTimestampUtc() > 0, "DateTime.UtcNow=" + DateTime.UtcNow.ToUnixTimestampUtc());
             Assert.True(DateTimeV2.UtcNow.ToUnixTimestampUtc() > 0, "DateTimeV2.UtcNow=" + DateTimeV2.UtcNow.ToUnixTimestampUtc());
@@ -53,11 +54,12 @@ namespace com.csutil.tests {
             Assert.NotNull(sysInfo.lastUpdateDate);
             Assert.NotNull(sysInfo.firstLaunchDate);
 
-            sysInfo.appVersion += "_v2"; // Simulate that the app was updated 
-
-            prefs = new Preferences(store);
-            Assert.Equal(firstStart, prefs.GetFirstStartDate());
-            Assert.NotEqual(lastUpdate, prefs.GetLastUpdateDate());
+            if (sysInfo is EnvironmentV2.SystemInfo si) {
+                si.appVersion += "_v2"; // Simulate that the app was updated 
+                prefs = new Preferences(store);
+                Assert.NotEqual(lastUpdate, prefs.GetLastUpdateDate());
+                Assert.Equal(firstStart, prefs.GetFirstStartDate());
+            }
 
             // PlayerPrefsV2.SetStringEncrypted and PlayerPrefsV2.GetStringDecrypted example:
             await prefs.SetStringEncrypted("mySecureString", "some text to encrypt", password: "myPassword123");

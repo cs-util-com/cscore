@@ -65,12 +65,15 @@ namespace com.csutil.tests {
 
         private static async Task<FileEntry> GetImageFile(string imageFileName) {
             FileEntry imgFile = EnvironmentV2.instance.GetCurrentDirectory().GetChild(imageFileName);
-            if (!imgFile.Exists) { // If the file does not exist, download a random image and save it there:
+            // If the file does not exist or is invalid, download a random image and save it there:
+            if (!imgFile.Exists || imgFile.GetFileSize() == 0) {
                 Log.d("Saving random image for testing to: " + imgFile.GetFullFileSystemPath());
                 var stream = await new Uri("https://picsum.photos/4000/4000").SendGET().GetResult<Stream>();
                 imgFile.SaveStream(stream);
                 stream.Dispose();
             }
+            Assert.True(imgFile.Exists);
+            Assert.NotEqual(0, imgFile.GetFileSize());
             return imgFile;
         }
 

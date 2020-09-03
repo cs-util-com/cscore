@@ -166,6 +166,14 @@ namespace com.csutil.tests {
             Assert.Equal(JsonWriter.AsPrettyString(sysInfo), JsonWriter.AsPrettyString(si2));
         }
 
+        [Fact]
+        public void TestThrowNullExtension() {
+            Assert.Throws<ArgumentNullException>(() => {
+                object x = null;
+                x.ThrowErrorIfNull("x");
+            });
+        }
+
         private class LogToTestMock : LogDefaultImpl {
             private string latestLog;
             private string latestWarning;

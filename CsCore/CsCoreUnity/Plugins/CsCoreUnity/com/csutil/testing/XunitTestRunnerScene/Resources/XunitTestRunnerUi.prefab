@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 2403769988627691999}
   - component: {fileID: 2403769988627691996}
-  - component: {fileID: 2403769988627691997}
   - component: {fileID: 2403769988627691994}
   - component: {fileID: 2403769988627691984}
   - component: {fileID: 2403769988627691985}
@@ -30,7 +29,7 @@ RectTransform:
   m_GameObject: {fileID: 2403769988627691995}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 8183621260587003064}
   - {fileID: 4240026393875684430}
@@ -65,28 +64,6 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
---- !u!114 &2403769988627691997
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2403769988627691995}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_UiScaleMode: 0
-  m_ReferencePixelsPerUnit: 100
-  m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 800, y: 600}
-  m_ScreenMatchMode: 0
-  m_MatchWidthOrHeight: 0
-  m_PhysicalUnit: 3
-  m_FallbackScreenDPI: 96
-  m_DefaultSpriteDPI: 96
-  m_DynamicPixelsPerUnit: 1
 --- !u!114 &2403769988627691994
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -127,6 +104,8 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 0.9978303, b: 0.81799996, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -167,10 +146,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   scrollDirection: 0
   scrollReverse: 0
-  cellObject: {fileID: 3744711965387531870, guid: 0cbce7b9752ed61438e6ed868dffe70c,
-    type: 3}
+  cellObject: {fileID: 0}
   defaultCellSize: 200
-  spacing: 8
+  spacing: 20
   contentPadding:
     m_Left: 0
     m_Right: 0
@@ -180,6 +158,7 @@ MonoBehaviour:
   autoRunAllTests: 0
   anyTypeInTargetAssembly:
   - e.g. MyNamespace.MyClass1, MyAssembly1
+  - com.csutil.tests.MathTests, CsCoreXUnitTests
 --- !u!1001 &2403769988561074369
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -571,7 +550,7 @@ PrefabInstance:
     - target: {fileID: 364702507001529485, guid: bc0d577ba408be94ab69072c52f969f6,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0.0009189428
+      value: -0.000061035156
       objectReference: {fileID: 0}
     - target: {fileID: 1984549775834742264, guid: bc0d577ba408be94ab69072c52f969f6,
         type: 3}
@@ -627,6 +606,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5487675634755727761, guid: bc0d577ba408be94ab69072c52f969f6,
+        type: 3}
+      propertyPath: m_Value
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5487675634755727761, guid: bc0d577ba408be94ab69072c52f969f6,
+        type: 3}
+      propertyPath: m_Size
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6599141094316522376, guid: bc0d577ba408be94ab69072c52f969f6,
         type: 3}

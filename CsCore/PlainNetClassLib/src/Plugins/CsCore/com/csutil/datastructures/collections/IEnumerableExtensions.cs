@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace com.csutil {
@@ -35,6 +36,10 @@ namespace com.csutil {
         }
 
         public static bool IsNullOrEmpty<T>(this IEnumerable<T> self) { return self == null || !self.Any(); }
+
+        public static void ThrowErrorIfNullOrEmpty<T>(this IEnumerable<T> self, string paramName, [CallerMemberName] string methodName = null) {
+            if (self.IsNullOrEmpty()) { throw new ArgumentException($"{paramName} null or emtpy (Method {methodName})"); }
+        }
 
         public static string ToStringV2(this IEnumerable<string> args, string bracket1 = "[", string bracket2 = "]", string separator = ", ") {
             return args.ToStringV2<string>(x => x, bracket1, bracket2, separator);

@@ -19,7 +19,7 @@ namespace com.csutil.http.cookies {
             LoadCompleteCookieDictionary();
         }
 
-        internal abstract void LoadCompleteCookieDictionary();
+        protected abstract void LoadCompleteCookieDictionary();
 
         public override string ToString() {
             var s = "CookieJar:";
@@ -39,7 +39,7 @@ namespace com.csutil.http.cookies {
             }
         }
 
-        internal abstract void DeleteAllCookies();
+        protected abstract void DeleteAllCookies();
 
         private void InformContentChangeListener() { if (ContentsChanged != null) { ContentsChanged(); } }
 
@@ -98,7 +98,7 @@ namespace com.csutil.http.cookies {
             InformContentChangeListener();
         }
 
-        internal abstract bool saveCompleteCookieDictionary();
+        protected abstract bool saveCompleteCookieDictionary();
 
         // TODO: figure out a way to respect the scriptAccessible flag and supress cookies being
         //       returned that should not be.  The issue is that at some point, within this
