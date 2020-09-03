@@ -192,7 +192,7 @@ namespace com.csutil {
             return null;
         }
 
-        public static UnityAction<string> SetOnValueChangedActionThrottled(this InputField self, Action<string> onValueChanged, double delayInMs = 1000) {
+        public static UnityAction<string> SetOnValueChangedActionThrottled(this InputField self, Action<string> onValueChanged, double delayInMs = 500) {
             if (self.onValueChanged != null && self.onValueChanged.GetPersistentEventCount() > 0) {
                 Log.w("Overriding old onValueChanged listener for input field " + self, self.gameObject);
             }
@@ -200,7 +200,7 @@ namespace com.csutil {
             return AddOnValueChangedActionThrottled(self, onValueChanged, delayInMs);
         }
 
-        public static UnityAction<string> AddOnValueChangedActionThrottled(this InputField self, Action<string> onValueChanged, double delayInMs = 1000) {
+        public static UnityAction<string> AddOnValueChangedActionThrottled(this InputField self, Action<string> onValueChanged, double delayInMs = 500) {
             EventHandler<string> action = (_, newText) => { onValueChanged(newText); };
             var throttledAction = action.AsThrottledDebounce(delayInMs, skipFirstEvent: true);
             return self.AddOnValueChangedAction((newText) => {
