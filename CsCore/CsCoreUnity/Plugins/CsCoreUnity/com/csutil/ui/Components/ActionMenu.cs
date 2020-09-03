@@ -92,6 +92,9 @@ namespace com.csutil.ui {
             }
         }
 
+        /// <summary> Can be overwritten to customize the text and description of the "More" entry </summary>
+        internal virtual Entry NewShowMoreEntry() { return new Entry(-1, "", "More", "Show all actions"); }
+
         private string GetSettingsId(Entry entry) { return menuId + " - " + entry.id; }
 
         public class Entry {
@@ -238,15 +241,7 @@ namespace com.csutil.ui {
                     titleMap.Get<Text>("TitleText").text = menu.title;
                 }
                 var sortedEntries = new List<Entry>(menu.entries);
-                if (showOnlyFavorites) {
-                    var showMore = new Entry(-1, "", "More", "Show all actions");
-                    showMore.isFavorite = true;
-                    showMore.onClicked = delegate {
-                        showOnlyFavorites = false; // Turn off fav. only mode
-                        SetupForViewMode(menu); // Force UI to rebuild
-                    };
-                    sortedEntries.Add(showMore);
-                }
+                if (showOnlyFavorites) { sortedEntries.Add(NewShowMoreEntry(menu)); }
                 sortedEntries.Sort(menu.SortMenuEntries);
                 return sortedEntries.ToDictionary(entry => entry, entry => {
                     if (menu.viewMode == ViewMode.iconsOnly) {
@@ -255,6 +250,16 @@ namespace com.csutil.ui {
                         return parentUi.AddChild(entry.CreateListEntryUi(menu, showOnlyFavorites, taskComplSource));
                     }
                 });
+            }
+
+            private Entry NewShowMoreEntry(ActionMenu menu) {
+                Entry showMore = menu.NewShowMoreEntry();
+                showMore.isFavorite = true;
+                showMore.onClicked = delegate {
+                    showOnlyFavorites = false; // Turn off fav. only mode
+                    SetupForViewMode(menu); // Force UI to rebuild
+                };
+                return showMore;
             }
 
             private void SetupSearchUi(Dictionary<Entry, GameObject> entryUis) {
