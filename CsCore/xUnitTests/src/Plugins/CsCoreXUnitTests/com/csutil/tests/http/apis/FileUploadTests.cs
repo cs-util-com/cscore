@@ -58,6 +58,7 @@ namespace com.csutil.tests.http {
 
         }
 
+#pragma warning disable 0649 // Variable is never assigned to, and will always have its default value
         private class FileIoResponse {
             public bool success;
             public string key;
@@ -85,6 +86,7 @@ namespace com.csutil.tests.http {
             }
 
         }
+#pragma warning restore 0649 // Variable is never assigned to, and will always have its default value
 
     }
 
