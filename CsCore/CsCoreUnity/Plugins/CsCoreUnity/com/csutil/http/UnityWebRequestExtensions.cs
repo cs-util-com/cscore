@@ -1,6 +1,7 @@
 ﻿using com.csutil.http;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -125,7 +126,7 @@ namespace com.csutil {
             return (HttpStatusCode)self.responseCode;
         }
 
-        public static UnityWebRequest SetRequestHeaders(this UnityWebRequest self, Headers headersToAdd) {
+        public static UnityWebRequest SetRequestHeaders(this UnityWebRequest self, IEnumerable<KeyValuePair<string, IEnumerable<string>>> headersToAdd) {
             if (!headersToAdd.IsNullOrEmpty()) {
                 foreach (var h in headersToAdd) {
                     AssertV2.AreEqual(1, h.Value.Count());
