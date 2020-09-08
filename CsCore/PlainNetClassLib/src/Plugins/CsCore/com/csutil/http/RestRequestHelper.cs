@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using Zio;
@@ -35,6 +37,17 @@ namespace com.csutil {
                     }
                 });
             }
+        }
+
+        public static RestRequest AddFileViaForm(this RestRequest self, FileEntry fileToUpload, string key = "file") {
+            var fileStream = fileToUpload.OpenForRead();
+            var streamContent = new StreamContent(fileStream);
+            streamContent.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data") {
+                Name = key,
+                FileName = fileToUpload.Name
+            };
+            self.WithFormContent(new Dictionary<string, object>() { { key, streamContent } });
+            return self;
         }
 
     }

@@ -43,6 +43,17 @@ namespace com.csutil.tests {
         }
 
         [Fact]
+        public void TestIProgressDispose() {
+            ProgressV2 progress = new ProgressV2("p3", 200);
+            Assert.NotEqual(100, progress.percent);
+            Assert.NotEqual(200, progress.GetCount());
+            progress.Dispose();
+            Assert.Equal(200, progress.totalCount);
+            Assert.Equal(100, progress.percent);
+            Assert.Equal(200, progress.GetCount());
+        }
+
+        [Fact]
         public async Task TestEventListeners() {
             using (ProgressV2 progress = new ProgressV2("p3", 200)) {
                 var progressEventTriggered = false;

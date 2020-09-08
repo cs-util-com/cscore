@@ -21,7 +21,7 @@ namespace com.csutil {
         }
 
         public static T LoadAs<T>(this FileEntry self, FileShare fileShare = FileShare.Read) {
-            using (var selff = self.Open(FileMode.Open, FileAccess.Read, fileShare)) { return selff.LoadAs<T>(); }
+            using (Stream s = self.Open(FileMode.Open, FileAccess.Read, fileShare)) { return s.LoadAs<T>(); }
         }
 
         public static object LoadAs(this FileInfo self, Type t, FileShare fileShare = FileShare.Read) {

@@ -8,6 +8,8 @@ namespace com.csutil.tests.http {
     /// <summary> Some REST API examples and how they would be used in async methods </summary>
     public class IpLookupExamples {
 
+        public IpLookupExamples(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
+
         [Fact]
         public async Task IpifyOrgExample() {
             IpifyOrg.Response response = await IpifyOrg.GetResponse();

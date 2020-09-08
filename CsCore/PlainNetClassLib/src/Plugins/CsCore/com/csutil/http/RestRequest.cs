@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,6 +16,8 @@ namespace com.csutil.http {
         /// <param name="encoding"> e.g. Encoding.UTF8 </param>
         /// <param name="mediaType"> e.g. "application/json" </param>
         RestRequest WithTextContent(string textContent, Encoding encoding, string mediaType);
+
+        RestRequest WithFormContent(Dictionary<string, object> formData);
 
         RestRequest WithRequestHeaders(Headers requestHeaders);
 

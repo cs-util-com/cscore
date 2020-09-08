@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using Zio;
 
 namespace com.csutil.http {
 
@@ -26,6 +27,24 @@ namespace com.csutil.http {
 
         public RestRequest WithTextContent(string textContent, Encoding encoding, string mediaType) {
             httpContent = new StringContent(textContent, encoding, mediaType);
+            return this;
+        }
+
+        public RestRequest WithFormContent(Dictionary<string, object> formData) {
+            MultipartFormDataContent form = httpContent as MultipartFormDataContent;
+            if (form == null) { form = new MultipartFormDataContent(); }
+            foreach (var formEntry in formData) {
+                if (formEntry.Value is HttpContent c) {
+                    if (formEntry.Key.IsEmpty()) { form.Add(c); } else { form.Add(c, formEntry.Key); }
+                } else if (formEntry.Value is byte[] bytes) {
+                    form.Add(new ByteArrayContent(bytes), formEntry.Key);
+                } else if (formEntry.Value is string formString) {
+                    form.Add(new StringContent(formString), formEntry.Key);
+                } else {
+                    Log.e("Did not handle form data entry of type " + formEntry.Value.GetType());
+                }
+            }
+            httpContent = form;
             return this;
         }
 
@@ -82,6 +101,7 @@ namespace com.csutil.http {
         }
 
         public void Dispose() {
+            httpContent?.Dispose();
             request?.Dispose();
             client?.Dispose();
         }
