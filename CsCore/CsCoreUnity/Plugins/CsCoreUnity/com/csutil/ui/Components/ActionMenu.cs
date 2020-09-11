@@ -82,10 +82,10 @@ namespace com.csutil.ui {
         }
 
         internal virtual async Task SetupFavoriteLogic(Entry e) {
-            e.isFavorite = await persistedSettings.Get(GetSettingsId(e), e.isFavorite);
+            e.isFavorite = await persistedSettings.Get(GetFullEntryId(e), e.isFavorite);
             if (e.onFavoriteToggled == null) {
                 e.onFavoriteToggled = (isNowChecked) => {
-                    persistedSettings?.Set(GetSettingsId(e), isNowChecked);
+                    persistedSettings?.Set(GetFullEntryId(e), isNowChecked);
                     if (isNowChecked) { Toast.Show("Saved as favorite: " + e.name); }
                     return true;
                 };
@@ -93,16 +93,16 @@ namespace com.csutil.ui {
         }
 
         /// <summary> Can be overwritten to customize the text and description of the "More" entry </summary>
-        internal virtual Entry NewShowMoreEntry() { return new Entry(-1, "", "More", "Show all actions"); }
+        internal virtual Entry NewShowMoreEntry() { return new Entry("-1", MenuIcons.More, "More", "Show all actions"); }
 
-        private string GetSettingsId(Entry entry) { return menuId + " - " + entry.id; }
+        private string GetFullEntryId(Entry entry) { return menuId + " - " + entry.id; }
 
         public class Entry {
 
             public string iconModeEntryPrefabName = "ActionMenu/IconModeEntry1";
             public string listModeEntryPrefabName = "ActionMenu/ListModeEntry1";
 
-            public int id { get; }
+            public string id { get; }
             public string icon;
             public string name;
             public string descr;
@@ -113,11 +113,16 @@ namespace com.csutil.ui {
             internal bool isFavorite;
             internal Func<bool, bool> onFavoriteToggled;
 
-            public Entry(int id, string icon, string name, string descr = null) {
-                this.id = id;
+            /// <summary> Creates a new menu entry </summary>
+            /// <param name="icon"> A material UI text font icon, see https://shanfan.github.io/material-icons-cheatsheet/ </param>
+            /// <param name="name">A short call to action what the action will do </param>
+            /// <param name="descr">A longer descr. of the action </param>
+            /// <param name="id"> if null will use name as the id </param>
+            public Entry(string icon, string name, string descr = null, string id = null) {
                 this.icon = icon;
                 this.name = name;
                 this.descr = descr;
+                this.id = id == null ? name : id;
             }
 
             public virtual bool IsInSearchResults(string searchString, bool showOnlyFavorites) {
@@ -138,6 +143,7 @@ namespace com.csutil.ui {
                 button.SetOnClickAction(btnGo => {
                     if (menu.entries.Contains(entry)) {
                         menu.clickedEntry = entry;
+                        AppFlow.TrackEvent(EventConsts.catUi, menu.GetFullEntryId(entry));
                         taskComplSource.TrySetResult(entry);
                     }
                     entry.onClicked.InvokeIfNotNull(btnGo);
@@ -160,6 +166,7 @@ namespace com.csutil.ui {
                 button.SetOnClickAction(go => {
                     if (menu.entries.Contains(entry)) {
                         menu.clickedEntry = entry;
+                        AppFlow.TrackEvent(EventConsts.catUi, menu.GetFullEntryId(entry));
                         taskComplSource.TrySetResult(entry);
                     }
                     entry.onClicked.InvokeIfNotNull(go);
@@ -280,6 +287,21 @@ namespace com.csutil.ui {
 
         }
 
+    }
+
+    public static class MenuIcons {
+        public const string Add = "";
+        public const string Edit = "";
+        public const string Delete = "";
+        public const string Confirm = "";
+        public const string More = "";
+        public const string Cut = "";
+        public const string Copy = "";
+        public const string Paste = "";
+        public const string Move = "";
+        public const string Save = "";
+        public const string Share = "";
+        public const string Like = "";
     }
 
 }
