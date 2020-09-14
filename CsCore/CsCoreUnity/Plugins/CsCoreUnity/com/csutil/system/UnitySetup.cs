@@ -35,10 +35,10 @@ namespace com.csutil {
         }
 
         public static void SetupDefaultSingletonsIfNeeded() {
-            MainThread.instance.enabled = true; // Called to init main thread if not yet done by other logic
             var caller = new object();
             Log.instance = IoC.inject.GetOrAddSingleton<ILog>(caller, () => new LogToUnityDebugLog());
             IoC.inject.GetOrAddSingleton<EnvironmentV2>(caller, () => new EnvironmentV2Unity());
+            MainThread.instance.enabled = true; // Called to init main thread if not yet done by other logic
             IoC.inject.GetOrAddSingleton<RestFactory>(caller, () => new UnityRestFactory());
             if (EnvironmentV2.isWebGL) {
                 IoC.inject.GetOrAddSingleton<TaskV2>(caller, () => new TaskV2WebGL());

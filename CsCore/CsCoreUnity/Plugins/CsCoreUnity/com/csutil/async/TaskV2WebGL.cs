@@ -12,6 +12,7 @@ namespace com.csutil.async {
     class TaskV2WebGL : TaskV2 {
 
         protected override Task DelayTask(int millisecondsDelay) {
+            if (!ApplicationV2.isPlaying) { return Task.Delay(millisecondsDelay); }
             return StartCoroutineAsTask(DelayCoroutine(millisecondsDelay));
         }
 
@@ -22,6 +23,7 @@ namespace com.csutil.async {
         }
 
         private static Task StartCoroutineAsTask(IEnumerator iEnum) {
+            AssertV2.IsTrue(ApplicationV2.isPlaying, "In EDIT mode!");
             var tcs = new TaskCompletionSource<bool>();
             MainThread.Invoke(() => { MainThread.instance.StartCoroutineAsTask(tcs, iEnum, () => true); });
             return tcs.Task;

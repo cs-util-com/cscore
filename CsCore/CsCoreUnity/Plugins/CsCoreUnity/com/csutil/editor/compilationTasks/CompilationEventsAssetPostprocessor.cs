@@ -18,7 +18,7 @@ namespace com.csutil.editor {
 
         [UnityEditor.Callbacks.DidReloadScripts]
         static void DidReloadScripts() {
-            UnitySetup.SetupDefaultSingletonsIfNeeded();
+            UnitySetup.ResetAllStaticObjects();
             // Logd(" !! UnityEditor.Callbacks.DidReloadScripts");
             try { new SoundPlayer("C:/CompileSuccess.wav").Play(); }
             catch (Exception e) { Logd("Add a C:/CompileSuccess.wav to get better compile feedback, " + e); }
