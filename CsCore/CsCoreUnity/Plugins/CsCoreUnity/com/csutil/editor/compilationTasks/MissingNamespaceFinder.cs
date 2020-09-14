@@ -11,7 +11,7 @@ namespace com.csutil.editor {
     public class MissingNamespaceFinder : AssetPostprocessor {
 
         /// <summary> Add assembly names to this list that should be ignored by the checker </summary>
-        public static HashSet<string> blackList = new HashSet<string>() { "UnityEngine" };
+        public static HashSet<string> blackList = new HashSet<string>() { "UnityEngine", "Unity" };
 
         [UnityEditor.Callbacks.DidReloadScripts]
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed

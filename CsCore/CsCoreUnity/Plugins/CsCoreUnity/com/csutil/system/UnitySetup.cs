@@ -15,11 +15,11 @@ namespace com.csutil {
 #if UNITY_2019_3_OR_NEWER // <- Check needed? TODO
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
 #endif  // See https://blogs.unity3d.com/2019/11/05/enter-play-mode-faster-in-unity-2019-3/
-        static void ResetAllStaticObjects() {
+        public static void ResetAllStaticObjects() {
             Debug.Log("ResetAllStaticObjects");
             EventBus.instance = new EventBus();
             IoC.inject = Injector.newInjector(EventBus.instance);
-            Log.instance = new LogToConsole();
+            Log.instance = new LogToUnityDebugLog();
         }
 
         static UnitySetup() { // This method is only executed only once at the very beginning 
