@@ -48,7 +48,7 @@ namespace com.csutil {
         private static void DestroyExistingMainThreadIfNeeded() {
             var mt = IoC.inject.Get<MainThread>(null, false);
             if (mt != null) { mt.gameObject.Destroy(); }
-            InjectorExtensionsForUnity.GetOrAddGameObject(InjectorExtensionsForUnity.DEFAULT_SINGLETON_NAME).Destroy();
+            GameObject.Find(InjectorExtensionsForUnity.DEFAULT_SINGLETON_NAME).Destroy();
         }
 
         /// <summary> This will be called after all components in the scene already triggered their initialization logic </summary>
