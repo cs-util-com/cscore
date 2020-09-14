@@ -12,7 +12,6 @@ namespace com.csutil.async {
     class TaskV2WebGL : TaskV2 {
 
         protected override Task DelayTask(int millisecondsDelay) {
-            if (!ApplicationV2.isPlaying) { return Task.Delay(millisecondsDelay); }
             return StartCoroutineAsTask(DelayCoroutine(millisecondsDelay));
         }
 
