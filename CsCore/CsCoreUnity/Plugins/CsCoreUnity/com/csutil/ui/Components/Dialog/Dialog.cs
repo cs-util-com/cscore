@@ -32,7 +32,9 @@ namespace com.csutil.ui {
             var dialog = new DialogLoader<Dialog>(new Dialog(caption, message, confirmText));
             GameObject dialogUi = dialog.LoadDialogPrefab(new DefaultPresenter(), dialogPrefabName);
             RootCanvas.GetOrAddRootCanvas().gameObject.AddChild(dialogUi); // Add dialog UI in a canvas
-            return dialog.ShowDialogAsync();
+            var d = dialog.ShowDialogAsync();
+            EventBus.instance.Publish(EventConsts.catUi + UiEvents.DIALOG, dialog);
+            return d;
         }
 
         public class DefaultPresenter : Presenter<Dialog> {

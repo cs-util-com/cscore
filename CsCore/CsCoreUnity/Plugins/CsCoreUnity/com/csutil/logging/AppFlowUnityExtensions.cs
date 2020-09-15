@@ -12,7 +12,8 @@ namespace com.csutil {
             self.WithBasicTrackingActive();
             self.ActivateLinkMapTracking();
             self.ActivatePrefabLoadTracking();
-            self.ActivateUiEventTracking();
+            self.ActivateHighLevelUiEventTracking();
+            self.ActivateLowLevelUiEventTracking();
             self.ActivateViewStackTracking();
             return self;
         }
@@ -23,7 +24,7 @@ namespace com.csutil {
             });
         }
 
-        public static void ActivateUiEventTracking(this IAppFlow self) {
+        public static void ActivateLowLevelUiEventTracking(this IAppFlow self) {
 
             // Button UI tracking:
             EventBus.instance.Subscribe(self, EventConsts.catUi + UiEvents.BUTTON_CLICKED, (Button button) => {
@@ -43,9 +44,29 @@ namespace com.csutil {
             EventBus.instance.Subscribe(self, EventConsts.catUi + UiEvents.INPUTFIELD_CHANGED, (InputField input, string newText) => {
                 delayedAction(input, newText);
             });
+
+        }
+
+        public static void ActivateHighLevelUiEventTracking(this IAppFlow self) {
+
+            // ActionMenu tracking:
+            EventBus.instance.Subscribe(self, EventConsts.catUi + UiEvents.ACTION_MENU, (string entry) => {
+                self.TrackEvent(EventConsts.catUi, UiEvents.ACTION_MENU + "_" + entry, entry);
+            });
+
+            // Dialog tracking:
+            EventBus.instance.Subscribe(self, EventConsts.catUi + UiEvents.DIALOG, (Dialog d) => {
+                self.TrackEvent(EventConsts.catUi, UiEvents.DIALOG + "_" + d.caption, d);
+            });
+            EventBus.instance.Subscribe(self, EventConsts.catUi + UiEvents.CONFIRM_CANCEL_DIALOG, (ConfirmCancelDialog d) => {
+                var action = UiEvents.CONFIRM_CANCEL_DIALOG + "_" + d.caption + (d.dialogWasConfirmed ? " CONFIRMED" : " CANCELED");
+                self.TrackEvent(EventConsts.catUi, action, d);
+            });
+
         }
 
         public static void ActivateViewStackTracking(this IAppFlow self) {
+
             EventBus.instance.Subscribe(self, EventConsts.catView + EventConsts.SHOW, (GameObject view) => {
                 self.TrackEvent(EventConsts.catView, EventConsts.SHOW + "_" + view.name, view);
             });
@@ -64,6 +85,7 @@ namespace com.csutil {
             EventBus.instance.Subscribe(self, EventConsts.catView + EventConsts.REMOVED, (GameObject view) => {
                 self.TrackEvent(EventConsts.catView, EventConsts.REMOVED + "_" + view.name, view);
             });
+
         }
 
     }

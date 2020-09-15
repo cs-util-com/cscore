@@ -44,7 +44,7 @@ namespace com.csutil {
             var tcs = new TaskCompletionSource<T>();
             var originTrace = new StackTrace();
             self.onClick.AddListener(() => {
-                EventBus.instance.Publish(UiEvents.BUTTON_CLICKED, self);
+                EventBus.instance.Publish(EventConsts.catUi + UiEvents.BUTTON_CLICKED, self);
                 try {
                     T res = onClickFunc(self.gameObject);
                     if (res is Task<T> asyncT) {
@@ -99,7 +99,7 @@ namespace com.csutil {
                         self.isOn = oldIsOn;
                     } else { // Change was accepted:
                         oldIsOn = newIsOn;
-                        EventBus.instance.Publish(UiEvents.TOGGLE_CHANGED, self, newIsOn);
+                        EventBus.instance.Publish(EventConsts.catUi + UiEvents.TOGGLE_CHANGED, self, newIsOn);
                     }
                 };
                 self.onValueChanged.AddListener(newListener);
@@ -127,7 +127,7 @@ namespace com.csutil {
                         self.value = oldValue;
                     } else { // Change was accepted:
                         oldValue = newValue;
-                        EventBus.instance.Publish(UiEvents.SLIDER_CHANGED, self, newValue);
+                        EventBus.instance.Publish(EventConsts.catUi + UiEvents.SLIDER_CHANGED, self, newValue);
                     }
                 };
                 self.onValueChanged.AddListener(newListener);
@@ -183,7 +183,7 @@ namespace com.csutil {
                         self.text = oldText;
                     } else {
                         oldText = newText;
-                        EventBus.instance.Publish(UiEvents.INPUTFIELD_CHANGED, self, newText);
+                        EventBus.instance.Publish(EventConsts.catUi + UiEvents.INPUTFIELD_CHANGED, self, newText);
                     }
                 };
                 self.onValueChanged.AddListener(newListener);

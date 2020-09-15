@@ -143,7 +143,7 @@ namespace com.csutil.ui {
                 button.SetOnClickAction(btnGo => {
                     if (menu.entries.Contains(entry)) {
                         menu.clickedEntry = entry;
-                        AppFlow.TrackEvent(EventConsts.catUi, menu.GetFullEntryId(entry));
+                        EventBus.instance.Publish(EventConsts.catUi + UiEvents.ACTION_MENU, menu.GetFullEntryId(entry));
                         taskComplSource.TrySetResult(entry);
                     }
                     entry.onClicked.InvokeIfNotNull(btnGo);
@@ -166,7 +166,7 @@ namespace com.csutil.ui {
                 button.SetOnClickAction(go => {
                     if (menu.entries.Contains(entry)) {
                         menu.clickedEntry = entry;
-                        AppFlow.TrackEvent(EventConsts.catUi, menu.GetFullEntryId(entry));
+                        EventBus.instance.Publish(EventConsts.catUi + UiEvents.ACTION_MENU, menu.GetFullEntryId(entry));
                         taskComplSource.TrySetResult(entry);
                     }
                     entry.onClicked.InvokeIfNotNull(go);
