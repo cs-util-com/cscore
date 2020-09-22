@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using UnityEngine;
 
 namespace com.csutil {
@@ -63,12 +61,20 @@ namespace com.csutil {
 
         /// <summary> Returns all comp. in scene (including all inactive) </summary>
         public static IEnumerable<T> FindAllInScene<T>() where T : Component {
-            return Resources.FindObjectsOfTypeAll<T>().Filter(comp => !comp.IsPartOfEditorOnlyPrefab());
+            return Resources.FindObjectsOfTypeAll<T>().Filter(comp => comp.gameObject.IsInActiveScene());
+        }
+
+        public static IEnumerable<GameObject> FindAllGOsInScene() {
+            return Resources.FindObjectsOfTypeAll<GameObject>().Filter(IsInActiveScene);
+        }
+
+        private static bool IsInActiveScene(this GameObject go) {
+            return go.activeInHierarchy || !go.IsPartOfEditorOnlyPrefab();
         }
 
         // See http://answers.unity.com/answers/1190932/view.html
-        private static bool IsPartOfEditorOnlyPrefab(this Component self) {
-            return self.gameObject.scene.rootCount == 0 || self.gameObject.scene.name == null;
+        private static bool IsPartOfEditorOnlyPrefab(this GameObject go) {
+            return go.scene.rootCount == 0 || go.scene.name == null;
         }
 
     }

@@ -12,6 +12,10 @@ namespace com.csutil.ui {
         public const string BUTTON_CLICKED = "ButtonClick";
         public const string SLIDER_CHANGED = "SliderChanged";
 
+        public const string ACTION_MENU = "ActionMenu";
+        public const string DIALOG = "Dialog";
+        public const string CONFIRM_CANCEL_DIALOG = "ConfirmDialog";
+
     }
 
 }

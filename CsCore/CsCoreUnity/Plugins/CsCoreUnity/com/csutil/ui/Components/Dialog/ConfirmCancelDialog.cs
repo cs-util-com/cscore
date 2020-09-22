@@ -22,6 +22,7 @@ namespace com.csutil.ui {
             GameObject dialogUi = loader.LoadDialogPrefab(new DefaultPresenter(), dialogPrefabName);
             RootCanvas.GetOrAddRootCanvas().gameObject.AddChild(dialogUi); // Add dialog UI in a canvas
             ConfirmCancelDialog dialog = await loader.ShowDialogAsync();
+            EventBus.instance.Publish(EventConsts.catUi + UiEvents.CONFIRM_CANCEL_DIALOG, dialog);
             return dialog.dialogWasConfirmed;
         }
 

@@ -1,4 +1,5 @@
 ﻿using com.csutil.injection;
+using System.Linq;
 using UnityEngine;
 
 namespace com.csutil {
@@ -12,21 +13,34 @@ namespace com.csutil {
             if (x == null) {
                 var overrideExisting = x.IsDestroyed();  // override if there is an existing destroyed comp.
                 x = GetOrAddComponentSingleton<T>(true, singletonsGoName);
-                self.SetSingleton<T>(x, overrideExisting); 
+                self.SetSingleton<T>(x, overrideExisting);
             }
             return x;
         }
 
         public static T GetOrAddComponentSingleton<T>(bool createIfNull, string singletonsGoName = DEFAULT_SINGLETON_NAME) where T : Component {
-            var singletonsGo = GetOrAddGameObject(singletonsGoName);
+            var singletonsGo = GetOrAddSingletonGameObject(singletonsGoName);
             if (createIfNull) { return singletonsGo.GetOrAddChild("" + typeof(T)).GetOrAddComponent<T>(); }
             var t = singletonsGo.transform.Find("" + typeof(T));
             return t != null ? t.GetComponentV2<T>() : null;
         }
 
-        public static GameObject GetOrAddGameObject(string gameObjectName) {
-            var go = GameObject.Find(gameObjectName);
-            if (go == null) { return new GameObject(gameObjectName); } else { return go; }
+        private static GameObject GetOrAddSingletonGameObject(string goName) {
+            GameObject go = GetSingletonGameObject(goName);
+            if (go != null) { return go; }
+            return new GameObject(goName);
+        }
+
+        /// <summary> Works better then GameObject.Find </summary>
+        private static GameObject GetSingletonGameObject(string goName) {
+            var go = GameObject.Find(goName);
+            if (go != null) { return go; }
+            var list = ResourcesV2.FindAllGOsInScene().Filter(g => g.name == goName && g.GetParent() == null);
+            if (!list.IsEmpty()) {
+                go = list.Single(); // Must be exactly 1
+                Log.d($"GameObject.Find could not find '{goName} but FindAllGOsInScene did'", go);
+            }
+            return go;
         }
 
     }

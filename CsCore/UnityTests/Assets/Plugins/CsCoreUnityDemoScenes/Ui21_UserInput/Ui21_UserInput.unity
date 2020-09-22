@@ -43,7 +43,7 @@ RenderSettings:
 --- !u!157 &3
 LightmapSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 11
+  serializedVersion: 12
   m_GIWorkflowMode: 1
   m_GISettings:
     serializedVersion: 2
@@ -98,7 +98,7 @@ LightmapSettings:
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
   m_LightingDataAsset: {fileID: 0}
-  m_UseShadowmask: 1
+  m_LightingSettings: {fileID: 0}
 --- !u!196 &4
 NavMeshSettings:
   serializedVersion: 2
@@ -118,6 +118,8 @@ NavMeshSettings:
     manualTileSize: 0
     tileSize: 256
     accuratePlacement: 0
+    maxJobWorkers: 0
+    preserveTilesOutsideBounds: 0
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
@@ -269,6 +271,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e0d08b618cbcf604a80468012d1f9888, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  dragStartOffset: {x: 0, y: 0}
+  targetPos: {x: 0, y: 0}
+  onDrag:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &531067090
 GameObject:
   m_ObjectHideFlags: 0
@@ -695,7 +702,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cd15b66475c42ba44a02598d096f8922, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  referenceResolution: 600
+  referenceResolution: 554.83
 --- !u!114 &1202108679
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -741,7 +748,7 @@ MonoBehaviour:
   m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 600, y: 600}
+  m_ReferenceResolution: {x: 554.83, y: 554.83}
   m_ScreenMatchMode: 0
   m_MatchWidthOrHeight: 0.5
   m_PhysicalUnit: 3
@@ -826,9 +833,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 87e0dc99c808bb648924a258cef84857, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  longPressDurInMs: 500
-  doubleClickTimeoutInMs: 300
-  maxPixelDistance: 10
   onClick:
     m_PersistentCalls:
       m_Calls: []
@@ -841,6 +845,9 @@ MonoBehaviour:
   onLongPressEnd:
     m_PersistentCalls:
       m_Calls: []
+  longPressDurInMs: 500
+  doubleClickTimeoutInMs: 300
+  maxPixelDistance: 10
 --- !u!1 &1310509835
 GameObject:
   m_ObjectHideFlags: 0
@@ -939,6 +946,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:

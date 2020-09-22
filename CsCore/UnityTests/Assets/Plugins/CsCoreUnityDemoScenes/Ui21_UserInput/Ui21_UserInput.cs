@@ -7,15 +7,14 @@ namespace com.csutil.tests {
 
         public override IEnumerator RunTest() {
             var input = GetComponentInChildren<PointerInputHandler>();
-            input.onClick.AddListener(() => Log.d("onClick"));
-            input.onDoubleClick.AddListener(() => Log.d("onDoubleClick"));
+            input.onClick.AddListener(() => Toast.Show("onClick"));
+            input.onDoubleClick.AddListener(() => Toast.Show("onDoubleClick"));
             input.onLongPressStart.AddListener(() => {
-                Log.d("onLongPressStart");
                 Toast.Show("Now drag me around");
                 input.gameObject.AddComponent<UiDragHandler>();
             });
             input.onLongPressEnd.AddListener(() => {
-                Log.d("onLongPressEnd");
+                Toast.Show("onLongPressEnd");
                 input.gameObject.GetComponent<UiDragHandler>().Destroy();
             });
             yield return null;

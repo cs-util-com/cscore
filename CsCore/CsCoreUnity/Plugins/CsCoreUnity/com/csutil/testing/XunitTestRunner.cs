@@ -76,7 +76,7 @@ namespace com.csutil.testing {
             DisposeAllInjectors();
             EventBus.instance = new EventBus();
             IoC.inject = new injection.Injector();
-            UnitySetup.SetupDefaultSingletonsIfNeeded();
+            UnitySetup.ResetAllStaticObjects();
         }
 
         private static void DisposeAllInjectors() {

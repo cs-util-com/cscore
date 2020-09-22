@@ -8,7 +8,12 @@ namespace com.csutil {
 
     public class MainThread : MonoBehaviour {
 
-        public static MainThread instance { get { return IoC.inject.GetOrAddComponentSingleton<MainThread>(new object()); } }
+        public static MainThread instance {
+            get {
+                AssertV2.IsTrue(ApplicationV2.isPlaying, "In EDIT mode!");
+                return IoC.inject.GetOrAddComponentSingleton<MainThread>(new object());
+            }
+        }
 
         public static bool isMainThread { get { return mainThreadRef.Equals(Thread.CurrentThread); } }
 

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace com.csutil.logging {
 
-    public class SystemConsoleToUnityLogRedirector {
+    public class SystemConsoleToUnityLogRedirector { 
 
         public static void Setup() { Console.SetOut(new UnityTextWriter()); }
 
