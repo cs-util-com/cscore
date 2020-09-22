@@ -23,12 +23,14 @@ namespace com.csutil {
             targetFile.SaveStream(new MemoryStream(self.EncodeToJPG(quality)));
         }
 
-        [Obsolete("Does not capture UI, consider using ScreenCapture.CaptureScreenshotAsTexture instead")]
+        /// <summary> This method does not capture the UI, consider using 
+        /// ScreenCapture.CaptureScreenshotAsTexture instead </summary>
         public static Texture2D CaptureScreenshot(this Camera self, int width = 0, int height = 0) {
             return CaptureScreenshot(new Camera[] { self }, width, height);
         }
 
-        [Obsolete("Does not capture UI, consider using ScreenCapture.CaptureScreenshotAsTexture instead")]
+        /// <summary> This method does not capture the UI, consider using 
+        /// ScreenCapture.CaptureScreenshotAsTexture instead </summary>
         public static Texture2D CaptureScreenshot(this Camera[] cameras, int width = 0, int height = 0) {
             if (width == 0) { width = ScreenV2.width; }
             if (height == 0) { height = width * ScreenV2.height / ScreenV2.width; }
