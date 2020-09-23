@@ -28,7 +28,6 @@ namespace com.csutil {
                 SetupDownloadAndUploadHanders(self, resp);
                 resp.duration = Stopwatch.StartNew();
                 self.ApplyAllCookiesToRequest();
-                if (self.downloadHandler == null) { self.downloadHandler = resp.createDownloadHandler(); }
                 resp.debugInfo = self.method + " " + self.url;
                 // Log.d("Sending: " + resp);
             }
@@ -69,11 +68,8 @@ namespace com.csutil {
         }
 
         private static void SetupDownloadAndUploadHanders<T>(UnityWebRequest self, Response<T> resp) {
-            if (self.downloadHandler == null && resp.onResult != null) { self.downloadHandler = resp.createDownloadHandler(); }
+            self.downloadHandler = resp.createDownloadHandler(); 
             switch (self.method) {
-                case UnityWebRequest.kHttpVerbGET:
-                    AssertV2.IsNotNull(self.downloadHandler, "Get-request had no downloadHandler set");
-                    break;
                 case UnityWebRequest.kHttpVerbPUT:
                 case UnityWebRequest.kHttpVerbPOST:
                     AssertV2.IsNotNull(self.uploadHandler, "Put/Post-request had no uploadHandler set");
@@ -109,9 +105,11 @@ namespace com.csutil {
             AssertV2.IsTrue(self.isDone, "web request was not done!");
             if (TypeCheck.AreEqual<T, UnityWebRequest>()) { return (T)(object)self; }
             if (typeof(Texture2D).IsCastableTo(typeof(T))) {
-                AssertV2.IsTrue(self.downloadHandler is DownloadHandlerTexture, "self.downloadHandler was not a DownloadHandlerTexture");
+                AssertV2.IsTrue(self.downloadHandler is DownloadHandlerTexture,
+                    "self.downloadHandler was not a DownloadHandlerTexture but a " + self.downloadHandler.GetType());
                 var h = (DownloadHandlerTexture)self.downloadHandler;
                 return (T)(object)h.texture;
+                //return (T)(object)DownloadHandlerTexture.GetContent(self);
             }
             if (TypeCheck.AreEqual<T, HttpStatusCode>()) { return (T)(object)self.GetStatusCode(); }
             if (TypeCheck.AreEqual<T, Stream>()) { return (T)(object)new MemoryStream(self.downloadHandler.data); }
