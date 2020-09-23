@@ -12,6 +12,10 @@ namespace com.csutil {
 
     public static class ImageLoaderUnity {
 
+        public static void LoadImageResult(this Image self, ImageResult img) { self.LoadTexture2D(img.ToTexture2D()); }
+
+        public static void LoadTexture2D(this Image self, Texture2D tex) { self.sprite = tex.ToSprite(); }
+
         /// <summary>
         /// Uses the StbImageLib internally and seems to be a bit slower then loading the texture directly via UnityWebRequest but 
         /// can be performed in a background thread.
