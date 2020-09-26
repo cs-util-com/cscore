@@ -11,7 +11,7 @@ namespace com.csutil.ui {
     /// Recommendation to test this using 2 fingers via Unity Remote: 
     /// https://docs.unity3d.com/Manual/UnityRemote5.html
     /// </summary>
-    public class UiDragHandlerForMultiPointers : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler {
+    public class UiDragHandlerForMultiPointers : MonoBehaviour, IPointerDownHandler, IDragHandler, IEndDragHandler {
 
         public OnDragEvent onDrag = new OnDragEvent();
 
@@ -19,12 +19,13 @@ namespace com.csutil.ui {
         private int currentFingerCount;
 
         private Vector2 finger1Start;
-        private PointerEventData latestFinger1;
         private Vector2 finger2Start;
-        private PointerEventData latestFinger2;
-
         private Vector2 startDist;
         private Vector3 startLocalScale;
+        private Quaternion startRotation;
+
+        private PointerEventData latestFinger1;
+        private PointerEventData latestFinger2;
 
         private void Start() {
             if (onDrag.IsNullOrEmpty()) { onDrag.AddListener(ApplyNoRotation); }
@@ -43,16 +44,19 @@ namespace com.csutil.ui {
             rt.position = newPosition;
         }
 
-        public void OnBeginDrag(PointerEventData e) {
-            Log.MethodEnteredWith(e.pointerId);
+        public void OnPointerDown(PointerEventData e) {
             rt = transform as RectTransform;
             currentFingerCount++;
+            EventSystem.current?.SetSelectedGameObject(gameObject, e);
             if (rt.GetLocalPointOnRt(e, out Vector2 r)) {
                 if (currentFingerCount == 1) {
                     finger1Start = r;
+                    latestFinger1 = e;
                 } else if (currentFingerCount == 2) {
                     finger2Start = r;
+                    latestFinger2 = e;
                     startLocalScale = rt.localScale;
+                    startRotation = rt.localRotation;
                     startDist = finger2Start - finger1Start;
                 }
             }
@@ -63,14 +67,15 @@ namespace com.csutil.ui {
             if (e.pointerId == 1) { latestFinger2 = e; }
             if (currentFingerCount != 2) { return; }
 
-            Vector2 currentDist = latestFinger1.position - latestFinger2.position;
+            Vector2 currentDist = latestFinger2.position - latestFinger1.position;
             float scaleFactor = currentDist.magnitude / startDist.magnitude;
+            if (scaleFactor == 0) { return; } // Cancel if there is no diff 
 
             var newLocalScale = startLocalScale * scaleFactor;
             var p1 = latestFinger1.position - finger1Start * scaleFactor;
             var p2 = latestFinger2.position - finger2Start * scaleFactor;
             var newPosition = (p1 + p2) / 2f;
-            var newLocalRotation = Quaternion.FromToRotation(startDist, currentDist);
+            var newLocalRotation = startRotation * Quaternion.FromToRotation(startDist, currentDist);
 
             onDrag?.Invoke(newPosition, newLocalScale, newLocalRotation);
         }
@@ -79,6 +84,15 @@ namespace com.csutil.ui {
             currentFingerCount = 0;
             latestFinger1 = null;
             latestFinger2 = null;
+        }
+
+        private void OnDrawGizmos() {
+            if (currentFingerCount != 2) { return; }
+            var size = 100;
+            Gizmos.color = Color.white;
+            Gizmos.DrawWireSphere(latestFinger1.position, size);
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireSphere(latestFinger2.position, size);
         }
 
         [System.Serializable]
