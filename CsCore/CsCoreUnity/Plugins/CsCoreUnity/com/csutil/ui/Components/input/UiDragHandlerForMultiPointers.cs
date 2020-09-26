@@ -24,8 +24,8 @@ namespace com.csutil.ui {
         private Vector3 startLocalScale;
         private Quaternion startRotation;
 
-        private PointerEventData latestFinger1;
-        private PointerEventData latestFinger2;
+        public PointerEventData latestFinger1;
+        public PointerEventData latestFinger2;
 
         private void Start() {
             if (onDrag.IsNullOrEmpty()) { onDrag.AddListener(ApplyNoRotation); }
