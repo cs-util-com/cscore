@@ -39,26 +39,32 @@ namespace com.csutil.ui {
         public bool TryGetColor(string colorName, out Color c) {
             c = Color.clear;
             if (colors.IsNullOrEmpty()) { return false; }
+            AssertV2.IsNotNull(colorName, "colorName");
+            AssertV2.IsFalse(colors.IsNullOrEmpty(), "colors.IsNullOrEmpty");
             var namedColor = colors.FirstOrDefault(x => x.colorName == colorName);
             if (namedColor != null) { c = namedColor.colorValue; return true; }
-            Log.w("Color not found in colors: " + colorName);
+            Log.w($"Color {colorName} not found in colors (count={colors.Count})");
             return false;
         }
 
         private void Start() {
-            if (colors.IsNullOrEmpty()) { colors = LoadHexColors(schemeName).Map(ToNamedColor).ToList(); }
+            InitColorsIfEmpty();
             this.ExecuteRepeated(() => { CheckIfColorsChanged(); return true; }, 1000);
         }
 
-        private NamedColor ToNamedColor(KeyValuePair<string, string> hexColor) {
-            if (ColorUtility.TryParseHtmlString(hexColor.Value, out Color c)) {
-                return new NamedColor() { colorName = hexColor.Key, colorValue = c };
-            }
-            Log.w("Could not parse hex color value: " + hexColor.Value);
-            return null;
+        private void InitColorsIfEmpty() {
+            if (colors.IsNullOrEmpty()) { colors = LoadHexColors(schemeName).Map(ToNamedColor).ToList(); }
+        }
+
+        private static NamedColor ToNamedColor(KeyValuePair<string, string> hexColor) {
+            var c = ColorUtil.HexStringToColor(hexColor.Value);
+            return new NamedColor() { colorName = hexColor.Key, colorValue = c };
         }
 
         private static Dictionary<string, string> LoadHexColors(string themeName) {
+#if UNITY_EDITOR // Force file reload by Unity, otherwise Resources files are cached by it:
+            UnityEditor.AssetDatabase.ImportAsset(themeName, UnityEditor.ImportAssetOptions.ForceUpdate);
+#endif
             var themeColorsJson = ResourcesV2.LoadV2<string>(themeName);
             return JsonReader.GetReader().Read<Dictionary<string, string>>(themeColorsJson);
         }
@@ -77,11 +83,16 @@ namespace com.csutil.ui {
 
         private static void ApplyColor(ThemeColor target, Color color) {
             var graphic = target.GetComponentV2<Graphic>();
-            if (graphic == null) { Log.w("Passed target graphic was null!"); return; }
-            graphic.color = color;
+            if (graphic != null) { graphic.color = color; return; }
+            var s = target.GetComponentV2<Selectable>();
+            if (s != null && s.targetGraphic != null) { s.targetGraphic.color = color; return; }
+            Log.e("Could not find anything to apply the ThemeColor to!");
         }
 
-        private void OnValidate() { CheckIfColorsChanged(); }
+        private void OnValidate() {
+            InitColorsIfEmpty();
+            CheckIfColorsChanged();
+        }
 
         private void CheckIfColorsChanged() {
             for (int i = 0; i < colors.Count; i++) {

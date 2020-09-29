@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace com.csutil.ui {
 
@@ -9,7 +8,8 @@ namespace com.csutil.ui {
             custom,
             accent, accentContrast, accentContrastWeak,
             primary, primaryContrast, primaryContrastWeak,
-            background, backgroundContrast, backgroundContractWeak,
+            background, backgroundContrast, backgroundContrastWeak,
+            card, cardDark, cardContrast, cardContrastWeak,
             transparent, transparentContrast, transparentContrastWeak,
             shadow, shadowContrast, shadowContrastWeak,
             warning, warningContrast, warningContrastWeak,
@@ -27,7 +27,12 @@ namespace com.csutil.ui {
         private string _colorName;
         public string colorName { get { return _colorName; } set { _colorName = value; Refresh(); } }
 
-        private void Refresh() { IoC.inject.GetOrAddComponentSingleton<Theme>(this).ApplyTheme(colorName, this); }
+        private void Refresh() {
+            if (colorName.IsNullOrEmpty()) { return; }
+            IoC.inject.GetOrAddComponentSingleton<Theme>(this).ApplyTheme(colorName, this);
+        }
+
+        private void OnValidate() { Refresh(); }
 
     }
 
