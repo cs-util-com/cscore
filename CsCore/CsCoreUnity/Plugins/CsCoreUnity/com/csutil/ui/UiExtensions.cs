@@ -15,7 +15,9 @@ namespace com.csutil {
     public static class UiExtensions {
 
         public static ViewStack GetViewStack(this GameObject gameObject) {
-            return gameObject.GetComponentInParents<ViewStack>();
+            var vs = gameObject.GetComponentInParents<ViewStack>();
+            if (vs == null) { Log.e("Not part of a UI managed by a ViewStack", gameObject); }
+            return vs;
         }
 
         public static Task SetOnClickAction(this Button self, Action<GameObject> onClickAction) {
