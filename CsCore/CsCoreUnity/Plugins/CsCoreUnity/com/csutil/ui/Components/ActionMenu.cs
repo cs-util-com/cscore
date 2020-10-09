@@ -12,7 +12,7 @@ namespace com.csutil {
 
     public static class ActionMenuExtensions {
 
-        public static async Task<ActionMenu.Entry> ShowActionMenu(this ViewStack self, ActionMenu menu, string menuPrefabName = "ActionMenu/ActionMenu1") {
+        public static async Task<ActionMenu.Entry> ShowActionMenu(this ViewStack self, ActionMenu menu, string menuPrefabName = ActionMenu.DEFAULT_MENU) {
             var eventName = "ShowActionMenu " + menu.menuId;
             var timing = Log.MethodEntered(eventName);
             var menuUiGo = self.ShowView(menuPrefabName);
@@ -42,7 +42,12 @@ namespace com.csutil.ui {
     /// <summary> A generic action menu that supports different view modes and introduces a reusable interaction pattern for all parameter-free actions </summary>
     public class ActionMenu {
 
-        public string titlePrefabName = "ActionMenu/ActionMenuTitle1";
+        public const string DEFAULT_TITLE = "Menus/ActionMenu/ActionMenuTitle1";
+        public const string DEFAULT_MENU = "Menus/ActionMenu/ActionMenu1";
+        public const string DEFAULT_LIST_ENTRY = "Menus/ActionMenu/ListModeEntry1";
+        public const string DEFAULT_ICON_ENTRY = "Menus/ActionMenu/IconModeEntry1";
+
+        public string titlePrefabName = DEFAULT_TITLE;
 
         public enum ViewMode { iconsOnly, noDescr, full }
 
@@ -99,8 +104,8 @@ namespace com.csutil.ui {
 
         public class Entry {
 
-            public string iconModeEntryPrefabName = "ActionMenu/IconModeEntry1";
-            public string listModeEntryPrefabName = "ActionMenu/ListModeEntry1";
+            public string iconModeEntryPrefabName = ActionMenu.DEFAULT_ICON_ENTRY;
+            public string listModeEntryPrefabName = ActionMenu.DEFAULT_LIST_ENTRY;
 
             public string id { get; }
             public string icon;
