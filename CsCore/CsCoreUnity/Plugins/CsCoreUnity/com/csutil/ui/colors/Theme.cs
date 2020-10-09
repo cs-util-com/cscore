@@ -32,10 +32,6 @@ namespace com.csutil.ui {
         public List<NamedColor> colors = new List<NamedColor>();
         private List<NamedColor> oldColors = new List<NamedColor>();
 
-        public void ApplyTheme(string colorName, ThemeColor target) {
-            if (TryGetColor(colorName, out Color color)) { ApplyColor(target, color); }
-        }
-
         public bool TryGetColor(string colorName, out Color c) {
             c = Color.clear;
             if (colors.IsNullOrEmpty()) { return false; }
@@ -61,11 +57,8 @@ namespace com.csutil.ui {
             return new NamedColor() { colorName = hexColor.Key, colorValue = c };
         }
 
-        private static Dictionary<string, string> LoadHexColors(string themeName) {
-#if UNITY_EDITOR // Force file reload by Unity, otherwise Resources files are cached by it:
-            UnityEditor.AssetDatabase.ImportAsset(themeName, UnityEditor.ImportAssetOptions.ForceUpdate);
-#endif
-            var themeColorsJson = ResourcesV2.LoadV2<string>(themeName);
+        private static Dictionary<string, string> LoadHexColors(string schemeName) {
+            var themeColorsJson = ResourcesV2.LoadV2<string>(schemeName, forceAssetDbReimport: true);
             return JsonReader.GetReader().Read<Dictionary<string, string>>(themeColorsJson);
         }
 
@@ -81,13 +74,7 @@ namespace com.csutil.ui {
             return result;
         }
 
-        private static void ApplyColor(ThemeColor target, Color color) {
-            var graphic = target.GetComponentV2<Graphic>();
-            if (graphic != null) { graphic.color = color; return; }
-            var s = target.GetComponentV2<Selectable>();
-            if (s != null && s.targetGraphic != null) { s.targetGraphic.color = color; return; }
-            Log.e("Could not find anything to apply the ThemeColor to!");
-        }
+
 
         private void OnValidate() {
             InitColorsIfEmpty();
@@ -106,8 +93,8 @@ namespace com.csutil.ui {
         private bool EqualJson<T>(T a, T b) { return JsonUtility.ToJson(a) == JsonUtility.ToJson(b); }
 
         private static void UpdateThemeColorMonos(NamedColor c) {
-            var allAffected = ResourcesV2.FindAllInScene<ThemeColor>().Filter(x => x.colorName == c.colorName);
-            foreach (var mono in allAffected) { ApplyColor(mono, c.colorValue); }
+            var allAffected = ResourcesV2.FindAllInScene<ThemeColor>().Filter(x => x._colorName == c.colorName);
+            foreach (var themeColor in allAffected) { themeColor.ApplyColor(c.colorValue); }
         }
 
     }
