@@ -338,6 +338,19 @@ namespace com.csutil.tests {
             Log.d("file: " + file.FullName);
         }
 
+        [Fact]
+        public void TestSubDirAsNewRootDir() {
+            var dir = CreateDirectoryForTesting("TestSubDirAsNewRootDir");
+            var dir1 = dir.GetChildDir("dir1");
+            var file1Name = "file1.txt";
+            var abc = "abc";
+            dir1.GetChild(file1Name).SaveAsText(abc);
+            var dir1AsRoot = dir1.AsNewRootDir();
+            var file1 = dir1AsRoot.GetChild(file1Name);
+            Assert.Equal("/" + file1Name, file1.FullName);
+            Assert.Equal(abc, file1.ReadAllText());
+        }
+
     }
 
 }
