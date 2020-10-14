@@ -68,8 +68,8 @@ namespace com.csutil {
             get { return new DirectoryInfo(Application.dataPath).Parent.ToRootDirectoryEntry().GetChildDir("Assets"); }
         }
 
-        public static bool IsUnityFullyInitialized() {
-            if (isPlaying) { return true; }
+        public static bool IsEditorOnValidateAllowed() {
+            if (isPlaying) { return false; }
             var s = GameObject.Find(InjectorExtensionsForUnity.DEFAULT_SINGLETON_NAME);
             /* There seems to be a strange Unity editor bug that can cause Unity to crash
              * if a root transform in the scene is interacted with while the scene is still 

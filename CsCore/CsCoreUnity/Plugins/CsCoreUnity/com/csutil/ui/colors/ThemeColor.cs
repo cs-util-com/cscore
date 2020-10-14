@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using ThisOtherThing.UI.Shapes;
+using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 namespace com.csutil.ui {
@@ -14,11 +16,12 @@ namespace com.csutil.ui {
             transparent, transparentContrast, transparentContrastWeak,
             shadow, shadowContrast, shadowContrastWeak,
             warning, warningContrast, warningContrastWeak,
-            element, elementContrast, elementContrastWeak,
+            element, elementLight, elementContrast, elementContrastWeak,
             button, buttonContrast, buttonContrastWeak
         }
 
         public string _colorName;
+        public SetColorEvent applyColorToTarget = new SetColorEvent();
 
         [ShowPropertyInInspector]
         public ColorNames colorNameSuggestion {
@@ -26,10 +29,17 @@ namespace com.csutil.ui {
             set { if (ColorNames.custom != value) { SetColor(value.GetEntryName()); } }
         }
 
+        [System.Serializable]
+        public class SetColorEvent : UnityEvent<Color> { }
+
+        private void OnEnable() { Refresh(); }
+
         private void SetColor(string newColor) {
             _colorName = newColor;
             Refresh();
         }
+
+        private void OnValidate() { if (ApplicationV2.IsEditorOnValidateAllowed()) { Refresh(); } }
 
         public void Refresh() {
             if (_colorName.IsNullOrEmpty()) { return; }
@@ -40,19 +50,36 @@ namespace com.csutil.ui {
 #endif
         }
 
-        private void OnEnable() { Refresh(); } // also needed to be able to disable in Editor
-
-        private void OnValidate() { if (ApplicationV2.IsUnityFullyInitialized()) { Refresh(); } }
-
         public void ApplyColor(Color color) {
             if (!enabled) { return; }
-            var graphic = this.GetComponentV2<Graphic>();
-            if (graphic != null) { graphic.color = color; return; }
-            var s = this.GetComponentV2<Selectable>();
-            if (s != null && s.targetGraphic != null) { s.targetGraphic.color = color; return; }
-            Log.e("Could not find anything to apply the ThemeColor to!");
+            if (applyColorToTarget.IsNullOrEmpty()) {
+                var rectagle = this.GetComponentV2<Rectangle>();
+                if (rectagle != null) { SetRectangleColor(rectagle, color); return; }
+                var graphic = this.GetComponentV2<Graphic>();
+                if (graphic != null) { SetGraphicColor(graphic, color); return; }
+                var sel = this.GetComponentV2<Selectable>();
+                if (sel != null && sel.targetGraphic != null) { SetSelectableColor(sel, color); return; }
+                Log.e("Could not find anything to apply the ThemeColor to!", gameObject);
+                enabled = false;
+            } else {
+                applyColorToTarget.Invoke(color);
+            }
         }
 
+        private static void SetSelectableColor(Selectable self, Color color) {
+            if (self.targetGraphic.color != color) { self.targetGraphic.color = color; }
+        }
+
+        private static void SetGraphicColor(Graphic self, Color color) {
+            if (self.color != color) { self.color = color; }
+        }
+
+        private static void SetRectangleColor(Rectangle self, Color color) {
+            if (self.color != color) {
+                self.ShapeProperties.OutlineColor = color;
+                self.color = color;
+            }
+        }
     }
 
 }
