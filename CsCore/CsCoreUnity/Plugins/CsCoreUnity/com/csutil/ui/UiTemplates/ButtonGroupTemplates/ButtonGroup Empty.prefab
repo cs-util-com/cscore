@@ -107,13 +107,13 @@ MonoBehaviour:
   ShapeProperties:
     FillColor:
       serializedVersion: 2
-      rgba: 4294834680
+      rgba: 4293979628
     DrawFill: 1
     DrawFillShadow: 0
     DrawOutline: 0
     OutlineColor:
       serializedVersion: 2
-      rgba: 4294967295
+      rgba: 4293979628
     DrawOutlineShadow: 0
   RoundedProperties:
     Type: 1
@@ -189,6 +189,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _colorName: cardDark
+  applyColorToTarget:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &6369632156903585488
 GameObject:
   m_ObjectHideFlags: 0
@@ -258,13 +261,13 @@ MonoBehaviour:
   ShapeProperties:
     FillColor:
       serializedVersion: 2
-      rgba: 4294967295
+      rgba: 4294769916
     DrawFill: 1
     DrawFillShadow: 1
     DrawOutline: 0
     OutlineColor:
       serializedVersion: 2
-      rgba: 4294967295
+      rgba: 4294769916
     DrawOutlineShadow: 0
   RoundedProperties:
     Type: 0
@@ -327,6 +330,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _colorName: card
+  applyColorToTarget:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &8903601871601888363
 GameObject:
   m_ObjectHideFlags: 0
@@ -387,7 +393,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.99, g: 0.99, b: 0.99, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -432,6 +438,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _colorName: card
+  applyColorToTarget:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &8903601871943597643
 GameObject:
   m_ObjectHideFlags: 0

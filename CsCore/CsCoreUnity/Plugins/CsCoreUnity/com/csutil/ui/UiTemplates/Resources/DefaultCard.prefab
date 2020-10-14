@@ -70,13 +70,13 @@ MonoBehaviour:
   ShapeProperties:
     FillColor:
       serializedVersion: 2
-      rgba: 4294967295
+      rgba: 4294769916
     DrawFill: 1
     DrawFillShadow: 1
     DrawOutline: 0
     OutlineColor:
       serializedVersion: 2
-      rgba: 4294967295
+      rgba: 4294769916
     DrawOutlineShadow: 0
   RoundedProperties:
     Type: 1
@@ -118,10 +118,10 @@ MonoBehaviour:
     Shadows:
     - Color:
         serializedVersion: 2
-        rgba: 452984832
+        rgba: 385875968
       Offset: {x: 0, y: 0}
-      Size: 9.89
-      Softness: 0.236
+      Size: 10
+      Softness: 0.232
     Offset: {x: 3.5640266, y: -1.8159609}
   AntiAliasingProperties:
     AntiAliasing: 1.25
@@ -139,6 +139,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _colorName: card
+  applyColorToTarget:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!114 &7793321899529709971
 MonoBehaviour:
   m_ObjectHideFlags: 0

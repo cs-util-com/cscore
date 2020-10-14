@@ -914,7 +914,7 @@ PrefabInstance:
     - target: {fileID: 1316733126202998496, guid: dd10759383a8a6041bbafbf8e82bd50e,
         type: 3}
       propertyPath: ShapeProperties.FillColor.rgba
-      value: 4294834680
+      value: 4293979628
       objectReference: {fileID: 0}
     - target: {fileID: 4732048178507648354, guid: dd10759383a8a6041bbafbf8e82bd50e,
         type: 3}

@@ -1,31 +1,83 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &6973931894202293594
+--- !u!114 &8692182543784530754
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6593845326491814843}
+  m_GameObject: {fileID: 12920557526358973}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 30649d3a9faa99c48a7b1166b86bf2a0, type: 3}
+  m_Script: {fileID: 11500000, guid: 3556e31b289f8ac428c441659ce46ffb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Padding:
-    m_Left: 0
-    m_Right: 0
-    m_Top: 0
-    m_Bottom: 0
-  m_ChildAlignment: 4
-  m_Spacing: 8
-  m_ChildForceExpandWidth: 0
-  m_ChildForceExpandHeight: 0
-  m_ChildControlWidth: 1
-  m_ChildControlHeight: 1
-  m_ChildScaleWidth: 0
-  m_ChildScaleHeight: 0
-  m_ReverseArrangement: 0
+  _colorName: cardContractWeak
+  applyColorToTarget:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!114 &2727484154404510978
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1047788765508206528}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3556e31b289f8ac428c441659ce46ffb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _colorName: cardContrast
+  applyColorToTarget:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!114 &1673275115485307396
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3357751379846788108}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 0}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!114 &5907822419296602109
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3775402878523085773}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3556e31b289f8ac428c441659ce46ffb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _colorName: cardContrast
+  applyColorToTarget:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &4027471710896403098
 GameObject:
   m_ObjectHideFlags: 0
@@ -102,75 +154,35 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _colorName: cardContractWeak
---- !u!114 &8692182543784530754
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 12920557526358973}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3556e31b289f8ac428c441659ce46ffb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _colorName: cardContractWeak
---- !u!114 &1673275115485307396
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3357751379846788108}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
+  applyColorToTarget:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
-  m_Type: 0
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
---- !u!114 &5907822419296602109
+--- !u!114 &6973931894202293594
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3775402878523085773}
+  m_GameObject: {fileID: 6593845326491814843}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3556e31b289f8ac428c441659ce46ffb, type: 3}
+  m_Script: {fileID: 11500000, guid: 30649d3a9faa99c48a7b1166b86bf2a0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _colorName: cardContrast
---- !u!114 &2727484154404510978
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1047788765508206528}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3556e31b289f8ac428c441659ce46ffb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _colorName: cardContrast
+  m_Padding:
+    m_Left: 0
+    m_Right: 0
+    m_Top: 0
+    m_Bottom: 0
+  m_ChildAlignment: 4
+  m_Spacing: 8
+  m_ChildForceExpandWidth: 0
+  m_ChildForceExpandHeight: 0
+  m_ChildControlWidth: 1
+  m_ChildControlHeight: 1
+  m_ChildScaleWidth: 0
+  m_ChildScaleHeight: 0
+  m_ReverseArrangement: 0
 --- !u!1001 &2309776894838400976
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -181,7 +193,7 @@ PrefabInstance:
     - target: {fileID: 1316733126202998496, guid: dd10759383a8a6041bbafbf8e82bd50e,
         type: 3}
       propertyPath: ShapeProperties.FillColor.rgba
-      value: 4294834680
+      value: 4293979628
       objectReference: {fileID: 0}
     - target: {fileID: 4732048178507648354, guid: dd10759383a8a6041bbafbf8e82bd50e,
         type: 3}
@@ -338,17 +350,17 @@ PrefabInstance:
     - target: {fileID: 766578131709943462, guid: 5a2e20dce301d184e8d9937efa5598ee,
         type: 3}
       propertyPath: m_Color.r
-      value: 0.45882353
+      value: 0.3297794
       objectReference: {fileID: 0}
     - target: {fileID: 766578131709943462, guid: 5a2e20dce301d184e8d9937efa5598ee,
         type: 3}
       propertyPath: m_Color.g
-      value: 0.45882353
+      value: 0.34411758
       objectReference: {fileID: 0}
     - target: {fileID: 766578131709943462, guid: 5a2e20dce301d184e8d9937efa5598ee,
         type: 3}
       propertyPath: m_Color.b
-      value: 0.45882353
+      value: 0.39
       objectReference: {fileID: 0}
     - target: {fileID: 2142786820454699788, guid: 5a2e20dce301d184e8d9937efa5598ee,
         type: 3}
@@ -498,17 +510,17 @@ PrefabInstance:
     - target: {fileID: 9139258741347180056, guid: 5a2e20dce301d184e8d9937efa5598ee,
         type: 3}
       propertyPath: m_Color.r
-      value: 0.45882353
+      value: 0.3297794
       objectReference: {fileID: 0}
     - target: {fileID: 9139258741347180056, guid: 5a2e20dce301d184e8d9937efa5598ee,
         type: 3}
       propertyPath: m_Color.g
-      value: 0.45882353
+      value: 0.34411758
       objectReference: {fileID: 0}
     - target: {fileID: 9139258741347180056, guid: 5a2e20dce301d184e8d9937efa5598ee,
         type: 3}
       propertyPath: m_Color.b
-      value: 0.45882353
+      value: 0.39
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 5a2e20dce301d184e8d9937efa5598ee, type: 3}
