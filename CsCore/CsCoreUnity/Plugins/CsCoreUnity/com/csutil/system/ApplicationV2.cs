@@ -76,7 +76,7 @@ namespace com.csutil {
              * initializing (e.g during Editor startup). 
              */
             var unityCouldCrash = s == null || s.transform.GetSiblingIndex() == 0;
-            if (unityCouldCrash) { Log.w("Unity currently initializing, abording to avoid Unity crash"); }
+            // if (unityCouldCrash) { Log.w("Unity currently initializing, abording to avoid Unity crash"); }
             return !unityCouldCrash;
         }
 
