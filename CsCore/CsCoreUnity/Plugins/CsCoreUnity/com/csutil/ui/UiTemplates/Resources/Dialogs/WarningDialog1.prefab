@@ -80,7 +80,12 @@ PrefabInstance:
     - target: {fileID: 2464489283458059039, guid: 5c6572fa11d446947b07455755d740ef,
         type: 3}
       propertyPath: ShapeProperties.FillColor.rgba
-      value: 4281568994
+      value: 4281569250
+      objectReference: {fileID: 0}
+    - target: {fileID: 2464489283458059039, guid: 5c6572fa11d446947b07455755d740ef,
+        type: 3}
+      propertyPath: ShapeProperties.OutlineColor.rgba
+      value: 4294967295
       objectReference: {fileID: 0}
     - target: {fileID: 3332272446039276602, guid: 5c6572fa11d446947b07455755d740ef,
         type: 3}
@@ -225,7 +230,32 @@ PrefabInstance:
     - target: {fileID: 4912252621680991387, guid: 5c6572fa11d446947b07455755d740ef,
         type: 3}
       propertyPath: ShapeProperties.FillColor.rgba
-      value: 4281438180
+      value: 4281503716
+      objectReference: {fileID: 0}
+    - target: {fileID: 4912252621680991387, guid: 5c6572fa11d446947b07455755d740ef,
+        type: 3}
+      propertyPath: m_Color.r
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4912252621680991387, guid: 5c6572fa11d446947b07455755d740ef,
+        type: 3}
+      propertyPath: m_Color.g
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4912252621680991387, guid: 5c6572fa11d446947b07455755d740ef,
+        type: 3}
+      propertyPath: m_Color.b
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4912252621680991387, guid: 5c6572fa11d446947b07455755d740ef,
+        type: 3}
+      propertyPath: ShapeProperties.OutlineColor.rgba
+      value: 4281503716
+      objectReference: {fileID: 0}
+    - target: {fileID: 5425630168361801027, guid: 5c6572fa11d446947b07455755d740ef,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6188245748441318714, guid: 5c6572fa11d446947b07455755d740ef,
         type: 3}
@@ -236,6 +266,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Color.a
       value: 0.18431373
+      objectReference: {fileID: 0}
+    - target: {fileID: 7437975760299708366, guid: 5c6572fa11d446947b07455755d740ef,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 9170408643925184740, guid: 5c6572fa11d446947b07455755d740ef,
         type: 3}

@@ -26,8 +26,9 @@ namespace com.csutil.editor {
 
         [MenuItem(UIv2menu + "Views/ViewStack View", false, priorityOfUiMenu + 2)]
         static void AddViewInViewStack() {
-            var viewInViewStack = AddViewToRootCanvas(new GameObject("ViewStack View"));
-            viewInViewStack.AddComponent<Image>();
+            RootCanvas.GetOrAddRootCanvas(); // Ensure there is a root canvas
+            var view = AddViewToRootCanvas(ResourcesV2.LoadPrefab("Canvas/DefaultViewStackView"));
+            view.name = "View " + (view.transform.GetSiblingIndex() + 1);
         }
 
         [MenuItem(UIv2menu + "Views/DefaultSideBar", false, priorityOfUiMenu + 2)]

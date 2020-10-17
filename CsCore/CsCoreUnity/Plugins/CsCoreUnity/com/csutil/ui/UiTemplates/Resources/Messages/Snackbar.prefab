@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 6912669871762846823}
   - component: {fileID: 6507326026607236374}
   - component: {fileID: 1783646391471106249}
+  - component: {fileID: 4356451906969709566}
   m_Layer: 5
   m_Name: Message
   m_TagString: Untagged
@@ -62,6 +63,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -113,6 +115,22 @@ MonoBehaviour:
   m_FlexibleWidth: 6
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &4356451906969709566
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5390705824244186789}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3556e31b289f8ac428c441659ce46ffb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _colorName: transparentContrast
+  applyColorToTarget:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &6822706154230665287
 GameObject:
   m_ObjectHideFlags: 0
@@ -127,6 +145,7 @@ GameObject:
   - component: {fileID: 7106910096657442091}
   - component: {fileID: 6396342596794872896}
   - component: {fileID: 6814907200558080721}
+  - component: {fileID: 70446436680729130}
   m_Layer: 5
   m_Name: SnackbarButton
   m_TagString: Untagged
@@ -174,8 +193,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.039215688, g: 0.6392157, b: 1, a: 1}
+  m_Color: {r: 0.99607843, g: 0.78039217, b: 0.42352942, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -270,6 +290,22 @@ MonoBehaviour:
   m_FlexibleWidth: 1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &70446436680729130
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6822706154230665287}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3556e31b289f8ac428c441659ce46ffb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _colorName: accent
+  applyColorToTarget:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &7444364790544267391
 GameObject:
   m_ObjectHideFlags: 0
@@ -283,6 +319,7 @@ GameObject:
   - component: {fileID: 2987929939047461975}
   - component: {fileID: 6028563809086236102}
   - component: {fileID: 5417844168214974544}
+  - component: {fileID: 110258884030007027}
   m_Layer: 5
   m_Name: Snackbar
   m_TagString: Untagged
@@ -332,8 +369,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 0.84705883}
+  m_Color: {r: 0, g: 0, b: 0, a: 0.69411767}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -373,6 +411,7 @@ MonoBehaviour:
   m_ChildControlHeight: 1
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
+  m_ReverseArrangement: 0
 --- !u!114 &5417844168214974544
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -393,3 +432,19 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &110258884030007027
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7444364790544267391}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3556e31b289f8ac428c441659ce46ffb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _colorName: transparent
+  applyColorToTarget:
+    m_PersistentCalls:
+      m_Calls: []

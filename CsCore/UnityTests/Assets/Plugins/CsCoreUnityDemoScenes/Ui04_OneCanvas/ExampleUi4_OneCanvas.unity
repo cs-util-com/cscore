@@ -38,12 +38,12 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657826, g: 0.49641263, b: 0.57481676, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 11
+  serializedVersion: 12
   m_GIWorkflowMode: 0
   m_GISettings:
     serializedVersion: 2
@@ -98,7 +98,7 @@ LightmapSettings:
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
   m_LightingDataAsset: {fileID: 0}
-  m_UseShadowmask: 1
+  m_LightingSettings: {fileID: 1654134485}
 --- !u!196 &4
 NavMeshSettings:
   serializedVersion: 2
@@ -118,9 +118,42 @@ NavMeshSettings:
     manualTileSize: 0
     tileSize: 256
     accuratePlacement: 0
+    maxJobWorkers: 0
+    preserveTilesOutsideBounds: 0
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &16219654
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 16219655}
+  m_Layer: 0
+  m_Name: Singletons
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &16219655
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 16219654}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children:
+  - {fileID: 1178725461}
+  m_Father: {fileID: 0}
+  m_RootOrder: 4
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &201754620
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -142,7 +175,7 @@ PrefabInstance:
         at sed, an veniam percipitur qui. Wisi essent te nam. In ius quem meis noluisse.
         No maluisset adipiscing his, putent diceret argumentum ex cum.
 
-        
+
 
         Sed
         velit iriure dissentiet no, nostro iriure euripidis ea has. Mundi graece
@@ -653,6 +686,109 @@ RectTransform:
     type: 3}
   m_PrefabInstance: {fileID: 1083510756}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1178725460
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1178725461}
+  - component: {fileID: 1178725462}
+  m_Layer: 0
+  m_Name: com.csutil.ui.Theme
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1178725461
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1178725460}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 16219655}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1178725462
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1178725460}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 13e698eef320c2747ada784311781a7a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  schemeName: Colors/colorScheme1
+  colors:
+  - colorName: accent
+    colorValue: {r: 0.99607843, g: 0.78039217, b: 0.42352942, a: 1}
+  - colorName: accentContrast
+    colorValue: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
+  - colorName: accentContrastWeak
+    colorValue: {r: 0.39607844, g: 0.39607844, b: 0.39607844, a: 1}
+  - colorName: primary
+    colorValue: {r: 0.03529412, g: 0.5529412, b: 0.85882354, a: 1}
+  - colorName: primaryContrast
+    colorValue: {r: 1, g: 1, b: 1, a: 1}
+  - colorName: primaryContrastWeak
+    colorValue: {r: 0.8784314, g: 0.8784314, b: 0.8784314, a: 1}
+  - colorName: background
+    colorValue: {r: 1, g: 1, b: 1, a: 1}
+  - colorName: backgroundContrast
+    colorValue: {r: 0.12941177, g: 0.12941177, b: 0.12941177, a: 1}
+  - colorName: backgroundContrastWeak
+    colorValue: {r: 0.45882353, g: 0.45882353, b: 0.45882353, a: 1}
+  - colorName: card
+    colorValue: {r: 0.9882353, g: 0.9882353, b: 0.9882353, a: 1}
+  - colorName: cardDark
+    colorValue: {r: 0.9254902, g: 0.92941177, b: 0.9411765, a: 1}
+  - colorName: cardContrast
+    colorValue: {r: 0.12941177, g: 0.12941177, b: 0.12941177, a: 1}
+  - colorName: cardContrastWeak
+    colorValue: {r: 0.53333336, g: 0.53333336, b: 0.53333336, a: 1}
+  - colorName: transparent
+    colorValue: {r: 0, g: 0, b: 0, a: 0.69411767}
+  - colorName: transparentContrast
+    colorValue: {r: 1, g: 1, b: 1, a: 1}
+  - colorName: transparentContrastWeak
+    colorValue: {r: 0.8666667, g: 0.8666667, b: 0.8666667, a: 1}
+  - colorName: shadow
+    colorValue: {r: 0, g: 0, b: 0, a: 0.2}
+  - colorName: shadowContrast
+    colorValue: {r: 1, g: 1, b: 1, a: 1}
+  - colorName: shadowContrastWeak
+    colorValue: {r: 0.8666667, g: 0.8666667, b: 0.8666667, a: 1}
+  - colorName: warning
+    colorValue: {r: 0.9372549, g: 0.3254902, b: 0.3137255, a: 1}
+  - colorName: warningContrast
+    colorValue: {r: 1, g: 0.9019608, b: 0.9019608, a: 1}
+  - colorName: warningContrastWeak
+    colorValue: {r: 0.9372549, g: 0.73333335, b: 0.7294118, a: 1}
+  - colorName: element
+    colorValue: {r: 0.32941177, g: 0.34509805, b: 0.3882353, a: 1}
+  - colorName: elementLight
+    colorValue: {r: 0.64705884, g: 0.67058825, b: 0.7607843, a: 1}
+  - colorName: elementContrast
+    colorValue: {r: 0.12941177, g: 0.12941177, b: 0.12941177, a: 1}
+  - colorName: elementContrastWeak
+    colorValue: {r: 0.5176471, g: 0.5176471, b: 0.5176471, a: 1}
+  - colorName: button
+    colorValue: {r: 0.2901961, g: 0.3019608, b: 0.34117648, a: 1}
+  - colorName: buttonContrast
+    colorValue: {r: 1, g: 1, b: 1, a: 1}
+  - colorName: buttonContrastWeak
+    colorValue: {r: 0.8666667, g: 0.8666667, b: 0.8666667, a: 1}
 --- !u!1001 &1611862249
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -961,6 +1097,67 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!850595691 &1654134485
+LightingSettings:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Settings.lighting
+  serializedVersion: 2
+  m_GIWorkflowMode: 0
+  m_EnableBakedLightmaps: 1
+  m_EnableRealtimeLightmaps: 1
+  m_RealtimeEnvironmentLighting: 1
+  m_BounceScale: 1
+  m_AlbedoBoost: 1
+  m_IndirectOutputScale: 1
+  m_UsingShadowmask: 1
+  m_BakeBackend: 1
+  m_LightmapMaxSize: 1024
+  m_BakeResolution: 40
+  m_Padding: 2
+  m_TextureCompression: 1
+  m_AO: 0
+  m_AOMaxDistance: 1
+  m_CompAOExponent: 1
+  m_CompAOExponentDirect: 0
+  m_ExtractAO: 0
+  m_MixedBakeMode: 2
+  m_LightmapsBakeMode: 1
+  m_FilterMode: 1
+  m_LightmapParameters: {fileID: 0}
+  m_ExportTrainingData: 0
+  m_TrainingDataDestination: TrainingData
+  m_RealtimeResolution: 2
+  m_ForceWhiteAlbedo: 0
+  m_ForceUpdates: 0
+  m_FinalGather: 0
+  m_FinalGatherRayCount: 256
+  m_FinalGatherFiltering: 1
+  m_PVRCulling: 1
+  m_PVRSampling: 1
+  m_PVRDirectSampleCount: 32
+  m_PVRSampleCount: 500
+  m_PVREnvironmentSampleCount: 500
+  m_PVREnvironmentReferencePointCount: 2048
+  m_LightProbeSampleCountMultiplier: 4
+  m_PVRBounces: 2
+  m_PVRRussianRouletteStartBounce: 2
+  m_PVREnvironmentMIS: 0
+  m_PVRFilteringMode: 2
+  m_PVRDenoiserTypeDirect: 0
+  m_PVRDenoiserTypeIndirect: 0
+  m_PVRDenoiserTypeAO: 0
+  m_PVRFilterTypeDirect: 0
+  m_PVRFilterTypeIndirect: 0
+  m_PVRFilterTypeAO: 0
+  m_PVRFilteringGaussRadiusDirect: 1
+  m_PVRFilteringGaussRadiusIndirect: 5
+  m_PVRFilteringGaussRadiusAO: 2
+  m_PVRFilteringAtrousPositionSigmaDirect: 0.5
+  m_PVRFilteringAtrousPositionSigmaIndirect: 2
+  m_PVRFilteringAtrousPositionSigmaAO: 1
 --- !u!1 &1872114931
 GameObject:
   m_ObjectHideFlags: 0
@@ -1066,6 +1263,7 @@ GameObject:
   - component: {fileID: 2071078030}
   - component: {fileID: 2071078029}
   - component: {fileID: 2071078033}
+  - component: {fileID: 2071078034}
   m_Layer: 5
   m_Name: ViewStackWithCanvas
   m_TagString: Untagged
@@ -1101,7 +1299,7 @@ MonoBehaviour:
   m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 560.06, y: 560.06}
+  m_ReferenceResolution: {x: 415.85, y: 415.85}
   m_ScreenMatchMode: 0
   m_MatchWidthOrHeight: 0.5
   m_PhysicalUnit: 3
@@ -1163,4 +1361,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cd15b66475c42ba44a02598d096f8922, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  referenceResolution: 560.06
+  referenceResolution: 415.85
+--- !u!114 &2071078034
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2071078028}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 179a76b0ca9916e44952e6ed899a252e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  es: {fileID: 0}
+  scaler: {fileID: 0}
+  speed: 0.15

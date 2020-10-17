@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 2723566250786742730}
   - component: {fileID: 951536481256872685}
   - component: {fileID: 2530667322267057888}
+  - component: {fileID: 4772254874647857503}
   m_Layer: 5
   m_Name: Message
   m_TagString: Untagged
@@ -59,13 +60,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.5921569}
+  m_Color: {r: 0.8666667, g: 0.8666667, b: 0.8666667, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
-      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
     m_FontSize: 14
@@ -94,6 +95,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   id: Message
+--- !u!114 &4772254874647857503
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3682831860402159527}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3556e31b289f8ac428c441659ce46ffb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _colorName: transparentContrastWeak
+  applyColorToTarget:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &5390705824244186789
 GameObject:
   m_ObjectHideFlags: 0
@@ -106,6 +123,7 @@ GameObject:
   - component: {fileID: 3761525966306664154}
   - component: {fileID: 6912669871762846823}
   - component: {fileID: 6507326026607236374}
+  - component: {fileID: 3224948965101067288}
   m_Layer: 5
   m_Name: Caption
   m_TagString: Untagged
@@ -155,11 +173,11 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
-      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
     m_FontSize: 16
@@ -187,6 +205,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   id: Caption
+--- !u!114 &3224948965101067288
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5390705824244186789}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3556e31b289f8ac428c441659ce46ffb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _colorName: transparentContrast
+  applyColorToTarget:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &7444364790544267391
 GameObject:
   m_ObjectHideFlags: 0
@@ -200,6 +234,7 @@ GameObject:
   - component: {fileID: 2244443757487720861}
   - component: {fileID: 4302120307988945508}
   - component: {fileID: 6040844393340777214}
+  - component: {fileID: 4079524479129042457}
   m_Layer: 5
   m_Name: Toast
   m_TagString: Untagged
@@ -251,21 +286,21 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
-      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   ShapeProperties:
     FillColor:
       serializedVersion: 2
-      rgba: 3861917744
+      rgba: 2969567232
     DrawFill: 1
     DrawFillShadow: 1
     DrawOutline: 0
     OutlineColor:
       serializedVersion: 2
-      rgba: 4294967295
+      rgba: 2969567232
     DrawOutlineShadow: 0
   RoundedProperties:
     Type: 1
@@ -348,3 +383,20 @@ MonoBehaviour:
   m_ChildControlHeight: 1
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
+  m_ReverseArrangement: 0
+--- !u!114 &4079524479129042457
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7444364790544267391}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3556e31b289f8ac428c441659ce46ffb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _colorName: transparent
+  applyColorToTarget:
+    m_PersistentCalls:
+      m_Calls: []

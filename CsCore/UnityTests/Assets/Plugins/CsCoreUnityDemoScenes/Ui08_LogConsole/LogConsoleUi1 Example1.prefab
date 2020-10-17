@@ -25,6 +25,7 @@ MonoBehaviour:
   m_ChildControlHeight: 1
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
+  m_ReverseArrangement: 0
 --- !u!1001 &722750158
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -837,12 +838,12 @@ PrefabInstance:
     - target: {fileID: 4437570931345753031, guid: 993af66ea497dc24eb231df28e9f7b74,
         type: 3}
       propertyPath: m_Value
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4437570931345753031, guid: 993af66ea497dc24eb231df28e9f7b74,
         type: 3}
       propertyPath: m_Size
-      value: 0.75666666
+      value: 0.75961536
       objectReference: {fileID: 0}
     - target: {fileID: 5194649077064149214, guid: 993af66ea497dc24eb231df28e9f7b74,
         type: 3}
@@ -927,7 +928,7 @@ PrefabInstance:
     - target: {fileID: 8409036708927878875, guid: 993af66ea497dc24eb231df28e9f7b74,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: 0.10676668
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 993af66ea497dc24eb231df28e9f7b74, type: 3}
