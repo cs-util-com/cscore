@@ -73,11 +73,11 @@ namespace com.csutil.ui {
             return result;
         }
 
-
-
         private void OnValidate() {
-            InitColorsIfEmpty();
-            CheckIfColorsChanged();
+            if (ApplicationV2.IsEditorOnValidateAllowed()) {
+                InitColorsIfEmpty();
+                CheckIfColorsChanged();
+            }
         }
 
         private void CheckIfColorsChanged() {
