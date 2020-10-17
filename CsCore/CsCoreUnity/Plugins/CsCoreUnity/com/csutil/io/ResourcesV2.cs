@@ -34,6 +34,7 @@ namespace com.csutil {
         [System.Diagnostics.Conditional("DEBUG")] // To remove line in builts
         public static void ForceAssetDatabaseReimport(string pathInResources) {
 #if UNITY_EDITOR 
+            if (Application.isPlaying) { return; }
             // Only way that I found to get the full path of assets is to load it and ask what its path is:
             var pathInAssets = UnityEditor.AssetDatabase.GetAssetPath(Resources.Load(pathInResources));
             UnityEditor.AssetDatabase.ImportAsset(pathInAssets, UnityEditor.ImportAssetOptions.ForceUpdate);

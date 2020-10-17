@@ -39,7 +39,6 @@ namespace com.csutil.ui {
             AssertV2.IsFalse(colors.IsNullOrEmpty(), "colors.IsNullOrEmpty");
             var namedColor = colors.FirstOrDefault(x => x.colorName == colorName);
             if (namedColor != null) { c = namedColor.colorValue; return true; }
-            Log.w($"Color {colorName} not found in colors (count={colors.Count})");
             return false;
         }
 
