@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3556e31b289f8ac428c441659ce46ffb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _colorName: cardContractWeak
+  _colorName: cardContrastWeak
   applyColorToTarget:
     m_PersistentCalls:
       m_Calls: []
@@ -153,7 +153,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3556e31b289f8ac428c441659ce46ffb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _colorName: cardContractWeak
+  _colorName: cardContrastWeak
   applyColorToTarget:
     m_PersistentCalls:
       m_Calls: []
@@ -208,7 +208,7 @@ PrefabInstance:
     - target: {fileID: 8903601871601888362, guid: dd10759383a8a6041bbafbf8e82bd50e,
         type: 3}
       propertyPath: m_SizeDelta.y
-      value: 176.02873
+      value: 105.1714
       objectReference: {fileID: 0}
     - target: {fileID: 8903601871943597642, guid: dd10759383a8a6041bbafbf8e82bd50e,
         type: 3}
@@ -350,17 +350,17 @@ PrefabInstance:
     - target: {fileID: 766578131709943462, guid: 5a2e20dce301d184e8d9937efa5598ee,
         type: 3}
       propertyPath: m_Color.r
-      value: 0.3297794
+      value: 0.53333336
       objectReference: {fileID: 0}
     - target: {fileID: 766578131709943462, guid: 5a2e20dce301d184e8d9937efa5598ee,
         type: 3}
       propertyPath: m_Color.g
-      value: 0.34411758
+      value: 0.53333336
       objectReference: {fileID: 0}
     - target: {fileID: 766578131709943462, guid: 5a2e20dce301d184e8d9937efa5598ee,
         type: 3}
       propertyPath: m_Color.b
-      value: 0.39
+      value: 0.53333336
       objectReference: {fileID: 0}
     - target: {fileID: 2142786820454699788, guid: 5a2e20dce301d184e8d9937efa5598ee,
         type: 3}
@@ -510,17 +510,17 @@ PrefabInstance:
     - target: {fileID: 9139258741347180056, guid: 5a2e20dce301d184e8d9937efa5598ee,
         type: 3}
       propertyPath: m_Color.r
-      value: 0.3297794
+      value: 0.53333336
       objectReference: {fileID: 0}
     - target: {fileID: 9139258741347180056, guid: 5a2e20dce301d184e8d9937efa5598ee,
         type: 3}
       propertyPath: m_Color.g
-      value: 0.34411758
+      value: 0.53333336
       objectReference: {fileID: 0}
     - target: {fileID: 9139258741347180056, guid: 5a2e20dce301d184e8d9937efa5598ee,
         type: 3}
       propertyPath: m_Color.b
-      value: 0.39
+      value: 0.53333336
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 5a2e20dce301d184e8d9937efa5598ee, type: 3}
