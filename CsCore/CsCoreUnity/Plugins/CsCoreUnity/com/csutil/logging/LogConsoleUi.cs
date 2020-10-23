@@ -9,10 +9,13 @@ using UnityEngine.UI;
 
 namespace com.csutil.logging {
 
-    public class LogConsole {
+    public static class LogConsole {
 
         public static void RegisterForAllLogEvents(object caller) {
-            Log.AddLoggerToLogInstances(new LogToLogConsoleConnector(GetLogConsole(caller)));
+            var consoleUi = GetLogConsole(caller);
+            var logger = new LogToLogConsoleConnector(consoleUi);
+            Log.AddLoggerToLogInstances(logger);
+            consoleUi.gameObject.AddOnDestroyListener(() => Log.RemoveLoggerFromLogInstances(logger));
         }
 
         public static LogConsoleUi GetLogConsole(object caller) {
@@ -61,7 +64,8 @@ namespace com.csutil.logging {
         private Toggle ToggleShowWarngs() { return map.Get<Toggle>("ToggleShowWarnings"); }
         private Toggle ToggleShowErrors() { return map.Get<Toggle>("ToggleShowErrors"); }
 
-        protected override void Start() {
+        protected override void OnEnable() {
+            base.OnEnable();
             InitMap();
             map.Get<Button>("BtnClear").SetOnClickAction(delegate { ClearConsole(); });
             map.Get<Button>("BtnHideLog").SetOnClickAction(delegate { ToggleConsoleVisibility(); });

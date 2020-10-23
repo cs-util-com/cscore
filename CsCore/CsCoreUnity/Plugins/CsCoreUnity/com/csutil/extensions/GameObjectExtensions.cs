@@ -101,6 +101,10 @@ namespace com.csutil {
             return (parent != null ? parent.FullQualifiedName() + separator : "") + self.name;
         }
 
+        public static void AddOnDestroyListener(this GameObject self, Action onDestroyCallback) {
+            self.GetOrAddComponent<OnDestroyListener>().onDestroy.AddListener(() => { onDestroyCallback(); });
+        }
+
     }
 
 }

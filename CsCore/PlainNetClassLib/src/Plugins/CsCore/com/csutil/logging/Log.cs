@@ -89,6 +89,14 @@ namespace com.csutil {
             }
         }
 
+        public static void RemoveLoggerFromLogInstances(ILog loggerToRemove) {
+            if (Log.instance is LogToMultipleLoggers existingInstance) {
+                existingInstance.loggers.Remove(loggerToRemove);
+            } else {
+                Log.e($"Cant remove logger {loggerToRemove} from {Log.instance}");
+            }
+        }
+
     }
 
     public static class LogExtensions {
