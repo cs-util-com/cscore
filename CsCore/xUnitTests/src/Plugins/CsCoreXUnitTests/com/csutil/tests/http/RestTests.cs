@@ -171,6 +171,19 @@ namespace com.csutil.tests.http {
             return Task.FromResult(true);
         }
 
+        [Fact]
+        public void TestEscapeAndUnescapeStrings() {
+            string s = "'abc'";
+            var escapedUriString = Uri.EscapeDataString(s);
+            Assert.Equal("%27abc%27", escapedUriString);
+            var unescapedDataString = Uri.UnescapeDataString(escapedUriString);
+            Assert.Equal(s, unescapedDataString);
+
+            // HTML encoded strings can have a different format that can be decoded too:
+            var unescapedHtmlString = WebUtility.HtmlDecode("&#39;abc&#39;");
+            Assert.Equal(s, unescapedHtmlString);
+        }
+
     }
 
 }
