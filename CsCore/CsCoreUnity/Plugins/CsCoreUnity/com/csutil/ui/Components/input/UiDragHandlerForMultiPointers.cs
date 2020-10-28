@@ -69,7 +69,7 @@ namespace com.csutil.ui {
 
             Vector2 currentDist = latestFinger2.position - latestFinger1.position;
             float scaleFactor = currentDist.magnitude / startDist.magnitude;
-            if (scaleFactor == 0) { return; } // Cancel if there is no diff 
+            if (scaleFactor == 0 || float.IsNaN(scaleFactor)) { return; } // Cancel if there is no diff 
 
             var newLocalScale = startLocalScale * scaleFactor;
             var p1 = latestFinger1.position - finger1Start * scaleFactor;

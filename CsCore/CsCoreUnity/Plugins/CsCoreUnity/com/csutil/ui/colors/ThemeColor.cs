@@ -1,6 +1,5 @@
 ﻿using ThisOtherThing.UI.Shapes;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.UI;
 
 namespace com.csutil.ui {
@@ -21,16 +20,13 @@ namespace com.csutil.ui {
         }
 
         public string _colorName;
-        public SetColorEvent applyColorToTarget = new SetColorEvent();
+        public Component target;
 
         [ShowPropertyInInspector]
         public ColorNames colorNameSuggestion {
             get { return ColorNames.custom.TryParse(_colorName); }
             set { if (ColorNames.custom != value) { SetColor(value.GetEntryName()); } }
         }
-
-        [System.Serializable]
-        public class SetColorEvent : UnityEvent<Color> { }
 
         private void OnEnable() { Refresh(); }
 
@@ -56,18 +52,20 @@ namespace com.csutil.ui {
 
         public void ApplyColor(Color color) {
             if (!enabled) { return; }
-            if (applyColorToTarget.IsNullOrEmpty()) {
-                var rectagle = this.GetComponentV2<Rectangle>();
-                if (rectagle != null) { SetRectangleColor(rectagle, color); return; }
-                var graphic = this.GetComponentV2<Graphic>();
-                if (graphic != null) { SetGraphicColor(graphic, color); return; }
-                var sel = this.GetComponentV2<Selectable>();
-                if (sel != null && sel.targetGraphic != null) { SetSelectableColor(sel, color); return; }
-                Log.e("Could not find anything to apply the ThemeColor to!", gameObject);
-                enabled = false;
-            } else {
-                applyColorToTarget.Invoke(color);
-            }
+            if (target == null) { target = LazyInitTarget(); }
+            if (target is Rectangle r) { SetRectangleColor(r, color); return; }
+            if (target is Graphic g) { SetGraphicColor(g, color); return; }
+            if (target is Selectable s && s.targetGraphic != null) { SetSelectableColor(s, color); return; }
+            Log.e($"Could not apply the ThemeColor to target='{target}'", gameObject);
+            enabled = false;
+        }
+
+        private Component LazyInitTarget() {
+            if (gameObject.HasComponent(out Rectangle r)) { return r; }
+            if (gameObject.HasComponent(out Graphic g)) { return g; }
+            if (gameObject.HasComponent(out Selectable s)) { return s; }
+            Log.e("Could not automatically find target for ThemeColor", gameObject);
+            return null;
         }
 
         private static void SetSelectableColor(Selectable self, Color color) {
