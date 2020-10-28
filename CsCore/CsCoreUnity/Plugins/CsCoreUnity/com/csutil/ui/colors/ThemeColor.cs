@@ -47,7 +47,7 @@ namespace com.csutil.ui {
             if (theme.TryGetColor(_colorName, out Color color)) {
                 ApplyColor(color);
             } else {
-                Log.w($"Color {_colorName} not found in theme colors)", gameObject);
+                Log.w($"Color '{_colorName}' not found in theme colors)", gameObject);
             }
 #if UNITY_EDITOR
             UnityEditor.EditorUtility.SetDirty(this);

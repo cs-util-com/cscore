@@ -42,7 +42,7 @@ namespace com.csutil.ui {
             return false;
         }
 
-        private void Start() {
+        private void OnEnable() {
             InitColorsIfEmpty();
             this.ExecuteRepeated(() => { CheckIfColorsChanged(); return true; }, 1000);
         }
