@@ -1,5 +1,19 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &4154815178290760032
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8790793173524496898}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3556e31b289f8ac428c441659ce46ffb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _colorName: transparent
+  target: {fileID: 5233085981463819721}
 --- !u!1 &6254169634357441388
 GameObject:
   m_ObjectHideFlags: 0
@@ -535,6 +549,26 @@ PrefabInstance:
       propertyPath: m_SizeDelta.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6090281863376536355, guid: 9481912778802284988408d6b17ef81c,
+        type: 3}
+      propertyPath: m_Color.r
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6090281863376536355, guid: 9481912778802284988408d6b17ef81c,
+        type: 3}
+      propertyPath: m_Color.g
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6090281863376536355, guid: 9481912778802284988408d6b17ef81c,
+        type: 3}
+      propertyPath: m_Color.b
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6090281863376536355, guid: 9481912778802284988408d6b17ef81c,
+        type: 3}
+      propertyPath: m_Color.a
+      value: 0.46666667
+      objectReference: {fileID: 0}
     - target: {fileID: 7060833057487566986, guid: 9481912778802284988408d6b17ef81c,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -623,12 +657,12 @@ PrefabInstance:
     - target: {fileID: 7060833057487566986, guid: 9481912778802284988408d6b17ef81c,
         type: 3}
       propertyPath: m_AnchorMax.x
-      value: 1
+      value: 0.9878296
       objectReference: {fileID: 0}
     - target: {fileID: 7060833057487566986, guid: 9481912778802284988408d6b17ef81c,
         type: 3}
       propertyPath: m_AnchorMax.y
-      value: 1
+      value: 0.61067855
       objectReference: {fileID: 0}
     - target: {fileID: 7060833057487566986, guid: 9481912778802284988408d6b17ef81c,
         type: 3}
@@ -705,8 +739,31 @@ PrefabInstance:
       propertyPath: m_SizeDelta.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8612715765863306312, guid: 9481912778802284988408d6b17ef81c,
+        type: 3}
+      propertyPath: m_Value
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9481912778802284988408d6b17ef81c, type: 3}
+--- !u!1 &8790793173524496898 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7342427873509209320, guid: 9481912778802284988408d6b17ef81c,
+    type: 3}
+  m_PrefabInstance: {fileID: 2025107931160786666}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &5233085981463819721 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6090281863376536355, guid: 9481912778802284988408d6b17ef81c,
+    type: 3}
+  m_PrefabInstance: {fileID: 2025107931160786666}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8790793173524496898}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!224 &7530177035742947311 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 8402081866926592261, guid: 9481912778802284988408d6b17ef81c,

@@ -169,9 +169,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _colorName: primary
-  applyColorToTarget:
-    m_PersistentCalls:
-      m_Calls: []
+  target: {fileID: 3320895823447733402}
 --- !u!114 &481418056322707001
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -318,9 +316,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _colorName: primaryContrast
-  applyColorToTarget:
-    m_PersistentCalls:
-      m_Calls: []
+  target: {fileID: 320953420027845127}
 --- !u!1001 &4548620108069191466
 PrefabInstance:
   m_ObjectHideFlags: 0

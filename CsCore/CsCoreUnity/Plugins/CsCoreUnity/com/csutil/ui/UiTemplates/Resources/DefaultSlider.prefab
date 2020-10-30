@@ -89,9 +89,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _colorName: primary
-  applyColorToTarget:
-    m_PersistentCalls:
-      m_Calls: []
+  target: {fileID: 3395277214673500039}
 --- !u!1 &1836508958057536907
 GameObject:
   m_ObjectHideFlags: 0
@@ -230,9 +228,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _colorName: primary
-  applyColorToTarget:
-    m_PersistentCalls:
-      m_Calls: []
+  target: {fileID: 8097505099910247996}
 --- !u!1 &2508063572502183010
 GameObject:
   m_ObjectHideFlags: 0
@@ -328,7 +324,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.9243637, g: 0.92809093, b: 0.943, a: 1}
+  m_Color: {r: 0.9254902, g: 0.92941177, b: 0.9411765, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -358,9 +354,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _colorName: cardDark
-  applyColorToTarget:
-    m_PersistentCalls:
-      m_Calls: []
+  target: {fileID: 6406170102882636882}
 --- !u!1 &7512182442070733735
 GameObject:
   m_ObjectHideFlags: 0

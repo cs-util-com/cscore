@@ -218,9 +218,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _colorName: button
-  applyColorToTarget:
-    m_PersistentCalls:
-      m_Calls: []
+  target: {fileID: 1393461139489519904}
 --- !u!1 &8121252338202999859
 GameObject:
   m_ObjectHideFlags: 0
@@ -314,6 +312,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _colorName: buttonContrast
-  applyColorToTarget:
-    m_PersistentCalls:
-      m_Calls: []
+  target: {fileID: 1209258386854057822}

@@ -106,9 +106,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _colorName: cardDark
-  applyColorToTarget:
-    m_PersistentCalls:
-      m_Calls: []
+  target: {fileID: 1535815719504385875}
 --- !u!114 &1496216135144704089
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -122,9 +120,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _colorName: primary
-  applyColorToTarget:
-    m_PersistentCalls:
-      m_Calls: []
+  target: {fileID: 6012319073938147962}
 --- !u!114 &6012319073938147962
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -245,9 +241,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _colorName: primaryContrast
-  applyColorToTarget:
-    m_PersistentCalls:
-      m_Calls: []
+  target: {fileID: 6095177067853156177}
 --- !u!1001 &7624025614156255911
 PrefabInstance:
   m_ObjectHideFlags: 0

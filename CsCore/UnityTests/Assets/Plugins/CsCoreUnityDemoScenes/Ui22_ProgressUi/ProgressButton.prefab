@@ -404,6 +404,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   progressText: {fileID: 0}
+  progressDetailsInfoText: {fileID: 0}
   enableProgressUiFading: 0
   delayInMsBeforeProgressCleanup: 2000
   progress: {fileID: 5920263673355501022}
