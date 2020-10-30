@@ -58,13 +58,20 @@ namespace com.csutil.tests {
         private async Task SetupBlockingProgressButton() {
             await gameObject.GetLinkMap().Get<Button>("BlockingProgressButton").SetOnClickAction(async delegate {
                 ProgressManager prManager = new ProgressManager();
-                var blockingView = gameObject.GetViewStack().ShowBlockingProgressUiFor(prManager);
+                ProgressUi progressUi = gameObject.GetViewStack().ShowBlockingProgressUiFor(prManager);
                 IProgress progress = prManager.GetOrAddProgress("DemoLoadingProgress", 200, true);
-                for (int i = 0; i < progress.totalCount; i++) {
+
+                progressUi.progressDetailsInfoText?.textLocalized("I am a progress UI, I hope I wont take to long!");
+                for (int i = 0; i < progress.totalCount - 1; i++) {
                     progress.IncrementCount();
                     await TaskV2.Delay(15);
                 }
-                AssertV2.IsTrue(blockingView.IsDestroyed(), "Blocking progress not destroyed after it completed");
+                progressUi.progressDetailsInfoText?.textLocalized("The last % is always the hardest!");
+                await TaskV2.Delay(2000);
+                progress.IncrementCount();
+
+                await TaskV2.Delay(15);
+                AssertV2.IsTrue(progressUi.IsDestroyed(), "Blocking progress not destroyed after it completed");
             });
         }
 
