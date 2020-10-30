@@ -1,4 +1,6 @@
-﻿using ThisOtherThing.UI.Shapes;
+﻿using System.Collections.Generic;
+using System.Linq;
+using ThisOtherThing.UI.Shapes;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -38,6 +40,7 @@ namespace com.csutil.ui {
         private void OnValidate() { if (ApplicationV2.IsEditorOnValidateAllowed()) { Refresh(); } }
 
         public void Refresh() {
+            if (!this.enabled) { return; }
             if (_colorName.IsNullOrEmpty()) { return; }
             var theme = IoC.inject.GetOrAddComponentSingleton<Theme>(this);
             if (theme.TryGetColor(_colorName, out Color color)) {
@@ -47,7 +50,20 @@ namespace com.csutil.ui {
             }
 #if UNITY_EDITOR
             UnityEditor.EditorUtility.SetDirty(this);
+            DisableIfMultipleThemeColorsWithSameTarget();
 #endif
+        }
+
+        private void DisableIfMultipleThemeColorsWithSameTarget() {
+            var list = GetConflictingThemeColors();
+            if (!list.IsNullOrEmpty()) {
+                Log.e($"{list.Count()} ThemeColors try to modify the same target!", gameObject);
+                this.enabled = false;
+            }
+        }
+
+        private IEnumerable<ThemeColor> GetConflictingThemeColors() {
+            return GetComponents<ThemeColor>().Filter(x => x != this && x.target == target && x.isActiveAndEnabled);
         }
 
         public void ApplyColor(Color color) {

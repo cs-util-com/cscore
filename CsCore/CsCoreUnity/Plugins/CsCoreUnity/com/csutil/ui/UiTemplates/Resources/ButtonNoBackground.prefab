@@ -93,9 +93,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _colorName: element
-  applyColorToTarget:
-    m_PersistentCalls:
-      m_Calls: []
+  target: {fileID: 766578131709943462}
 --- !u!1 &7164108468750781651
 GameObject:
   m_ObjectHideFlags: 0
@@ -314,6 +312,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _colorName: element
-  applyColorToTarget:
-    m_PersistentCalls:
-      m_Calls: []
+  target: {fileID: 9139258741347180056}

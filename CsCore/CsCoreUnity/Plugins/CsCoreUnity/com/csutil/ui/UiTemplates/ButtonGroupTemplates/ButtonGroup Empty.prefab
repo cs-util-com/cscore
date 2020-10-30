@@ -189,9 +189,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _colorName: cardDark
-  applyColorToTarget:
-    m_PersistentCalls:
-      m_Calls: []
+  target: {fileID: 1316733126202998496}
 --- !u!1 &6369632156903585488
 GameObject:
   m_ObjectHideFlags: 0
@@ -330,9 +328,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _colorName: card
-  applyColorToTarget:
-    m_PersistentCalls:
-      m_Calls: []
+  target: {fileID: 6588094343775132406}
 --- !u!1 &8903601871601888363
 GameObject:
   m_ObjectHideFlags: 0
@@ -438,9 +434,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _colorName: card
-  applyColorToTarget:
-    m_PersistentCalls:
-      m_Calls: []
+  target: {fileID: 8903601871601888357}
 --- !u!1 &8903601871943597643
 GameObject:
   m_ObjectHideFlags: 0

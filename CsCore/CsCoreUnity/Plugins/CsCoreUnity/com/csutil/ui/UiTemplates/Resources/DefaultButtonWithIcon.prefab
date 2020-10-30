@@ -93,9 +93,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _colorName: buttonContrast
-  applyColorToTarget:
-    m_PersistentCalls:
-      m_Calls: []
+  target: {fileID: 1068790268463852865}
 --- !u!1001 &7733176671930096750
 PrefabInstance:
   m_ObjectHideFlags: 0
