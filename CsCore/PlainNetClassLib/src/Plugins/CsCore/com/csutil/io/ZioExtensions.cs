@@ -24,13 +24,19 @@ namespace com.csutil {
             return new FileEntry(self.FileSystem, self.Path / relativePath);
         }
 
+        /// <summary> Returns a root dir for an existing directory entry </summary>
         public static DirectoryEntry ToRootDirectoryEntry(this DirectoryInfo localDir) {
-            if (!localDir.Exists) {
+            if (!localDir.Exists) { // The SubFileSystem cant handle non existing roots
                 throw new DirectoryNotFoundException("ToRootDirectoryEntry on non-existing dir: " + localDir);
             }
             var pfs = new PhysicalFileSystemV2(ExtractDiscPrefix(localDir));
             var fs = new SubFileSystem(pfs, pfs.ConvertPathFromInternal(localDir.FullName));
             return fs.GetDirectoryEntry(UPath.Root);
+        }
+
+        /// <summary> Takes the parent dir and uses this as a root dir, only works if parent dir exists! </summary>
+        public static FileEntry ToFileEntryInNewRoot(this FileInfo self) {
+            return self.ParentDir().ToRootDirectoryEntry().GetChild(self.Name);
         }
 
         private static string ExtractDiscPrefix(DirectoryInfo dir) { return ExtractDiscPrefix(dir.FullName); }

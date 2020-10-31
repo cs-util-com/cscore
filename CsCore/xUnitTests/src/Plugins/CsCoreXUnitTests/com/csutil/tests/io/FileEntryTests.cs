@@ -351,6 +351,19 @@ namespace com.csutil.tests {
             Assert.Equal(abc, file1.ReadAllText());
         }
 
+        [Fact]
+        public void TestToRootEntry() {
+            var dir = new DirectoryInfo(Path.GetTempPath()).GetChildDir("TestToRootEntry");
+            dir.DeleteV2();
+            Assert.False(dir.ExistsV2());
+            Assert.Throws<DirectoryNotFoundException>(() => dir.ToRootDirectoryEntry());
+            dir.CreateV2();
+            var f1 = dir.GetChildDir("subDir1").GetChildDir("subSubDir1").GetChild("file1.txt");
+            f1.SaveAsText("abc");
+            var fileEntry1 = f1.ToFileEntryInNewRoot();
+            Assert.Equal("/file1.txt", fileEntry1.FullName);
+        }
+
     }
 
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.UI;
+using Zio;
 
 namespace com.csutil.ui {
 
@@ -14,7 +14,8 @@ namespace com.csutil.ui {
             base.OnInspectorGUI();
             if (GUILayout.Button("Save current colors to JSON")) {
                 var path = UnityEditor.EditorUtility.SaveFilePanel("Save current colors to JSON", "", "", "json");
-                (target as Theme)?.SaveToSchemeJson(path);
+                var fileToSaveTo = new FileInfo(path).ToFileEntryInNewRoot();
+                (target as Theme)?.SaveToSchemeJson(fileToSaveTo);
             }
         }
     }
@@ -61,8 +62,8 @@ namespace com.csutil.ui {
             return JsonReader.GetReader().Read<Dictionary<string, string>>(themeColorsJson);
         }
 
-        public void SaveToSchemeJson(string pathToSaveTo) {
-            new FileInfo(pathToSaveTo).SaveAsText(JsonWriter.AsPrettyString(ToHexColors(colors)));
+        public void SaveToSchemeJson(FileEntry fileToSaveTo) {
+            fileToSaveTo.SaveAsText(JsonWriter.AsPrettyString(ToHexColors(colors)));
         }
 
         private static Dictionary<string, string> ToHexColors(List<NamedColor> colors) {
