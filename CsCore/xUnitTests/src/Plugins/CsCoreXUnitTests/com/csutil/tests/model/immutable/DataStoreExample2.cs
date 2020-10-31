@@ -257,7 +257,12 @@ namespace com.csutil.tests.model.immutable {
         }
 
         private static async Task<List<string>> DownloadWeatherFor(string cityName) {
-            var foundLocations = await MetaWeatherLocationLookup.GetLocation(cityName);
+            List<MetaWeatherLocationLookup.LocationResp> foundLocations = null;
+            try {
+                foundLocations = await MetaWeatherLocationLookup.GetLocation(cityName);
+            } catch (System.Net.Http.HttpRequestException e) {
+                Log.e("MetaWeatherLocationLookup error, is metaweather.com still down?", e);
+            }
             if (foundLocations == null) { // Assume test currently has no internet so simulate:
                 return new List<string>() { "Rain", "Cloudy" };
             }
