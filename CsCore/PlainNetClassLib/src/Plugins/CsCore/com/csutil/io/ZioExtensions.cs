@@ -7,6 +7,7 @@ using Zio;
 using Zio.FileSystems;
 
 namespace com.csutil {
+
     public static class ZioExtensions {
 
         public static DirectoryEntry GetChildDir(this DirectoryEntry self, string subDirName) {
@@ -16,11 +17,16 @@ namespace com.csutil {
 
         public static FileEntry GetChild(this DirectoryEntry self, string fileName) {
             AssertV2.AreEqual(fileName, EnvironmentV2.SanatizeToFileName(fileName));
-            return new FileEntry(self.FileSystem, self.Path / fileName);
+            return ResolveFilePath(self, fileName);
         }
 
+        public static FileEntry ResolveFilePath(this DirectoryEntry self, string relativePath) {
+            return new FileEntry(self.FileSystem, self.Path / relativePath);
+        }
+
+        /// <summary> Returns a root dir for an existing directory entry </summary>
         public static DirectoryEntry ToRootDirectoryEntry(this DirectoryInfo localDir) {
-            if (!localDir.Exists) {
+            if (!localDir.Exists) { // The SubFileSystem cant handle non existing roots
                 throw new DirectoryNotFoundException("ToRootDirectoryEntry on non-existing dir: " + localDir);
             }
             var pfs = new PhysicalFileSystemV2(ExtractDiscPrefix(localDir));
@@ -28,15 +34,20 @@ namespace com.csutil {
             return fs.GetDirectoryEntry(UPath.Root);
         }
 
-        private static string ExtractDiscPrefix(DirectoryInfo localDir) {
-            var absolutePath = localDir.FullName;
-            if (absolutePath[1] == ':') { return absolutePath.Substring(0, 2); }
-            return null;
+        /// <summary> Takes the parent dir and uses this as a root dir, only works if parent dir exists! </summary>
+        public static FileEntry ToFileEntryInNewRoot(this FileInfo self) {
+            return self.ParentDir().ToRootDirectoryEntry().GetChild(self.Name);
+        }
+
+        private static string ExtractDiscPrefix(DirectoryInfo dir) { return ExtractDiscPrefix(dir.FullName); }
+
+        private static string ExtractDiscPrefix(string absPath) {
+            if (absPath[1] != ':') { throw new InvalidDataException("Path does not contain a disc prefix: " + absPath); }
+            return absPath.Substring(0, 2);
         }
 
         public static DirectoryEntry AsNewRootDir(this DirectoryEntry self) {
-            UPath subPath = self.FileSystem.ConvertPathFromInternal(self.FullName);
-            return new SubFileSystem(self.FileSystem, subPath).GetDirectoryEntry(UPath.Root);
+            return new SubFileSystem(self.FileSystem, self.Path).GetDirectoryEntry(UPath.Root);
         }
 
         public static DirectoryEntry CreateV2(this DirectoryEntry self) {
@@ -193,10 +204,6 @@ namespace com.csutil {
             return ByteSizeToString.ByteSizeToReadableString(self.GetFileSize());
         }
 
-        public static string GetNameWithoutExtension(this FileEntry self) {
-            return Path.GetFileNameWithoutExtension(self.Name);
-        }
-
         /// <summary> Currently only works when working with a physical file system for the target directory </summary>
         public static void ExtractIntoDir(this FileEntry self, DirectoryEntry targetDir) {
             if (targetDir.Exists) { throw new IOException("Target dir to extract zip into already exists: " + targetDir); }
@@ -225,6 +232,12 @@ namespace com.csutil {
         public static void SetLastWriteTimeUtc(this FileSystemEntry targetFile, DateTime utcTimestamp) {
             targetFile.LastWriteTime = utcTimestamp.ToLocalTime();
         }
+
+        public static string CalcFileMd5Hash(this FileEntry targetFile) {
+            using (var fileStream = targetFile.OpenForRead()) { return fileStream.GetMD5Hash(); }
+        }
+
+        public static bool HasExtension(this FileEntry self) { return self.NameWithoutExtension != self.Name; }
 
     }
 

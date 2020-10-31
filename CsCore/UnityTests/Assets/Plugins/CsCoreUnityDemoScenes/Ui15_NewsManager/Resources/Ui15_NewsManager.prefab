@@ -108,6 +108,8 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0.0051231165, g: 0, b: 0.078, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -261,7 +263,7 @@ PrefabInstance:
     - target: {fileID: 364702507001529485, guid: bc0d577ba408be94ab69072c52f969f6,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: 0.000046266112
       objectReference: {fileID: 0}
     - target: {fileID: 364702507001529485, guid: bc0d577ba408be94ab69072c52f969f6,
         type: 3}
@@ -272,6 +274,21 @@ PrefabInstance:
         type: 3}
       propertyPath: m_AnchorMax.y
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1006608467651409860, guid: bc0d577ba408be94ab69072c52f969f6,
+        type: 3}
+      propertyPath: m_Color.r
+      value: 0.32941177
+      objectReference: {fileID: 0}
+    - target: {fileID: 1006608467651409860, guid: bc0d577ba408be94ab69072c52f969f6,
+        type: 3}
+      propertyPath: m_Color.g
+      value: 0.34509805
+      objectReference: {fileID: 0}
+    - target: {fileID: 1006608467651409860, guid: bc0d577ba408be94ab69072c52f969f6,
+        type: 3}
+      propertyPath: m_Color.b
+      value: 0.3882353
       objectReference: {fileID: 0}
     - target: {fileID: 1673717681094435080, guid: bc0d577ba408be94ab69072c52f969f6,
         type: 3}
@@ -323,6 +340,11 @@ PrefabInstance:
       propertyPath: m_Color.b
       value: 0.050980397
       objectReference: {fileID: 0}
+    - target: {fileID: 5224215849946481707, guid: bc0d577ba408be94ab69072c52f969f6,
+        type: 3}
+      propertyPath: _colorName
+      value: element
+      objectReference: {fileID: 0}
     - target: {fileID: 5344746104104298738, guid: bc0d577ba408be94ab69072c52f969f6,
         type: 3}
       propertyPath: m_AnchorMax.y
@@ -346,7 +368,7 @@ PrefabInstance:
     - target: {fileID: 5487675634755727761, guid: bc0d577ba408be94ab69072c52f969f6,
         type: 3}
       propertyPath: m_Size
-      value: 1
+      value: 0.99528086
       objectReference: {fileID: 0}
     - target: {fileID: 6288817455880958346, guid: bc0d577ba408be94ab69072c52f969f6,
         type: 3}

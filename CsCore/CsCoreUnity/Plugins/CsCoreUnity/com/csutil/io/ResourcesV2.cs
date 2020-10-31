@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 namespace com.csutil {
@@ -29,18 +30,42 @@ namespace com.csutil {
             return go;
         }
 
-        public static T LoadV2<T>(string pathInResourcesFolder) {
+        /// <summary> Force AssetDB entry reload by Unity, otherwise Resources files are cached by it </summary>
+        [System.Diagnostics.Conditional("DEBUG")] // To remove line in builts
+        public static void ForceAssetDatabaseReimport(string pathInResources) {
+#if UNITY_EDITOR 
+            if (Application.isPlaying) { return; }
+            // Only way that I found to get the full path of assets is to load it and ask what its path is:
+            var pathInAssets = UnityEditor.AssetDatabase.GetAssetPath(Resources.Load(pathInResources));
+            UnityEditor.AssetDatabase.ImportAsset(pathInAssets, UnityEditor.ImportAssetOptions.ForceUpdate);
+#endif
+        }
+
+        /// <summary> Loads an asset from the Resources of the Unity project </summary>
+        /// <param name="pathInResourcesFolder"> a path like Colors/colorScheme1 in a Resource folder of 
+        /// your project and WITHOUT a file extension </param>
+        /// <param name="forceAssetDbReimport"> If true will force the unity AssetDatabase to reload 
+        /// the asset if its already cached, only relevant in Editor, ignored in runtime </param>
+        /// <returns></returns>
+        public static T LoadV2<T>(string pathInResourcesFolder, bool forceAssetDbReimport = false) {
             if (pathInResourcesFolder.IsNullOrEmpty()) {
                 throw new ArgumentNullException("pathInResourcesFolder null or emtpy");
             }
+            if (forceAssetDbReimport) { ForceAssetDatabaseReimport(pathInResourcesFolder); }
+            pathInResourcesFolder = RemovePathPrefixIfNeeded(pathInResourcesFolder);
             pathInResourcesFolder = RemoveExtensionIfNeeded(pathInResourcesFolder, ".prefab");
             pathInResourcesFolder = RemoveExtensionIfNeeded(pathInResourcesFolder, ".asset");
             if ((typeof(T).IsCastableTo<string>())) {
-                TextAsset textAsset = LoadV2<TextAsset>(pathInResourcesFolder);
-                if (textAsset == null) { throw new System.IO.FileNotFoundException("No text asset found at " + pathInResourcesFolder); }
+                TextAsset textAsset = LoadV2<TextAsset>(pathInResourcesFolder, forceAssetDbReimport);
+                if (textAsset == null) { throw new FileNotFoundException("No text asset found at " + pathInResourcesFolder); }
                 return (T)(object)textAsset.text;
             }
             return (T)(object)Resources.Load(pathInResourcesFolder, typeof(T));
+        }
+
+        private static string RemovePathPrefixIfNeeded(string pathInResourcesFolder) {
+            if (pathInResourcesFolder.StartsWith("/")) { return pathInResourcesFolder.Substring(1); }
+            return pathInResourcesFolder;
         }
 
         private static string RemoveExtensionIfNeeded(string path, string fileExtension) {

@@ -97,10 +97,13 @@ namespace com.csutil.tests {
 
         [Fact]
         public void TestProgressManager() {
-            ProgressManager m = new ProgressManager();
-            var p1 = m.GetOrAddProgress("p1", 10, createIfNull: true);
-            Assert.Same(p1, m.GetOrAddProgress("p1", 0, createIfNull: true));
-            Assert.NotSame(p1, m.GetOrAddProgress("p2", 0, createIfNull: true));
+            ProgressManager pm = new ProgressManager();
+            // Enable that pm reacts to injection requests for IProgress:
+            IoC.inject.RegisterInjector(pm, pm.ProgressInjectionRequest);
+
+            var p1 = pm.GetOrAddProgress("p1", 10, createIfNull: true);
+            Assert.Same(p1, pm.GetOrAddProgress("p1", 0, createIfNull: true));
+            Assert.NotSame(p1, pm.GetOrAddProgress("p2", 0, createIfNull: true));
             Assert.Same(p1, IoC.inject.Get<IProgress>("p1"));
             Assert.Same(p1, IoC.inject.Get<IProgress>(new KeyValuePair<string, double>("p1", 1)));
         }

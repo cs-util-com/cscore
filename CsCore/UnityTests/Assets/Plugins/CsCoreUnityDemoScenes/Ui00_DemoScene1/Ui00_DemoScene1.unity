@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.37311953, g: 0.38074014, b: 0.3587274, a: 1}
+  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -395,21 +395,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 2071078032}
     m_Modifications:
-    - target: {fileID: 319736239629347954, guid: 25d0ce4b41c1e1445aef72ac6c125cad,
-        type: 3}
-      propertyPath: m_AnchorMax.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 319736239629347954, guid: 25d0ce4b41c1e1445aef72ac6c125cad,
-        type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 319736239629347954, guid: 25d0ce4b41c1e1445aef72ac6c125cad,
-        type: 3}
-      propertyPath: m_SizeDelta.x
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 469172865748388769, guid: 25d0ce4b41c1e1445aef72ac6c125cad,
         type: 3}
       propertyPath: m_AnchorMin.y
@@ -578,21 +563,6 @@ PrefabInstance:
     - target: {fileID: 4344387429163480652, guid: 25d0ce4b41c1e1445aef72ac6c125cad,
         type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4344387429163480652, guid: 25d0ce4b41c1e1445aef72ac6c125cad,
-        type: 3}
-      propertyPath: m_AnchorMin.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5354445733178400634, guid: 25d0ce4b41c1e1445aef72ac6c125cad,
-        type: 3}
-      propertyPath: m_AnchorMax.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5354445733178400634, guid: 25d0ce4b41c1e1445aef72ac6c125cad,
-        type: 3}
-      propertyPath: m_SizeDelta.x
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5853827108501892316, guid: 25d0ce4b41c1e1445aef72ac6c125cad,
@@ -800,10 +770,10 @@ PrefabInstance:
       propertyPath: m_AnchorMax.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 7920862642477589318, guid: 25d0ce4b41c1e1445aef72ac6c125cad,
+    - target: {fileID: 8184942304984182682, guid: 25d0ce4b41c1e1445aef72ac6c125cad,
         type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
+      propertyPath: m_Text
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 8862010921208450892, guid: 25d0ce4b41c1e1445aef72ac6c125cad,
         type: 3}

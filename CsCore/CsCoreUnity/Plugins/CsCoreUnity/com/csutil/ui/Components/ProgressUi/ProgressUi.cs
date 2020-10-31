@@ -10,6 +10,8 @@ namespace com.csutil.progress {
 
         /// <summary> Optional text that will show the current progress values </summary>
         public Text progressText;
+        /// <summary> An optional info text that can be used to show the user details about what is happening </summary>
+        public Text progressDetailsInfoText;
         /// <summary> If true will look for a CanvasGroupFader in parents to fade based on total progress </summary>
         public bool enableProgressUiFading = true;
         /// <summary> After this delay the finished progress will be cleared once all progresses are 100 so 

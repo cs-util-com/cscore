@@ -1,5 +1,25 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &1224374765438627901
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 111843180727378176}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IgnoreLayout: 0
+  m_MinWidth: -1
+  m_MinHeight: 16
+  m_PreferredWidth: -1
+  m_PreferredHeight: -1
+  m_FlexibleWidth: -1
+  m_FlexibleHeight: -1
+  m_LayoutPriority: 1
 --- !u!114 &1535815719504385875
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15,6 +35,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -22,13 +43,13 @@ MonoBehaviour:
   ShapeProperties:
     FillColor:
       serializedVersion: 2
-      rgba: 4294962408
+      rgba: 4293979628
     DrawFill: 1
     DrawFillShadow: 1
     DrawOutline: 0
     OutlineColor:
       serializedVersion: 2
-      rgba: 4294967295
+      rgba: 4293979628
     DrawOutlineShadow: 0
   RoundedProperties:
     Type: 1
@@ -72,6 +93,34 @@ MonoBehaviour:
   AntiAliasingProperties:
     AntiAliasing: 0.34
   Sprite: {fileID: 0}
+--- !u!114 &7452306714732320265
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5688915945565153936}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3556e31b289f8ac428c441659ce46ffb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _colorName: cardDark
+  target: {fileID: 1535815719504385875}
+--- !u!114 &1496216135144704089
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7752811437212851767}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3556e31b289f8ac428c441659ce46ffb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _colorName: primary
+  target: {fileID: 6012319073938147962}
 --- !u!114 &6012319073938147962
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -87,6 +136,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -159,6 +209,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -177,6 +228,20 @@ MonoBehaviour:
     m_VerticalOverflow: 0
     m_LineSpacing: 1
   m_Text: 34 / 120
+--- !u!114 &8830710625035554515
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8120392327099633452}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3556e31b289f8ac428c441659ce46ffb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _colorName: primaryContrast
+  target: {fileID: 6095177067853156177}
 --- !u!1001 &7624025614156255911
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -399,6 +464,12 @@ PrefabInstance:
     - {fileID: 3395277214673500039, guid: 5f5d85764e559e14ca095daafee79910, type: 3}
     - {fileID: 8097505099910247996, guid: 5f5d85764e559e14ca095daafee79910, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 5f5d85764e559e14ca095daafee79910, type: 3}
+--- !u!1 &111843180727378176 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7512182442070733735, guid: 5f5d85764e559e14ca095daafee79910,
+    type: 3}
+  m_PrefabInstance: {fileID: 7624025614156255911}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &5688915945565153936 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2827957168260790327, guid: 5f5d85764e559e14ca095daafee79910,

@@ -9,7 +9,8 @@ namespace com.csutil.progress {
         public static void SetupSingleton() {
             var pm = new ProgressManager();
             IoC.inject.SetSingleton(pm);
-            pm.RegisterProgressInjector();
+            // Enable that pm reacts to injection requests for IProgress:
+            IoC.inject.RegisterInjector(pm, pm.ProgressInjectionRequest);
         }
 
         public event EventHandler<IProgress> OnProgressUpdate;
@@ -26,9 +27,7 @@ namespace com.csutil.progress {
         public int totalTasks { get; private set; }
         public int finishedTasks { get; private set; }
 
-        private void RegisterProgressInjector() { IoC.inject.RegisterInjector(this, ProgressInjectionRequest); }
-
-        private IProgress ProgressInjectionRequest(object caller, bool createIfNull) {
+        public IProgress ProgressInjectionRequest(object caller, bool createIfNull) {
             AssertV2.IsNotNull(caller, "caller");
             if (caller is string id) { return GetOrAddProgress(id, 0, createIfNull); }
             if (caller is KeyValuePair<string, double> p) { return GetOrAddProgress(p.Key, p.Value, createIfNull); }

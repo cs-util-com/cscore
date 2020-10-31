@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 6495054079200328590}
   - component: {fileID: 3009606000734550557}
   - component: {fileID: 4647940709132614515}
+  - component: {fileID: 5284830896781916154}
   m_Layer: 5
   m_Name: Ui14_ImageLoading
   m_TagString: Untagged
@@ -73,6 +74,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   simulateUserInput: 0
+  testUrl: https://github.com/cs-util-com/cscore/raw/master/CsCore/UnityTests/Assets/TestApplicationData/testImage.png
 --- !u!222 &3009606000734550557
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -96,6 +98,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -110,6 +113,20 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &5284830896781916154
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 171437831589405724}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3556e31b289f8ac428c441659ce46ffb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _colorName: background
+  target: {fileID: 4647940709132614515}
 --- !u!114 &171437832149401761
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -587,7 +604,7 @@ PrefabInstance:
     - target: {fileID: 364702507001529485, guid: bc0d577ba408be94ab69072c52f969f6,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: 603.46265
       objectReference: {fileID: 0}
     - target: {fileID: 364702507001529485, guid: bc0d577ba408be94ab69072c52f969f6,
         type: 3}
@@ -642,12 +659,12 @@ PrefabInstance:
     - target: {fileID: 5487675634755727761, guid: bc0d577ba408be94ab69072c52f969f6,
         type: 3}
       propertyPath: m_Value
-      value: 1
+      value: -0.00000020228318
       objectReference: {fileID: 0}
     - target: {fileID: 5487675634755727761, guid: bc0d577ba408be94ab69072c52f969f6,
         type: 3}
       propertyPath: m_Size
-      value: 0.91543543
+      value: 0.5858838
       objectReference: {fileID: 0}
     - target: {fileID: 6830146504201124615, guid: bc0d577ba408be94ab69072c52f969f6,
         type: 3}
@@ -1285,8 +1302,7 @@ PrefabInstance:
       propertyPath: prtBounds.m_Extent.y
       value: -45.5
       objectReference: {fileID: 0}
-    m_RemovedComponents:
-    - {fileID: 2181276645915404085, guid: 29ae205f68951a346bf539d45480d556, type: 3}
+    m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 29ae205f68951a346bf539d45480d556, type: 3}
 --- !u!1001 &6194141960835897386
 PrefabInstance:

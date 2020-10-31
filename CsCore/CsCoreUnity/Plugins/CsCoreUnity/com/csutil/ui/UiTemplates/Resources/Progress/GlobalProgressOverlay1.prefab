@@ -125,7 +125,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   progressText: {fileID: 4800759638447099300}
+  progressDetailsInfoText: {fileID: 0}
   enableProgressUiFading: 1
+  delayInMsBeforeProgressCleanup: 2000
   progress: {fileID: 4341238499772110342}
 --- !u!1001 &1588031564293505781
 PrefabInstance:

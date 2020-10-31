@@ -1,5 +1,7 @@
 ﻿using System;
+using System.IO;
 using UnityEngine;
+using Zio;
 
 namespace com.csutil {
 
@@ -60,6 +62,22 @@ namespace com.csutil {
                 try { _isPlaying = Application.isPlaying; } catch (Exception e) { Debug.LogWarning(e); }
                 return _isPlaying;
             }
+        }
+
+        public static DirectoryEntry dataPath {
+            get { return new DirectoryInfo(Application.dataPath).Parent.ToRootDirectoryEntry().GetChildDir("Assets"); }
+        }
+
+        public static bool IsEditorOnValidateAllowed() {
+            if (isPlaying) { return false; }
+            var s = GameObject.Find(InjectorExtensionsForUnity.DEFAULT_SINGLETON_NAME);
+            /* There seems to be a strange Unity editor bug that can cause Unity to crash
+             * if a root transform in the scene is interacted with while the scene is still 
+             * initializing (e.g during Editor startup). 
+             */
+            var unityCouldCrash = s == null || s.transform.GetSiblingIndex() == 0;
+            // if (unityCouldCrash) { Log.w("Unity currently initializing, abording to avoid Unity crash"); }
+            return !unityCouldCrash;
         }
 
     }

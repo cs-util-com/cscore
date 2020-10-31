@@ -7,6 +7,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 148184958052006388, guid: 7312d6253e0f72943b376dcb2ecdfe15,
+        type: 3}
+      propertyPath: _colorName
+      value: warningContrast
+      objectReference: {fileID: 0}
     - target: {fileID: 280333166878060085, guid: 7312d6253e0f72943b376dcb2ecdfe15,
         type: 3}
       propertyPath: m_AnchorMin.y
@@ -70,7 +75,7 @@ PrefabInstance:
     - target: {fileID: 2393529356468938940, guid: 7312d6253e0f72943b376dcb2ecdfe15,
         type: 3}
       propertyPath: ShapeProperties.OutlineColor.rgba
-      value: 4294967295
+      value: 4283454447
       objectReference: {fileID: 0}
     - target: {fileID: 2393529356468938940, guid: 7312d6253e0f72943b376dcb2ecdfe15,
         type: 3}
@@ -80,7 +85,7 @@ PrefabInstance:
     - target: {fileID: 2393529356468938940, guid: 7312d6253e0f72943b376dcb2ecdfe15,
         type: 3}
       propertyPath: ShapeProperties.FillColor.rgba
-      value: 4283190251
+      value: 4283454447
       objectReference: {fileID: 0}
     - target: {fileID: 2393529356468938940, guid: 7312d6253e0f72943b376dcb2ecdfe15,
         type: 3}
@@ -110,17 +115,17 @@ PrefabInstance:
     - target: {fileID: 2497582281368045250, guid: 7312d6253e0f72943b376dcb2ecdfe15,
         type: 3}
       propertyPath: m_Color.r
-      value: 0.9921569
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2497582281368045250, guid: 7312d6253e0f72943b376dcb2ecdfe15,
         type: 3}
       propertyPath: m_Color.g
-      value: 0.9921569
+      value: 0.9019608
       objectReference: {fileID: 0}
     - target: {fileID: 2497582281368045250, guid: 7312d6253e0f72943b376dcb2ecdfe15,
         type: 3}
       propertyPath: m_Color.b
-      value: 0.9921569
+      value: 0.9019608
       objectReference: {fileID: 0}
     - target: {fileID: 2497582281368045250, guid: 7312d6253e0f72943b376dcb2ecdfe15,
         type: 3}
@@ -285,7 +290,17 @@ PrefabInstance:
     - target: {fileID: 5129540658801704760, guid: 7312d6253e0f72943b376dcb2ecdfe15,
         type: 3}
       propertyPath: ShapeProperties.FillColor.rgba
-      value: 4283190251
+      value: 4283454447
+      objectReference: {fileID: 0}
+    - target: {fileID: 5129540658801704760, guid: 7312d6253e0f72943b376dcb2ecdfe15,
+        type: 3}
+      propertyPath: ShapeProperties.OutlineColor.rgba
+      value: 4283454447
+      objectReference: {fileID: 0}
+    - target: {fileID: 5210572765791500000, guid: 7312d6253e0f72943b376dcb2ecdfe15,
+        type: 3}
+      propertyPath: _colorName
+      value: warning
       objectReference: {fileID: 0}
     - target: {fileID: 5465520969712890971, guid: 7312d6253e0f72943b376dcb2ecdfe15,
         type: 3}
@@ -321,6 +336,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_MinHeight
       value: 40
+      objectReference: {fileID: 0}
+    - target: {fileID: 7222901053374327917, guid: 7312d6253e0f72943b376dcb2ecdfe15,
+        type: 3}
+      propertyPath: _colorName
+      value: warning
       objectReference: {fileID: 0}
     - target: {fileID: 7359957909116776500, guid: 7312d6253e0f72943b376dcb2ecdfe15,
         type: 3}

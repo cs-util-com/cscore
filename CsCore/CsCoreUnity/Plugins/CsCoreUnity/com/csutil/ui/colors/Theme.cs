@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.UI;
+using Zio;
 
 namespace com.csutil.ui {
 
@@ -14,7 +14,8 @@ namespace com.csutil.ui {
             base.OnInspectorGUI();
             if (GUILayout.Button("Save current colors to JSON")) {
                 var path = UnityEditor.EditorUtility.SaveFilePanel("Save current colors to JSON", "", "", "json");
-                (target as Theme)?.SaveToSchemeJson(path);
+                var fileToSaveTo = new FileInfo(path).ToFileEntryInNewRoot();
+                (target as Theme)?.SaveToSchemeJson(fileToSaveTo);
             }
         }
     }
@@ -32,39 +33,37 @@ namespace com.csutil.ui {
         public List<NamedColor> colors = new List<NamedColor>();
         private List<NamedColor> oldColors = new List<NamedColor>();
 
-        public void ApplyTheme(string colorName, ThemeColor target) {
-            if (TryGetColor(colorName, out Color color)) { ApplyColor(target, color); }
-        }
-
         public bool TryGetColor(string colorName, out Color c) {
             c = Color.clear;
             if (colors.IsNullOrEmpty()) { return false; }
+            AssertV2.IsNotNull(colorName, "colorName");
+            AssertV2.IsFalse(colors.IsNullOrEmpty(), "colors.IsNullOrEmpty");
             var namedColor = colors.FirstOrDefault(x => x.colorName == colorName);
             if (namedColor != null) { c = namedColor.colorValue; return true; }
-            Log.w("Color not found in colors: " + colorName);
             return false;
         }
 
-        private void Start() {
-            if (colors.IsNullOrEmpty()) { colors = LoadHexColors(schemeName).Map(ToNamedColor).ToList(); }
+        private void OnEnable() {
+            InitColorsIfEmpty();
             this.ExecuteRepeated(() => { CheckIfColorsChanged(); return true; }, 1000);
         }
 
-        private NamedColor ToNamedColor(KeyValuePair<string, string> hexColor) {
-            if (ColorUtility.TryParseHtmlString(hexColor.Value, out Color c)) {
-                return new NamedColor() { colorName = hexColor.Key, colorValue = c };
-            }
-            Log.w("Could not parse hex color value: " + hexColor.Value);
-            return null;
+        private void InitColorsIfEmpty() {
+            if (colors.IsNullOrEmpty()) { colors = LoadHexColors(schemeName).Map(ToNamedColor).ToList(); }
         }
 
-        private static Dictionary<string, string> LoadHexColors(string themeName) {
-            var themeColorsJson = ResourcesV2.LoadV2<string>(themeName);
+        private static NamedColor ToNamedColor(KeyValuePair<string, string> hexColor) {
+            var c = ColorUtil.HexStringToColor(hexColor.Value);
+            return new NamedColor() { colorName = hexColor.Key, colorValue = c };
+        }
+
+        private static Dictionary<string, string> LoadHexColors(string schemeName) {
+            var themeColorsJson = ResourcesV2.LoadV2<string>(schemeName, forceAssetDbReimport: true);
             return JsonReader.GetReader().Read<Dictionary<string, string>>(themeColorsJson);
         }
 
-        public void SaveToSchemeJson(string pathToSaveTo) {
-            new FileInfo(pathToSaveTo).SaveAsText(JsonWriter.AsPrettyString(ToHexColors(colors)));
+        public void SaveToSchemeJson(FileEntry fileToSaveTo) {
+            fileToSaveTo.SaveAsText(JsonWriter.AsPrettyString(ToHexColors(colors)));
         }
 
         private static Dictionary<string, string> ToHexColors(List<NamedColor> colors) {
@@ -75,13 +74,12 @@ namespace com.csutil.ui {
             return result;
         }
 
-        private static void ApplyColor(ThemeColor target, Color color) {
-            var graphic = target.GetComponentV2<Graphic>();
-            if (graphic == null) { Log.w("Passed target graphic was null!"); return; }
-            graphic.color = color;
+        private void OnValidate() {
+            if (ApplicationV2.IsEditorOnValidateAllowed()) {
+                InitColorsIfEmpty();
+                CheckIfColorsChanged();
+            }
         }
-
-        private void OnValidate() { CheckIfColorsChanged(); }
 
         private void CheckIfColorsChanged() {
             for (int i = 0; i < colors.Count; i++) {
@@ -95,8 +93,8 @@ namespace com.csutil.ui {
         private bool EqualJson<T>(T a, T b) { return JsonUtility.ToJson(a) == JsonUtility.ToJson(b); }
 
         private static void UpdateThemeColorMonos(NamedColor c) {
-            var allAffected = ResourcesV2.FindAllInScene<ThemeColor>().Filter(x => x.colorName == c.colorName);
-            foreach (var mono in allAffected) { ApplyColor(mono, c.colorValue); }
+            var allAffected = ResourcesV2.FindAllInScene<ThemeColor>().Filter(x => x._colorName == c.colorName);
+            foreach (var themeColor in allAffected) { themeColor.ApplyColor(c.colorValue); }
         }
 
     }

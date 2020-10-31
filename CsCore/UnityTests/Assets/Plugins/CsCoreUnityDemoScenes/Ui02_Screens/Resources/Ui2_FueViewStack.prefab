@@ -101,6 +101,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3f35593b8ce04f146b41df38e025af16, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  screenToShowAsCloseView: SideBar
 --- !u!1001 &3149495148513866860
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -233,6 +234,41 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 3149495149462368040}
     m_Modifications:
+    - target: {fileID: 1241265511006538415, guid: 7f5888efed9355e47b0c877efdfd06ad,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1241265511006538415, guid: 7f5888efed9355e47b0c877efdfd06ad,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1241265511006538415, guid: 7f5888efed9355e47b0c877efdfd06ad,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1241265511006538415, guid: 7f5888efed9355e47b0c877efdfd06ad,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 3149495149462364373}
+    - target: {fileID: 1241265511006538415, guid: 7f5888efed9355e47b0c877efdfd06ad,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: DestroyViewStack
+      objectReference: {fileID: 0}
+    - target: {fileID: 1241265511006538415, guid: 7f5888efed9355e47b0c877efdfd06ad,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
+    - target: {fileID: 6775746537755374812, guid: 7f5888efed9355e47b0c877efdfd06ad,
+        type: 3}
+      propertyPath: m_Text
+      value: FUE Step 4
+      objectReference: {fileID: 0}
     - target: {fileID: 7271287806932245858, guid: 7f5888efed9355e47b0c877efdfd06ad,
         type: 3}
       propertyPath: m_Name
@@ -348,45 +384,10 @@ PrefabInstance:
       propertyPath: m_Pivot.y
       value: 0.5
       objectReference: {fileID: 0}
-    - target: {fileID: 6775746537755374812, guid: 7f5888efed9355e47b0c877efdfd06ad,
-        type: 3}
-      propertyPath: m_Text
-      value: FUE Step 4
-      objectReference: {fileID: 0}
     - target: {fileID: 9078897825029712039, guid: 7f5888efed9355e47b0c877efdfd06ad,
         type: 3}
       propertyPath: m_Text
       value: "\uE5CA"
-      objectReference: {fileID: 0}
-    - target: {fileID: 1241265511006538415, guid: 7f5888efed9355e47b0c877efdfd06ad,
-        type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1241265511006538415, guid: 7f5888efed9355e47b0c877efdfd06ad,
-        type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1241265511006538415, guid: 7f5888efed9355e47b0c877efdfd06ad,
-        type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 1241265511006538415, guid: 7f5888efed9355e47b0c877efdfd06ad,
-        type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
-      value: 
-      objectReference: {fileID: 3149495149462364373}
-    - target: {fileID: 1241265511006538415, guid: 7f5888efed9355e47b0c877efdfd06ad,
-        type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: DestroyViewStack
-      objectReference: {fileID: 0}
-    - target: {fileID: 1241265511006538415, guid: 7f5888efed9355e47b0c877efdfd06ad,
-        type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
-      value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 8753001383128489199, guid: 7f5888efed9355e47b0c877efdfd06ad, type: 3}
@@ -404,6 +405,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 3149495149462368040}
     m_Modifications:
+    - target: {fileID: 6775746537755374812, guid: 7f5888efed9355e47b0c877efdfd06ad,
+        type: 3}
+      propertyPath: m_Text
+      value: FUE Step 3
+      objectReference: {fileID: 0}
     - target: {fileID: 7271287806932245858, guid: 7f5888efed9355e47b0c877efdfd06ad,
         type: 3}
       propertyPath: m_Name
@@ -519,11 +525,6 @@ PrefabInstance:
       propertyPath: m_Pivot.y
       value: 0.5
       objectReference: {fileID: 0}
-    - target: {fileID: 6775746537755374812, guid: 7f5888efed9355e47b0c877efdfd06ad,
-        type: 3}
-      propertyPath: m_Text
-      value: FUE Step 3
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7f5888efed9355e47b0c877efdfd06ad, type: 3}
 --- !u!224 &5718881697505979641 stripped
@@ -539,6 +540,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 3149495149462368040}
     m_Modifications:
+    - target: {fileID: 6775746537755374812, guid: 7f5888efed9355e47b0c877efdfd06ad,
+        type: 3}
+      propertyPath: m_Text
+      value: FUE Step 2
+      objectReference: {fileID: 0}
     - target: {fileID: 7271287806932245858, guid: 7f5888efed9355e47b0c877efdfd06ad,
         type: 3}
       propertyPath: m_Name
@@ -653,11 +659,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Pivot.y
       value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 6775746537755374812, guid: 7f5888efed9355e47b0c877efdfd06ad,
-        type: 3}
-      propertyPath: m_Text
-      value: FUE Step 2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7f5888efed9355e47b0c877efdfd06ad, type: 3}

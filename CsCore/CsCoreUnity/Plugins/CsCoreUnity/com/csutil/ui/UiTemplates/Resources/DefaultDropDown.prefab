@@ -81,6 +81,7 @@ GameObject:
   - component: {fileID: 390913624439941894}
   - component: {fileID: 5771244647753811638}
   - component: {fileID: 5570083903005558628}
+  - component: {fileID: 3686928128586841743}
   m_Layer: 5
   m_Name: DefaultIconButton
   m_TagString: Untagged
@@ -128,7 +129,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
+  m_Color: {r: 0.3297794, g: 0.34411758, b: 0.39, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -183,6 +184,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   target: {fileID: 6146384139041577882}
   onToggled:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!114 &3686928128586841743
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3370706403116767593}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3556e31b289f8ac428c441659ce46ffb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _colorName: element
+  applyColorToTarget:
     m_PersistentCalls:
       m_Calls: []
 --- !u!114 &3206083156725865540
@@ -799,6 +816,21 @@ PrefabInstance:
       propertyPath: m_Name
       value: DefaultInput
       objectReference: {fileID: 0}
+    - target: {fileID: 1294259768795602811, guid: dbe80deaafbcf4d4f8d7d2af96148088,
+        type: 3}
+      propertyPath: m_Color.r
+      value: 0.3297794
+      objectReference: {fileID: 0}
+    - target: {fileID: 1294259768795602811, guid: dbe80deaafbcf4d4f8d7d2af96148088,
+        type: 3}
+      propertyPath: m_Color.g
+      value: 0.34411758
+      objectReference: {fileID: 0}
+    - target: {fileID: 1294259768795602811, guid: dbe80deaafbcf4d4f8d7d2af96148088,
+        type: 3}
+      propertyPath: m_Color.b
+      value: 0.39
+      objectReference: {fileID: 0}
     - target: {fileID: 2193531391076097098, guid: dbe80deaafbcf4d4f8d7d2af96148088,
         type: 3}
       propertyPath: m_Interactable
@@ -807,22 +839,37 @@ PrefabInstance:
     - target: {fileID: 2439507927762018716, guid: dbe80deaafbcf4d4f8d7d2af96148088,
         type: 3}
       propertyPath: m_Color.r
-      value: 0.234
+      value: 0.3297794
       objectReference: {fileID: 0}
     - target: {fileID: 2439507927762018716, guid: dbe80deaafbcf4d4f8d7d2af96148088,
         type: 3}
       propertyPath: m_Color.g
-      value: 0.234
+      value: 0.34411758
       objectReference: {fileID: 0}
     - target: {fileID: 2439507927762018716, guid: dbe80deaafbcf4d4f8d7d2af96148088,
         type: 3}
       propertyPath: m_Color.b
-      value: 0.234
+      value: 0.39
       objectReference: {fileID: 0}
     - target: {fileID: 2868370126669774591, guid: dbe80deaafbcf4d4f8d7d2af96148088,
         type: 3}
       propertyPath: m_Text
       value: Dropdown X
+      objectReference: {fileID: 0}
+    - target: {fileID: 2868370126669774591, guid: dbe80deaafbcf4d4f8d7d2af96148088,
+        type: 3}
+      propertyPath: m_Color.r
+      value: 0.64585716
+      objectReference: {fileID: 0}
+    - target: {fileID: 2868370126669774591, guid: dbe80deaafbcf4d4f8d7d2af96148088,
+        type: 3}
+      propertyPath: m_Color.g
+      value: 0.6694285
+      objectReference: {fileID: 0}
+    - target: {fileID: 2868370126669774591, guid: dbe80deaafbcf4d4f8d7d2af96148088,
+        type: 3}
+      propertyPath: m_Color.b
+      value: 0.759
       objectReference: {fileID: 0}
     - target: {fileID: 2987880900062994617, guid: dbe80deaafbcf4d4f8d7d2af96148088,
         type: 3}
@@ -833,6 +880,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_SizeDelta.x
       value: 32
+      objectReference: {fileID: 0}
+    - target: {fileID: 4199681256107097445, guid: dbe80deaafbcf4d4f8d7d2af96148088,
+        type: 3}
+      propertyPath: _colorName
+      value: element
       objectReference: {fileID: 0}
     - target: {fileID: 5808628251569709610, guid: dbe80deaafbcf4d4f8d7d2af96148088,
         type: 3}

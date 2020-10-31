@@ -338,6 +338,32 @@ namespace com.csutil.tests {
             Log.d("file: " + file.FullName);
         }
 
+        [Fact]
+        public void TestSubDirAsNewRootDir() {
+            var dir = CreateDirectoryForTesting("TestSubDirAsNewRootDir");
+            var dir1 = dir.GetChildDir("dir1");
+            var file1Name = "file1.txt";
+            var abc = "abc";
+            dir1.GetChild(file1Name).SaveAsText(abc);
+            var dir1AsRoot = dir1.AsNewRootDir();
+            var file1 = dir1AsRoot.GetChild(file1Name);
+            Assert.Equal("/" + file1Name, file1.FullName);
+            Assert.Equal(abc, file1.ReadAllText());
+        }
+
+        [Fact]
+        public void TestToRootEntry() {
+            var dir = new DirectoryInfo(Path.GetTempPath()).GetChildDir("TestToRootEntry");
+            dir.DeleteV2();
+            Assert.False(dir.ExistsV2());
+            Assert.Throws<DirectoryNotFoundException>(() => dir.ToRootDirectoryEntry());
+            dir.CreateV2();
+            var f1 = dir.GetChildDir("subDir1").GetChildDir("subSubDir1").GetChild("file1.txt");
+            f1.SaveAsText("abc");
+            var fileEntry1 = f1.ToFileEntryInNewRoot();
+            Assert.Equal("/file1.txt", fileEntry1.FullName);
+        }
+
     }
 
 }
