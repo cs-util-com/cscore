@@ -98,9 +98,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _colorName: elementContrast
-  applyColorToTarget:
-    m_PersistentCalls:
-      m_Calls: []
+  target: {fileID: 3127626835033394520}
 --- !u!1 &1984617238033251078
 GameObject:
   m_ObjectHideFlags: 0
@@ -315,9 +313,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _colorName: elementContrastWeak
-  applyColorToTarget:
-    m_PersistentCalls:
-      m_Calls: []
+  target: {fileID: 6271886195652503799}
 --- !u!114 &8735445431239178694
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -331,9 +327,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _colorName: element
-  applyColorToTarget:
-    m_PersistentCalls:
-      m_Calls: []
+  target: {fileID: 3127493753095368040}
 --- !u!1 &3808771620855158106
 GameObject:
   m_ObjectHideFlags: 0
@@ -689,9 +683,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _colorName: primary
-  applyColorToTarget:
-    m_PersistentCalls:
-      m_Calls: []
+  target: {fileID: 952195660840781923}
 --- !u!114 &6515501738899945007
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -870,9 +862,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _colorName: primary
-  applyColorToTarget:
-    m_PersistentCalls:
-      m_Calls: []
+  target: {fileID: 2054566557571462118}
 --- !u!1 &6880667900829475766
 GameObject:
   m_ObjectHideFlags: 0
