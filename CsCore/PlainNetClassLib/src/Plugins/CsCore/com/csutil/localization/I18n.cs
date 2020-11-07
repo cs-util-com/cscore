@@ -64,6 +64,7 @@ namespace com.csutil {
                 if (number == 1) { return t.one; }
             }
             if (t.other != null) { return t.other; }
+            Log.e("Translation entry found but no translation available for " + t.key);
             return t.key;
         }
 
