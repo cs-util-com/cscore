@@ -77,6 +77,12 @@ namespace com.csutil.editor {
         [MenuItem(UIv2menu + "DefaultSliderWithText", false, priorityOfUiMenu + 6)]
         static void DefaultSliderWithText() { AddPrefabToActiveView("DefaultSliderWithText"); }
 
+        [MenuItem(UIv2menu + "DefaultProgressBar", false, priorityOfUiMenu + 6)]
+        static void DefaultProgressBar() { AddPrefabToActiveView("DefaultProgressBar"); }
+
+        [MenuItem(UIv2menu + "DefaultProgressBarWithText", false, priorityOfUiMenu + 6)]
+        static void DefaultProgressBarWithText() { AddPrefabToActiveView("DefaultProgressBarWithText"); }
+
         [MenuItem(UIv2menu + "Messages/Tooltip", false, priorityOfUiMenu + 7)]
         static void Tooltip() { AddPrefabToActiveView("Messages/Tooltip"); }
 
