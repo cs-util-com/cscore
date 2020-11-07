@@ -22,6 +22,13 @@ namespace com.csutil.ui {
         /// <summary> Adds a passed view to the view stack to show it </summary>
         /// <param name="newView"> The new view to show in the stack </param>
         public GameObject ShowView(GameObject newView, GameObject currentViewToHide = null, int siblingIndex = -1) {
+
+            if (newView.IsPartOfEditorOnlyPrefab()) { // If its a prefab first create an instance from it
+                var name = newView.name;
+                newView = Instantiate(newView);
+                newView.name = name;
+            }
+
             gameObject.AddChild(newView, siblingIndex: siblingIndex);
             if (newView.GetComponentInParents<Canvas>() != null) { // The view is in a UI
                 newView.GetOrAddComponent<RectTransform>().SetAnchorsStretchStretch();
