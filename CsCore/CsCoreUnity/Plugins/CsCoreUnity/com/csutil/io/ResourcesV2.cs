@@ -24,7 +24,7 @@ namespace com.csutil {
                 return prefabInstance;
             }
 #endif
-            var go = GameObject.Instantiate(prefab) as GameObject;
+            var go = GameObject.Instantiate(prefab);
             go.name = pathInResourcesFolder;
             EventBus.instance.Publish(EventConsts.catTemplate, go);
             return go;
@@ -98,7 +98,7 @@ namespace com.csutil {
         }
 
         // See http://answers.unity.com/answers/1190932/view.html
-        private static bool IsPartOfEditorOnlyPrefab(this GameObject go) {
+        public static bool IsPartOfEditorOnlyPrefab(this GameObject go) {
             return go.scene.rootCount == 0 || go.scene.name == null;
         }
 
