@@ -106,9 +106,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _colorName: primary
-  applyColorToTarget:
-    m_PersistentCalls:
-      m_Calls: []
+  target: {fileID: 3298129404919094284}
 --- !u!1 &572564935047093095
 GameObject:
   m_ObjectHideFlags: 0
@@ -202,9 +200,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _colorName: primaryContrast
-  applyColorToTarget:
-    m_PersistentCalls:
-      m_Calls: []
+  target: {fileID: 7647217667749541265}
 --- !u!1 &906434048739065637
 GameObject:
   m_ObjectHideFlags: 0
@@ -543,9 +539,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _colorName: primary
-  applyColorToTarget:
-    m_PersistentCalls:
-      m_Calls: []
+  target: {fileID: 4382708453576577664}
 --- !u!1 &3908457553005560185
 GameObject:
   m_ObjectHideFlags: 0
@@ -639,9 +633,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _colorName: primaryContrast
-  applyColorToTarget:
-    m_PersistentCalls:
-      m_Calls: []
+  target: {fileID: 788492424617568248}
 --- !u!1 &3923436639318500506
 GameObject:
   m_ObjectHideFlags: 0
@@ -793,9 +785,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _colorName: background
-  applyColorToTarget:
-    m_PersistentCalls:
-      m_Calls: []
+  target: {fileID: 2552005393243978913}
 --- !u!1 &5595293855598257938
 GameObject:
   m_ObjectHideFlags: 0
@@ -1001,9 +991,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _colorName: primaryContrast
-  applyColorToTarget:
-    m_PersistentCalls:
-      m_Calls: []
+  target: {fileID: 2859936872091084711}
 --- !u!1 &7342427873509209320
 GameObject:
   m_ObjectHideFlags: 0
@@ -1194,6 +1182,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   id: TransparentBackground
+  syncWithGOName: 1
 --- !u!114 &4859832884489097509
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1207,6 +1196,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   switchDirection: 3
+  nextScreenPrefab: {fileID: 0}
   nextScreenPrefabName: 
   forceAddingAction: 0
   destroyViewStackWhenLastScreenReached: 1

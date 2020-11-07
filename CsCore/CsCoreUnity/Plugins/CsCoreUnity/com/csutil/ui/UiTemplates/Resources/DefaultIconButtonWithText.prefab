@@ -59,7 +59,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.3297794, g: 0.34411758, b: 0.39, a: 1}
+  m_Color: {r: 0.32941177, g: 0.34509805, b: 0.3882353, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -93,9 +93,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _colorName: element
-  applyColorToTarget:
-    m_PersistentCalls:
-      m_Calls: []
+  target: {fileID: 6883284843923421587}
 --- !u!1001 &5658947198563102898
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -121,17 +119,17 @@ PrefabInstance:
     - target: {fileID: 1826576467927810384, guid: 1c599e31dd8ea2d40acdfa6166c8de0d,
         type: 3}
       propertyPath: m_Color.r
-      value: 0.3297794
+      value: 0.32941177
       objectReference: {fileID: 0}
     - target: {fileID: 1826576467927810384, guid: 1c599e31dd8ea2d40acdfa6166c8de0d,
         type: 3}
       propertyPath: m_Color.g
-      value: 0.34411758
+      value: 0.34509805
       objectReference: {fileID: 0}
     - target: {fileID: 1826576467927810384, guid: 1c599e31dd8ea2d40acdfa6166c8de0d,
         type: 3}
       propertyPath: m_Color.b
-      value: 0.39
+      value: 0.3882353
       objectReference: {fileID: 0}
     - target: {fileID: 3671181214303023935, guid: 1c599e31dd8ea2d40acdfa6166c8de0d,
         type: 3}
@@ -257,6 +255,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_MinHeight
       value: 48
+      objectReference: {fileID: 0}
+    - target: {fileID: 6813319196563033022, guid: 1c599e31dd8ea2d40acdfa6166c8de0d,
+        type: 3}
+      propertyPath: id
+      value: DefaultIconButtonWithText
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1c599e31dd8ea2d40acdfa6166c8de0d, type: 3}

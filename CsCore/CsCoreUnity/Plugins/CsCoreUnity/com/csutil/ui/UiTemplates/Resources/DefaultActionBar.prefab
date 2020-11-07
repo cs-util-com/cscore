@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   switchDirection: 2
+  nextScreenPrefab: {fileID: 0}
   nextScreenPrefabName: SideBar
   forceAddingAction: 0
   destroyViewStackWhenLastScreenReached: 0
@@ -183,6 +184,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   switchDirection: 0
+  nextScreenPrefab: {fileID: 0}
   nextScreenPrefabName: 
   forceAddingAction: 0
   destroyViewStackWhenLastScreenReached: 0
