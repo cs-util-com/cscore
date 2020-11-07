@@ -12,9 +12,10 @@ namespace com.csutil.model.immutable {
             return AddStateChangeListener(s, getSubState, (subState) => { onChanged(subState); });
         }
 
-        public static Action AddStateChangeListener<T, S>(this IDataStore<T> self, Func<T, S> getSubState, Action<S> onChanged) {
+        public static Action AddStateChangeListener<T, S>(this IDataStore<T> self, Func<T, S> getSubState, Action<S> onChanged, bool triggerInstantToInit = false) {
             Action newListener = NewSubstateChangeListener(() => getSubState(self.GetState()), onChanged);
             self.onStateChanged += newListener;
+            if (triggerInstantToInit) { onChanged(getSubState(self.GetState())); }
             return newListener;
         }
 
@@ -132,7 +133,7 @@ namespace com.csutil.model.immutable {
             innerListeners.InvokeIfNotNull();
         }
 
-        public Action AddStateChangeListener<SSS>(Func<SubState, SSS> getSubSubState, Action<SSS> onChanged) {
+        public Action AddStateChangeListener<T>(Func<SubState, T> getSubSubState, Action<T> onChanged) {
             Action newListener = ImmutableExtensions.NewSubstateChangeListener(() => getSubSubState(latestSubState), onChanged);
             innerListeners += newListener;
             return newListener;
