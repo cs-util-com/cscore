@@ -35,6 +35,11 @@ namespace ReuseScroller {
             }
         }
 
+        public void SetListData(List<T> listData, bool isReset = true) {
+            cellData = listData;
+            ReloadData(isReset);
+        }
+
         protected override void Awake() {
             base.Awake();
             rectTransform = GetComponent<RectTransform>();
