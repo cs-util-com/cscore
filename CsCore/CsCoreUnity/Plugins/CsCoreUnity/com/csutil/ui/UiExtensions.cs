@@ -75,7 +75,7 @@ namespace com.csutil {
                 return true;
             }
             catch (Exception e) {
-                Log.e(e + "\n by Button: \n\n" + originTrace);
+                Log.e(e);
                 if (task.IsCanceled) { tcs.TrySetCanceled(); }
                 if (task.IsFaulted) { tcs.TrySetException(task.Exception); }
             }
@@ -250,15 +250,14 @@ namespace com.csutil {
             self.textLocalized(text);
         }
 
-        public static void SubscribeToStateChanges<T, V>(this Behaviour self, IDataStore<T> store, Func<T, V> getSubState, Action<V> updateUi, bool triggerOnSubscribe = true) {
+        public static void SubscribeToStateChanges<T, V>(this UnityEngine.Object self, IDataStore<T> store, Func<T, V> getSubState, Action<V> updateUi, bool triggerOnSubscribe = true) {
             updateUi(getSubState(store.GetState()));
             Action listener = null;
             listener = store.AddStateChangeListener(getSubState, newVal => {
-                if (self.IsDestroyed()) {
-                    store.onStateChanged -= listener;
-                } else if (self.isActiveAndEnabled) {
-                    updateUi(newVal);
-                }
+                if (self.IsDestroyed()) { store.onStateChanged -= listener; return; }
+                if (self is Behaviour b && !b.isActiveAndEnabled) { return; }
+                if (self is GameObject go && !go.activeInHierarchy) { return; }
+                updateUi(newVal);
             }, triggerOnSubscribe);
         }
 
