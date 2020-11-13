@@ -63,7 +63,7 @@ namespace com.csutil.model.immutable {
         private static void AssertActionDidNotChangeDuringDispatch(object actionBeforeDispatch, object actionAfter) {
             JToken diff = MergeJson.GetDiff(actionBeforeDispatch, actionAfter);
             if (!diff.IsNullOrEmpty()) {
-                throw Log.e("The action was changed by dispatching it, check reducers: " + diff.ToPrettyString());
+                Log.e("The action was changed by dispatching it, check reducers: " + diff.ToPrettyString());
             }
         }
 
