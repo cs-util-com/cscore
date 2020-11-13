@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
-using UnityEngine.Assertions;
+﻿using UnityEngine;
 using UnityEngine.EventSystems;
 
 namespace com.csutil {
@@ -72,6 +66,16 @@ namespace com.csutil {
             self.SetPadding(0);
         }
 
+        /// <summary> The input system has its coordinate system in the bottom left of the screen, so 
+        /// any element placed or moved based on the input system values should also use the 
+        /// bottom left as the 0,0 position to simplify any math used afterwards </summary>
+        public static bool SetAnchorsBottomLeft(this RectTransform self) {
+            if (self.anchorMin == Vector2.zero && self.anchorMax == Vector2.zero) { return false; }
+            self.anchorMin = Vector2.zero;
+            self.anchorMax = Vector2.zero;
+            return true;
+        }
+
         public static float GetVerticalPercentOnScreen(this RectTransform self, Camera cachedCam, Vector3[] cachedCorners) {
             if (cachedCorners == null) { cachedCorners = new Vector3[4]; }
             var prtBounds = self.GetWorldBounds(cachedCorners);
@@ -90,7 +94,7 @@ namespace com.csutil {
             res = Vector2.zero;
             return false;
         }
-
+     
     }
 
 }
