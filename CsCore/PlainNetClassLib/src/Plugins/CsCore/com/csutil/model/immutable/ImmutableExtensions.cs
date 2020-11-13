@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -99,6 +98,30 @@ namespace com.csutil.model.immutable {
 
         public static ForkedStore<T> NewFork<T>(this DataStore<T> s) {
             return new ForkedStore<T>(s, s.reducer);
+        }
+
+        /// <summary> Creates a selector to access parts of the state and stay updated automatically </summary>
+        public static Func<V> SelectElement<T, V>(this IDataStore<T> self, Func<T, V> getElement) {
+            V latestState = getElement(self.GetState());
+            self.AddStateChangeListener(getElement, (newState) => { latestState = newState; });
+            return () => { return latestState; };
+        }
+
+        /// <summary> Creates a selector that efficiently gets a list entry and stays updated automatically </summary>
+        public static Func<V> SelectListEntry<T, V>(this IDataStore<T> self, Func<T, ImmutableList<V>> getList, Predicate<V> match) {
+            ImmutableList<V> latestList = getList(self.GetState());
+            V found = latestList.Find(match);
+            int latestPos = latestList.IndexOf(found);
+            self.AddStateChangeListener(getList, (changedList) => { latestList = changedList; });
+            return () => {
+                if (latestList.Count > latestPos) { // First check at the latest known position:
+                    V eleAtLastPos = latestList[latestPos];
+                    if (match(eleAtLastPos)) { return eleAtLastPos; }
+                }
+                found = latestList.Find(match);
+                latestPos = latestList.IndexOf(found);
+                return found;
+            };
         }
 
     }
