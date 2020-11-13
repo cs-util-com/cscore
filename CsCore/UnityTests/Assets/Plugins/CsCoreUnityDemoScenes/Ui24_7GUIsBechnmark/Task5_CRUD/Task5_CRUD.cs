@@ -14,7 +14,8 @@ namespace com.csutil.tests {
         public static async Task ShowIn(ViewStack viewStack) {
             MyModel model = new MyModel(null, ImmutableList<MyUser>.Empty);
             Middleware<MyModel> exampleMiddleware = Middlewares.NewLoggingMiddleware<MyModel>();
-            DataStore<MyModel> store = new DataStore<MyModel>(MyReducer, model, exampleMiddleware);
+            UndoRedoReducer<MyModel> undoLogic = new UndoRedoReducer<MyModel>();
+            DataStore<MyModel> store = new DataStore<MyModel>(undoLogic.Wrap(MyReducer), model, exampleMiddleware);
 
             MyPresenter presenter = new MyPresenter();
             presenter.targetView = viewStack.ShowView("7GUIs_Task5_CRUD");
@@ -64,10 +65,15 @@ namespace com.csutil.tests {
                         newUserValues = new MyUser(lastnameInput.text, surnameInput.text)
                     });
                 });
-                var deleteWasClicked = deleteButton.SetOnClickAction(delegate {
+                deleteButton.SetOnClickAction(delegate {
                     store.Dispatch(new DeleteAction() { userToDelete = store.GetState().currentlySelectedUser });
                 });
-                return deleteWasClicked;
+
+                // Add undo of model changes:
+                var undoUsedOnce = map.Get<Button>("Undo").SetOnClickAction(delegate {
+                    store.Dispatch(new UndoAction<MyModel>());
+                });
+                return undoUsedOnce;
             }
 
             /// <summary> Takes the list of users, filters it and shows the result in the UI </summary>

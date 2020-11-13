@@ -305,6 +305,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   id: Caption
+  syncWithGOName: 1
 --- !u!114 &2242789848697885007
 MonoBehaviour:
   m_ObjectHideFlags: 0

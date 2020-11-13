@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 
 namespace com.csutil.model.immutable {
@@ -12,7 +11,7 @@ namespace com.csutil.model.immutable {
         private Stack<T> past = new Stack<T>();
         private Stack<T> future = new Stack<T>();
 
-        public StateReducer<T> wrap(StateReducer<T> wrappedReducer) {
+        public StateReducer<T> Wrap(StateReducer<T> wrappedReducer) {
             return (T present, object action) => {
                 if (action is UndoAction<T>) { return RestoreFrom(past, present, future); }
                 if (action is RedoAction<T>) { return RestoreFrom(future, present, past); }
