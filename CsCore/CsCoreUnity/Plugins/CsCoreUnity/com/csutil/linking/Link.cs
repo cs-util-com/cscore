@@ -9,7 +9,7 @@ namespace com.csutil {
 
         private void OnValidate() {
             if (id.IsNullOrEmpty() && !name.ToLowerInvariant().Contains("gameobject")) { id = name; }
-            if (syncWithGOName && name != id) { name = id; }
+            if (!id.IsNullOrEmpty() && syncWithGOName && name != id) { name = id; }
         }
 
         internal void SetId(string id) {
