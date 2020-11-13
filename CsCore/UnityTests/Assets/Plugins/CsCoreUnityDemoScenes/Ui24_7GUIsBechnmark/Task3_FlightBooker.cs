@@ -76,12 +76,6 @@ namespace com.csutil.tests {
 
         }
 
-        private static Color GetColor(this Theme self, ThemeColor.ColorNames n) {
-            var found = self.TryGetColor("" + n, out Color color);
-            if (!found) { throw new MissingMemberException("Color {n} not found in theme"); }
-            return color;
-        }
-
         private static void SetNormalColor(this InputField self, Color color) {
             var colors = self.colors;
             colors.normalColor = color;
