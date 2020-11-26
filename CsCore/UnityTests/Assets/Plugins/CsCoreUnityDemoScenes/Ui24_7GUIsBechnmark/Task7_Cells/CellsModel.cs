@@ -66,11 +66,12 @@ namespace com.csutil.tests.Task7 {
             this.isSelected = isSelected;
         }
 
-        public static double Calculate(string formula, ImmutableDictionary<CellPos, Cell> allCells) {
+        public static double Calculate(string formula, ImmutableDictionary<CellPos, Cell> allCells, int depth = 0) {
+            if (depth > 100) { throw new MyActions.SetCell.SelfRefException("Resolution loop in " + formula); }
             IEnumerable<Match> matches = GetVariables(formula);
             foreach (Match m in matches) {
                 var cell = allCells[ToCellPos(m.Value)];
-                double valToInsert = Calculate(cell.formula, allCells);
+                double valToInsert = Calculate(cell.formula, allCells, depth + 1);
                 formula = formula.Replace(m.Value, "" + valToInsert);
             }
             return Numbers.Calculate(formula);
@@ -109,6 +110,11 @@ namespace com.csutil.tests.Task7 {
                 this.pos = new CellPos(columnId, rowNr);
                 this.newFormula = value;
             }
+
+            public class SelfRefException : Exception {
+                public SelfRefException(string message) : base(message) { }
+            }
+
         }
 
         public class SelectCell {

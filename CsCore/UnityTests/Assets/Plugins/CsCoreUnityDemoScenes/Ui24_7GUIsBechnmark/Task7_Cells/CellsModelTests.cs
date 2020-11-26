@@ -1,4 +1,5 @@
 ﻿using com.csutil.model.immutable;
+using System;
 using System.Collections.Immutable;
 using System.Data;
 using Xunit;
@@ -47,6 +48,11 @@ namespace com.csutil.tests.Task7 {
             Assert.True(cells()[new CellPos("D", 1)].isSelected);
             Assert.False(cells()[new CellPos("C", 1)].isSelected);
 
+            store.Dispatch(new MyActions.SetCell("A", 3, "1"));
+            store.Dispatch(new MyActions.SetCell("A", 2, "A3 + 1"));
+            Assert.Throws<MyActions.SetCell.SelfRefException>(() => {
+                store.Dispatch(new MyActions.SetCell("A", 3, "A2 + 1"));
+            });
         }
 
         [Fact]
