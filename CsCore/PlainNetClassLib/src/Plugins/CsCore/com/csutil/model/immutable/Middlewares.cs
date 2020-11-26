@@ -44,12 +44,17 @@ namespace com.csutil.model.immutable {
                 if (action is IsValid v && !v.IsValid()) {
                     Log.e("Invalid action: " + asJson(action.GetType().Name, action));
                 }
-                // If the action is a delegate it will be handled by thunk and cant be copied:
-                var actionBeforeDispatch = action is Delegate ? null : action.DeepCopyViaTypedJson();
+
+                bool copyOfActionSupported = false;
+                object actionBeforeDispatch = null;
+                MakeDebugCopyOfAction(action, ref copyOfActionSupported, ref actionBeforeDispatch);
+
                 T previousState = store.GetState();
                 var returnedAction = innerDispatcher(action);
                 T newState = store.GetState();
-                if (actionBeforeDispatch != null) { AssertActionDidNotChangeDuringDispatch(actionBeforeDispatch, action); }
+
+                if (copyOfActionSupported) { AssertActionDidNotChangeDuringDispatch(actionBeforeDispatch, action); }
+
                 if (Object.Equals(previousState, newState)) {
                     Log.w("The action  " + action + " was not handled by any of the reducers! Store=" + store);
                 } else {
@@ -60,11 +65,34 @@ namespace com.csutil.model.immutable {
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_FULL_LOGGING")]
-        private static void AssertActionDidNotChangeDuringDispatch(object actionBeforeDispatch, object actionAfter) {
-            JToken diff = MergeJson.GetDiff(actionBeforeDispatch, actionAfter);
-            if (!diff.IsNullOrEmpty()) {
-                Log.e("The action was changed by dispatching it, check reducers: " + diff.ToPrettyString());
+        private static void MakeDebugCopyOfAction(object action, ref bool copyOfActionSupported, ref object actionBeforeDispatch) {
+            try {
+                // If the action is a delegate it will be handled by thunk and cant be copied:
+                actionBeforeDispatch = action is Delegate ? null : action.DeepCopyViaTypedJson();
+                if (actionBeforeDispatch != null) {
+                    copyOfActionSupported = !HasDiff(actionBeforeDispatch, action, out _);
+                    if (!copyOfActionSupported) { Log.w("Deep copy not supported for action: " + action); }
+                }
             }
+            catch (Exception e) {
+                //Log.w($"MakeDebugCopyOfAction using DeepCopyViaTypedJson failed for action {action.GetType()}", e);
+            }
+        }
+
+        [Conditional("DEBUG"), Conditional("ENFORCE_FULL_LOGGING")]
+        private static void AssertActionDidNotChangeDuringDispatch(object actionBeforeDispatch, object actionAfter) {
+            if (HasDiff(actionBeforeDispatch, actionAfter, out JToken diff)) {
+                Log.e($"The action {actionAfter.GetType()} was changed by dispatching it, check reducers: "
+                    + "\n Diff: " + diff.ToPrettyString()
+                    + "\n\n Action before dispatch: " + JsonWriter.AsPrettyString(actionBeforeDispatch)
+                    + "\n\n Action after dispatch: " + JsonWriter.AsPrettyString(actionAfter)
+                    );
+            }
+        }
+
+        private static bool HasDiff(object actionBeforeDispatch, object actionAfter, out JToken diff) {
+            diff = MergeJson.GetDiff(actionBeforeDispatch, actionAfter);
+            return !diff.IsNullOrEmpty();
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_FULL_LOGGING")]

@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using com.csutil.math;
 using Xunit;
 
@@ -29,5 +28,14 @@ namespace com.csutil.tests {
             return newAverage;
         }
 
+        [Fact]
+        public void TestMathEvaluator() {
+            Assert.Equal(9, Numbers.Calculate("1 + 2 * 4"));
+            Assert.Equal(1, Numbers.Calculate("(1 + 2 * 4) % 2"));
+            Assert.Equal(4.5, Numbers.Calculate("(1 + 2 * 4) / 2"));
+            Assert.Equal(1, Numbers.Calculate("0.5 + 0,5"));
+        }
+
     }
+
 }

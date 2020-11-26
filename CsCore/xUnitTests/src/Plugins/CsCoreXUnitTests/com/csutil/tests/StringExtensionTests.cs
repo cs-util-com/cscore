@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Text.RegularExpressions;
 using com.csutil.model;
 using DiffMatchPatch;
 using Xunit;
@@ -123,6 +124,29 @@ namespace com.csutil.tests {
             Assert.True("abbA1".IsRegexMatch(or1)); // and1
             Assert.False("abb1".IsRegexMatch(or1));
 
+        }
+
+        [Fact]
+        public void TestRegexMatchAndExtractSyntax() {
+            { // See https://regex101.com/r/uS6cH4/18
+                var regex = "([A-Za-z]+[0-9]+)";
+                var matches = Regex.Matches("66 + Aa7 * BB43 / 2", regex);
+                Assert.Equal(2, matches.Count);
+                Assert.Equal("Aa7", matches[0].Value);
+                Assert.Equal("BB43", matches[1].Value);
+            }
+            { // See https://regex101.com/r/uS6cH4/19
+                var regex = "([A-Za-z]+)([0-9]+)";
+                var input = "Aaa678"; // Would also work with eg "123 Aaa678 !!"
+                var match = Regex.Match(input, regex);
+                Assert.Equal(3, match.Groups.Count);
+                Group fullMatch = match.Groups[0];
+                Group group1 = match.Groups[1];
+                Group group2 = match.Groups[2];
+                Assert.Equal("Aaa678", fullMatch.Value);
+                Assert.Equal("Aaa", group1.Value);
+                Assert.Equal("678", group2.Value);
+            }
         }
 
         [Fact]

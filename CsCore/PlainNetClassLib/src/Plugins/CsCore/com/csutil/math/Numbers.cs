@@ -19,6 +19,15 @@ namespace com.csutil {
                 || t == typeof(uint) || t == typeof(long) || t == typeof(ulong);
         }
 
+        /// <summary>
+        /// See https://docs.microsoft.com/en-us/dotnet/api/system.data.datatable
+        /// and https://docs.microsoft.com/en-us/dotnet/api/system.data.datacolumn.expression
+        /// </summary>
+        /// <param name="formula"> eg "(1 + 2 * 4) / 2" </param>
+        public static double Calculate(string formula) {
+            return Convert.ToDouble(new System.Data.DataTable().Compute(formula, null));
+        }
+
     }
 
 }
