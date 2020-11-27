@@ -12,9 +12,7 @@ namespace com.csutil.tests.Task7 {
     internal static class Task7_Cells {
 
         public static async Task ShowIn(ViewStack viewStack) {
-            // Call some unit tests manually before the UI is shown:
-            // TODO use xunit runner instead to automatically call these tests here?
-            CellsModelTests.TestDataTable();
+            // Call model unit tests manually before the UI is shown:
             CellsModelTests.TestFromAndToRowName();
             CellsModelTests.TestDataStoreTransitiveChanges();
 
@@ -27,9 +25,10 @@ namespace com.csutil.tests.Task7 {
             presenter.targetView = viewStack.ShowView("7GUIs_Task7_Cells");
             await presenter.LoadModelIntoView(store);
 
+            await TaskV2.Delay(2000);
+            Toast.Show("Now simulating some table model changes..");
             // Simulate changes in the model to check if the UI updates correctly:
             CellsModelTests.SimulateSomeChangesInModel(store);
-            await CellsModelTests.SimulateManyChangesInModel(store);
         }
 
         private class MyPresenter : Presenter<DataStore<CellsModel>> {

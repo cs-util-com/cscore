@@ -2,7 +2,6 @@
 using com.csutil.progress;
 using System;
 using System.Collections.Immutable;
-using System.Data;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -68,28 +67,6 @@ namespace com.csutil.tests.Task7 {
             Assert.Equal("AZ", CellPos.ToColumnName(CellPos.ToColumnNr("AZ")));
         }
 
-        /// <summary> Data table would be an alternative to implement the complete Task 7, to 
-        /// test & demonstrate the usability of Redux the DataTable class was only used for the 
-        /// final formula calculations like 1+1 </summary>
-        [Fact]
-        public static void TestDataTable() {
-            Assert.Equal(9, Numbers.Calculate("1 + 2 * 4"));
-
-            var dt = new DataTable();
-            dt.Columns.Add("A", typeof(int));
-            dt.Columns.Add("B", typeof(int));
-            dt.Rows.Add(11, 12); // Insert a row with A=4, B=1
-            // Querying the table for specific entries:
-            var boolResult = dt.Select("A>B-2").Length > 0;
-            Assert.True(boolResult); // 11 > 12-2
-            // Add a result column that calculates a formula based on the entries:
-            var columnName = "Result Column";
-            dt.Columns.Add(columnName, typeof(int), "A+B*2");
-            var rowNr = 0;
-            var valResult = dt.Rows[rowNr][columnName];
-            Assert.Equal(35, valResult); // 11 + 12*2  = 35
-        }
-
         public static void SimulateSomeChangesInModel(DataStore<CellsModel> store) {
             store.Dispatch(new MyActions.SetCell("C", 3, "1 + 1"));
             store.Dispatch(new MyActions.SetCell("D", 4, "1 + C3"));
@@ -102,8 +79,7 @@ namespace com.csutil.tests.Task7 {
         }
 
         public static async Task SimulateManyChangesInModel(DataStore<CellsModel> store, int nrOfChanges = 100) {
-            var t = Log.MethodEnteredWith("nrOfChanges" + nrOfChanges);
-            Log.e("SimulateManyChangesInModel");
+            var t = Log.MethodEnteredWith("nrOfChanges=" + nrOfChanges);
             var random = new Random();
             var ops = new string[] { "+", "-", "*", "/" };
             var progress = ProgressUi.NewProgress(nrOfChanges);
