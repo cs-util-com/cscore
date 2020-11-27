@@ -12,7 +12,7 @@ namespace com.csutil {
         private long memoryAtStop;
         public string methodName;
 
-        public StopwatchV2([CallerMemberName]string methodName = null) {
+        public StopwatchV2([CallerMemberName] string methodName = null) {
             this.methodName = methodName;
         }
 
@@ -31,12 +31,10 @@ namespace com.csutil {
             GC.WaitForPendingFinalizers();
             GC.Collect();
             managedMemoryAtStart = GC.GetTotalMemory(true);
-            if (!EnvironmentV2.isWebGL) {
-                using (var p = Process.GetCurrentProcess()) { memoryAtStart = p.PrivateMemorySize64; }
-            }
+            memoryAtStart = GetCurrentProcessPrivateMemorySize64();
         }
 
-        public static StopwatchV2 StartNewV2([CallerMemberName]string methodName = null) {
+        public static StopwatchV2 StartNewV2([CallerMemberName] string methodName = null) {
             return new StopwatchV2(methodName).StartV2();
         }
 
@@ -48,7 +46,12 @@ namespace com.csutil {
         [Conditional("DEBUG"), Conditional("ENFORCE_FULL_LOGGING")]
         private void CaptureMemoryAtStop() {
             managedMemoryAtStop = GC.GetTotalMemory(true);
-            using (var p = Process.GetCurrentProcess()) { memoryAtStop = p.PrivateMemorySize64; }
+            memoryAtStop = GetCurrentProcessPrivateMemorySize64();
+        }
+
+        private long GetCurrentProcessPrivateMemorySize64() {
+            if (EnvironmentV2.isWebGL) { return 0; }
+            using (var p = Process.GetCurrentProcess()) { return p.PrivateMemorySize64; }
         }
 
         public string GetAllocatedMemBetweenStartAndStop() {
