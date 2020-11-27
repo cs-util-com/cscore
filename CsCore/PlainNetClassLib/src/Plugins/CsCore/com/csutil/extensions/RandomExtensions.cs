@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace com.csutil {
 
@@ -29,6 +30,19 @@ namespace com.csutil {
         public static bool NextBool(this Random random) {
             // Source: https://stackoverflow.com/a/19191165/165106
             return random.NextDouble() > 0.5;
+        }
+
+        /// <summary> Will efficiently return a random entry of a source enumerable with a 
+        /// uniform probability, see also https://stackoverflow.com/a/648240/165106 </summary>
+        public static T NextRndChild<T>(this Random self, IEnumerable<T> source) {
+            T current = default(T);
+            int count = 0;
+            foreach (T element in source) {
+                count++;
+                if (self.Next(count) == 0) { current = element; }
+            }
+            if (count == 0) { throw new InvalidOperationException("Sequence was empty"); }
+            return current;
         }
 
     }
