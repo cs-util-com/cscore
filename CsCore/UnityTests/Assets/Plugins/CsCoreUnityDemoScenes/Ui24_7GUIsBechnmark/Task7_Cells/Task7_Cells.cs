@@ -28,18 +28,8 @@ namespace com.csutil.tests.Task7 {
             await presenter.LoadModelIntoView(store);
 
             // Simulate changes in the model to check if the UI updates correctly:
-            SimulateSomeChangesInModel(store);
-        }
-
-        private static void SimulateSomeChangesInModel(DataStore<CellsModel> store) {
-            store.Dispatch(new MyActions.SetCell("C", 3, "1 + 1"));
-            store.Dispatch(new MyActions.SetCell("D", 4, "1 + C3"));
-            store.Dispatch(new MyActions.SetCell("E", 5, "1 + D4"));
-            store.Dispatch(new MyActions.SetCell("F", 6, "1 + E5"));
-            store.Dispatch(new MyActions.SetCell("G", 8, "1 + F6"));
-            store.Dispatch(new MyActions.SetCell("H", 9, "1 + G8"));
-            // Then change the C3 chell which all other cells depend on:
-            store.Dispatch(new MyActions.SetCell("C", 3, "2"));
+            CellsModelTests.SimulateSomeChangesInModel(store);
+            await CellsModelTests.SimulateManyChangesInModel(store);
         }
 
         private class MyPresenter : Presenter<DataStore<CellsModel>> {
@@ -55,6 +45,9 @@ namespace com.csutil.tests.Task7 {
                 });
                 map.Get<Button>("Redo").SetOnClickAction(delegate {
                     store.Dispatch(new RedoAction<CellsModel>());
+                });
+                map.Get<Button>("AddManyEntries").SetOnClickAction(async delegate {
+                    await CellsModelTests.SimulateManyChangesInModel(store);
                 });
                 uiRows = map.Get<GameObject>("Rows");
                 store.AddStateChangeListener(m => m.cells, Cells => {

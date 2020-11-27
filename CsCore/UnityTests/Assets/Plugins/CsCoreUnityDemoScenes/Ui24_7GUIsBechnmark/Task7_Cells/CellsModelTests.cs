@@ -1,6 +1,9 @@
 ﻿using com.csutil.model.immutable;
+using com.csutil.progress;
+using System;
 using System.Collections.Immutable;
 using System.Data;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace com.csutil.tests.Task7 {
@@ -85,6 +88,44 @@ namespace com.csutil.tests.Task7 {
             var rowNr = 0;
             var valResult = dt.Rows[rowNr][columnName];
             Assert.Equal(35, valResult); // 11 + 12*2  = 35
+        }
+
+        public static void SimulateSomeChangesInModel(DataStore<CellsModel> store) {
+            store.Dispatch(new MyActions.SetCell("C", 3, "1 + 1"));
+            store.Dispatch(new MyActions.SetCell("D", 4, "1 + C3"));
+            store.Dispatch(new MyActions.SetCell("E", 5, "1 + D4"));
+            store.Dispatch(new MyActions.SetCell("F", 6, "1 + E5"));
+            store.Dispatch(new MyActions.SetCell("G", 8, "1 + F6"));
+            store.Dispatch(new MyActions.SetCell("H", 9, "1 + G8"));
+            // Then change the C3 chell which all other cells depend on:
+            store.Dispatch(new MyActions.SetCell("C", 3, "2"));
+        }
+
+        public static async Task SimulateManyChangesInModel(DataStore<CellsModel> store, int nrOfChanges = 100) {
+            var t = Log.MethodEnteredWith("nrOfChanges" + nrOfChanges);
+            Log.e("SimulateManyChangesInModel");
+            var random = new Random();
+            var ops = new string[] { "+", "-", "*", "/" };
+            var progress = ProgressUi.NewProgress(nrOfChanges);
+            for (int i = 0; i < nrOfChanges; i++) {
+                progress.IncrementCount();
+                try {
+                    int column = random.Next(1, 26 * 2);
+                    int row = random.Next(1, 26 * 2);
+                    string rndFormula = RndVar(random, store) + random.NextRndChild(ops) + RndVar(random, store);
+                    store.Dispatch(new MyActions.SetCell(CellPos.ToColumnName(column), row, rndFormula));
+                }
+                catch (Exception e) { Log.e(e); }
+                if (i % 5 == 0) { await TaskV2.Delay(1); } // Every 5 mutations wait to let the UI catch UI
+            }
+            Log.MethodDone(t);
+        }
+
+        /// <summary> Returns randomly a number or another cell reference </summary>
+        private static string RndVar(System.Random random, DataStore<CellsModel> store) {
+            if (random.NextBool()) { return "" + random.Next(-10, 10); }
+            // With 50% prob. return a random other cell reference, currently in use:
+            return "" + random.NextRndChild(store.GetState().cells).Key;
         }
 
     }

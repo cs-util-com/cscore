@@ -23,7 +23,7 @@ namespace com.csutil.tests.Task7 {
             this.columnNr = ToColumnNr(columnId);
         }
 
-        public override string ToString() { return $"[{columnId}{rowNr}]"; }
+        public override string ToString() { return $"{columnId}{rowNr}"; }
 
         public static int ToColumnNr(IEnumerable<char> columnId) {
             var offset = 0;
