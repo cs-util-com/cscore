@@ -25,8 +25,12 @@
   </div>
   <div id="unity-fullscreen-button" style="display: none;"></div>
   <script>
+    // The HIDE_FULL_SCREEN_BUTTON placeholder is an example for a variable that can be set in the 
+    // Unity editor before building the WebGL application, see also the m_TemplateCustomTags in the 
+    // Unity ProjectSettings file:
     const hideFullScreenButton = "{{{ HIDE_FULL_SCREEN_BUTTON }}}";
     const buildUrl = "Build";
+    // For builtin Unity placeholder like LOADER_FILENAME, see https://docs.unity3d.com/2020.1/Documentation/Manual/webgl-templates.html
     const loaderUrl = buildUrl + "/{{{ LOADER_FILENAME }}}";
     const config = {
       dataUrl: buildUrl + "/{{{ DATA_FILENAME }}}",
@@ -71,6 +75,8 @@
       container.className = "unity-mobile";
       config.devicePixelRatio = 1;
     }
+// BACKGROUND_FILENAME info from https://docs.unity3d.com/2020.1/Documentation/Manual/webgl-templates.html :
+// This is set to the filename of the background image when the background image is selected in the Player Settings > Splash Image, otherwise it is set to an empty string
 #if BACKGROUND_FILENAME
     canvas.style.background = "url('" + buildUrl + "/{{{ BACKGROUND_FILENAME.replace(/'/g, '%27') }}}') center / cover";
 #endif
