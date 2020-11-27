@@ -8,6 +8,27 @@ namespace com.csutil.progress {
 
     public abstract class ProgressUi : MonoBehaviour {
 
+        public static IProgress NewProgress(double totalCount) {
+            return NewProgress(totalCount, "" + Guid.NewGuid());
+        }
+
+        public static IProgress NewProgress(double totalCount, string id) {
+            var progressUi = IoC.inject.Get<ProgressUi>(id, false);
+            if (progressUi == null) {
+                progressUi = NewGlobalProgressUi(new ProgressManager());
+                IoC.inject.SetSingleton(progressUi);
+            }
+            return progressUi.progressManager.GetOrAddProgress(id, totalCount, true);
+        }
+
+        private static ProgressUi NewGlobalProgressUi(ProgressManager pm, string prefab = "Progress/GlobalProgressOverlay1") {
+            ProgressUi progressUi;
+            var go = RootCanvas.GetOrAddRootCanvas().gameObject.AddChild(ResourcesV2.LoadPrefab(prefab));
+            progressUi = go.GetComponentInChildren<ProgressUi>();
+            progressUi.progressManager = pm;
+            return progressUi;
+        }
+
         /// <summary> Optional text that will show the current progress values </summary>
         public Text progressText;
         /// <summary> An optional info text that can be used to show the user details about what is happening </summary>
