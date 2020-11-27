@@ -26,6 +26,20 @@ namespace com.csutil.tests.Task7 {
             MyPresenter presenter = new MyPresenter();
             presenter.targetView = viewStack.ShowView("7GUIs_Task7_Cells");
             await presenter.LoadModelIntoView(store);
+
+            // Simulate changes in the model to check if the UI updates correctly:
+            SimulateSomeChangesInModel(store);
+        }
+
+        private static void SimulateSomeChangesInModel(DataStore<CellsModel> store) {
+            store.Dispatch(new MyActions.SetCell("C", 3, "1 + 1"));
+            store.Dispatch(new MyActions.SetCell("D", 4, "1 + C3"));
+            store.Dispatch(new MyActions.SetCell("E", 5, "1 + D4"));
+            store.Dispatch(new MyActions.SetCell("F", 6, "1 + E5"));
+            store.Dispatch(new MyActions.SetCell("G", 8, "1 + F6"));
+            store.Dispatch(new MyActions.SetCell("H", 9, "1 + G8"));
+            // Then change the C3 chell which all other cells depend on:
+            store.Dispatch(new MyActions.SetCell("C", 3, "2"));
         }
 
         private class MyPresenter : Presenter<DataStore<CellsModel>> {
@@ -36,19 +50,18 @@ namespace com.csutil.tests.Task7 {
             public Task OnLoad(DataStore<CellsModel> store) {
 
                 var map = targetView.GetLinkMap();
+                map.Get<Button>("Undo").SetOnClickAction(delegate {
+                    store.Dispatch(new UndoAction<CellsModel>());
+                });
+                map.Get<Button>("Redo").SetOnClickAction(delegate {
+                    store.Dispatch(new RedoAction<CellsModel>());
+                });
                 uiRows = map.Get<GameObject>("Rows");
                 store.AddStateChangeListener(m => m.cells, Cells => {
                     SyncUiRowCountWithModelRowCount(Cells);
                     SyncUiColumnCountWithModelColumnCount(store, Cells);
                     LinkCellUiToNewAddedCells(Cells);
                 });
-
-                // Simulate changes in the model to check if the UI updates correctly:
-                store.Dispatch(new MyActions.SetCell("C", 3, "1 + 1"));
-                store.Dispatch(new MyActions.SetCell("D", 4, "1 + C3"));
-                store.Dispatch(new MyActions.SetCell("E", 5, "1 + D4"));
-                store.Dispatch(new MyActions.SetCell("C", 3, "2"));
-
                 return Task.FromResult(true);
             }
 
@@ -67,7 +80,7 @@ namespace com.csutil.tests.Task7 {
                 // For each UI row check that they all have the same nr of UI cells:
                 var rowNr = 0;
                 foreach (var row in uiRows.GetChildren()) {
-                    var columnCount = row.GetChildCount();
+                    var columnCount = row.GetChildCount() - 1;
                     while (columnCount < maxColumn) {
                         string columnId = CellPos.ToColumnName(columnCount);
                         if (rowNr == 0) {
@@ -109,7 +122,7 @@ namespace com.csutil.tests.Task7 {
             }
 
             private GameObject GetCellUi(CellPos cellPos) {
-                try { return uiRows.GetChild(cellPos.rowNr).GetChild(cellPos.columnNr); }
+                try { return uiRows.GetChild(cellPos.rowNr).GetChild(cellPos.columnNr + 1); }
                 catch (System.Exception e) { throw Log.e("Could not get cell at " + cellPos, e); }
             }
 

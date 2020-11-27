@@ -7,7 +7,7 @@ using UnityEngine.UI;
 namespace com.csutil.tests.Task7 {
 
     /// <summary> Connects a cell UI with a cell model </summary>
-    internal class CellPresenter : MonoBehaviour, IPointerClickHandler {
+    internal class CellPresenter : MonoBehaviour {
 
         public Text value;
         public InputField formulaInput;
@@ -21,11 +21,13 @@ namespace com.csutil.tests.Task7 {
             formulaInput.SetOnValueChangedActionThrottled(SetFormulaOfCell);
         }
 
-        public void OnPointerClick(PointerEventData eventData) {
+        /// <summary> Will be called by the UI button attached to the same GameObject </summary>
+        public void OnCellClicked() {
             var t = Log.MethodEnteredWith(cellPos);
             // If the cell was not used before, initialize it with 0:
             if (!store.GetState().cells.ContainsKey(cellPos)) { SetFormulaOfCell("0"); }
             store.Dispatch(new MyActions.SelectCell(cellPos));
+            formulaInput.SelectV2();
             Log.MethodDone(t);
         }
 
@@ -37,7 +39,7 @@ namespace com.csutil.tests.Task7 {
                 var cell = store.GetState().cells[cellPos];
                 if (cell.formula != "" + cell.value) { Toast.Show($"{cellPos}: {cell.value}"); }
             }
-            catch (Exception e) { 
+            catch (Exception e) {
                 Toast.Show("Invalid input: " + e.Message); // Or indicate error in cell input UI
             }
             Log.MethodDone(t);
@@ -48,13 +50,13 @@ namespace com.csutil.tests.Task7 {
             if (cellPos.columnId.IsNullOrEmpty()) { throw Log.e("cellPos not set"); }
             if (isSubscribed) { throw Log.e("Already setup", gameObject); }
             isSubscribed = true;
-            this.SubscribeToStateChanges(store, s => s.cells[cellPos], UpdateUi);
+            this.SubscribeToStateChanges(store, s => s.cells.GetValue(cellPos, null), UpdateUi);
         }
 
         private void UpdateUi(Cell newCellValue) {
-            value.text = "" + newCellValue.value;
-            formulaInput.text = newCellValue.formula;
-            inputUi.SetActiveV2(newCellValue.isSelected);
+            value.text = "" + newCellValue?.value;
+            formulaInput.text = newCellValue?.formula;
+            inputUi.SetActiveV2(newCellValue != null && newCellValue.isSelected);
         }
 
     }

@@ -1,5 +1,4 @@
 ﻿using com.csutil.model.immutable;
-using System;
 using System.Collections.Immutable;
 using System.Data;
 using Xunit;
@@ -57,6 +56,7 @@ namespace com.csutil.tests.Task7 {
 
         [Fact]
         public static void TestFromAndToRowName() {
+            Assert.Equal(0, CellPos.ToColumnNr("A"));
             Assert.Equal("A", CellPos.ToColumnName(CellPos.ToColumnNr("A")));
             Assert.Equal("A", CellPos.ToColumnName(CellPos.ToColumnNr("a")));
             Assert.Equal("Z", CellPos.ToColumnName(CellPos.ToColumnNr("Z")));
