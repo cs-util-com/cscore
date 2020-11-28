@@ -1,7 +1,6 @@
 ﻿using com.csutil.model.immutable;
 using System;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace com.csutil.tests.Task7 {
@@ -9,6 +8,7 @@ namespace com.csutil.tests.Task7 {
     /// <summary> Connects a cell UI with a cell model </summary>
     internal class CellPresenter : MonoBehaviour {
 
+#pragma warning disable 0649 // Variable is never assigned to, and will always have its default value
         public Text value;
         public InputField formulaInput;
         public GameObject inputUi;
@@ -16,6 +16,7 @@ namespace com.csutil.tests.Task7 {
         public bool isSubscribed = false;
         public DataStore<CellsModel> store;
         public CellPos cellPos;
+#pragma warning restore 0649 // Variable is never assigned to, and will always have its default value
 
         private void OnEnable() {
             formulaInput.SetOnValueChangedActionThrottled(SetFormulaOfCell);

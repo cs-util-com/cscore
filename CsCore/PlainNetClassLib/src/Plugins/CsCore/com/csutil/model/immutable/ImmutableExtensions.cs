@@ -7,6 +7,10 @@ namespace com.csutil.model.immutable {
 
     public static class ImmutableExtensions {
 
+        public static Action AddStateChangeListenerDebounced<T, S>(this IDataStore<T> self, Func<T, S> getSubState, Action<S> onChanged, double delayInMs, bool triggerInstantToInit = false) {
+            return self.AddStateChangeListener(getSubState, onChanged.AsThrottledDebounce(delayInMs), triggerInstantToInit);
+        }
+
         public static Action AddAsyncStateChangeListener<T, S>(this IDataStore<T> s, Func<T, S> getSubState, Func<S, Task> onChanged) {
             return AddStateChangeListener(s, getSubState, (subState) => { onChanged(subState); });
         }

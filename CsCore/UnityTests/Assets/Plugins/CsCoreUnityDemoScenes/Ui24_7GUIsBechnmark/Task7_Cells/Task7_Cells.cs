@@ -49,11 +49,12 @@ namespace com.csutil.tests.Task7 {
                     await CellsModelTests.SimulateManyChangesInModel(store);
                 });
                 uiRows = map.Get<GameObject>("Rows");
-                store.AddStateChangeListener(m => m.cells, Cells => {
+
+                store.AddStateChangeListenerDebounced(m => m.cells, Cells => {
                     SyncUiRowCountWithModelRowCount(Cells);
                     SyncUiColumnCountWithModelColumnCount(store, Cells);
                     LinkCellUiToNewAddedCells(Cells);
-                });
+                }, delayInMs: 600);
                 return Task.FromResult(true);
             }
 

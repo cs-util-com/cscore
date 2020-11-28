@@ -22,6 +22,12 @@ namespace com.csutil {
             };
         }
 
+        public static Action<S> AsThrottledDebounce<S>(this Action<S> self, double delayInMs) {
+            EventHandler<S> onChangedHandler = (_, value) => self(value);
+            EventHandler<S> debounced = onChangedHandler.AsThrottledDebounce(delayInMs);
+            return (value) => debounced(null, value);
+        }
+
         /// <summary> 
         /// This will create an EventHandler where the first call is executed and the last call is executed but 
         /// every call in between that is below the passed millisecond threshold is ignored

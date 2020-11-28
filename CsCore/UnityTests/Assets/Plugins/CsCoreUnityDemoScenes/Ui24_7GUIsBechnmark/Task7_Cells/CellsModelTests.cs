@@ -9,6 +9,27 @@ namespace com.csutil.tests.Task7 {
     public class CellsModelTests {
 
         [Fact]
+        public static async Task TestLoggingOverhead() {
+            StopwatchV2 t1, t2;
+            {
+                t1 = Log.MethodEntered("SimulateManyChangesInModel without logging");
+                CellsModel model = new CellsModel(ImmutableDictionary<CellPos, Cell>.Empty);
+                var store = new DataStore<CellsModel>(MyReducers.MyReducer, model);
+                await SimulateManyChangesInModel(store);
+                Log.MethodDone(t1);
+            }
+            {
+                t2 = Log.MethodEntered("SimulateManyChangesInModel without logging");
+                CellsModel model = new CellsModel(ImmutableDictionary<CellPos, Cell>.Empty);
+                var store = new DataStore<CellsModel>(MyReducers.MyReducer, model, Middlewares.NewLoggingMiddleware<CellsModel>());
+                 await SimulateManyChangesInModel(store);
+                Log.MethodDone(t2);
+            }
+            // Logging makes mutating the model at least double as slow:
+            Assert.True(t1.ElapsedMilliseconds * 2 < t2.ElapsedMilliseconds, $"t1={t1}, t2={t2}");
+        }
+
+        [Fact]
         public static void TestDataStoreTransitiveChanges() {
 
             CellsModel model = new CellsModel(ImmutableDictionary<CellPos, Cell>.Empty);
@@ -92,8 +113,9 @@ namespace com.csutil.tests.Task7 {
                     store.Dispatch(new MyActions.SetCell(CellPos.ToColumnName(column), row, rndFormula));
                 }
                 catch (Exception e) { Log.e(e); }
-                if (i % 5 == 0) { await TaskV2.Delay(1); } // Every 5 mutations wait to let the UI catch UI
+                if (i % 10 == 0) { await TaskV2.Delay(20); } // Every few mutations wait to let the UI catch UI
             }
+            progress.SetComplete();
             Log.MethodDone(t);
         }
 
