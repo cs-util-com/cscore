@@ -35,7 +35,12 @@ namespace com.csutil.model.immutable {
         public static Middleware<T> NewLoggingMiddleware<T>() {
             return (store) => {
                 Log.MethodEntered("NewLoggingMiddleware", "store =" + store);
-                return (Dispatcher innerDispatcher) => NewLoggingDispatcher(store, innerDispatcher);
+                return (Dispatcher innerDispatcher) => {
+#if !DEBUG
+                    return innerDispatcher;
+#endif
+                    return NewLoggingDispatcher(store, innerDispatcher);
+                };
             };
         }
 
@@ -74,9 +79,7 @@ namespace com.csutil.model.immutable {
                     if (!copyOfActionSupported) { Log.w("Deep copy not supported for action: " + action); }
                 }
             }
-            catch (Exception e) {
-                //Log.w($"MakeDebugCopyOfAction using DeepCopyViaTypedJson failed for action {action.GetType()}", e);
-            }
+            catch (Exception) { }
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_FULL_LOGGING")]
