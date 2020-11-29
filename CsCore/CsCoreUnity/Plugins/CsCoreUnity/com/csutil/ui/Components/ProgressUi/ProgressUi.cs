@@ -47,6 +47,7 @@ namespace com.csutil.progress {
         private CanvasGroupFader canvasGroupFader;
 
         private void OnEnable() {
+            SetPercentInUi(0);
             this.ExecuteDelayed(RegisterWithProgressManager, delayInMsBeforeExecution: 100); // Wait for manager to exist
         }
 
@@ -64,26 +65,29 @@ namespace com.csutil.progress {
         private void OnProgressUpdate(object sender, IProgress _) {
             AssertV2.IsTrue(sender == progressManager, "sender != pm (ProgressManager field)");
             var percent = Math.Round(progressManager.combinedAvgPercent, 3);
-            SetPercentInUi(percent);
             if (progressText != null) {
                 progressText.text = $"{percent}% ({progressManager.combinedCount}/{progressManager.combinedTotalCount})";
             }
+            SetPercentInUi(percent);
+            if (percent >= 100 && delayInMsBeforeProgressCleanup >= 0) {
+                this.ExecuteDelayed(ResetProgressManagerIfAllFinished, delayInMsBeforeProgressCleanup);
+                onProgressUiComplete?.Invoke();
+            }
+        }
 
+        private void SetPercentInUi(double percent) {
+            UpdateUiPercentValue(percent);
             // Handle progress UI fading:
             if (enableProgressUiFading) {
                 if (canvasGroupFader == null) {
                     canvasGroupFader = GetProgressUiGo().GetComponentInParents<CanvasGroupFader>();
+                    canvasGroupFader.GetCanvasGroup().alpha = 0;
                 }
                 if (percent == 0 || percent >= 100) {
                     canvasGroupFader.targetAlpha = 0;
                 } else {
                     canvasGroupFader.targetAlpha = canvasGroupFader.initialAlpha;
                 }
-            }
-
-            if (percent >= 100 && delayInMsBeforeProgressCleanup >= 0) {
-                this.ExecuteDelayed(ResetProgressManagerIfAllFinished, delayInMsBeforeProgressCleanup);
-                onProgressUiComplete?.Invoke();
             }
         }
 
@@ -98,7 +102,7 @@ namespace com.csutil.progress {
 
         /// <summary> Called whenever the progress changes </summary>
         /// <param name="percent"> A value from 0 to 100 </param>
-        protected abstract void SetPercentInUi(double percent);
+        protected abstract void UpdateUiPercentValue(double percent);
 
     }
 

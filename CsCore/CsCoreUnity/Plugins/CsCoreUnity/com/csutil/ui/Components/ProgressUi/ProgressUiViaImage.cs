@@ -9,7 +9,7 @@ namespace com.csutil.progress {
 
         protected override GameObject GetProgressUiGo() { return progress.gameObject; }
 
-        protected override void SetPercentInUi(double percent) {
+        protected override void UpdateUiPercentValue(double percent) {
             progress.fillAmount = (float)percent / 100f;
         }
 
