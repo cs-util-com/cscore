@@ -179,7 +179,7 @@ namespace com.csutil.tests.async {
             Assert.Null(wrappedFunc("bad"));
             Assert.Null(wrappedFunc("bad"));
             Assert.Null(wrappedFunc("bad"));
-            await TaskV2.Delay(delayInMs * 2);
+            await TaskV2.Delay(delayInMs * 3);
             Assert.Equal("awesome", wrappedFunc("good"));
             Assert.Null(wrappedFunc("bad"));
             Assert.Null(wrappedFunc("bad"));
