@@ -37,29 +37,35 @@ namespace com.csutil.tests {
                 durationSlider = map.Get<Slider>("DurationSlider");
                 timerText = map.Get<Text>("TimerLabel");
 
-                RestartTimer(model);
+                ResetTimer(model);
                 durationSlider.value = model.durationInS;
                 durationSlider.SetOnValueChangedAction(newVal => {
                     model.durationInS = newVal;
-                    RefreshUi(model);
+                    SetCurrentModelValuesInUi(model);
                     return true;
                 });
-                return map.Get<Button>("ResetButton").SetOnClickAction(delegate { RestartTimer(model); });
+                return map.Get<Button>("ResetButton").SetOnClickAction(delegate { ResetTimer(model); });
             }
 
-            private void RestartTimer(MyModel model) {
+            private void ResetTimer(MyModel model) {
                 model.start = DateTimeV2.Now;
+                StartTimerLoopIfNeeded(model);
+            }
+
+            private void StartTimerLoopIfNeeded(MyModel model) {
                 if (model.timerRunning) { return; }
+                // If the timer is currently not running, start it:
                 model.timerRunning = true;
                 elapsedTimeProgress.ExecuteRepeated(() => {
                     model.elapsedTimeInS = (float)(DateTimeV2.Now - model.start).TotalSeconds;
-                    RefreshUi(model);
                     model.timerRunning = model.elapsedTimeInS < model.durationInS;
-                    return model.timerRunning; // Continue as long as elapsed time is smaller then duration
+                    SetCurrentModelValuesInUi(model);
+                    // Continue as long as elapsed time is smaller then duration:
+                    return model.timerRunning; // returning false will stop the repeated execution
                 }, delayInMsBetweenIterations: 50);
             }
 
-            private void RefreshUi(MyModel model) {
+            private void SetCurrentModelValuesInUi(MyModel model) {
                 timerText.text = Math.Round(model.elapsedTimeInS, 1) + "s";
                 elapsedTimeProgress.maxValue = model.durationInS;
                 elapsedTimeProgress.value = model.durationInS - model.elapsedTimeInS;

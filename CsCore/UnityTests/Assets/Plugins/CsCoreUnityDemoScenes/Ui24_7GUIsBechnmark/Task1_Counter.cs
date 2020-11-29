@@ -14,6 +14,8 @@ namespace com.csutil.tests {
             await presenter.LoadModelIntoView(model);
         }
 
+        /// <summary> The model in the counter example is just a single number which
+        /// is being increased every time the user clicks the Count button </summary>
         private class MyModel {
             public int counter = 0;
         }
@@ -26,7 +28,7 @@ namespace com.csutil.tests {
                 InputField input = map.Get<InputField>("CountInput");
                 input.text = "" + model.counter;
                 return map.Get<Button>("CountButton").SetOnClickAction(delegate {
-                    model.counter = int.Parse(input.text) + 1;
+                    model.counter += 1;
                     input.text = "" + model.counter;
                 });
             }

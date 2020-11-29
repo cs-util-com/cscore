@@ -165,7 +165,7 @@ namespace com.csutil.tests {
 
         }
 
-        #region Actions
+        #region Actions that can be send to the Redux data store
 
         private class ChangeDiameterAction {
             public string targetCircleId;
@@ -182,7 +182,7 @@ namespace com.csutil.tests {
 
         #endregion
 
-        #region Reducers
+        #region Reducers of the Redux data store that will process the actions
 
         private static MyModel MyReducer(MyModel previousState, object action) {
             bool modelChanged = false;
@@ -214,7 +214,7 @@ namespace com.csutil.tests {
 
         #endregion
 
-        #region Model
+        #region Model which is immutable and can only be changed through the Redux datastore
 
         internal class MyModel {
 

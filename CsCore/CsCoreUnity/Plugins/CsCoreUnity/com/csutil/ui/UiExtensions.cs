@@ -245,6 +245,7 @@ namespace com.csutil {
             self.ActivateInputField();
         }
 
+        /// <summary> Sets the input text localized which will notify all UI listeners </summary>
         public static void SetTextLocalizedWithNotify(this InputField self, string text) {
             self.SelectV2(); // Without this the change listeners are not triggered
             self.textLocalized(text);

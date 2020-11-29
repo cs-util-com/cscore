@@ -24,29 +24,34 @@ namespace com.csutil.tests {
 
         private class MyPresenter : Presenter<DataStore<MyModel>> {
 
+            public GameObject targetView { get; set; }
+
             private UserListController listUi;
             private InputField filterInput;
             private Button createButton;
             private Button updateButton;
             private Button deleteButton;
+            private InputField lastnameInput;
+            private InputField surnameInput;
 
-            public GameObject targetView { get; set; }
             public Task OnLoad(DataStore<MyModel> store) {
                 var map = targetView.GetLinkMap();
 
-                var lastnameInput = map.Get<InputField>("LastnameInput");
-                var surnameInput = map.Get<InputField>("SurnameInput");
                 listUi = map.Get<UserListController>("ListUi");
                 filterInput = map.Get<InputField>("FilterInput");
                 createButton = map.Get<Button>("Create");
                 updateButton = map.Get<Button>("Update");
                 deleteButton = map.Get<Button>("Delete");
+                lastnameInput = map.Get<InputField>("LastnameInput");
+                surnameInput = map.Get<InputField>("SurnameInput");
 
                 listUi.OnUserEntryClicked = (clickedUserEntry) => {
-                    store.Dispatch(new ChangeSelectionAction() { newSelection = clickedUserEntry });
+                    store.Dispatch(new ChangeSelectionAction() {
+                        newSelection = clickedUserEntry
+                    });
                 };
-                listUi.SubscribeToStateChanges(store, model => model.users, delegate { LoadList(store, false); });
-                filterInput.SetOnValueChangedActionThrottled(delegate { LoadList(store, false); });
+                listUi.SubscribeToStateChanges(store, model => model.users, delegate { LoadList(store); });
+                filterInput.SetOnValueChangedActionThrottled(delegate { LoadList(store); });
 
                 lastnameInput.SubscribeToStateChanges(store, model => model.currentlySelectedUser?.lastname);
                 surnameInput.SubscribeToStateChanges(store, model => model.currentlySelectedUser?.surname);
@@ -57,7 +62,9 @@ namespace com.csutil.tests {
                 }, triggerInstantToInit: true);
 
                 createButton.SetOnClickAction(delegate {
-                    store.Dispatch(new CreateAction() { newUser = new MyUser(lastnameInput.text, surnameInput.text) });
+                    store.Dispatch(new CreateAction() {
+                        newUser = new MyUser(lastnameInput.text, surnameInput.text)
+                    });
                 });
                 updateButton.SetOnClickAction(delegate {
                     store.Dispatch(new UpdateAction() {
@@ -66,19 +73,25 @@ namespace com.csutil.tests {
                     });
                 });
                 deleteButton.SetOnClickAction(delegate {
-                    store.Dispatch(new DeleteAction() { userToDelete = store.GetState().currentlySelectedUser });
+                    store.Dispatch(new DeleteAction() {
+                        userToDelete = store.GetState().currentlySelectedUser
+                    });
                 });
 
                 // Add undo of model changes:
-                var undoUsedOnce = map.Get<Button>("Undo").SetOnClickAction(delegate {
+                var undoClickedAtLeastOnce = map.Get<Button>("Undo").SetOnClickAction(delegate {
                     store.Dispatch(new UndoAction<MyModel>());
                 });
-                return undoUsedOnce;
+
+                // The presenter will signal that loading is done once the user clicked undo at least once
+                return undoClickedAtLeastOnce; // In this case done to allow auto. testing the presenter
             }
 
-            /// <summary> Takes the list of users, filters it and shows the result in the UI </summary>
-            /// <param name="newFilter"> A filter prefix like "Schmidt" to filter show only Schmidts </param>
-            private void LoadList(DataStore<MyModel> store, bool resetUi) {
+            /// <summary> Takes the list of users, filters it as a prefix based on the 
+            /// current filterInput text and shows the result in the UI </summary>
+            /// <param name="resetUi"> If this set to true, the list will fully rebuild its UI (this would clear
+            /// its ui state, eg the scroll position the user currently scrolled to </param>
+            private void LoadList(DataStore<MyModel> store, bool resetUi = false) {
                 MyModel myModel = store.GetState();
                 var usersThatMatchFilter = myModel.users.Filter(u => u.ToString().StartsWith(filterInput.text));
                 listUi.SetListData(usersThatMatchFilter.ToList(), resetUi);
@@ -86,7 +99,7 @@ namespace com.csutil.tests {
 
         }
 
-        #region Actions
+        #region Actions that can be send to the Redux data store
 
         private class ChangeSelectionAction {
             public MyUser newSelection;
@@ -107,7 +120,7 @@ namespace com.csutil.tests {
 
         #endregion
 
-        #region Reducers
+        #region Reducers of the Redux data store that will process the actions
 
         private static MyModel MyReducer(MyModel previousState, object action) {
             bool modelChanged = false;
@@ -140,7 +153,7 @@ namespace com.csutil.tests {
 
         #endregion
 
-        #region Model
+        #region Model which is immutable and can only be changed through the Redux datastore
 
         internal class MyModel {
 

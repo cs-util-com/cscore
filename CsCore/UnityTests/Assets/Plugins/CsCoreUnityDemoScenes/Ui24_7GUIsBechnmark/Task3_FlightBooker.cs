@@ -22,11 +22,13 @@ namespace com.csutil.tests {
             public FlightType flightType = FlightType.oneWayFlight;
             public DateTime tripStart = DateTimeV2.Now;
             public DateTime tripBack;
+
         }
 
         private class MyPresenter : Presenter<MyModel> {
 
             public GameObject targetView { get; set; }
+
             private InputField tripStartInput;
             private InputField tripBackInput;
             private Dropdown oneWayDropdown;
@@ -41,13 +43,13 @@ namespace com.csutil.tests {
 
                 tripStartInput.text = "" + DateTimeV2.Now;
                 tripStartInput.AddOnValueChangedActionThrottled(newVal => {
-                    if (SetValid(tripBackInput, DateTime.TryParse(newVal, out DateTime x))) {
+                    if (ShowValidInUi(tripBackInput, DateTime.TryParse(newVal, out DateTime x))) {
                         model.tripStart = x;
                         Validate(model);
                     }
                 }, delayInMs: 1000);
                 tripBackInput.AddOnValueChangedActionThrottled(newVal => {
-                    if (SetValid(tripBackInput, DateTime.TryParse(newVal, out DateTime x))) {
+                    if (ShowValidInUi(tripBackInput, DateTime.TryParse(newVal, out DateTime x))) {
                         model.tripBack = x;
                         Validate(model);
                     }
@@ -62,12 +64,12 @@ namespace com.csutil.tests {
             }
 
             private void Validate(MyModel model) {
-                bool startValid = SetValid(tripStartInput, model.tripStart > DateTime.Now);
-                bool backValid = SetValid(tripBackInput, model.tripBack > model.tripStart);
+                bool startValid = ShowValidInUi(tripStartInput, model.tripStart > DateTime.Now);
+                bool backValid = ShowValidInUi(tripBackInput, model.tripBack > model.tripStart);
                 bookButton.enabled = startValid && backValid;
             }
 
-            private bool SetValid(InputField i, bool valid) {
+            private bool ShowValidInUi(InputField i, bool valid) {
                 var c = valid ? ThemeColor.ColorNames.elementContrast : ThemeColor.ColorNames.warning;
                 Log.MethodEnteredWith(i, valid, c);
                 i.SetNormalColor(IoC.inject.Get<Theme>(this).GetColor(c));
