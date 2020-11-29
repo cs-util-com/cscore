@@ -226,6 +226,8 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0, g: 0, b: 0, a: 0.5019608}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -295,6 +297,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   id: Backdrop
+  syncWithGOName: 1
 --- !u!114 &6796571093634338021
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -308,10 +311,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   switchDirection: 0
+  nextScreenPrefab: {fileID: 0}
   nextScreenPrefabName: 
   forceAddingAction: 0
   destroyViewStackWhenLastScreenReached: 0
-  hideCurrentScreen: 1
+  hideCurrentView: 1
   hideNotDestroyCurrentViewWhenGoingBackwards: 0
 --- !u!1 &5272367283175678953
 GameObject:
@@ -373,6 +377,8 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0.3679245, g: 0.3679245, b: 0.3679245, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -494,6 +500,7 @@ MonoBehaviour:
   m_ChildControlHeight: 1
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
+  m_ReverseArrangement: 0
 --- !u!114 &42759979079604681
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -506,6 +513,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3312d7739989d2b4e91e6319e9a96d76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_Padding: {x: 0, y: 0, z: 0, w: 0}
+  m_Softness: {x: 0, y: 0}
 --- !u!1 &9201397400691654037
 GameObject:
   m_ObjectHideFlags: 0
@@ -571,6 +580,7 @@ MonoBehaviour:
   m_ChildControlHeight: 1
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
+  m_ReverseArrangement: 0
 --- !u!222 &5332135649439602233
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -594,6 +604,8 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []

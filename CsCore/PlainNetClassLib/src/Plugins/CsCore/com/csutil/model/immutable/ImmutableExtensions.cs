@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -8,13 +7,18 @@ namespace com.csutil.model.immutable {
 
     public static class ImmutableExtensions {
 
+        public static Action AddStateChangeListenerDebounced<T, S>(this IDataStore<T> self, Func<T, S> getSubState, Action<S> onChanged, double delayInMs, bool triggerInstantToInit = false) {
+            return self.AddStateChangeListener(getSubState, onChanged.AsThrottledDebounce(delayInMs), triggerInstantToInit);
+        }
+
         public static Action AddAsyncStateChangeListener<T, S>(this IDataStore<T> s, Func<T, S> getSubState, Func<S, Task> onChanged) {
             return AddStateChangeListener(s, getSubState, (subState) => { onChanged(subState); });
         }
 
-        public static Action AddStateChangeListener<T, S>(this IDataStore<T> self, Func<T, S> getSubState, Action<S> onChanged) {
+        public static Action AddStateChangeListener<T, S>(this IDataStore<T> self, Func<T, S> getSubState, Action<S> onChanged, bool triggerInstantToInit = false) {
             Action newListener = NewSubstateChangeListener(() => getSubState(self.GetState()), onChanged);
             self.onStateChanged += newListener;
+            if (triggerInstantToInit) { onChanged(getSubState(self.GetState())); }
             return newListener;
         }
 
@@ -100,6 +104,30 @@ namespace com.csutil.model.immutable {
             return new ForkedStore<T>(s, s.reducer);
         }
 
+        /// <summary> Creates a selector to access parts of the state and stay updated automatically </summary>
+        public static Func<V> SelectElement<T, V>(this IDataStore<T> self, Func<T, V> getElement) {
+            V latestState = getElement(self.GetState());
+            self.AddStateChangeListener(getElement, (newState) => { latestState = newState; });
+            return () => { return latestState; };
+        }
+
+        /// <summary> Creates a selector that efficiently gets a list entry and stays updated automatically </summary>
+        public static Func<V> SelectListEntry<T, V>(this IDataStore<T> self, Func<T, ImmutableList<V>> getList, Predicate<V> match) {
+            ImmutableList<V> latestList = getList(self.GetState());
+            V found = latestList.Find(match);
+            int latestPos = latestList.IndexOf(found);
+            self.AddStateChangeListener(getList, (changedList) => { latestList = changedList; });
+            return () => {
+                if (latestList.Count > latestPos) { // First check at the latest known position:
+                    V eleAtLastPos = latestList[latestPos];
+                    if (match(eleAtLastPos)) { return eleAtLastPos; }
+                }
+                found = latestList.Find(match);
+                latestPos = latestList.IndexOf(found);
+                return found;
+            };
+        }
+
     }
 
     /// <summary> Similar to the StateReducer but provides the parent context of the field as well </summary>
@@ -132,7 +160,7 @@ namespace com.csutil.model.immutable {
             innerListeners.InvokeIfNotNull();
         }
 
-        public Action AddStateChangeListener<SSS>(Func<SubState, SSS> getSubSubState, Action<SSS> onChanged) {
+        public Action AddStateChangeListener<T>(Func<SubState, T> getSubSubState, Action<T> onChanged) {
             Action newListener = ImmutableExtensions.NewSubstateChangeListener(() => getSubSubState(latestSubState), onChanged);
             innerListeners += newListener;
             return newListener;

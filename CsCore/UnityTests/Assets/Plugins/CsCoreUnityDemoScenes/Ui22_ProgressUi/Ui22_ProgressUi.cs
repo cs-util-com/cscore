@@ -18,7 +18,7 @@ namespace com.csutil.tests {
             yield return SetupBlockingProgressButton().AsCoroutine();
         }
 
-        /// <summary> THe first example here demonstrates how a progress manager can be 
+        /// <summary> The first example here demonstrates how a progress manager can be 
         /// created and then shown in a global progress UI (that is eg shown on top of all 
         /// screens). This manager can be set as a global singlton to use it from anywhere 
         /// in your logic and show overall progress indication of background tasks to the 

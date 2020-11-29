@@ -9,6 +9,8 @@ namespace com.csutil.ui.viewstack {
         public enum SwitchDirection { backwards, forwards, loadNextScreenViaPrefab, backwardsOrForwards }
 
         public SwitchDirection switchDirection = SwitchDirection.backwards;
+        /// <summary> A reference to a prefab, that is then instanciated on runtime and shown as the next view </summary>
+        public GameObject nextScreenPrefab;
         /// <summary> e.g. "uis/MyScreenPrefab1" - The path of the prefab that should be loaded as the next view </summary>
         public string nextScreenPrefabName;
         /// <summary> If true the action will be added even if there are already other click listeners registered for the button </summary>
@@ -49,9 +51,18 @@ namespace com.csutil.ui.viewstack {
                 case SwitchDirection.forwards:
                     return GoForwards();
                 case SwitchDirection.loadNextScreenViaPrefab:
-                    return gameObject.GetViewStack().ShowView(nextScreenPrefabName, hideCurrentView ? gameObject : null) != null;
+                    return ShowNextScreenPrefab();
                 default: return false;
             }
+        }
+
+        private bool ShowNextScreenPrefab() {
+            GameObject currentViewToHide = hideCurrentView ? gameObject : null;
+            var stack = gameObject.GetViewStack();
+            AssertV2.IsTrue(nextScreenPrefab == null || nextScreenPrefab.IsPartOfEditorOnlyPrefab(), "nextScreenPrefab was not a prefab");
+            if (nextScreenPrefab != null) { return stack.ShowView(nextScreenPrefab, currentViewToHide) != null; }
+            if (!nextScreenPrefabName.IsNullOrEmpty()) { return stack.ShowView(nextScreenPrefabName, currentViewToHide) != null; }
+            return false;
         }
 
         private bool DestroyCurrentView() { return gameObject.GetViewStack().GetRootViewOf(gameObject).Destroy(); }

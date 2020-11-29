@@ -185,6 +185,11 @@ PrefabInstance:
       propertyPath: m_FontData.m_MaxSize
       value: 14
       objectReference: {fileID: 0}
+    - target: {fileID: 1086322818576102482, guid: 5a2e20dce301d184e8d9937efa5598ee,
+        type: 3}
+      propertyPath: id
+      value: BG_Button1
+      objectReference: {fileID: 0}
     - target: {fileID: 2142786820454699788, guid: 5a2e20dce301d184e8d9937efa5598ee,
         type: 3}
       propertyPath: m_MinHeight

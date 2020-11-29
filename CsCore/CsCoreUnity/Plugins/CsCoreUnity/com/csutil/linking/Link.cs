@@ -1,20 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace com.csutil {
 
     public class Link : MonoBehaviour {
+
         public string id;
+        public bool syncWithGOName = true;
 
         private void OnValidate() {
             if (id.IsNullOrEmpty() && !name.ToLowerInvariant().Contains("gameobject")) { id = name; }
+            if (!id.IsNullOrEmpty() && syncWithGOName && name != id) { name = id; }
         }
 
         internal void SetId(string id) {
-            if (id.IsNullOrEmpty()) { throw Log.e("Link.id cant be set to null", gameObject); }
+            if (id.IsNullOrEmpty()) { throw Log.e("Invalid Link.id (null or empty)", gameObject); }
             this.id = id;
         }
 

@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 
 namespace com.csutil {
 
-
     public static class EventHandlerExtensions {
 
         public class EventHandlerResult<T> { public T result; }

@@ -15,8 +15,14 @@ namespace com.csutil.ui {
 
         public void ToggleVisibilityOfTarget() {
             if (target == null) { throw Log.e("Toggle-target not set", gameObject); }
-            target.gameObject.SetActiveV2(!target.gameObject.activeSelf);
-            onToggled?.Invoke(target.gameObject.activeSelf);
+            SetTargetActive(!target.gameObject.activeSelf);
+        }
+
+        public void SetTargetActive(bool active) {
+            if (target.gameObject.activeSelf != active) {
+                target.gameObject.SetActiveV2(active);
+                onToggled?.Invoke(target.gameObject.activeSelf);
+            }
         }
 
         private void OnValidate() {

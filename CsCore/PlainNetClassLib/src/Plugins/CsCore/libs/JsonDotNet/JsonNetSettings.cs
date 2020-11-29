@@ -4,8 +4,8 @@ namespace com.csutil.json {
 
     public static class JsonNetSettings {
 
-        public static JsonSerializerSettings defaultSettings => NewDefaultSettings();
-        public static JsonSerializerSettings typedJsonSettings => NewTypedJsonSettings();
+        public static JsonSerializerSettings defaultSettings = NewDefaultSettings();
+        public static JsonSerializerSettings typedJsonSettings = NewTypedJsonSettings();
 
         private static JsonSerializerSettings NewDefaultSettings() {
             var s = new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore, };

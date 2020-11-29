@@ -75,7 +75,7 @@ namespace com.csutil {
                 return true;
             }
             catch (Exception e) {
-                Log.e(e + "\n by Button: \n\n" + originTrace);
+                Log.e(e);
                 if (task.IsCanceled) { tcs.TrySetCanceled(); }
                 if (task.IsFaulted) { tcs.TrySetException(task.Exception); }
             }
@@ -194,6 +194,34 @@ namespace com.csutil {
             return null;
         }
 
+        public static UnityAction<int> SetOnValueChangedAction(this Dropdown self, Func<int, bool> onValueChanged) {
+            if (self.onValueChanged != null && self.onValueChanged.GetPersistentEventCount() > 0) {
+                Log.w("Overriding old onValueChanged listener for input field " + self, self.gameObject);
+            }
+            self.onValueChanged = new Dropdown.DropdownEvent(); // clear previous onValueChanged listeners
+            return AddOnValueChangedAction(self, onValueChanged);
+        }
+
+        public static UnityAction<int> AddOnValueChangedAction(this Dropdown self, Func<int, bool> onValueChanged) {
+            if (onValueChanged != null) {
+                var oldSelection = self.value;
+                UnityAction<int> newListener = (newSection) => {
+                    if (newSection == oldSelection) { return; }
+                    // Ignore event event if it was triggered through code, only fire for actual user input:
+                    if (!self.ChangeWasTriggeredByUserThroughEventSystem()) { return; }
+                    if (!onValueChanged(newSection)) {
+                        self.value = oldSelection;
+                    } else {
+                        oldSelection = newSection;
+                        EventBus.instance.Publish(EventConsts.catUi + UiEvents.DROPDOWN_CHANGED, self, newSection);
+                    }
+                };
+                self.onValueChanged.AddListener(newListener);
+                return newListener;
+            }
+            return null;
+        }
+
         public static UnityAction<string> SetOnValueChangedActionThrottled(this InputField self, Action<string> onValueChanged, double delayInMs = 500) {
             if (self.onValueChanged != null && self.onValueChanged.GetPersistentEventCount() > 0) {
                 Log.w("Overriding old onValueChanged listener for input field " + self, self.gameObject);
@@ -217,21 +245,21 @@ namespace com.csutil {
             self.ActivateInputField();
         }
 
+        /// <summary> Sets the input text localized which will notify all UI listeners </summary>
         public static void SetTextLocalizedWithNotify(this InputField self, string text) {
             self.SelectV2(); // Without this the change listeners are not triggered
             self.textLocalized(text);
         }
 
-        public static void SubscribeToStateChanges<T, V>(this Behaviour self, IDataStore<T> store, Func<T, V> getSubState, Action<V> updateUi) {
+        public static void SubscribeToStateChanges<T, V>(this UnityEngine.Object self, IDataStore<T> store, Func<T, V> getSubState, Action<V> updateUi, bool triggerOnSubscribe = true) {
             updateUi(getSubState(store.GetState()));
             Action listener = null;
             listener = store.AddStateChangeListener(getSubState, newVal => {
-                if (self.IsDestroyed()) {
-                    store.onStateChanged -= listener;
-                } else if (self.isActiveAndEnabled) {
-                    updateUi(newVal);
-                }
-            });
+                if (self.IsDestroyed()) { store.onStateChanged -= listener; return; }
+                if (self is Behaviour b && !b.isActiveAndEnabled) { return; }
+                if (self is GameObject go && !go.activeInHierarchy) { return; }
+                updateUi(newVal);
+            }, triggerOnSubscribe);
         }
 
         public static void SubscribeToStateChanges<T>(this InputField self, IDataStore<T> store, Func<T, string> getSubState) {

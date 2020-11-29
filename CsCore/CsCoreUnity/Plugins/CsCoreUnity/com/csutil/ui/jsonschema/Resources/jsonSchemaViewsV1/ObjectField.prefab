@@ -15,20 +15,9 @@ MonoBehaviour:
   title: {fileID: 7763929594500601426}
   description: {fileID: 0}
   mainLink: {fileID: 4008164378151271588}
-  field:
-    type: 
-    modelType: 
-    order: []
-    required: []
-    title: 
-    description: 
-    defaultVal: 
-    pattern: 
-    contentType: 
-    items: []
-    contentEnum: []
   fieldName: 
   fullPath: 
+  fieldAsJson: 
   canvasGroup: {fileID: 5659056978392419180}
 --- !u!114 &4008164378151271588
 MonoBehaviour:
@@ -43,6 +32,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   id: InnerContainer
+  syncWithGOName: 1
 --- !u!114 &7145691973187777691
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -68,6 +58,7 @@ MonoBehaviour:
   m_ChildControlHeight: 1
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
+  m_ReverseArrangement: 0
 --- !u!114 &903104805015131343
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -103,7 +94,7 @@ PrefabInstance:
     - target: {fileID: 5745350344737129455, guid: a2405f5cee0091740ae06e3315367228,
         type: 3}
       propertyPath: m_Name
-      value: ObjectField
+      value: InnerContainer
       objectReference: {fileID: 0}
     - target: {fileID: 7702202963873201237, guid: a2405f5cee0091740ae06e3315367228,
         type: 3}

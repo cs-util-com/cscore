@@ -12,6 +12,29 @@ namespace com.csutil.tests.async {
         public EventHandlerTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
         [Fact]
+        public async Task ThrottledDebounceExample1() {
+            int counter = 0;
+            bool allWereGood = true;
+            Action<string> action = (myStringParam) => {
+                // Make sure the action is never called with "bad" being passed:
+                if (myStringParam != "good") { allWereGood = false; }
+                Interlocked.Increment(ref counter);
+            };
+            // Make the action throttled / debounced:
+            action = action.AsThrottledDebounce(delayInMs: 50);
+
+            // Call it multiple times with less then 50ms between the calls:
+            action("good"); // The first call will always be passed through
+            action("bad"); // This one will be delayed and not called because of the next:
+            action("good"); // This will be delayed for 50ms and then triggered because no additional call follows after it
+
+            // Wait a little bit until the action was triggered at least 2 times:
+            for (int i = 0; i < 50; i++) { await TaskV2.Delay(100); if (counter >= 2) { break; } }
+            Assert.Equal(2, counter);
+            Assert.True(allWereGood);
+        }
+
+        [Fact]
         public async Task ExponentialBackoffExample1() {
             Stopwatch timer = Stopwatch.StartNew();
             long finalTimingResult = await TaskV2.TryWithExponentialBackoff<long>(async () => {
@@ -156,7 +179,7 @@ namespace com.csutil.tests.async {
             Assert.Null(wrappedFunc("bad"));
             Assert.Null(wrappedFunc("bad"));
             Assert.Null(wrappedFunc("bad"));
-            await TaskV2.Delay(delayInMs * 2);
+            await TaskV2.Delay(delayInMs * 3);
             Assert.Equal("awesome", wrappedFunc("good"));
             Assert.Null(wrappedFunc("bad"));
             Assert.Null(wrappedFunc("bad"));

@@ -36,13 +36,19 @@ namespace com.csutil {
                 self.TrackEvent(EventConsts.catUi, UiEvents.TOGGLE_CHANGED + "_" + toggle + "_" + isChecked, toggle, isChecked);
             });
 
-            // InputField UI tracking:
-            EventHandler<string> action = (input, newText) => {
-                self.TrackEvent(EventConsts.catUi, UiEvents.INPUTFIELD_CHANGED + "_" + input, input);
-            };
-            var delayedAction = action.AsThrottledDebounce(delayInMs: 1900, skipFirstEvent: true);
-            EventBus.instance.Subscribe(self, EventConsts.catUi + UiEvents.INPUTFIELD_CHANGED, (InputField input, string newText) => {
-                delayedAction(input, newText);
+            { // InputField UI tracking:
+                EventHandler<string> action = (input, newText) => {
+                    self.TrackEvent(EventConsts.catUi, UiEvents.INPUTFIELD_CHANGED + "_" + input, input);
+                };
+                var delayedAction = action.AsThrottledDebounce(delayInMs: 1900, skipFirstEvent: true);
+                EventBus.instance.Subscribe(self, EventConsts.catUi + UiEvents.INPUTFIELD_CHANGED, (InputField input, string newText) => {
+                    delayedAction(input, newText);
+                });
+            }
+
+            // Dropdown UI tracking:
+            EventBus.instance.Subscribe(self, EventConsts.catUi + UiEvents.DROPDOWN_CHANGED, (Dropdown d, int selection) => {
+                self.TrackEvent(EventConsts.catUi, UiEvents.DROPDOWN_CHANGED + "_" + d + "_" + selection, d, selection);
             });
 
         }

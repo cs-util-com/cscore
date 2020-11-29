@@ -72,6 +72,7 @@ MonoBehaviour:
   m_ChildControlHeight: 1
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
+  m_ReverseArrangement: 0
 --- !u!114 &1003967732543090659
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -84,6 +85,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3312d7739989d2b4e91e6319e9a96d76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_Padding: {x: 0, y: 0, z: 0, w: 0}
+  m_Softness: {x: 0, y: 0}
 --- !u!1 &1235362533033466
 GameObject:
   m_ObjectHideFlags: 0
@@ -226,6 +229,8 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0, g: 0, b: 0, a: 0.5019608}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -295,6 +300,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   id: Backdrop
+  syncWithGOName: 1
 --- !u!1 &1665842664035984
 GameObject:
   m_ObjectHideFlags: 0
@@ -361,6 +367,7 @@ MonoBehaviour:
   m_ChildControlHeight: 1
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
+  m_ReverseArrangement: 0
 --- !u!222 &222663113211355182
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -384,6 +391,8 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -410,6 +419,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   id: EntryList
+  syncWithGOName: 1
 --- !u!114 &7954764487796240718
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -654,6 +664,8 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0.3679245, g: 0.3679245, b: 0.3679245, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -728,6 +740,8 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0, g: 0, b: 0, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -758,6 +772,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   id: IconSwitchToNoDescr
+  syncWithGOName: 1
 --- !u!1 &3211299342273696774
 GameObject:
   m_ObjectHideFlags: 0
@@ -855,6 +870,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   id: EntryGrid
+  syncWithGOName: 1
 --- !u!114 &5522281708614615629
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -983,6 +999,8 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -1009,6 +1027,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   id: ToggleBetweenViewModes
+  syncWithGOName: 1
 --- !u!1 &5187815353273507876
 GameObject:
   m_ObjectHideFlags: 0
@@ -1070,6 +1089,8 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0, g: 0, b: 0, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -1100,6 +1121,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   id: IconSwitchToFull
+  syncWithGOName: 1
 --- !u!1 &6832801304264627642
 GameObject:
   m_ObjectHideFlags: 0
@@ -1166,6 +1188,8 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 0.80784315}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -1204,6 +1228,7 @@ MonoBehaviour:
   m_ChildControlHeight: 1
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
+  m_ReverseArrangement: 0
 --- !u!114 &5800806103452650664
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1217,6 +1242,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   id: IconGridContainer
+  syncWithGOName: 1
 --- !u!114 &8284264302829536992
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1336,6 +1362,8 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -1410,6 +1438,8 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0, g: 0, b: 0, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -1440,6 +1470,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   id: IconSwitchToIconsOnly
+  syncWithGOName: 1
 --- !u!1001 &1178722522935265609
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1450,17 +1481,17 @@ PrefabInstance:
     - target: {fileID: 1826576467927810384, guid: 1c599e31dd8ea2d40acdfa6166c8de0d,
         type: 3}
       propertyPath: m_Color.r
-      value: 0.3207547
+      value: 0.32941177
       objectReference: {fileID: 0}
     - target: {fileID: 1826576467927810384, guid: 1c599e31dd8ea2d40acdfa6166c8de0d,
         type: 3}
       propertyPath: m_Color.g
-      value: 0.3207547
+      value: 0.34509805
       objectReference: {fileID: 0}
     - target: {fileID: 1826576467927810384, guid: 1c599e31dd8ea2d40acdfa6166c8de0d,
         type: 3}
       propertyPath: m_Color.b
-      value: 0.3207547
+      value: 0.3882353
       objectReference: {fileID: 0}
     - target: {fileID: 1826576467927810384, guid: 1c599e31dd8ea2d40acdfa6166c8de0d,
         type: 3}
@@ -1739,7 +1770,7 @@ PrefabInstance:
     - target: {fileID: 7264978023672007144, guid: c661210becb307343ae9917b97011a84,
         type: 3}
       propertyPath: m_Name
-      value: IconGridTitle
+      value: Title
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c661210becb307343ae9917b97011a84, type: 3}

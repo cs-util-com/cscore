@@ -14,16 +14,23 @@ namespace com.csutil.ui {
         private float currentVelocity;
 
         private void OnEnable() {
-            initialAlpha = GetComponent<CanvasGroup>().alpha;
-            targetAlpha = initialAlpha;
             this.ExecuteRepeated(delegate {
-                if (canvasGroup == null) { canvasGroup = GetComponent<CanvasGroup>(); }
-                var a = canvasGroup.alpha;
-                if (a != targetAlpha) {
-                    canvasGroup.alpha = VelocityLerp.LerpWithVelocity(a, targetAlpha, ref currentVelocity, Time.deltaTime * fadeSpeed);
+                var currentAlpha = GetCanvasGroup().alpha;
+                if (currentAlpha != targetAlpha) {
+                    var newAlpha = VelocityLerp.LerpWithVelocity(currentAlpha, targetAlpha, ref currentVelocity, Time.deltaTime * fadeSpeed);
+                    canvasGroup.alpha = newAlpha;
                 }
                 return true;
             }, delayInMsBetweenIterations);
+        }
+
+        public CanvasGroup GetCanvasGroup() {
+            if (canvasGroup == null) {
+                canvasGroup = GetComponent<CanvasGroup>();
+                initialAlpha = canvasGroup.alpha;
+                targetAlpha = initialAlpha;
+            }
+            return canvasGroup;
         }
 
     }

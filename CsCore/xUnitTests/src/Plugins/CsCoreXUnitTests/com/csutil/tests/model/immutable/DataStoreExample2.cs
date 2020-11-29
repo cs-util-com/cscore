@@ -35,7 +35,7 @@ namespace com.csutil.tests.model.immutable {
 
             var undoable = new UndoRedoReducer<MyAppState1>();
             // To allow undo redo on the full store wrap the main reducer with the undo reducer:
-            var undoReducer = undoable.wrap(MyReducers1.ReduceMyAppState1);
+            var undoReducer = undoable.Wrap(MyReducers1.ReduceMyAppState1);
 
             var data = new MyAppState1(); // the initial immutable state
             var store = new DataStore<MyAppState1>(undoReducer, data, loggingMiddleware, recMiddleware, thunkMiddleware);
@@ -188,7 +188,7 @@ namespace com.csutil.tests.model.immutable {
             var logging = Middlewares.NewLoggingMiddleware<MyAppState1>();
 
             var data2 = new MyAppState1();
-            var store2 = new DataStore<MyAppState1>(undoable.wrap(MyReducers1.ReduceMyAppState1), data2, logging, recMiddleware);
+            var store2 = new DataStore<MyAppState1>(undoable.Wrap(MyReducers1.ReduceMyAppState1), data2, logging, recMiddleware);
             store2.storeName = "Store 2";
 
             // Replaying the recorder will now fill the second store with the same actions:

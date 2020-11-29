@@ -329,7 +329,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 544358e3651005141809e3fd767a8a71, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  id: IconButton
+  id: BG_Button2
+  syncWithGOName: 1
 --- !u!114 &3320385321791778326
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -97,6 +97,12 @@ namespace com.csutil.ui {
             foreach (var themeColor in allAffected) { themeColor.ApplyColor(c.colorValue); }
         }
 
+        public Color GetColor(ThemeColor.ColorNames n) {
+            var found = TryGetColor("" + n, out Color color);
+            if (!found) { throw new MissingMemberException("Color {n} not found in theme"); }
+            return color;
+        }
+
     }
 
 }

@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using com.csutil.model.immutable;
 using Xunit;
@@ -12,7 +14,7 @@ namespace com.csutil.tests.model.immutable {
         [Fact]
         public void StressTest1() {
 
-            var initialState = new MyAppState1(new SubStateA("a1"), new SubStateB("b1"));
+            var initialState = new MyAppState1(new SubStateA("a1"), new SubStateB("b1"), NewVeryLargeList());
             var store = new DataStore<MyAppState1>(ReduceMyAppState1, initialState);
 
             // In total this test will create 4 million state change listeners:
@@ -81,13 +83,75 @@ namespace com.csutil.tests.model.immutable {
                 Assert.True(0.5f < t3t4Ratio && t3t4Ratio < 2f, "t3t4Ratio=" + t3t4Ratio);
 
             }
+
+            TestListEntrySelector(store);
+
+        }
+
+        /// <summary>
+        /// if the data model contains lists traversing through the model tree into the list to get a 
+        /// specific element can be a costly operation if performed many times. Normally indexed 
+        /// structures like dictionaries should be used to efficiently access such collections but 
+        /// when a list in the model is needed the index of the element can be used to make accessing
+        /// the entry more efficient. The following test demonstrates this efficiency difference
+        /// </summary>
+        private static void TestListEntrySelector(DataStore<MyAppState1> store) {
+
+            var lastEntry = store.GetState().substateC.listC.Last();
+
+            // First the usual way is measured where the normal Find is used to get the wanted list entry:
+            var findUsedCount = 400;
+            var timingUsingFind = Log.MethodEntered($"Find in list ({findUsedCount} times)");
+            for (int i = 0; i < findUsedCount; i++) {
+                var foundEntry = store.GetState().substateC.listC.Find(x => x.valB == lastEntry.valB);
+                Assert.Equal(lastEntry, foundEntry);
+            }
+            Log.MethodDone(timingUsingFind);
+
+            // Now the optimized version to find the list entry is shown:
+            Func<SubStateB> entrySelector = store.SelectListEntry(x => x.substateC.listC, e => e.valB == lastEntry.valB);
+
+            var selectorTiming1 = Log.MethodEntered($"Find selector 1 ({findUsedCount} times)");
+            for (int i = 0; i < findUsedCount / 2; i++) {
+                var foundEntry = entrySelector();
+                Assert.Equal(lastEntry, foundEntry);
+            }
+            Log.MethodDone(selectorTiming1);
+
+            // Remove the first entry from the immutable list so that the index of the last entry changes:
+            var oldList = store.GetState().substateC.listC;
+            var newList = oldList.Remove(oldList.First());
+            store.Dispatch(new ActionChangeSubstateC() { newVal = newList });
+
+            // Check that the selector still finds the last entry after modification now:
+            var selectorTiming2 = Log.MethodEntered($"Find selector 2 ({findUsedCount} times)");
+            for (int i = 0; i < findUsedCount / 2; i++) {
+                var foundEntry = entrySelector();
+                Assert.Equal(lastEntry, foundEntry);
+            }
+            Log.MethodDone(selectorTiming2);
+
+            // The optimized selector version must be at least 100 times faster then using normal find:
+            long xTimesFaster = 100;
+            var totalSelectorTime = selectorTiming1.ElapsedMilliseconds + selectorTiming2.ElapsedMilliseconds;
+            var errorT = $"timingUsingSelector={totalSelectorTime} not {xTimesFaster} times faster then " +
+                $"timingUsingFind={timingUsingFind.ElapsedMilliseconds}";
+            Assert.True(totalSelectorTime < timingUsingFind.ElapsedMilliseconds / xTimesFaster, errorT);
+
+        }
+
+        private SubStateC NewVeryLargeList(int entries = 100000) {
+            var largeList = new List<SubStateB>();
+            for (int i = 0; i < entries; i++) { largeList.Add(new SubStateB("Entry " + i)); }
+            return new SubStateC(largeList.ToImmutableList());
         }
 
         private MyAppState1 ReduceMyAppState1(MyAppState1 previousState, object action) {
             bool changed = false;
             var newA = previousState.substateA.Mutate(action, SubStateAReducer, ref changed);
             var newB = previousState.substateB.Mutate(action, SubStateBReducer, ref changed);
-            if (changed) { return new MyAppState1(newA, newB); }
+            var newC = previousState.substateC.Mutate(action, SubStateCReducer, ref changed);
+            if (changed) { return new MyAppState1(newA, newB, newC); }
             return previousState;
         }
 
@@ -101,10 +165,20 @@ namespace com.csutil.tests.model.immutable {
             return previousState;
         }
 
+        private SubStateC SubStateCReducer(SubStateC previousState, object action) {
+            if (action is ActionChangeSubstateC c) { return new SubStateC(c.newVal); }
+            return previousState;
+        }
+
         private class MyAppState1 {
             internal readonly SubStateA substateA;
             internal readonly SubStateB substateB;
-            public MyAppState1(SubStateA newA, SubStateB newB) { substateA = newA; substateB = newB; }
+            internal readonly SubStateC substateC;
+            public MyAppState1(SubStateA newA, SubStateB newB, SubStateC newC) {
+                substateA = newA;
+                substateB = newB;
+                substateC = newC;
+            }
         }
 
         internal class SubStateA {
@@ -117,9 +191,16 @@ namespace com.csutil.tests.model.immutable {
             public SubStateB(string newVal) { valB = newVal; }
         }
 
+        internal class SubStateC {
+            internal readonly ImmutableList<SubStateB> listC;
+            public SubStateC(ImmutableList<SubStateB> newVal) { listC = newVal; }
+        }
+
         private class ActionChangeSubstateA { internal string newVal; }
 
         private class ActionChangeSubstateB { internal string newVal; }
+
+        internal class ActionChangeSubstateC { internal ImmutableList<SubStateB> newVal; }
 
     }
 

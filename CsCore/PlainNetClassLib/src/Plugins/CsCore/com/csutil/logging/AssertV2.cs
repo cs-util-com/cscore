@@ -93,6 +93,12 @@ namespace com.csutil {
             }
         }
 
+        [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
+        public static void AreEqual<T>(T expected, T actual, string varName = "", params object[] args) {
+            var errorMsg = $"Assert.AreEqual() FAILED: expected {typeof(T)} {varName}= {expected} NOT equal to actual {varName}= {actual}";
+            Assert(Equals(expected, actual), errorMsg, args);
+        }
+
         private static string CalcMultiLineUnequalText<T>(IEnumerable<T> expected, IEnumerable<T> actual, string _ = LB + "   ") {
             int diffPos = GetPosOfFirstDiff(expected, actual);
             int spacesCount = diffPos - 1;

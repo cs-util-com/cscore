@@ -36,7 +36,7 @@ namespace com.csutil.logging {
         }
 
         private void PrintErrorString(string e, object[] args) {
-            PrintErrorMessage(e + Log.ToArgsStr(args, ArgToString) + LB
+            PrintErrorMessage(e + LB + Log.ToArgsStr(args, ArgToString) + LB
                 + "    * at " + Log.CallingMethodStr(args, count: 4) + LB + LB, args);
         }
 

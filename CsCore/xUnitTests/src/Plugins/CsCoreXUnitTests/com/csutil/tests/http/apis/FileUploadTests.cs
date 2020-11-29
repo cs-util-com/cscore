@@ -54,7 +54,7 @@ namespace com.csutil.tests.http {
 
             FileEntry fileToDownloadTo = dir.GetChild("test2.txt");
             await new Uri(result.link).SendGET().DownloadTo(fileToDownloadTo);
-            Assert.Equal(textInFile, fileToDownloadTo.LoadAs<string>());
+            Assert.True(textInFile == fileToDownloadTo.LoadAs<string>(), "Invalid textInFile from " + result.link);
 
         }
 
