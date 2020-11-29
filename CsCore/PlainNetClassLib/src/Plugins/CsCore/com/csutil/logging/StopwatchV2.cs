@@ -4,16 +4,18 @@ using System.Runtime.CompilerServices;
 
 namespace com.csutil {
 
-    public class StopwatchV2 : Stopwatch {
+    public class StopwatchV2 : Stopwatch, IDisposable {
 
         private long managedMemoryAtStart;
         private long managedMemoryAtStop;
         private long memoryAtStart;
         private long memoryAtStop;
         public string methodName;
+        public Action onDispose;
 
         public StopwatchV2([CallerMemberName] string methodName = null) {
             this.methodName = methodName;
+            if (onDispose == null) { onDispose = () => Log.MethodDone(this); }
         }
 
         public long allocatedManagedMemBetweenStartAndStop { get { return managedMemoryAtStop - managedMemoryAtStart; } }
@@ -58,6 +60,8 @@ namespace com.csutil {
             return "allocated managed mem: " + ByteSizeToString.ByteSizeToReadableString(allocatedManagedMemBetweenStartAndStop)
                 + ", allocated mem: " + ByteSizeToString.ByteSizeToReadableString(allocatedMemBetweenStartAndStop);
         }
+
+        public void Dispose() { onDispose?.Invoke(); }
 
     }
 
