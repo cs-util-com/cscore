@@ -14,14 +14,14 @@ namespace com.csutil.tests.Task7 {
             {
                 t1 = Log.MethodEntered("SimulateManyChangesInModel without logging");
                 CellsModel model = new CellsModel(ImmutableDictionary<CellPos, Cell>.Empty);
-                var store = new DataStore<CellsModel>(MyReducers.MyReducer, model);
+                var store = new DataStore<CellsModel>(CellsReducers.MainReducer, model);
                 await SimulateManyChangesInModel(store);
                 Log.MethodDone(t1);
             }
             {
                 t2 = Log.MethodEntered("SimulateManyChangesInModel without logging");
                 CellsModel model = new CellsModel(ImmutableDictionary<CellPos, Cell>.Empty);
-                var store = new DataStore<CellsModel>(MyReducers.MyReducer, model, Middlewares.NewLoggingMiddleware<CellsModel>());
+                var store = new DataStore<CellsModel>(CellsReducers.MainReducer, model, Middlewares.NewLoggingMiddleware<CellsModel>());
                  await SimulateManyChangesInModel(store);
                 Log.MethodDone(t2);
             }
@@ -33,7 +33,7 @@ namespace com.csutil.tests.Task7 {
         public static void TestDataStoreTransitiveChanges() {
 
             CellsModel model = new CellsModel(ImmutableDictionary<CellPos, Cell>.Empty);
-            var store = new DataStore<CellsModel>(MyReducers.MyReducer, model, Middlewares.NewLoggingMiddleware<CellsModel>());
+            var store = new DataStore<CellsModel>(CellsReducers.MainReducer, model, Middlewares.NewLoggingMiddleware<CellsModel>());
 
             store.Dispatch(new MyActions.SetCell("A", 1, "1 + 1"));
             var cells = store.SelectElement(s => s.cells);

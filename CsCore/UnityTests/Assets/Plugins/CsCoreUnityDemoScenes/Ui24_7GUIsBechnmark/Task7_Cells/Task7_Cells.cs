@@ -19,7 +19,7 @@ namespace com.csutil.tests.Task7 {
             CellsModel model = new CellsModel(ImmutableDictionary<CellPos, Cell>.Empty);
             Middleware<CellsModel> logging = Middlewares.NewLoggingMiddleware<CellsModel>();
             UndoRedoReducer<CellsModel> undoLogic = new UndoRedoReducer<CellsModel>();
-            DataStore<CellsModel> store = new DataStore<CellsModel>(undoLogic.Wrap(MyReducers.MyReducer), model, logging);
+            DataStore<CellsModel> store = new DataStore<CellsModel>(undoLogic.Wrap(CellsReducers.MainReducer), model, logging);
 
             MyPresenter presenter = new MyPresenter();
             presenter.targetView = viewStack.ShowView("7GUIs_Task7_Cells");
@@ -33,11 +33,13 @@ namespace com.csutil.tests.Task7 {
 
         private class MyPresenter : Presenter<DataStore<CellsModel>> {
 
-            private GameObject uiRows;
-
             public GameObject targetView { get; set; }
-            public Task OnLoad(DataStore<CellsModel> store) {
 
+            private GameObject uiRows;
+            private DataStore<CellsModel> store;
+
+            public Task OnLoad(DataStore<CellsModel> store) {
+                this.store = store;
                 var map = targetView.GetLinkMap();
                 map.Get<Button>("Undo").SetOnClickAction(delegate {
                     store.Dispatch(new UndoAction<CellsModel>());
@@ -50,12 +52,16 @@ namespace com.csutil.tests.Task7 {
                 });
                 uiRows = map.Get<GameObject>("Rows");
 
-                store.AddStateChangeListenerDebounced(m => m.cells, Cells => {
-                    SyncUiRowCountWithModelRowCount(Cells);
-                    SyncUiColumnCountWithModelColumnCount(store, Cells);
-                    LinkCellUiToNewAddedCells(Cells);
-                }, delayInMs: 600);
+                store.AddStateChangeListenerDebounced(m => m.cells, UpdateCellsGridUi, delayInMs: 300);
                 return Task.FromResult(true);
+            }
+
+            private void UpdateCellsGridUi(ImmutableDictionary<CellPos, Cell> Cells) {
+                var cellsGridUiUpdateTiming = Log.MethodEntered();
+                SyncUiRowCountWithModelRowCount(Cells);
+                SyncUiColumnCountWithModelColumnCount(Cells);
+                LinkCellUiToNewAddedCells(Cells);
+                Log.MethodDone(cellsGridUiUpdateTiming);
             }
 
             // For each cell that is new in the model make sure its UI listens to its changes:
@@ -67,7 +73,7 @@ namespace com.csutil.tests.Task7 {
                 }
             }
 
-            private void SyncUiColumnCountWithModelColumnCount(DataStore<CellsModel> store, ImmutableDictionary<CellPos, Cell> Cells) {
+            private void SyncUiColumnCountWithModelColumnCount(ImmutableDictionary<CellPos, Cell> Cells) {
                 // Get the biggest column count in the cells model:
                 int maxColumn = Cells.Keys.Map(k => k.columnNr).Max() + 1;
                 // For each UI row check that they all have the same nr of UI cells:

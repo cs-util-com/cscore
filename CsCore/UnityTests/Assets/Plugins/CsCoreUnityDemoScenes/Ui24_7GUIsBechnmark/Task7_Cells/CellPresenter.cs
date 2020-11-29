@@ -28,12 +28,12 @@ namespace com.csutil.tests.Task7 {
             // If the cell was not used before, initialize it with 0:
             if (!store.GetState().cells.ContainsKey(cellPos)) { SetFormulaOfCell("0"); }
             store.Dispatch(new MyActions.SelectCell(cellPos));
-            formulaInput.SelectV2();
+            formulaInput.SelectV2(); // Set the UI input cursor on the now visible formula input
             Log.MethodDone(t);
         }
 
         private void SetFormulaOfCell(string newFormula) {
-            var t = Log.MethodEntered(newFormula);
+            var t = Log.MethodEnteredWith(newFormula);
             try {
                 store.Dispatch(new MyActions.SetCell(cellPos.columnId, cellPos.rowNr, newFormula));
                 // Show latest value via toast while formula is being edited:
@@ -55,7 +55,7 @@ namespace com.csutil.tests.Task7 {
         }
 
         private void UpdateUi(Cell newCellValue) {
-            value.text = "" + newCellValue?.value;
+            value.text = newCellValue != null ? "" + Math.Round(newCellValue.value, 3) : "";
             formulaInput.text = newCellValue?.formula;
             inputUi.SetActiveV2(newCellValue != null && newCellValue.isSelected);
         }

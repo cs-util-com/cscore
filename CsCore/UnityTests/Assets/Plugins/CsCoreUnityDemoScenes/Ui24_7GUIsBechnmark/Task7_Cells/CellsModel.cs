@@ -99,9 +99,13 @@ namespace com.csutil.tests.Task7 {
 
     }
 
+    #region Actions that can be send to the Redux data store
+
     public class MyActions {
+
         /// <summary> Allows to add or update a cell s</summary>
         public class SetCell {
+
             /// <summary> The cell entry to update </summary>
             public readonly CellPos pos;
             /// <summary> The new formula to set for the cell </summary>
@@ -121,15 +125,22 @@ namespace com.csutil.tests.Task7 {
             public readonly CellPos pos;
             public SelectCell(CellPos pos) { this.pos = pos; }
         }
+
     }
 
-    public class MyReducers {
+    #endregion
 
-        public static CellsModel MyReducer(CellsModel previousState, object action) {
-            var changed = false;
-            var newCells = previousState.MutateField(previousState.cells, action, CellsReducer, ref changed);
-            if (changed) { return new CellsModel(newCells); }
-            return previousState;
+    #region Reducers of the Redux data store that will process the actions
+
+    public class CellsReducers {
+
+        public static CellsModel MainReducer(CellsModel previousState, object action) {
+            using (var mainReducerTiming = Log.MethodEnteredWith(action)) {
+                var changed = false;
+                var newCells = previousState.MutateField(previousState.cells, action, CellsReducer, ref changed);
+                if (changed) { return new CellsModel(newCells); }
+                return previousState;
+            }
         }
 
         private static ImmutableDictionary<CellPos, Cell> CellsReducer(CellsModel parent, ImmutableDictionary<CellPos, Cell> oldCells, object action) {
@@ -158,15 +169,18 @@ namespace com.csutil.tests.Task7 {
 
         private static Cell ReduceCell(ImmutableDictionary<CellPos, Cell> allCells, Cell cell, object action) {
             if (action is MyActions.SetCell s && Equals(s.pos, cell.pos)) {
+                if (s.newFormula == cell.formula) { return cell; }
                 return NewCell(s, allCells, cell.isSelected);
             }
             if (action is MyActions.SelectCell c) {
-                bool select = Equals(c.pos, cell.pos);
-                if (cell.isSelected != select) {
-                    return new Cell(cell.pos, cell.formula, cell.dependentCells, cell.value, select);
-                }
+                return SetSelected(cell, Equals(c.pos, cell.pos));
             }
             return cell;
+        }
+
+        private static Cell SetSelected(Cell cell, bool isSelected) {
+            if (cell.isSelected == isSelected) { return cell; }
+            return new Cell(cell.pos, cell.formula, cell.dependentCells, cell.value, isSelected);
         }
 
         private static Cell NewCell(MyActions.SetCell s, ImmutableDictionary<CellPos, Cell> allCells, bool isSelected) {
@@ -187,5 +201,7 @@ namespace com.csutil.tests.Task7 {
         }
 
     }
+
+    #endregion
 
 }
