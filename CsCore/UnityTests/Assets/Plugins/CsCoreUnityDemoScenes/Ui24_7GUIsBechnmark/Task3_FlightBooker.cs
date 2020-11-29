@@ -20,8 +20,8 @@ namespace com.csutil.tests {
             public enum FlightType { oneWayFlight, withReturnFlight }
 
             public FlightType flightType = FlightType.oneWayFlight;
-            public DateTime tripStart = DateTimeV2.Now;
-            public DateTime tripBack;
+            public DateTime tripStart = DateTimeV2.Now + TimeSpan.FromMinutes(60);
+            public DateTime? tripBack;
 
         }
 
@@ -41,37 +41,50 @@ namespace com.csutil.tests {
                 oneWayDropdown = map.Get<Dropdown>("OneWayDropdown");
                 bookButton = map.Get<Button>("BookButton");
 
-                tripStartInput.text = "" + DateTimeV2.Now;
+                tripStartInput.text = "" + model.tripStart;
                 tripStartInput.AddOnValueChangedActionThrottled(newVal => {
-                    if (ShowValidInUi(tripBackInput, DateTime.TryParse(newVal, out DateTime x))) {
-                        model.tripStart = x;
-                        Validate(model);
+                    if (ShowValidInUi(tripStartInput, DateTime.TryParse(newVal, out DateTime d))) {
+                        model.tripStart = d;
+                        UpdateUi(model);
                     }
                 }, delayInMs: 1000);
                 tripBackInput.AddOnValueChangedActionThrottled(newVal => {
-                    if (ShowValidInUi(tripBackInput, DateTime.TryParse(newVal, out DateTime x))) {
-                        model.tripBack = x;
-                        Validate(model);
+                    if (ShowValidInUi(tripBackInput, DateTime.TryParse(newVal, out DateTime d))) {
+                        model.tripBack = d;
+                        UpdateUi(model);
                     }
                 }, delayInMs: 1000);
                 oneWayDropdown.SetOnValueChangedAction(selectedEntry => {
-                    Log.e("rejected selectedEntry=" + selectedEntry);
-                    return false;
+                    model.flightType = IsTwoWaySelected() ? MyModel.FlightType.withReturnFlight : MyModel.FlightType.oneWayFlight;
+                    // Auto fill the trip back the first time its selected:
+                    if (IsTwoWaySelected() && model.tripBack == null) {
+                        model.tripBack = model.tripStart + TimeSpan.FromDays(1);
+                        tripBackInput.text = "" + model.tripBack;
+                    }
+                    UpdateUi(model);
+                    return true;
                 });
+                UpdateUi(model);
                 return bookButton.SetOnClickAction(delegate {
-                    Log.d("Flight now booked: " + JsonWriter.AsPrettyString(model));
+                    Toast.Show("Flight now booked: " + JsonWriter.AsPrettyString(model));
                 });
             }
 
-            private void Validate(MyModel model) {
-                bool startValid = ShowValidInUi(tripStartInput, model.tripStart > DateTime.Now);
-                bool backValid = ShowValidInUi(tripBackInput, model.tripBack > model.tripStart);
-                bookButton.enabled = startValid && backValid;
+            private void UpdateUi(MyModel model) {
+                bool inputIsValid = ShowValidInUi(tripStartInput, model.tripStart > DateTime.Now);
+                var isTwoWaySelected = IsTwoWaySelected();
+                Log.MethodEnteredWith(oneWayDropdown.value);
+                tripBackInput.interactable = isTwoWaySelected;
+                if (isTwoWaySelected) {
+                    inputIsValid = ShowValidInUi(tripBackInput, model.tripBack > model.tripStart) & inputIsValid;
+                }
+                bookButton.interactable = inputIsValid;
             }
+
+            private bool IsTwoWaySelected() { return oneWayDropdown.value == 1; }
 
             private bool ShowValidInUi(InputField i, bool valid) {
                 var c = valid ? ThemeColor.ColorNames.elementContrast : ThemeColor.ColorNames.warning;
-                Log.MethodEnteredWith(i, valid, c);
                 i.SetNormalColor(IoC.inject.Get<Theme>(this).GetColor(c));
                 return valid;
             }

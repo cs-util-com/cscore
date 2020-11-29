@@ -166,6 +166,20 @@ namespace com.csutil {
             return EventSystem.current?.currentSelectedGameObject == self.gameObject;
         }
 
+        /// <summary> Similar to ChangeWasTriggeredByUserThroughEventSystem but checks not only if the 
+        /// eventsystems current selected GameObject is the target GO but also if any of the parents match the 
+        /// target GO which is important when a child of the UI construct is the one that received the click and 
+        /// informed the parent component based on this event (like the DropDown does) </summary>
+        private static bool ChangeInChildWasTriggeredByUserThroughEventSystem(this Component self) {
+            var go = EventSystem.current?.currentSelectedGameObject;
+            return CheckEqualOrParent(self.gameObject, go);
+        }
+
+        private static bool CheckEqualOrParent(GameObject parent, GameObject go) {
+            if (go == null) { return false; }
+            return go == parent || CheckEqualOrParent(parent, go.GetParent());
+        }
+
         public static UnityAction<string> SetOnValueChangedAction(this InputField self, Func<string, bool> onValueChanged) {
             if (self.onValueChanged != null && self.onValueChanged.GetPersistentEventCount() > 0) {
                 Log.w("Overriding old onValueChanged listener for input field " + self, self.gameObject);
@@ -208,7 +222,7 @@ namespace com.csutil {
                 UnityAction<int> newListener = (newSection) => {
                     if (newSection == oldSelection) { return; }
                     // Ignore event event if it was triggered through code, only fire for actual user input:
-                    if (!self.ChangeWasTriggeredByUserThroughEventSystem()) { return; }
+                    if (!self.ChangeInChildWasTriggeredByUserThroughEventSystem()) { return; }
                     if (!onValueChanged(newSection)) {
                         self.value = oldSelection;
                     } else {
