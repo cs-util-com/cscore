@@ -45,16 +45,20 @@ namespace com.csutil.tests.http {
             fileToUpload.SaveAsText(textInFile);
             Assert.Equal(textInFile, fileToUpload.LoadAs<string>());
 
-            RestRequest request = new Uri("https://file.io/?expires=1d").SendPOST().AddFileViaForm(fileToUpload);
-            FileIoResponse result = await request.GetResult<FileIoResponse>();
+            RestRequest uploadRequest = new Uri("https://file.io/?expires=1d").SendPOST().AddFileViaForm(fileToUpload);
+            uploadRequest.WithRequestHeaderUserAgent("" + Guid.NewGuid());
+            FileIoResponse result = await uploadRequest.GetResult<FileIoResponse>();
 
             Log.d(JsonWriter.AsPrettyString(result));
             Assert.True(result.success);
             Assert.NotEmpty(result.link);
 
             FileEntry fileToDownloadTo = dir.GetChild("test2.txt");
-            await new Uri(result.link).SendGET().DownloadTo(fileToDownloadTo);
-            Assert.True(textInFile == fileToDownloadTo.LoadAs<string>(), "Invalid textInFile from " + result.link);
+            var downloadRequest = new Uri(result.link).SendGET();
+            downloadRequest.WithRequestHeaderUserAgent("" + Guid.NewGuid());
+            await downloadRequest.DownloadTo(fileToDownloadTo);
+            //Assert.True(textInFile == fileToDownloadTo.LoadAs<string>(), "Invalid textInFile from " + result.link);
+            Assert.Equal(textInFile, fileToDownloadTo.LoadAs<string>());
 
         }
 
@@ -64,6 +68,8 @@ namespace com.csutil.tests.http {
             public string key;
             public string link;
             public string expiry;
+            public int? error;
+            public string message;
         }
 
         public class PostmanEchoResponse {
