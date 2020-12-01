@@ -49,6 +49,9 @@ namespace com.csutil.http {
         }
 
         public RestRequest WithRequestHeaders(Headers requestHeaders) {
+            if (request.IsCompleted) {
+                throw new AccessViolationException("Request already sent, cant set requestHeaders anymore");
+            }
             this.requestHeaders = new Headers(this.requestHeaders.AddRangeViaUnion(requestHeaders));
             return this;
         }
