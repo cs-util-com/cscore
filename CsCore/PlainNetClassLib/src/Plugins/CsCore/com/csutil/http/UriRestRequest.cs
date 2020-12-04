@@ -58,6 +58,9 @@ namespace com.csutil.http {
 
         public async Task<T> GetResult<T>() {
             HttpResponseMessage resp = await request;
+            if (typeof(T).IsCastableTo<Exception>() && resp.StatusCode.IsErrorStatus()) {
+                return (T)(object)new NoSuccessError(resp.StatusCode, await GetResult<string>());
+            }
             AssertV2.IsTrue(HttpStatusCode.OK == resp.StatusCode, "response.StatusCode=" + resp.StatusCode);
             if (TypeCheck.AreEqual<T, HttpResponseMessage>()) { return (T)(object)resp; }
             if (TypeCheck.AreEqual<T, HttpStatusCode>()) { return (T)(object)resp.StatusCode; }
@@ -90,7 +93,10 @@ namespace com.csutil.http {
         }
 
         public async Task<HttpResponseMessage> SendAsync(HttpMethod method) {
-            client = new HttpClient();
+            HttpClientHandler handler = new HttpClientHandler() {
+                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
+            };
+            client = new HttpClient(handler);
             await TaskV2.Delay(5); // Wait so that the created RestRequest can be modified before its sent
             httpMethod = "" + method;
             client.AddRequestHeaders(requestHeaders);

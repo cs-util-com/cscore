@@ -9,6 +9,7 @@ using Xunit;
 
 namespace com.csutil.tests.model {
 
+    [Collection("Sequential")] // Will execute tests in here sequentially
     public class FeatureUsageRuleSystemTests {
 
         public FeatureUsageRuleSystemTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }

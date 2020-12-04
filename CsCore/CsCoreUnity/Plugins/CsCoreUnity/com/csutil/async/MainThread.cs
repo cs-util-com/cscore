@@ -25,7 +25,7 @@ namespace com.csutil {
         private ConcurrentQueue<Action> actionsForMainThread = new ConcurrentQueue<Action>();
 
         private void Awake() {
-            UnityEngine.Debug.Log($"MainThread_{GetHashCode()}.Awake (while Application.isPlaying={ApplicationV2.isPlaying})", gameObject);
+            // UnityEngine.Debug.Log($"MainThread_{GetHashCode()}.Awake (while Application.isPlaying={ApplicationV2.isPlaying})", gameObject);
             if (mainThreadRef != null) { throw Log.e("There is already a MainThread"); }
             mainThreadRef = Thread.CurrentThread;
         }
@@ -36,7 +36,7 @@ namespace com.csutil {
         }
 
         private void OnDestroy() {
-            UnityEngine.Debug.Log($"MainThread_{GetHashCode()}.OnDestroy (while Application.isPlaying={ApplicationV2.isPlaying})", gameObject);
+            // UnityEngine.Debug.Log($"MainThread_{GetHashCode()}.OnDestroy (while Application.isPlaying={ApplicationV2.isPlaying})", gameObject);
             mainThreadRef = null;
         }
 

@@ -7,6 +7,7 @@ using Xunit;
 
 namespace com.csutil.tests {
 
+    [Collection("Sequential")] // Will execute tests in here sequentially
     public class AppFlowTests {
 
         public AppFlowTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
@@ -68,7 +69,7 @@ namespace com.csutil.tests {
                 AppFlowToStore appFlow = new AppFlowToStore(store.GetTypeAdapter<AppFlowEvent>());
                 await TestAppFlowWithStore(eventCount, appFlow); // Run the tests
                 Assert.Equal(eventCount, dir1.GetFiles().Count());
-                Log.MethodDone(s2, maxAllowedTimeInMs: 4000);
+                Log.MethodDone(s2, maxAllowedTimeInMs: 10000);
             }
             var s3 = Log.MethodEntered("Real FileSystem");
             {
@@ -78,9 +79,10 @@ namespace com.csutil.tests {
                 AppFlowToStore appFlow = new AppFlowToStore(store.GetTypeAdapter<AppFlowEvent>());
                 await TestAppFlowWithStore(eventCount, appFlow); // Run the tests
                 Assert.Equal(eventCount, dir2.GetFiles().Count());
-                Log.MethodDone(s3, maxAllowedTimeInMs: 5000);
+                Log.MethodDone(s3, maxAllowedTimeInMs: 10000);
             }
-            Assert.True(s2.ElapsedMilliseconds < s3.ElapsedMilliseconds);
+            float ratioInMemVsReadFs = s2.ElapsedMilliseconds / s3.ElapsedMilliseconds;
+            Assert.True(0.5 < ratioInMemVsReadFs && ratioInMemVsReadFs < 2, $"s2={s2} > s3={s3}");
         }
 
         [Fact]

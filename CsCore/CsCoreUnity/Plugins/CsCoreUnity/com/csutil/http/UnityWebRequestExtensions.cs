@@ -4,8 +4,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Net;
+using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -48,7 +50,7 @@ namespace com.csutil {
             }
             try {
                 resp.duration.Stop();
-                Log.d("   > Finished " + resp);
+                // Log.d("   > Finished " + resp);
                 AssertResponseLooksNormal(self, resp);
                 self.SaveAllNewCookiesFromResponse();
                 if (self.error.IsNullOrEmpty()) { resp.progressInPercent.SetNewValue(100); }
@@ -68,7 +70,7 @@ namespace com.csutil {
         }
 
         private static void SetupDownloadAndUploadHanders<T>(UnityWebRequest self, Response<T> resp) {
-            self.downloadHandler = resp.createDownloadHandler(); 
+            self.downloadHandler = resp.createDownloadHandler();
             switch (self.method) {
                 case UnityWebRequest.kHttpVerbPUT:
                 case UnityWebRequest.kHttpVerbPOST:
@@ -111,13 +113,44 @@ namespace com.csutil {
                 return (T)(object)h.texture;
                 //return (T)(object)DownloadHandlerTexture.GetContent(self);
             }
+            if (typeof(T).IsCastableTo<Exception>() && self.GetStatusCode().IsErrorStatus()) {
+                return (T)(object)new NoSuccessError(self.GetStatusCode(), self.GetResult<string>());
+            }
             if (TypeCheck.AreEqual<T, HttpStatusCode>()) { return (T)(object)self.GetStatusCode(); }
-            if (TypeCheck.AreEqual<T, Stream>()) { return (T)(object)new MemoryStream(self.downloadHandler.data); }
-            if (TypeCheck.AreEqual<T, byte[]>()) { return (T)(object)self.downloadHandler.data; }
+            if (TypeCheck.AreEqual<T, Stream>()) { return (T)(object)new MemoryStream(GetBytesResult(self)); }
+            if (TypeCheck.AreEqual<T, byte[]>()) { return (T)(object)GetBytesResult(self); }
             if (TypeCheck.AreEqual<T, Headers>()) { return (T)(object)self.GetResponseHeadersV2(); }
-            var text = self.downloadHandler.text;
+            var text = GetStringResult(self);
             if (TypeCheck.AreEqual<T, string>()) { return (T)(object)text; }
             return r.Read<T>(text);
+        }
+
+        private static byte[] GetBytesResult(UnityWebRequest self) {
+            if (ResponseIsGZipped(self)) {
+                try { return DecompressGzip(self.downloadHandler?.data); }
+                catch (Exception e) { Log.e(e); }
+            }
+            return self.downloadHandler.data;
+        }
+
+        private static string GetStringResult(UnityWebRequest self) {
+            if (ResponseIsGZipped(self)) {
+                try { return Encoding.UTF8.GetString(DecompressGzip(self.downloadHandler?.data)); }
+                catch (Exception e) { Log.e(e); }
+            }
+            return self.downloadHandler?.text;
+        }
+
+        private static bool ResponseIsGZipped(UnityWebRequest self) {
+            return self.GetResponseHeader("content-encoding").ToLowerInvariant() == "gzip";
+        }
+
+        private static byte[] DecompressGzip(byte[] gzippedData) {
+            using (var stream = new MemoryStream(gzippedData)) {
+                using (var gzipStream = new GZipStream(stream, CompressionMode.Decompress)) {
+                    return gzipStream.ToByteArray();
+                }
+            }
         }
 
         public static HttpStatusCode GetStatusCode(this UnityWebRequest self) {

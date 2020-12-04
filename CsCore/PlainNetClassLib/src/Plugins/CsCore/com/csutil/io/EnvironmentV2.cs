@@ -27,6 +27,16 @@ namespace com.csutil {
             }
         }
 
+        public static bool isDebugMode {
+            get {
+#if DEBUG
+                return true;
+#else
+                return false;
+#endif
+            }
+        }
+
         public virtual CultureInfo CurrentCulture {
             get => CultureInfo.CurrentCulture;
             set => CultureInfo.CurrentCulture = value;

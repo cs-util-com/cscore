@@ -7,6 +7,7 @@ using Xunit;
 
 namespace com.csutil.tests.system {
 
+    [Collection("Sequential")] // Will execute tests in here sequentially
     public class NewsManagerTests {
 
         public NewsManagerTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }

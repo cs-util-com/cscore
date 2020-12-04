@@ -15,6 +15,7 @@ namespace com.csutil.tests.model.immutable {
     /// - A thunk middleware to enable dispatching async actions
     /// - A recorder middleware to record and replay all actions of a store
     /// </summary>
+    [Collection("Sequential")] // Will execute tests in here sequentially
     public class DataStoreExample2 {
 
         public DataStoreExample2(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }

@@ -10,9 +10,12 @@ namespace com.csutil.logging.ui {
         public Text icon;
 
         public override void UpdateContent(LogEntry item) {
-            logText.text = item.createdAt.ToString("[HH:mm:ss] ")  + item.message;
-            background.color = item.color;
+            logText.text = item.createdAt.ToString("[HH:mm:ss] ") + item.message;
             icon.text = item.icon;
+            background.color = item.color;
+            var compl = item.color.GetContrastBlackOrWhite();
+            logText.color = compl;
+            icon.color = compl;
         }
 
     }

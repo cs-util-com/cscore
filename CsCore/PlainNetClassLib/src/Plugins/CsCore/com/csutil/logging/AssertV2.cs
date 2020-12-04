@@ -6,9 +6,13 @@ using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
 
 namespace com.csutil {
+
     public static class AssertV2 {
 
         private const string LB = "\r\n";
+        private static object syncLock = new object();
+        
+        public static bool throwExeptionIfAssertionFails = false;
 
         private static void Assert(bool condition, string errorMsg, object[] args) {
             args = new StackTrace(2, true).AddTo(args);
@@ -174,9 +178,6 @@ namespace com.csutil {
 
         public static bool IsUnderXms(this Stopwatch self, int maxTimeInMs) { return self.ElapsedMilliseconds <= maxTimeInMs; }
 
-        private static object syncLock = new object();
-        public static bool throwExeptionIfAssertionFails = false;
-
         public static void ThrowExeptionIfAssertionFails(Action taskToExecute) {
             ThrowExeptionIfAssertionFails(true, taskToExecute);
         }
@@ -191,4 +192,5 @@ namespace com.csutil {
         }
 
     }
+
 }

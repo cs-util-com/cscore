@@ -5,6 +5,8 @@ using System.Threading.Tasks.Schedulers;
 using Xunit;
 
 namespace com.csutil.tests.async {
+
+    [Collection("Sequential")] // Will execute tests in here sequentially
     public class TaskV2Tests {
 
         public TaskV2Tests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
@@ -69,14 +71,15 @@ namespace com.csutil.tests.async {
         }
 
         [Fact]
-        public async Task testNotAwaitingAsyncTask() {
+        public async Task TestNotAwaitingAsyncTask() {
             bool b1 = false, b2 = false;
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-            RunSomeAsyncTask(() => b1 = true);
+            var b1Task = RunSomeAsyncTask(() => b1 = true);
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             Assert.False(b1);
             await RunSomeAsyncTask(() => b2 = true);
             Assert.True(b2);
+            await b1Task;
             Assert.True(b1);
         }
 

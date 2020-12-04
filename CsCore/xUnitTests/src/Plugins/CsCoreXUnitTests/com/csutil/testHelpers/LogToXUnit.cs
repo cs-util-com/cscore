@@ -1,6 +1,7 @@
 
 using com.csutil;
 using com.csutil.logging;
+using System;
 using Xunit.Abstractions;
 
 namespace Xunit {
@@ -21,15 +22,16 @@ namespace Xunit {
         public LogToXUnit(ITestOutputHelper xunitLogger) { this.xunitLogger = xunitLogger; }
 
         protected override void PrintDebugMessage(string debugLogMsg, params object[] args) {
-            xunitLogger.WriteLine(debugLogMsg);
+            try { xunitLogger.WriteLine(debugLogMsg); } catch (Exception) { }
+
         }
 
         protected override void PrintErrorMessage(string errorMsg, params object[] args) {
-            xunitLogger.WriteLine(errorMsg);
+            try { xunitLogger.WriteLine(errorMsg); } catch (Exception) { }
         }
 
         protected override void PrintWarningMessage(string warningMsg, params object[] args) {
-            xunitLogger.WriteLine(warningMsg);
+            try { xunitLogger.WriteLine(warningMsg); } catch (Exception) { }
         }
 
     }

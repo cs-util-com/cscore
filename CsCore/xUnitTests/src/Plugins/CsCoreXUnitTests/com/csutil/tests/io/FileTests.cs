@@ -7,6 +7,7 @@ using Xunit;
 
 namespace com.csutil.tests {
 
+    [Collection("Sequential")] // Will execute tests in here sequentially
     public class FileTests {
 
         public FileTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
@@ -89,7 +90,6 @@ namespace com.csutil.tests {
 
         [Fact]
         public void TestFileAndDirIteration() {
-            AssertV2.throwExeptionIfAssertionFails = true;
             var rootDir = CreateDirectoryForTesting("TestFileAndDirIteration");
             TestIterationInFolder(rootDir);
             TestIterationInFolder(rootDir.GetChildDir("Dir3").CreateV2());
@@ -115,7 +115,6 @@ namespace com.csutil.tests {
 
         [Fact]
         public async Task TestDirectoryMethods() {
-            AssertV2.throwExeptionIfAssertionFails = true;
             var rootDir = CreateDirectoryForTesting("DirMethodsTest_" + DateTimeV2.UtcNow.ToUnixTimestampUtc());
 
             // Test FullPath:

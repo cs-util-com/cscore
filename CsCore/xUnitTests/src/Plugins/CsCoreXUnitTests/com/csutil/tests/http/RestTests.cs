@@ -4,14 +4,18 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Web;
 using com.csutil.http;
+using com.csutil.http.apis;
 using com.csutil.io;
 using StbImageLib;
 using Xunit;
 
 namespace com.csutil.tests.http {
 
+    [Collection("Sequential")] // Will execute tests in here sequentially
     public class RestTests {
 
         public RestTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
@@ -86,7 +90,7 @@ namespace com.csutil.tests.http {
 
         [Fact]
         public async Task TestDateTimeV2() {
-            const int maxDiffInMs = 50;
+            const int maxDiffInMs = 1000;
             Assert.True(GetDiffBetweenV1AndV2() < maxDiffInMs, "GetTimeDiff()=" + GetDiffBetweenV1AndV2());
 
             // Trigger any REST request to get a UTC time from the used server:
@@ -94,8 +98,8 @@ namespace com.csutil.tests.http {
             string serverUtcString = headers.First(h => h.Key == "date").Value.First();
             DateTime serverUtcTime = DateTimeV2.ParseUtc(serverUtcString);
             Log.d("Server reported its UTC time to be: " + serverUtcTime);
-            var diffBetweenLocalAndOnline = IoC.inject.Get<DateTimeV2>(this).diffOfLocalToServer.Value;
-            Assert.True(Math.Abs(diffBetweenLocalAndOnline.Milliseconds) > maxDiffInMs);
+            var diffLocalAndOnline = Math.Abs(IoC.inject.Get<DateTimeV2>(this).diffOfLocalToServer.Value.Milliseconds);
+            Assert.True(diffLocalAndOnline < maxDiffInMs, $"diffLocalAndOnline {diffLocalAndOnline} > maxDiffInMs {maxDiffInMs}");
             Log.d("Current DateTimeV2.UtcNow: " + DateTimeV2.UtcNow);
             await TaskV2.Delay(1000);
             Log.d("Corrected local time: " + DateTimeV2.UtcNow);
@@ -141,8 +145,54 @@ namespace com.csutil.tests.http {
             Assert.True(hasInet || hasNoInet); // Any of the 2 callbacks was triggered
         }
 
+        [Fact]
+        public void TestEscapeAndUnescapeStrings() {
+            string s = "'abc'";
+            var escapedUriString = Uri.EscapeDataString(s);
+            Assert.Equal("%27abc%27", escapedUriString);
+            var unescapedDataString = Uri.UnescapeDataString(escapedUriString);
+            Assert.Equal(s, unescapedDataString);
+
+            // HTML encoded strings can have a different format that can be decoded too:
+            var unescapedHtmlString = WebUtility.HtmlDecode("&#39;abc&#39;");
+            Assert.Equal(s, unescapedHtmlString);
+        }
+
+        [Fact]
+        public async Task AskStackOverflowCom1() {
+            string answer = await StackOverflowCom.CheckError("How to sort a list", new List<string>() { "C#", "list" }, maxResults: 2);
+            Log.d(answer);
+            Assert.True(answer.Length > 600, "answer.Length=" + answer.Length);
+        }
+
+        [Fact]
+        public async Task AskStackOverflowCom2() {
+            string answer = await StackOverflowCom.CheckError("Sequence contains no elements", new List<string>() { "C#" }, maxResults: 2);
+            Log.d(answer);
+            Assert.True(answer.Length > 600, "answer.Length=" + answer.Length);
+        }
+
+        [Fact]
+        public async Task TestStackOverflowCom() {
+            try {
+
+                try { // Provoke an exception that will then be searched for on StackOverflow
+                    List<string> list = new List<string>(); // List without entries
+                    list.First(); // Will cause "Sequence contains no elements" exception
+                }
+                catch (Exception e) { await e.RethrowWithAnswers(); }
+
+            }
+            catch (Error exceptionWithAnswers) {
+                // Check that the error contains detailed answers:
+                var length = exceptionWithAnswers.Message.Length;
+                Assert.True(length > 1500, "message length=" + length);
+            }
+        }
+
     }
 
+    [Collection("Sequential")] // Will execute tests in here sequentially
     public class HasInternetTests : IHasInternetListener {
 
         private bool hasInet;
@@ -159,7 +209,6 @@ namespace com.csutil.tests.http {
 
         [Fact]
         public async Task TestInternetStateListener20Times() {
-            Assert.False(InternetStateManager.Instance(this).HasInet);
             for (int i = 0; i < 20; i++) {
                 await TestInternetStateListenerOnce();
             }
@@ -169,19 +218,6 @@ namespace com.csutil.tests.http {
             this.hasInet = hasInet;
             Assert.True(hasInet);
             return Task.FromResult(true);
-        }
-
-        [Fact]
-        public void TestEscapeAndUnescapeStrings() {
-            string s = "'abc'";
-            var escapedUriString = Uri.EscapeDataString(s);
-            Assert.Equal("%27abc%27", escapedUriString);
-            var unescapedDataString = Uri.UnescapeDataString(escapedUriString);
-            Assert.Equal(s, unescapedDataString);
-
-            // HTML encoded strings can have a different format that can be decoded too:
-            var unescapedHtmlString = WebUtility.HtmlDecode("&#39;abc&#39;");
-            Assert.Equal(s, unescapedHtmlString);
         }
 
     }

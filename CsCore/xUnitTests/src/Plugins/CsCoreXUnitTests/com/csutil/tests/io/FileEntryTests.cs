@@ -12,11 +12,11 @@ namespace com.csutil.tests {
     /// These tests are analog to the FileTests (that work directly with FileInfo and DirectoryInfo) but 
     /// the FileEntry use the new FileSystem abstraction.
     /// </summary>
+    [Collection("Sequential")] // Will execute tests in here sequentially
     public class FileEntryTests {
 
         public FileEntryTests(Xunit.Abstractions.ITestOutputHelper logger) {
             logger.UseAsLoggingOutput();
-            AssertV2.throwExeptionIfAssertionFails = true;
         }
 
         [Fact]
@@ -101,7 +101,6 @@ namespace com.csutil.tests {
 
         [Fact]
         public void TestFileAndDirIteration() {
-            AssertV2.throwExeptionIfAssertionFails = true;
             var rootDir = CreateDirectoryForTesting("TestFileAndDirIteration");
             TestIterationInFolder(rootDir);
             TestIterationInFolder(rootDir.GetChildDir("Dir3").CreateV2());
@@ -127,7 +126,6 @@ namespace com.csutil.tests {
 
         [Fact]
         public async Task TestDirectoryMethods() {
-            AssertV2.throwExeptionIfAssertionFails = true;
             var rootDir = CreateDirectoryForTesting("DirMethodsTest_" + DateTimeV2.UtcNow.ToUnixTimestampUtc());
 
             // Test FullPath:

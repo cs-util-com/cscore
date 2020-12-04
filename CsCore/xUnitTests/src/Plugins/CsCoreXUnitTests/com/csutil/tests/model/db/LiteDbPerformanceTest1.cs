@@ -12,14 +12,13 @@ using Zio;
 
 namespace com.csutil.tests.model {
 
+    [Collection("Sequential")] // Will execute tests in here sequentially
     public class LiteDbPerformanceTest1 {
 
         public LiteDbPerformanceTest1(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
         [Fact]
         public async Task PerformanceTest1() {
-            AssertV2.throwExeptionIfAssertionFails = true;
-
             var dataTree = NewTreeLayer("1", 1000, () => NewTreeLayer("2", 2, () => NewTreeLayer("3", 4, () => NewTreeLayer("4", 1))));
 
             var testFolder = EnvironmentV2.instance.GetOrAddTempFolder("tests.io.db").CreateV2();

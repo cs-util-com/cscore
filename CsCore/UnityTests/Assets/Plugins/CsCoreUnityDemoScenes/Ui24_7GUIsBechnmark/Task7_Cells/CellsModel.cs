@@ -117,6 +117,9 @@ namespace com.csutil.tests.Task7 {
 
             public class SelfRefException : Exception {
                 public SelfRefException(string message) : base(message) { }
+                // Required default constructors (https://docs.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca1032):
+                public SelfRefException() { }
+                public SelfRefException(string message, Exception innerException) : base(message, innerException) { }
             }
 
         }

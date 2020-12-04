@@ -5,6 +5,7 @@ using Xunit;
 
 namespace com.csutil.tests {
 
+    [Collection("Sequential")] // Will execute tests in here sequentially
     public class PreferencesTests {
 
         public PreferencesTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
@@ -14,15 +15,15 @@ namespace com.csutil.tests {
         public void ExampleUsage1() {
 
             // In the setup logic of your application set the Preferences singleton:
-            IoC.inject.SetSingleton<IPreferences>(new Preferences(new InMemoryKeyValueStore()));
+            IoC.inject.GetOrAddSingleton<IPreferences>(new Preferences(new InMemoryKeyValueStore()));
 
             string key1 = "key1";
             string value1 = "value1";
             var prefs = Preferences.instance;
             prefs.Set(key1, value1);
             string x = prefs.Get(key1, "defaultValue1").Result;
-            prefs.Remove(key1); // cleanup
             Assert.Equal(value1, x);
+            prefs.Remove(key1); // cleanup
 
         }
 
