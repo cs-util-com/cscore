@@ -127,18 +127,38 @@ namespace com.csutil.tests {
         }
 
         [Fact]
+        public void TestSplitViaRegex() {
+            // See https://stackoverflow.com/a/2159085 and https://regex101.com/r/uS6cH4/20
+            string input = @"#@!@LOLOLOL YOU'VE BEEN \***PWN3D*** ! :') !!!1einszwei drei !";
+            List<string> res = input.SplitViaRegex(regex: @"[^\W\d](\w|[-']{1,2}(?=\w))*");
+            Assert.Equal(6, res.Count);
+            Assert.Equal("LOLOLOL", res[0]);
+            Assert.Equal("YOU'VE", res[1]);
+            Assert.Equal("BEEN", res[2]);
+            Assert.Equal("PWN3D", res[3]);
+            Assert.Equal("einszwei", res[4]);
+            Assert.Equal("drei", res[5]);
+        }
+
+        [Fact]
         public void TestRegexMatchAndExtractSyntax() {
+            // Splitting a string using a regex
+
+            // When the regex has a single group:
             { // See https://regex101.com/r/uS6cH4/18
-                var regex = "([A-Za-z]+[0-9]+)";
-                var matches = Regex.Matches("66 + Aa7 * BB43 / 2", regex);
+                string input = "66 + Aa7 * BB43 / 2";
+                string regex = "([A-Za-z]+[0-9]+)";
+                MatchCollection matches = Regex.Matches(input, regex);
                 Assert.Equal(2, matches.Count);
                 Assert.Equal("Aa7", matches[0].Value);
                 Assert.Equal("BB43", matches[1].Value);
             }
+
+            // The regex can also have multiple groups: 
             { // See https://regex101.com/r/uS6cH4/19
-                var regex = "([A-Za-z]+)([0-9]+)";
-                var input = "Aaa678"; // Would also work with eg "123 Aaa678 !!"
-                var match = Regex.Match(input, regex);
+                string regex = "([A-Za-z]+)([0-9]+)";
+                string input = "Aaa678"; // Would also work with eg "123 Aaa678 !!"
+                Match match = Regex.Match(input, regex);
                 Assert.Equal(3, match.Groups.Count);
                 Group fullMatch = match.Groups[0];
                 Group group1 = match.Groups[1];

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace com.csutil {
@@ -39,6 +40,11 @@ namespace com.csutil {
 
         public static string[] Split(this string self, string separator) {
             return self.Split(new string[] { separator }, StringSplitOptions.None);
+        }
+
+        public static List<string> SplitViaRegex(this string self, string regex) {
+            IEnumerable<Match> e = Regex.Matches(self, regex).Cast<Match>();
+            return e.Map(match => match.Value).ToList();
         }
 
         /// <summary> "An {0} with {1} placeholders!".With("example", "multiple") </summary>
