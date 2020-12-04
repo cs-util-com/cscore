@@ -8,6 +8,7 @@ using Zio;
 
 namespace com.csutil.tests.model {
 
+    [Collection("Sequential")] // Will execute tests in here sequentially
     public class ModelPersistenceTests {
 
         public ModelPersistenceTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }

@@ -119,10 +119,10 @@ namespace com.csutil {
             catch (Exception e) { Console.WriteLine("" + e); return ""; }
         }
 
-        internal static object[] AddTo(this StackFrame self, object[] args) { return Add(args, self); }
-        internal static object[] AddTo(this StackTrace self, object[] args) { return Add(args, self); }
+        internal static object[] AddTo(this StackFrame self, object[] args) { return AddToArgs(args, self); }
+        internal static object[] AddTo(this StackTrace self, object[] args) { return AddToArgs(args, self); }
 
-        private static object[] Add(object[] args, Object obj) {
+        public static object[] AddToArgs(this object[] args, object obj) {
             var a = new object[1] { obj };
             if (args == null) { return a; } else { return args.Concat(a).ToArray(); }
         }

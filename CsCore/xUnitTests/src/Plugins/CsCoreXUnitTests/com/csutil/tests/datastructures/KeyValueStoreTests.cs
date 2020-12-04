@@ -8,11 +8,11 @@ using Xunit;
 
 namespace com.csutil.tests.keyvaluestore {
 
+    [Collection("Sequential")] // Will execute tests in here sequentially
     public class KeyValueStoreTests {
 
         public KeyValueStoreTests(Xunit.Abstractions.ITestOutputHelper logger) {
             logger.UseAsLoggingOutput();
-            AssertV2.throwExeptionIfAssertionFails = true;
         }
 
         private class MyClass1 {

@@ -61,6 +61,10 @@ namespace com.csutil {
                 + ", allocated mem: " + ByteSizeToString.ByteSizeToReadableString(allocatedMemBetweenStartAndStop);
         }
 
+        public override string ToString() {
+            return $"StopWatch '{methodName}' ({ElapsedMilliseconds} ms)";
+        }
+
         public void Dispose() { onDispose?.Invoke(); }
 
     }

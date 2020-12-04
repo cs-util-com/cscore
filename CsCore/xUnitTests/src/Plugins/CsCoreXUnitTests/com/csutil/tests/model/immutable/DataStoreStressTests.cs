@@ -7,6 +7,7 @@ using Xunit;
 
 namespace com.csutil.tests.model.immutable {
 
+    [Collection("Sequential")] // Will execute tests in here sequentially
     public class DataStoreStressTests {
 
         public DataStoreStressTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }

@@ -6,6 +6,7 @@ using Xunit;
 
 namespace com.csutil.tests {
 
+    [Collection("Sequential")] // Will execute tests in here sequentially
     public class I18nTests {
 
         public I18nTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }

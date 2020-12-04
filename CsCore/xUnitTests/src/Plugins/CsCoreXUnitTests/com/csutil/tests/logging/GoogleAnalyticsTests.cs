@@ -9,6 +9,7 @@ using Xunit;
 
 namespace com.csutil.tests.logging {
 
+    [Collection("Sequential")] // Will execute tests in here sequentially
     public class GoogleAnalyticsTests {
 
         // https://analytics.google.com/analytics/web/?pli=1#/report/content-event-events/a130164002w221792235p210768996/

@@ -7,6 +7,7 @@ using Xunit;
 
 namespace com.csutil.tests.async {
 
+    [Collection("Sequential")] // Will execute tests in here sequentially
     public class EventHandlerTests {
 
         public EventHandlerTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
@@ -29,7 +30,7 @@ namespace com.csutil.tests.async {
             action("good"); // This will be delayed for 50ms and then triggered because no additional call follows after it
 
             // Wait a little bit until the action was triggered at least 2 times:
-            for (int i = 0; i < 50; i++) { await TaskV2.Delay(100); if (counter >= 2) { break; } }
+            for (int i = 0; i < 50; i++) { await TaskV2.Delay(200); if (counter >= 2) { break; } }
             Assert.Equal(2, counter);
             Assert.True(allWereGood);
         }
@@ -97,13 +98,13 @@ namespace com.csutil.tests.async {
             throttledAction(this, "bad");
             throttledAction(this, "bad");
             throttledAction(this, "good");
-            for (int i = 0; i < 30; i++) { await TaskV2.Delay(100); if (counter >= 2) { break; } }
+            for (int i = 0; i < 30; i++) { await TaskV2.Delay(300); if (counter >= 2) { break; } }
             Assert.Equal(2, counter);
             await TaskV2.Delay(100);
             throttledAction(this, "good");
             throttledAction(this, "bad");
             throttledAction(this, "good");
-            for (int i = 0; i < 30; i++) { await TaskV2.Delay(100); if (counter >= 4) { break; } }
+            for (int i = 0; i < 30; i++) { await TaskV2.Delay(300); if (counter >= 4) { break; } }
             await TaskV2.Delay(100);
             Assert.Equal(4, counter);
             await TaskV2.Delay(100);
@@ -126,7 +127,7 @@ namespace com.csutil.tests.async {
                 tasks.Add(TaskV2.Run(() => { throttledAction(this, myIntParam); }));
             }
             await Task.WhenAll(tasks.ToArray());
-            for (int i = 0; i < 20; i++) { await TaskV2.Delay(5); if (counter >= 2) { break; } }
+            for (int i = 0; i < 20; i++) { await TaskV2.Delay(30); if (counter >= 2) { break; } }
             Assert.Equal(2, counter);
             await TaskV2.Delay(100);
             Assert.Equal(2, counter);
@@ -202,7 +203,9 @@ namespace com.csutil.tests.async {
             Assert.Null(wrappedFunc("bad"));
             Assert.Null(wrappedFunc("bad"));
             await task;
+            await TaskV2.Delay(delayInMs);
             task = wrappedFunc("good");
+            Assert.NotNull(task);
             Assert.Null(wrappedFunc("bad"));
             Assert.Null(wrappedFunc("bad"));
             Assert.Null(wrappedFunc("bad"));

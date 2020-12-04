@@ -15,6 +15,7 @@ using Xunit;
 
 namespace com.csutil.tests.http {
 
+    [Collection("Sequential")] // Will execute tests in here sequentially
     public class RestTests {
 
         public RestTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
@@ -191,6 +192,7 @@ namespace com.csutil.tests.http {
 
     }
 
+    [Collection("Sequential")] // Will execute tests in here sequentially
     public class HasInternetTests : IHasInternetListener {
 
         private bool hasInet;
@@ -207,7 +209,6 @@ namespace com.csutil.tests.http {
 
         [Fact]
         public async Task TestInternetStateListener20Times() {
-            Assert.False(InternetStateManager.Instance(this).HasInet);
             for (int i = 0; i < 20; i++) {
                 await TestInternetStateListenerOnce();
             }

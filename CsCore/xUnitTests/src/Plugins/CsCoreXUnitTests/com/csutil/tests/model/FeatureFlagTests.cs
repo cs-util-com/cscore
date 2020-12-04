@@ -9,6 +9,7 @@ using Xunit;
 
 namespace com.csutil.tests.model {
 
+    [Collection("Sequential")] // Will execute tests in here sequentially
     public class FeatureFlagTests {
 
         public FeatureFlagTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }

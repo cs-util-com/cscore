@@ -122,15 +122,14 @@ namespace com.csutil.tests {
 
         [Fact]
         public void DateTime_MoreTests() {
-            AssertV2.ThrowExeptionIfAssertionFails(false, () => {
+            {
                 var dateTime1 = DateTimeV2.NewDateTimeFromUnixTimestamp(1547535889);
                 var dateTime2 = DateTimeV2.NewDateTimeFromUnixTimestamp(1547535889000);
                 Assert.Equal(dateTime1, dateTime2);
                 var dateTime3 = DateTimeV2.NewDateTimeFromUnixTimestamp(1547535889, autoCorrectIfPassedInSeconds: false);
                 Assert.NotEqual(dateTime1, dateTime3);
-            });
-            AssertV2.ThrowExeptionIfAssertionFails(false, () => {
-                if (AssertV2.throwExeptionIfAssertionFails) { return; } // Abort test if the flag is not correct
+            }
+            {
                 var dateTime1 = DateTimeV2.NewDateTimeFromUnixTimestamp(-2);
                 var dateTime2 = DateTimeV2.NewDateTimeFromUnixTimestamp(2);
                 Assert.True(dateTime1.IsBefore(dateTime2));
@@ -140,8 +139,7 @@ namespace com.csutil.tests {
                 Assert.True(DateTimeV2.NewDateTimeFromUnixTimestamp(0).IsBetween(dateTime1, dateTime2));
                 Assert.False(DateTimeV2.NewDateTimeFromUnixTimestamp(0).IsBetween(dateTime2, dateTime1));
                 Assert.False(DateTimeV2.NewDateTimeFromUnixTimestamp(3).IsBetween(dateTime1, dateTime2));
-            });
-
+            }
         }
 
         [Fact]
