@@ -50,7 +50,7 @@ namespace com.csutil {
             }
             try {
                 resp.duration.Stop();
-                Log.d("   > Finished " + resp);
+                // Log.d("   > Finished " + resp);
                 AssertResponseLooksNormal(self, resp);
                 self.SaveAllNewCookiesFromResponse();
                 if (self.error.IsNullOrEmpty()) { resp.progressInPercent.SetNewValue(100); }
