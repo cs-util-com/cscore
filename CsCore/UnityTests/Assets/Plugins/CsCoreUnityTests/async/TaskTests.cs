@@ -88,7 +88,13 @@ namespace com.csutil.tests.threading {
         }
 
         [Serializable]
-        private class MyException1 : Exception { public MyException1(string message) : base(message) { } }
+        private class MyException1 : Exception { 
+            public MyException1(string message) : base(message) { }
+            // Required default constructors (https://docs.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca1032):
+            public MyException1() { }
+            public MyException1(string message, Exception innerException) : base(message, innerException) { }
+        }
+        
     }
 
 }
