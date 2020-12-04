@@ -46,7 +46,7 @@ namespace com.csutil.logging {
 
         protected virtual void PrintException(Exception e, params object[] args) {
             // The default implementation prints exceptions the same as errors:
-            PrintErrorString(">>> EXCEPTION: " + e, args);
+            PrintErrorString(">>> EXCEPTION: " + e, args.AddToArgs(e));
         }
 
         protected virtual string ArgToString(object arg) {
