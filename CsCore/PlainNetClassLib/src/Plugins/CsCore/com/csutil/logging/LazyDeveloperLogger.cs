@@ -31,7 +31,7 @@ namespace com.csutil.logging {
                 if (!cache.ContainsKey(question)) {
                     var summary = await StackOverflowCom.Ask(question, tags, maxResults: 2);
                     cache.Add(question, summary);
-                    Log.w(">> Found a possible answer for error " + summary);
+                    Log.w("<color=#89FF84> >> Found a possible fix for error:</color>" + summary);
                 }
             }
             catch (Exception e) { Log.d("" + e); }
