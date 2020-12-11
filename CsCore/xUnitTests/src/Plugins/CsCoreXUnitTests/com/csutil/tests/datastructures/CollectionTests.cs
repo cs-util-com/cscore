@@ -104,5 +104,47 @@ namespace com.csutil.tests {
             Assert.Equal("C", l_123.InsertRangeViaUnion(index: 999, items: l_ABC).Last());
         }
 
+        [Fact]
+        public void TestRecursiveTreeFlattenTraversal() {
+
+            var tree = new TreeNode() {
+                id = "Root",
+                children = new TreeNode[] {
+                    new TreeNode() { id = "1 - 1", children = new TreeNode[] {
+                            new TreeNode() { id = "1 - 1 - 1" },
+                            new TreeNode() { id = "1 - 1 - 2" }
+                        }
+                    },
+                    new TreeNode() { id = "1 - 2" },
+                    new TreeNode() { id = "1 - 3" }
+                }
+            };
+
+            var listDepthFi = TreeFlattenTraverse.DepthFirst(tree, x => x.children).ToList();
+            var listBreadth = TreeFlattenTraverse.BreadthFirst(tree, x => x.children).ToList();
+
+            Assert.Equal(6, listDepthFi.Count);
+            Assert.Equal(6, listBreadth.Count);
+
+            Assert.Equal("Root", listDepthFi[0].id);
+            Assert.Equal("Root", listBreadth[0].id);
+
+            Assert.Equal("1 - 1", listDepthFi[1].id);
+            Assert.Equal("1 - 1", listBreadth[1].id);
+
+            Assert.Equal("1 - 1 - 1", listDepthFi[2].id);
+            Assert.Equal("1 - 2", listBreadth[2].id);
+
+            Assert.Equal("1 - 3", listDepthFi.Last().id);
+            Assert.Equal("1 - 1 - 2", listBreadth.Last().id);
+
+        }
+
+        private class TreeNode {
+            public string id;
+            public TreeNode[] children;
+            public override string ToString() { return id; }
+        }
+
     }
 }
