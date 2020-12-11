@@ -11,7 +11,7 @@ namespace com.csutil.tests.ui {
         public override IEnumerator RunTest() {
 
             MyUserUi userUiPresenter = new MyUserUi();
-            userUiPresenter.targetView = gameObject.GetViewStack().ShowView("MyUserUi1");
+            userUiPresenter.targetView = gameObject.GetViewStack().GetLatestView();
 
             { // Load a first user into the UI by passing it through the presenter:
                 var user1 = new MyUserModel() { userName = "Carl", userAge = 4 };
