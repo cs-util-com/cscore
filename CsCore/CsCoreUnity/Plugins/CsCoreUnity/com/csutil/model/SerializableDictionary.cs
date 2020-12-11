@@ -16,7 +16,7 @@ namespace com.csutil.model {
         [SerializeField]
         private List<E> keyValuePairs = new List<E>();
 
-        private const double REFRESH_RATE_IN_SECONDS = 10;
+        private const double REFRESH_RATE_IN_SECONDS = 1;
         private DateTime nextSerializeTime = ResetNextUpdateTimeStamp();
         private static DateTime ResetNextUpdateTimeStamp() {
             return DateTimeV2.UtcNow + TimeSpan.FromSeconds(REFRESH_RATE_IN_SECONDS);
@@ -25,7 +25,7 @@ namespace com.csutil.model {
         // save the dictionary to lists
         public void OnBeforeSerialize() {
             if (WasRecentlySerialized()) {
-                MakeSureKeysAreUnique();
+                MakeSureKeysAreUniqueAndDeveloperFriendly();
                 return;
             }
             keyValuePairs.Clear();
@@ -51,12 +51,19 @@ namespace com.csutil.model {
         /// last list entry, since this list is actually representing a dictionary duplicating the 
         /// last entry is not intuitive and instead the default value should be set automatically, which 
         /// is what this method does </summary>
-        private void MakeSureKeysAreUnique() {
+        private void MakeSureKeysAreUniqueAndDeveloperFriendly() {
             HashSet<K> foundKeys = new HashSet<K>();
-            foreach (var e in keyValuePairs) {
+            for (int i = 0; i < keyValuePairs.Count; i++) {
+                var e = keyValuePairs[i];
                 if (!foundKeys.Add(e.key)) {
-                    e.key = default(K);
+                    if (typeof(string).IsCastableTo<K>()) {
+                        e.key = (K)(object)("" + (i + 1));
+                    } else {
+                        e.key = default(K);
+                    }
                     e.value = default(V);
+                    // Make sure the updated values are persisted in the actual model:
+                    this.Add(e.key, e.value);
                 }
             }
         }

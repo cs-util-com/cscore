@@ -48,11 +48,15 @@ namespace com.csutil.io {
                 gameObject.name = nameof(ResourceCache);
                 cache = new ObjDict();
             }
-            var emtpyOnes = cache.Filter(o => o.Key.IsNullOrEmpty() && o.Value != null).ToList();
+            var emtpyOnes = cache.Filter(o => IsDefaultKey(o.Key) && o.Value != null).ToList();
             foreach (var x in emtpyOnes) {
                 cache.Add(CalcKey(x.Value), x.Value);
                 cache.Remove(x.Key);
             }
+        }
+
+        private static bool IsDefaultKey(string key) {
+            return key.IsNullOrEmpty() || int.TryParse(key, out _);
         }
 
         /// <summary> Tries to guess the correct pass the cached object would have in the Resources folder </summary>
