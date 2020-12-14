@@ -11,7 +11,7 @@ namespace com.csutil.tests {
         public void OnPointerClick(PointerEventData clickEvent) {
             Log.MethodEnteredWith(clickEvent.button);
             if (clickEvent.IsLeftClick()) {
-                var pos = clickEvent.localPosition();
+                var pos = clickEvent.localPosition(ignoreGlobalScale: true);
                 OnCicleCreated.Invoke(new Task6_CircleDrawer.MyCircle(Guid.NewGuid().ToString(), pos.x, pos.y, diameter: 1));
             }
         }

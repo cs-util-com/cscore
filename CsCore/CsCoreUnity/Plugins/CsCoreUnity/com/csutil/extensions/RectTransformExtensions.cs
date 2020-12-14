@@ -86,15 +86,6 @@ namespace com.csutil {
             return progressInPixels / totalHeightInPixels;
         }
 
-        public static bool GetLocalPointOnRt(this RectTransform self, PointerEventData e, out Vector2 res) {
-            if (RectTransformUtility.ScreenPointToLocalPointInRectangle(self, e.position, e.pressEventCamera, out Vector2 p)) {
-                res = self.localRotation * new Vector2(p.x * self.lossyScale.x, p.y * self.lossyScale.y);
-                return true;
-            }
-            res = Vector2.zero;
-            return false;
-        }
-     
     }
 
 }

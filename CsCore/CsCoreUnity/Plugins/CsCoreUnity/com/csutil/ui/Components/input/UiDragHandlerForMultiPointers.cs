@@ -48,17 +48,16 @@ namespace com.csutil.ui {
             rt = transform as RectTransform;
             currentFingerCount++;
             EventSystem.current?.SetSelectedGameObject(gameObject, e);
-            if (rt.GetLocalPointOnRt(e, out Vector2 r)) {
-                if (currentFingerCount == 1) {
-                    finger1Start = r;
-                    latestFinger1 = e;
-                } else if (currentFingerCount == 2) {
-                    finger2Start = r;
-                    latestFinger2 = e;
-                    startLocalScale = rt.localScale;
-                    startRotation = rt.localRotation;
-                    startDist = finger2Start - finger1Start;
-                }
+            Vector2 r = e.localPosition();
+            if (currentFingerCount == 1) {
+                finger1Start = r;
+                latestFinger1 = e;
+            } else if (currentFingerCount == 2) {
+                finger2Start = r;
+                latestFinger2 = e;
+                startLocalScale = rt.localScale;
+                startRotation = rt.localRotation;
+                startDist = finger2Start - finger1Start;
             }
         }
 

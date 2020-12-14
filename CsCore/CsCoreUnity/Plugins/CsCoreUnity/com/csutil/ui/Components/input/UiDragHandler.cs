@@ -7,7 +7,7 @@ namespace com.csutil.ui {
     /// <summary> Allows dragging UI elements in a canvas </summary>
     public class UiDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler {
 
-        public Vector2 dragStartOffset;
+        public Vector2 localDragStartOffsetOnRt;
         public Vector2 targetPos;
         public OnDragEvent onDrag = new OnDragEvent();
 
@@ -18,11 +18,11 @@ namespace com.csutil.ui {
         }
 
         public void OnBeginDrag(PointerEventData e) {
-            if ((transform as RectTransform).GetLocalPointOnRt(e, out Vector2 res)) { dragStartOffset = res; }
+            localDragStartOffsetOnRt = e.localPosition();
         }
 
         public void OnDrag(PointerEventData eventData) {
-            targetPos = eventData.position - dragStartOffset;
+            targetPos = eventData.position - localDragStartOffsetOnRt;
             onDrag?.Invoke(targetPos);
         }
 
