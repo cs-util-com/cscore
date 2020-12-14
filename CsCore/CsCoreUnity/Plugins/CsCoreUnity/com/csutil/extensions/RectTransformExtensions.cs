@@ -13,6 +13,10 @@ namespace com.csutil {
             self.sizeDelta = self.sizeDelta.SetY(height);
         }
 
+        public static float GetWidth(this RectTransform self) { return self.rect.width; }
+        public static float GetHeight(this RectTransform self) { return self.rect.height; }
+        public static Vector2 GetSize(this RectTransform self) { return self.rect.size; }
+
         public static Vector3[] GetWorldCornersV2(this RectTransform self, Vector3[] cache = null) {
             if (cache == null) { cache = new Vector3[4]; }
             AssertV2.AreEqual(4, cache.Length);

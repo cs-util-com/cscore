@@ -316,11 +316,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cache:
     keyValuePairs:
-    - key: 2
-      value: {fileID: 7841446369474827965, guid: 8e717fa6c0876e64aa099e7dac302f61,
-        type: 3}
     - key: CircleUi
       value: {fileID: 6056802955735332899, guid: 841d4d709f50cab41a8b8bb650a71a9b,
+        type: 3}
+    - key: DiameterEditUi
+      value: {fileID: 7841446369474827965, guid: 8e717fa6c0876e64aa099e7dac302f61,
         type: 3}
 --- !u!1001 &799794337889366271
 PrefabInstance:
