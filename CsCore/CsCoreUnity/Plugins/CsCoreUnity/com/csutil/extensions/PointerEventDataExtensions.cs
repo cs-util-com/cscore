@@ -5,13 +5,17 @@ namespace com.csutil {
 
     public static class PointerEventDataExtensions {
 
-        public static Vector2 localPosition(this PointerEventData e) {
-            var rt = e.pointerEnter.GetComponent<RectTransform>();
+        public static Vector3 localPosition(this PointerEventData e, bool ignoreGlobalScale = false) {
+            var go = e.pointerEnter;
+            if (go == null) { go = e.pointerPress; }
+            var rt = go.GetComponent<RectTransform>();
             if (rt != null) {
-                RectTransformUtility.ScreenPointToLocalPointInRectangle(rt, e.position, e.pressEventCamera, out Vector2 result);
-                return result;
+                RectTransformUtility.ScreenPointToLocalPointInRectangle(rt, e.position, e.pressEventCamera, out Vector2 res);
+                // TODO get rid of ignoreGlobalScale flag (Ui21 & Ui26_circles conflict each other)
+                var scale = ignoreGlobalScale ? rt.localScale : rt.lossyScale;
+                return rt.rotation * new Vector2(res.x * scale.x, res.y * scale.y);
             } else {
-                return e.pointerEnter.transform.InverseTransformPoint(e.pointerCurrentRaycast.worldPosition);
+                return go.transform.InverseTransformPoint(e.pointerCurrentRaycast.worldPosition);
             }
         }
 

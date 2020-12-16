@@ -124,7 +124,7 @@ namespace com.csutil.tests {
                 // Get a selector that always returns the current selected circle:
                 var selectedCircleId = store.SelectElement(s => s.selectedCircle);
                 // Get a selector that always returns the latest state of the current selected circle:
-                var selectedCicrle = store.SelectListEntry(s => s.circles, c => c.id == selectedCircleId());
+                var selectedCicrle = store.SelectListEntry(s => s.circles, c => c?.id == selectedCircleId());
 
                 Text text = map.Get<Text>("CircleInfoText");
                 text.SubscribeToStateChanges(store, x => x.selectedCircle, (_) => {
