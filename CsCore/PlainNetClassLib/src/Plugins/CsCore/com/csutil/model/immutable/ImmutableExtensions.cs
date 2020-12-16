@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -38,8 +39,7 @@ namespace com.csutil.model.immutable {
             var oldState = getSubstate();
             Action newListener = () => {
                 var newState = getSubstate();
-                bool isPrimitive = typeof(S).IsPrimitiveOrSimple();
-                if ((!isPrimitive && !ReferenceEquals(oldState, newState)) || (isPrimitive && !Equals(oldState, newState))) {
+                if (StateCompare.WasModified(oldState, newState)) {
                     onChanged(newState);
                     oldState = newState;
                 }
@@ -51,7 +51,7 @@ namespace com.csutil.model.immutable {
             if (list != null) {
                 foreach (var elem in list) {
                     var newElem = reducer(elem, action);
-                    if (!Object.Equals(newElem, elem)) {
+                    if (StateCompare.WasModified(elem, newElem)) {
                         list = list.Replace(elem, newElem);
                     }
                 }
@@ -63,8 +63,22 @@ namespace com.csutil.model.immutable {
             if (list != null) {
                 foreach (var elem in list) {
                     var newValue = reducer(elem.Value, action);
-                    if (!Object.Equals(newValue, elem.Value)) {
+                    if (StateCompare.WasModified(elem.Value, newValue)) {
                         list = list.SetItem(elem.Key, newValue);
+                    }
+                }
+            }
+            return list;
+        }
+
+        public static ICollection<T> MutateEntries<T>(this IList<T> list, object action, StateReducer<T> reducer, ref bool changed) {
+            if (list != null) {
+                for (int i = 0; i < list.Count; i++) {
+                    var elem = list[i];
+                    var newElem = reducer(elem, action);
+                    if (StateCompare.WasModified(elem, newElem)) {
+                        list[i] = newElem;
+                        changed = true;
                     }
                 }
             }
@@ -80,7 +94,7 @@ namespace com.csutil.model.immutable {
         public static T Mutate<T>(this T self, bool applyReducer, object action, StateReducer<T> reducer, ref bool changed) {
             if (!applyReducer) { return self; }
             var newVal = reducer(self, action);
-            changed = changed || !Object.Equals(self, newVal);
+            changed = changed || StateCompare.WasModified(self, newVal);
             AssertValid(self, newVal);
             return newVal;
         }
@@ -95,7 +109,7 @@ namespace com.csutil.model.immutable {
             if (oldVal is IsValid v1) {
                 AssertV2.IsTrue(v1.IsValid(), "Old value before mutation invalid");
             }
-            if (!Object.Equals(oldVal, newVal) && newVal is IsValid v2) {
+            if (StateCompare.WasModified(oldVal, newVal) && newVal is IsValid v2) {
                 AssertV2.IsTrue(v2.IsValid(), "New value after mutation invalid");
             }
         }

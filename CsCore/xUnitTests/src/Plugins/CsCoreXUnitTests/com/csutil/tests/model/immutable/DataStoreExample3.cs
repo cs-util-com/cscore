@@ -24,7 +24,7 @@ namespace com.csutil.tests.model.immutable {
             // Add a thunk middleware to allow dispatching async actions:
             var thunkMiddleware = Middlewares.NewThunkMiddleware<MyAppState1>();
 
-            // aDD A logging middleware to log all dispatched actions:
+            // Add A logging middleware to log all dispatched actions:
             var loggingMiddleware = Middlewares.NewLoggingMiddleware<MyAppState1>();
 
             var serverOutboxHandler = new ServerOutboxHandler<MyAppState1>();
