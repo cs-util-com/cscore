@@ -1,6 +1,5 @@
 using System;
 using System.Diagnostics;
-using JsonDiffPatchDotNet;
 using Newtonsoft.Json.Linq;
 
 namespace com.csutil.model.immutable {
@@ -44,6 +43,20 @@ namespace com.csutil.model.immutable {
             };
         }
 
+        public static Middleware<T> NewMutableDataSupport<T>() {
+            return (IDataStore<T> store) => {
+                return (Dispatcher innerDispatcher) => {
+                    Dispatcher dispatcher = (action) => {
+                        StateCompare.SetStoreDispatchingStarted();
+                        var a = innerDispatcher(action);
+                        StateCompare.SetStoreDispatchingEnded();
+                        return a;
+                    };
+                    return dispatcher;
+                };
+            };
+        }
+
         private static Dispatcher NewLoggingDispatcher<T>(IDataStore<T> store, Dispatcher innerDispatcher) {
             return (action) => {
                 if (action is IsValid v && !v.IsValid()) {
@@ -60,7 +73,7 @@ namespace com.csutil.model.immutable {
 
                 if (copyOfActionSupported) { AssertActionDidNotChangeDuringDispatch(actionBeforeDispatch, action); }
 
-                if (Object.Equals(previousState, newState)) {
+                if (!StateCompare.WasModified(previousState, newState)) {
                     Log.w("The action  " + action + " was not handled by any of the reducers! Store=" + store);
                 } else {
                     ShowChanges(action, previousState, newState);
@@ -103,11 +116,11 @@ namespace com.csutil.model.immutable {
             try {
                 JToken diff = MergeJson.GetDiff(previousState, newState);
                 Log.d(asJson("" + action.GetType().Name, action), asJson("previousState -> newState diff", diff));
-            } catch (Exception e) { Log.e(e); }
+            }
+            catch (Exception e) { Log.e(e); }
         }
 
         private static string asJson(string varName, object result) { return varName + "=" + JsonWriter.AsPrettyString(result); }
-
 
     }
 

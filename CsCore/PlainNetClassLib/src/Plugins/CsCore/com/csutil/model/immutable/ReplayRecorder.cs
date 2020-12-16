@@ -90,7 +90,7 @@ namespace com.csutil.model.immutable {
             var nextEntry = jsonReader.Read<Entry>(nextEntryJson);
             try {
                 targetStore.Dispatch(nextEntry.action);
-            } catch (System.Exception e) {
+            } catch (Exception e) {
                 CompareErrors(nextEntry, e);
             }
         }
