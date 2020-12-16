@@ -1,4 +1,5 @@
-﻿using System;
+﻿using com.csutil.io;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
@@ -60,6 +61,7 @@ namespace com.csutil {
                 if (textAsset == null) { throw new FileNotFoundException("No text asset found at " + pathInResourcesFolder); }
                 return (T)(object)textAsset.text;
             }
+            if (ResourceCache.TryLoad(pathInResourcesFolder, out T result)) { return result; }
             return (T)(object)Resources.Load(pathInResourcesFolder, typeof(T));
         }
 

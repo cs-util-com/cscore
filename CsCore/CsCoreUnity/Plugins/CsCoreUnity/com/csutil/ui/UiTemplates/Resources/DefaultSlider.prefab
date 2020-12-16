@@ -458,6 +458,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   id: DefaultSlider
+  syncWithGOName: 1
 --- !u!1 &9115083144221099750
 GameObject:
   m_ObjectHideFlags: 0

@@ -83,10 +83,10 @@ namespace com.csutil.tests.Task7 {
                     while (columnCount < maxColumn) {
                         string columnId = CellPos.ToColumnName(columnCount);
                         if (rowNr == 0) {
-                            var columnNameUi = row.AddChild(ResourcesV2.LoadPrefab("7GUIs_Task7_ColumnName"));
+                            var columnNameUi = row.AddChild(ResourcesV2.LoadPrefab("ColumnName"));
                             columnNameUi.GetComponentInChildren<Text>().text = columnId;
                         } else {
-                            var cellGo = row.AddChild(ResourcesV2.LoadPrefab("7GUIs_Task7_CellUiEntry"));
+                            var cellGo = row.AddChild(ResourcesV2.LoadPrefab("CellUiEntry"));
                             var cell = cellGo.GetComponent<CellPresenter>();
                             cell.cellPos = new CellPos(columnId, rowNr);
                             cell.store = store;
@@ -103,7 +103,7 @@ namespace com.csutil.tests.Task7 {
 
                 // Add UI rows based on model row count (until UI has same row count):
                 while (uiRows.GetChildCount() <= maxRow) {
-                    var rowUi = uiRows.AddChild(ResourcesV2.LoadPrefab("7GUIs_Task7_Row"));
+                    var rowUi = uiRows.AddChild(ResourcesV2.LoadPrefab("Row"));
                     // Set the row nr in the row UIs first cell:
                     rowUi.GetChild(0).GetComponentInChildren<Text>().text = "" + (uiRows.GetChildCount() - 1);
                 } // Repeat until the count of UI rows is same as model 
