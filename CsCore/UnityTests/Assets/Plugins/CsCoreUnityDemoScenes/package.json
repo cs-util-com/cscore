@@ -1,0 +1,12 @@
+{
+	"name": "com.csutil.cscore.unity.demos",
+	"version": "1.4.5",
+	"displayName": "cscore Unity Demo Scenes",
+	"description": "Drag the individual demo scenes from the package into your asset folders and then open the scene",	
+	"unity": "2018.1",
+	"license": "Apache License 2.0",
+	"author": {
+		"name": "csutil.com",
+		"url": "https://github.com/cs-util-com/cscore"
+	}	
+}
