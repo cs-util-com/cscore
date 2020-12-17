@@ -37,7 +37,7 @@ namespace com.csutil.editor {
 
         private static void CheckTypesInAssembly(Assembly assembly) {
             foreach (var type in assembly.GetTypesWithMissingNamespace()) {
-                Debug.LogError("(Assembly " + assembly.GetName().Name + ") Missing namespace: " + type);
+                Debug.LogWarning("(Assembly " + assembly.GetName().Name + ") Missing namespace: " + type);
             }
         }
 
