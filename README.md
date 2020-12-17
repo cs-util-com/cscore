@@ -739,19 +739,66 @@ Additionally in your nUnit tests you can also use the xUnitTestRunner, e.g. if y
 
 # 📦 Getting started
 
-cscore can be used in **Unity** projects but also in pure **C#/.net** projects (see below):
+Select the type of project you want to install cscore to:
 
-## 🎮 Install cscore into your Unity project
+1. [**Unity** projects](#Install-cscore-into-your-Unity-project)
+2. [Pure **C#/.net** projects](#Install-via-NuGet)
 
-The cscore project has some components that are only usable in Unity projects. The provided Unity package below includes all these components.
+## Install cscore into your Unity project
 
-### Download the Unity package here:
+The cscore project has some components that are only usable in Unity projects. There are different ways how to add cscore to your project, first the **recommended** way:
+
+### Using the Unity Package Manager (The **recommended** way)
+
+1. Open `Window -> Package Manager`
+2. Click on the **`+`** Icon
+3. Click "Add package from git URL..."
+4. This way you can add the 5 separate cscore building blocks in the following order:
+
+   1. Insert https://github.com/cs-util-com/cscore.git?path=CsCore/PlainNetClassLib/src/Plugins 
+      - (**Required**) Contains the **pure C#** classes
+
+   2. Insert https://github.com/cs-util-com/cscore.git?path=CsCore/CsCoreUnity/Plugins
+      - (**Required**) Contains the **Unity** related classes
+
+   3. Insert https://github.com/cs-util-com/cscore.git?path=CsCore/UnityTests/Assets/Plugins/CsCoreUnityDemoScenes
+      - (*Optional*) Contains **demo scenes** that can be dragged into your `Assets` folder to try them individually to learn about all features 
+
+   4. Insert https://github.com/cs-util-com/cscore.git?path=CsCore/xUnitTests/src/Plugins
+      - (*Optional*) Contains the **xUnit tests** which test cscore. These can also be run in Unity using the included `XunitTestRunner.cs`
+
+   5. Insert https://github.com/cs-util-com/cscore.git?path=CsCore/UnityTests/Assets/Plugins/CsCoreUnityTests
+      - (*Optional*) Contains the **Unity tests** of cscore to run with the Unity test runner
+
+**The result** will be that the manifest file which is located in your project at `YourUnityProject123/Packages/manifest.json` has some new dependencies added. 
+
+Your can also manually open your `manifest.json` file with a text editor and add the lines by hand: 
+```json
+{ 
+  "dependencies": { 
+    ...
+	"com.csutil.cscore": "https://github.com/cs-util-com/cscore.git?path=CsCore/PlainNetClassLib/src/Plugins",
+	"com.csutil.cscore.unity": "https://github.com/cs-util-com/cscore.git?path=CsCore/CsCoreUnity/Plugins",
+	"com.csutil.cscore.tests": "https://github.com/cs-util-com/cscore.git?path=CsCore/xUnitTests/src/Plugins",
+    "com.csutil.cscore.unity.demos": "https://github.com/cs-util-com/cscore.git?path=CsCore/UnityTests/Assets/Plugins/CsCoreUnityDemoScenes",
+	"com.csutil.cscore.unity.tests": "https://github.com/cs-util-com/cscore.git?path=CsCore/UnityTests/Assets/Plugins/CsCoreUnityTests",
+    ...
+  } 
+}
+```
+
+More details how the Unity package manager works can be found here:
+* https://docs.unity3d.com/Manual/upm-manifestPkg.html  
+* https://docs.unity3d.com/Packages/com.unity.package-manager-ui@2.0/manual/index.html  
+* https://docs.unity3d.com/Manual/upm-git.html  
+* https://docs.unity3d.com/Manual/CustomPackages.html 
+
+
+### Alternative ways to add cscore to your Unity project:
+
 * From the [Asset Store (https://assetstore.unity.com/packages/tools/integration/cscore-138254)](https://assetstore.unity.com/packages/tools/integration/cscore-138254) 
 * From the [/CsCore/UnityPackages folder](https://github.com/cs-util-com/cscore/raw/master/CsCore/UnityPackages/) 
 * From the `master` branch, you will have to link the `src` folders to your Unity project, see e.g. the linking bat script in `cscore\CsCore\PlainNetClassLib\src\linkThisIntoAUnityProject.bat`. This option makes sense e.g. if you want to submit pull requests to cscore. See also the section about **Sym Links** below.
-
-**Important:** If you use `.net 3.5` you will need to extract the ZIP file in the `CsCoreNet3.5Compat` folder, it contains the classes that are missing for `.net 3.5`:
-![Step 1](https://i.imgur.com/1DyQ4q1.png)
 
 ### Optional experimental Unity features
 
@@ -759,9 +806,9 @@ Some of the included features are disabled by default via the `CSCORE_EXPERIMENT
 
 
 
-## Install via NuGet (For pure C#/.net projects)
+## Install via NuGet
 
-The NuGet package from [nuget.org/packages/com.csutil.cscore](https://www.nuget.org/packages/com.csutil.cscore) can be installed in [multiple ways](https://docs.microsoft.com/en-us/nuget/consume-packages/ways-to-install-a-package), for example via the dotnet CLI:
+The NuGet package (for pure C#/.net projects) from [nuget.org/packages/com.csutil.cscore](https://www.nuget.org/packages/com.csutil.cscore) can be installed in [multiple ways](https://docs.microsoft.com/en-us/nuget/consume-packages/ways-to-install-a-package), for example via the dotnet CLI:
 ```XML
 dotnet add package Newtonsoft.Json
 dotnet add package com.csutil.cscore
