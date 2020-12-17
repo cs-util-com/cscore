@@ -6,7 +6,7 @@
 	"unity": "2018.1",
 	"dependencies": {
 		"com.csutil.cscore": "https://github.com/cs-util-com/cscore.git?path=CsCore/PlainNetClassLib/src/Plugins",
-		"com.csutil.cscore.unity": "https://github.com/cs-util-com/cscore.git?path=CsCore/CsCoreUnity/Plugins",
+		"com.csutil.cscore.unity": "https://github.com/cs-util-com/cscore.git?path=CsCore/CsCoreUnity/Plugins"
 	},
 	"license": "Apache License 2.0",
 	"author": {
