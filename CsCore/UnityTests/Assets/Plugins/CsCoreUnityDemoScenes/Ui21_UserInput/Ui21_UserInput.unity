@@ -1335,7 +1335,7 @@ GameObject:
   - component: {fileID: 357979917}
   - component: {fileID: 357979916}
   m_Layer: 0
-  m_Name: RotateJoystick
+  m_Name: MovementJoystick
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2106,7 +2106,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 531067090}
   serializedVersion: 2
-  m_Mass: 1
+  m_Mass: 1.5
   m_Drag: 1.5
   m_AngularDrag: 2
   m_UseGravity: 0
@@ -2510,8 +2510,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 4.0499997, y: -47.736}
-  m_SizeDelta: {x: -7.8999996, y: -111.472}
+  m_AnchoredPosition: {x: 2.4500122, y: -51.27}
+  m_SizeDelta: {x: -4.900009, y: -114.85133}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &641281051
 MonoBehaviour:
@@ -2560,8 +2560,8 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: The left JoystickUi is using a FlyStick, Hold it to fly forward, move it
-    to rotate the camera. Double click it to switch to backwards mode.
+  m_Text: The left JoystickUi is using a SideMoveStick. Move it to add a movement
+    force to the target Rigidbody
 --- !u!222 &641281053
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -2650,7 +2650,7 @@ GameObject:
   - component: {fileID: 668995837}
   - component: {fileID: 668995840}
   m_Layer: 0
-  m_Name: MovementJoystick
+  m_Name: RotateJoystick
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2693,7 +2693,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   isDragging: 0
-  maxDist: 50
+  maxDist: 200
   joystickCenterImg: {fileID: 1762956266}
   joystickImg: {fileID: 533391165}
   speed: 2
@@ -3229,9 +3229,9 @@ RectTransform:
   m_Father: {fileID: 357979915}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 58.6, y: 134.7}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 54.9, y: -58.7}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &869012132
@@ -4547,7 +4547,7 @@ GameObject:
   - component: {fileID: 1446648960}
   - component: {fileID: 1446648959}
   m_Layer: 0
-  m_Name: Image
+  m_Name: ResizableImage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5497,9 +5497,9 @@ RectTransform:
   m_Father: {fileID: 668995836}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 157.1, y: -130.4}
+  m_AnchorMin: {x: 1, y: 0}
+  m_AnchorMax: {x: 1, y: 0}
+  m_AnchoredPosition: {x: -50, y: 50}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1762956267
@@ -5579,8 +5579,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -4.0000153, y: 49.942993}
-  m_SizeDelta: {x: -8, y: -115.886215}
+  m_AnchoredPosition: {x: -3.25, y: 45.48}
+  m_SizeDelta: {x: -6.5000153, y: -109.034424}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1807853675
 MonoBehaviour:
@@ -5629,8 +5629,8 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: The right JoystickUi is using a SideMoveStick. Move it to add a movement
-    force to the target Rigidbody
+  m_Text: The right JoystickUi is using a FlyStick, Hold it to fly forward, move
+    it to rotate the camera. Double click it to switch to backwards mode.
 --- !u!222 &1807853677
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -6544,14 +6544,14 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2086441422}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_Color: {r: 0.8997333, g: 0.872, b: 1, a: 0.08627451}
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:

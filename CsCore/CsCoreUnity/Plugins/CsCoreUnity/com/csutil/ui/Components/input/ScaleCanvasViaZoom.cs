@@ -18,8 +18,10 @@ namespace com.csutil.ui {
 
         private void Update() {
             // First check if input is already handled by event system:
-            if (es.currentSelectedGameObject == null) { // If not check for pinch/zoom:
-                if (Input.touchCount == 2) { scaler.referenceResolution += GetDragDelta() * speed; }
+            if (es.currentSelectedGameObject == null && !es.IsPointerOverGameObject()) { 
+                if (Input.touchCount == 2) { // If 2 fingers are down check for pinch/zoom
+                    scaler.referenceResolution += GetDragDelta() * speed;
+                }
             }
         }
 
