@@ -19,9 +19,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Web;
 
 namespace DiffMatchPatch {
   internal static class CompatibilityExtensions {
@@ -1474,7 +1474,7 @@ namespace DiffMatchPatch {
             // decode would change all "+" to " "
             param = param.Replace("+", "%2b");
 
-            param = HttpUtility.UrlDecode(param);
+            param = WebUtility.UrlDecode(param);
             //} catch (UnsupportedEncodingException e) {
             //  // Not likely on modern system.
             //  throw new Error("This system does not support UTF-8.", e);
@@ -2249,7 +2249,7 @@ namespace DiffMatchPatch {
           }
           line = text[textPointer].Substring(1);
           line = line.Replace("+", "%2b");
-          line = HttpUtility.UrlDecode(line);
+          line = WebUtility.UrlDecode(line);
           if (sign == '-') {
             // Deletion.
             patch.diffs.Add(new Diff(Operation.DELETE, line));
@@ -2282,7 +2282,7 @@ namespace DiffMatchPatch {
      */
     public static string encodeURI(string str) {
         // C# is overzealous in the replacements.  Walk back on a few.
-        return new StringBuilder(HttpUtility.UrlEncode(str))
+        return new StringBuilder(WebUtility.UrlEncode(str))
             .Replace('+', ' ').Replace("%20", " ").Replace("%21", "!")
             .Replace("%2a", "*").Replace("%27", "'").Replace("%28", "(")
             .Replace("%29", ")").Replace("%3b", ";").Replace("%2f", "/")

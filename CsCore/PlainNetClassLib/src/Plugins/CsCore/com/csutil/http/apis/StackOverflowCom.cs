@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
-using System.Web;
 
 namespace com.csutil.http.apis {
 
@@ -26,12 +26,12 @@ namespace com.csutil.http.apis {
             if (bestAnswers.IsEmpty()) { throw new Error("No answers found for " + question); }
             var answerStrings = bestAnswers.Map(a => {
                 var answerHtmlAsText = RestRequestHelper.HtmlToPlainText(a.Value.body);
-                var questi = $"?? Question ({a.Key.score} votes):  {HttpUtility.HtmlDecode(a.Key.title)}";
+                var questi = $"?? Question ({a.Key.score} votes):  {WebUtility.HtmlDecode(a.Key.title)}";
                 var answer = $">> Answer {a.Value.answer_url} ({a.Value.score} votes): \n{answerHtmlAsText}";
                 return "\n" + questi + ":\n" + answer + "\n";
             });
             var searchSentence = question + " " + tags.ToStringV2("[", "]", "] [");
-            var s = "https://stackoverflow.com/search?q=" + HttpUtility.UrlEncode(searchSentence);
+            var s = "https://stackoverflow.com/search?q=" + WebUtility.UrlEncode(searchSentence);
             return $"\n{question}\nSearching.. {s}\n{answerStrings.ToStringV2("", "", "")}";
         }
 
@@ -64,10 +64,10 @@ namespace com.csutil.http.apis {
 
         /// <summary> See https://api.stackexchange.com/docs/advanced-search for documentation </summary>
         public static async Task<ApiResponse> Search(string question, List<string> tags) {
-            var q = HttpUtility.UrlEncode(question);
+            var q = WebUtility.UrlEncode(question);
             string url = $"https://api.stackexchange.com/2.2/search/advanced?order=desc&sort=relevance&q={q}&site=stackoverflow";
             if (!tags.IsNullOrEmpty()) {
-                url += "&tagged=" + HttpUtility.UrlEncode(tags.ToStringV2("", "", ";"));
+                url += "&tagged=" + WebUtility.UrlEncode(tags.ToStringV2("", "", ";"));
             }
             ApiResponse apiResponse;
             try {
