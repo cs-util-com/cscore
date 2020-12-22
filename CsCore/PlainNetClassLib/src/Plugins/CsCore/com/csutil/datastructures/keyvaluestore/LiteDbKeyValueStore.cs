@@ -21,12 +21,13 @@ namespace com.csutil.keyvaluestore {
         public IKeyValueStore fallbackStore { get; set; }
         public long latestFallbackGetTimingInMs { get; set; }
 
-        public LiteDbKeyValueStore(FileEntry dbFile) { Init(dbFile); }
+        public LiteDbKeyValueStore(Stream stream) { Init(stream); }
+        public LiteDbKeyValueStore(FileEntry dbFile) { Init(dbFile.OpenOrCreateForReadWrite()); }
 
-        private void Init(FileEntry dbFile, string collectionName = "Default") {
+        private void Init(Stream stream, string collectionName = "Default") {
+            dbStream = stream;
             bsonMapper = new BsonMapper();
             bsonMapper.IncludeFields = true;
-            dbStream = dbFile.OpenOrCreateForReadWrite();
             db = new UltraLiteDatabase(dbStream, bsonMapper);
             collection = db.GetCollection(collectionName);
         }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using com.csutil.json;
@@ -340,6 +341,24 @@ namespace com.csutil.tests.keyvaluestore {
             await store.Set(myKey1, e1);
             MyEnum1 e2 = await store.Get(myKey1, MyEnum1.state1);
             Assert.Equal(e1, e2);
+        }
+
+        [Fact]
+        public async Task TestReadOnlyLiteDbKeyValueStoreFromStream() {
+            var f = EnvironmentV2.instance.GetOrAddTempFolder("TestReadOnlyLiteDbKeyValueStoreFromStream");
+            f.DeleteV2();
+            var dbFile = f.CreateV2().GetChild("LiteDb1");
+            string myKey1 = "myKey1";
+            string val1 = "e1";
+            using (IKeyValueStore store = new LiteDbKeyValueStore(dbFile)) {
+                await store.Set("myKey1", val1);
+            }
+            // Now test how a steam (even a read only stream) can be accessed the same way:
+            var memStream = new MemoryStream();
+            using (var readOnlyStream = dbFile.OpenForRead()) { readOnlyStream.CopyTo(memStream); }
+            using (IKeyValueStore store = new LiteDbKeyValueStore(memStream)) {
+                Assert.Equal(val1, await store.Get(myKey1, ""));
+            }
         }
 
         [Fact]
