@@ -57,7 +57,7 @@ namespace com.csutil.tests.json {
             };
 
             // Deleting old diff entries is possible like this:
-            //await new PersistedRegression().regressionStore.Remove("RegressionCheckpointTests_2");
+            // await new PersistedRegression().regressionStore.Remove("PersistedRegressionTests_ExampleUsage2_1");
 
             var diffInStateWasAccepted = false;
             // A filter can be used to remove/filter out acceptable diffs from the report: 

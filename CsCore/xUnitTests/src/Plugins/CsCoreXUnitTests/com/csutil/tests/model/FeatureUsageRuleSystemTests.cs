@@ -21,7 +21,7 @@ namespace com.csutil.tests.model {
             var analytics = CreateLocalAnalyticsSystem();
 
             var t = new MockDateTimeV2();
-            IoC.inject.SetSingleton<DateTimeV2>(t);
+            IoC.inject.SetSingleton<DateTimeV2>(t, overrideExisting: true);
 
             string featureId = "feature1";
 
