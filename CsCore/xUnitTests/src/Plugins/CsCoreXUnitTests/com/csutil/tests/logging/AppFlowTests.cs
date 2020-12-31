@@ -81,8 +81,8 @@ namespace com.csutil.tests {
                 Assert.Equal(eventCount, dir2.GetFiles().Count());
                 Log.MethodDone(s3, maxAllowedTimeInMs: 10000);
             }
-            float ratioInMemVsReadFs = s2.ElapsedMilliseconds / s3.ElapsedMilliseconds;
-            Assert.True(0.5 < ratioInMemVsReadFs && ratioInMemVsReadFs < 2, $"s2={s2} > s3={s3}");
+            float ratioInMemVsReadFs = s2.ElapsedMilliseconds / (float)s3.ElapsedMilliseconds;
+            Assert.True(0.01 < ratioInMemVsReadFs && ratioInMemVsReadFs < 1, $"s2={s2} > s3={s3}, ratioInMemVsReadFs={ratioInMemVsReadFs}");
         }
 
         [Fact]

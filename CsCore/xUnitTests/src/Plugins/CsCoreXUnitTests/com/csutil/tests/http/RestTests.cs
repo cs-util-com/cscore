@@ -91,21 +91,21 @@ namespace com.csutil.tests.http {
         [Fact]
         public async Task TestDateTimeV2() {
             const int maxDiffInMs = 1000;
-            Assert.True(GetDiffBetweenV1AndV2() < maxDiffInMs, "GetTimeDiff()=" + GetDiffBetweenV1AndV2());
+            // No diff between DateTime and DateTimeV2 until first server timestamp is received:
+            var diffBetweenV1AndV2 = GetDiffBetweenV1AndV2();
+            Assert.True(diffBetweenV1AndV2 < 100, "GetTimeDiff()=" + diffBetweenV1AndV2);
 
             // Trigger any REST request to get a UTC time from the used server:
             Headers headers = await RestFactory.instance.SendRequest(new Uri("https://httpbin.org/get"), HttpMethod.Get).GetResultHeaders();
             string serverUtcString = headers.First(h => h.Key == "date").Value.First();
             DateTime serverUtcTime = DateTimeV2.ParseUtc(serverUtcString);
             Log.d("Server reported its UTC time to be: " + serverUtcTime);
-            var diffLocalAndOnline = Math.Abs(IoC.inject.Get<DateTimeV2>(this).diffOfLocalToServer.Value.Milliseconds);
+            int diffLocalAndOnline = Math.Abs(IoC.inject.Get<DateTimeV2>(this).diffOfLocalToServer.Value.Milliseconds);
             Assert.True(diffLocalAndOnline < maxDiffInMs, $"diffLocalAndOnline {diffLocalAndOnline} > maxDiffInMs {maxDiffInMs}");
-            Log.d("Current DateTimeV2.UtcNow: " + DateTimeV2.UtcNow);
-            await TaskV2.Delay(1000);
-            Log.d("Corrected local time: " + DateTimeV2.UtcNow);
+            Assert.NotEqual(0, diffLocalAndOnline);
 
             // Now the server utc date should be used which will cause the diff to be larger:
-            Assert.True(GetDiffBetweenV1AndV2() > maxDiffInMs, "GetTimeDiff()=" + GetDiffBetweenV1AndV2());
+            Assert.True(GetDiffBetweenV1AndV2() > diffBetweenV1AndV2, $"GetTimeDiff()={GetDiffBetweenV1AndV2()}ms < diffBetweenV1AndV2 ({diffBetweenV1AndV2}ms)");
         }
 
         private static int GetDiffBetweenV1AndV2() { return Math.Abs((DateTime.UtcNow - DateTimeV2.UtcNow).Milliseconds); }
@@ -174,6 +174,7 @@ namespace com.csutil.tests.http {
 
         [Fact]
         public async Task TestStackOverflowCom() {
+            if (!EnvironmentV2.isDebugMode) { Log.e("This test only works in DebugMode"); return; }
             try {
 
                 try { // Provoke an exception that will then be searched for on StackOverflow
