@@ -38,6 +38,15 @@ namespace com.csutil {
             return new JsonDiffPatch().Diff(JToken.FromObject(a, s), JToken.FromObject(b, s));
         }
 
+        public static void Patch(object targetToPatch, JToken patchToApply) {
+            Patch(targetToPatch, patchToApply, JsonSerializer.Create(JsonNetSettings.defaultSettings));
+        }
+
+        public static void Patch(object targetToPatch, JToken patchToApply, JsonSerializer s) {
+            var patchedTarget = new JsonDiffPatch().Patch(JToken.FromObject(targetToPatch, s), patchToApply);
+            patchedTarget.PopulateInto(targetToPatch, s);
+        }
+
         public class Result<T> {
             internal JToken original;
             internal JToken variant1;

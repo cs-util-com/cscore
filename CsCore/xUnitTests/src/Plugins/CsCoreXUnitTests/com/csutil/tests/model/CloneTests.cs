@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using com.csutil.model;
+using Newtonsoft.Json.Linq;
 using Xunit;
 
 namespace com.csutil.tests.model {
@@ -12,6 +12,7 @@ namespace com.csutil.tests.model {
 
         private class MyClass1 : ICloneable {
             public string name;
+            public int age;
             public MyClass1 child;
             public object Clone() { return this.MemberwiseClone(); }
         }
@@ -19,22 +20,30 @@ namespace com.csutil.tests.model {
         [Fact]
         public void ExampleUsage1() {
 
-            MyClass1 original = new MyClass1() { name = "1", child = new MyClass1() { name = "2" } };
+            MyClass1 original = new MyClass1() { name = "1", child = new MyClass1() { name = "2", age = 3 } };
 
             MyClass1 copy = original.DeepCopyViaJson();
             Assert.Null(MergeJson.GetDiff(original, copy)); // No diff between original and copy
-            AssertV2.AreEqualJson(original, copy); // WIll use MergeJson.GetDiff internally
+            AssertV2.AreEqualJson(original, copy); // AreEqualJson will use MergeJson.GetDiff internally
             Assert.Equal(original.child.name, copy.child.name);
             // Modify the copy, changing the copy will not change the original:
             copy.child.name = "Some new name..";
             // Check that the change was only done in the copy and not the original:
             Assert.NotEqual(original.child.name, copy.child.name);
-            Assert.NotNull(MergeJson.GetDiff(original, copy));
+            JToken diffToOriginal = MergeJson.GetDiff(original, copy);
+            Assert.NotNull(diffToOriginal);
 
             // Objects that impl. IClonable can also ShallowCopy (will call .Clone internally):
             MyClass1 shallowCopy = original.ShallowCopyViaClone();
             Assert.NotSame(original, shallowCopy);
             Assert.Same(original.child, shallowCopy.child);
+
+            // Applying a change to an existing target object is done using MergeJson.Patch:
+            var oldName = original.child.name;
+            MergeJson.Patch(original, diffToOriginal); // Apply the changes stored in the diff 
+            Assert.NotEqual(oldName, original.child.name); // The name field was updated
+            Assert.Equal(copy.child.name, original.child.name);
+            Assert.Equal(3, original.child.age); // The age field was not changed by the patch
 
         }
 
