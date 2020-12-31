@@ -61,6 +61,11 @@ namespace com.csutil {
                 if (textAsset == null) { throw new FileNotFoundException("No text asset found at " + pathInResourcesFolder); }
                 return (T)(object)textAsset.text;
             }
+            if ((typeof(MemoryStream).IsCastableTo<T>())) {
+                TextAsset textAsset = LoadV2<TextAsset>(pathInResourcesFolder, forceAssetDbReimport);
+                if (textAsset == null) { throw new FileNotFoundException("No text asset found at " + pathInResourcesFolder); }
+                return (T)(object)new MemoryStream(textAsset.bytes); 
+            }
             if (ResourceCache.TryLoad(pathInResourcesFolder, out T result)) { return result; }
             return (T)(object)Resources.Load(pathInResourcesFolder, typeof(T));
         }
