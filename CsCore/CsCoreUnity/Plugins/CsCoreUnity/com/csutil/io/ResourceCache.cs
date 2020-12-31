@@ -44,10 +44,7 @@ namespace com.csutil.io {
         }
 
         private void OnValidate() {
-            if (cache == null) {
-                gameObject.name = nameof(ResourceCache);
-                cache = new ObjDict();
-            }
+            if (cache == null) { cache = new ObjDict(); }
             var emtpyOnes = cache.Filter(o => IsDefaultKey(o.Key) && o.Value != null).ToList();
             foreach (var x in emtpyOnes) {
                 cache.Add(CalcKey(x.Value), x.Value);
