@@ -112,14 +112,6 @@ namespace com.csutil.tests.http {
         private static int GetDiffBetweenV1AndV2() { return Math.Abs((DateTime.UtcNow - DateTimeV2.UtcNow).Milliseconds); }
 
         private static async Task ValidateResponse(RestRequest request) {
-
-            IoC.inject.SetSingleton<CookieJar>(new InMemCookieJar());
-
-            var cookieJar = IoC.inject.Get<CookieJar>(null, false);
-            Assert.NotNull(cookieJar);
-            cookieJar.SetCookie(csutil.http.cookies.Cookie.NewCookie("coo1", "cooVal1", request.uri.Host));
-            cookieJar.SetCookie(csutil.http.cookies.Cookie.NewCookie("coo2", "cooVal2", request.uri.Host));
-
             var includedRequestHeaders = new Dictionary<string, string>();
             includedRequestHeaders.Add("Aaa", "aaa 1");
             includedRequestHeaders.Add("Bbb", "bbb 2");
@@ -200,17 +192,36 @@ namespace com.csutil.tests.http {
             }
         }
 
+        [Fact]
+        public async Task TestCookies() {
+            IoC.inject.SetSingleton<CookieJar>(new InMemoryCookieJar());
+            var cookieJar = IoC.inject.Get<CookieJar>(null, false);
+            Assert.NotNull(cookieJar);
+
+            var uri = new Uri("http://httpbin.org/cookies");
+
+            cookieJar.SetCookie(csutil.http.cookies.Cookie.NewCookie("coo1", "cooVal1", uri.Host));
+            cookieJar.SetCookie(csutil.http.cookies.Cookie.NewCookie("coo2", "cooVal2", uri.Host));
+            var resp = await uri.SendGET().GetResult<CookieResp>();
+            Assert.Contains(resp.cookies, x => x.Key == "coo1" && x.Value == "cooVal1");
+            Assert.Contains(resp.cookies, x => x.Key == "coo2" && x.Value == "cooVal2");
+        }
+
+        private class CookieResp { public Dictionary<string, string> cookies { get; set; } }
+
+        private class InMemoryCookieJar : CookieJar {
+
+            protected override void LoadCompleteCookieDictionary() { }
+
+            protected override bool saveCompleteCookieDictionary() { return true; }
+
+            protected override void DeleteAllCookies() { }
+
+        }
+
+
     }
 
-    internal class InMemCookieJar : CookieJar {
-
-        protected override void LoadCompleteCookieDictionary() { }
-
-        protected override bool saveCompleteCookieDictionary() { return true; }
-
-        protected override void DeleteAllCookies() { }
-
-    }
 
     [Collection("Sequential")] // Will execute tests in here sequentially
     public class HasInternetTests : IHasInternetListener {
