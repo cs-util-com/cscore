@@ -15,7 +15,7 @@ namespace com.csutil.http.cookies {
 
         public delegate void ContentsChangedDelegate();
 
-        private CookieJar() {
+        public CookieJar() {
             LoadCompleteCookieDictionary();
         }
 

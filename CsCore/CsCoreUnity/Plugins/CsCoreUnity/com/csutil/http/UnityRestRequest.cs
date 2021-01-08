@@ -1,3 +1,4 @@
+using com.csutil.http.cookies;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -41,7 +42,7 @@ namespace com.csutil.http {
             TaskCompletionSource<T> onErrorTask = new TaskCompletionSource<T>();
             response.onError = (_, e) => { onErrorTask.SetException(e); };
             return await Task.WhenAny<T>(runningResTask, onErrorTask.Task).Unwrap();
-        } 
+        }
 
         private IEnumerator PrepareRequest<T>(Response<T> response) {
             yield return new WaitForSeconds(0.05f); // wait 5ms so that headers etc can be set
@@ -51,6 +52,11 @@ namespace com.csutil.http {
                 request.uploadHandler = new UploadHandlerRaw(form.data);
             }
             request.SetRequestHeaders(h);
+
+            var cookieJar = IoC.inject.Get<CookieJar>(this, false);
+            var cookies = cookieJar?.GetCookies(new CookieAccessInfo(uri.Host, uri.AbsolutePath));
+            if (!cookies.IsNullOrEmpty()) { request.SetCookies(cookies); }
+
             yield return request.SendWebRequestV2(response);
         }
 

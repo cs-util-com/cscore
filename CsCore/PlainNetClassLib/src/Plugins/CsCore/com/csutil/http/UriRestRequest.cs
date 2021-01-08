@@ -96,6 +96,7 @@ namespace com.csutil.http {
             HttpClientHandler handler = new HttpClientHandler() {
                 AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
             };
+            AddAllCookiesToRequest(handler);
             client = new HttpClient(handler);
             await TaskV2.Delay(5); // Wait so that the created RestRequest can be modified before its sent
             httpMethod = "" + method;
@@ -107,6 +108,15 @@ namespace com.csutil.http {
             var serverUtcDate = result.Headers.Date;
             if (serverUtcDate != null) { EventBus.instance.Publish(DateTimeV2.SERVER_UTC_DATE, uri, serverUtcDate.Value.DateTime); }
             return result;
+        }
+
+        private void AddAllCookiesToRequest(HttpClientHandler handler) {
+            var cookieJar = IoC.inject.Get<cookies.CookieJar>(this, false);
+            var cookies = cookieJar?.GetCookies(new cookies.CookieAccessInfo(uri.Host, uri.AbsolutePath));
+            if (!cookies.IsNullOrEmpty()) {
+                var cookieContainer = handler.CookieContainer;
+                foreach (var c in cookies) { cookieContainer.Add(uri, new Cookie(c.name, c.value)); }
+            }
         }
 
         public void Dispose() {

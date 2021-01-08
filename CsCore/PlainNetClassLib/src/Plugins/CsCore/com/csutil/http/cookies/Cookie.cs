@@ -14,6 +14,10 @@ namespace com.csutil.http.cookies {
 
         private static string cookiePattern = "\\s*([^=]+)(?:=((?:.|\\n)*))?";
 
+        public static Cookie NewCookie(string key, string value, string domain) {
+            return new Cookie(key + "=" + value + "; path=/; domain=" + domain);
+        }
+
         public Cookie(string cookieString) {
             string[] parts = cookieString.Split(';');
             foreach (string part in parts) {
