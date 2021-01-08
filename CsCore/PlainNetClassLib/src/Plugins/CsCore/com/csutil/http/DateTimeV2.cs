@@ -50,7 +50,7 @@ namespace com.csutil {
         public ISet<string> uriBlacklist = new HashSet<string>();
         public TimeSpan? diffOfLocalToServer { get; private set; }
 
-        protected DateTimeV2() { EventBus.instance.Subscribe(this, SERVER_UTC_DATE, (Uri uri, DateTime utcDate) => onUtcUpdate(uri, utcDate)); }
+        public DateTimeV2() { EventBus.instance.Subscribe(this, SERVER_UTC_DATE, (Uri uri, DateTime utcDate) => onUtcUpdate(uri, utcDate)); }
         public void Dispose() { EventBus.instance.UnsubscribeAll(this); }
 
         private void onUtcUpdate(Uri uri, DateTime serverUtcDate) {

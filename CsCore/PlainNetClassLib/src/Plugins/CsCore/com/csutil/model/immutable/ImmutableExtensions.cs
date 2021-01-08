@@ -71,7 +71,7 @@ namespace com.csutil.model.immutable {
             return list;
         }
 
-        public static ICollection<T> MutateEntries<T>(this IList<T> list, object action, StateReducer<T> reducer, ref bool changed) {
+        public static IList<T> MutateEntries<T>(this IList<T> list, object action, StateReducer<T> reducer, ref bool changed) {
             if (list != null) {
                 for (int i = 0; i < list.Count; i++) {
                     var elem = list[i];
