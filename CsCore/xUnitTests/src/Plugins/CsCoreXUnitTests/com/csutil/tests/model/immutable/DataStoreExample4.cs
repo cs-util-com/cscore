@@ -24,7 +24,7 @@ namespace com.csutil.tests.model.immutable {
             var t = Log.MethodEntered("DataStoreExample3.ExampleUsage1");
 
             // A middleware that will allow to use mutable data in the data store:
-            var thunkMiddleware = Middlewares.NewMutableDataSupport<MyAppState1>();
+            var mutableMiddleware = Middlewares.NewMutableDataSupport<MyAppState1>();
 
             // Add A logging middleware to log all dispatched actions:
             var loggingMiddleware = Middlewares.NewLoggingMiddleware<MyAppState1>();
@@ -32,7 +32,7 @@ namespace com.csutil.tests.model.immutable {
             MyUser1 user = new MyUser1() { name = "Carl" };
             var model = new MyAppState1() { user = user };
 
-            var store = new DataStore<MyAppState1>(MyReducers1.ReduceMyAppState1, model, loggingMiddleware, thunkMiddleware);
+            var store = new DataStore<MyAppState1>(MyReducers1.ReduceMyAppState1, model, loggingMiddleware, mutableMiddleware);
             IoC.inject.SetSingleton(store);
             store.storeName = "Store 4";
 

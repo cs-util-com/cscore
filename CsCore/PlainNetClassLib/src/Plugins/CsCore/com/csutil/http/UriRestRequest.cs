@@ -15,9 +15,10 @@ namespace com.csutil.http {
         public IJsonReader jsonReader = JsonReader.GetReader();
         public Action<float> onProgress { get; set; }
         public HttpCompletionOption sendAsyncCompletedAfter = HttpCompletionOption.ResponseHeadersRead;
-
         public Uri uri { get; }
         public string httpMethod { get; private set; }
+        public Func<HttpClient, HttpRequestMessage, Task> OnBeforeSend;
+
         private Headers requestHeaders = new Headers(new Dictionary<string, string>());
         private Task<HttpResponseMessage> request;
         private HttpClient client;
@@ -96,17 +97,28 @@ namespace com.csutil.http {
             HttpClientHandler handler = new HttpClientHandler() {
                 AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
             };
+            AddAllCookiesToRequest(handler);
             client = new HttpClient(handler);
             await TaskV2.Delay(5); // Wait so that the created RestRequest can be modified before its sent
             httpMethod = "" + method;
             client.AddRequestHeaders(requestHeaders);
             var message = new HttpRequestMessage(method, uri);
             if (httpContent != null) { message.Content = httpContent; }
+            if (OnBeforeSend != null) { await OnBeforeSend(client, message); }
             request = client.SendAsync(message, sendAsyncCompletedAfter);
             var result = await request;
             var serverUtcDate = result.Headers.Date;
             if (serverUtcDate != null) { EventBus.instance.Publish(DateTimeV2.SERVER_UTC_DATE, uri, serverUtcDate.Value.DateTime); }
             return result;
+        }
+
+        private void AddAllCookiesToRequest(HttpClientHandler handler) {
+            var cookieJar = IoC.inject.Get<cookies.CookieJar>(this, false);
+            var cookies = cookieJar?.GetCookies(new cookies.CookieAccessInfo(uri.Host, uri.AbsolutePath));
+            if (!cookies.IsNullOrEmpty()) {
+                var cookieContainer = handler.CookieContainer;
+                foreach (var c in cookies) { cookieContainer.Add(uri, new Cookie(c.name, c.value)); }
+            }
         }
 
         public void Dispose() {

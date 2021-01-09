@@ -142,7 +142,7 @@ namespace com.csutil {
         }
 
         private static bool ResponseIsGZipped(UnityWebRequest self) {
-            return self.GetResponseHeader("content-encoding").ToLowerInvariant() == "gzip";
+            return self.GetResponseHeader("content-encoding")?.ToLowerInvariant() == "gzip";
         }
 
         private static byte[] DecompressGzip(byte[] gzippedData) {

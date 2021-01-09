@@ -5,21 +5,22 @@ using System.Text.RegularExpressions;
 namespace com.csutil.http.cookies {
 
     public abstract class CookieJar { // Ported version of https://github.com/bmeck/node-cookiejar
-        private const string version = "v2";
+
         private const string cookiesStringPattern = "[:](?=\\s*[a-zA-Z0-9_\\-]+\\s*[=])";
-        private const string boundary = "\n!!::!!\n";
 
         private object cookieJarLock = new object();
         private Dictionary<string, List<Cookie>> cookies = new Dictionary<string, List<Cookie>>();
-        public ContentsChangedDelegate ContentsChanged;
+        public Action OnCookiesChanged;
 
-        public delegate void ContentsChangedDelegate();
-
-        private CookieJar() {
-            LoadCompleteCookieDictionary();
+        public CookieJar() {
+            LoadAllCookies();
         }
 
-        protected abstract void LoadCompleteCookieDictionary();
+        protected abstract void LoadAllCookies();
+        
+        protected abstract bool PersistAllCookies(Dictionary<string, List<Cookie>> allCookies);
+
+        protected abstract void DeleteAllCookies();
 
         public override string ToString() {
             var s = "CookieJar:";
@@ -31,7 +32,6 @@ namespace com.csutil.http.cookies {
         }
 
         public void ClearCookies(bool deleteCachedCookiesFile = true) {
-            Log.w("ClearCookies (deleteCachedCookiesFile=" + deleteCachedCookiesFile + ")");
             lock (cookieJarLock) {
                 cookies.Clear();
                 if (deleteCachedCookiesFile) { DeleteAllCookies(); }
@@ -39,9 +39,7 @@ namespace com.csutil.http.cookies {
             }
         }
 
-        protected abstract void DeleteAllCookies();
-
-        private void InformContentChangeListener() { if (ContentsChanged != null) { ContentsChanged(); } }
+        private void InformContentChangeListener() { if (OnCookiesChanged != null) { OnCookiesChanged(); } }
 
         public bool SetCookie(Cookie cookie, bool saveToCookieFile = true) {
             lock (cookieJarLock) {
@@ -93,18 +91,10 @@ namespace com.csutil.http.cookies {
         }
 
         private void SaveAllCookies() {
-            var savingWorked = saveCompleteCookieDictionary();
-            if (!savingWorked) { Log.e(("Could not save cookies file")); }
+            var savingWorked = PersistAllCookies(cookies);
+            if (!savingWorked) { Log.e(("Could not persist cookies")); }
             InformContentChangeListener();
         }
-
-        protected abstract bool saveCompleteCookieDictionary();
-
-        // TODO: figure out a way to respect the scriptAccessible flag and supress cookies being
-        //       returned that should not be.  The issue is that at some point, within this
-        //       library, we need to send all the correct cookies back in the request.  Right now
-        //       there's no way to add all cookies (regardless of script accessibility) to the
-        //       request without exposing cookies that should not be script accessible.
 
         public Cookie GetCookie(string name, CookieAccessInfo accessInfo) {
             if (!cookies.ContainsKey(name)) { return null; }
@@ -120,13 +110,6 @@ namespace com.csutil.http.cookies {
                 }
             }
             return null;
-        }
-
-        [Obsolete("use GetCookies(CookieAccessInfo accessInfo) instead", true)]
-        public List<Cookie> GetCookies(string url) {
-            foreach (KeyValuePair<string, List<Cookie>> k in cookies) { Log.d(k.Key + ": " + k.Value.ToString()); }
-            if (cookies.ContainsKey(url)) { return cookies[url]; }
-            return new List<Cookie>();
         }
 
         public bool HasCookie(string cookieName) { return !cookies.IsNullOrEmpty() && cookies.ContainsKey(cookieName); }
@@ -149,6 +132,7 @@ namespace com.csutil.http.cookies {
             if (!match.Success) { throw new Exception("Could not parse cookies string: " + cookiesString); }
             for (int index = 0; index < match.Groups.Count; ++index) { SetCookie(new Cookie(match.Groups[index].Value)); }
         }
+
     }
 
 }
