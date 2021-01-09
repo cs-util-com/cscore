@@ -15,9 +15,10 @@ namespace com.csutil.http {
         public IJsonReader jsonReader = JsonReader.GetReader();
         public Action<float> onProgress { get; set; }
         public HttpCompletionOption sendAsyncCompletedAfter = HttpCompletionOption.ResponseHeadersRead;
-
         public Uri uri { get; }
         public string httpMethod { get; private set; }
+        public Func<HttpClient, HttpRequestMessage, Task> OnBeforeSend;
+
         private Headers requestHeaders = new Headers(new Dictionary<string, string>());
         private Task<HttpResponseMessage> request;
         private HttpClient client;
@@ -103,6 +104,7 @@ namespace com.csutil.http {
             client.AddRequestHeaders(requestHeaders);
             var message = new HttpRequestMessage(method, uri);
             if (httpContent != null) { message.Content = httpContent; }
+            if (OnBeforeSend != null) { await OnBeforeSend(client, message); }
             request = client.SendAsync(message, sendAsyncCompletedAfter);
             var result = await request;
             var serverUtcDate = result.Headers.Date;
