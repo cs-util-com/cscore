@@ -52,11 +52,6 @@ namespace com.csutil.http {
                 request.uploadHandler = new UploadHandlerRaw(form.data);
             }
             request.SetRequestHeaders(h);
-
-            var cookieJar = IoC.inject.Get<CookieJar>(this, false);
-            var cookies = cookieJar?.GetCookies(new CookieAccessInfo(uri.Host, uri.AbsolutePath));
-            if (!cookies.IsNullOrEmpty()) { request.SetCookies(cookies); }
-
             yield return request.SendWebRequestV2(response);
         }
 

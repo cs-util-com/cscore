@@ -1,10 +1,6 @@
-﻿using com.csutil;
-using com.csutil.http.cookies;
+﻿using com.csutil.http.cookies;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine.Networking;
 
 namespace com.csutil {
@@ -13,19 +9,15 @@ namespace com.csutil {
 
         /// <summary> set all current cookies for each new request </summary>
         public static bool ApplyAllCookiesToRequest(this UnityWebRequest self) {
-            if (self.url.StartsWith("file://")) {
-                Log.d("Will not apply cookies for request to file " + self.url);
-                return false;
-            }
             return self.SetCookies(LoadStoredCookiesForUri(new Uri(self.url)));
         }
 
         private static List<Cookie> LoadStoredCookiesForUri(Uri uri) {
             try {
-                CookieJar ccc = IoC.inject.Get<CookieJar>(uri);
-                if (ccc == null) { return new List<Cookie>(); }
-                var c = ccc.GetCookies(new CookieAccessInfo(uri.Host, uri.AbsolutePath));
-                if (c.IsNullOrEmpty() && uri.Scheme.Equals("https")) { c = ccc.GetCookies(new CookieAccessInfo(uri.Host, uri.AbsolutePath, true)); }
+                CookieJar jar = IoC.inject.Get<CookieJar>(uri);
+                if (jar == null) { return new List<Cookie>(); }
+                var c = jar.GetCookies(new CookieAccessInfo(uri.Host, uri.AbsolutePath));
+                if (c.IsNullOrEmpty() && uri.Scheme.Equals("https")) { c = jar.GetCookies(new CookieAccessInfo(uri.Host, uri.AbsolutePath, true)); }
                 return c;
             }
             catch (Exception e) { Log.e(e); }
@@ -35,17 +27,16 @@ namespace com.csutil {
         /// <summary> can be used to manually set a specific set of cookies, normally not needed since cookies are applied automatically by applyAllCookies()! </summary>
         private static bool SetCookies(this UnityWebRequest self, List<Cookie> cookieList) {
             if (cookieList.IsNullOrEmpty()) { return false; }
+            string allCookies = "";
             bool allCookiesSetCorrectly = true;
-            string cookieString = "";
             foreach (var cookie in cookieList) {
                 try {
-                    var newcookies = cookieString + cookie.name + "=" + cookie.value + ";";
-                    // https://docs.unity3d.com/ScriptReference/Networking.UnityWebRequest.SetRequestHeader.html :
+                    var newcookies = allCookies + cookie.name + "=" + cookie.value + ";";
                     self.SetRequestHeader("Cookie", newcookies);
-                    cookieString = newcookies;
+                    allCookies = newcookies;
                 }
                 catch (Exception e) {
-                    Log.e("Name or value invalid: " + cookie.name + "=" + cookie.value + "    - full cookie string=" + cookieString, e);
+                    Log.e("Cant set invalid cookie: " + cookie.name + "=" + cookie.value, e);
                     allCookiesSetCorrectly = false;
                 }
             }

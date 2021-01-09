@@ -202,23 +202,21 @@ namespace com.csutil.tests.http {
 
             cookieJar.SetCookie(csutil.http.cookies.Cookie.NewCookie("coo1", "cooVal1", uri.Host));
             cookieJar.SetCookie(csutil.http.cookies.Cookie.NewCookie("coo2", "cooVal2", uri.Host));
-            var resp = await uri.SendGET().GetResult<CookieResp>();
+            var resp = await uri.SendGET().GetResult<HttpbinCookieResp>();
             Assert.Contains(resp.cookies, x => x.Key == "coo1" && x.Value == "cooVal1");
             Assert.Contains(resp.cookies, x => x.Key == "coo2" && x.Value == "cooVal2");
         }
 
-        private class CookieResp { public Dictionary<string, string> cookies { get; set; } }
+        private class HttpbinCookieResp { public Dictionary<string, string> cookies { get; set; } }
 
+        /// <summary> This implementation does not persist any cookies, so the callbacks are all NOOP </summary>
         private class InMemoryCookieJar : CookieJar {
-
-            protected override void LoadCompleteCookieDictionary() { }
-
-            protected override bool saveCompleteCookieDictionary() { return true; }
-
+            protected override void LoadAllCookies() { }
+            protected override bool PersistAllCookies(Dictionary<string, List<csutil.http.cookies.Cookie>> all) {
+                return true;
+            }
             protected override void DeleteAllCookies() { }
-
         }
-
 
     }
 

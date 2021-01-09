@@ -142,7 +142,7 @@ namespace com.csutil {
         }
 
         private static bool ResponseIsGZipped(UnityWebRequest self) {
-            return self.GetResponseHeader("content-encoding").ToLowerInvariant() == "gzip";
+            return self.GetResponseHeader("content-encoding")?.ToLowerInvariant() == "gzip";
         }
 
         private static byte[] DecompressGzip(byte[] gzippedData) {
@@ -169,24 +169,6 @@ namespace com.csutil {
 
         public static Headers GetResponseHeadersV2(this UnityWebRequest self) {
             return new Headers(self.GetResponseHeaders());
-        }
-
-        public static bool SetCookies(this UnityWebRequest self, List<http.cookies.Cookie> cookieList) {
-            if (cookieList.IsNullOrEmpty()) { return false; }
-            var allCookies = "";
-            var allCookiesSetCorrectly = true;
-            foreach (var cookie in cookieList) {
-                try {
-                    var newcookies = allCookies + cookie.name + "=" + cookie.value + ";";
-                    self.SetRequestHeader("Cookie", newcookies);
-                    allCookies = newcookies;
-                }
-                catch (Exception e) {
-                    Log.e("Cant set invalid cookie: " + cookie.name + "=" + cookie.value, e);
-                    allCookiesSetCorrectly = false;
-                }
-            }
-            return allCookiesSetCorrectly;
         }
 
     }
