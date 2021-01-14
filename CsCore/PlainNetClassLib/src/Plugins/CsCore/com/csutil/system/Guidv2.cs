@@ -5,7 +5,22 @@ namespace com.csutil {
 
     public static class Guidv2 {
 
-        private static long _counter = DateTimeV2.UtcNow.Ticks;
+        // See idea from https://mrpmorris.blogspot.com/2020/07/generating-globally-unique-sequential.html
+        private static class Counter {
+
+            private static long _counter = DateTime.UtcNow.Ticks;
+
+            public static long Increment() {
+                long result;
+                long ticksNow = DateTime.UtcNow.Ticks;
+                do {
+                    result = Interlocked.Increment(ref _counter);
+                    if (result >= ticksNow) { return result; }
+                } while (Interlocked.CompareExchange(ref _counter, ticksNow, result) != result);
+                return result;
+            }
+
+        }
 
         /// <summary> 
         ///     <para>
@@ -25,8 +40,7 @@ namespace com.csutil {
         /// </summary>
         public static Guid NewGuidSequentialAndPartiallyOrdered() {
             var guidBytes = Guid.NewGuid().ToByteArray();
-            var counterBytes = BitConverter.GetBytes(Interlocked.Increment(ref _counter));
-
+            var counterBytes = BitConverter.GetBytes(Counter.Increment());
             if (!BitConverter.IsLittleEndian) {
                 Array.Reverse(counterBytes);
             }
