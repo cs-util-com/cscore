@@ -16,7 +16,7 @@ namespace com.csutil.tests.model.jsonschema {
         public void ExampleUsage1() {
 
             // A normal user model with a few example fields that users typically have:
-            var user1 = new MyUserModel("" + Guid.NewGuid()) {
+            var user1 = new MyUserModel("" + GuidV2.NewGuid()) {
                 name = "Tom",
                 password = "12345678",
                 age = 50,
@@ -167,7 +167,7 @@ namespace com.csutil.tests.model.jsonschema {
         private class MyUserModel {
 
             [JsonProperty(Required = Required.Always)]
-            public string id { get; private set; } = Guid.NewGuid().ToString();
+            public string id { get; private set; } = GuidV2.NewGuid().ToString();
 
             [Required]
             [InputLength(2, 30)]
@@ -185,7 +185,7 @@ namespace com.csutil.tests.model.jsonschema {
             [Description("e.g. +1 234 5678 90")]
             public int? phoneNumber;
 
-            public MyUserModel(string id = null) { this.id = id == null ? "" + Guid.NewGuid() : id; }
+            public MyUserModel(string id = null) { this.id = id == null ? "" + GuidV2.NewGuid() : id; }
 
             public List<string> tags { get; set; }
             public List<UserContact> contacts { get; } = new List<UserContact>();

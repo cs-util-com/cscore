@@ -52,7 +52,7 @@ namespace com.csutil.system {
     public class News {
 
         public static News NewLocalNewsEvent(string title, string descr, string url, string urlText, NewsType type = News.NewsType.New, string id = null) {
-            if (id == null) { id = Guid.NewGuid().ToString(); }
+            if (id == null) { id = GuidV2.NewGuid().ToString(); }
             return new News() {
                 key = id,
                 title = title,

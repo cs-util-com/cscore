@@ -23,7 +23,7 @@ namespace com.csutil.tests.model {
 
             var testFolder = EnvironmentV2.instance.GetOrAddTempFolder("tests.io.db").CreateV2();
             Log.d("Path=" + testFolder);
-            var dbFile = testFolder.GetChild("PerformanceTestDB_" + Guid.NewGuid().ToString());
+            var dbFile = testFolder.GetChild("PerformanceTestDB_" + GuidV2.NewGuid().ToString());
 
             // Open database (or create if doesn't exist)
             using (var db = new UltraLiteDatabase(dbFile.OpenOrCreateForReadWrite(), disposeStream: true)) {
@@ -104,7 +104,7 @@ namespace com.csutil.tests.model {
         }
 
         private TreeElem NewTreeElem(string nodeName, Func<List<TreeElem>> CreateChildren = null) {
-            return new TreeElem { id = Guid.NewGuid().ToString(), name = nodeName, children = CreateChildren?.Invoke() };
+            return new TreeElem { id = GuidV2.NewGuid().ToString(), name = nodeName, children = CreateChildren?.Invoke() };
         }
     }
 

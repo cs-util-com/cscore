@@ -136,7 +136,7 @@ namespace com.csutil.tests.model.immutable {
         }
 
         private class MyUser1 : IsMutable {
-            public Guid id { get; } = Guid.NewGuid();
+            public Guid id { get; } = GuidV2.NewGuid();
             public string name;
             public List<MyContact1> contacts;
             public long LastMutation { get; set; }

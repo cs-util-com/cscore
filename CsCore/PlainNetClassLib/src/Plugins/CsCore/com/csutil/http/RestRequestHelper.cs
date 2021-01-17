@@ -67,6 +67,11 @@ namespace com.csutil {
             return self.WithRequestHeader("user-agent", userAgent);
         }
 
+        /// <summary> See e.g. https://jwt.io/introduction/ </summary>
+        public static RestRequest WithRequestHeaderJwt(this RestRequest self, string jwt) {
+            return self.WithRequestHeader("Authorization", "Bearer " + jwt);
+        }
+
         public static bool IsErrorStatus(this HttpStatusCode statusCode) {
             if (statusCode.IsClientError()) { return true; }
             if (statusCode.IsServerError()) { return true; }

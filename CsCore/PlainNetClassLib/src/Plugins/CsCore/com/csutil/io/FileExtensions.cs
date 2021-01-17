@@ -118,7 +118,7 @@ namespace com.csutil {
 
         public static bool MoveToV2(this DirectoryInfo source, DirectoryInfo target) {
             AssertNotIdentical(source, target);
-            var tempCopyId = "" + Guid.NewGuid();
+            var tempCopyId = "" + GuidV2.NewGuid();
             var originalPath = source.FullPath();
             if (EnvironmentV2.isWebGL) {
                 // In WebGL .MoveTo does not work correctly so copy+delete is tried instead:
