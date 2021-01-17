@@ -46,7 +46,7 @@ namespace com.csutil.tests.http {
             Assert.Equal(textInFile, fileToUpload.LoadAs<string>());
 
             RestRequest uploadRequest = new Uri("https://file.io/?expires=1d").SendPOST().AddFileViaForm(fileToUpload);
-            uploadRequest.WithRequestHeaderUserAgent("" + Guid.NewGuid());
+            uploadRequest.WithRequestHeaderUserAgent("" + GuidV2.NewGuid());
             FileIoResponse result = await uploadRequest.GetResult<FileIoResponse>();
 
             Log.d(JsonWriter.AsPrettyString(result));
@@ -55,7 +55,7 @@ namespace com.csutil.tests.http {
 
             FileEntry fileToDownloadTo = dir.GetChild("test2.txt");
             var downloadRequest = new Uri(result.link).SendGET();
-            downloadRequest.WithRequestHeaderUserAgent("" + Guid.NewGuid());
+            downloadRequest.WithRequestHeaderUserAgent("" + GuidV2.NewGuid());
             await downloadRequest.DownloadTo(fileToDownloadTo);
             //Assert.True(textInFile == fileToDownloadTo.LoadAs<string>(), "Invalid textInFile from " + result.link);
             Assert.Equal(textInFile, fileToDownloadTo.LoadAs<string>());

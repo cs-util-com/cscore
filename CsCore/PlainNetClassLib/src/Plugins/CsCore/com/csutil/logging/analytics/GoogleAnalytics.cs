@@ -85,7 +85,7 @@ namespace com.csutil.logging.analytics {
             public readonly string t = "event";
 
             /// <summary> An id generated in a static context to be used for all events </summary>
-            public static string SESSION_ID = Guid.NewGuid().ToString();
+            public static string SESSION_ID = GuidV2.NewGuid().ToString();
             /// <summary> Anonymous Client ID. Required if uid not specified. A UUID associated with particular user, device, or browser instance. </summary>
             public string cid = SESSION_ID;
             /// <summary> User ID. Required if cid not specified. It must not itself be PII (personally identifiable information). </summary>

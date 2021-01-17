@@ -18,7 +18,7 @@ namespace com.csutil.tests.model {
         [Fact]
         void ExampleUsage1() {
 
-            string testId = Guid.NewGuid().ToString();
+            string testId = GuidV2.NewGuid().ToString();
 
             var dbFile = EnvironmentV2.instance.GetOrAddTempFolder("tests.io.db").GetChild("TestDB_" + testId);
 

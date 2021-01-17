@@ -140,7 +140,7 @@ namespace com.csutil.tests.model {
         }
 
         private TreeElem NewTreeElem(string nodeName, Func<List<TreeElem>> CreateChildren = null) {
-            return new TreeElem { id = Guid.NewGuid().ToString(), name = nodeName, children = CreateChildren?.Invoke() };
+            return new TreeElem { id = GuidV2.NewGuid().ToString(), name = nodeName, children = CreateChildren?.Invoke() };
         }
 
     }

@@ -51,7 +51,7 @@ namespace com.csutil.tests.model {
             dbFile.DeleteV2(); // cleanup after the test
         }
 
-        private static string NewId() { return Guid.NewGuid().ToString(); }
+        private static string NewId() { return GuidV2.NewGuid().ToString(); }
 
     }
 
