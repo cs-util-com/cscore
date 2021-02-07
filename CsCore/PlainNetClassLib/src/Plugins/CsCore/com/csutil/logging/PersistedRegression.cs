@@ -63,7 +63,7 @@ namespace com.csutil {
                     var problemReport = foundProblems.ToStringV2(p => p.ToPrettyString());
                     var path = id;
                     if (regressionStore is FileBasedKeyValueStore f) { path = f.GetFile(id).GetFullFileSystemPath(); }
-                    throw new Exception($"Diff found for regression id {path}: " + problemReport);
+                    throw new Exception($"Diff found for regression id {path}: \n" + problemReport);
                 }
             }
         }

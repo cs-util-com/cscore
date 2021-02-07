@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using com.csutil.http;
 using com.csutil.keyvaluestore;
 using com.csutil.logging.analytics;
 using Xunit;
@@ -19,7 +18,7 @@ namespace com.csutil.tests.logging {
 
         [Fact]
         public async Task TestConvertEventToQueryParams() {
-            var googleAnalytics = new GoogleAnalytics(TEST_APP_KEY, NewInMemoryStore()) {
+            var googleAnalytics = new GoogleAnalytics(TEST_APP_KEY, "GoogleAnalyticsTests", NewInMemoryStore()) {
                 url = GoogleAnalytics.DEBUG_ENDPOINT // Use the debug endpoint
             };
             var e = googleAnalytics.NewEvent("cat1", "action1", "label1", value: 123);
@@ -31,7 +30,7 @@ namespace com.csutil.tests.logging {
 
         [Fact]
         public async Task TestSendEventToGA() {
-            var googleAnalytics = new GoogleAnalytics(TEST_APP_KEY, NewInMemoryStore()) {
+            var googleAnalytics = new GoogleAnalytics(TEST_APP_KEY, "GoogleAnalyticsTests", NewInMemoryStore()) {
                 url = GoogleAnalytics.DEBUG_ENDPOINT // Use the debug endpoint
             };
             // Test if the GA debug endpoint is returning that the request is valid:
@@ -43,7 +42,7 @@ namespace com.csutil.tests.logging {
 
         [Fact]
         public async Task TestSendTimingToGA() {
-            var googleAnalytics = new GoogleAnalytics(TEST_APP_KEY, NewInMemoryStore()) {
+            var googleAnalytics = new GoogleAnalytics(TEST_APP_KEY, "GoogleAnalyticsTests", NewInMemoryStore()) {
                 url = GoogleAnalytics.DEBUG_ENDPOINT // Use the debug endpoint
             };
             // Test if the GA debug endpoint is returning that the request is valid:
@@ -55,7 +54,7 @@ namespace com.csutil.tests.logging {
 
         [Fact]
         public async Task TestAppFlowToGoogleAnalytics() {
-            var tracker = new GoogleAnalytics(TEST_APP_KEY, NewInMemoryStore());
+            var tracker = new GoogleAnalytics(TEST_APP_KEY, "GoogleAnalyticsTests", NewInMemoryStore());
             tracker.WithBasicTrackingActive();
 
             var t = Log.MethodEntered(); // This will internally notify the AppFlow instance
