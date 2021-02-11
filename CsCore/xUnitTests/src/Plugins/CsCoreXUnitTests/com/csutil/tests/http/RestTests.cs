@@ -65,6 +65,59 @@ namespace com.csutil.tests.http {
         }
 
         [Fact]
+        public async Task DownloadTest3() {
+            var h = 110;
+            var w = 60;
+            var stream = await new Uri("https://picsum.photos/" + w + "/" + h).SendGET().GetResult<Stream>();
+            var image = await ImageLoader.LoadAndDispose(stream);
+            Assert.Equal(h, image.Height);
+            Assert.Equal(w, image.Width);
+        }
+
+        public static async Task<ImageInfo> LoadImageInfoOnly(Stream stream, int bytesToCopy) {
+            Stream s = await stream.CopyParts(bytesToCopy);
+            Assert.True(s.CanSeek);
+            return ImageInfo.FromStream(s).Value;
+        }
+
+        [Fact]
+        public async Task DownloadTest4_LoadOnlyImageInfo() {
+            var s = 5000; // 5k x 5k is the max that picsum will serve
+            var h = s;
+            var w = s;
+
+            var bytesToCopy = 1000 * 200;
+
+            var timingForImageInfoOny = Log.MethodEntered("Load only image info");
+            {
+                string url = "https://picsum.photos/" + w + "/" + h;
+                RestRequest req = new Uri(url).SendGET();
+                var stream = await req.GetResult<Stream>();
+                var image = await LoadImageInfoOnly(stream, bytesToCopy);
+                Assert.Equal(h, image.Height);
+                Assert.Equal(w, image.Width);
+            }
+            Log.MethodDone(timingForImageInfoOny);
+
+            // Wait some time before sending the next request to the picsum server to not get rejected:
+            await TaskV2.Delay((int)timingForImageInfoOny.ElapsedMilliseconds);
+
+            var timingForFullImage = Log.MethodEntered("Load full image");
+            {
+                var stream = await new Uri("https://picsum.photos/" + w + "/" + h).SendGET().GetResult<Stream>();
+                var image = await ImageLoader.LoadAndDispose(stream);
+                Assert.Equal(h, image.Height);
+                Assert.Equal(w, image.Width);
+            }
+            Log.MethodDone(timingForFullImage);
+
+            // Loading only the image info should be at least this factor faster then loading the full image:
+            var f = 10;
+            string e = timingForImageInfoOny + " was not faster then " + timingForFullImage;
+            Assert.True(timingForImageInfoOny.ElapsedMilliseconds * f < timingForFullImage.ElapsedMilliseconds, e);
+        }
+
+        [Fact]
         public async Task TestSendGET2() {
             RestRequest request = new Uri("https://httpbin.org/get").SendGET();
             await ValidateResponse(request);

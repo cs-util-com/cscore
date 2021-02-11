@@ -29,7 +29,12 @@ namespace com.csutil {
             if (!localDir.Exists) { // The SubFileSystem cant handle non existing roots
                 throw new DirectoryNotFoundException("ToRootDirectoryEntry on non-existing dir: " + localDir);
             }
-            var pfs = new PhysicalFileSystemV2(ExtractDiscPrefix(localDir));
+            FileSystem pfs;
+            if (HasDiscPrefix(localDir.FullName)) {
+                pfs = new PhysicalFileSystemV2(ExtractDiscPrefix(localDir));
+            } else {
+                pfs = new PhysicalFileSystem();
+            }
             var fs = new SubFileSystem(pfs, pfs.ConvertPathFromInternal(localDir.FullName));
             return fs.GetDirectoryEntry(UPath.Root);
         }
@@ -42,9 +47,11 @@ namespace com.csutil {
         private static string ExtractDiscPrefix(DirectoryInfo dir) { return ExtractDiscPrefix(dir.FullName); }
 
         private static string ExtractDiscPrefix(string absPath) {
-            if (absPath[1] != ':') { throw new InvalidDataException("Path does not contain a disc prefix: " + absPath); }
+            if (HasDiscPrefix(absPath)) { throw new InvalidDataException("Path does not contain a disc prefix: " + absPath); }
             return absPath.Substring(0, 2);
         }
+
+        private static bool HasDiscPrefix(string absPath) { return absPath[1] != ':'; }
 
         public static DirectoryEntry AsNewRootDir(this DirectoryEntry self) {
             return new SubFileSystem(self.FileSystem, self.Path).GetDirectoryEntry(UPath.Root);

@@ -34,6 +34,12 @@ namespace com.csutil {
             return self.Keys.Intersect(otherDict.Keys).ToDictionary(k => k, k => self[k]);
         }
 
+        public static bool AddRange<T>(this ISet<T> self, IEnumerable<T> e) {
+            bool res = true;
+            foreach (var l in e) { res &= self.Add(l); }
+            return res;
+        }
+
     }
 
 }

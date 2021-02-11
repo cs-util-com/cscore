@@ -46,6 +46,15 @@ namespace com.csutil {
             return seekableStream;
         }
 
+        public static async Task<Stream> CopyParts(this Stream self, int bytesToCopy, int offset = 0) {
+            var destination = new MemoryStream();
+            byte[] buffer = new byte[bytesToCopy];
+            int numBytes = await self.ReadAsync(buffer, offset, buffer.Length);
+            await destination.WriteAsync(buffer, offset, numBytes);
+            destination.Seek(0, SeekOrigin.Begin);
+            return destination;
+        }
+
     }
 
 }
