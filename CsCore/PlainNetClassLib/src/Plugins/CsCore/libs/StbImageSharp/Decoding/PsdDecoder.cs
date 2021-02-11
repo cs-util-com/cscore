@@ -1,8 +1,8 @@
 ﻿using System;
 using System.IO;
-using StbImageLib.Utility;
+using StbImageSharp.Utility;
 
-namespace StbImageLib.Decoding
+namespace StbImageSharp.Decoding
 {
 #if !STBSHARP_INTERNAL
 	public

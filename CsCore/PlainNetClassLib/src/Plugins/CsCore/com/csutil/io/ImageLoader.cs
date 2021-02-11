@@ -1,4 +1,4 @@
-﻿using StbImageLib;
+﻿using StbImageSharp;
 using System.IO;
 using System.Threading.Tasks;
 using Zio;
