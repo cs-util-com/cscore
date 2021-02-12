@@ -74,28 +74,18 @@ namespace com.csutil.tests.http {
             Assert.Equal(w, image.Width);
         }
 
-        public static async Task<ImageInfo> LoadImageInfoOnly(Stream stream, int bytesToCopy) {
-            Stream s = await stream.CopyParts(bytesToCopy);
-            Assert.True(s.CanSeek);
-            return ImageInfo.FromStream(s).Value;
-        }
-
         [Fact]
         public async Task DownloadTest4_LoadOnlyImageInfo() {
-            var s = 5000; // 5k x 5k is the max that picsum will serve
-            var h = s;
-            var w = s;
-
-            var bytesToCopy = 1000 * 200;
+            var pixels = 4000; // 5k x 5k is the max that picsum will serve
+            var h = pixels;
+            var w = pixels;
 
             var timingForImageInfoOny = Log.MethodEntered("Load only image info");
             {
-                string url = "https://picsum.photos/" + w + "/" + h;
-                RestRequest req = new Uri(url).SendGET();
-                var stream = await req.GetResult<Stream>();
-                var image = await LoadImageInfoOnly(stream, bytesToCopy);
-                Assert.Equal(h, image.Height);
-                Assert.Equal(w, image.Width);
+                var stream = await new Uri("https://picsum.photos/" + w + "/" + h).SendGET().GetResult<Stream>();
+                var result = await ImageLoader.ReadImageInfoAsync(stream, fallbackToFullImageDownload: false);
+                Assert.Equal(w, result.Width);
+                Assert.Equal(h, result.Height);
             }
             Log.MethodDone(timingForImageInfoOny);
 
@@ -111,10 +101,9 @@ namespace com.csutil.tests.http {
             }
             Log.MethodDone(timingForFullImage);
 
-            // Loading only the image info should be at least this factor faster then loading the full image:
-            var f = 10;
+            var xTimesFaster = 3; // Loading only the image info should be at least this factor faster then loading the full image
             string e = timingForImageInfoOny + " was not faster then " + timingForFullImage;
-            Assert.True(timingForImageInfoOny.ElapsedMilliseconds * f < timingForFullImage.ElapsedMilliseconds, e);
+            Assert.True(timingForImageInfoOny.ElapsedMilliseconds * xTimesFaster < timingForFullImage.ElapsedMilliseconds, e);
         }
 
         [Fact]
@@ -234,11 +223,9 @@ namespace com.csutil.tests.http {
                 try { // Provoke an exception that will then be searched for on StackOverflow
                     List<string> list = new List<string>(); // List without entries
                     list.First(); // Will cause "Sequence contains no elements" exception
-                }
-                catch (Exception e) { await e.RethrowWithAnswers(); }
+                } catch (Exception e) { await e.RethrowWithAnswers(); }
 
-            }
-            catch (Error exceptionWithAnswers) {
+            } catch (Error exceptionWithAnswers) {
                 // Check that the error contains detailed answers:
                 var length = exceptionWithAnswers.Message.Length;
                 Assert.True(length > 1500, "message length=" + length);
