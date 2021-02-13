@@ -1,10 +1,10 @@
-﻿using StbImageLib.Decoding;
-using StbImageLib.Utility;
+﻿using StbImageSharp.Decoding;
+using StbImageSharp.Utility;
 using System;
 
-namespace StbImageLib
+namespace StbImageSharp
 {
-	public static class Conversion
+	internal static class Conversion
 	{
 		public static byte stbi__compute_y(int r, int g, int b)
 		{

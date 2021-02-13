@@ -1,7 +1,7 @@
-﻿using StbImageLib.Decoding;
+﻿using StbImageSharp.Decoding;
 using System.IO;
 
-namespace StbImageLib
+namespace StbImageSharp
 {
 #if !STBSHARP_INTERNAL
 	public
@@ -20,6 +20,14 @@ namespace StbImageLib
 		/// </summary>
 		public int BitsPerChannel { get; set; }
 		public byte[] Data { get; set; }
+
+		public static ImageResult FromMemory(byte[] data, ColorComponents? requiredComponents = null, bool use8BitsPerChannel = true)
+		{
+			using (var stream = new MemoryStream(data))
+			{
+				return FromStream(stream, requiredComponents, use8BitsPerChannel);
+			}
+		}
 
 		public static ImageResult FromStream(Stream stream, ColorComponents? requiredComponents = null, bool use8BitsPerChannel = true)
 		{

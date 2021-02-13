@@ -1,9 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.InteropServices;
-using StbImageLib.Utility;
+using StbImageSharp.Utility;
 
-namespace StbImageLib.Decoding
+namespace StbImageSharp.Decoding
 {
 	[StructLayout(LayoutKind.Sequential)]
 	internal struct img_comp

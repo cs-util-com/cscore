@@ -11,7 +11,7 @@ using com.csutil.http;
 using com.csutil.http.apis;
 using com.csutil.http.cookies;
 using com.csutil.io;
-using StbImageLib;
+using StbImageSharp;
 using Xunit;
 
 namespace com.csutil.tests.http {
@@ -62,6 +62,48 @@ namespace com.csutil.tests.http {
             var image = await ImageLoader.LoadAndDispose(new MemoryStream(bytes));
             Assert.Equal(h, image.Height);
             Assert.Equal(w, image.Width);
+        }
+
+        [Fact]
+        public async Task DownloadTest3() {
+            var h = 110;
+            var w = 60;
+            var stream = await new Uri("https://picsum.photos/" + w + "/" + h).SendGET().GetResult<Stream>();
+            var image = await ImageLoader.LoadAndDispose(stream);
+            Assert.Equal(h, image.Height);
+            Assert.Equal(w, image.Width);
+        }
+
+        [Fact]
+        public async Task DownloadTest4_LoadOnlyImageInfo() {
+            var pixels = 4000; // 5k x 5k is the max that picsum will serve
+            var h = pixels;
+            var w = pixels;
+
+            var timingForImageInfoOny = Log.MethodEntered("Load only image info");
+            {
+                var stream = await new Uri("https://picsum.photos/" + w + "/" + h).SendGET().GetResult<Stream>();
+                var result = await ImageLoader.ReadImageInfoAsync(stream, fallbackToFullImageDownload: false);
+                Assert.Equal(w, result.Width);
+                Assert.Equal(h, result.Height);
+            }
+            Log.MethodDone(timingForImageInfoOny);
+
+            // Wait some time before sending the next request to the picsum server to not get rejected:
+            await TaskV2.Delay((int)timingForImageInfoOny.ElapsedMilliseconds);
+
+            var timingForFullImage = Log.MethodEntered("Load full image");
+            {
+                var stream = await new Uri("https://picsum.photos/" + w + "/" + h).SendGET().GetResult<Stream>();
+                var image = await ImageLoader.LoadAndDispose(stream);
+                Assert.Equal(h, image.Height);
+                Assert.Equal(w, image.Width);
+            }
+            Log.MethodDone(timingForFullImage);
+
+            var xTimesFaster = 3; // Loading only the image info should be at least this factor faster then loading the full image
+            string e = timingForImageInfoOny + " was not faster then " + timingForFullImage;
+            Assert.True(timingForImageInfoOny.ElapsedMilliseconds * xTimesFaster < timingForFullImage.ElapsedMilliseconds, e);
         }
 
         [Fact]
@@ -181,11 +223,9 @@ namespace com.csutil.tests.http {
                 try { // Provoke an exception that will then be searched for on StackOverflow
                     List<string> list = new List<string>(); // List without entries
                     list.First(); // Will cause "Sequence contains no elements" exception
-                }
-                catch (Exception e) { await e.RethrowWithAnswers(); }
+                } catch (Exception e) { await e.RethrowWithAnswers(); }
 
-            }
-            catch (Error exceptionWithAnswers) {
+            } catch (Error exceptionWithAnswers) {
                 // Check that the error contains detailed answers:
                 var length = exceptionWithAnswers.Message.Length;
                 Assert.True(length > 1500, "message length=" + length);

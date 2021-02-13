@@ -8,7 +8,7 @@ namespace com.csutil.json {
         public static JsonSerializerSettings typedJsonSettings = NewTypedJsonSettings();
 
         private static JsonSerializerSettings NewDefaultSettings() {
-            var s = new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore, };
+            var s = new JsonSerializerSettings();
             s.Converters.Add(new JsonConverterHandlingMissingFields());
             return s;
         }

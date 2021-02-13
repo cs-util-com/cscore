@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using com.csutil.io;
-using StbImageLib;
 using Xunit;
 using Zio;
 
@@ -16,7 +15,7 @@ namespace com.csutil.tests {
         public async Task ExampleUsage1() {
             var t = Log.MethodEntered();
             FileEntry imgFile = await GetImageFile("testImage1.jpg");
-            ImageResult image = await ImageLoader.LoadImageInBackground(imgFile);
+            var image = await ImageLoader.LoadImageInBackground(imgFile);
             Assert.True(image.Height > 0);
             Assert.True(image.Width > 0);
             Log.MethodDone(t);

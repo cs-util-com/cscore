@@ -2,6 +2,7 @@ using System.Net.Http;
 using com.csutil.http;
 
 namespace com.csutil {
+
     public static class HttpClientExtensions {
 
         public static bool AddRequestHeaders(this HttpClient self, Headers requestHeadersToAdd) {
@@ -17,4 +18,5 @@ namespace com.csutil {
         }
 
     }
+
 }

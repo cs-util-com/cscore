@@ -14,13 +14,15 @@ namespace com.csutil.logging.analytics {
 
         public string url = "http://www.google-analytics.com/collect";
         public string appId;
+        public string appName;
         private string latestScreen;
 
         /// <summary> Creates a new Google analytics tracker </summary>
         /// <param name="gaTrackingId"> Tracking ID / Property ID. Format: UA-XXXXX-Y </param>
         /// <param name="store"> Optional store to cache the events in </param>
-        public GoogleAnalytics(string gaTrackingId, KeyValueStoreTypeAdapter<AppFlowEvent> store = null) : base(store) {
+        public GoogleAnalytics(string gaTrackingId, string appName, KeyValueStoreTypeAdapter<AppFlowEvent> store = null) : base(store) {
             this.appId = gaTrackingId;
+            this.appName = appName;
         }
 
         protected override async Task<bool> SendEventToExternalSystem(AppFlowEvent e) {
@@ -39,12 +41,12 @@ namespace com.csutil.logging.analytics {
         }
 
         public Timing NewTiming(string category, string varName, long timingInMs) {
-            return new Timing() { tid = appId, cd = latestScreen, utc = category, utv = varName, utt = timingInMs };
+            return new Timing() { tid = appId, an = appName, cd = latestScreen, utc = category, utv = varName, utt = timingInMs };
         }
 
         // Example: https://developers.google.com/analytics/devguides/collection/protocol/v1/devguide#event
         public Event NewEvent(string category, string action, string label = null, int value = -1) {
-            var r = new Event() { tid = appId, ec = category, ea = action, el = label, cd = latestScreen };
+            var r = new Event() { tid = appId, an = appName, ec = category, ea = action, el = label, cd = latestScreen };
             if (value > 0) { r.ev = value; }
             return r;
         }
@@ -97,14 +99,17 @@ namespace com.csutil.logging.analytics {
             /// <summary> The tracking ID / web property ID. The format is typically UA-XXXX-Y </summary>
             public string tid;
 
+            /// <summary> The tracking ID / web property ID. The format is typically UA-XXXX-Y </summary>
+            public string an;
+
             /// <summary> When not null, the IP address of the sender will be anonymized. </summary>
             public string aip = "1";
 
             /// <summary> Data source, e.g. "web" or "app" or "crm" </summary>
             public string ds = "app";
 
-            /// <summary> Screen resolution e.g. "1234x1234" </summary>
-            public string screenResolution;
+            /// <summary> Screen resolution e.g. "1280x800" </summary>
+            public string sr;
 
             /// <summary> Campain ID </summary>
             public string cn;

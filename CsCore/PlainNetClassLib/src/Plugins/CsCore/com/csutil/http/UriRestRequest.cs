@@ -10,7 +10,7 @@ using Zio;
 
 namespace com.csutil.http {
 
-    internal class UriRestRequest : RestRequest, IDisposable {
+    public class UriRestRequest : RestRequest, IDisposable {
 
         public IJsonReader jsonReader = JsonReader.GetReader();
         public Action<float> onProgress { get; set; }

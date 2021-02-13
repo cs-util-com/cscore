@@ -1,10 +1,15 @@
-﻿using StbImageLib.Utility;
+﻿using StbImageSharp.Utility;
 using System;
 using System.IO;
 
-namespace StbImageLib.Decoding
+namespace StbImageSharp.Decoding
 {
-	public class Decoder
+#if !STBSHARP_INTERNAL
+	public
+#else
+	internal
+#endif
+	class Decoder
 	{
 		public const int STBI__SCAN_load = 0;
 		public const int STBI__SCAN_type = 1;
