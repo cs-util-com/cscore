@@ -32,10 +32,11 @@ namespace com.csutil.io {
 
         public static ImageInfo ReadImageInfo(Stream imgStream, bool fallbackToFullImageDownload, int exifHeaderByteSizeToTryFirst) {
             // Extract first bytes to check for Exif header:
-            var part1 = imgStream.CopyParts(bytesToCopy: exifHeaderByteSizeToTryFirst);
+            var part1 = CopyParts(imgStream, bytesToCopy: exifHeaderByteSizeToTryFirst);
             using (var fullImage = new MemoryStream()) {
                 part1.CopyTo(fullImage); // Make copy of bytes in case exif reader breaks stream
-                try { return GetInfoFromExifReader(part1); } catch (Exception) {
+                try { return GetInfoFromExifReader(part1); }
+                catch (Exception) {
                     if (!fallbackToFullImageDownload) { throw; }
                 }
                 // The exif reader failed and destroyed the part1 stream in this process
@@ -44,6 +45,15 @@ namespace com.csutil.io {
                 fullImage.Seek(0, SeekOrigin.Begin); // Set curser back to start
                 return ImageInfo.FromStream(fullImage).Value;
             }
+        }
+
+        private static Stream CopyParts(Stream self, int bytesToCopy, int offset = 0) {
+            var destination = new MemoryStream();
+            byte[] buffer = new byte[bytesToCopy];
+            int numBytes = self.Read(buffer, offset, buffer.Length);
+            destination.Write(buffer, offset, numBytes);
+            destination.Seek(0, SeekOrigin.Begin);
+            return destination;
         }
 
         private static ImageInfo GetInfoFromExifReader(Stream stream) {
