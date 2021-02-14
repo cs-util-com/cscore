@@ -26,51 +26,39 @@ namespace com.csutil.io {
             return image;
         }
 
-        public static Task<ImageInfo> ReadImageInfoAsync(Stream imgStream, bool fallbackToFullImageDownload = true, int exifHeaderByteSizeToTryFirst = 1000) {
-            return TaskV2.Run(() => Task.FromResult(ReadImageInfo(imgStream, fallbackToFullImageDownload, exifHeaderByteSizeToTryFirst)));
-        }
-
-        public static ImageInfo ReadImageInfo(Stream imgStream, bool fallbackToFullImageDownload, int exifHeaderByteSizeToTryFirst) {
-            // Extract first bytes to check for Exif header:
-            var part1 = CopyParts(imgStream, bytesToCopy: exifHeaderByteSizeToTryFirst);
-            using (var fullImage = new MemoryStream()) {
-                part1.CopyTo(fullImage); // Make copy of bytes in case exif reader breaks stream
-                try { return GetInfoFromExifReader(part1); }
-                catch (Exception) {
-                    if (!fallbackToFullImageDownload) { throw; }
+        public static async Task<ImageInfo> GetImageInfoFrom(Stream source) {
+            source = await source.CopyToSeekableStreamIfNeeded(disposeOriginalStream: true);
+            try {
+                try {
+                    source.Seek(0, SeekOrigin.Begin);
+                    return ImageInfo.FromStream(source).Value;
                 }
-                // The exif reader failed and destroyed the part1 stream in this process
-                // Fill in rest of bytes from original stream to have full image back
-                imgStream.CopyTo(fullImage);
-                fullImage.Seek(0, SeekOrigin.Begin); // Set curser back to start
-                return ImageInfo.FromStream(fullImage).Value;
+                catch (Exception e) { Log.w("ImageInfo.FromStream failed", e); }
+                source.Seek(0, SeekOrigin.Begin);
+                var img = ImageResult.FromStream(source);
+                return new ImageInfo() { Width = img.Width, Height = img.Height };
             }
+            catch (Exception e) { Log.w("ImageResult.FromStream failed", e); }
+            source.Seek(0, SeekOrigin.Begin);
+            // ExifLib.ExifReader closes the stream on error so has to be tried last
+            return GetInfoFromJpgExifReader(source);
         }
 
-        private static Stream CopyParts(Stream self, int bytesToCopy, int offset = 0) {
-            var destination = new MemoryStream();
-            byte[] buffer = new byte[bytesToCopy];
-            int numBytes = self.Read(buffer, offset, buffer.Length);
-            destination.Write(buffer, offset, numBytes);
-            destination.Seek(0, SeekOrigin.Begin);
-            return destination;
-        }
-
-        private static ImageInfo GetInfoFromExifReader(Stream stream) {
+        private static ImageInfo GetInfoFromJpgExifReader(Stream stream) {
             stream.Seek(0, SeekOrigin.Begin); // Set curser back to start
             var exif = new ExifLib.ExifReader(stream);
             var res = new ImageInfo();
 
             if (exif.GetTagValue(ExifLib.ExifTags.ImageWidth, out uint w1)) {
                 res.Width = (int)w1;
-            } else if (exif.GetTagValue(ExifLib.ExifTags.PixelXDimension, out uint w3)) {
-                res.Width = (int)w3;
+            } else if (exif.GetTagValue(ExifLib.ExifTags.PixelXDimension, out uint w2)) {
+                res.Width = (int)w2;
             }
 
             if (exif.GetTagValue(ExifLib.ExifTags.ImageLength, out uint h1)) {
                 res.Height = (int)h1;
-            } else if (exif.GetTagValue(ExifLib.ExifTags.PixelYDimension, out uint h3)) {
-                res.Height = (int)h3;
+            } else if (exif.GetTagValue(ExifLib.ExifTags.PixelYDimension, out uint h2)) {
+                res.Height = (int)h2;
             }
 
             //if (exif.GetTagValue(ExifLib.ExifTags.BitsPerSample, out uint b1) && b1 > 0) {

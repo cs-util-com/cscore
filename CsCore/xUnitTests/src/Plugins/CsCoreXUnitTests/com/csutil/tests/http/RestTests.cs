@@ -76,34 +76,42 @@ namespace com.csutil.tests.http {
 
         [Fact]
         public async Task DownloadTest4_LoadOnlyImageInfo() {
-            var pixels = 4000; // 5k x 5k is the max that picsum will serve
+            var pixels = 4500; // 5k x 5k is the max that picsum will serve
             var h = pixels;
             var w = pixels;
 
-            var timingForImageInfoOny = Log.MethodEntered("Load only image info");
-            {
-                var stream = await new Uri("https://picsum.photos/" + w + "/" + h).SendGET().GetResult<Stream>();
-                var result = await ImageLoader.ReadImageInfoAsync(stream, fallbackToFullImageDownload: false);
-                Assert.Equal(w, result.Width);
-                Assert.Equal(h, result.Height);
-            }
-            Log.MethodDone(timingForImageInfoOny);
-
-            // Wait some time before sending the next request to the picsum server to not get rejected:
-            await TaskV2.Delay((int)timingForImageInfoOny.ElapsedMilliseconds);
-
             var timingForFullImage = Log.MethodEntered("Load full image");
-            {
-                var stream = await new Uri("https://picsum.photos/" + w + "/" + h).SendGET().GetResult<Stream>();
-                var image = await ImageLoader.LoadAndDispose(stream);
-                Assert.Equal(h, image.Height);
-                Assert.Equal(w, image.Width);
-            }
+            var fullImage = await new Uri("https://picsum.photos/" + w + "/" + h).SendGET().GetResult<Stream>();
+            var info2 = await ImageLoader.GetImageInfoFrom(fullImage);
+            fullImage.Dispose();
+            Assert.Equal(h, info2.Height);
+            Assert.Equal(w, info2.Width);
             Log.MethodDone(timingForFullImage);
 
-            var xTimesFaster = 3; // Loading only the image info should be at least this factor faster then loading the full image
+            // Wait some time before sending the next request to the picsum server to not get rejected:
+            await TaskV2.Delay(1000);
+
+            var timingForImageInfoOny = Log.MethodEntered("Load only first bytes");
+            var stream = await new Uri("https://picsum.photos/" + w + "/" + h).SendGET().GetResult<Stream>();
+            var firstBytes = await CopyFirstBytes(stream, bytesToCopy: 2000);
+            stream.Dispose();
+            var info = await ImageLoader.GetImageInfoFrom(firstBytes);
+            firstBytes.Dispose();
+            Assert.Equal(w, info.Width);
+            Assert.Equal(h, info.Height);
+            Log.MethodDone(timingForImageInfoOny);
+
+            var xTimesFaster = 2; // Loading only the image info should be at least this factor faster then loading the full image
             string e = timingForImageInfoOny + " was not faster then " + timingForFullImage;
             Assert.True(timingForImageInfoOny.ElapsedMilliseconds * xTimesFaster < timingForFullImage.ElapsedMilliseconds, e);
+        }
+
+        private static async Task<Stream> CopyFirstBytes(Stream self, int bytesToCopy) {
+            var destination = new MemoryStream();
+            byte[] buffer = new byte[bytesToCopy];
+            int numBytes = await self.ReadAsync(buffer, offset: 0, buffer.Length);
+            destination.Write(buffer, offset: 0, numBytes);
+            return destination;
         }
 
         [Fact]
