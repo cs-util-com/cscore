@@ -1,10 +1,12 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 using Zio;
+using Zio.FileSystems;
 
 namespace com.csutil.tests {
 
@@ -360,6 +362,26 @@ namespace com.csutil.tests {
             f1.SaveAsText("abc");
             var fileEntry1 = f1.ToFileEntryInNewRoot();
             Assert.Equal("/file1.txt", fileEntry1.FullName);
+        }
+
+        [Fact]
+        public void TestFileSystem() {
+            var dir = CreateDirectoryForTesting("TestFileSystem");
+            Type fileSystem = dir.FileSystem.GetType();
+            Assert.Equal(typeof(SubFileSystem), fileSystem);
+            var s = (SubFileSystem)dir.FileSystem;
+            // Use reflection to access protected parent file system:
+            var parentFileSystem = s.GetType().GetNonPublicInstanceMember("NextFileSystem").GetValue(s);
+
+            var sysInfo = EnvironmentV2.instance.systemInfo;
+            bool IsWindows = sysInfo.osPlatform.StartsWith("Win", StringComparison.InvariantCultureIgnoreCase);
+            if (IsWindows) {
+                // On Windows a PhysicalFileSystemV2 is used to handle the disc letter prefix:
+                Assert.Equal(typeof(PhysicalFileSystemV2), parentFileSystem.GetType());
+            } else { // On all other systems the normal PhysicalFileSystem is used:
+                Assert.Equal(typeof(PhysicalFileSystem), parentFileSystem.GetType());
+            }
+
         }
 
     }

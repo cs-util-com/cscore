@@ -42,6 +42,10 @@ namespace com.csutil {
             return false;
         }
 
+        public static MemberInfo GetNonPublicInstanceMember(this Type self, string name) {
+            return self.GetMember(name, BindingFlags.Instance | BindingFlags.NonPublic).First();
+        }
+
         public static object GetValue(this MemberInfo self, object obj) {
             if (self is PropertyInfo p) { return p.GetValue(obj); }
             if (self is FieldInfo f) { return f.GetValue(obj); }
