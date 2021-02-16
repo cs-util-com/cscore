@@ -29,6 +29,9 @@ namespace com.csutil.model {
         public const string HAS_NUMBER = @".*\d.*";
         public const string HAS_SPECIAL_CHAR = @".*\W.*";
 
+        /// <summary> Represents an emtpy (all zeros) UUID in any of the valid UUID formats (0..0) / {0..0} / 0..0 </summary>
+        public const string EMPTY_GUID_UUID = @"({?\(?00000000-0000-0000-0000-000000000000\)?}?|00000000000000000000000000000000)";
+
     }
 
     public static class RegexUtil {

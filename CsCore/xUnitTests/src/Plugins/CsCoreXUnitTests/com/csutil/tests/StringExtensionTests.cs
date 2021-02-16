@@ -124,6 +124,10 @@ namespace com.csutil.tests {
             Assert.True("abbA1".IsRegexMatch(or1)); // and1
             Assert.False("abb1".IsRegexMatch(or1));
 
+            string emtpyUuid = Guid.Empty.ToString();
+            string normalUuid = Guid.NewGuid().ToString();
+            Assert.True(emtpyUuid.IsRegexMatch(RegexTemplates.EMPTY_GUID_UUID));
+            Assert.False(normalUuid.IsRegexMatch(RegexTemplates.EMPTY_GUID_UUID));
         }
 
         [Fact]
