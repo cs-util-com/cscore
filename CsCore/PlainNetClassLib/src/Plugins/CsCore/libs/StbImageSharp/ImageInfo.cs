@@ -17,43 +17,34 @@ namespace StbImageSharp
 
 		public static ImageInfo? FromStream(Stream stream)
 		{
-			var info = JpgDecoder.Info(stream);
-			if (info != null)
+			ImageInfo? info = null;
+
+			if (JpgDecoder.Test(stream))
 			{
-				return info;
+				info = JpgDecoder.Info(stream);
+			}
+			else if (PngDecoder.Test(stream))
+			{
+				info = PngDecoder.Info(stream);
+			}
+			else if (BmpDecoder.Test(stream))
+			{
+				info = BmpDecoder.Info(stream);
+			}
+			else if (GifDecoder.Test(stream))
+			{
+				info = GifDecoder.Info(stream);
+			}
+			else if (PsdDecoder.Test(stream))
+			{
+				info = PsdDecoder.Info(stream);
+			}
+			else if (TgaDecoder.Test(stream))
+			{
+				info = TgaDecoder.Info(stream);
 			}
 
-			info = PngDecoder.Info(stream);
-			if (info != null)
-			{
-				return info;
-			}
-
-			info = GifDecoder.Info(stream);
-			if (info != null)
-			{
-				return info;
-			}
-
-			info = BmpDecoder.Info(stream);
-			if (info != null)
-			{
-				return info;
-			}
-
-			info = PsdDecoder.Info(stream);
-			if (info != null)
-			{
-				return info;
-			}
-
-			info = TgaDecoder.Info(stream);
-			if (info != null)
-			{
-				return info;
-			}
-
-			return null;
+			return info;
 		}
 	}
 }
