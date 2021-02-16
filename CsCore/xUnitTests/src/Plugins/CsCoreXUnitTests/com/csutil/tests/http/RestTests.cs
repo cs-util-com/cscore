@@ -76,12 +76,13 @@ namespace com.csutil.tests.http {
 
         [Fact]
         public async Task DownloadTest4_LoadOnlyImageInfo() {
-            var pixels = 4500; // 5k x 5k is the max that picsum will serve
+            var pixels = 5000; // 5k x 5k is the max that picsum will serve
             var h = pixels;
             var w = pixels;
 
             var timingForFullImage = Log.MethodEntered("Load full image");
             var fullImage = await new Uri("https://picsum.photos/" + w + "/" + h).SendGET().GetResult<Stream>();
+            Assert.False(fullImage.CanSeek);
             var info2 = await ImageLoader.GetImageInfoFrom(fullImage);
             fullImage.Dispose();
             Assert.Equal(h, info2.Height);
@@ -93,7 +94,9 @@ namespace com.csutil.tests.http {
 
             var timingForImageInfoOny = Log.MethodEntered("Load only first bytes");
             var stream = await new Uri("https://picsum.photos/" + w + "/" + h).SendGET().GetResult<Stream>();
-            var firstBytes = await CopyFirstBytes(stream, bytesToCopy: 2000);
+            var firstBytes = await CopyFirstBytes(stream, bytesToCopy: 500);
+            Assert.False(fullImage.CanSeek);
+            Assert.True(firstBytes.CanSeek);
             stream.Dispose();
             var info = await ImageLoader.GetImageInfoFrom(firstBytes);
             firstBytes.Dispose();
