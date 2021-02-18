@@ -82,7 +82,7 @@ namespace com.csutil.model {
         private static void AddCheckSum(this IFileRef self, string type, string hash) {
             hash.ThrowErrorIfNull($"The passed {type}-hash was null");
             if (self.checksums == null) { self.checksums = new Dictionary<string, object>(); }
-            self.checksums.Add(type, hash);
+            self.checksums.AddOrReplace(type, hash);
         }
 
         private static void SetLocalFileInfosFrom(this IFileRef self, Headers headers, FileEntry targetFile) {
