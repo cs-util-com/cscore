@@ -51,8 +51,8 @@ namespace com.csutil {
 
 namespace com.csutil.random {
 
+    /// <summary> Helps with generating random data for testing </summary>
     public static class RandomNameGenerator {
-        // Not really core but it was fun to build ;) And might help with generating random data for testing
 
         // v for vowels 1 for the first set of consonants and 2 for the second set of consonants:
         public static List<string> generatorInstructions = new List<string>() { "v2", "v2v", "1v2", "v2v2", "1v2v2" };
@@ -60,13 +60,13 @@ namespace com.csutil.random {
         public static List<string> consonants1 = new List<string>() { "b", "c", "d", "f", "g", "h", "k", "l", "m", "n", "p", "q", "r", "s", "t", "v", "w", "x", "z", "ch", "bl", "br", "fl", "gl", "gr", "kl", "pr", "st", "sh", "th" };
         public static List<string> consonants2 = new List<string>() { "b", "d", "f", "g", "h", "k", "l", "m", "n", "p", "r", "s", "t", "v", "w", "z", "ch", "gh", "nn", "st", "sh", "th", "tt", "ss", "pf", "nt" };
 
-        public static String NextRandomName(this Random self) {
+        public static string NextRandomName(this Random self) {
             string instructionSet = self.NextRandomListEntry(generatorInstructions);
             return NextRandomName(self, instructionSet, vowels, consonants1, consonants2);
         }
 
         public static string NextRandomName(this Random self, string genertorInstruction, List<string> vowels, List<string> consonants1, List<string> consonants2) {
-            String generatedName = "";
+            string generatedName = "";
             int length = genertorInstruction.Length;
             for (int i = 0; i < length; i++) {
                 char c = genertorInstruction[0];
@@ -83,4 +83,5 @@ namespace com.csutil.random {
         private static T NextRandomListEntry<T>(this Random self, List<T> list) { return list[self.Next(0, list.Count - 1)]; }
 
     }
+
 }

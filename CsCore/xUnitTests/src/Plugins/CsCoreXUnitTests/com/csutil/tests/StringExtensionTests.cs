@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using com.csutil.model;
+using com.csutil.random;
 using DiffMatchPatch;
 using Xunit;
 
@@ -218,6 +219,40 @@ namespace com.csutil.tests {
             Assert.Equal("!", diff.Last().text);
             Assert.Equal(Operation.INSERT, diff.Last().operation);
 
+        }
+
+        [Fact]
+        public void StringBaseConversion() {
+            var base64String = "8Uie51Oz+GZcufyQ8q2GwA=="; // An example md5 hash in base 64
+            var base16HexString = BaseConversionHelper.FromBase64StringToHexString(base64String);
+            Assert.Equal("F1489EE753B3F8665CB9FC90F2AD86C0", base16HexString);
+            var newBase64String = BaseConversionHelper.FromHexStringtoBase64String(base16HexString);
+            Assert.Equal(base64String, newBase64String);
+            Assert_IsBase64(base64String);
+            Assert_IsBase16(base16HexString);
+        }
+
+        [Fact]
+        public void TestBaseConversionWithRandomStrings() {
+            for (int i = 0; i < 10000; i++) {
+                var someRandomName = new Random().NextRandomName();
+                var md5InBase16 = someRandomName.GetMD5Hash();
+                Assert_IsBase16(md5InBase16);
+                var b64 = BaseConversionHelper.FromHexStringtoBase64String(md5InBase16);
+                Assert_IsBase64(b64);
+                Assert.Equal(md5InBase16, BaseConversionHelper.FromBase64StringToHexString(b64));
+            }
+        }
+
+        private static void Assert_IsBase64(string base64String) {
+            Assert.True(base64String.IsRegexMatch(RegexTemplates.BASE64_ENCODED_STRING));
+            Assert.True(base64String.IsRegexMatch(RegexTemplates.MD5_HASH_BASE64));
+            Assert.False(base64String.IsRegexMatch(RegexTemplates.MD5_HASH_BASE16));
+        }
+
+        private static void Assert_IsBase16(string base16HexString) {
+            Assert.True(base16HexString.IsRegexMatch(RegexTemplates.MD5_HASH_BASE16));
+            Assert.False(base16HexString.IsRegexMatch(RegexTemplates.MD5_HASH_BASE64));
         }
 
     }

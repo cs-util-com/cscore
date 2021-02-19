@@ -45,7 +45,28 @@ namespace com.csutil.http {
             return headers.TryGetValue(key, out value);
         }
 
-        public string GetMD5Checksum() { return GetHeaderValue("content-md5", null); }
+        /// <summary> Returns the MD5 hash in hex (base 16) if available in the headers </summary>
+        public string GetMD5Checksum() {
+            var result = GetHeaderValue("content-md5", null);
+            if (result.IsNullOrEmpty()) {  // If the normal md5 header was not found, check for others:
+                // Google uses the "x-goog-hash" header instead containing an md5 hash as well:
+                if (TryGetXGoogMd5HashInHexBase16(this, out var xGoogMd5)) { result = xGoogMd5; }
+            }
+            return result;
+        }
+
+        private static bool TryGetXGoogMd5HashInHexBase16(Headers self, out string md5Hash) {
+            if (self.TryGetValue("x-goog-hash", out IEnumerable<string> hashes)) {
+                md5Hash = hashes.SingleOrDefault(x => x.StartsWith("md5="));
+                if (!md5Hash.IsNullOrEmpty()) { // eg "md5=8Uie51Oz+GZcufyQ8q2GwA=="
+                    string md5InBase64 = md5Hash.SubstringAfter("md5=");
+                    md5Hash = BaseConversionHelper.FromBase64StringToHexString(md5InBase64);
+                    return true;
+                }
+            }
+            md5Hash = null;
+            return false;
+        }
 
         public string GetEtagHeader() { return GetHeaderValue("etag", null); }
 

@@ -32,6 +32,13 @@ namespace com.csutil.model {
         /// <summary> Represents an emtpy (all zeros) UUID in any of the valid UUID formats (0..0) / {0..0} / 0..0 </summary>
         public const string EMPTY_GUID_UUID = @"({?\(?00000000-0000-0000-0000-000000000000\)?}?|00000000000000000000000000000000)";
 
+        /// <summary> base 64 encoded arbitrary strings have a few attributes that can be validated </summary>
+        public const string BASE64_ENCODED_STRING = "^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{4})$";
+        /// <summary> md5 hashes in base 64 are similar to arbitrary base 64 strings but have a fixed length </summary>
+        public const string MD5_HASH_BASE64 = "^(?:[A-Za-z0-9+/]{22}==)$";
+        /// <summary> base 16 encoded md5 hashes have an exact length that can be validated </summary>
+        public const string MD5_HASH_BASE16 = "[a-fA-F0-9]{32}";
+
     }
 
     public static class RegexUtil {

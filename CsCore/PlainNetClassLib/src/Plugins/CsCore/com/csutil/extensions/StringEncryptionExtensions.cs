@@ -36,6 +36,30 @@ namespace com.csutil {
 
     }
 
+    public static class BaseConversionHelper {
+
+        public static string FromBase64StringToHexString(string base64String) {
+            return Base64BytesToHexString(Convert.FromBase64String(base64String));
+        }
+
+        private static string Base64BytesToHexString(byte[] base64bytes) {
+            return BitConverter.ToString(base64bytes).Replace("-", "");
+        }
+
+        public static string FromHexStringtoBase64String(string hexBase16String) {
+            return Convert.ToBase64String(HexStringToHexBytes(hexBase16String));
+        }
+
+        private static byte[] HexStringToHexBytes(string hexBase16String) {
+            var base64bytes = new byte[hexBase16String.Length / 2];
+            for (var i = 0; i < base64bytes.Length; i++) {
+                base64bytes[i] = Convert.ToByte(hexBase16String.Substring(i * 2, 2), 16);
+            }
+            return base64bytes;
+        }
+
+    }
+
     public static class StringEncryption { // Modified version of https://stackoverflow.com/a/10177020/165106
 
         // This constant is used to determine the keysize of the encryption algorithm in bits.
