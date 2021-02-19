@@ -76,12 +76,12 @@ namespace com.csutil.tests.http {
 
         [Fact]
         public async Task DownloadTest4_LoadOnlyImageInfo() {
-            var pixels = 5000; // 5k x 5k is the max that picsum will serve
-            var h = pixels;
-            var w = pixels;
+            var imgUrl = "https://raw.githubusercontent.com/cs-util-com/cscore/master/CsCore/assets/logo-cscore1024x1024_2.png";
+            var h = 1024;
+            var w = 1024;
 
             var timingForFullImage = Log.MethodEntered("Load full image");
-            var fullImage = await new Uri("https://picsum.photos/" + w + "/" + h).SendGET().GetResult<Stream>();
+            var fullImage = await new Uri(imgUrl).SendGET().GetResult<Stream>();
             Assert.False(fullImage.CanSeek);
             var info2 = await ImageLoader.GetImageInfoFrom(fullImage);
             fullImage.Dispose();
@@ -89,22 +89,19 @@ namespace com.csutil.tests.http {
             Assert.Equal(w, info2.Width);
             Log.MethodDone(timingForFullImage);
 
-            // Wait some time before sending the next request to the picsum server to not get rejected:
-            await TaskV2.Delay(1000);
-
             var timingForImageInfoOny = Log.MethodEntered("Load only first bytes");
-            var stream = await new Uri("https://picsum.photos/" + w + "/" + h).SendGET().GetResult<Stream>();
+            var stream = await new Uri(imgUrl).SendGET().GetResult<Stream>();
             var firstBytes = await CopyFirstBytes(stream, bytesToCopy: 500);
             Assert.False(fullImage.CanSeek);
             Assert.True(firstBytes.CanSeek);
-            stream.Dispose();
             var info = await ImageLoader.GetImageInfoFrom(firstBytes);
             firstBytes.Dispose();
             Assert.Equal(w, info.Width);
             Assert.Equal(h, info.Height);
             Log.MethodDone(timingForImageInfoOny);
+            stream.Dispose();
 
-            var xTimesFaster = 2; // Loading only the image info should be at least this factor faster then loading the full image
+            var xTimesFaster = 3; // Loading only the image info should be at least this factor faster then loading the full image
             string e = timingForImageInfoOny + " was not faster then " + timingForFullImage;
             Assert.True(timingForImageInfoOny.ElapsedMilliseconds * xTimesFaster < timingForFullImage.ElapsedMilliseconds, e);
         }
