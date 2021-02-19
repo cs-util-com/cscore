@@ -118,7 +118,7 @@ namespace com.csutil.model {
             var onlineMD5 = headers.GetMD5Checksum();
             if (onlineMD5.IsNullOrEmpty()) { return false; }
             string localMD5 = targetFile.CalcFileMd5Hash();
-            if (localMD5 == onlineMD5) {
+            if (localMD5 != onlineMD5) {
                 throw new InvalidDataException($"Missmatch in MD5 hashes, local={localMD5} & online={onlineMD5}");
             }
             self.AddCheckSum(CHECKSUM_MD5, localMD5);
