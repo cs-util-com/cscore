@@ -1,3 +1,4 @@
+using com.csutil.model;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -47,20 +48,22 @@ namespace com.csutil.http {
 
         /// <summary> Returns the MD5 hash in hex (base 16) if available in the headers </summary>
         public string GetMD5Checksum() {
-            var result = GetHeaderValue("content-md5", null);
-            if (result.IsNullOrEmpty()) {  // If the normal md5 header was not found, check for others:
+            var md5Hash = GetHeaderValue("content-md5", null);
+            if (md5Hash.IsNullOrEmpty()) {  // If the normal md5 header was not found, check for others:
                 // Google uses the "x-goog-hash" header instead containing an md5 hash as well:
-                if (TryGetXGoogMd5HashInHexBase16(this, out var xGoogMd5)) { result = xGoogMd5; }
+                if (TryGetXGoogMd5HashInBase64(this, out var xGoogMd5)) { md5Hash = xGoogMd5; }
             }
-            return result;
+            if (md5Hash.IsRegexMatch(RegexTemplates.MD5_HASH_BASE64)) {
+                md5Hash = BaseConversionHelper.FromBase64StringToHexString(md5Hash);
+            }
+            return md5Hash;
         }
 
-        private static bool TryGetXGoogMd5HashInHexBase16(Headers self, out string md5Hash) {
+        private static bool TryGetXGoogMd5HashInBase64(Headers self, out string md5Hash) {
             if (self.TryGetValue("x-goog-hash", out IEnumerable<string> hashes)) {
                 md5Hash = hashes.SingleOrDefault(x => x.StartsWith("md5="));
                 if (!md5Hash.IsNullOrEmpty()) { // eg "md5=8Uie51Oz+GZcufyQ8q2GwA=="
-                    string md5InBase64 = md5Hash.SubstringAfter("md5=");
-                    md5Hash = BaseConversionHelper.FromBase64StringToHexString(md5InBase64);
+                    md5Hash = md5Hash.SubstringAfter("md5=");
                     return true;
                 }
             }
