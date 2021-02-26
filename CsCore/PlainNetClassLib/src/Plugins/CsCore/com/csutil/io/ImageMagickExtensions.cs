@@ -37,18 +37,24 @@ namespace com.csutil {
         }
 
         public static double CompareV2(this MagickImage self, MagickImage oldImg, ErrorMetric errorMetric, out MagickImage imgWithDifferences) {
-            AssertV2.AreEqual(oldImg.Width, self.Width, "RegressionImage.Width");
-            AssertV2.AreEqual(oldImg.Height, self.Height, "RegressionImage.Height");
             // Check if both images have the same size:
-            if (oldImg.Width != self.Width || oldImg.Height != self.Height) {
-                if (self.GetAspectRatio() == oldImg.GetAspectRatio()) {
+            bool isNewImageSameSizeAsOldImage = oldImg.Width == self.Width && oldImg.Height == self.Height;
+            if (!isNewImageSameSizeAsOldImage) {
+                var diffSizesWarn = $"Different sizes: OldImage=({oldImg.Width}X{oldImg.Height}) but NewImage=({self.Width}X{self.Height})";
+                bool isNewImageAspectRatioSameAsOldImage = self.GetAspectRatio() == oldImg.GetAspectRatio();
+                if (isNewImageAspectRatioSameAsOldImage) {
+                    Log.w(diffSizesWarn);
                     // If aspect ratio matches, resize both images to same size:
                     var minWidth = Math.Min(oldImg.Width, self.Width);
                     var minHeight = Math.Min(oldImg.Height, self.Height);
                     oldImg.Resize(minWidth, minHeight);
                     self.Resize(minWidth, minHeight);
+                } else { // Missmatch in image sizes cant be fixed, abort:
+                    throw new ArgumentException("Can't compare! " + diffSizesWarn);
                 }
             }
+            AssertV2.AreEqual(oldImg.Width, self.Width, "RegressionImage.Width");
+            AssertV2.AreEqual(oldImg.Height, self.Height, "RegressionImage.Height");
             //return oldImg.Compare(self, out imgWithDifferences);
             imgWithDifferences = new MagickImage();
             return oldImg.Compare(self, new CompareSettings() { Metric = errorMetric }, imgWithDifferences);

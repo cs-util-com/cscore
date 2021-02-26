@@ -67,36 +67,43 @@ namespace com.csutil {
             Texture2D screenShot = ScreenCapture.CaptureScreenshotAsTexture(config.screenshotUpscaleFactor);
             // Texture2D screenShot = Camera.allCameras.CaptureScreenshot(); // Does not capture UI 
 
-            if (newImg.Exists) { newImg.CopyToV2(backup, replaceExisting: false); }
+            if (newImg.Exists) { newImg.CopyToV2(backup, replaceExisting: true); }
             screenShot.SaveToJpgFile(newImg, config.screenshotQuality);
             screenShot.Destroy();
 
-            var diffImg = CalculateDiffImage(oldImg, newImg, config.maxAllowedDiff, config.errorMetric);
-            if (diffImg != null) {
-                var e = $"Visual diff to previous '{id}' detected! To approve an allowed visual change, delete '{oldImg.Name}'";
-                if (!config.customErrorMessage.IsNullOrEmpty()) { e = config.customErrorMessage + "/n" + e; }
-                var exeption = new Error(e, stacktrace);
-                if (config.throwAssertException) {
-                    throw exeption;
-                } else if (config.logAsError) {
-                    Log.e(exeption);
-                } else if (config.logAsWarning) {
-                    Log.w(e);
+            try {
+                var diffImg = CalculateDiffImage(oldImg, newImg, config.maxAllowedDiff, config.errorMetric);
+                if (diffImg != null) {
+                    var e = $"Visual diff to previous '{id}' detected! To approve an allowed visual change, delete '{oldImg.Name}'";
+                    if (!config.customErrorMessage.IsNullOrEmpty()) { e = config.customErrorMessage + "/n" + e; }
+                    HandleException(config, diffImg, new Error(e, stacktrace));
+                } else { // No difference between oldImg and newImg
+                         // To prevent git from detecting invalid file changes: 
+                    if (backup.Exists) { // If there is a backup of newImg..
+                        newImg.DeleteV2(); // Remove the newly generated version ..
+                        backup.Rename(newImg.Name, out FileEntry _); // and replace it with the backup
+                    }
                 }
-                if (config.openExternallyOnAssertFail) {
-                    diffImg.Parent.OpenInExternalApp();
-                    diffImg.OpenInExternalApp();
-                }
-            } else { // No difference between oldImg and newImg
-                // To prevent git from detecting invalid file changes: 
-                if (backup.Exists) { // If there is a backup of newImg..
-                    newImg.DeleteV2(); // Remove the newly generated version ..
-                    backup.Rename(newImg.Name, out FileEntry _); // and replace it with the backup
-                }
+                backup.DeleteV2(); // If a backup file was created during the process delete it
+                AssertV2.IsTrue(newImg.Exists, "newImg did not exist after AssertNoVisualChange done");
             }
-            backup.DeleteV2(); // If a backup file was created during the process delete it
-            AssertV2.IsTrue(newImg.Exists, "newImg did not exist after AssertNoVisualChange done");
+            catch (ArgumentException e) {
+                HandleException(config, oldImg, new Error(e.Message, stacktrace));
+            }
+        }
 
+        private static void HandleException(Config config, FileEntry imgToOpen, Error exeption) {
+            if (config.throwAssertException) {
+                throw exeption;
+            } else if (config.logAsError) {
+                Log.e(exeption);
+            } else if (config.logAsWarning) {
+                Log.w(exeption.Message);
+            }
+            if (config.openExternallyOnAssertFail) {
+                imgToOpen.Parent.OpenInExternalApp();
+                imgToOpen.OpenInExternalApp();
+            }
         }
 
         private Config LoadConfigFor(string id) {
@@ -114,7 +121,6 @@ namespace com.csutil {
 
         public Task WaitForNoVisualChangeInScene(Config config = null) {
             if (config == null) { config = this.config; }
-            StackTrace stacktrace = new StackTrace(skipFrames: 2, fNeedFileInfo: true);
             return MainThread.instance.StartCoroutineAsTask(WaitForNoVisualChangeCoroutine(config));
         }
 
@@ -138,7 +144,7 @@ namespace com.csutil {
                 }
             } while (noDiffCounter < consecutiveNoDiffNeeded);
 #else
-            Log.w("ENABLE_IMAGE_MAGICK define not active, see instructions 'readme Image Magick Unity Installation Instructions.txt'");
+            Log.w("WaitForNoVisualChangeInScene() skipped: ENABLE_IMAGE_MAGICK define not active, see instructions 'readme Image Magick Unity Installation Instructions.txt'");
             yield return null;
 #endif
         }
