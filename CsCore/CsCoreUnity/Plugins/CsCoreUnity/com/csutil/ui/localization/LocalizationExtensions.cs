@@ -32,7 +32,7 @@ namespace com.csutil {
                 var listJson = ResourcesV2.LoadV2<string>("Locales/" + localeToLoad);
                 var list = JsonReader.GetReader().Read<List<I18n.Translation>>(listJson);
                 return Task.FromResult(list.ToDictionary(e => e.key, e => e));
-            } catch (Exception e) { Log.w("Could not load json for locale=" + localeToLoad, e); }
+            } catch (Exception e) { }
             return Task.FromResult<Dictionary<string, I18n.Translation>>(null);
         }
 

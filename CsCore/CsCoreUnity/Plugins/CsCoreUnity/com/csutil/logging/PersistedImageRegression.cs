@@ -173,7 +173,7 @@ namespace com.csutil {
                     }
                 }
 #else
-                Log.w("ENABLE_IMAGE_MAGICK define not active, see instructions 'readme Image Magick Unity Installation Instructions.txt'");
+                Log.d("AssertVisually.AssertNoVisualChange() skipped: ENABLE_IMAGE_MAGICK define not active, see instructions 'readme Image Magick Unity Installation Instructions.txt'");
 #endif
             } else {
                 newImg.CopyToV2(oldImg, replaceExisting: false);

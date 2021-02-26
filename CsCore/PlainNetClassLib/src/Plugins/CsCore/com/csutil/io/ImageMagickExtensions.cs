@@ -27,7 +27,7 @@ namespace com.csutil {
                 oldImg.LoadFromFileEntry(imgFile);
 
                 double diffValue = self.CompareV2(oldImg, errorMetric, out MagickImage imgWithDifferences);
-                Log.d($"Visual difference of current scene VS image '{imgFile.Name}' is: {diffValue}");
+                // Log.d($"Visual difference of current scene VS image '{imgFile.Name}' is: {diffValue}");
                 var diffDetected = diffValue > maxAllowedDiff;
                 FileEntry diffFile = imgFile.Parent.GetChild(imgFile.NameWithoutExtension + ".diff" + imgFile.ExtensionWithDot);
                 imgWithDifferences.SaveToFileEntry(diffFile);
