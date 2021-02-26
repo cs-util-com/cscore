@@ -6,6 +6,7 @@ namespace ThisOtherThing.UI.Shapes
 {
 
 	[AddComponentMenu("UI/Shapes/Edge Gradient", 100)]
+	[RequireComponent(typeof(CanvasRenderer))]
 	public class EdgeGradient : MaskableGraphic, IShape
 	{
 		public enum Positions

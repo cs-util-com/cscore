@@ -5,6 +5,7 @@ using System.Collections;
 namespace ThisOtherThing.UI.Shapes
 {
 	[AddComponentMenu("UI/Shapes/Rectangle", 1)]
+	[RequireComponent(typeof(CanvasRenderer))]
 	public class Rectangle : MaskableGraphic, IShape
 	{
         // todo: add override colors for the other shapes
