@@ -129,6 +129,18 @@ namespace com.csutil.tests {
             string normalUuid = Guid.NewGuid().ToString();
             Assert.True(emtpyUuid.IsRegexMatch(RegexTemplates.EMPTY_GUID_UUID));
             Assert.False(normalUuid.IsRegexMatch(RegexTemplates.EMPTY_GUID_UUID));
+
+            // Create a regex that does not allow 
+            var notOnBacklist = RegexUtil.NotExactly("a", "bc", "cde", RegexTemplates.EMTPY_STRING);
+            Assert.False("bc".IsRegexMatch(notOnBacklist));
+            Assert.True("b".IsRegexMatch(notOnBacklist));
+            Assert.False("a".IsRegexMatch(notOnBacklist));
+            Assert.True("aa".IsRegexMatch(notOnBacklist));
+            Assert.False("cde".IsRegexMatch(notOnBacklist));
+            Assert.True("cdeb".IsRegexMatch(notOnBacklist));
+            Assert.False("".IsRegexMatch(notOnBacklist));
+            Assert.True(" ".IsRegexMatch(notOnBacklist));
+
         }
 
         [Fact]

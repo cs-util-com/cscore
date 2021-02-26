@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -14,6 +15,7 @@ namespace com.csutil.model {
         public const string PHONE_NR = "^\\+?[\\d\\s]{3,}$";
 
         /// <summary> Matches if string is not emtpy and not only whitespaces </summary>
+        public const string EMTPY_STRING = "(^$)";
         public const string NON_EMPTY_STRING = "^(?!\\s*$).+";
         public const string NUMBER_INTEGER = "^-{0,1}\\d+$";
         public const string COLOR_HEX_RGB = "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$";
@@ -70,6 +72,10 @@ namespace com.csutil.model {
             return "^.{" + minChars + "," + maxChars + "}$";
         }
 
+        public static string NotExactly(params string[] blackList) {
+            var orRegex = blackList.ToStringV2("", "", "|");
+            return $"^(?!({orRegex})$).*";
+        }
     }
 
 }
