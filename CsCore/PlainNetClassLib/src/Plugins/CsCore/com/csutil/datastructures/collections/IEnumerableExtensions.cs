@@ -57,12 +57,6 @@ namespace com.csutil {
             return bracket1 + filteredResultStrings.Reduce((x, y) => x + separator + y) + bracket2;
         }
 
-        public static HashSet<TSource> ToHashSet<TSource>(this IEnumerable<TSource> source) {
-            var r = new HashSet<TSource>();
-            foreach (var e in source) { r.Add(e); }
-            return r;
-        }
-
         public static Dictionary<K, V> ToDictionary<K, V>(this IEnumerable<K> keys, IEnumerable<V> values) {
             return keys.Zip(values, (key, value) => new KeyValuePair<K, V>(key, value)).ToDictionary(p => p.Key, p => p.Value);
         }
@@ -90,7 +84,7 @@ namespace com.csutil {
             IEnumerator<T> enumerator;
             bool isCacheComplete;
 
-            public CachedEnumerable(IEnumerable<T> source) {           this.source = source;            }
+            public CachedEnumerable(IEnumerable<T> source) { this.source = source; }
 
             public IEnumerator<T> GetEnumerator() {
                 lock (this.gate) {
@@ -142,6 +136,21 @@ namespace com.csutil {
 
         }
 
+
+    }
+
+}
+
+// Moved to separate namespace to not cause problems if a project uses TargetFramework netstandard2.1
+namespace com.csutil.netstandard2_1polyfill {
+
+    public static class IEnumerableExtensions {
+
+        public static HashSet<TSource> ToHashSet<TSource>(this IEnumerable<TSource> source) {
+            var r = new HashSet<TSource>();
+            foreach (var e in source) { r.Add(e); }
+            return r;
+        }
 
     }
 
