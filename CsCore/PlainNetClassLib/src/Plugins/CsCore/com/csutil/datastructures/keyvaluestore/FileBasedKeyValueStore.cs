@@ -12,7 +12,7 @@ namespace com.csutil.keyvaluestore {
         /// <summary> Will create a new store instance </summary>
         /// <param name="dirName"> e.g. "MyPersistedElems1" </param>
         public static FileBasedKeyValueStore New(string dirName) {
-            return New(EnvironmentV2.SanatizeToFileName(EnvironmentV2.instance.systemInfo.appId), dirName);
+            return New(EnvironmentV2.instance.systemInfo.appId, dirName);
         }
 
         public static FileBasedKeyValueStore New(string appId, string dirName) {
@@ -55,7 +55,7 @@ namespace com.csutil.keyvaluestore {
             return false;
         }
 
-        public FileEntry GetFile(string key) { return folderForAllFiles.GetChild(EnvironmentV2.SanatizeToFileName(key)); }
+        public FileEntry GetFile(string key) { return folderForAllFiles.GetChild(key); }
 
         public async Task<object> Set(string key, object value) {
             var oldValue = InternalSet(key, value);

@@ -39,7 +39,7 @@ namespace com.csutil.model {
 
         public static async Task<bool> DownloadTo(this IFileRef self, RestRequest request, DirectoryEntry targetDir) {
             var fileName = CalculateFileName(self, await request.GetResultHeaders());
-            var targetFile = targetDir.GetChild(EnvironmentV2.SanatizeToFileName(fileName));
+            var targetFile = targetDir.GetChild(fileName);
             return await self.DownloadTo(request, targetFile);
         }
 

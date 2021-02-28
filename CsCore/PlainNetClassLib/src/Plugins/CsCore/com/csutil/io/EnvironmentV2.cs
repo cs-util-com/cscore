@@ -1,7 +1,6 @@
 using System;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
 using Zio;
 
@@ -12,7 +11,6 @@ namespace com.csutil {
         public static EnvironmentV2 instance { get { return IoC.inject.GetOrAddSingleton<EnvironmentV2>(new object()); } }
 
         public readonly ISystemInfo systemInfo;
-        private static char[] invalidChars;
 
         public EnvironmentV2() : this(new SystemInfo()) { }
         protected EnvironmentV2(ISystemInfo systemInfo) { this.systemInfo = systemInfo; }
@@ -54,9 +52,8 @@ namespace com.csutil {
 
         /// <summary> On Windows e.g. C:\Users\User123\AppData\Roaming\MyFolderName123 </summary>
         public virtual DirectoryEntry GetOrAddAppDataFolder(string appDataSubfolderName) {
-            if (appDataSubfolderName.IsNullOrEmpty()) {
-                throw new ArgumentNullException("Invalid appDataSubfolderName");
-            }
+            appDataSubfolderName = Sanitize.SanitizeToDirName(appDataSubfolderName);
+            appDataSubfolderName.ThrowErrorIfNullOrEmpty(appDataSubfolderName);
             var appDataRoot = GetSpecialDirInfo(Environment.SpecialFolder.ApplicationData);
             return appDataRoot.GetChildDir(appDataSubfolderName).CreateV2().ToRootDirectoryEntry();
         }
@@ -80,11 +77,6 @@ namespace com.csutil {
 
         public virtual DirectoryEntry GetNewInMemorySystem() {
             return new DirectoryEntry(new Zio.FileSystems.MemoryFileSystem(), UPath.Root);
-        }
-
-        public static string SanatizeToFileName(string fileName) {
-            if (invalidChars == null) { invalidChars = Path.GetInvalidFileNameChars().AddViaUnion(':').ToArray(); }
-            return string.Join("_", fileName.Split(invalidChars, StringSplitOptions.RemoveEmptyEntries)).TrimEnd('.');
         }
 
         public interface ISystemInfo {

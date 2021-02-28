@@ -6,18 +6,22 @@ namespace com.csutil {
 
     public static class FileExtensions {
 
-        public static DirectoryInfo GetChildDir(this DirectoryInfo self, string childFolder, bool assertThatChildMustExist = false) {
-            var c = new DirectoryInfo(self.FullPath() + childFolder);
+        public static DirectoryInfo GetChildDir(this DirectoryInfo self, string subDirName, bool assertThatChildMustExist = false, bool sanitize = true) {
+            if (sanitize) { subDirName = Sanitize.SanitizeToDirName(subDirName); }
+            AssertV2.AreEqual(subDirName, Sanitize.SanitizeToDirName(subDirName));
+            var c = new DirectoryInfo(self.FullPath() + subDirName);
             if (assertThatChildMustExist) {
-                AssertV2.IsTrue(c.IsNotNullAndExists(), "childFolder '" + childFolder + "' doesnt exist! Path=" + c.FullPath());
+                AssertV2.IsTrue(c.IsNotNullAndExists(), "childFolder '" + subDirName + "' doesnt exist! Path=" + c.FullPath());
             }
             return c;
         }
 
-        public static FileInfo GetChild(this DirectoryInfo self, string childFile, bool assertThatChildMustExist = false) {
-            var c = new FileInfo(self.FullPath() + childFile);
+        public static FileInfo GetChild(this DirectoryInfo self, string fileName, bool assertThatChildMustExist = false, bool sanitize = true) {
+            if (sanitize) { fileName = Sanitize.SanitizeToFileName(fileName); }
+            AssertV2.AreEqual(fileName, Sanitize.SanitizeToFileName(fileName));
+            var c = new FileInfo(self.FullPath() + fileName);
             if (assertThatChildMustExist) {
-                AssertV2.IsTrue(c.IsNotNullAndExists(), "childFile '" + childFile + "' doesnt exist! Path=" + c.FullPath());
+                AssertV2.IsTrue(c.IsNotNullAndExists(), "childFile '" + fileName + "' doesnt exist! Path=" + c.FullPath());
             }
             return c;
         }

@@ -10,14 +10,20 @@ namespace com.csutil {
 
     public static class ZioExtensions {
 
-        public static DirectoryEntry GetChildDir(this DirectoryEntry self, string subDirName) {
-            AssertV2.AreEqual(subDirName, EnvironmentV2.SanatizeToFileName(subDirName));
-            return new DirectoryEntry(self.FileSystem, self.Path / subDirName);
+        public static DirectoryEntry GetChildDir(this DirectoryEntry self, string subDirName, bool sanitize = true) {
+            if (sanitize) { subDirName = Sanitize.SanitizeToDirName(subDirName); }
+            AssertV2.AreEqual(subDirName, Sanitize.SanitizeToDirName(subDirName));
+            return ResolveDirectoryPath(self, subDirName);
         }
 
-        public static FileEntry GetChild(this DirectoryEntry self, string fileName) {
-            AssertV2.AreEqual(fileName, EnvironmentV2.SanatizeToFileName(fileName));
+        public static FileEntry GetChild(this DirectoryEntry self, string fileName, bool sanitize = true) {
+            if (sanitize) { fileName = Sanitize.SanitizeToFileName(fileName); }
+            AssertV2.AreEqual(fileName, Sanitize.SanitizeToFileName(fileName));
             return ResolveFilePath(self, fileName);
+        }
+
+        public static DirectoryEntry ResolveDirectoryPath(this DirectoryEntry self, string relativePath) {
+            return new DirectoryEntry(self.FileSystem, self.Path / relativePath);
         }
 
         public static FileEntry ResolveFilePath(this DirectoryEntry self, string relativePath) {

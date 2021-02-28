@@ -381,7 +381,14 @@ namespace com.csutil.tests {
             } else { // On all other systems the normal PhysicalFileSystem is used:
                 Assert.Equal(typeof(PhysicalFileSystem), parentFileSystem.GetType());
             }
+        }
 
+        [Fact]
+        public void TestSpecialCharacters() {
+            var dir1 = CreateDirectoryForTesting("TestSpecialCharacters");
+            var badChars = "#%&<>{}/\\+*?$!'\":@|=";
+            dir1.GetChildDir(badChars).GetChild(badChars).SaveAsText("abc");
+            Assert.Equal("abc", dir1.GetChildDir(badChars).GetChild(badChars).LoadAs<string>());
         }
 
     }

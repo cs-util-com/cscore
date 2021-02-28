@@ -29,7 +29,12 @@ namespace com.csutil.tests.model {
             Assert.NotEmpty(x1.fileName);
             Assert.NotEmpty(x2.fileName);
 
-            var file2 = root.GetChild("" + x2.GetPath());
+            // GetChild ensures that no special characters like / are in the file name:
+            var fullPathViaGetChild = root.GetChild("" + x2.GetPath());
+            Assert.False(fullPathViaGetChild.Exists);
+
+            // ResolveFilePath can be used to resolve full pathes including / characters:
+            var file2 = root.ResolveFilePath("" + x2.GetPath());
             Assert.True(file2.Exists);
             Assert.Equal(savedText, file2.LoadAs<string>());
 

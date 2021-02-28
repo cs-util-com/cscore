@@ -330,6 +330,14 @@ namespace com.csutil.tests {
             Log.d("file: " + file.FullName);
         }
 
+        [Fact]
+        public void TestSpecialCharacters() {
+            var dir1 = CreateDirectoryForTesting("TestSpecialCharacters");
+            var badChars = "#%&<>{}/\\+*?$!'\":@|="; 
+            dir1.GetChildDir(badChars).GetChild(badChars).SaveAsText("abc");
+            Assert.Equal("abc", dir1.GetChildDir(badChars).GetChild(badChars).LoadAs<string>());
+        }
+
     }
 
 }
