@@ -13,6 +13,7 @@ namespace com.csutil.tests.ui {
 
         private async Task ShowAllDialogs() {
             AssertVisually.SetupDefaultSingletonInDebugMode();
+            await ShowCancelConfirmDialog();
             await ShowInfoDialog();
             await ShowWarningDialog();
             await ShowErrorDialog();
