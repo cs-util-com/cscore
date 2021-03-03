@@ -53,7 +53,6 @@ namespace com.csutil {
         }
 
         private IEnumerator AssertNoVisualRegressionCoroutine(string id, StackTrace stacktrace) {
-            id = EnvironmentV2.SanatizeToFileName(id);
             if (id.IsNullOrEmpty()) { throw new ArgumentNullException("Invalid ID passed"); }
 
             var idFolder = GetFolderFor(id);
