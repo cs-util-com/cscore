@@ -14,10 +14,13 @@ namespace com.csutil {
         public static DateTime NewDateTimeFromUnixTimestamp(long unixTimeInMs, bool autoCorrectIfPassedInSeconds = true) {
             AssertV2.IsTrue(unixTimeInMs > 0, "NewDateTimeFromUnixTimestamp: unixTimeInMs was " + unixTimeInMs);
             DateTime result = DateTimeOffset.FromUnixTimeMilliseconds(unixTimeInMs).UtcDateTime;
-            if (autoCorrectIfPassedInSeconds && result.Year == 1970) {
-                Log.w("The passed unixTimeInMs was likely passed in seconds instead of milliseconds,"
-                    + " it was too small by a factor of *1000, which would result in " + result.ToReadableString());
-                return DateTimeOffset.FromUnixTimeSeconds(unixTimeInMs).UtcDateTime;
+            if (result.Year == 1970) {
+                if (autoCorrectIfPassedInSeconds) {
+                    return DateTimeOffset.FromUnixTimeSeconds(unixTimeInMs).UtcDateTime;
+                } else {
+                    Log.e("The passed unixTimeInMs was likely passed in seconds instead of milliseconds,"
+                        + " it was too small by a factor of *1000, which would result in " + result.ToReadableString());
+                }
             }
             return result;
         }
