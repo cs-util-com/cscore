@@ -19,7 +19,7 @@ namespace com.csutil {
                     return DateTimeOffset.FromUnixTimeSeconds(unixTimeInMs).UtcDateTime;
                 } else {
                     Log.e("The passed unixTimeInMs was likely passed in seconds instead of milliseconds,"
-                        + " it was too small by a factor of *1000, which would result in " + result.ToReadableString());
+                        + " it was too small by a factor of *1000 and will result in " + result.ToReadableString());
                 }
             }
             return result;
