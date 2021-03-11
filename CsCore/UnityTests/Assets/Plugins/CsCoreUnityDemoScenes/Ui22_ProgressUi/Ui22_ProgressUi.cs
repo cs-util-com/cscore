@@ -14,7 +14,10 @@ namespace com.csutil.tests {
 
         public override IEnumerator RunTest() {
             SetupGlobalProgressUi();
-            SetupLocalProgressButton();
+            SetupLocalProgressButton("ProgressButton");
+            SetupLocalProgressButton("CircularProgressButton1");
+            SetupProgressButtonForSimulatedProgress("CircularProgressButton2");
+            SetupProgressButtonForSimulatedProgress("CircularProgressButton3");
             yield return SetupBlockingProgressButton().AsCoroutine();
         }
 
@@ -42,14 +45,27 @@ namespace com.csutil.tests {
         /// <summary> There can be multiple progress managers and they can be visualized on 
         /// multiple UIs each. The second example shows that a progress can be shown directly 
         /// on any UI element that has an image set up using the images fill amount </summary>
-        private void SetupLocalProgressButton() {
-            // Create a second independent progress manager to be only shown on the button
+        private void SetupLocalProgressButton(string buttonName) {
+            // Create an independent progress manager to be only shown on the button
             var pm2 = new ProgressManager();
-            var button = gameObject.GetLinkMap().Get<Button>("ProgressButton");
+            var button = gameObject.GetLinkMap().Get<Button>(buttonName);
             button.GetComponentInChildren<ProgressUiViaImage>().progressManager = pm2;
             button.SetOnClickAction(delegate {
                 // Get the progress object (or create a new one if not found) and increment it:
                 pm2.GetOrAddProgress("Progress on Button UI", 10, true).IncrementCount();
+            });
+        }
+
+        private void SetupProgressButtonForSimulatedProgress(string buttonName) {
+            // Create an independent progress manager to be only shown on the button
+            var pm2 = new ProgressManager();
+            var button = gameObject.GetLinkMap().Get<Button>(buttonName);
+            ProgressUiViaImage progressUi = button.GetComponentInChildren<ProgressUiViaImage>();
+            progressUi.progressManager = pm2;
+            button.SetOnClickAction(async delegate {
+                // Get the progress object (or create a new one if not found) and increment it:
+                var progress = pm2.GetOrAddProgress("Simulated Progress at " + Time.realtimeSinceStartup, 10, true);
+                await SimulateProgressOn(progressUi, progress, 400);
             });
         }
 
@@ -60,21 +76,22 @@ namespace com.csutil.tests {
                 ProgressManager prManager = new ProgressManager();
                 ProgressUi progressUi = gameObject.GetViewStack().ShowBlockingProgressUiFor(prManager);
                 IProgress progress = prManager.GetOrAddProgress("DemoLoadingProgress", 200, true);
-
-                progressUi.progressDetailsInfoText?.textLocalized("I am a progress UI, I hope I wont take to long!");
-                for (int i = 0; i < progress.totalCount - 1; i++) {
-                    progress.IncrementCount();
-                    await TaskV2.Delay(15);
-                }
-                progressUi.progressDetailsInfoText?.textLocalized("The last % is always the hardest!");
-                await TaskV2.Delay(2000);
-                progress.IncrementCount();
-
-                await TaskV2.Delay(15);
+                await SimulateProgressOn(progressUi, progress, 15);
                 AssertV2.IsTrue(progressUi.IsDestroyed(), "Blocking progress not destroyed after it completed");
             });
         }
 
+        private static async Task SimulateProgressOn(ProgressUi progressUi, IProgress progress, int delayInMsPerUpdate) {
+            progressUi.progressDetailsInfoText?.textLocalized("I am a progress UI, I hope I wont take to long!");
+            for (int i = 0; i < progress.totalCount - 1; i++) {
+                progress.IncrementCount();
+                await TaskV2.Delay(delayInMsPerUpdate);
+            }
+            progressUi.progressDetailsInfoText?.textLocalized("The last % is always the hardest!");
+            await TaskV2.Delay(2000);
+            progress.IncrementCount();
+            await TaskV2.Delay(15);
+        }
     }
 
 }

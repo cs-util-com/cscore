@@ -12,7 +12,7 @@ namespace com.csutil.progress {
         private float targetVal;
         private float currentVelocity;
 
-        protected override GameObject GetProgressUiGo() { return progress.gameObject; }
+        protected override GameObject GetProgressUiGo() { return progress?.gameObject; }
 
         protected override void UpdateUiPercentValue(double percent) {
             targetVal = (float)percent / 100f;

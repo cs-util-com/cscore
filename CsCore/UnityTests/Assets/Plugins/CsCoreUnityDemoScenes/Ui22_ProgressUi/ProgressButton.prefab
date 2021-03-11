@@ -409,6 +409,8 @@ MonoBehaviour:
   enableProgressUiFading: 0
   delayInMsBeforeProgressCleanup: 2000
   progress: {fileID: 5920263673355501022}
+  useAnimations: 1
+  fadeSpeed: 6
 --- !u!114 &5920263673355501020
 MonoBehaviour:
   m_ObjectHideFlags: 0
