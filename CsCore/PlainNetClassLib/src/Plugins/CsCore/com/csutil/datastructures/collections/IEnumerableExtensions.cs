@@ -69,6 +69,25 @@ namespace com.csutil {
             return -1;
         }
 
+        public static void Move<T>(this IList<T> self, int oldIndex, int newIndex) {
+            if (oldIndex == newIndex) { return; }
+            T itemToMove = self[oldIndex];
+            if (newIndex < 0 || self.Count - 1 < newIndex) {
+                throw new ArgumentOutOfRangeException("newIndex", $"Cant move '{itemToMove}' from {oldIndex} to {newIndex} (>list.Count={self.Count})");
+            }
+            if (self is Array array) { // If the IList has a fixed size
+                if (newIndex < oldIndex) { // Need to move part of the array "up" to make room
+                    Array.Copy(array, newIndex, array, newIndex + 1, oldIndex - newIndex);
+                } else { // Need to move part of the array "down" to fill the gap
+                    Array.Copy(array, oldIndex + 1, array, oldIndex, newIndex - oldIndex);
+                }
+                array.SetValue(itemToMove, newIndex);
+            } else { // If its not an array (has no fixed size, moving is easier:
+                self.RemoveAt(oldIndex);
+                self.Insert(newIndex, itemToMove);
+            }
+        }
+
         public static IEnumerable<T> Cached<T>(this IEnumerable<T> source) {
             if (source == null) { throw new ArgumentNullException("source"); }
             return new CachedEnumerable<T>(source);
@@ -135,7 +154,6 @@ namespace com.csutil {
             }
 
         }
-
 
     }
 

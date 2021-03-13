@@ -11,7 +11,7 @@ namespace com.csutil {
         /// Uses the map of allowed transitions to evaluate the transition request and throws
         /// an exception its not valid.
         /// </summary>
-        public static T TransitionTo<T>(this Dictionary<T, HashSet<T>> allowedTransitions, T currentState, T newState) {
+        public static T TransitionTo<T>(this IDictionary<T, HashSet<T>> allowedTransitions, T currentState, T newState) {
             if (!allowedTransitions.ContainsKey(currentState)) {
                 throw new InvalidOperationException(currentState + " -> " + newState + " blocked, " + currentState + " has no allowed transitions");
             } else if (!allowedTransitions[currentState].Contains(newState)) {

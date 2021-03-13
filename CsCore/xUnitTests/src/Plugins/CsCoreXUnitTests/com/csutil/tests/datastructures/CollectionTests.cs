@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
@@ -138,6 +139,25 @@ namespace com.csutil.tests {
             Assert.Equal("1 - 3", listDepthFi.Last().id);
             Assert.Equal("1 - 1 - 2", listBreadth.Last().id);
 
+        }
+
+        [Fact]
+        public void TestMove() {
+            TestMoveWith(new List<string>() { "A", "B", "C", "D" });
+            TestMoveWith(new string[] { "A", "B", "C", "D" });
+        }
+
+        private static void TestMoveWith(IList<string> l) {
+            l.Move(2, 3);
+            Assert.Equal("[A, B, D, C]", l.ToStringV2());
+            l.Move(3, 0);
+            Assert.Equal("[C, A, B, D]", l.ToStringV2());
+            l.Move(1, 3);
+            Assert.Equal("[C, B, D, A]", l.ToStringV2());
+            var r = new Random();
+            for (int i = 0; i < 1000; i++) { l.Move(r.Next(0, l.Count), r.Next(0, l.Count)); }
+            Assert.Throws<ArgumentOutOfRangeException>(() => { l.Move(0, 4); });
+            Assert.Throws<ArgumentOutOfRangeException>(() => { l.Move(0, -1); });
         }
 
         private class TreeNode {
