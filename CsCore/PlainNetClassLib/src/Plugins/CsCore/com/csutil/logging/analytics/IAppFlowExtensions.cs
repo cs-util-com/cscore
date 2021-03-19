@@ -42,13 +42,13 @@ namespace com.csutil {
             EventBus.instance.Subscribe(self, EventConsts.catMethod, (string methodName) => {
                 self.TrackEvent(EventConsts.catMethod, methodName);
             });
-            EventBus.instance.Subscribe(self, EventConsts.catMethod + " ENTERED",
+            EventBus.instance.Subscribe(self, EventConsts.catMethod + EventConsts.START,
                 (string methodName, object[] args) => {
                     self.TrackEvent(EventConsts.catMethod, methodName, args);
                 });
-            EventBus.instance.Subscribe(self, EventConsts.catMethod + " DONE",
+            EventBus.instance.Subscribe(self, EventConsts.catMethod + EventConsts.DONE,
                 (string methodName, Stopwatch timing) => {
-                    self.TrackEvent(EventConsts.catMethod, methodName + " DONE", timing);
+                    self.TrackEvent(EventConsts.catMethod, methodName + EventConsts.DONE, timing);
                 });
         }
 
