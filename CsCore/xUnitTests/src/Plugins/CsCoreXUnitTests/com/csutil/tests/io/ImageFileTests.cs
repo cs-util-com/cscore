@@ -28,6 +28,7 @@ namespace com.csutil.tests {
             if (!imgFile.Exists || imgFile.GetFileSize() == 0) {
                 Log.d("Saving random image for testing to: " + imgFile.GetFullFileSystemPath());
                 var stream = await new Uri("https://picsum.photos/50/50").SendGET().GetResult<Stream>();
+                Assert.NotNull(stream);
                 imgFile.SaveStream(stream);
                 stream.Dispose();
             }

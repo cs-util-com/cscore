@@ -13,11 +13,12 @@ namespace com.csutil.tests {
         [Fact]
         public void ExampleUsage1() {
             var methodAnalytics = new MethodAnalytics() { includeMethodArguments = true };
-            var t = Log.MethodEntered();
+            StopwatchV2 t = Log.MethodEntered();
             MyMethod1(true);
             Log.MethodDone(t);
-            var report = methodAnalytics.ToString();
+            string report = methodAnalytics.ToString();
             Assert.True(1600 < report.Count(), report);
+            Log.d(report);
         }
 
         [Fact]

@@ -64,34 +64,45 @@ See below for a full usage overview to explain the APIs with simple examples.
 
 
 ## Logging
-A lightweight zero config Log wrapper that is automatically **stripped from production** builds and can be combined with other logging libraries like Serilog for more complex usecases
+A lightweight zero config Log wrapper that is automatically **stripped from production** builds and can be combined with other logging libraries like Serilog for more complex use cases.
 
 ```cs
 Log.d("I'm a log message");
 Log.w("I'm a warning");
 Log.e("I'm an error");
 Log.e(new Exception("I'm an exception"));
-Log.w("I'm a warning with parmas", "param 1", 2, "..");
+Log.w("I'm a warning with params:", "param 1", 2, "..");
+using (Log.MethodEntered()) {
+    // Some method body (duration and memory will be logged)
+}
 ```
 
 This will result in the following output in the Log:
 ```
 > I'm a log message
-  at LogTests.TestBasicLogOutputExamples() 
+  * at LogTests.TestBasicLogOutputExamples() c:\..\LogTests.cs:line 19
+  ..
 
 > WARNING: I'm a warning
-  at LogTests.TestBasicLogOutputExamples() 
+  * at LogTests.TestBasicLogOutputExamples() c:\..\LogTests.cs:line 20
+     ..
 
->>> ERROR: I'm an error
-    at Log.e(System.String error, System.Object[] args) c:\...\Log.cs:line 25
-     LogTests.TestBasicLogOutputExamples() c:\...\LogTests.cs:line 15
+>>> EXCEPTION: com.csutil.Error: I'm an error
+ : [[com.csutil.Error: I'm an error]]
+    * at LogTests.TestBasicLogOutputExamples() c:\..\LogTests.cs:line 21
+     ..
 
 >>> EXCEPTION: System.Exception: I'm an exception
-    at Log.e(System.Exception e, System.Object[] args) c:\...\Log.cs:line 29
-     LogTests.TestBasicLogOutputExamples() c:\...\LogTests.cs:line 16
+ : [[System.Exception: I'm an exception]]
+    * at LogTests.TestBasicLogOutputExamples() c:\..\LogTests.cs:line 22
+     ..
 
-> WARNING: I'm a warning with parmas : [[param 1, 2, ..]]
-  at LogTests.TestBasicLogOutputExamples()
+> WARNING: I'm a warning with parmas: : [[param 1, 2, ..]]
+     ..
+
+>  --> TestBasicLogOutputExamples
+
+>     <-- TestBasicLogOutputExamples finished after 0 ms, allocated managed mem: 525,40 KB, allocated mem: 12,00 KB 
 ```
 
 Creating logging-adapters is simple, the following logging-adapters can be used out of the box (and they can be seen as examples/templates):
@@ -151,7 +162,63 @@ This will result in the following output in the Log:
   at LogTests.SomeExampleMethod1(System.String s, Int32 i) 
 ```
 
+#### MethodAnalytics
 
+Analyzing the results of these `Log.MethodEntered`.. and `Log.MethodDone..` is possible for example through the [MethodAnalytics](https://github.com/cs-util-com/cscore/blob/master/CsCore/PlainNetClassLib/src/Plugins/CsCore/com/csutil/logging/analytics/MethodAnalytics.cs) class:
+
+```cs
+var methodAnalytics = new MethodAnalytics() { includeMethodArguments = true };
+StopwatchV2 t = Log.MethodEntered();
+MyMethod1(true);
+Log.MethodDone(t);
+string report = methodAnalytics.ToString();
+```
+
+The `report` string from this is:
+
+```json
+{
+  "MethodName": "ExampleUsage1",
+  "DurationInMs": 135,
+  "Then": [
+    {
+      "MethodName": "MyMethod1",
+      "DurationInMs": 120,
+      "Args": [ "True" ],
+      "Then": [
+        {
+          "MethodName": "MyMethod2",
+          "DurationInMs": 28,
+          "Args": [ "10" ],
+          "Then": [ .. ]
+        },
+        {
+          "MethodName": "MyMethod3",
+          "Args": [ "abc" ]
+        },
+        {
+          "MethodName": "MyMethod1",
+          "DurationInMs": 52,
+          "Args": [ "False" ],
+          "Then": [
+            {
+              "MethodName": "MyMethod2",
+              "DurationInMs": 26,
+              "Args": [ "10" ],
+              "Then": [ .. ]
+            },
+            ..
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+
+See the [MethodAnalyticsTests here](https://github.com/cs-util-com/cscore/blob/master/CsCore/xUnitTests/src/Plugins/CsCoreXUnitTests/com/csutil/tests/logging/MethodAnalyticsTests.cs) for more examples.
+
+The created analytics tree tries to represent the relation between the different logging events but in multi-threading setups or if `Log.MethodDone..` is not always called the created relations in the tree can't always represent the actual "Who was called by whom" relationships. Because of that creating short-lived MethodAnalytics instances to analyse specific parts of your code is recommended. 
 
 ## The EventBus
 
@@ -229,46 +296,6 @@ Assert.Equal(6, sumOfAllInts); // 1+2+3 is 6
 
 More usage examples can be found in the [HelperMethodTests.cs](https://github.com/cs-util-com/cscore/blob/master/CsCore/xUnitTests/src/com/csutil/tests/HelperMethodTests.cs)
 
-
-
-## Transducers
-Transducers allow to do similar things as the functional concepts like ``Filter``, ``Map`` and ``Reduce``. The main idea of transducers is to make this functional style as efficient as possible, iterating through the target structure only once and bulding a pipeline still of the same easy to understand functional building blocks. 
-
-A first example that uses only ``Filter`` will give a better idea how this looks like:
-
-```cs
-List<int> testData = new List<int>() { 1, 2, 3, 4, 5, 6, 7, 8 };
-
-var filter1 = Transducers.NewFilter<int>(x => x > 4);
-var filter2 = Transducers.NewFilter<int>(x => x % 2 != 0);
-{
-    List<int> result = testData.FilterToList(Transducers.Compose(filter1, filter2));
-    Assert.Equal(2, result.Count()); // 5 and 7 will be left
-    Assert.Equal(5, result.First());
-    Assert.Equal(7, result.Last());
-}
-{ // without Transducers.Compose the filters have to be chained manually:
-    List<int> result = testData.FilterToList(x => (filter1(filter2(x))));
-    Assert.Equal(2, result.Count()); // 5 and 7 will be left
-    Assert.Equal(5, result.First());
-    Assert.Equal(7, result.Last());
-}
-```
-
-A more complex example that uses ``Filter``, ``Map`` and ``Reduce``:
-```cs
-List<MyClass1> testData = newExampleList();
-
-Transducer<MyClass1, MyClass1> filter1 = Transducers.NewFilter<MyClass1>(x => x != null);
-Transducer<MyClass1, MyClass1> filter2 = Transducers.NewFilter<MyClass1>(x => x.someInt > 1);
-Transducer<MyClass1, int> mapper = Transducers.NewMapper<MyClass1, int>(x => x.someInt);
-Func<int, int, int> sumReducer = (total, x) => total + x;
-
-// Create the reducer by composing the transducers:
-var sum = testData.ReduceTo(x => filter1(filter2(mapper(x))), sumReducer, seed: 0);
-Assert.Equal(6, sum);
-```
-More examples can be found in the [TransducerTests.cs](https://github.com/cs-util-com/cscore/blob/master/CsCore/xUnitTests/src/com/csutil/tests/datastructures/TransducerTests.cs). The syntax is still work in progress and I am happy for any suggestions how to improve this. And there are some great [related sources](https://jrsinclair.com/articles/2019/magical-mystical-js-transducers/) you can read to learn more about Transducers.
 
 
 
@@ -366,10 +393,10 @@ More [statemachine examples can be found here](https://github.com/cs-util-com/cs
 
 ## KeyValueStore
 Provides an async chainable key value store (get & set) that can be used for simple persistent settings but also for remote server/DB access. Different store implementations are included for some common use cases:
-* InMemoryKeyValueStore - Keeps a very fast in memory dictionary for fastest possible read write
-* FileBasedKeyValueStore - Enables persisting values permanently 
-* RetryKeyValueStore - A retry layer using exponential backoff 
-* ExceptionWrapperKeyValueStore - To handle exceptions of an inner store (e.g. if a connection to a remote server throws a timeout exception this can be handled to return the cached local value instead)
+* **InMemoryKeyValueStore** - Keeps a very fast in memory dictionary for fastest possible read write
+* **FileBasedKeyValueStore** - Enables persisting values permanently 
+* **RetryKeyValueStore** - A retry layer using exponential backoff 
+* **ExceptionWrapperKeyValueStore** - To handle exceptions of an inner store (e.g. if a connection to a remote server throws a timeout exception this can be handled to return the cached local value instead)
 
 ```cs
 IKeyValueStore store = new InMemoryKeyValueStore();
@@ -383,7 +410,7 @@ Assert.Equal(x1.myString1, x2.myString1);
 Assert.Equal(x1.myString2, x2.myString2);
 ```
 
-The KeyValueStores can be chained so that if the outer store does not find the element it will ask the next inner store. This allows to have fast stores like the ``InMemoryKeyValueStore`` on the most outer level and the slowest stores like the connection to the database on the most inner one:
+The `KeyValueStores` can be chained so that if the outer store does not find the element it will ask the next inner store. This allows to have fast stores like the ``InMemoryKeyValueStore`` on the most outer level and the slowest stores like the connection to the database on the most inner one:
 
 ```cs
 string myKey1 = "test123";
@@ -403,16 +430,29 @@ More examples [can be found here](https://github.com/cs-util-com/cscore/blob/mas
 
 
 ## Immutable DataStore
-* It uses the Redux syntax and core principles to not reinvent a matured and well proven wheel
+* It uses the Redux syntax and core principles to not reinvent the wheel on a matured and well proven concept
 * Enables undo/redo of all dispatched actions out of the box without any additional work 
-* Enables timetravel to enable recording the full userinteraction and replaying it later to get back into the same state
-* Includes a thunk middleware to dispatcht async tasks (e.g. talking to a remote server)
+* Enables time travel to enable recording the full user interaction and replaying it later to get back into the same state
+* Includes a thunk middleware to dispatch async tasks (e.g. talking to a remote server)
 
 See [this example for a first introduction](https://github.com/cs-util-com/cscore/blob/master/CsCore/xUnitTests/src/Plugins/CsCoreXUnitTests/com/csutil/tests/model/immutable/DataStoreExample1.cs#L11) including an example datamodel, example actions and some listeners that are informed when the datamodel changes.
 
 See [here for additional more complex examples](https://github.com/cs-util-com/cscore/tree/master/CsCore/xUnitTests/src/Plugins/CsCoreXUnitTests/com/csutil/tests/model/immutable) which include the other features like undo/redo, middlewares and server synchronization. 
 
+And if your model is not immutable from top to bottom, so if it was not designed from the beginning to be impossible to change without a data store then [the example how to use Redux with mutable state](https://github.com/cs-util-com/cscore/blob/master/CsCore/xUnitTests/src/Plugins/CsCoreXUnitTests/com/csutil/tests/model/immutable/DataStoreExample4.cs) will be relevant for you. Here an extract:
 
+```cs
+// A middleware that will allow to use mutable data in the data store:
+var model = new MyAppState1() { user = new MyUser1() { name = "Carl" } };
+var mutableMiddleware = Middlewares.NewMutableDataSupport<MyAppState1>();
+var loggingMiddleware = Middlewares.NewLoggingMiddleware<MyAppState1>();
+var store = new DataStore<MyAppState1>(MyReducer1, model, mutableMiddleware);
+store.AddStateChangeListener(s => s.user, (MyUser1 theChangedUser) => { ... });
+..
+store.Dispatch(new ActionChangeUserName() { targetUserId = "1", newName = "Caaarl" });
+```
+
+Changes performed through the DataStore will allow the same state change listening as for immutable data models but the big advantage to be sure that only the store can change the model is of course not given since anyone could just do `model.name = "Ohnoo"` anywhere in the code. Working with internal or private setters for all fields can get you closer to immutable safety but data structures like `List` you will not be able to protect the way an [ImmutableList](https://github.com/cs-util-com/cscore/blob/master/CsCore/xUnitTests/src/Plugins/CsCoreXUnitTests/com/csutil/tests/model/immutable/DataStoreExample1.cs#L58) does. 
 
 ## JsonMerger
 [Json merging and diffing logic](https://github.com/cs-util-com/cscore/blob/master/CsCore/xUnitTests/src/Plugins/CsCoreXUnitTests/com/csutil/tests/json/JsonDiffAndMergeTests.cs#L14) that helps to update an instance of a class using a [Three-way merge](https://en.wikipedia.org/wiki/Merge_(version_control)#Three-way_merge). Here an example:
@@ -438,8 +478,6 @@ MyClass1 mergeResult1 = merge.GetResult();
 Assert.Equal(copy1.myString, mergeResult1.myString);
 Assert.Equal(copy2.myString2, mergeResult1.myString2);
 ```
-
-
 
 ## REST Extensions 
 ```cs
@@ -467,6 +505,134 @@ var weatherReports = await MetaWeatherReport.GetReport(whereOnEarthIDOfYourCity)
 var currentWeather = weatherReports.consolidated_weather.Map(r => r.weather_state_name);
 Log.d("The weather today in " + yourCity + " is: " + currentWeather.ToStringV2());
 ```
+
+
+
+
+### IFileRef for file downloads
+Handling file downloads is a common task that includes the download process itself but also generic topics like communicating progress during the download and checking if the file is already downloaded (and has the exact same content as the remote file). The `IFileRef` interface helps with these tasks and provides common helper methods to download and cache files correctly based on their url: 
+
+```cs
+var dir = EnvironmentV2.instance.GetOrAddTempFolder("SomeFolder1");
+IFileRef f = new FileRef() { url = "https://.../someFile123.zip" };
+await f.DownloadTo(dir, (float progress) => {
+    Log.d($"Download {progress}% done");
+}, useAutoCachedFileRef: true);
+var downloadText = f.GetFileEntry(dir.FileSystem).LoadAs<string>();
+```
+
+For more examples see the [ModelPersistenceTests here](https://github.com/cs-util-com/cscore/blob/master/CsCore/xUnitTests/src/Plugins/CsCoreXUnitTests/com/csutil/tests/model/ModelPersistenceTests.cs).
+
+
+
+## Action.AsThrottledDebounce
+
+[Debouncing](https://stackoverflow.com/a/25991510/10808596) will combine a series of sequential calls to a function into a single call to that function. It ensures that one notification is made for an event that fires multiple times.
+
+This is useful if you want to run an action once after a frequent event was triggered once or multiple times, this way events can be "collected" and then processed once. Real world examples where this helps are:
+- Every time the user moves the mouse an action is triggered, the logic should react when the user stopped moving the mouse for 50ms.
+- A local state of the app is changes 1000 times in 1 second and persisting these local changes to the backend should only be executed once after modifying the local state stopped for minimum 1 second.
+
+Here a code example how `Action.AsThrottledDebounce` can be used to realize debouncing: 
+
+```cs
+int counter = 0;
+bool allWereGood = true;
+Action<string> action = (myStringParam) => {
+    // Make sure the action is never called with "bad" being passed:
+    if (myStringParam != "good") { allWereGood = false; }
+    Interlocked.Increment(ref counter);
+};
+// Make the action throttled / debounced:
+action = action.AsThrottledDebounce(delayInMs: 50);
+
+// Call it multiple times with less then 50ms between the calls:
+action("good"); // The first call will always be passed through
+action("bad"); // This one will be delayed and not called because of the next:
+action("good"); // This will be delayed for 50ms and then triggered because no additional call follows after it
+
+Assert.Equal(2, counter);
+Assert.True(allWereGood);
+```
+
+Debouncing becomes more relevant the more decoupled your different components are, if a lot of events are send around in the system processing these events often can use debouncing to reduce processing load.
+
+
+
+
+
+## TaskV2 Helpers
+
+Executing the same task multiple times can be helpful for network or file operations, using [exponential backoff delays](https://en.wikipedia.org/wiki/Exponential_backoff) is a common best practice and using TaskV2.TryWithExponentialBackoff its easy to use this approach without writing any manual delay code:
+
+```cs
+Stopwatch timer = Stopwatch.StartNew();
+long finalTimingResult = await TaskV2.TryWithExponentialBackoff<long>(async () => {
+    
+    .. Here your async task that might fail and will be auto retried .. 
+
+    // In the first second of the test throw errors:
+    // Will cause the task to be re-executed with exponential backoff delay
+    if (timer.ElapsedMilliseconds < 1000) { throw new Exception(); }
+    return timer.ElapsedMilliseconds;
+});
+```
+
+Another useful Task related helper is the `QueuedTaskScheduler` to run multi threaded tasks in parallel but with full control of how many tasks run concurrently. See TestRunWithTaskScheduler1 for details, here a short extract:
+
+```cs
+QueuedTaskScheduler scheduler = new QueuedTaskScheduler(TaskScheduler.Default, maxConcurrencyLevel: 1);
+
+// Create both tasks at the same time:
+Task t1 = TaskV2.Run(SomeAsyncTask1, new CancellationTokenSource(), scheduler);
+Task<string> t2 = TaskV2.Run(SomeAsyncTask2, new CancellationTokenSource(), scheduler);
+
+Assert.Equal(1, scheduler.GetRemainingScheduledTaskCount()); // 1 task started and 1 waiting
+
+await t2;
+// t1 never awaited but must be complete because maxConcurrencyLevel=1
+Assert.Equal(0, scheduler.GetRemainingScheduledTaskCount()); 
+```
+
+## Transducers
+Transducers allow to do similar things as the functional concepts like ``Filter``, ``Map`` and ``Reduce``. The main idea of transducers is to make this functional style as efficient as possible, iterating through the target structure only once and bulding a pipeline still of the same easy to understand functional building blocks. 
+
+A first example that uses only ``Filter`` will give a better idea how this looks like:
+
+```cs
+List<int> testData = new List<int>() { 1, 2, 3, 4, 5, 6, 7, 8 };
+
+var filter1 = Transducers.NewFilter<int>(x => x > 4);
+var filter2 = Transducers.NewFilter<int>(x => x % 2 != 0);
+{
+    List<int> result = testData.FilterToList(Transducers.Compose(filter1, filter2));
+    Assert.Equal(2, result.Count()); // 5 and 7 will be left
+    Assert.Equal(5, result.First());
+    Assert.Equal(7, result.Last());
+}
+{ // without Transducers.Compose the filters have to be chained manually:
+    List<int> result = testData.FilterToList(x => (filter1(filter2(x))));
+    Assert.Equal(2, result.Count()); // 5 and 7 will be left
+    Assert.Equal(5, result.First());
+    Assert.Equal(7, result.Last());
+}
+```
+
+A more complex example that uses ``Filter``, ``Map`` and ``Reduce``:
+```cs
+List<MyClass1> testData = newExampleList();
+
+Transducer<MyClass1, MyClass1> filter1 = Transducers.NewFilter<MyClass1>(x => x != null);
+Transducer<MyClass1, MyClass1> filter2 = Transducers.NewFilter<MyClass1>(x => x.someInt > 1);
+Transducer<MyClass1, int> mapper = Transducers.NewMapper<MyClass1, int>(x => x.someInt);
+Func<int, int, int> sumReducer = (total, x) => total + x;
+
+// Create the reducer by composing the transducers:
+var sum = testData.ReduceTo(x => filter1(filter2(mapper(x))), sumReducer, seed: 0);
+Assert.Equal(6, sum);
+```
+More examples can be found in the [TransducerTests.cs](https://github.com/cs-util-com/cscore/blob/master/CsCore/xUnitTests/src/com/csutil/tests/datastructures/TransducerTests.cs). The syntax is still work in progress and I am happy for any suggestions how to improve this. And there are some great [related sources](https://jrsinclair.com/articles/2019/magical-mystical-js-transducers/) you can read to learn more about Transducers.
+
 
 
 

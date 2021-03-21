@@ -53,5 +53,13 @@ namespace com.csutil.tests.http {
 
         }
 
+        [Fact]
+        public async Task MetaWeatherComTest2() {
+            var cityName = "Berlin";
+            var w = await MetaWeather.GetWeather(cityName);
+            var summary1 = w.consolidated_weather.Map(report => report.weather_state_name);
+            Assert.NotEmpty(summary1);
+        }
+
     }
 }

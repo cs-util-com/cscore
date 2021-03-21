@@ -91,8 +91,7 @@ namespace com.csutil.tests.async {
         [Fact]
         public async Task TestRunWithTaskScheduler1() { // Aligned with the coroutine test TestExecuteRepeated1
 
-            var maxConcurrencyLevel = 1;
-            QueuedTaskScheduler scheduler = new QueuedTaskScheduler(TaskScheduler.Default, maxConcurrencyLevel);
+            QueuedTaskScheduler scheduler = new QueuedTaskScheduler(TaskScheduler.Default, maxConcurrencyLevel: 1);
             var cancel = new CancellationTokenSource();
 
             // Create both tasks at the same time:

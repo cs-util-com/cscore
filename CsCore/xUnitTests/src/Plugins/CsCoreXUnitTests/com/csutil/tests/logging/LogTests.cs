@@ -20,7 +20,10 @@ namespace com.csutil.tests {
             Log.w("I'm a warning");
             Log.e("I'm an error");
             Log.e(new Exception("I'm an exception"));
-            Log.w("I'm a warning with parmas:", "param 1", 2, "..");
+            Log.w("I'm a warning with params:", "param 1", 2, "..");
+            using (Log.MethodEntered()) {
+                // Some method body (duration and memory will be logged)
+            }
         }
 
         [Fact]
@@ -101,7 +104,8 @@ namespace com.csutil.tests {
                     }); // ..so the AssertV2.Throws should fail
                     Log.e("This line should never be reached since AssertV2.Throws should fail!");
                     throw new Exception("AssertV2.Throws did not fail correctly!");
-                } catch (AssertV2.ThrowsException) { // Only catch it if its a ThrowsException
+                }
+                catch (AssertV2.ThrowsException) { // Only catch it if its a ThrowsException
                     // AssertV2.Throws failed correctly and threw an ThrowsException error
                     Log.d("ThrowsException was expected and arrived correctly");
                 }

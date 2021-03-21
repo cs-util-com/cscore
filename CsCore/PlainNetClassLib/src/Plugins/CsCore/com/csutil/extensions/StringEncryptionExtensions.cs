@@ -9,10 +9,12 @@ namespace com.csutil {
     public static class HashingHelper {
 
         public static string GetMD5Hash(this string data) {
+            data.ThrowErrorIfNullOrEmpty("data");
             return GetMD5Hash(Encoding.ASCII.GetBytes(data));
         }
 
         public static string GetSHA1Hash(this string data) {
+            data.ThrowErrorIfNullOrEmpty("data");
             return GetSHA1Hash(Encoding.ASCII.GetBytes(data));
         }
 
