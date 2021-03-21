@@ -30,11 +30,38 @@ namespace com.csutil.model {
             return self.GetDirectoryEntry(fs).GetChild(self.fileName);
         }
 
-        public static async Task<bool> DownloadTo(this IFileRef self, DirectoryEntry targetDirectory, Action<float> onProgress = null) {
+        public static async Task<bool> DownloadTo(this IFileRef self, DirectoryEntry targetDirectory, Action<float> onProgress = null, bool useAutoCachedFileRef = false) {
             self.AssertValidDirectory(targetDirectory);
+            FileEntry cachedFileRef = self.LoadAutoCachedFileRef(targetDirectory, useAutoCachedFileRef);
             RestRequest request = new Uri(self.url).SendGET();
             if (onProgress != null) { request.onProgress = onProgress; }
-            return await self.DownloadTo(request, targetDirectory);
+            bool downloadWasNeeded = await self.DownloadTo(request, targetDirectory);
+            if (useAutoCachedFileRef) { cachedFileRef.SaveAsJson(self, true); }
+            return downloadWasNeeded;
+        }
+
+        private static FileEntry LoadAutoCachedFileRef(this IFileRef self, DirectoryEntry targetDirectory, bool useAutoCachedFileRef) {
+            self.url.ThrowErrorIfNullOrEmpty("IFileRef.url");
+            var cachedFile = targetDirectory.GetChild("fileRef-" + self.url.GetMD5Hash() + ".json");
+            if (cachedFile.IsNotNullAndExists()) {
+                if (!useAutoCachedFileRef) {
+                    Log.w("A file exists that seems to contain the fileRef details but it will not be used");
+                    return null;
+                }
+                FillFileRefValuesFrom(cachedFile, self);
+            }
+            return cachedFile;
+        }
+
+        private static void FillFileRefValuesFrom(FileEntry source, IFileRef targetToFill) {
+            try {
+                var loaded = source.LoadAs(targetToFill.GetType()) as IFileRef;
+                if (targetToFill.dir.IsNullOrEmpty()) { targetToFill.dir = loaded.dir; }
+                if (targetToFill.fileName.IsNullOrEmpty()) { targetToFill.fileName = loaded.fileName; }
+                if (targetToFill.checksums.IsNullOrEmpty()) { targetToFill.checksums = loaded.checksums; }
+                if (targetToFill.mimeType.IsNullOrEmpty()) { targetToFill.mimeType = loaded.mimeType; }
+            }
+            catch (Exception e) { Log.e(e); }
         }
 
         public static async Task<bool> DownloadTo(this IFileRef self, RestRequest request, DirectoryEntry targetDir) {

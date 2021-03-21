@@ -13,6 +13,16 @@ namespace com.csutil.tests.model {
 
         public ModelPersistenceTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
+        [Fact]
+        public async Task ExampleUsage1() {
+            DirectoryEntry dir = EnvironmentV2.instance.GetOrAddTempFolder("Download_ExampleUsage1").CreateV2();
+            IFileRef f = new FileRef() { url = "https://raw.githubusercontent.com/cs-util-com/cscore/master/LICENSE" };
+            bool wasDownloadNeeded = await f.DownloadTo(dir, (float progress) => {
+                Log.d($"Download {progress}% done");
+            }, useAutoCachedFileRef: true);
+            string licenseText = f.GetFileEntry(dir.FileSystem).LoadAs<string>();
+            Assert.Equal(11344, licenseText.Length);
+        }
 
         [Fact]
         public void TestFilePathesInJson() {
