@@ -3,11 +3,21 @@ using UnityEngine;
 
 namespace com.csutil {
 
-    [Obsolete("Consider using Preferences.instance over PlayerPrefsV2")]
+    /// <summary> Extends the default PlayerPrefs with some additional functionality and fixes.
+    /// 
+    /// Consider using <see cref="Preferences.instance"/> over PlayerPrefsV2 to have 
+    /// Unity independent key value storage API that can use the PlayerPrefs internally but 
+    /// can also switch to other stores easily </summary>
     public class PlayerPrefsV2 : PlayerPrefs {
 
         public static void SetBool(string key, bool value) {
             SetInt(key, BoolToInt(value));
+        }
+
+        public static new string GetString(string key, string defaultValue) {
+            var res = PlayerPrefs.GetString(key, defaultValue);
+            if (res == "" && !HasKey(key)) { return defaultValue; }
+            return res;
         }
 
         public static bool GetBool(string key, bool defaultValue) {

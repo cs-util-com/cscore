@@ -15,7 +15,10 @@ namespace com.csutil.tests {
         public LogTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
         [Fact]
-        public void TestBasicLogOutputExamples() {
+        public void TestBasicLogOutputExamples() { InnerMethod1(); }
+        private static void InnerMethod1() { InnerMethod2(); }
+        private static void InnerMethod2() { InnerMethod3(); }
+        private static void InnerMethod3() {
             Log.d("I'm a log message");
             Log.w("I'm a warning");
             Log.e("I'm an error");

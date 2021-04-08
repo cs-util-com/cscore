@@ -68,6 +68,15 @@ namespace com.csutil.tests.io {
         }
 
         [Test]
+        public void TestDefaultNullValue() {
+            var key = "aKeyThatDoesNotExist";
+            PlayerPrefsV2.DeleteKey(key); // ensure it does not exist
+            // WHYYYY would you doo that Unity:
+            Assert.AreEqual("", UnityEngine.PlayerPrefs.GetString(key, defaultValue: null));
+            Assert.AreEqual(null, PlayerPrefsV2.GetString(key, defaultValue: null));
+        }
+
+        [Test]
         public void TestGetAndSetEncyptedString() {
             var key = "b1";
             var value = "val 1";

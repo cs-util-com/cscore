@@ -1,10 +1,7 @@
 ﻿using com.csutil.json;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using UnityEngine;
 
 namespace com.csutil.keyvaluestore {
 
@@ -42,7 +39,7 @@ namespace com.csutil.keyvaluestore {
 
         private object InternalSet(string key, object value) {
             object oldValue = InternalGet<object>(key, null);
-            PlayerPrefs.SetString(key, ToJsonString(value));
+            PlayerPrefsV2.SetString(key, ToJsonString(value));
             return oldValue;
         }
 
@@ -51,8 +48,8 @@ namespace com.csutil.keyvaluestore {
         }
 
         private T InternalGet<T>(string key, T defaultValue) {
-            if (!PlayerPrefs.HasKey(key)) { return defaultValue; }
-            var value = PlayerPrefs.GetString(key);
+            if (!PlayerPrefsV2.HasKey(key)) { return defaultValue; }
+            var value = PlayerPrefsV2.GetString(key);
             var wrapper = jsonReader.Read<ValueWrapper>(value);
             if (wrapper == null) {
                 Log.e($"Entry not a ValueWrapper but instead: '{value}'");
@@ -62,18 +59,18 @@ namespace com.csutil.keyvaluestore {
         }
 
         public async Task<bool> Remove(string key) {
-            PlayerPrefs.DeleteKey(key);
+            PlayerPrefsV2.DeleteKey(key);
             if (fallbackStore != null) { return await fallbackStore.Remove(key); }
             return true;
         }
 
         public async Task RemoveAll() {
-            PlayerPrefs.DeleteAll();
+            PlayerPrefsV2.DeleteAll();
             if (fallbackStore != null) { await fallbackStore.RemoveAll(); }
         }
 
         public async Task<bool> ContainsKey(string key) {
-            var res = PlayerPrefs.HasKey(key);
+            var res = PlayerPrefsV2.HasKey(key);
             if (!res && fallbackStore != null) { return await fallbackStore.ContainsKey(key); }
             return res;
         }
