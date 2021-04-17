@@ -30,10 +30,21 @@ namespace com.csutil.editor {
 
         [MenuItem(DIR + "CsCore/Install default packages")]
         static void InstallDefaultPackages() {
-            UnityPackageInstaller.AddToProjectViaPackageManager("com.unity.build-report-inspector", "0.1.2-preview");
-            UnityPackageInstaller.AddToProjectViaPackageManager("com.unity.device-simulator", "2.0.0-preview");
-            UnityPackageInstaller.AddToProjectViaPackageManager("com.unity.mobile.android-logcat", "1.1.1");
-            // UnityPackageInstaller.AddToProjectViaPackageManager("com.unity.nuget.newtonsoft-json", "2.0.0-preview");
+            // https://docs.unity3d.com/Packages/com.unity.nuget.newtonsoft-json@2.0
+            UnityPackageInstaller.AddToProjectViaPackageManager("com.unity.nuget.newtonsoft-json", "2.0.0");
+
+            // https://docs.unity3d.com/Packages/com.unity.build-report-inspector@0.2
+            UnityPackageInstaller.AddToProjectViaPackageManager("com.unity.build-report-inspector", "0.2.2-preview");
+
+            // https://docs.unity3d.com/Manual/com.unity.device-simulator.html
+            UnityPackageInstaller.AddToProjectViaPackageManager("com.unity.device-simulator", "2.2.4-preview");
+            
+            // https://docs.unity3d.com/Manual/com.unity.mobile.android-logcat.html
+            UnityPackageInstaller.AddToProjectViaPackageManager("com.unity.mobile.android-logcat", "1.2.1");
+
+            // https://docs.unity3d.com/Packages/com.unity.automated-testing@0.2
+            UnityPackageInstaller.AddToProjectViaPackageManager("com.unity.automated-testing", "0.2.0-preview.3");
+            
             // UnityPackageInstaller.AddToProjectViaPackageManager("com.unity.vectorgraphics", "2.0.0-preview.11");
         }
 
