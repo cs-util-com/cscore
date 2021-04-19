@@ -173,3 +173,13 @@ The following packages were updated:
   com.unity.ide.visualstudio from version 2.0.2 to 2.0.3
   com.unity.ide.vscode from version 1.2.2 to 1.2.3
   com.unity.test-framework from version 1.1.16 to 1.1.18
+
+=== Sun Apr 18 21:39:46 2021
+
+Packages were changed.
+Update Mode: updateDependencies
+
+The following packages were updated:
+  com.unity.timeline from version 1.2.10 to 1.5.4
+The following packages were removed:
+  com.unity.device-simulator@2.2.4-preview
