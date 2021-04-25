@@ -32,7 +32,7 @@ namespace com.csutil {
             return instance.LogExeption(e, ArgsPlusStackTraceIfNeeded(args));
         }
 
-        private static object[] ArgsPlusStackFrameIfNeeded(object[] args, int skipFrames = 2) {
+        public static object[] ArgsPlusStackFrameIfNeeded(object[] args, int skipFrames = 2) {
             return IsTraceIncludedIn(args) ? args : new StackFrame(skipFrames, true).AddTo(args);
         }
 
@@ -115,8 +115,7 @@ namespace com.csutil {
                 var methodString = method.ReflectedType.Name + "." + method.Name;
                 var paramsString = includeParams ? method.GetParameters().ToStringV2(x => "" + x, "", "") : "..";
                 return methodString + "(" + paramsString + ")";
-            }
-            catch (Exception e) { Console.WriteLine("" + e); return ""; }
+            } catch (Exception e) { Console.WriteLine("" + e); return ""; }
         }
 
         internal static object[] AddTo(this StackFrame self, object[] args) { return AddToArgs(args, self); }

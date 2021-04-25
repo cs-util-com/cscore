@@ -14,9 +14,19 @@ namespace com.csutil {
         
         public static bool throwExeptionIfAssertionFails = false;
 
+        /// <summary> Allows an easy way to do print debugging for all successful assertions present in the 
+        /// code to allow printing feedback that an Assert statement was successfully evaluated and did NOT fail. 
+        /// When print debugging its not only important to see failing assertions but also that the code these 
+        /// assertions are placed in is executed in general. Logging the assertions allows to use Assertions for 
+        /// print debugging and at the same time motivates to write print debug lines that after the 
+        /// debugging session can stay in the code </summary>
+        public static Action<string, object[]> onAssertSuccess;
+
         private static void Assert(bool condition, string errorMsg, object[] args) {
             args = new StackTrace(2, true).AddTo(args);
-            if (!condition) { Fail(errorMsg, args); }
+            if (!condition) { Fail(errorMsg, args); } else {
+                onAssertSuccess?.Invoke(errorMsg, args); // If callback set inform it on success
+            }
         }
 
         private static void Fail(string errorMsg, object[] args) {
@@ -189,6 +199,13 @@ namespace com.csutil {
                 taskToExecute();
                 throwExeptionIfAssertionFails = oldVal;
             }
+        }
+
+        /// <summary> Log out successful assetions, <see cref="AssertV2.onAssertSuccess"/> when this is useful </summary>
+        public static void SetupPrintDebuggingSuccessfulAssertions() {
+            AssertV2.onAssertSuccess = (msg, args) => {
+                Log.d($"SUCCESSFUL ASSERT, did NOT throw: <<<{msg}>>>", Log.ArgsPlusStackFrameIfNeeded(args, skipFrames: 3));
+            };
         }
 
     }

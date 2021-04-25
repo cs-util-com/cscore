@@ -87,13 +87,24 @@ namespace com.csutil.tests {
             AssertV2.ThrowExeptionIfAssertionFails(() => { stopWatch.AssertUnderXms(200); });
             Assert.True(stopWatch.IsUnderXms(200), "More time was needed than expected!");
 
+        }
+
+        /// <summary> Prints out failing AssertV2.AreEqual to show if they are readable in the log </summary>
+        [Fact]
+        public void TestReadableAssertAreEqualErrorOutputs() {
             AssertV2.AreEqual("abcd", "abce");
             AssertV2.AreEqual(new int[4] { 1, 2, 2, 4 }, new int[4] { 1, 2, 3, 4 });
             AssertV2.AreEqual(new int[2] { 1, 2 }, new int[2] { 1, 3 });
             AssertV2.AreEqual(new int[6] { 1, 2, 3, 4, 5, 6 }, new int[6] { 1, 2, 3, 4, 5, 7 });
             AssertV2.AreEqual(new int[2] { 1, 2 }, new int[1] { 1 });
             AssertV2.AreEqual(new int[1] { 1 }, new int[2] { 1, 2 });
+        }
 
+        [Fact]
+        public void TestUsingAssertV2ForPrintDebugging() {
+            AssertV2.SetupPrintDebuggingSuccessfulAssertions();
+            // Then call AssertV2 methods that normally do not produce any log output (because they dont fail):
+            TestAssertV2Methods();
         }
 
         [Fact]
@@ -107,8 +118,7 @@ namespace com.csutil.tests {
                     }); // ..so the AssertV2.Throws should fail
                     Log.e("This line should never be reached since AssertV2.Throws should fail!");
                     throw new Exception("AssertV2.Throws did not fail correctly!");
-                }
-                catch (AssertV2.ThrowsException) { // Only catch it if its a ThrowsException
+                } catch (AssertV2.ThrowsException) { // Only catch it if its a ThrowsException
                     // AssertV2.Throws failed correctly and threw an ThrowsException error
                     Log.d("ThrowsException was expected and arrived correctly");
                 }
