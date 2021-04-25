@@ -102,10 +102,10 @@ namespace com.csutil.tests {
 
         [Fact]
         public void TestUsingAssertV2ForPrintDebugging() {
-            AssertV2.SetupPrintDebuggingSuccessfulAssertions();
+            AssertV2.SetupPrintDebuggingSuccessfulAssertions(); // Turn on print debugging
             // Then call AssertV2 methods that normally do not produce any log output (because they dont fail):
             TestAssertV2Methods();
-            AssertV2.onAssertSuccess = null;
+            AssertV2.onAssertSuccess = null; // Turn off print debugging again
         }
 
         [Fact]
