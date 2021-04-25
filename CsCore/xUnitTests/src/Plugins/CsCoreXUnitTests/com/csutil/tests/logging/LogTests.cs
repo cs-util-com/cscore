@@ -105,6 +105,7 @@ namespace com.csutil.tests {
             AssertV2.SetupPrintDebuggingSuccessfulAssertions();
             // Then call AssertV2 methods that normally do not produce any log output (because they dont fail):
             TestAssertV2Methods();
+            AssertV2.onAssertSuccess = null;
         }
 
         [Fact]
