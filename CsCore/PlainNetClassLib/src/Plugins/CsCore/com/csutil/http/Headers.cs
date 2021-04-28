@@ -11,12 +11,21 @@ namespace com.csutil.http {
 
         private Dictionary<string, IEnumerable<string>> headers = new Dictionary<string, IEnumerable<string>>();
 
-        public Headers(IEnumerable<KeyValuePair<string, string>> headers) {
-            foreach (var e in headers) { this.headers.Add(e.Key.ToLowerInvariant(), new string[] { e.Value }); }
+        public Headers(IEnumerable<KeyValuePair<string, string>> headers) { AddRange(headers); }
+
+        public Headers(IEnumerable<KeyValuePair<string, IEnumerable<string>>> headers) { AddRange(headers); }
+
+        public void AddRange(IEnumerable<KeyValuePair<string, string>> headers) {
+            foreach (var e in headers) { TryAdd(e.Key.ToLowerInvariant(), new string[] { e.Value }); }
         }
 
-        public Headers(IEnumerable<KeyValuePair<string, IEnumerable<string>>> headers) {
-            foreach (var e in headers) { this.headers.Add(e.Key.ToLowerInvariant(), e.Value); }
+        public void AddRange(IEnumerable<KeyValuePair<string, IEnumerable<string>>> headers) {
+            foreach (var e in headers) { TryAdd(e.Key.ToLowerInvariant(), e.Value); }
+        }
+
+        public void TryAdd(string key, IEnumerable<string> val) {
+            try { this.headers.Add(key, val); }
+            catch (Exception e) { Log.e($"Could not add header {key}:{val}", e); }
         }
 
         public string GetFileNameOnServer() {

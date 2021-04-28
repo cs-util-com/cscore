@@ -35,22 +35,23 @@ namespace com.csutil {
             if (!localDir.Exists) { // The SubFileSystem cant handle non existing roots
                 throw new DirectoryNotFoundException("ToRootDirectoryEntry on non-existing dir: " + localDir);
             }
-            FileSystem pfs;
-            if (HasDiscPrefix(localDir.FullName)) {
-                pfs = new PhysicalFileSystemV2(ExtractDiscPrefix(localDir));
-            } else {
-                pfs = new PhysicalFileSystem();
-            }
-            var fs = new SubFileSystem(pfs, pfs.ConvertPathFromInternal(localDir.FullName));
-            return fs.GetDirectoryEntry(UPath.Root);
+            return NewSubFileSystemFor(localDir.FullName).GetDirectoryEntry(UPath.Root);
+        }
+
+        private static SubFileSystem NewSubFileSystemFor(string fullPath) {
+            FileSystem fileSystem = NewFileSystem(fullPath);
+            return new SubFileSystem(fileSystem, fileSystem.ConvertPathFromInternal(fullPath));
+        }
+
+        private static FileSystem NewFileSystem(string fullPath) {
+            if (HasDiscPrefix(fullPath)) { return new PhysicalFileSystemV2(ExtractDiscPrefix(fullPath)); }
+            return new PhysicalFileSystem();
         }
 
         /// <summary> Takes the parent dir and uses this as a root dir, only works if parent dir exists! </summary>
         public static FileEntry ToFileEntryInNewRoot(this FileInfo self) {
             return self.ParentDir().ToRootDirectoryEntry().GetChild(self.Name);
         }
-
-        private static string ExtractDiscPrefix(DirectoryInfo dir) { return ExtractDiscPrefix(dir.FullName); }
 
         private static string ExtractDiscPrefix(string absPath) {
             if (!HasDiscPrefix(absPath)) { throw new InvalidDataException("Path does not contain a disc prefix: " + absPath); }

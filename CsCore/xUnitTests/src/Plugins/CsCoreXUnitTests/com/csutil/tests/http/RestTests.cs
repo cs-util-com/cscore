@@ -102,7 +102,7 @@ namespace com.csutil.tests.http {
             stream.Dispose();
 
             var xTimesFaster = 3; // Loading only the image info should be at least this factor faster then loading the full image
-            string e = timingForImageInfoOny + " was not faster then " + timingForFullImage;
+            string e = $"{timingForImageInfoOny} was not {xTimesFaster} times faster then {timingForFullImage}!";
             Assert.True(timingForImageInfoOny.ElapsedMilliseconds * xTimesFaster < timingForFullImage.ElapsedMilliseconds, e);
         }
 

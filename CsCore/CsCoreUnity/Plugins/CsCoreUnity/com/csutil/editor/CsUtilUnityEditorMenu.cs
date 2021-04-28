@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using com.csutil.system;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -54,6 +55,16 @@ namespace com.csutil.editor {
         [MenuItem("CONTEXT/RectTransform/Set Anchors Around Object")]
         static void SetAnchorsAroundObject(MenuCommand command) {
             SetAnchorsAroundObject(command.context as RectTransform);
+        }
+
+        [MenuItem("Assets/Create/Folder SymLink", priority = 21)]
+        static void CreateFolderSymLink() {
+            DirectoryEntry selectedFolder = EditorIO.OpenFolderPanelV2("Select a folder to link into Assets");
+            var targetFolder = EditorIO.GetAssetsFolder();
+            try { targetFolder = EditorIO.GetFolderOfCurrentSelectedObject(); } catch (System.Exception) { }
+            targetFolder = targetFolder.GetChildDir(selectedFolder.Name);
+            SymLinker.CreateSymlink(selectedFolder, targetFolder);
+            AssetDatabase.Refresh(ImportAssetOptions.ForceUpdate);
         }
 
         static void SetAnchorsAroundObject(RectTransform t) {

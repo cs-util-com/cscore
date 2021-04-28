@@ -373,9 +373,7 @@ namespace com.csutil.tests {
             // Use reflection to access protected parent file system:
             var parentFileSystem = s.GetType().GetNonPublicInstanceMember("NextFileSystem").GetValue(s);
 
-            var sysInfo = EnvironmentV2.instance.systemInfo;
-            bool IsWindows = sysInfo.osPlatform.StartsWith("Win", StringComparison.InvariantCultureIgnoreCase);
-            if (IsWindows) {
+            if (EnvironmentV2.instance.IsWindows()) {
                 // On Windows a PhysicalFileSystemV2 is used to handle the disc letter prefix:
                 Assert.Equal(typeof(PhysicalFileSystemV2), parentFileSystem.GetType());
             } else { // On all other systems the normal PhysicalFileSystem is used:

@@ -78,13 +78,10 @@ namespace com.csutil.http {
         }
 
         public async Task<Headers> GetResultHeaders() {
-            return new Headers(await GetHttpClientResultHeaders());
-        }
-
-        public async Task<HttpResponseHeaders> GetHttpClientResultHeaders() {
-            HttpResponseMessage resp = await request;
-            // Log.d("resp.StatusCode=" + resp.StatusCode);
-            return resp.Headers;
+            HttpResponseMessage response = await request;
+            var headers = new Headers(response.Headers);
+            headers.AddRange(response.Content.Headers);
+            return headers;
         }
 
         public RestRequest Send(HttpMethod method) {
