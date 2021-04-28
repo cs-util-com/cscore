@@ -918,8 +918,11 @@ The cscore project has some components that are only usable in Unity projects. T
 
 1. Open `Window -> Package Manager`
 2. Click on the **`+`** Icon
-3. Click "Add package from git URL..."
-4. This way you can add the 5 separate cscore building blocks in the following order:
+3. Select "Add package by name" and then insert `com.unity.nuget.newtonsoft-json` 
+   - (**Required**) Is used by cscore for json parsing, diffing and more
+4. Click again on the **`+`** Icon
+5. Click "Add package from git URL..."
+6. This way you can add the 5 separate cscore building blocks in the following order:
 
    1. Insert https://github.com/cs-util-com/cscore.git?path=CsCore/PlainNetClassLib/src/Plugins 
       - (**Required**) Contains the **pure C#** classes
