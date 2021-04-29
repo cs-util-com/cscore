@@ -7,6 +7,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -174,15 +175,15 @@ namespace com.csutil.tests.jsonschema {
 
             [DataTypeV2(DataTypeV2.password, "Lenght >= 6 & has A-Z a-z 0-9 ?!..")]
             [StringLength(maximumLength: 99, MinimumLength = 6)]
-            [RegularExpression(RegexTemplates.HAS_UPPERCASE, RegexTemplates.HAS_LOWERCASE, RegexTemplates.HAS_NUMBER, RegexTemplates.HAS_SPECIAL_CHAR)]
+            [RegularExpressionV2(RegexTemplates.HAS_UPPERCASE, RegexTemplates.HAS_LOWERCASE, RegexTemplates.HAS_NUMBER, RegexTemplates.HAS_SPECIAL_CHAR)]
             public string password;
 
             [Description("e.g. 99")]
-            [model.jsonschema.Range(0, 130)]
+            [System.ComponentModel.DataAnnotations.Range(0, 130)]
             public int? age;
 
             [Description("e.g. 99")]
-            [model.jsonschema.Range(0, 160)]
+            [System.ComponentModel.DataAnnotations.Range(0, 160)]
             public int? progress { get; private set; } = 60;
 
             public float money;

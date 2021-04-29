@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 
 namespace com.csutil.model.jsonschema {
 
@@ -16,10 +15,8 @@ namespace com.csutil.model.jsonschema {
     }
 
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
-    public class RegularExpressionAttribute : Attribute {
-        public string Pattern;
-
-        public RegularExpressionAttribute(params string[] pattern) { this.Pattern = RegexUtil.CombineViaAnd(pattern); }
+    public class RegularExpressionV2Attribute : System.ComponentModel.DataAnnotations.RegularExpressionAttribute {
+        public RegularExpressionV2Attribute(params string[] pattern) : base(RegexUtil.CombineViaAnd(pattern)) { }
     }
 
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
@@ -49,32 +46,6 @@ namespace com.csutil.model.jsonschema {
             names = Enum.GetNames(enumType);
             this.allowOtherInput = allowOtherInput;
         }
-    }
-
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
-    public class RequiredAttribute : Attribute {
-        public bool AllowEmptyStrings { get; set; }
-    }
-
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
-    public class RangeAttribute : Attribute {
-        public float? Minimum;
-        public float? Maximum;
-
-        public RangeAttribute(float minimum) { Minimum = minimum; }
-        public RangeAttribute(float minimum, float maximum) {
-            Minimum = minimum; Maximum = maximum;
-        }
-    }
-
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
-    public class StringLengthAttribute : Attribute {
-        /// <summary> If set to 0 will be ingored </summary>
-        public int MinimumLength;
-        /// <summary> If set to 0 will be ingored </summary>
-        public int MaximumLength;
-
-        public StringLengthAttribute(int maximumLength) { MaximumLength = maximumLength; }
     }
 
 }

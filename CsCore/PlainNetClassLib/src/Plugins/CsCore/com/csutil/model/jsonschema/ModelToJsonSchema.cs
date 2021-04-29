@@ -4,6 +4,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
 
@@ -103,8 +104,8 @@ namespace com.csutil.model.jsonschema {
                 if (model.TryGetCustomAttribute(out RegularExpressionAttribute attr)) { newField.pattern = attr.Pattern; }
                 if (model.TryGetCustomAttribute(out DataTypeV2Attribute c)) { newField.format = "" + c.DataType; }
                 if (model.TryGetCustomAttribute(out RangeAttribute ra)) {
-                    newField.minimum = ra.Minimum;
-                    newField.maximum = ra.Maximum;
+                    newField.minimum = ToFloat(ra.Minimum);
+                    newField.maximum = ToFloat(ra.Maximum);
                 }
                 if (model.TryGetCustomAttribute(out StringLengthAttribute ila)) {
                     if (ila.MinimumLength > 0) { newField.minLength = ila.MinimumLength; }
@@ -168,6 +169,13 @@ namespace com.csutil.model.jsonschema {
                 }
             }
             return newField;
+        }
+
+        private float? ToFloat(object o) {
+            if (o == null) { return null; }
+            if (o is int i) { return i; }
+            if (o is double d) { return (float)d; }
+            throw new ArgumentException($"Cant handle {o.GetType()} with value {o}");
         }
 
         public virtual bool ExtractFieldDocu(JsonSchema field, MemberInfo m, Type modelType, JTokenType t, object pInstance, JToken jpInstance) {
