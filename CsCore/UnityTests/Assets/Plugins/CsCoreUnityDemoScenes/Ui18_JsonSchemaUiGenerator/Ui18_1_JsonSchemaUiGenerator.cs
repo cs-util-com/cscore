@@ -160,29 +160,29 @@ namespace com.csutil.tests.jsonschema {
             [JsonProperty(Required = Required.Always)]
             public string id { get; private set; } = Guid.NewGuid().ToString();
 
-            [InputLength(2, 30)]
-            [Content(ContentFormat.name, "e.g. Tom")]
+            [StringLength(maximumLength: 30, MinimumLength = 2)]
+            [DataTypeV2(DataTypeV2.name, "e.g. Tom")]
             public string name;
 
             [Required]
-            [Content(ContentFormat.name, "e.g. Riddle")]
+            [DataTypeV2(DataTypeV2.name, "e.g. Riddle")]
             public string lastName;
 
-            [Content(ContentFormat.email, "e.g. tom@email.com")]
-            [Regex(RegexTemplates.EMAIL_ADDRESS)]
+            [DataTypeV2(DataTypeV2.email, "e.g. tom@email.com")]
+            [RegularExpression(RegexTemplates.EMAIL_ADDRESS)]
             public string email;
 
-            [Content(ContentFormat.password, "Lenght >= 6 & has A-Z a-z 0-9 ?!..")]
-            [InputLength(min: 6)]
-            [Regex(RegexTemplates.HAS_UPPERCASE, RegexTemplates.HAS_LOWERCASE, RegexTemplates.HAS_NUMBER, RegexTemplates.HAS_SPECIAL_CHAR)]
+            [DataTypeV2(DataTypeV2.password, "Lenght >= 6 & has A-Z a-z 0-9 ?!..")]
+            [StringLength(maximumLength: 99, MinimumLength = 6)]
+            [RegularExpression(RegexTemplates.HAS_UPPERCASE, RegexTemplates.HAS_LOWERCASE, RegexTemplates.HAS_NUMBER, RegexTemplates.HAS_SPECIAL_CHAR)]
             public string password;
 
             [Description("e.g. 99")]
-            [MinMaxRange(0, 130)]
+            [model.jsonschema.Range(0, 130)]
             public int? age;
 
             [Description("e.g. 99")]
-            [MinMaxRange(0, 160)]
+            [model.jsonschema.Range(0, 160)]
             public int? progress { get; private set; } = 60;
 
             public float money;
@@ -197,7 +197,7 @@ namespace com.csutil.tests.jsonschema {
             [Description("Checked if there is any money")]
             public bool hasMoney;
 
-            [Regex(RegexTemplates.PHONE_NR)]
+            [RegularExpression(RegexTemplates.PHONE_NR)]
             [Description("e.g. +1 234 5678 90")]
             public string phoneNumber;
 
@@ -205,10 +205,10 @@ namespace com.csutil.tests.jsonschema {
 
             public UserContact bestFriend;
 
-            [Content(ContentFormat.essay, "A detailed description")]
+            [DataTypeV2(DataTypeV2.essay, "A detailed description")]
             public string description;
 
-            [Regex(RegexTemplates.URL)]
+            [RegularExpression(RegexTemplates.URL)]
             public string homepage;
 
             //public List<string> tags { get; set; }
@@ -218,7 +218,7 @@ namespace com.csutil.tests.jsonschema {
 #pragma warning disable 0649 // Variable is never assigned to, and will always have its default value
             public class UserContact {
 
-                [Content(ContentFormat.name, "e.g. Barbara")]
+                [DataTypeV2(DataTypeV2.name, "e.g. Barbara")]
                 public string name;
                 public MyUserModel user;
 
@@ -228,7 +228,7 @@ namespace com.csutil.tests.jsonschema {
 
             internal class FileRef : IFileRef {
 
-                [Regex(RegexTemplates.URL)]
+                [RegularExpression(RegexTemplates.URL)]
                 public string url { get; set; }
 
                 public string dir { get; set; }

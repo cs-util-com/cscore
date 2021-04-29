@@ -36,24 +36,24 @@ namespace com.csutil.ui.jsonschema {
         }
 
         private static void SetupForContentType(InputField self, JsonSchema field) {
-            if (EnumUtil.TryParse(field.format, out ContentFormat contentType)) {
+            if (EnumUtil.TryParse(field.format, out DataTypeV2 contentType)) {
                 switch (contentType) {
-                    case ContentFormat.alphanumeric:
+                    case DataTypeV2.alphanumeric:
                         self.contentType = InputField.ContentType.Alphanumeric;
                         break;
-                    case ContentFormat.name:
+                    case DataTypeV2.name:
                         self.contentType = InputField.ContentType.Name;
                         break;
-                    case ContentFormat.email:
+                    case DataTypeV2.email:
                         self.contentType = InputField.ContentType.EmailAddress;
                         break;
-                    case ContentFormat.password:
+                    case DataTypeV2.password:
                         self.contentType = InputField.ContentType.Password;
                         break;
-                    case ContentFormat.pin:
+                    case DataTypeV2.pin:
                         self.contentType = InputField.ContentType.Pin;
                         break;
-                    case ContentFormat.essay:
+                    case DataTypeV2.essay:
                         self.contentType = InputField.ContentType.Autocorrected;
                         self.lineType = InputField.LineType.MultiLineNewline;
                         ForceRecalculateNeededHeightOfInputField(self);

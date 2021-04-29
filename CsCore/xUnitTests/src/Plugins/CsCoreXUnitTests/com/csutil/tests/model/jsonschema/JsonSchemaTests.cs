@@ -57,7 +57,7 @@ namespace com.csutil.tests.model.jsonschema {
 
             Assert.Equal("" + typeof(MyUserModel.UserContact), schema.properties["bestFriend"].modelType);
 
-            Assert.Equal("" + ContentFormat.password, schema.properties["password"].format);
+            Assert.Equal("" + DataTypeV2.password, schema.properties["password"].format);
 
             var userSchemaInUserContactClass = schema.properties["bestFriend"].properties["user"];
             Assert.Equal("" + typeof(MyUserModel), userSchemaInUserContactClass.modelType);
@@ -169,19 +169,19 @@ namespace com.csutil.tests.model.jsonschema {
             [JsonProperty(Required = Required.Always)]
             public string id { get; private set; } = GuidV2.NewGuid().ToString();
 
-            [Required]
-            [InputLength(2, 30)]
+            [Required(AllowEmptyStrings = false)]
+            [StringLength(30, MinimumLength = 2)]
             public string name;
 
-            [Content(ContentFormat.password, "A secure password")]
+            [DataTypeV2(DataTypeV2.password, "A secure password")]
             public string password;
 
-            [MinMaxRange(min: 0, max: 130)]
+            [Range(minimum: 0, maximum: 130)]
             public int age;
             public float money;
             public FileRef profilePic;
             public UserContact bestFriend;
-            [Regex(RegexTemplates.PHONE_NR)]
+            [RegularExpression(RegexTemplates.PHONE_NR)]
             [Description("e.g. +1 234 5678 90")]
             public int? phoneNumber;
 

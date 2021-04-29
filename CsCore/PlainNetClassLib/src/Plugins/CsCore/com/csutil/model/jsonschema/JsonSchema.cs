@@ -84,7 +84,21 @@ namespace com.csutil.model.jsonschema {
 
     }
 
-    /// <summary> https://json-schema.org/understanding-json-schema/reference/string.html#built-in-formats </summary>
-    public enum ContentFormat { alphanumeric, name, email, password, pin, essay, color, date, uri }
+    /// <summary> See https://json-schema.org/understanding-json-schema/reference/string.html#built-in-formats </summary>
+    public enum DataTypeV2 {
+        alphanumeric,
+        color,
+        /// <summary> Same as <see cref="System.ComponentModel.DataAnnotations.DataType.Date"/> </summary>
+        date,
+        /// <summary> Same as <see cref="System.ComponentModel.DataAnnotations.DataType.EmailAddress"/> </summary>
+        email,
+        essay,
+        name,
+        /// <summary> Same as <see cref="System.ComponentModel.DataAnnotations.DataType.Password"/> </summary>
+        password,
+        pin,
+        /// <summary> Same as <see cref="System.ComponentModel.DataAnnotations.DataType.Url"/> </summary>
+        uri
+    }
 
 }

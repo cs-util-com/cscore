@@ -16,22 +16,19 @@ namespace com.csutil.model.jsonschema {
     }
 
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
-    public class RegexAttribute : Attribute {
-        public string regex;
+    public class RegularExpressionAttribute : Attribute {
+        public string Pattern;
 
-        public RegexAttribute(params string[] regex) { this.regex = RegexUtil.CombineViaAnd(regex); }
-
-        private void SetRegex(string[] regex, string s) {
-            var minMaxRegex = new string[1] { s };
-            this.regex = RegexUtil.CombineViaAnd(minMaxRegex.Union(regex).ToArray());
-        }
+        public RegularExpressionAttribute(params string[] pattern) { this.Pattern = RegexUtil.CombineViaAnd(pattern); }
     }
 
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
-    public class ContentAttribute : DescriptionAttribute {
-        public ContentFormat type;
+    public class DataTypeV2Attribute : DescriptionAttribute {
+        public DataTypeV2 DataType;
 
-        public ContentAttribute(ContentFormat type, string description) : base(description) { this.type = type; }
+        public DataTypeV2Attribute(DataTypeV2 dataType, string description) : base(description) {
+            DataType = dataType;
+        }
     }
 
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
@@ -55,27 +52,29 @@ namespace com.csutil.model.jsonschema {
     }
 
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
-    public class RequiredAttribute : Attribute { }
-
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
-    public class MinMaxRangeAttribute : Attribute {
-        public float? minimum;
-        public float? maximum;
-
-        public MinMaxRangeAttribute(float min) { minimum = min; }
-        public MinMaxRangeAttribute(float max, bool exclusiveMaximum = false) { maximum = exclusiveMaximum ? max + float.Epsilon : max; }
-        public MinMaxRangeAttribute(float min, float max) { minimum = min; maximum = max; }
+    public class RequiredAttribute : Attribute {
+        public bool AllowEmptyStrings { get; set; }
     }
 
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
-    public class InputLengthAttribute : Attribute {
-        /// <summary> If set to 0 will be ingored </summary>
-        public int minLength;
-        /// <summary> If set to 0 will be ingored </summary>
-        public int maxLength;
+    public class RangeAttribute : Attribute {
+        public float? Minimum;
+        public float? Maximum;
 
-        public InputLengthAttribute(int max) { maxLength = max; }
-        public InputLengthAttribute(int min, int max = 0) { minLength = min; maxLength = max; }
+        public RangeAttribute(float minimum) { Minimum = minimum; }
+        public RangeAttribute(float minimum, float maximum) {
+            Minimum = minimum; Maximum = maximum;
+        }
+    }
+
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
+    public class StringLengthAttribute : Attribute {
+        /// <summary> If set to 0 will be ingored </summary>
+        public int MinimumLength;
+        /// <summary> If set to 0 will be ingored </summary>
+        public int MaximumLength;
+
+        public StringLengthAttribute(int maximumLength) { MaximumLength = maximumLength; }
     }
 
 }

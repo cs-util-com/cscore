@@ -100,21 +100,26 @@ namespace com.csutil.model.jsonschema {
             ExtractFieldDocu(newField, model, modelType, jTokenType, pInstance, jpInstance);
             if (model != null) {
                 if (!model.CanWriteTo()) { newField.readOnly = true; }
-                if (model.TryGetCustomAttribute(out RegexAttribute attr)) { newField.pattern = attr.regex; }
-                if (model.TryGetCustomAttribute(out ContentAttribute c)) { newField.format = "" + c.type; }
-                if (model.TryGetCustomAttribute(out MinMaxRangeAttribute ra)) {
-                    newField.minimum = ra.minimum;
-                    newField.maximum = ra.maximum;
+                if (model.TryGetCustomAttribute(out RegularExpressionAttribute attr)) { newField.pattern = attr.Pattern; }
+                if (model.TryGetCustomAttribute(out DataTypeV2Attribute c)) { newField.format = "" + c.DataType; }
+                if (model.TryGetCustomAttribute(out RangeAttribute ra)) {
+                    newField.minimum = ra.Minimum;
+                    newField.maximum = ra.Maximum;
                 }
-                if (model.TryGetCustomAttribute(out InputLengthAttribute ila)) {
-                    if (ila.minLength > 0) { newField.minLength = ila.minLength; }
-                    if (ila.maxLength > 0) { newField.maxLength = ila.maxLength; }
+                if (model.TryGetCustomAttribute(out StringLengthAttribute ila)) {
+                    if (ila.MinimumLength > 0) { newField.minLength = ila.MinimumLength; }
+                    if (ila.MaximumLength > 0) { newField.maxLength = ila.MaximumLength; }
                 }
                 if (model.TryGetCustomAttribute(out EnumAttribute e)) {
                     newField.contentEnum = e.names;
                     newField.additionalItems = e.allowOtherInput;
                 }
-                if (model.TryGetCustomAttribute(out RequiredAttribute r)) { newField.mandatory = true; }
+                if (model.TryGetCustomAttribute(out RequiredAttribute r)) {
+                    newField.mandatory = true;
+                    if (!r.AllowEmptyStrings && newField.minLength == null || newField.minLength <= 0) {
+                        newField.minLength = 1;
+                    }
+                }
                 if (model.TryGetCustomAttribute(out JsonPropertyAttribute p)) {
                     if (p.Required == Required.Always || p.Required == Required.DisallowNull) {
                         newField.mandatory = true;
