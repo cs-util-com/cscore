@@ -36,6 +36,8 @@ namespace com.csutil.tests {
             Assert.Equal(1, Numbers.Calculate("0.5 + 0.5"));
             Assert.Equal(1, Numbers.Calculate("0.5 + 0,5"));
             Assert.Equal(1, Numbers.Calculate("0,5 + 0,5"));
+            Assert.Equal(0.6667, Numbers.Calculate("2/3"), 4);
+            Assert.NotEqual(0.667, Numbers.Calculate("2/3"), 4);
         }
 
         [Fact]

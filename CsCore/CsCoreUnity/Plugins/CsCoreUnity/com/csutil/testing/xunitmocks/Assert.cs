@@ -44,6 +44,14 @@ namespace Xunit {
             return objA == objB || Equals(objA, objB);
         }
 
+        public static void Equal(double exp, double actual, int precision) {
+            True(Eq(Math.Round(exp, precision), Math.Round(actual, precision)), $"NOT Equal: Expected\n {exp} \n but was \n {actual}");
+        }
+
+        public static void NotEqual(double objA, double objB, int precision) {
+            True(!Eq(Math.Round(objA, precision), Math.Round(objB, precision)), $"EQUAL: \n {objA} \n and \n {objB}");
+        }
+
         public static void NotEqual(object objA, object objB) {
             True(!Eq(objA, objB), "EQUAL: \n " + objA + " \n and \n " + objB);
         }
