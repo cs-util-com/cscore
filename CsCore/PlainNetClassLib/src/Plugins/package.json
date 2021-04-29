@@ -8,5 +8,10 @@
 	"author": {
 		"name": "csutil.com",
 		"url": "https://github.com/cs-util-com/cscore"
-	}	
+	},
+	"dependencies":
+      {
+        "com.unity.nuget.newtonsoft-json": "2.0.0"
+      }
+    }
 }
