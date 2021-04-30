@@ -41,6 +41,7 @@ namespace com.csutil.tests.model.immutable {
             var userNameChangedCounter = 0;
             var contact1NameChangedCounter = 0;
             var contact2NameChangedCounter = 0;
+            var contactsListChanged = 0;
             store.AddStateChangeListener(s => s.user, (MyUser1 theChangedUser) => {
                 userChangedCounter++;
             });
@@ -52,6 +53,9 @@ namespace com.csutil.tests.model.immutable {
             });
             store.AddStateChangeListener(s => s.user?.contacts?.Skip(1).FirstOrDefault()?.contactData.name, (_) => {
                 contact2NameChangedCounter++;
+            });
+            store.AddStateChangeListener(s => s.user?.contacts, (_) => {
+                contactsListChanged++;
             });
 
             var contact1 = new MyUser1() { name = "Tom" };
@@ -69,6 +73,7 @@ namespace com.csutil.tests.model.immutable {
                 Assert.Equal(0, userNameChangedCounter);
                 Assert.Equal(1, contact1NameChangedCounter);
                 Assert.Equal(0, contact2NameChangedCounter);
+                Assert.Equal(1, contactsListChanged);
             }
 
             var contact2 = new MyUser1() { name = "Bill" };
@@ -85,6 +90,7 @@ namespace com.csutil.tests.model.immutable {
                 Assert.Equal(0, userNameChangedCounter);
                 Assert.Equal(1, contact1NameChangedCounter);
                 Assert.Equal(1, contact2NameChangedCounter);
+                Assert.Equal(2, contactsListChanged);
             }
             { // Change the name of contact 1 which should not affect contact 2:
                 var newName1 = "Toooom";
@@ -97,6 +103,7 @@ namespace com.csutil.tests.model.immutable {
                 Assert.Equal(0, userNameChangedCounter);
                 Assert.Equal(2, contact1NameChangedCounter);
                 Assert.Equal(1, contact2NameChangedCounter);
+                Assert.Equal(2, contactsListChanged);
             }
             { // Change the name of the user which should not affect the 2 contacts:
                 var newName = "Caaaarl";
@@ -117,6 +124,7 @@ namespace com.csutil.tests.model.immutable {
                 Assert.Equal(1, userNameChangedCounter);
                 Assert.Equal(2, contact1NameChangedCounter);
                 Assert.Equal(1, contact2NameChangedCounter);
+                Assert.Equal(2, contactsListChanged);
             }
             { // Marking an object mutated while not dispatching will throw an exception:
                 Assert.Throws<InvalidOperationException>(() => {
@@ -124,7 +132,7 @@ namespace com.csutil.tests.model.immutable {
                     user.MarkMutated();
                 });
                 Assert.Equal(4, userChangedCounter); // Count should not have changed
-                Assert.Equal(1, userNameChangedCounter); 
+                Assert.Equal(1, userNameChangedCounter);
             }
         }
 

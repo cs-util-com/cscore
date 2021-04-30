@@ -212,6 +212,7 @@ namespace com.csutil {
             try { return !self.EnumerateEntries().Any(); } catch (Exception) { return true; }
         }
 
+        /// <summary> Returns file size in bytes, use with <see cref="ByteSizeToString"/> </summary>
         public static long GetFileSize(this FileEntry self) { return self.Length; }
 
         public static string GetFileSizeString(this FileEntry self) {

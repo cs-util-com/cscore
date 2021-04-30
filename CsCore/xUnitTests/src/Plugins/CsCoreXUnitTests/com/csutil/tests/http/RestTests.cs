@@ -106,6 +106,27 @@ namespace com.csutil.tests.http {
             Assert.True(timingForImageInfoOny.ElapsedMilliseconds * xTimesFaster < timingForFullImage.ElapsedMilliseconds, e);
         }
 
+        [Fact]
+        public async Task DownloadTest5_GetOnlyHeaders1() {
+            var url = "https://raw.githubusercontent.com/cs-util-com/cscore/master/CsCore/assets/logo-cscore1024x1024_2.png";
+            Headers headers = await new Uri(url).SendGET().GetResult<Headers>();
+            Assert.NotEmpty(headers);
+            Assert.Equal("image/png", headers.GetContentMimeType(null));
+            // The image file size of 492 KB is returned as well:
+            Assert.Equal("492,78 KB", ByteSizeToString.ByteSizeToReadableString(headers.GetContentLengthInBytes(0)));
+            Assert.Equal("66148616DAFA743A73F9F5284F3B1D3C.png", headers.GenerateHashNameFromHeaders());
+        }
+
+        [Fact]
+        public async Task DownloadTest5_GetOnlyHeaders2() {
+            var url = "https://picsum.photos/50/50";
+            Headers headers = await new Uri(url).SendGET().GetResult<Headers>();
+            Assert.NotEmpty(headers);
+            Assert.NotNull(headers.GetContentMimeType(null));
+            Assert.NotEqual(-1, headers.GetContentLengthInBytes(-1));
+            Assert.False(headers.GetFileNameOnServer().IsNullOrEmpty());
+        }
+
         private static async Task<Stream> CopyFirstBytes(Stream self, int bytesToCopy) {
             var destination = new MemoryStream();
             byte[] buffer = new byte[bytesToCopy];

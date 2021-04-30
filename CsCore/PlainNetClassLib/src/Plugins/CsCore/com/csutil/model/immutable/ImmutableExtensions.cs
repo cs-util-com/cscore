@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -37,14 +38,22 @@ namespace com.csutil.model.immutable {
 
         internal static Action NewSubstateChangeListener<S>(Func<S> getSubstate, Action<S> onChanged) {
             var oldState = getSubstate();
+            var oldMonitor = GetMonitorFor(oldState);
             Action newListener = () => {
                 var newState = getSubstate();
-                if (StateCompare.WasModified(oldState, newState)) {
+                bool stateChanged = StateCompare.WasModified(oldState, newState);
+                if (stateChanged || StateCompare.WasModified(oldMonitor, GetMonitorFor(newState))) {
                     onChanged(newState);
                     oldState = newState;
+                    oldMonitor = GetMonitorFor(newState);
                 }
             };
             return newListener;
+        }
+
+        private static object GetMonitorFor(object state) {
+            if (state is ICollection c) { return c.Count; }
+            return null;
         }
 
         public static ImmutableList<T> MutateEntries<T>(this ImmutableList<T> list, object action, StateReducer<T> reducer) {
