@@ -28,8 +28,10 @@ namespace com.csutil.http {
             catch (Exception e) { Log.e($"Could not add header {key}:{val}", e); }
         }
 
-        public string GetFileNameOnServer() {
-            return ExtractFileName(GetHeaderValue("content-disposition", null));
+        /// <summary> If null is returned <see cref="Headers.GenerateHashNameFromHeaders"/> could be 
+        /// used instead, but this file name would change every time the file changes on the server! </summary>
+        public string GetFileNameOnServer(string fallbackValue = null) {
+            return ExtractFileName(GetHeaderValue("content-disposition", fallbackValue));
         }
 
         public string GenerateHashNameFromHeaders() {
@@ -138,6 +140,13 @@ namespace com.csutil.http {
 
         public string GetContentMimeType(string fallbackValue) {
             return GetHeaderValue("Content-Type", fallbackValue, allowFuzzyHeaderName: false);
+        }
+
+        /// <summary> Returns the number of bytes of data in the body of the response. For a 
+        /// file download this might not be the exact size of the transmitted file if the body is
+        /// compressed but its an indicator of the total amount of bytes that have to be transfered </summary>
+        public int GetContentLengthInBytes(int fallbackValue) {
+            return int.Parse(GetHeaderValue("Content-Length", "" + fallbackValue, allowFuzzyHeaderName: false));
         }
 
         public IEnumerator<KeyValuePair<string, IEnumerable<string>>> GetEnumerator() { return headers.GetEnumerator(); }

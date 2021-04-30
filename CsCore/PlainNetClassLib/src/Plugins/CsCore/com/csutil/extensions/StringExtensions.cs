@@ -70,6 +70,16 @@ namespace com.csutil {
             }
         }
 
+        public static string ToFirstCharUpperCase(this string self) {
+            if (self.IsNullOrEmpty()) { return self; }
+            return self.Substring(0, 1).ToUpperInvariant() + self.Substring(1);
+        }
+
+        public static string ToFirstCharLowerCase(this string self) {
+            if (self.IsNullOrEmpty()) { return self; }
+            return self.Substring(0, 1).ToLowerInvariant() + self.Substring(1);
+        }
+
     }
 
     public static class ByteSizeToString {
@@ -90,16 +100,6 @@ namespace com.csutil {
                 }
             }
             return "-" + ByteSizeToReadableString(-value); // negative bytes (common case optimised to the end of this routine)
-        }
-
-        public static string ToFirstCharUpperCase(this string self) {
-            if (self.IsNullOrEmpty()) { return self; }
-            return self.Substring(0, 1).ToUpperInvariant() + self.Substring(1);
-        }
-
-        public static string ToFirstCharLowerCase(this string self) {
-            if (self.IsNullOrEmpty()) { return self; }
-            return self.Substring(0, 1).ToLowerInvariant() + self.Substring(1);
         }
 
     }
