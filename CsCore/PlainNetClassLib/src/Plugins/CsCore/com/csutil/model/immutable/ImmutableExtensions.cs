@@ -24,6 +24,13 @@ namespace com.csutil.model.immutable {
             return newListener;
         }
 
+        public static Action AddStateChangeListener<T, S>(this IDataStore<T> self, S mutableObj, Action<S> onChanged, bool triggerInstantToInit = false) where S : IsMutable {
+            Action newListener = () => { if (StateCompare.WasModifiedInLastDispatch(mutableObj)) { onChanged(mutableObj); } };
+            self.onStateChanged += newListener;
+            if (triggerInstantToInit) { onChanged(mutableObj); }
+            return newListener;
+        }
+
         public static SubListeners<S> NewSubStateListener<T, S>(this IDataStore<T> self, Func<T, S> getSubState) {
             var subListener = new SubListeners<S>(getSubState(self.GetState()));
             self.AddStateChangeListener(getSubState, newSubState => { subListener.OnSubstateChanged(newSubState); });
@@ -183,9 +190,17 @@ namespace com.csutil.model.immutable {
             innerListeners.InvokeIfNotNull();
         }
 
-        public Action AddStateChangeListener<T>(Func<SubState, T> getSubSubState, Action<T> onChanged) {
+        public Action AddStateChangeListener<T>(Func<SubState, T> getSubSubState, Action<T> onChanged, bool triggerInstantToInit = false) {
             Action newListener = ImmutableExtensions.NewSubstateChangeListener(() => getSubSubState(latestSubState), onChanged);
             innerListeners += newListener;
+            if (triggerInstantToInit) { onChanged(getSubSubState(latestSubState)); }
+            return newListener;
+        }
+
+        public Action AddStateChangeListener<T, S>(S mutableObj, Action<S> onChanged, bool triggerInstantToInit = false) where S : IsMutable {
+            Action newListener = () => { if (StateCompare.WasModifiedInLastDispatch(mutableObj)) { onChanged(mutableObj); } };
+            innerListeners += newListener;
+            if (triggerInstantToInit) { onChanged(mutableObj); }
             return newListener;
         }
 

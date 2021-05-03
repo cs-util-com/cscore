@@ -38,12 +38,18 @@ namespace com.csutil.tests.model.immutable {
 
             // Setup 3 listeners that react when the name of the user or his contacts change:
             var userChangedCounter = 0;
+            var userChangedCounter2 = 0;
             var userNameChangedCounter = 0;
             var contact1NameChangedCounter = 0;
             var contact2NameChangedCounter = 0;
             var contactsListChanged = 0;
             store.AddStateChangeListener(s => s.user, (MyUser1 theChangedUser) => {
                 userChangedCounter++;
+            });
+            // Listeners for objects that implement the IsMutable interface can also be registered like this: 
+            store.AddStateChangeListener(user, (u) => {
+                userChangedCounter2++;
+                Assert.Same(user, u);
             });
             store.AddStateChangeListener(s => s.user?.name, (string theChangedName) => {
                 userNameChangedCounter++;
@@ -70,6 +76,7 @@ namespace com.csutil.tests.model.immutable {
 
                 // Now that there is a contact 1 the listener was triggered: 
                 Assert.Equal(1, userChangedCounter);
+                Assert.Equal(1, userChangedCounter2);
                 Assert.Equal(0, userNameChangedCounter);
                 Assert.Equal(1, contact1NameChangedCounter);
                 Assert.Equal(0, contact2NameChangedCounter);
@@ -87,6 +94,7 @@ namespace com.csutil.tests.model.immutable {
                 Assert.False(contact1.WasModifiedInLastDispatch());
 
                 Assert.Equal(2, userChangedCounter);
+                Assert.Equal(2, userChangedCounter2);
                 Assert.Equal(0, userNameChangedCounter);
                 Assert.Equal(1, contact1NameChangedCounter);
                 Assert.Equal(1, contact2NameChangedCounter);
@@ -100,6 +108,7 @@ namespace com.csutil.tests.model.immutable {
                 Assert.False(contact2.WasModifiedInLastDispatch());
 
                 Assert.Equal(3, userChangedCounter);
+                Assert.Equal(3, userChangedCounter2);
                 Assert.Equal(0, userNameChangedCounter);
                 Assert.Equal(2, contact1NameChangedCounter);
                 Assert.Equal(1, contact2NameChangedCounter);
@@ -121,6 +130,7 @@ namespace com.csutil.tests.model.immutable {
                 Assert.False(contact2.WasModifiedInLastDispatch());
 
                 Assert.Equal(4, userChangedCounter);
+                Assert.Equal(4, userChangedCounter2);
                 Assert.Equal(1, userNameChangedCounter);
                 Assert.Equal(2, contact1NameChangedCounter);
                 Assert.Equal(1, contact2NameChangedCounter);
@@ -132,6 +142,7 @@ namespace com.csutil.tests.model.immutable {
                     user.MarkMutated();
                 });
                 Assert.Equal(4, userChangedCounter); // Count should not have changed
+                Assert.Equal(4, userChangedCounter2); 
                 Assert.Equal(1, userNameChangedCounter);
             }
         }
