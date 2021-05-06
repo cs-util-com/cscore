@@ -40,6 +40,8 @@ namespace com.csutil {
 
         public static bool IsNullOrEmpty<T>(this IEnumerable<T> self) { return self == null || !self.Any(); }
 
+        public static IEnumerable<T> OrEmptyIfNull<T>(this IEnumerable<T> self) { return self ?? Enumerable.Empty<T>(); }
+
         public static void ThrowErrorIfNullOrEmpty<T>(this IEnumerable<T> self, string paramName, [CallerMemberName] string methodName = null) {
             if (self.IsNullOrEmpty()) {
                 System.Diagnostics.Debugger.Break();

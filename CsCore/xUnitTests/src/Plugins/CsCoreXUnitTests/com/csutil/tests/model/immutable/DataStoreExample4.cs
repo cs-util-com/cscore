@@ -45,24 +45,24 @@ namespace com.csutil.tests.model.immutable {
             var contactsListChanged = 0;
             store.AddStateChangeListener(s => s.user, (MyUser1 theChangedUser) => {
                 userChangedCounter++;
-            });
+            }, triggerInstantToInit: false);
             // Listeners for objects that implement the IsMutable interface can also be registered like this: 
             store.AddStateChangeListener(user, (u) => {
                 userChangedCounter2++;
                 Assert.Same(user, u);
-            });
+            }, triggerInstantToInit: false);
             store.AddStateChangeListener(s => s.user?.name, (string theChangedName) => {
                 userNameChangedCounter++;
-            });
+            }, triggerInstantToInit: false);
             store.AddStateChangeListener(s => s.user?.contacts?.FirstOrDefault()?.contactData.name, (_) => {
                 contact1NameChangedCounter++;
-            });
+            }, triggerInstantToInit: false);
             store.AddStateChangeListener(s => s.user?.contacts?.Skip(1).FirstOrDefault()?.contactData.name, (_) => {
                 contact2NameChangedCounter++;
-            });
+            }, triggerInstantToInit: false);
             store.AddStateChangeListener(s => s.user?.contacts, (_) => {
                 contactsListChanged++;
-            });
+            }, triggerInstantToInit: false);
 
             var contact1 = new MyUser1() { name = "Tom" };
             { // Add a first contact to the user:
@@ -142,7 +142,7 @@ namespace com.csutil.tests.model.immutable {
                     user.MarkMutated();
                 });
                 Assert.Equal(4, userChangedCounter); // Count should not have changed
-                Assert.Equal(4, userChangedCounter2); 
+                Assert.Equal(4, userChangedCounter2);
                 Assert.Equal(1, userNameChangedCounter);
             }
         }

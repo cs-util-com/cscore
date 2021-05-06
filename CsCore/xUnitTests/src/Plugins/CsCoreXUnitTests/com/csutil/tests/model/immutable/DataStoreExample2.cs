@@ -68,7 +68,7 @@ namespace com.csutil.tests.model.immutable {
                 } else if (firstContactWasModifiedCounter == 3) { // 3rd event when the user is logged out at the end:
                     Assert.Null(firstContact);
                 }
-            });
+            }, triggerInstantToInit: false);
 
             store.Dispatch(new ActionLoginUser() { newLoggedInUser = new MyUser1("Karl") });
             Assert.NotNull(store.GetState().user);
@@ -261,7 +261,8 @@ namespace com.csutil.tests.model.immutable {
             List<MetaWeatherLocationLookup.LocationResp> foundLocations = null;
             try {
                 foundLocations = await MetaWeatherLocationLookup.GetLocation(cityName);
-            } catch (System.Net.Http.HttpRequestException e) {
+            }
+            catch (System.Net.Http.HttpRequestException e) {
                 Log.e("MetaWeatherLocationLookup error, is metaweather.com still down?", e);
             }
             if (foundLocations == null) { // Assume test currently has no internet so simulate:

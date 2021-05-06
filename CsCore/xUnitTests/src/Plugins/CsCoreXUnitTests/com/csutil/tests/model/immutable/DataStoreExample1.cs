@@ -25,6 +25,7 @@ namespace com.csutil.tests.model.immutable {
             store.AddStateChangeListener(state => state.user?.contacts?.FirstOrDefault(), (firstContact) => {
                 firstContactWasModifiedCounter++;
             });
+            Assert.Equal(1, firstContactWasModifiedCounter);
 
             store.Dispatch(new ActionLoginUser() { newLoggedInUser = new MyUser1("Karl") });
             Assert.NotNull(store.GetState().user);
@@ -34,12 +35,12 @@ namespace com.csutil.tests.model.immutable {
 
             store.Dispatch(new ActionOnUser.AddContact() { targetUser = "Karl", newContact = new MyUser1(name: "Tim") });
             Assert.Equal("Tim", store.GetState().user.contacts.First().name);
-            Assert.Equal(1, firstContactWasModifiedCounter);
+            Assert.Equal(2, firstContactWasModifiedCounter);
 
             // Change name of Tim to Peter:
             store.Dispatch(new ActionOnUser.ChangeName() { targetUser = "Tim", newName = "Peter" });
             Assert.Equal("Peter", store.GetState().user.contacts.First().name);
-            Assert.Equal(2, firstContactWasModifiedCounter);
+            Assert.Equal(3, firstContactWasModifiedCounter);
 
             store.Dispatch(new ActionLogoutUser());
             Assert.Null(store.GetState().user);
