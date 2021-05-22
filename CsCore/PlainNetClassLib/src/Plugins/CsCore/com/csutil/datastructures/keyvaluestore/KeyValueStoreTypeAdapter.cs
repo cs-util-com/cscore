@@ -11,7 +11,11 @@ namespace com.csutil.keyvaluestore {
 
         public virtual Task<T> Get(string key, T defVal) { return store.Get(key, defVal); }
 
-        public virtual async Task<T> Set(string key, T val) { return (T)await store.Set(key, val); }
+        public virtual async Task<T> Set(string key, T val) {
+            object o = await store.Set(key, val);
+            if (o == null) { return default(T); }
+            return (T)o;
+        }
 
         public virtual Task<bool> Remove(string key) { return store.Remove(key); }
 

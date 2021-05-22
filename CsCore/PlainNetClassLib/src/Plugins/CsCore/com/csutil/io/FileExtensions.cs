@@ -7,6 +7,7 @@ namespace com.csutil {
     public static class FileExtensions {
 
         public static DirectoryInfo GetChildDir(this DirectoryInfo self, string subDirName, bool assertThatChildMustExist = false, bool sanitize = true) {
+            subDirName.ThrowErrorIfNullOrEmpty("subDirName");
             if (sanitize) { subDirName = Sanitize.SanitizeToDirName(subDirName); }
             AssertV2.AreEqual(subDirName, Sanitize.SanitizeToDirName(subDirName));
             var c = new DirectoryInfo(self.FullPath() + subDirName);
@@ -17,6 +18,7 @@ namespace com.csutil {
         }
 
         public static FileInfo GetChild(this DirectoryInfo self, string fileName, bool assertThatChildMustExist = false, bool sanitize = true) {
+            fileName.ThrowErrorIfNullOrEmpty("fileName");
             if (sanitize) { fileName = Sanitize.SanitizeToFileName(fileName); }
             AssertV2.AreEqual(fileName, Sanitize.SanitizeToFileName(fileName));
             var c = new FileInfo(self.FullPath() + fileName);

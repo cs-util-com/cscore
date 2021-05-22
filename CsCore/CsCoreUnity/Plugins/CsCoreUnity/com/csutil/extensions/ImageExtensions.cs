@@ -23,6 +23,11 @@ namespace com.csutil {
             targetFile.SaveStream(new MemoryStream(self.EncodeToJPG(quality)));
         }
 
+        public static void SaveToPngFile(this Texture2D self, FileEntry targetFile) {
+            if (!targetFile.Parent.Exists) { targetFile.Parent.CreateV2(); }
+            targetFile.SaveStream(new MemoryStream(self.EncodeToPNG()));
+        }
+
         /// <summary> This method does not capture the UI, consider using 
         /// ScreenCapture.CaptureScreenshotAsTexture instead </summary>
         public static Texture2D CaptureScreenshot(this Camera self, int width = 0, int height = 0) {

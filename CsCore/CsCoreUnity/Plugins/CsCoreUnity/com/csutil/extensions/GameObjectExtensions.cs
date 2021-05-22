@@ -71,9 +71,12 @@ namespace com.csutil {
             return child.transform.parent.gameObject;
         }
 
-        /// <summary> Returns true if the GameObject is null because it was destroyed </summary>
+        /// <summary> Returns true if the GameObject is only null because it was destroyed </summary>
         // == operator overloaded by gameObject but reference still exists:
         public static bool IsDestroyed(this UnityEngine.Object self) { return self == null && !ReferenceEquals(self, null); }
+
+        /// <summary> Returns true if the object is null because it was never initialized or already destroyed </summary>
+        public static bool IsNullOrDestroyed(this UnityEngine.Object self) { return self == null; }
 
         public static bool Destroy(this UnityEngine.Object self, bool destroyNextFrame = false) {
             if (self == null) { return false; }

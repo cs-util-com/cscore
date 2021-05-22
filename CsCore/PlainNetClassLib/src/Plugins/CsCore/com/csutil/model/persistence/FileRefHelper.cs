@@ -65,9 +65,13 @@ namespace com.csutil.model {
         }
 
         public static async Task<bool> DownloadTo(this IFileRef self, RestRequest request, DirectoryEntry targetDir) {
+            self.AssertValidDirectory(targetDir);
             var fileName = CalculateFileName(self, await request.GetResultHeaders());
             var targetFile = targetDir.GetChild(fileName);
-            return await self.DownloadTo(request, targetFile);
+            bool downloadWasNeeded = await self.DownloadTo(request, targetFile);
+            if (self.fileName.IsNullOrEmpty() && targetFile.Exists) { self.fileName = fileName; }
+            if (self.dir.IsNullOrEmpty() && targetDir.Exists) { self.dir = targetDir.FullName; }
+            return downloadWasNeeded;
         }
 
         public static async Task<bool> DownloadTo(this IFileRef self, RestRequest request, FileEntry targetFile) {
@@ -81,7 +85,7 @@ namespace com.csutil.model {
 
         private static bool IsAlreadyDownloaded(this IFileRef self, Headers headers, FileEntry targetFile) {
             if (targetFile.Exists) {
-                AssertV2.IsFalse(self.checksums.IsNullOrEmpty(), "targetFile.Exists but no checksums stored");
+                AssertV2.IsFalse(self.checksums.IsNullOrEmpty(), "targetFile.Exists but no checksums stored: " + self.url);
                 // Cancel download if etag header matches the locally stored one:
                 if (self.HasMatchingChecksum(headers.GetEtagHeader())) { return true; }
                 // Cancel download if local file with the same MD5 hash exists:
@@ -150,6 +154,19 @@ namespace com.csutil.model {
             }
             self.AddCheckSum(CHECKSUM_MD5, localMD5);
             return true;
+        }
+
+        public static bool IsJpgFile(this IFileRef self) {
+            if (!self.mimeType.IsNullOrEmpty()) {
+                return self.mimeType == "image/jpeg";
+            }
+            if (!self.fileName.IsNullOrEmpty()) {
+                bool endsWithJpg = self.fileName.EndsWith(".jpg");
+                bool endsWithJpeg = self.fileName.EndsWith(".jpeg");
+                return endsWithJpg || endsWithJpeg;
+            }
+            Log.e("Could not resolve if image is of type jpg");
+            return false;
         }
 
     }
