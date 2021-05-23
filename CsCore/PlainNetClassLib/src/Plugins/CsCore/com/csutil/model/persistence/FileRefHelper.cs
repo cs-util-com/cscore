@@ -64,23 +64,28 @@ namespace com.csutil.model {
             catch (Exception e) { Log.e(e); }
         }
 
-        public static async Task<bool> DownloadTo(this IFileRef self, RestRequest request, DirectoryEntry targetDir) {
+        public static async Task<bool> DownloadTo(this IFileRef self, RestRequest request, DirectoryEntry targetDir, int maxNrOfRetries = 4) {
             self.AssertValidDirectory(targetDir);
             var fileName = CalculateFileName(self, await request.GetResultHeaders());
             var targetFile = targetDir.GetChild(fileName);
-            bool downloadWasNeeded = await self.DownloadTo(request, targetFile);
-            if (self.fileName.IsNullOrEmpty() && targetFile.Exists) { self.fileName = fileName; }
-            if (self.dir.IsNullOrEmpty() && targetDir.Exists) { self.dir = targetDir.FullName; }
+            bool downloadWasNeeded = await TaskV2.TryWithExponentialBackoff(async () => {
+                return await self.DownloadTo(request, targetFile);
+            }, maxNrOfRetries: maxNrOfRetries, initialExponent: 10);
+            if (self.fileName.IsNullOrEmpty() && targetFile.Exists) {
+                throw new MissingFieldException("IFileRef.fileName not set after successful download, must not happen!");
+            }
             return downloadWasNeeded;
         }
 
         public static async Task<bool> DownloadTo(this IFileRef self, RestRequest request, FileEntry targetFile) {
             var headers = await request.GetResultHeaders();
-            if (self.IsAlreadyDownloaded(headers, targetFile)) { return false; }
-            await request.DownloadTo(targetFile);
-            self.CheckMD5AfterDownload(headers, targetFile);
+            var isAlreadyDownloaded = self.IsAlreadyDownloaded(headers, targetFile);
+            if (!isAlreadyDownloaded) {
+                await request.DownloadTo(targetFile);
+                self.CheckMD5AfterDownload(headers, targetFile);
+            }
             self.SetLocalFileInfosFrom(headers, targetFile);
-            return true;
+            return !isAlreadyDownloaded;
         }
 
         private static bool IsAlreadyDownloaded(this IFileRef self, Headers headers, FileEntry targetFile) {

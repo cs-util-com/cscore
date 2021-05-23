@@ -59,7 +59,7 @@ namespace com.csutil {
         private static bool _isPlaying = true;
         public static bool isPlaying {
             get {
-                try { _isPlaying = Application.isPlaying; } catch (Exception e) { Debug.LogWarning(e); }
+                try { _isPlaying = Application.isPlaying; } catch (Exception) { }
                 return _isPlaying;
             }
         }
