@@ -5,6 +5,8 @@ using System.Diagnostics;
 
 namespace com.csutil.analytics {
 
+    /// <summary> Collects all broadcasted log metrics (via <see cref="Log.MethodEntered(string, object[])"/>) to 
+    /// measure and display the performance </summary>
     public class MethodAnalytics : IDisposable {
 
         private const string methodStart = EventConsts.catMethod + EventConsts.START;

@@ -25,12 +25,14 @@ namespace com.csutil.http {
 
         public UnityRestRequest(UnityWebRequest request) { this.request = request; }
 
-        public async Task<T> GetResult<T>() {
-            if (!request.isModifiable) { // Request was already sent
-                await WaitForRequestToFinish();
-                return request.GetResult<T>();
-            }
-            return await SendRequest(new Response<T>());
+        public Task<T> GetResult<T>() {
+            return MainThread.instance.ExecuteOnMainThreadAsync(async () => {
+                if (!request.isModifiable) { // Request was already sent
+                    await WaitForRequestToFinish();
+                    return request.GetResult<T>();
+                }
+                return await SendRequest(new Response<T>());
+            });
         }
 
         private async Task<T> SendRequest<T>(Response<T> resp) {

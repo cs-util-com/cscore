@@ -10,10 +10,12 @@ namespace com.csutil.http {
     public class UnityRestFactory : RestFactory {
 
         public override RestRequest SendRequest(Uri uri, HttpMethod method) {
-            if (method.ToString() == "GET") {
-                return new UnityRestRequest(UnityWebRequest.Get(uri));
-            }
-            return new UnityRestRequest(new UnityWebRequest(uri, method.ToString()));
+            return MainThread.instance.ExecuteOnMainThread(() => {
+                if (method.ToString() == "GET") {
+                    return new UnityRestRequest(UnityWebRequest.Get(uri));
+                }
+                return new UnityRestRequest(new UnityWebRequest(uri, method.ToString()));
+            });
         }
 
         public override Task<long> GetCurrentPing(string ipOrUrl = "8.8.8.8", int timeoutInMs = 1000) {

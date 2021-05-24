@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace com.csutil {
@@ -68,6 +69,17 @@ namespace com.csutil {
             } else {
                 throw Log.e("MainThread not initialized via MainThread.instance");
             }
+        }
+
+        public T ExecuteOnMainThread<T>(Func<T> f) {
+            if (isMainThread) { return f(); }
+            TaskCompletionSource<T> src = new TaskCompletionSource<T>();
+            ExecuteOnMainThread(() => { try { src.SetResult(f()); } catch (Exception e) { src.SetException(e); } });
+            return src.Task.Result;
+        }
+
+        public Task<T> ExecuteOnMainThreadAsync<T>(Func<Task<T>> f) {
+            return ExecuteOnMainThread(() => f());
         }
 
     }
