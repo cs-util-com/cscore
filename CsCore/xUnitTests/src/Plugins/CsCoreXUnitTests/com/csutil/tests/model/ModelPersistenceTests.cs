@@ -100,7 +100,7 @@ namespace com.csutil.tests.model {
             await Assert.ThrowsAsync<TaskCanceledException>(async () => {
                 await f.DownloadTo(dir, downloadProgress => {
                     if (downloadProgress > 5) { throw new TaskCanceledException("Download canceled after 5%"); }
-                });
+                }, maxNrOfRetries: 0);
             });
             Assert.NotNull(f.url);
             // Local values should only be set after successful download to have a more atomic predicatable behavior: 

@@ -30,12 +30,20 @@ namespace com.csutil.model {
             return self.GetDirectoryEntry(fs).GetChild(self.fileName);
         }
 
-        public static async Task<bool> DownloadTo(this IFileRef self, DirectoryEntry targetDirectory, Action<float> onProgress = null, bool useAutoCachedFileRef = false) {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="self"></param>
+        /// <param name="targetDirectory"></param>
+        /// <param name="onProgress"> A float from 0 to 100 </param>
+        /// <param name="useAutoCachedFileRef"> If true the fileRef will create itself a cache file in the targetDirectory </param>
+        /// <returns></returns>
+        public static async Task<bool> DownloadTo(this IFileRef self, DirectoryEntry targetDirectory, Action<float> onProgress = null, bool useAutoCachedFileRef = false, int maxNrOfRetries = 4) {
             self.AssertValidDirectory(targetDirectory);
             FileEntry cachedFileRef = self.LoadAutoCachedFileRef(targetDirectory, useAutoCachedFileRef);
             RestRequest request = new Uri(self.url).SendGET();
             if (onProgress != null) { request.onProgress = onProgress; }
-            bool downloadWasNeeded = await self.DownloadTo(request, targetDirectory);
+            bool downloadWasNeeded = await self.DownloadTo(request, targetDirectory, maxNrOfRetries);
             if (useAutoCachedFileRef) { cachedFileRef.SaveAsJson(self, true); }
             return downloadWasNeeded;
         }
@@ -60,17 +68,22 @@ namespace com.csutil.model {
                 if (targetToFill.fileName.IsNullOrEmpty()) { targetToFill.fileName = loaded.fileName; }
                 if (targetToFill.checksums.IsNullOrEmpty()) { targetToFill.checksums = loaded.checksums; }
                 if (targetToFill.mimeType.IsNullOrEmpty()) { targetToFill.mimeType = loaded.mimeType; }
-            }
-            catch (Exception e) { Log.e(e); }
+            } catch (Exception e) { Log.e(e); }
         }
 
-        public static async Task<bool> DownloadTo(this IFileRef self, RestRequest request, DirectoryEntry targetDir, int maxNrOfRetries = 4) {
+        public static async Task<bool> DownloadTo(this IFileRef self, RestRequest request, DirectoryEntry targetDir, int maxNrOfRetries) {
             self.AssertValidDirectory(targetDir);
             var fileName = CalculateFileName(self, await request.GetResultHeaders());
             var targetFile = targetDir.GetChild(fileName);
-            bool downloadWasNeeded = await TaskV2.TryWithExponentialBackoff(async () => {
-                return await self.DownloadTo(request, targetFile);
-            }, maxNrOfRetries: maxNrOfRetries, initialExponent: 10);
+            bool downloadWasNeeded;
+            if (maxNrOfRetries == 0) {
+                downloadWasNeeded = await self.DownloadTo(request, targetFile);
+            } else {
+                int initialExponent = 9; // 2^9 = 512ms (for first delay if fails)
+                downloadWasNeeded = await TaskV2.TryWithExponentialBackoff(async () => {
+                    return await self.DownloadTo(request, targetFile);
+                }, maxNrOfRetries: maxNrOfRetries, initialExponent: initialExponent);
+            }
             if (self.fileName.IsNullOrEmpty() && targetFile.Exists) {
                 throw new MissingFieldException("IFileRef.fileName not set after successful download, must not happen!");
             }
@@ -90,7 +103,6 @@ namespace com.csutil.model {
 
         private static bool IsAlreadyDownloaded(this IFileRef self, Headers headers, FileEntry targetFile) {
             if (targetFile.Exists) {
-                AssertV2.IsFalse(self.checksums.IsNullOrEmpty(), "targetFile.Exists but no checksums stored: " + self.url);
                 // Cancel download if etag header matches the locally stored one:
                 if (self.HasMatchingChecksum(headers.GetEtagHeader())) { return true; }
                 // Cancel download if local file with the same MD5 hash exists:
@@ -98,13 +110,16 @@ namespace com.csutil.model {
                 if (!onlineMD5.IsNullOrEmpty()) {
                     if (self.HasMatchingChecksum(onlineMD5)) { return true; }
                     if (onlineMD5 == targetFile.CalcFileMd5Hash()) { return true; }
+                    return false;
                 }
+                /*
                 // Cancel download if local file with the exact last-write timestamp exists:
                 if (headers.GetRawLastModifiedString() != null) {
                     var distance = headers.GetLastModifiedUtcDate(DateTime.MinValue) - targetFile.LastWriteTime.ToUniversalTime();
                     Log.d("distance.Milliseconds: " + distance.Milliseconds);
                     if (distance.Milliseconds == 0) { return true; }
                 }
+                */
             }
             return false;
         }

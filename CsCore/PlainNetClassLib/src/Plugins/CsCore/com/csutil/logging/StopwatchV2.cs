@@ -12,6 +12,7 @@ namespace com.csutil {
         private long memoryAtStop;
         public string methodName;
         public Action onDispose;
+        private long lastLogStep = 0;
 
         public StopwatchV2([CallerMemberName] string methodName = null) {
             this.methodName = methodName;
@@ -63,6 +64,15 @@ namespace com.csutil {
 
         public override string ToString() {
             return $"StopWatch '{methodName}' ({ElapsedMilliseconds} ms)";
+        }
+
+        [Conditional("DEBUG"), Conditional("ENFORCE_FULL_LOGGING")]
+        public void LogStep(string stepName, string prefix = "        +> ", int skipIfBelowXMs = 10) {
+            var diff = ElapsedMilliseconds - lastLogStep;
+            lastLogStep = ElapsedMilliseconds;
+            if (diff > skipIfBelowXMs) {
+                Log.d($"{prefix}{stepName} finished after {diff} ms");
+            }
         }
 
         public void Dispose() { onDispose?.Invoke(); }

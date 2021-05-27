@@ -33,14 +33,12 @@ namespace com.csutil.model.immutable {
 
         public static Middleware<T> NewLoggingMiddleware<T>() {
             return (store) => {
-                using (Log.MethodEntered("NewLoggingMiddleware", "store =" + store)) {
-                    return (Dispatcher innerDispatcher) => {
+                return (Dispatcher innerDispatcher) => {
 #if !DEBUG
-                        return innerDispatcher;
+                    return innerDispatcher;
 #endif
-                        return NewLoggingDispatcher(store, innerDispatcher);
-                    };
-                }
+                    return NewLoggingDispatcher(store, innerDispatcher);
+                };
             };
         }
 
