@@ -10,6 +10,7 @@ namespace com.csutil.progress {
         protected override GameObject GetProgressUiGo() { return progress.gameObject; }
 
         protected override void UpdateUiPercentValue(double percent) {
+            if (progress.maxValue != 100) { progress.maxValue = 100; }
             progress.value = (int)percent;
         }
 
