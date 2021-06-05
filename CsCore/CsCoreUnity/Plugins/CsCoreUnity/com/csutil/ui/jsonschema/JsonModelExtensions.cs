@@ -32,7 +32,7 @@ namespace com.csutil.ui.jsonschema {
 #if UNITY_EDITOR
             await self.LogAnyDiffToNewGeneratedUi<T>(autoCheckUiVsLatestModel);
 #endif
-            JObject json = JObject.Parse(JsonWriter.GetWriter().Write(model));
+            JObject json = JObject.Parse(JsonWriter.GetWriter(model).Write(model));
             await self.LoadModelIntoView(json);
             await userSavedChanges;
             return JsonReader.GetReader().Read<T>(json.ToString());

@@ -90,7 +90,7 @@ namespace com.csutil.ui.jsonschema {
             foreach (var item in self.IntersectKeys(newFieldViews)) {
                 var oldFieldView = item.Value;
                 var newFieldView = newFieldViews[item.Key];
-                var newFieldValue = JsonWriter.GetWriter().Write(newFieldView.field);
+                var newFieldValue = JsonWriter.GetWriter(newFieldView.field).Write(newFieldView.field);
                 if (oldFieldView.fieldAsJson != newFieldValue) { onUpdateNeeded(oldFieldView, newFieldView, newFieldValue); }
                 AssertV2.AreEqual(item.Value.fieldName, newFieldView.fieldName);
             }

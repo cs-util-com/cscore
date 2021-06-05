@@ -11,29 +11,30 @@ namespace com.csutil.logging {
         public FileEntry logFile;
         private Stream stream;
         private TextWriter writer;
-        private IJsonWriter jsonWriter;
 
         public LogToFile(FileEntry targetFileToLogInto) {
             this.logFile = targetFileToLogInto;
             stream = targetFileToLogInto.Open(FileMode.Append, FileAccess.Write, FileShare.Read);
             writer = TextWriter.Synchronized(new StreamWriter(stream));
-            jsonWriter = JsonWriter.GetWriter();
         }
 
         protected override void PrintDebugMessage(string debugLogMsg, params object[] args) {
-            var asJson = jsonWriter.Write(new LogEntry() { d = debugLogMsg });
+            LogEntry logEntry = new LogEntry() { d = debugLogMsg };
+            var asJson = JsonWriter.GetWriter(logEntry).Write(logEntry);
             writer.WriteLine(asJson + JSON_LB);
             writer.Flush();
         }
 
         protected override void PrintWarningMessage(string warningMsg, params object[] args) {
-            var asJson = jsonWriter.Write(new LogEntry() { w = warningMsg });
+            LogEntry logEntry = new LogEntry() { w = warningMsg };
+            var asJson = JsonWriter.GetWriter(logEntry).Write(logEntry);
             writer.WriteLine(asJson + JSON_LB);
             writer.Flush();
         }
 
         protected override void PrintErrorMessage(string errorMsg, params object[] args) {
-            var asJson = jsonWriter.Write(new LogEntry() { e = errorMsg });
+            LogEntry logEntry = new LogEntry() { e = errorMsg };
+            var asJson = JsonWriter.GetWriter(logEntry).Write(logEntry);
             writer.WriteLine(asJson + JSON_LB);
             writer.Flush();
         }

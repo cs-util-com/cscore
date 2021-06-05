@@ -70,7 +70,7 @@ namespace com.csutil.keyvaluestore {
             if (objType == typeof(string)) {
                 file.SaveAsText((string)value);
             } else {
-                file.SaveAsText(JsonWriter.GetWriter().Write(value));
+                file.SaveAsText(JsonWriter.GetWriter(value).Write(value));
             }
             return oldVal;
         }

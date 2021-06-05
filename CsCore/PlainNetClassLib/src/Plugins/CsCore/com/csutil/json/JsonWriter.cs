@@ -10,19 +10,24 @@ namespace com.csutil {
 
     public static class JsonWriter {
 
-        public static IJsonWriter GetWriter() {
-            return IoC.inject.GetOrAddSingleton<IJsonWriter>(new object(), () => new JsonNetWriter());
+        [Obsolete("Pass a caller (tycally the object to write should be passed here)")]
+        public static IJsonWriter GetWriter() { return GetWriter(new object()); }
+
+        /// <summary> Gets the systems current default JSON writer </summary>
+        /// <param name="caller"> Typically the object being written should be passed here </param>
+        public static IJsonWriter GetWriter(object caller) {
+            return IoC.inject.GetOrAddSingleton<IJsonWriter>(caller, () => new JsonNetWriter());
         }
 
         public static string AsPrettyString(object o) {
-            var jToken = Newtonsoft.Json.Linq.JToken.Parse(GetWriter().Write(o));
+            var jToken = Newtonsoft.Json.Linq.JToken.Parse(GetWriter(o).Write(o));
             return jToken.ToPrettyString();
         }
 
         public static bool HasEqualJson<T>(T a, T b) {
             if (a == null && b != null) { return false; }
             if (b == null && a != null) { return false; }
-            var w = GetWriter();
+            var w = GetWriter(a);
             return Equals(w.Write(a), w.Write(b));
         }
 

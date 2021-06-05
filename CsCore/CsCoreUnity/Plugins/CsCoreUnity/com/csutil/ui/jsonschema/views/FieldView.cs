@@ -19,7 +19,7 @@ namespace com.csutil.ui.jsonschema {
 
         public void OnBeforeSerialize() {
             if (field == null) { fieldAsJson = null; return; }
-            fieldAsJson = JsonWriter.GetWriter().Write(field);
+            fieldAsJson = JsonWriter.GetWriter(field).Write(field);
         }
 
         public void OnAfterDeserialize() {

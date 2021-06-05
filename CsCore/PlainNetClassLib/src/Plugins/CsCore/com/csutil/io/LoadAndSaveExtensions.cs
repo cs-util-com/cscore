@@ -17,19 +17,27 @@ namespace com.csutil {
         }
 
         public static T LoadAs<T>(this FileInfo self, FileShare fileShare = FileShare.Read) {
-            using (FileStream s = self.LoadAsStream(fileShare: fileShare)) { return s.LoadAs<T>(); }
+            using (FileStream stream = self.LoadAsStream(fileShare: fileShare)) {
+                return stream.LoadAs<T>();
+            }
         }
 
         public static T LoadAs<T>(this FileEntry self, FileShare fileShare = FileShare.Read) {
-            using (Stream s = self.Open(FileMode.Open, FileAccess.Read, fileShare)) { return s.LoadAs<T>(); }
+            using (Stream stream = self.Open(FileMode.Open, FileAccess.Read, fileShare)) {
+                return stream.LoadAs<T>();
+            }
         }
 
-        public static object LoadAs(this FileInfo self, Type t, FileShare fileShare = FileShare.Read) {
-            using (FileStream s = File.Open(self.FullPath(), FileMode.Open, FileAccess.Read, fileShare)) { return s.LoadAs(t); }
+        public static object LoadAs(this FileInfo self, Type type, FileShare fileShare = FileShare.Read) {
+            using (FileStream stream = File.Open(self.FullPath(), FileMode.Open, FileAccess.Read, fileShare)) {
+                return stream.LoadAs(type);
+            }
         }
 
         public static object LoadAs(this FileEntry self, Type type, FileShare fileShare = FileShare.Read) {
-            using (var selff = self.Open(FileMode.Open, FileAccess.Read, fileShare)) { return selff.LoadAs(type); }
+            using (Stream stream = self.Open(FileMode.Open, FileAccess.Read, fileShare)) {
+                return stream.LoadAs(type);
+            }
         }
 
         public static T LoadAs<T>(this Stream self) {
@@ -103,7 +111,7 @@ namespace com.csutil {
         }
 
         public static void SaveAsJson<T>(this StreamWriter self, T objectToSave) {
-            JsonWriter.GetWriter().Write(objectToSave, self);
+            JsonWriter.GetWriter(objectToSave).Write(objectToSave, self);
         }
 
         /// <summary> This method helps with decrypting the string before parsing it as a json object </summary>
@@ -115,7 +123,7 @@ namespace com.csutil {
         }
 
         public static void SaveAsEncryptedJson<T>(this FileInfo self, T objectToSave, string jsonEncrKey) {
-            self.SaveAsText(JsonWriter.GetWriter().Write(objectToSave).Encrypt(jsonEncrKey));
+            self.SaveAsText(JsonWriter.GetWriter(objectToSave).Write(objectToSave).Encrypt(jsonEncrKey));
         }
 
         public static void SaveAsText(this FileInfo self, string text) {

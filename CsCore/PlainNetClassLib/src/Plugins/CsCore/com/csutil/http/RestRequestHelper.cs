@@ -17,7 +17,7 @@ namespace com.csutil {
     public static class RestRequestHelper {
 
         public static RestRequest WithJsonContent(this RestRequest self, object jsonContent) {
-            return self.WithJsonContent(JsonWriter.GetWriter().Write(jsonContent));
+            return self.WithJsonContent(JsonWriter.GetWriter(jsonContent).Write(jsonContent));
         }
 
         public static RestRequest WithJsonContent(this RestRequest self, string jsonContent) {
@@ -25,7 +25,7 @@ namespace com.csutil {
         }
 
         public static string ToUriEncodedString(object o) {
-            var map = JsonReader.GetReader().Read<Dictionary<string, object>>(JsonWriter.GetWriter().Write(o));
+            var map = JsonReader.GetReader().Read<Dictionary<string, object>>(JsonWriter.GetWriter(o).Write(o));
             return map.Select((x) => x.Key + "=" + Uri.EscapeDataString("" + x.Value)).Aggregate((a, b) => a + "&" + b);
         }
 

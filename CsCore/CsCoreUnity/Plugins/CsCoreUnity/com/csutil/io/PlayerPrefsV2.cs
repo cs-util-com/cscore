@@ -43,7 +43,7 @@ namespace com.csutil {
         }
 
         public static void SetObject(string key, object obj) {
-            SetString(key, JsonWriter.GetWriter().Write(obj));
+            SetString(key, JsonWriter.GetWriter(obj).Write(obj));
         }
 
     }
