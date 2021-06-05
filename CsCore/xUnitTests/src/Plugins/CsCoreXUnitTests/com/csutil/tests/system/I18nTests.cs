@@ -202,8 +202,8 @@ namespace com.csutil.tests {
             await i18n.SetLocale("de-De");
 
             Assert.Equal("Hallo Potter, Sie haben keine Credits", i18n.Get("Hello {0}, you have {1} credits", "Potter", 0));
-            Assert.Equal("Hallo Potter, haben Sie 1 Credit", i18n.Get("Hello {0}, you have {1} credits", "Potter", 1));
-            Assert.Equal("Hallo Potter, haben Sie 5 Credits", i18n.Get("Hello {0}, you have {1} credits", "Potter", 5));
+            Assert.Equal("Hallo Potter, Sie haben 1 Gutschrift", i18n.Get("Hello {0}, you have {1} credits", "Potter", 1));
+            Assert.Equal("Hallo Potter, hast du 5 Credits", i18n.Get("Hello {0}, you have {1} credits", "Potter", 5));
 
         }
 
