@@ -47,7 +47,7 @@ namespace com.csutil {
                 self[i] = newEntry;
                 return oldEntry.Value;
             } else {
-                self.Add(newEntry);
+                self.Insert(0, newEntry); // Always add new subscribers at the front of the list
                 return null;
             }
         }
