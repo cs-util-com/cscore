@@ -48,7 +48,6 @@ namespace com.csutil {
 
         private static T CreateNewInstance<T>() {
             return (T)Activator.CreateInstance(typeof(T));
-            }
         }
 
     }
