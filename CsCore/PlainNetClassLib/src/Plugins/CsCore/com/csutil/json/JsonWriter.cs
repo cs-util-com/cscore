@@ -16,7 +16,10 @@ namespace com.csutil {
         /// <summary> Gets the systems current default JSON writer </summary>
         /// <param name="caller"> Typically the object being written should be passed here </param>
         public static IJsonWriter GetWriter(object caller) {
-            return IoC.inject.GetOrAddSingleton<IJsonWriter>(caller, () => new JsonNetWriter());
+            if (IoC.inject.TryGet(caller, out IJsonWriter w) && w != null) { return w; }
+            var writer = new JsonNetWriter();
+            IoC.inject.RegisterInjector(caller, (_, createIfNull) => writer);
+            return writer;
         }
 
         public static string AsPrettyString(object o) {
