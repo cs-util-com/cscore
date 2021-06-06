@@ -24,7 +24,7 @@ namespace com.csutil.injection {
         public bool TryGet<T>(object caller, out T obj, bool createIfNull = true) {
             if (HasInjectorRegistered<T>()) {
                 obj = Get<T>(caller, createIfNull);
-                return true;
+                return obj != null;
             }
             obj = default(T);
             return false;

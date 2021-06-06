@@ -23,7 +23,7 @@ namespace com.csutil {
         public static IJsonReader GetReader() { return GetReader(new object()); }
 
         public static IJsonReader GetReader(object caller) {
-            if (IoC.inject.TryGet(caller, out IJsonReader r) && r != null) { return r; }
+            if (IoC.inject.TryGet(caller, out IJsonReader r)) { return r; }
             var reader = new JsonNetReader();
             IoC.inject.RegisterInjector(caller, (_, createIfNull) => reader);
             return reader;

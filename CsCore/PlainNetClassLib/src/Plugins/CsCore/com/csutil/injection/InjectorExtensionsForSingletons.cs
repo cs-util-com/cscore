@@ -36,8 +36,7 @@ namespace com.csutil {
 
         public static T GetOrAddSingleton<T>(this Injector self, object caller, Func<T> createSingletonInstance) {
             lock (syncLock) {
-                T singleton = self.Get<T>(caller, true);
-                if (singleton != null) { return singleton; }
+                if (self.TryGet(caller, out T singleton)) { return singleton; }
                 singleton = createSingletonInstance();
                 if (ReferenceEquals(null, singleton) || "null".Equals("" + singleton)) {
                     throw new ArgumentNullException("The created singleton instance was null for type " + typeof(T));
