@@ -1,4 +1,6 @@
 using com.csutil.json;
+using System;
+using System.IO;
 using Xunit;
 
 namespace com.csutil.tests.json {
@@ -60,6 +62,35 @@ namespace com.csutil.tests.json {
             var x3 = x2 as MySubClass1;
             Assert.Equal(x3.myString, x1.myString);
             Assert.Equal((x3.myComplexField2 as MySubClass1).myString, (x1.myComplexField2 as MySubClass1).myString);
+        }
+
+        [Fact]
+        public void TestMultipleJsonWriters() {
+
+            if (new Random().NextBool()) {
+                Assert.Equal("{}", JsonWriter.AsPrettyString(new MyClass2()));
+            }
+
+            // Register a custom writer that handles only MyClass1 conversions:
+            var myClass1JsonConverter = new MyClass1JsonConverter();
+            IoC.inject.RegisterInjector<IJsonWriter>(this, (caller, createIfNull) => {
+                if (caller is MyClass1) { return myClass1JsonConverter; }
+                return null; // Return null otherwise so that the default JsonWriter is used 
+            });
+
+            // Converting MyClass1 instances to json will now always use the MyClass1JsonConverter:
+            Assert.Equal("[]", JsonWriter.AsPrettyString(new MyClass1()));
+            // Other json conversions still work as usual
+            Assert.Equal("{}", JsonWriter.AsPrettyString(new MyClass2()));
+
+            // Ensure that the additional create json writer for MyClass2 did not delete MyClass1JsonConverter:   
+            Assert.Equal("[]", JsonWriter.AsPrettyString(new MyClass1()));
+        }
+
+        /// <summary> Dummy json converter that always returns an emtpy list: [] </summary>
+        private class MyClass1JsonConverter : IJsonWriter {
+            public string Write(object data) { return "[]"; }
+            public void Write(object data, StreamWriter streamWriter) { throw Log.e("Not supported"); }
         }
 
     }

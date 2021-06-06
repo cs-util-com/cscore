@@ -19,8 +19,9 @@ namespace com.csutil {
         // private because normally prefer GetOrAddSingleton should be used instead
         private static object SetSingleton<T, V>(this Injector self, object caller, V singletonInstance, bool overrideExisting = false) where V : T {
             lock (syncLock) {
+                singletonInstance.ThrowErrorIfNull("singletonInstance");
                 if (self.HasInjectorRegistered<T>()) {
-                    if (!overrideExisting) { throw new MultipleProvidersException("Existing provider found for " + typeof(T)); }
+                    if (!overrideExisting) { throw new InvalidOperationException("Existing provider found for " + typeof(T)); }
                     if (!self.RemoveAllInjectorsFor<T>()) { Log.e("Could not remove all existing injectors!"); }
                     return SetSingleton<T, V>(self, caller, singletonInstance, false); // then retry setting the singleton
                 }
@@ -47,13 +48,7 @@ namespace com.csutil {
 
         private static T CreateNewInstance<T>() {
             return (T)Activator.CreateInstance(typeof(T));
-        }
-
-        [Serializable]
-        public class MultipleProvidersException : Exception {
-            public MultipleProvidersException() : base() { }
-            public MultipleProvidersException(string message) : base(message) { }
-            public MultipleProvidersException(string message, Exception innerException) : base(message, innerException) { }
+            }
         }
 
     }

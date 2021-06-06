@@ -111,7 +111,7 @@ namespace com.csutil.tests {
             Assert.Equal(typeof(MySubClass1), IoC_inject.Get<MyClass1>(this).GetType());
 
             // Try to register an additional injector for the same class which should fail:
-            Assert.Throws<Singleton.MultipleProvidersException>(() => {
+            Assert.Throws<InvalidOperationException>(() => {
                 IoC_inject.SetSingleton<MyClass1>(new MySubClass2());
             });
             // The first provider is still active and provides the same singleton instance as before:

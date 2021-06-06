@@ -21,6 +21,15 @@ namespace com.csutil.injection {
             EventBus.instance.Publish(EventConsts.catInjection, "Register_" + injectorName);
         }
 
+        public bool TryGet<T>(object caller, out T obj, bool createIfNull = true) {
+            if (HasInjectorRegistered<T>()) {
+                obj = Get<T>(caller, createIfNull);
+                return true;
+            }
+            obj = default(T);
+            return false;
+        }
+
         public T Get<T>(object caller, bool createIfNull = true) {
             return GetAll<T>(caller, createIfNull).FirstOrDefault();
         }
