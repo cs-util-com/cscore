@@ -65,17 +65,20 @@ namespace com.csutil.tests.json {
         }
 
         [Fact]
-        public void TestMultipleJsonWriters() {
+        public void TestMultipleJsonWriters1() {
+            // Force the default json writer to be injected before the custom one is setup:
+            Assert.Equal("{}", JsonWriter.AsPrettyString(new MyClass2()));
+            TestMultipleJsonWriters2();
+        }
 
-            if (new Random().NextBool()) {
-                Assert.Equal("{}", JsonWriter.AsPrettyString(new MyClass2()));
-            }
-
+        [Fact]
+        public void TestMultipleJsonWriters2() {
             // Register a custom writer that handles only MyClass1 conversions:
-            var myClass1JsonConverter = new MyClass1JsonConverter();
-            IoC.inject.RegisterInjector<IJsonWriter>(this, (caller, createIfNull) => {
+            IJsonWriter myClass1JsonConverter = new MyClass1JsonConverter();
+            IJsonWriter defaultWriter = JsonWriter.GetWriter(this);
+            IoC.inject.RegisterInjector(this, (caller, createIfNull) => {
                 if (caller is MyClass1) { return myClass1JsonConverter; }
-                return null; // Return null otherwise so that the default JsonWriter is used 
+                return defaultWriter; // Fallback to default JsonWriter  
             });
 
             // Converting MyClass1 instances to json will now always use the MyClass1JsonConverter:
@@ -85,6 +88,10 @@ namespace com.csutil.tests.json {
 
             // Ensure that the additional create json writer for MyClass2 did not delete MyClass1JsonConverter:   
             Assert.Equal("[]", JsonWriter.AsPrettyString(new MyClass1()));
+
+            IoC.inject.UnregisterInjector<IJsonWriter>(this);
+            Assert.Equal("{}", JsonWriter.AsPrettyString(new MyClass2()));
+            Assert.NotEqual("[]", JsonWriter.AsPrettyString(new MyClass1()));
         }
 
         /// <summary> Dummy json converter that always returns an emtpy list: [] </summary>
