@@ -31,11 +31,16 @@ namespace com.csutil {
         }
 
         public static JToken GetDiff<T>(T a, T b) {
-            return GetDiff(a, b, JsonSerializer.Create(JsonNetSettings.defaultSettings));
+            return GetDiff(a, b, () => JsonSerializer.Create(JsonNetSettings.defaultSettings));
         }
 
+        [Obsolete("use the variant that calls a function to create multiple serializers")]
         public static JToken GetDiff<T>(T a, T b, JsonSerializer s) {
             return new JsonDiffPatch().Diff(JToken.FromObject(a, s), JToken.FromObject(b, s));
+        }
+
+        public static JToken GetDiff<T>(T a, T b, Func<JsonSerializer> serializer) {
+            return new JsonDiffPatch().Diff(JToken.FromObject(a, serializer()), JToken.FromObject(b, serializer()));
         }
 
         public static bool HasNoDifferences(JToken jsonDiff) {
