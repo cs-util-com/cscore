@@ -111,7 +111,7 @@ namespace com.csutil.tests {
             Assert.Equal(typeof(MySubClass1), IoC_inject.Get<MyClass1>(this).GetType());
 
             // Try to register an additional injector for the same class which should fail:
-            Assert.Throws<Singleton.MultipleProvidersException>(() => {
+            Assert.Throws<InvalidOperationException>(() => {
                 IoC_inject.SetSingleton<MyClass1>(new MySubClass2());
             });
             // The first provider is still active and provides the same singleton instance as before:
@@ -177,30 +177,39 @@ namespace com.csutil.tests {
         [Fact]
         public void TestMultipleInjectors2() {
             var IoC_inject = GetInjectorForTest();
+            MyClass1 a = new MySubClass1();
+            MyClass1 b = new MySubClass2();
+
+            var firstInjectorWasUsed = false;
+            var secondInjectorWasUsed = false;
 
             Assert.False(IoC_inject.HasInjectorRegistered<MyClass1>());
-            IoC_inject.RegisterInjector<MyClass1>(new object(), (caller, createIfNull) => {
+            IoC_inject.RegisterInjector(new object(), (caller, createIfNull) => {
                 Log.d("Injector with MySubClass1 was called");
-                return new MySubClass1();
+                firstInjectorWasUsed = true;
+                return a;
             });
             Assert.True(IoC_inject.HasInjectorRegistered<MyClass1>());
 
-            var secondInjectorWasUsed = false;
-            IoC_inject.RegisterInjector<MyClass1>(new object(), (caller, createIfNull) => {
+            IoC_inject.RegisterInjector(new object(), (caller, createIfNull) => {
                 Log.d("Injector with MySubClass2 was called");
                 secondInjectorWasUsed = true;
-                return new MySubClass2();
+                return b;
             });
+
+            Assert.False(firstInjectorWasUsed);
             Assert.False(secondInjectorWasUsed);
-            Assert.NotNull(IoC_inject.Get<MyClass1>(this));
-            Assert.False(secondInjectorWasUsed);
-            Assert.True(IoC_inject.Get<MyClass1>(this) is MySubClass1);
-            Assert.False(secondInjectorWasUsed);
+            Assert.Equal(b, IoC_inject.Get<MyClass1>(this));
+            Assert.False(firstInjectorWasUsed);
+            Assert.True(secondInjectorWasUsed);
+
             var bothResults = IoC_inject.GetAll<MyClass1>(this);
-            Assert.True(bothResults.First() is MySubClass1);
-            Assert.False(secondInjectorWasUsed); // before accessing .Last the injection was not yet triggered
-            Assert.True(bothResults.Last() is MySubClass2);
-            Assert.True(secondInjectorWasUsed); // after accessing .Last the injection was triggered
+
+            Assert.Equal(b, bothResults.First());
+            Assert.False(firstInjectorWasUsed); // before accessing .Last the injection was not yet triggered
+
+            Assert.Equal(a, bothResults.Last());
+            Assert.True(firstInjectorWasUsed); // after accessing .Last the injection was triggered
         }
 
         [Fact]

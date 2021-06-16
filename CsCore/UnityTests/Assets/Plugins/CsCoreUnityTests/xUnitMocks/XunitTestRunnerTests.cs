@@ -1,6 +1,7 @@
 ﻿using com.csutil.logging;
 using com.csutil.testing;
 using com.csutil.tests.http;
+using com.csutil.tests.model;
 using com.csutil.tests.model.immutable;
 using System;
 using System.Collections;
@@ -15,6 +16,11 @@ namespace com.csutil.tests {
         [UnityTest]
         public IEnumerator RunXunitTest_DataStoreExample2() {
             yield return RunTestsInClass(typeof(DataStoreExample2));
+        }
+
+        [UnityTest]
+        public IEnumerator RunXunitTest_FeatureFlagTests() {
+            yield return RunTestsInClass(typeof(FeatureFlagTests));
         }
 
         [UnityTest]
