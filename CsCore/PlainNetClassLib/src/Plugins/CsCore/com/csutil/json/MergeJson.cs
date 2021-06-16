@@ -38,6 +38,10 @@ namespace com.csutil {
             return new JsonDiffPatch().Diff(JToken.FromObject(a, s), JToken.FromObject(b, s));
         }
 
+        public static bool HasNoDifferences(JToken jsonDiff) {
+            return jsonDiff == null || jsonDiff.ToString() == new JObject().ToString();
+        }
+
         public static void Patch(object targetToPatch, JToken patchToApply) {
             Patch(targetToPatch, patchToApply, JsonSerializer.Create(JsonNetSettings.defaultSettings));
         }

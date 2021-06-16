@@ -60,7 +60,11 @@ namespace com.csutil.testing {
         }
 
         public static IEnumerable<Test> GetIteratorOverAllTests(Type classToTest, Action<Test> onTestStarted) {
-            return GetMethodsToTest(classToTest).Map((methodToTest) => {
+            return GetIteratorOverTests(classToTest, GetMethodsToTest(classToTest), onTestStarted);
+        }
+
+        public static IEnumerable<Test> GetIteratorOverTests(Type classToTest, IEnumerable<MethodInfo> methodsToTest, Action<Test> onTestStarted) {
+            return methodsToTest.Map((methodToTest) => {
                 var test = new Test(CreateInstance(classToTest), methodToTest);
                 test.StartTest = () => {
                     ResetStaticInstances();
@@ -85,7 +89,7 @@ namespace com.csutil.testing {
             foreach (var d in instances.OfType<UnityEngine.Object>()) { d.Destroy(); }
         }
 
-        private static IEnumerable<MethodInfo> GetMethodsToTest(Type classToTest) {
+        public static IEnumerable<MethodInfo> GetMethodsToTest(Type classToTest) {
             var f = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
             var testMethods = classToTest.GetMethods(f).Filter(m => { return m.HasAttribute<Fact>(true); });
             return testMethods;
