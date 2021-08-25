@@ -8,6 +8,10 @@ namespace com.csutil.logging {
             WithColor(ConsoleColor.DarkGray, () => { Console.Write(debugLogMsg); });
         }
 
+        protected override void PrintInfoMessage(string infoLogMsg, params object[] args) {
+            WithColor(ConsoleColor.White, () => { Console.Write(infoLogMsg); });
+        }
+
         protected override void PrintErrorMessage(string errorMsg, params object[] args) {
             WithColor(ConsoleColor.Red, () => { Console.Write(errorMsg); });
         }

@@ -20,6 +20,7 @@ namespace com.csutil.tests {
         private static void InnerMethod2() { InnerMethod3(); }
         private static void InnerMethod3() {
             Log.d("I'm a log message");
+            Log.i("I'm an info message");
             Log.w("I'm a warning");
             Log.e("I'm an error");
             Log.e(new Exception("I'm an exception"));
@@ -199,6 +200,7 @@ namespace com.csutil.tests {
             private string latestError;
 
             protected override void PrintDebugMessage(string l, params object[] args) { this.latestLog = l; }
+            protected override void PrintInfoMessage(string i, params object[] args) { this.latestLog = i; }
             protected override void PrintErrorMessage(string e, params object[] args) { this.latestError = e; }
             protected override void PrintWarningMessage(string w, params object[] args) { this.latestWarning = w; }
 

@@ -14,6 +14,11 @@ namespace com.csutil.logging {
                 + "  * at " + Log.CallingMethodStr(args) + LB + LB, args);
         }
 
+        public void LogInfo(string msg, params object[] args) {
+            PrintInfoMessage("> INFO: " + msg + Log.ToArgsStr(args, ArgToString) + LB
+                + "  * at " + Log.CallingMethodStr(args) + LB + LB, args);
+        }
+
         public void LogWarning(string warning, params object[] args) {
             PrintWarningMessage("> WARNING: " + warning + Log.ToArgsStr(args, ArgToString) + LB
                 + "  * at " + Log.CallingMethodStr(args) + LB + LB, args);
@@ -41,6 +46,7 @@ namespace com.csutil.logging {
         }
 
         protected abstract void PrintDebugMessage(string debugLogMsg, params object[] args);
+        protected abstract void PrintInfoMessage(string infoLogMsg, params object[] args);
         protected abstract void PrintWarningMessage(string warningMsg, params object[] args);
         protected abstract void PrintErrorMessage(string errorMsg, params object[] args);
 

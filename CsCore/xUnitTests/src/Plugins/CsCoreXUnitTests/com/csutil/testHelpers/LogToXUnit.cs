@@ -23,7 +23,10 @@ namespace Xunit {
 
         protected override void PrintDebugMessage(string debugLogMsg, params object[] args) {
             try { xunitLogger.WriteLine(debugLogMsg); } catch (Exception) { }
+        }
 
+        protected override void PrintInfoMessage(string infoLogMsg, params object[] args) {
+            try { xunitLogger.WriteLine(infoLogMsg); } catch (Exception) { }
         }
 
         protected override void PrintErrorMessage(string errorMsg, params object[] args) {

@@ -38,6 +38,7 @@ namespace com.csutil.logging {
         }
 
         protected override void PrintDebugMessage(string debugLogMsg, params object[] args) { }
+        protected override void PrintInfoMessage(string infoLogMsg, params object[] args) { }
         protected override void PrintWarningMessage(string warningMsg, params object[] args) { }
 
     }

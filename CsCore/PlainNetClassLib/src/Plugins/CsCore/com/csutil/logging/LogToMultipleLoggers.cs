@@ -14,6 +14,10 @@ namespace com.csutil.logging {
             foreach (var logger in loggers) { logger.LogDebug(msg, args); }
         }
 
+        public void LogInfo(string msg, params object[] args) {
+            foreach (var logger in loggers) { logger.LogInfo(msg, args); }
+        }
+
         public Exception LogError(string error, params object[] args) {
             return loggers.Map(l => l.LogError(error, args)).ToList().FirstOrDefault();
         }

@@ -17,6 +17,11 @@ namespace com.csutil {
             instance.LogDebug(msg, ArgsPlusStackFrameIfNeeded(args));
         }
 
+        [Conditional("DEBUG"), Conditional("ENFORCE_INFO_LOGGING"), Conditional("ENFORCE_FULL_LOGGING")]
+        public static void i(string msg, params object[] args) {
+            instance.LogInfo(msg, ArgsPlusStackFrameIfNeeded(args));
+        }
+
         [Conditional("DEBUG"), Conditional("ENFORCE_WARNING_LOGGING"), Conditional("ENFORCE_FULL_LOGGING")]
         public static void w(string warning, params object[] args) {
             instance.LogWarning(warning, ArgsPlusStackTraceIfNeeded(args));

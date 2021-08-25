@@ -25,6 +25,13 @@ namespace com.csutil.logging {
             writer.Flush();
         }
 
+        protected override void PrintInfoMessage(string infoLogMsg, params object[] args) {
+            LogEntry logEntry = new LogEntry() { i = infoLogMsg };
+            var asJson = JsonWriter.GetWriter(logEntry).Write(logEntry);
+            writer.WriteLine(asJson + JSON_LB);
+            writer.Flush();
+        }
+
         protected override void PrintWarningMessage(string warningMsg, params object[] args) {
             LogEntry logEntry = new LogEntry() { w = warningMsg };
             var asJson = JsonWriter.GetWriter(logEntry).Write(logEntry);
@@ -56,6 +63,7 @@ namespace com.csutil.logging {
 
         public class LogEntry {
             public string d;
+            public string i;
             public string w;
             public string e;
         }
