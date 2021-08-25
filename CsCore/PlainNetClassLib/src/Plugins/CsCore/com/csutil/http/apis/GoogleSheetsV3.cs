@@ -6,7 +6,7 @@ using Newtonsoft.Json.Linq;
 
 namespace com.csutil.http.apis {
 
-    [Obsolete("The Google Sheets v3 API will be shut down on September 30, 2020, see https://developers.google.com/sheets/api/v3/data")]
+    [Obsolete("The Google Sheets v3 API will be shut down on September 30, 2020, see https://developers.google.com/sheets/api/v3/data", true)]
     public static class GoogleSheetsV3 {
 
         // Only works if the sheet is published (not the same as setting it to public)
