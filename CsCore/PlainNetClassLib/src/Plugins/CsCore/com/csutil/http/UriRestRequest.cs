@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -74,7 +75,8 @@ namespace com.csutil.http {
             if (typeof(T) == typeof(string)) { return (T)(object)respText; }
             AssertV2.IsNotNull(respText, "respText");
             AssertV2.IsNotNull(respText.IsNullOrEmpty(), "respText.IsNullOrEmpty");
-            return jsonReader.Read<T>(respText);
+            try { return jsonReader.Read<T>(respText); }
+            catch (JsonReaderException e) { throw new JsonReaderException("Cant parse to JSON: " + respText, e); }
         }
 
         public async Task<Headers> GetResultHeaders() {
