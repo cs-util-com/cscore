@@ -40,6 +40,7 @@ namespace com.csutil {
     public static class JTokenExtensions {
 
         public static string ToPrettyString(this Newtonsoft.Json.Linq.JToken jToken) {
+            if (jToken == null) { return "null"; }
             return jToken.ToString(Newtonsoft.Json.Formatting.Indented);
         }
 
