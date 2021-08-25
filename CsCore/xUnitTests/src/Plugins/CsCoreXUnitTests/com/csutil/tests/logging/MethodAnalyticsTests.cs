@@ -17,7 +17,7 @@ namespace com.csutil.tests {
             MyMethod1(true);
             Log.MethodDone(t);
             string report = methodAnalytics.ToString();
-            Assert.True(1600 < report.Count(), report);
+            Assert.True(1500 < report.Count(), "report.Count: " + report.Count());
             Log.d(report);
         }
 
@@ -32,7 +32,7 @@ namespace com.csutil.tests {
             MyMethod3("5");
             Log.MethodDone(t);
             var report = methodAnalytics.ToString();
-            Assert.True(600 < report.Count(), report);
+            Assert.True(500 < report.Count(), "report.Count: " + report.Count());
         }
 
         private void MyMethod1(bool v) {
