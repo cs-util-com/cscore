@@ -36,6 +36,7 @@ namespace com.csutil.logging {
         public LogToLogConsoleConnector(LogConsoleUi logConsoleUi) { this.logUi = logConsoleUi; }
 
         protected override void PrintDebugMessage(string d, params object[] args) { logUi.AddToLog(LogEntry.d(d)); }
+        protected override void PrintInfoMessage(string i, params object[] args) { logUi.AddToLog(LogEntry.i(i)); }
         protected override void PrintWarningMessage(string w, params object[] args) { logUi.AddToLog(LogEntry.w(w)); }
         protected override void PrintErrorMessage(string e, params object[] args) { logUi.AddToLog(LogEntry.e(e)); }
 
@@ -61,6 +62,7 @@ namespace com.csutil.logging {
         private Dictionary<string, Link> map;
         private InputField SearchInputField() { return map.Get<InputField>("Search"); }
         private Toggle ToggleShowDebugs() { return map.Get<Toggle>("ToggleShowDebugs"); }
+        private Toggle ToggleShowInfos() { return map.Get<Toggle>("ToggleShowInfos"); }
         private Toggle ToggleShowWarngs() { return map.Get<Toggle>("ToggleShowWarnings"); }
         private Toggle ToggleShowErrors() { return map.Get<Toggle>("ToggleShowErrors"); }
 
@@ -70,6 +72,7 @@ namespace com.csutil.logging {
             map.Get<Button>("BtnClear").SetOnClickAction(delegate { ClearConsole(); });
             map.Get<Button>("BtnHideLog").SetOnClickAction(delegate { ToggleConsoleVisibility(); });
             ToggleShowDebugs().SetOnValueChangedAction(delegate { UpdateFilter(NewFilter()); return true; });
+            ToggleShowInfos().SetOnValueChangedAction(delegate { UpdateFilter(NewFilter()); return true; });
             ToggleShowWarngs().SetOnValueChangedAction(delegate { UpdateFilter(NewFilter()); return true; });
             ToggleShowErrors().SetOnValueChangedAction(delegate { UpdateFilter(NewFilter()); return true; });
             SearchInputField().SetOnValueChangedAction(delegate { UpdateFilter(NewFilter()); return true; });
@@ -90,11 +93,13 @@ namespace com.csutil.logging {
 
         private Func<LogEntry, bool> NewFilter() {
             bool d = ToggleShowDebugs().isOn;
+            bool i = ToggleShowInfos().isOn;
             bool w = ToggleShowWarngs().isOn;
             bool e = ToggleShowErrors().isOn;
             string s = SearchInputField().text.ToLowerInvariant();
             return (logEntry) => {
                 if (!d && logEntry.type == "d") { return false; }
+                if (!i && logEntry.type == "i") { return false; }
                 if (!w && logEntry.type == "w") { return false; }
                 if (!e && logEntry.type == "e") { return false; }
                 if (!s.IsNullOrEmpty() && !logEntry.message.ToLowerInvariant().Contains(s)) { return false; }
@@ -121,10 +126,12 @@ namespace com.csutil.logging {
     public class LogEntry {
 
         public const string ICON_D = "";
+        public const string ICON_I = "";
         public const string ICON_W = "";
         public const string ICON_E = "";
 
         public static Color COLOR_GRAY = Color.black;
+        public static Color COLOR_WHITE = Color.white;
         public static Color COLOR_YELLOW = Color.yellow;
         public static Color COLOR_RED = Color.red;
 
@@ -135,6 +142,7 @@ namespace com.csutil.logging {
         public string type;
 
         public static LogEntry d(string d) { return new LogEntry() { message = d, color = COLOR_GRAY, icon = ICON_D, type = "d" }; }
+        public static LogEntry i(string i) { return new LogEntry() { message = i, color = COLOR_WHITE, icon = ICON_I, type = "i" }; }
         public static LogEntry w(string w) { return new LogEntry() { message = w, color = COLOR_YELLOW, icon = ICON_W, type = "w" }; }
         public static LogEntry e(string e) { return new LogEntry() { message = e, color = COLOR_RED, icon = ICON_E, type = "e" }; }
 

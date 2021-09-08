@@ -11,6 +11,10 @@ namespace com.csutil.logging {
             Debug.Log(EditModePrefix() + debugLogMsg, GetUnityObjFrom(args));
         }
 
+        protected override void PrintInfoMessage(string infoMsg, params object[] args) {
+            Debug.Log(EditModePrefix() + infoMsg, GetUnityObjFrom(args));
+        }
+
         protected override void PrintWarningMessage(string warningMsg, params object[] args) {
             Debug.LogWarning(EditModePrefix() + warningMsg, GetUnityObjFrom(args));
         }
