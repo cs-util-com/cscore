@@ -73,6 +73,28 @@ namespace com.csutil.io {
             return res;
         }
 
+        public static async Task<ImageInfo> GetImageInfoFromFirstBytesOf(Stream source, int bytesToCopy = 5000) {
+            using (var firstBytes = await CopyFirstBytes(source, bytesToCopy)) {
+                return await GetImageInfoFrom(firstBytes);
+            }
+        }
+
+        public static async Task<Stream> CopyFirstBytes(this Stream self, int bytesToCopy) {
+            var destination = new MemoryStream();
+            await CopyFirstBytesTo(self, destination, bytesToCopy);
+            return destination;
+        }
+
+        // From https://stackoverflow.com/a/13022108
+        public static async Task CopyFirstBytesTo(this Stream self, Stream destination, int bytesToCopy) {
+            byte[] buffer = new byte[bytesToCopy];
+            int read;
+            while (bytesToCopy > 0 && (read = await self.ReadAsync(buffer, 0, Math.Min(buffer.Length, bytesToCopy))) > 0) {
+                await destination.WriteAsync(buffer, 0, read);
+                bytesToCopy -= read;
+            }
+        }
+
     }
 
 }

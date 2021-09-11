@@ -15,6 +15,10 @@ namespace com.csutil.progress {
             AssertV2.IsTrue(0 <= self.percent && self.percent <= 100, "" + self);
         }
 
+        public static void IncrementTotalCount(this IProgress self, int incrementStep = 1) {
+            self.totalCount = self.totalCount + incrementStep;
+        }
+
         public static void IncrementCount(this IProgress self, int incrementStep = 1) {
             self.SetCount(self.GetCount() + incrementStep);
         }

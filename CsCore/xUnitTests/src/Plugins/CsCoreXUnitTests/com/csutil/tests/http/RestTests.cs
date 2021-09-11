@@ -91,7 +91,7 @@ namespace com.csutil.tests.http {
 
             var timingForImageInfoOny = Log.MethodEntered("Load only first bytes");
             var stream = await new Uri(imgUrl).SendGET().GetResult<Stream>();
-            var firstBytes = await CopyFirstBytes(stream, bytesToCopy: 500);
+            var firstBytes = await ImageLoader.CopyFirstBytes(stream, bytesToCopy: 5000);
             Assert.False(fullImage.CanSeek);
             Assert.True(firstBytes.CanSeek);
             var info = await ImageLoader.GetImageInfoFrom(firstBytes);
@@ -125,14 +125,6 @@ namespace com.csutil.tests.http {
             Assert.NotNull(headers.GetContentMimeType(null));
             Assert.NotEqual(-1, headers.GetContentLengthInBytes(-1));
             Assert.False(headers.GetFileNameOnServer().IsNullOrEmpty());
-        }
-
-        private static async Task<Stream> CopyFirstBytes(Stream self, int bytesToCopy) {
-            var destination = new MemoryStream();
-            byte[] buffer = new byte[bytesToCopy];
-            int numBytes = await self.ReadAsync(buffer, offset: 0, buffer.Length);
-            destination.Write(buffer, offset: 0, numBytes);
-            return destination;
         }
 
         [Fact]

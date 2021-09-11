@@ -70,6 +70,7 @@ namespace com.csutil {
 
         }
 
+        /// <param name="initialExponent">e.g 9 => 2^9 = 512ms (for first delay if fails) </param>
         public static async Task<T> TryWithExponentialBackoff<T>(Func<Task<T>> taskToTry,
                         Action<Exception> onError = null, int maxNrOfRetries = -1, int maxDelayInMs = -1, int initialExponent = 0) {
 
