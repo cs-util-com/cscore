@@ -46,6 +46,9 @@ namespace com.csutil.tests {
             myString = "<{0}, {1}>".With("A", "B");
             Assert.Equal("<A, B>", myString);
 
+            myString = "ABCDEF";
+            Assert.Equal("AB..", myString.TruncateToMaxLenght(2, ".."));
+
         }
 
         [Fact]

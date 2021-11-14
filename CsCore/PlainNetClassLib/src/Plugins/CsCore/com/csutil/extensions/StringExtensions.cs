@@ -80,6 +80,11 @@ namespace com.csutil {
             return self.Substring(0, 1).ToLowerInvariant() + self.Substring(1);
         }
 
+        public static string TruncateToMaxLenght(this string self, int maxLength, string postfix = "") {
+            if (self.IsNullOrEmpty()) return self;
+            return self.Length <= maxLength ? self : self.Substring(0, maxLength) + postfix;
+        }
+
     }
 
     public static class ByteSizeToString {
