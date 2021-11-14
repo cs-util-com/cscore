@@ -112,6 +112,10 @@ namespace com.csutil.http {
             while (!request.isDone && !request.isHttpError && !request.isNetworkError) { await TaskV2.Delay(10); }
         }
 
+        public void Dispose() {
+            try { request.Abort(); } catch (Exception e) { Log.d("Could not abort request: " + e); }
+        }
+
     }
 
 }

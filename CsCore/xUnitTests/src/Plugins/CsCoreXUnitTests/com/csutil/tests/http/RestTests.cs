@@ -91,7 +91,7 @@ namespace com.csutil.tests.http {
 
             var timingForImageInfoOny = Log.MethodEntered("Load only first bytes");
             var stream = await new Uri(imgUrl).SendGET().GetResult<Stream>();
-            var firstBytes = await ImageLoader.CopyFirstBytes(stream, bytesToCopy: 5000);
+            var firstBytes = await ImageLoader.CopyFirstBytes(stream, bytesToCopy: 500);
             Assert.False(fullImage.CanSeek);
             Assert.True(firstBytes.CanSeek);
             var info = await ImageLoader.GetImageInfoFrom(firstBytes);
@@ -104,6 +104,18 @@ namespace com.csutil.tests.http {
             var xTimesFaster = 3; // Loading only the image info should be at least this factor faster then loading the full image
             string e = $"{timingForImageInfoOny} was not {xTimesFaster} times faster then {timingForFullImage}!";
             Assert.True(timingForImageInfoOny.ElapsedMilliseconds * xTimesFaster < timingForFullImage.ElapsedMilliseconds, e);
+        }
+
+        [Fact]
+        public async Task DownloadTest5_GetImageInfoFromFirstBytesOf() {
+            var imgUrl = "https://raw.githubusercontent.com/cs-util-com/cscore/master/CsCore/assets/logo-cscore1024x1024_2.png";
+            var w = 1024;
+            var h = 1024;
+            using (var stream = await new Uri(imgUrl).SendGET().GetResult<Stream>()) {
+                var info = await ImageLoader.GetImageInfoFromFirstBytesOf(stream);
+                Assert.Equal(w, info.Width);
+                Assert.Equal(h, info.Height);
+            }
         }
 
         [Fact]

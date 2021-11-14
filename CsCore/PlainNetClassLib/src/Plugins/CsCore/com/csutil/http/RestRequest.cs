@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace com.csutil.http {
 
-    public interface RestRequest {
+    public interface RestRequest : IDisposable {
 
         Uri uri { get; }
         string httpMethod { get; }
