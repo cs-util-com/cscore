@@ -32,6 +32,6 @@ your code like this:
 #define ENABLE_IMAGE_MAGICK
 (Docu what a #define is at https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/preprocessor-directives/preprocessor-define )
 
-Alternatively open your Unity Project Settings -> Player and there add ENABLE_IMAGE_MAGICK to 
+Alternatively open your "Edit -> Unity Project Settings -> Player" and there add ENABLE_IMAGE_MAGICK to 
 the "Scripting Define Symbols" which causes the same effect. Docu about this feature: 
 https://docs.unity3d.com/Manual/PlatformDependentCompilation.html
