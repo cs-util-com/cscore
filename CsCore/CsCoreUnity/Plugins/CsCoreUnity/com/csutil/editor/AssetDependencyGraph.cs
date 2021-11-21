@@ -62,11 +62,9 @@ namespace com.csutil.editor {
 
         static void SaveDependencyGraphToFile() {
             if (_dict == null) { return; }
-            var t = Log.MethodEntered();
             using (var stream = GetCacheFile().OpenOrCreateForWrite()) {
                 new BinaryFormatter().Serialize(stream, _dict);
             }
-            Log.MethodDone(t);
         }
 
         private static Zio.FileEntry GetCacheFile() {
@@ -74,14 +72,12 @@ namespace com.csutil.editor {
         }
 
         static Dictionary<string, List<string>> LoadDependencyGraphFromFile() {
-            var t = Log.MethodEntered();
             try {
                 using (var stream = GetCacheFile().OpenForRead()) {
                     _dict = (Dictionary<string, List<string>>)new BinaryFormatter().Deserialize(stream);
                 }
             }
             catch (System.Exception) { _dict = null; }
-            Log.MethodDone(t);
             return _dict;
         }
 
