@@ -75,16 +75,17 @@ namespace com.csutil.model.immutable {
             return list;
         }
 
-        public static ImmutableDictionary<T, V> MutateEntries<T, V>(this ImmutableDictionary<T, V> list, object action, StateReducer<V> reducer) {
-            if (list != null) {
-                foreach (var elem in list) {
+        [Obsolete("Typically not needed, since the key should be used to modify the specific entries of the Dict instead of iterating over all")]
+        public static ImmutableDictionary<T, V> MutateEntries<T, V>(this ImmutableDictionary<T, V> dict, object action, StateReducer<V> reducer) {
+            if (dict != null) {
+                foreach (var elem in dict) {
                     var newValue = reducer(elem.Value, action);
                     if (StateCompare.WasModified(elem.Value, newValue)) {
-                        list = list.SetItem(elem.Key, newValue);
+                        dict = dict.SetItem(elem.Key, newValue);
                     }
                 }
             }
-            return list;
+            return dict;
         }
 
         public static IList<T> MutateEntries<T>(this IList<T> list, object action, StateReducer<T> reducer, ref bool changed) {
@@ -102,6 +103,11 @@ namespace com.csutil.model.immutable {
         }
 
         public static ImmutableList<T> AddOrCreate<T>(this ImmutableList<T> self, T t) { return (self == null) ? ImmutableList.Create(t) : self.Add(t); }
+
+        public static ImmutableDictionary<K, T> AddOrCreate<K, T>(this ImmutableDictionary<K, T> self, K key, T t) {
+            if (self == null) { self = ImmutableDictionary<K, T>.Empty; }
+            return self.Add(key, t);
+        }
 
         public static T Mutate<T>(this T self, object action, StateReducer<T> reducer, ref bool changed) {
             return self.Mutate<T>(true, action, reducer, ref changed);

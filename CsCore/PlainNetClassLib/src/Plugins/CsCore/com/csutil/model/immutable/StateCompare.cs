@@ -29,9 +29,9 @@ namespace com.csutil.model.immutable {
 
         public static bool WasModified<S>(S oldState, S newState) {
             if (oldState == null && newState == null) { return false; }
-            if (oldState != null && oldState.GetType().IsPrimitiveOrSimple()) {
-                return !Equals(oldState, newState);
-            }
+            if (oldState != null && oldState.GetType().IsPrimitiveOrSimple()) { return !Equals(oldState, newState); }
+            if (newState != null && newState.GetType().IsPrimitiveOrSimple()) { return !Equals(oldState, newState); }
+            if (Nullable.GetUnderlyingType(typeof(S)) != null) { return !Equals(oldState, newState); }
             if (!ReferenceEquals(oldState, newState)) { return true; }
             if (oldState is IsMutable m) { return WasModifiedInLastDispatch(m); }
             return false;

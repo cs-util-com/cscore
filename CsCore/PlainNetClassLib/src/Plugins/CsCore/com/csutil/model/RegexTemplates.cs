@@ -33,6 +33,7 @@ namespace com.csutil.model {
 
         /// <summary> Represents an emtpy (all zeros) UUID in any of the valid UUID formats (0..0) / {0..0} / 0..0 </summary>
         public const string EMPTY_GUID_UUID = @"({?\(?00000000-0000-0000-0000-000000000000\)?}?|00000000000000000000000000000000)";
+        public const string NOT_EMPTY_GUID_UUID = "^((?!00000000-0000-0000-0000-000000000000).)*$";
 
         /// <summary> base 64 encoded arbitrary strings have a few attributes that can be validated </summary>
         public const string BASE64_ENCODED_STRING = "^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{4})$";
