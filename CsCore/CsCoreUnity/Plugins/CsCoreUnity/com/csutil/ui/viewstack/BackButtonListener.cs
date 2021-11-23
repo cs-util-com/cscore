@@ -1,4 +1,6 @@
-﻿using com.csutil.netstandard2_1polyfill;
+﻿#if !UNITY_2021_2_OR_NEWER
+using com.csutil.netstandard2_1polyfill;
+#endif
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;

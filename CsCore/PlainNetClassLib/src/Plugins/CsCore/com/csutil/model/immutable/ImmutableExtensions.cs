@@ -88,6 +88,13 @@ namespace com.csutil.model.immutable {
             return dict;
         }
 
+        public static ImmutableDictionary<T, V> MutateEntry<T, V>(this ImmutableDictionary<T, V> dict, T key, object action, StateReducer<V> reducer) {
+            var elem = dict[key];
+            var newValue = reducer(elem, action);
+            if (StateCompare.WasModified(elem, newValue)) { dict = dict.SetItem(key, newValue); }
+            return dict;
+        }
+
         public static IList<T> MutateEntries<T>(this IList<T> list, object action, StateReducer<T> reducer, ref bool changed) {
             if (list != null) {
                 for (int i = 0; i < list.Count; i++) {
