@@ -265,15 +265,25 @@ namespace com.csutil {
             self.textLocalized(text);
         }
 
-        public static void SubscribeToStateChanges<T, V>(this UnityEngine.Object self, IDataStore<T> store, Func<T, V> getSubState, Action<V> updateUi, bool triggerOnSubscribe = true) {
+        private class Wrapper { public Action stateChangeListener; }
+
+        public static void SubscribeToStateChanges<T, V>(this UnityEngine.Object self, IDataStore<T> store, Func<T, V> getSubState, Action<V> updateUi, bool triggerOnSubscribe = true, bool eventsAlwaysInMainThread = true) {
             updateUi(getSubState(store.GetState()));
-            Action listener = null;
-            listener = store.AddStateChangeListener(getSubState, newVal => {
-                if (self.IsDestroyed()) { store.onStateChanged -= listener; return; }
-                if (self is Behaviour b && !b.isActiveAndEnabled) { return; }
-                if (self is GameObject go && !go.activeInHierarchy) { return; }
-                updateUi(newVal);
+            Wrapper w = new Wrapper();
+            w.stateChangeListener = store.AddStateChangeListener(getSubState, newVal => {
+                if (self.IsDestroyed()) { store.onStateChanged -= w.stateChangeListener; return; }
+                if (eventsAlwaysInMainThread) {
+                    MainThread.Invoke(() => { OnStateChangedForUnity(updateUi, newVal, self); });
+                } else {
+                    OnStateChangedForUnity(updateUi, newVal, self);
+                }
             }, triggerOnSubscribe);
+        }
+
+        private static void OnStateChangedForUnity<V>(Action<V> onStateChanged, V newVal, UnityEngine.Object context) {
+            if (context is Behaviour b && !b.isActiveAndEnabled) { return; }
+            if (context is GameObject go && !go.activeInHierarchy) { return; }
+            onStateChanged(newVal);
         }
 
         public static void SubscribeToStateChanges<T>(this InputField self, IDataStore<T> store, Func<T, string> getSubState) {
