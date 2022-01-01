@@ -17,9 +17,9 @@ namespace com.csutil {
         public static Result<T> Merge<T>(this JsonDiffPatch self, T originalObj, T variant1, T variant2) {
             var res = new Result<T>();
             var s = JsonSerializer.Create(JsonNetSettings.defaultSettings);
-            res.original = JToken.FromObject(originalObj, s);
-            res.variant1 = JToken.FromObject(variant1, s);
-            res.variant2 = JToken.FromObject(variant2, s);
+            res.original = ToJToken(originalObj, s);
+            res.variant1 = ToJToken(variant1, s);
+            res.variant2 = ToJToken(variant2, s);
             res.patch2 = self.Diff(res.original, res.variant2);
             res.mergeOf2Into1 = self.Patch(res.variant1, res.patch2);
             res.patch1 = self.Diff(res.original, res.variant1);
@@ -36,11 +36,16 @@ namespace com.csutil {
 
         [Obsolete("use the variant that calls a function to create multiple serializers")]
         public static JToken GetDiff<T>(T a, T b, JsonSerializer s) {
-            return new JsonDiffPatch().Diff(JToken.FromObject(a, s), JToken.FromObject(b, s));
+            return new JsonDiffPatch().Diff(ToJToken(a, s), ToJToken(b, s));
         }
 
         public static JToken GetDiff<T>(T a, T b, Func<JsonSerializer> serializer) {
-            return new JsonDiffPatch().Diff(JToken.FromObject(a, serializer()), JToken.FromObject(b, serializer()));
+            return new JsonDiffPatch().Diff(ToJToken(a, serializer()), ToJToken(b, serializer()));
+        }
+
+        private static JToken ToJToken(object o, JsonSerializer jsonSerializer) {
+            if (o == null) { return null; }
+            return JToken.FromObject(o, jsonSerializer);
         }
 
         public static bool HasNoDifferences(JToken jsonDiff) {
@@ -52,7 +57,7 @@ namespace com.csutil {
         }
 
         public static void Patch(object targetToPatch, JToken patchToApply, JsonSerializer s) {
-            var patchedTarget = new JsonDiffPatch().Patch(JToken.FromObject(targetToPatch, s), patchToApply);
+            var patchedTarget = new JsonDiffPatch().Patch(ToJToken(targetToPatch, s), patchToApply);
             patchedTarget.PopulateInto(targetToPatch, s);
         }
 

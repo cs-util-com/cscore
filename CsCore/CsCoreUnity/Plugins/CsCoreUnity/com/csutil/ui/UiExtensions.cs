@@ -265,15 +265,32 @@ namespace com.csutil {
             self.textLocalized(text);
         }
 
-        public static void SubscribeToStateChanges<T, V>(this UnityEngine.Object self, IDataStore<T> store, Func<T, V> getSubState, Action<V> updateUi, bool triggerOnSubscribe = true) {
+        private class Wrapper { public Action stateChangeListener; }
+
+        public static void SubscribeToStateChanges<T, V>(this UnityEngine.Object self, IDataStore<T> store, Func<T, V> getSubState, Action<V> updateUi, bool triggerOnSubscribe = true, bool eventsAlwaysInMainThread = true) {
             updateUi(getSubState(store.GetState()));
-            Action listener = null;
-            listener = store.AddStateChangeListener(getSubState, newVal => {
-                if (self.IsDestroyed()) { store.onStateChanged -= listener; return; }
-                if (self is Behaviour b && !b.isActiveAndEnabled) { return; }
-                if (self is GameObject go && !go.activeInHierarchy) { return; }
-                updateUi(newVal);
+            Wrapper w = new Wrapper();
+            w.stateChangeListener = store.AddStateChangeListener(getSubState, newVal => {
+                if (self.IsDestroyed()) { store.onStateChanged -= w.stateChangeListener; return; }
+                if (eventsAlwaysInMainThread) {
+                    MainThread.Invoke(() => { OnStateChangedForUnity(updateUi, newVal, self); });
+                } else {
+                    OnStateChangedForUnity(updateUi, newVal, self);
+                }
             }, triggerOnSubscribe);
+        }
+
+        private static void OnStateChangedForUnity<V>(Action<V> onStateChanged, V newVal, UnityEngine.Object context) {
+            if (context is Behaviour b && !b.isActiveAndEnabled) { return; }
+            if (context is GameObject go && !go.activeInHierarchy) { return; }
+            onStateChanged(newVal);
+        }
+
+        private static void OnSubstateChangedForUnity<V>(SubListeners<V> onStateChanged, V newVal, UnityEngine.Object context) {
+            if (context.IsDestroyed()) { onStateChanged.UnregisterFromParent(); return; }
+            if (context is Behaviour b && !b.isActiveAndEnabled) { return; }
+            if (context is GameObject go && !go.activeInHierarchy) { return; }
+            onStateChanged.OnSubstateChanged(newVal);
         }
 
         public static void SubscribeToStateChanges<T>(this InputField self, IDataStore<T> store, Func<T, string> getSubState) {
@@ -286,6 +303,32 @@ namespace com.csutil {
 
         public static void SubscribeToStateChanges<T>(this Slider self, IDataStore<T> store, Func<T, float> getSubState) {
             self.SubscribeToStateChanges(store, getSubState, newText => self.value = newText);
+        }
+
+        public static SubListeners<S> NewSubStateListenerForUnity<T, S>(this IDataStore<T> self, UnityEngine.Object context, Func<T, S> getSubState, bool eventsAlwaysInMainThread = true) {
+            var subListener = new SubListeners<S>(getSubState(self.GetState()));
+            var ownListenerInParent = self.AddStateChangeListener(getSubState, newSubState => {
+                if (eventsAlwaysInMainThread) {
+                    MainThread.Invoke(() => { OnSubstateChangedForUnity(subListener, newSubState, context); });
+                } else {
+                    OnSubstateChangedForUnity(subListener, newSubState, context);
+                }
+            });
+            subListener.SetUnregisterInParentAction(() => { self.onStateChanged -= ownListenerInParent; });
+            return subListener;
+        }
+
+        public static SubListeners<S> NewSubStateListenerForUnity<T, S>(this SubListeners<T> self, UnityEngine.Object context, Func<T, S> getSubState, bool eventsAlwaysInMainThread = true) {
+            var subListener = new SubListeners<S>(getSubState(self.latestSubState));
+            var ownListenerInParent = self.AddStateChangeListener(getSubState, newSubState => {
+                if (eventsAlwaysInMainThread) {
+                    MainThread.Invoke(() => { OnSubstateChangedForUnity(subListener, newSubState, context); });
+                } else {
+                    OnSubstateChangedForUnity(subListener, newSubState, context);
+                }
+            });
+            subListener.SetUnregisterInParentAction(() => { self.innerListeners -= ownListenerInParent; });
+            return subListener;
         }
 
         public static int CalcCurrentMaxSortingOrderInLayer(this Canvas self) {

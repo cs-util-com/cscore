@@ -33,13 +33,15 @@ namespace com.csutil.model.immutable {
 
         public static SubListeners<S> NewSubStateListener<T, S>(this IDataStore<T> self, Func<T, S> getSubState) {
             var subListener = new SubListeners<S>(getSubState(self.GetState()));
-            self.AddStateChangeListener(getSubState, newSubState => { subListener.OnSubstateChanged(newSubState); });
+            var ownListenerInParent = self.AddStateChangeListener(getSubState, newSubState => { subListener.OnSubstateChanged(newSubState); });
+            subListener.SetUnregisterInParentAction(() => { self.onStateChanged -= ownListenerInParent; });
             return subListener;
         }
 
         public static SubListeners<S> NewSubStateListener<T, S>(this SubListeners<T> self, Func<T, S> getSubState) {
             var subListener = new SubListeners<S>(getSubState(self.latestSubState));
-            self.AddStateChangeListener(getSubState, newSubState => { subListener.OnSubstateChanged(newSubState); });
+            var ownListenerInParent = self.AddStateChangeListener(getSubState, newSubState => { subListener.OnSubstateChanged(newSubState); });
+            subListener.SetUnregisterInParentAction(() => { self.innerListeners -= ownListenerInParent; });
             return subListener;
         }
 
@@ -195,6 +197,10 @@ namespace com.csutil.model.immutable {
     public class SubListeners<SubState> {
 
         public Action innerListeners;
+
+        /// <summary> This is the action that can be called to unregister the <see cref="SubListeners{SubState}"/> in its parent again </summary>
+        private Action unregisterInParentAction;
+
         public SubState latestSubState { get; private set; }
         public SubListeners(SubState currentSubState) { latestSubState = currentSubState; }
 
@@ -216,6 +222,13 @@ namespace com.csutil.model.immutable {
             if (triggerInstantToInit) { onChanged(mutableObj); }
             return newListener;
         }
+
+        public void SetUnregisterInParentAction(Action unregisterInParentAction) {
+            this.unregisterInParentAction = unregisterInParentAction;
+        }
+
+        /// <summary> Can be called to unregister the <see cref="SubListeners{SubState}"/> in its parent again. Afterwards it (and all its children) will no longer be informed about updates </summary>
+        public void UnregisterFromParent() { unregisterInParentAction(); }
 
     }
 
