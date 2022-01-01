@@ -305,7 +305,7 @@ namespace com.csutil {
             self.SubscribeToStateChanges(store, getSubState, newText => self.value = newText);
         }
 
-        public static SubListeners<S> NewSubStateListenerForUnity<T, S>(this IDataStore<T> self, UnityEngine.Object context, Func<T, S> getSubState, bool eventsAlwaysInMainThread = false) {
+        public static SubListeners<S> NewSubStateListenerForUnity<T, S>(this IDataStore<T> self, UnityEngine.Object context, Func<T, S> getSubState, bool eventsAlwaysInMainThread = true) {
             var subListener = new SubListeners<S>(getSubState(self.GetState()));
             var ownListenerInParent = self.AddStateChangeListener(getSubState, newSubState => {
                 if (eventsAlwaysInMainThread) {
@@ -318,7 +318,7 @@ namespace com.csutil {
             return subListener;
         }
 
-        public static SubListeners<S> NewSubStateListenerForUnity<T, S>(this SubListeners<T> self, UnityEngine.Object context, Func<T, S> getSubState, bool eventsAlwaysInMainThread = false) {
+        public static SubListeners<S> NewSubStateListenerForUnity<T, S>(this SubListeners<T> self, UnityEngine.Object context, Func<T, S> getSubState, bool eventsAlwaysInMainThread = true) {
             var subListener = new SubListeners<S>(getSubState(self.latestSubState));
             var ownListenerInParent = self.AddStateChangeListener(getSubState, newSubState => {
                 if (eventsAlwaysInMainThread) {
