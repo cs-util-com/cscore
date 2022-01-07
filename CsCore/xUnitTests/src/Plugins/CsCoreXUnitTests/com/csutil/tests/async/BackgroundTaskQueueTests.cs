@@ -11,7 +11,7 @@ namespace com.csutil.tests.async {
         [Fact]
         public async Task TestRunWithTaskScheduler1() { // Aligned with the coroutine test TestExecuteRepeated1
 
-            IBackgroundTaskQueue taskQueue = BackgroundTaskQueue.NewBackgroundTaskQueue(maxConcurrencyLevel: 1);
+            var taskQueue = BackgroundTaskQueue.NewBackgroundTaskQueue(maxConcurrencyLevel: 1);
 
             // Create both tasks at the same time:
             Task t1 = taskQueue.Run(SomeAsyncTask1);
@@ -39,7 +39,7 @@ namespace com.csutil.tests.async {
         [Fact]
         public async Task TestRunWithTaskScheduler2() { // Aligned with the coroutine test TestExecuteRepeated1
 
-            IBackgroundTaskQueue taskQueue = BackgroundTaskQueue.NewBackgroundTaskQueue(maxConcurrencyLevel: 2);
+            var taskQueue = BackgroundTaskQueue.NewBackgroundTaskQueue(maxConcurrencyLevel: 2);
 
             // Create both tasks at the same time:
             Task t1 = taskQueue.Run(SomeAsyncTask1);
