@@ -40,6 +40,7 @@ namespace com.csutil {
             return IoC.inject.GetOrAddSingleton<TaskV2>(null).RunTask(asyncAction, cancel, scheduler);
         }
 
+        [Obsolete("Consider using BackgroundTaskQueue.Run instead")]
         protected virtual Task RunTask(Func<Task> asyncAction, CancellationTokenSource cancel, TaskScheduler scheduler) {
             return Task.Factory.StartNew(() => Wait(Run(asyncAction)), cancel.Token, TaskCreationOptions.None, scheduler);
         }
@@ -50,6 +51,7 @@ namespace com.csutil {
 
         protected virtual Task<T> RunTask<T>(Func<Task<T>> asyncFunction) { return Task.Run(asyncFunction); }
 
+        [Obsolete("Consider using BackgroundTaskQueue.Run instead")]
         public static Task<T> Run<T>(Func<Task<T>> asyncFunction, CancellationTokenSource cancel, TaskScheduler scheduler) {
             return IoC.inject.GetOrAddSingleton<TaskV2>(null).RunTask(asyncFunction, cancel, scheduler);
         }

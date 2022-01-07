@@ -34,7 +34,12 @@ namespace com.csutil.tests {
         }
 
         public static IEnumerator RunTest<T>(string prefabName) where T : UnitTestMono {
-            var ui = RootCanvas.GetOrAddRootCanvas().gameObject.AddComponent<ViewStack>().ShowView(prefabName);
+            ViewStack viewStack = RootCanvas.GetOrAddRootCanvas().gameObject.GetOrAddComponent<ViewStack>();
+            yield return RunTest<T>(viewStack, prefabName);
+        }
+
+        public static IEnumerator RunTest<T>(ViewStack viewStack, string prefabName) where T : UnitTestMono {
+            var ui = viewStack.ShowView(prefabName);
             yield return RunTest<T>(ui);
         }
 
