@@ -62,6 +62,9 @@ namespace com.csutil.editor {
         [MenuItem(UIv2menu + "More Buttons/TwoHorizontalButtons", false, priorityOfUiMenu + 5)]
         static void TwoHorizontalButtons() { AddPrefabToActiveView("TwoHorizontalButtons"); }
 
+        [MenuItem(UIv2menu + "More Buttons/DefaultFloatingActionButton", false, priorityOfUiMenu + 5)]
+        static void DefaultFloatingActionButton() { AddPrefabToActiveView("DefaultFloatingActionButton"); }
+
         [MenuItem(UIv2menu + "DefaultToggle", false, priorityOfUiMenu + 6)]
         static void DefaultToggle() { AddPrefabToActiveView("DefaultToggle"); }
 
