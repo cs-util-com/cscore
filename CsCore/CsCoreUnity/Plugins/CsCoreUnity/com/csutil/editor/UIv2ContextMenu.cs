@@ -44,6 +44,12 @@ namespace com.csutil.editor {
             actionBar.GetLinkMap().Get<Text>("Caption").text = viewName;
         }
 
+        [MenuItem(UIv2menu + "DefaultCard", false, priorityOfUiMenu + 3)]
+        static void DefaultCard() { AddPrefabToActiveView("DefaultCard"); }
+
+        [MenuItem(UIv2menu + "DefaultPanel", false, priorityOfUiMenu + 3)]
+        static void DefaultPanel() { AddPrefabToActiveView("DefaultPanel"); }
+
         [MenuItem(UIv2menu + "DefaultButton", false, priorityOfUiMenu + 4)]
         static void DefaultButton() { AddPrefabToActiveView("DefaultButton"); }
 
