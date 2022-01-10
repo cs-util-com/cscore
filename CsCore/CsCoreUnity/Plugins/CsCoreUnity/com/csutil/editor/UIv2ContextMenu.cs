@@ -101,6 +101,9 @@ namespace com.csutil.editor {
         [MenuItem(UIv2menu + "Menus/ButtonGroup Example 2", false, priorityOfUiMenu + 8)]
         static void DefaultMenu2() { AddPrefabToActiveView("ButtonGroupTemplates/ButtonGroup2", false); }
 
+        [MenuItem(UIv2menu + "DefaultVerticalGroupWithHorizontalChildren", false, priorityOfUiMenu + 8)]
+        static void DefaultVerticalGroupWithHorizontalChildren() { AddPrefabToActiveView("DefaultVerticalGroupWithHorizontalChildren", false); }
+
         private static GameObject AddPrefabToActiveView(string uiPrefabName, bool keepReferenceToEditorPrefab = true) {
             var go = GetSelectedCanvasChild().AddChild(ResourcesV2.LoadPrefab(uiPrefabName, keepReferenceToEditorPrefab));
             SelectInHirarchyUi(go);
