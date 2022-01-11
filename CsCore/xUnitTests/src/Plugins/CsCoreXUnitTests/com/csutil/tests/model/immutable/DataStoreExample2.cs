@@ -38,7 +38,7 @@ namespace com.csutil.tests.model.immutable {
             // To allow undo redo on the full store wrap the main reducer with the undo reducer:
             var undoReducer = undoable.Wrap(MyReducers1.ReduceMyAppState1);
 
-            var data = new MyAppState1(); // the initial immutable state
+            var data = new MyAppState1(null, null, 0); // the initial immutable state
             var store = new DataStore<MyAppState1>(undoReducer, data, loggingMiddleware, recMiddleware, thunkMiddleware);
             store.storeName = "Store 1";
 
@@ -49,6 +49,8 @@ namespace com.csutil.tests.model.immutable {
             await TestAsyncActions(store);
 
             await TestReplayRecorder(recorder, store);
+
+            TestSkippableUndoActions(store);
 
             Log.MethodDone(t);
         }
@@ -133,6 +135,55 @@ namespace com.csutil.tests.model.immutable {
             Log.MethodDone(t);
         }
 
+        /// <summary> This method tests the <see cref="SkipInUndoRedoLogic"/> interface that can be added to 
+        /// any Action (see eg the <see cref="ActionUpdateDownloadProgress"/> Action below). </summary>
+        private void TestSkippableUndoActions(DataStore<MyAppState1> store) {
+            using var t = Log.MethodEntered();
+
+            var listenerWasCalledCounter = 0;
+            store.AddStateChangeListener(x => x.downloadProgress, (int newDownloadPercentage) => {
+                listenerWasCalledCounter++;
+            }, triggerInstantToInit: false);
+
+            store.Dispatch(new ActionLogoutUser());
+            Assert.Null(store.GetState().user);
+
+            var newUser = new MyUser1("Karl");
+            store.Dispatch(new ActionLoginUser() { newLoggedInUser = newUser });
+            Assert.Same(newUser, store.GetState().user);
+
+            { // Now a download progress is simulated
+                Assert.Equal(0, listenerWasCalledCounter);
+                Assert.Equal(0, store.GetState().downloadProgress);
+
+                store.Dispatch(new ActionUpdateDownloadProgress(10));
+                Assert.Equal(10, store.GetState().downloadProgress);
+
+                store.Dispatch(new ActionUpdateDownloadProgress(99));
+                Assert.Equal(99, store.GetState().downloadProgress);
+
+                store.Dispatch(new ActionUpdateDownloadProgress(100));
+                Assert.Equal(100, store.GetState().downloadProgress);
+                Assert.Equal(3, listenerWasCalledCounter);
+            }
+
+            // The download progress is not something that should be undoable, so
+            // triggering an undo action now should directly skip all these
+            // download progress events and undo the login Action directly:
+
+            Assert.Same(newUser, store.GetState().user);
+            store.Dispatch(new UndoAction<MyAppState1>());
+            Assert.Null(store.GetState().user);
+            Assert.Equal(0, store.GetState().downloadProgress);
+            Assert.Equal(4, listenerWasCalledCounter);
+
+            store.Dispatch(new RedoAction<MyAppState1>());
+            Assert.Same(newUser, store.GetState().user);
+            Assert.Equal(100, store.GetState().downloadProgress);
+            Assert.Equal(5, listenerWasCalledCounter);
+
+        }
+
         private static async Task TestAsyncActions(IDataStore<MyAppState1> store) {
             var t = Log.MethodEntered("TestAsyncActions");
 
@@ -188,7 +239,7 @@ namespace com.csutil.tests.model.immutable {
             var undoable = new UndoRedoReducer<MyAppState1>();
             var logging = Middlewares.NewLoggingMiddleware<MyAppState1>();
 
-            var data2 = new MyAppState1();
+            var data2 = new MyAppState1(null, null, 0);
             var store2 = new DataStore<MyAppState1>(undoable.Wrap(MyReducers1.ReduceMyAppState1), data2, logging, recMiddleware);
             store2.storeName = "Store 2";
 
@@ -211,9 +262,11 @@ namespace com.csutil.tests.model.immutable {
         private class MyAppState1 {
             public readonly MyUser1 user;
             public readonly List<string> currentWeather;
-            public MyAppState1(MyUser1 user = null, List<string> currentWeather = null) {
+            public readonly int downloadProgress;
+            public MyAppState1(MyUser1 user, List<string> currentWeather, int downloadProgress) {
                 this.user = user;
                 this.currentWeather = currentWeather;
+                this.downloadProgress = downloadProgress;
             }
         }
 
@@ -249,6 +302,11 @@ namespace com.csutil.tests.model.immutable {
 
         private class ActionSetWeather { public List<string> newWeather; }
 
+        private class ActionUpdateDownloadProgress : SkipInUndoRedoLogic {
+            public int newDownloadProgress;
+            public ActionUpdateDownloadProgress(int newDownloadProgress) { this.newDownloadProgress = newDownloadProgress; }
+        }
+
         private static Func<IDataStore<MyAppState1>, Task> NewAsyncGetWeatherAction() {
             // The created method is executed by the thunk middlewhere when its dispatched in a store:
             return async (IDataStore<MyAppState1> store) => {
@@ -281,10 +339,11 @@ namespace com.csutil.tests.model.immutable {
             // The most outer reducer is public to be passed into the store:
             public static MyAppState1 ReduceMyAppState1(MyAppState1 previousState, object action) {
                 bool changed = false;
-                if (action is ResetStoreAction) { return new MyAppState1(); }
+                if (action is ResetStoreAction) { return new MyAppState1(null, null, 0); }
                 var newWeather = previousState.currentWeather.Mutate(action, ReduceWeather, ref changed);
                 var newUser = previousState.user.Mutate(action, ReduceUser, ref changed);
-                if (changed) { return new MyAppState1(newUser, newWeather); }
+                var newDownloadProgress = previousState.downloadProgress.Mutate(action, ReduceDownloadProgress, ref changed);
+                if (changed) { return new MyAppState1(newUser, newWeather, newDownloadProgress); }
                 return previousState;
             }
 
@@ -305,6 +364,13 @@ namespace com.csutil.tests.model.immutable {
                     if (userChanged) { return new MyUser1(name, age, contacts); }
                 }
                 return user; // None of the fields changed, old user can be returned
+            }
+
+            private static int ReduceDownloadProgress(int previousDownloadProgress, object action) {
+                if (action is ActionUpdateDownloadProgress a) {
+                    return a.newDownloadProgress;
+                }
+                return previousDownloadProgress;
             }
 
             private static ImmutableList<MyUser1> ReduceContacts(MyUser1 user, ImmutableList<MyUser1> contacts, object action) {
