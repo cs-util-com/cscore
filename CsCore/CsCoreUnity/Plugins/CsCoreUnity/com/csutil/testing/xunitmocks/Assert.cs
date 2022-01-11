@@ -60,18 +60,14 @@ namespace Xunit {
             True(obj is T, "Not Type " + typeof(T) + ": " + obj);
         }
 
-        public static void Throws<T>(Action a) where T : Exception {
-            var notThrown = false;
-            try { a(); notThrown = true; }
-            catch (T) { }
-            if (notThrown) { throw new AssertException("Did not throw " + typeof(T)); }
+        public static T Throws<T>(Action a) where T : Exception {
+            try { a(); } catch (T t) { return t; }
+            throw new AssertException("Did not throw " + typeof(T));
         }
 
-        public static async Task ThrowsAsync<T>(Func<Task> a) where T : Exception {
-            var notThrown = false;
-            try { await a(); notThrown = true; }
-            catch (T) { }
-            if (notThrown) { throw new AssertException("Did not throw " + typeof(T)); }
+        public static async Task<T> ThrowsAsync<T>(Func<Task> a) where T : Exception {
+            try { await a(); } catch (T t) { return t; }
+            throw new AssertException("Did not throw " + typeof(T));
         }
 
         public static void Same<T>(T expected, T actual) {

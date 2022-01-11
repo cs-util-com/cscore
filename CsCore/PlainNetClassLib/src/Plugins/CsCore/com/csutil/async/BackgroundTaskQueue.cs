@@ -8,7 +8,7 @@ using System.Threading.Tasks.Schedulers;
 
 namespace com.csutil {
 
-    public class BackgroundTaskQueue {
+    public class BackgroundTaskQueue : IDisposable {
 
         public static BackgroundTaskQueue NewBackgroundTaskQueue(int maxConcurrencyLevel) {
             return new BackgroundTaskQueue(new QueuedTaskScheduler(TaskScheduler.Default, maxConcurrencyLevel), new CancellationTokenSource());
@@ -41,13 +41,22 @@ namespace com.csutil {
 
         public void CancelAllOpenTasks() { if (!Cancel.IsCancellationRequested) { Cancel.Cancel(); } }
 
-        public async Task Run(Func<Task> asyncAction) {
-            var t = TaskV2.Run(asyncAction, Cancel, Scheduler);
-            await AddToManagedTasks(t);
+        public Task Run(Func<CancellationToken, Task> asyncAction) {
+            var t = TaskV2.Run(async () => {
+                Cancel.Token.ThrowIfCancellationRequested();
+                await asyncAction(Cancel.Token);
+                Cancel.Token.ThrowIfCancellationRequested();
+            }, Cancel, Scheduler);
+            return AddToManagedTasks(t);
         }
 
-        public async Task<T> Run<T>(Func<Task<T>> asyncFunction) {
-            var t = TaskV2.Run(asyncFunction, Cancel, Scheduler);
+        public async Task<T> Run<T>(Func<CancellationToken, Task<T>> asyncFunction) {
+            var t = TaskV2.Run(async () => {
+                Cancel.Token.ThrowIfCancellationRequested();
+                T result = await asyncFunction(Cancel.Token);
+                Cancel.Token.ThrowIfCancellationRequested();
+                return result;
+            }, Cancel, Scheduler);
             await AddToManagedTasks(t);
             return await t;
         }
@@ -55,10 +64,13 @@ namespace com.csutil {
         private async Task AddToManagedTasks(Task taskToAdd) {
             Tasks.Add(taskToAdd);
             ProgressListener?.SetCount(GetCompletedTasksCount(), GetTotalTasksCount());
-            await taskToAdd; // After the task is done update the progress listener again:
-            ProgressListener?.SetCount(GetCompletedTasksCount(), GetTotalTasksCount());
+            try { await taskToAdd; }
+            finally { // After the task is done update the progress listener again:
+                ProgressListener?.SetCount(GetCompletedTasksCount(), GetTotalTasksCount());
+            }
         }
 
+        public void Dispose() { Cancel.Dispose(); }
     }
 
 }

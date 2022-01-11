@@ -44,6 +44,12 @@ namespace com.csutil.editor {
             actionBar.GetLinkMap().Get<Text>("Caption").text = viewName;
         }
 
+        [MenuItem(UIv2menu + "DefaultCard", false, priorityOfUiMenu + 3)]
+        static void DefaultCard() { AddPrefabToActiveView("DefaultCard"); }
+
+        [MenuItem(UIv2menu + "DefaultPanel", false, priorityOfUiMenu + 3)]
+        static void DefaultPanel() { AddPrefabToActiveView("DefaultPanel"); }
+
         [MenuItem(UIv2menu + "DefaultButton", false, priorityOfUiMenu + 4)]
         static void DefaultButton() { AddPrefabToActiveView("DefaultButton"); }
 
@@ -62,11 +68,17 @@ namespace com.csutil.editor {
         [MenuItem(UIv2menu + "More Buttons/TwoHorizontalButtons", false, priorityOfUiMenu + 5)]
         static void TwoHorizontalButtons() { AddPrefabToActiveView("TwoHorizontalButtons"); }
 
+        [MenuItem(UIv2menu + "More Buttons/DefaultFloatingActionButton", false, priorityOfUiMenu + 5)]
+        static void DefaultFloatingActionButton() { AddPrefabToActiveView("DefaultFloatingActionButton"); }
+
         [MenuItem(UIv2menu + "DefaultToggle", false, priorityOfUiMenu + 6)]
         static void DefaultToggle() { AddPrefabToActiveView("DefaultToggle"); }
 
         [MenuItem(UIv2menu + "DefaultInput", false, priorityOfUiMenu + 6)]
         static void DefaultInput() { AddPrefabToActiveView("DefaultInput"); }
+
+        [MenuItem(UIv2menu + "DefaultDropDown", false, priorityOfUiMenu + 6)]
+        static void DefaultDropDown() { AddPrefabToActiveView("DefaultDropDown"); }
 
         [MenuItem(UIv2menu + "DefaultImage", false, priorityOfUiMenu + 6)]
         static void DefaultImage() { AddPrefabToActiveView("DefaultImage"); }
@@ -97,6 +109,9 @@ namespace com.csutil.editor {
 
         [MenuItem(UIv2menu + "Menus/ButtonGroup Example 2", false, priorityOfUiMenu + 8)]
         static void DefaultMenu2() { AddPrefabToActiveView("ButtonGroupTemplates/ButtonGroup2", false); }
+
+        [MenuItem(UIv2menu + "DefaultVerticalGroupWithHorizontalChildren", false, priorityOfUiMenu + 8)]
+        static void DefaultVerticalGroupWithHorizontalChildren() { AddPrefabToActiveView("DefaultVerticalGroupWithHorizontalChildren", false); }
 
         private static GameObject AddPrefabToActiveView(string uiPrefabName, bool keepReferenceToEditorPrefab = true) {
             var go = GetSelectedCanvasChild().AddChild(ResourcesV2.LoadPrefab(uiPrefabName, keepReferenceToEditorPrefab));

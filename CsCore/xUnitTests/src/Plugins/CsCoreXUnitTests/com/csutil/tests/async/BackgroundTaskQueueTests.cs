@@ -1,4 +1,8 @@
-﻿using System.Threading.Tasks;
+﻿using com.csutil.progress;
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace com.csutil.tests.async {
@@ -9,9 +13,9 @@ namespace com.csutil.tests.async {
         public BackgroundTaskQueueTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
         [Fact]
-        public async Task TestRunWithTaskScheduler1() { // Aligned with the coroutine test TestExecuteRepeated1
+        public async Task ExampleUsage1() {
 
-            var taskQueue = BackgroundTaskQueue.NewBackgroundTaskQueue(maxConcurrencyLevel: 1);
+            using var taskQueue = BackgroundTaskQueue.NewBackgroundTaskQueue(maxConcurrencyLevel: 1);
 
             // Create both tasks at the same time:
             Task t1 = taskQueue.Run(SomeAsyncTask1);
@@ -37,34 +41,68 @@ namespace com.csutil.tests.async {
         }
 
         [Fact]
-        public async Task TestRunWithTaskScheduler2() { // Aligned with the coroutine test TestExecuteRepeated1
+        public async Task TestConcurrency2() {
 
-            var taskQueue = BackgroundTaskQueue.NewBackgroundTaskQueue(maxConcurrencyLevel: 2);
+            using var taskQueue = BackgroundTaskQueue.NewBackgroundTaskQueue(maxConcurrencyLevel: 2);
+            taskQueue.ProgressListener = new ProgressV2("Progress Listener", 0);
 
             // Create both tasks at the same time:
             Task t1 = taskQueue.Run(SomeAsyncTask1);
             Task<string> t2 = taskQueue.Run(SomeAsyncTask2);
             var t3 = taskQueue.Run(SomeAsyncTask1); // Add a 3rd task (will not be started)
             Assert.Equal(3, taskQueue.GetRemainingScheduledTaskCount());
+            Assert.Equal(0, taskQueue.ProgressListener.percent);
 
             await t2;
             // Since the scheduler allows 2 tasks at a time, t1 will not be complete when t2 is done:
             Assert.False(t1.IsCompleted);
             Assert.Equal(1, taskQueue.GetCompletedTasksCount());
+            Assert.Equal(1, taskQueue.ProgressListener.GetCount()); // 1 Task should be completed
 
             await taskQueue.WhenAllTasksCompleted(flushQueueAfterCompletion: true);
             Assert.Equal(0, taskQueue.GetRemainingScheduledTaskCount());
             Assert.Equal(0, taskQueue.GetCompletedTasksCount()); // Queue was flushed
+            Assert.Equal(100, taskQueue.ProgressListener.percent); // All tasks should be compleded
 
         }
 
-        private async Task SomeAsyncTask1() {
+        [Fact]
+        public async Task TestCancelRequest() {
+
+            using var taskQueue = BackgroundTaskQueue.NewBackgroundTaskQueue(maxConcurrencyLevel: 1);
+
+            // Create both tasks at the same time:
+            Task t1 = taskQueue.Run(SomeAsyncTask1);
+            Task<string> t2 = taskQueue.Run(SomeAsyncTask2);
+            var t3 = taskQueue.Run(SomeAsyncTask1); // Add a 3rd task (will not be started)
+
+            taskQueue.CancelAllOpenTasks();
+            // Awaiting the canceled queue will throw a TaskCanceledException:
+            var exceptions = await Assert.ThrowsAsync<AggregateException>(async () => {
+                await taskQueue.WhenAllTasksCompleted();
+            });
+
+            var innerExceptions = exceptions.InnerExceptions.Cast<TaskCanceledException>();
+            Assert.Single(innerExceptions);
+
+            // The first task was started but then canceled while it was already running:
+            Assert.False(t1.IsCanceled);
+            Assert.False(t1.IsCompletedSuccessfully);
+            Assert.True(t1.IsFaulted);
+
+            // The other 2 were canceled before they started:
+            Assert.True(t2.IsCanceled);
+            Assert.True(t3.IsCanceled);
+
+        }
+
+        private async Task SomeAsyncTask1(CancellationToken cancelRequest) {
             var t = Log.MethodEntered();
             await TaskV2.Delay(500);
             Log.MethodDone(t);
         }
 
-        private async Task<string> SomeAsyncTask2() {
+        private async Task<string> SomeAsyncTask2(CancellationToken cancelRequest) {
             var t = Log.MethodEntered();
             await TaskV2.Delay(5);
             Log.MethodDone(t);
