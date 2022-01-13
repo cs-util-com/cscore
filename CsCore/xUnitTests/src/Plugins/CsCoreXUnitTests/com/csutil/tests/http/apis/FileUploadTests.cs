@@ -33,6 +33,29 @@ namespace com.csutil.tests.http {
             Assert.Equal(formText, result.form.First().Value);
             Assert.Single(result.files);
             Assert.Equal(fileToUpload.Name, result.files.First().Key);
+            Assert.True(result.headers.contentType.StartsWith("multipart/form-data"));
+
+        }
+
+        [Fact]
+        public async Task TestPostFormData2() {
+
+            // Use postman-echo.com to test posting form data including files:
+            RestRequest request = new Uri("https://postman-echo.com/post").SendPOST();
+
+            string formText1 = "I am a string 1";
+            string formText2 = "I am a string 2";
+            var formData = new Dictionary<string, object>();
+            formData.Add("formString1", formText1);
+            formData.Add("formString2", formText2);
+            request.WithFormContent(formData);
+
+            PostmanEchoResponse result = await request.GetResult<PostmanEchoResponse>();
+            Log.d(JsonWriter.AsPrettyString(result));
+            Assert.Equal(2, result.form.Count);
+            Assert.Equal(formText1, result.form.First().Value);
+            Assert.Equal(formText2, result.form.Skip(1).First().Value);
+            Assert.Equal("application/x-www-form-urlencoded", result.headers.contentType);
 
         }
 

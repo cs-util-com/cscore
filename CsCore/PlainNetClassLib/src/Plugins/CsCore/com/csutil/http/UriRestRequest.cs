@@ -2,6 +2,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -33,6 +34,18 @@ namespace com.csutil.http {
         }
 
         public RestRequest WithFormContent(Dictionary<string, object> formData) {
+
+            // For pure string based key value pairs send "application/x-www-form-urlencoded" content:
+            if (formData.All(entry => entry.Value is string)) {
+                if (httpContent == null) {
+                    httpContent = new FormUrlEncodedContent(formData.ToDictionary(x => x.Key, x => (string)x.Value));
+                    return this;
+                } else {
+                    Log.w("formData is all strings application/x-www-form-urlencoded could be used but " +
+                        "other form content was already added so multipart/form-data will be used instead!");
+                }
+            }
+
             MultipartFormDataContent form = httpContent as MultipartFormDataContent;
             if (form == null) { form = new MultipartFormDataContent(); }
             foreach (var formEntry in formData) {
