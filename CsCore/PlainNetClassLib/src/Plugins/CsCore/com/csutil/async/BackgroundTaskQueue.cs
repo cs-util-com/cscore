@@ -43,18 +43,23 @@ namespace com.csutil {
 
         public Task Run(Func<CancellationToken, Task> asyncAction) {
             var t = TaskV2.Run(async () => {
-                Cancel.Token.ThrowIfCancellationRequested();
+                ThrowIfCancellationRequested(Cancel);
                 await asyncAction(Cancel.Token);
-                Cancel.Token.ThrowIfCancellationRequested();
+                ThrowIfCancellationRequested(Cancel);
             }, Cancel, Scheduler);
             return AddToManagedTasks(t);
         }
 
+        private static void ThrowIfCancellationRequested(CancellationTokenSource cancel) {
+            if (cancel.IsCancellationRequested) { throw new TaskCanceledException(); }
+            cancel.Token.ThrowIfCancellationRequested();
+        }
+
         public async Task<T> Run<T>(Func<CancellationToken, Task<T>> asyncFunction) {
             var t = TaskV2.Run(async () => {
-                Cancel.Token.ThrowIfCancellationRequested();
+                ThrowIfCancellationRequested(Cancel);
                 T result = await asyncFunction(Cancel.Token);
-                Cancel.Token.ThrowIfCancellationRequested();
+                ThrowIfCancellationRequested(Cancel);
                 return result;
             }, Cancel, Scheduler);
             await AddToManagedTasks(t);
@@ -70,7 +75,10 @@ namespace com.csutil {
             }
         }
 
-        public void Dispose() { Cancel.Dispose(); }
+        public void Dispose() {
+            CancelAllOpenTasks();
+            Cancel.Dispose();
+        }
     }
 
 }
