@@ -108,6 +108,12 @@ namespace com.csutil {
             self.GetOrAddComponent<OnDestroyListener>().onDestroy.AddListener(() => { onDestroyCallback(); });
         }
 
+        /// <summary> When the gameobject is destroyed call Dispose on a target <see cref="IDisposable"/> </summary>
+        public static T SetUpDisposeOnDestroy<T>(this GameObject self, T objectToDispose) where T : IDisposable {
+            self.AddComponent<DisposerMono>().disposable = objectToDispose;
+            return objectToDispose;
+        }
+
     }
 
 }
