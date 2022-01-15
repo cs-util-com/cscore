@@ -78,7 +78,6 @@ namespace com.csutil.tests.http {
 
             var timingForFullImage = Log.MethodEntered("Load full image");
             var fullImage = await new Uri(imgUrl).SendGET().GetResult<Stream>();
-            Assert.False(fullImage.CanSeek);
             var info2 = await ImageLoader.GetImageInfoFrom(fullImage);
             fullImage.Dispose();
             Assert.Equal(h, info2.Height);
@@ -88,7 +87,6 @@ namespace com.csutil.tests.http {
             var timingForImageInfoOny = Log.MethodEntered("Load only first bytes");
             var stream = await new Uri(imgUrl).SendGET().GetResult<Stream>();
             var firstBytes = await ImageLoader.CopyFirstBytes(stream, bytesToCopy: 500);
-            Assert.False(fullImage.CanSeek);
             Assert.True(firstBytes.CanSeek);
             var info = await ImageLoader.GetImageInfoFrom(firstBytes);
             firstBytes.Dispose();
