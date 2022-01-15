@@ -15,6 +15,7 @@ namespace com.csutil.tests {
 
         [Fact]
         public async Task ExampleUsage1() {
+            GetTempFolder().DeleteV2();
             FileEntry inputFile = await GetImageFile("testImage2.jpg");
             FileEntry outputFile = inputFile.Parent.GetChild("testImage2.png");
 
@@ -64,7 +65,7 @@ namespace com.csutil.tests {
         }
 
         private static async Task<FileEntry> GetImageFile(string imageFileName) {
-            FileEntry imgFile = EnvironmentV2.instance.GetCurrentDirectory().GetChild(imageFileName);
+            FileEntry imgFile = GetTempFolder().GetChild(imageFileName);
             // If the file does not exist or is invalid, download a random image and save it there:
             if (!imgFile.Exists || imgFile.GetFileSize() == 0) {
                 Log.d("Saving random image for testing to: " + imgFile.GetFullFileSystemPath());
@@ -76,6 +77,8 @@ namespace com.csutil.tests {
             Assert.NotEqual(0, imgFile.GetFileSize());
             return imgFile;
         }
+
+        private static DirectoryEntry GetTempFolder() { return EnvironmentV2.instance.GetOrAddTempFolder("ImageMagickTests"); }
 
     }
 
