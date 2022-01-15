@@ -119,17 +119,25 @@ namespace com.csutil.http {
             if (OnBeforeSend != null) { await OnBeforeSend(client, message); }
             request = client.SendAsync(message, sendAsyncCompletedAfter);
             var result = await request;
+
+            var cookieJar = IoC.inject.Get<cookies.CookieJar>(this, false);
+            if (cookieJar != null) {
+                cookieJar.SetCookies(handler.CookieContainer.GetCookiesForCookieJar(uri).ToArray());
+            }
+
             var serverUtcDate = result.Headers.Date;
             if (serverUtcDate != null) { EventBus.instance.Publish(DateTimeV2.SERVER_UTC_DATE, uri, serverUtcDate.Value.DateTime); }
             return result;
         }
 
         private void AddAllCookiesToRequest(HttpClientHandler handler) {
-            var cookieJar = IoC.inject.Get<cookies.CookieJar>(this, false);
-            var cookies = cookieJar?.GetCookies(new cookies.CookieAccessInfo(uri.Host, uri.AbsolutePath));
-            if (!cookies.IsNullOrEmpty()) {
-                var cookieContainer = handler.CookieContainer;
-                foreach (var c in cookies) { cookieContainer.Add(uri, new Cookie(c.name, c.value)); }
+            var reusableCookieContainer = IoC.inject.Get<CookieContainer>(this, false);
+            if (reusableCookieContainer != null) {
+                handler.CookieContainer = reusableCookieContainer;
+                // Since an existing cookie container is reused it is assumed it is already filled with the correct cookies
+            } else {
+                var cookieJar = IoC.inject.Get<cookies.CookieJar>(this, false);
+                cookieJar.LoadFromCookieJarIntoCookieContainer(uri, target: handler.CookieContainer);
             }
         }
 

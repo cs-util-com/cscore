@@ -9,19 +9,25 @@ namespace com.csutil {
 
         /// <summary> set all current cookies for each new request </summary>
         public static bool ApplyAllCookiesToRequest(this UnityWebRequest self) {
-            return self.SetCookies(LoadStoredCookiesForUri(new Uri(self.url)));
-        }
-
-        private static List<Cookie> LoadStoredCookiesForUri(Uri uri) {
+            Uri uri = new Uri(self.url);
             try {
+                // If available use the CookieContainer to apply set cookies to the request:
+                var container = IoC.inject.Get<System.Net.CookieContainer>(uri);
+                if (container != null) {
+                    self.SetRequestHeader("Cookie", container.GetCookieHeader(uri));
+                    return true;
+                }
+                // Else use the CookieJar (if available):
                 CookieJar jar = IoC.inject.Get<CookieJar>(uri);
-                if (jar == null) { return new List<Cookie>(); }
-                var c = jar.GetCookies(new CookieAccessInfo(uri.Host, uri.AbsolutePath));
-                if (c.IsNullOrEmpty() && uri.Scheme.Equals("https")) { c = jar.GetCookies(new CookieAccessInfo(uri.Host, uri.AbsolutePath, true)); }
-                return c;
+                if (jar == null) { return true; }
+                var allCookies = jar.GetCookies(new CookieAccessInfo(uri.Host, uri.AbsolutePath));
+                if (allCookies.IsNullOrEmpty() && uri.Scheme.Equals("https")) {
+                    allCookies = jar.GetCookies(new CookieAccessInfo(uri.Host, uri.AbsolutePath, true));
+                }
+                return self.SetCookies(allCookies);
             }
             catch (Exception e) { Log.e(e); }
-            return new List<Cookie>();
+            return false;
         }
 
         /// <summary> can be used to manually set a specific set of cookies, normally not needed since cookies are applied automatically by applyAllCookies()! </summary>
@@ -45,30 +51,27 @@ namespace com.csutil {
 
         public static bool SaveAllNewCookiesFromResponse(this UnityWebRequest self) {
             try {
-                List<string> cookies = GetResponseHeaders(self, "Set-Cookie");
-                if (cookies.IsNullOrEmpty()) { return false; }
-                foreach (var cookieString in cookies) { AddCookie(self, cookieString); }
-                return true;
+                string cookieHeader = self.GetResponseHeader("Set-Cookie");
+                if (cookieHeader.IsNullOrEmpty()) { return false; }
+
+                var cookieJar = IoC.inject.Get<CookieJar>(self, createIfNull: false);
+                if (cookieJar != null) { SetCookieHeader(self, cookieHeader, cookieJar); }
+
+                var container = IoC.inject.Get<System.Net.CookieContainer>(self, createIfNull: false);
+                if (container != null) { container.SetCookies(self.uri, cookieHeader); }
+
+                return cookieJar != null || container != null;
             }
             catch (Exception e) { Log.e(e); }
             return false;
         }
 
-        private static List<string> GetResponseHeaders(UnityWebRequest self, string headerName) {
-            List<string> cookies = new List<string>();
-            cookies.Add(self.GetResponseHeader(headerName));
-            return cookies;
-        }
-
-        private static bool AddCookie(UnityWebRequest self, string cookieString) {
+        private static bool SetCookieHeader(UnityWebRequest self, string cookieHeader, CookieJar cookieJar) {
             try {
-                if (self == null || cookieString.IsNullOrEmpty()) { return false; }
-                // from Response.cs:
-                if (cookieString.IndexOf("domain=", StringComparison.CurrentCultureIgnoreCase) == -1) { cookieString += "; domain=" + self.url; }
-                if (cookieString.IndexOf("path=", StringComparison.CurrentCultureIgnoreCase) == -1) { cookieString += "; path=" + self.url; }
-                var cookieJar = IoC.inject.Get<CookieJar>(self);
-                if (cookieJar == null) { return false; }
-                return cookieJar.SetCookie(new Cookie(cookieString));
+                if (self == null || cookieHeader.IsNullOrEmpty()) { return false; }
+                if (cookieHeader.IndexOf("domain=", StringComparison.CurrentCultureIgnoreCase) == -1) { cookieHeader += "; domain=" + self.uri.Host; }
+                if (cookieHeader.IndexOf("path=", StringComparison.CurrentCultureIgnoreCase) == -1) { cookieHeader += "; path=" + self.uri.LocalPath; }
+                return cookieJar.SetCookie(new Cookie(cookieHeader));
             }
             catch (Exception e) { Log.e(e); }
             return false;

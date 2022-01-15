@@ -4,14 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Web;
 using com.csutil.http;
 using com.csutil.http.apis;
-using com.csutil.http.cookies;
 using com.csutil.io;
-using StbImageSharp;
 using Xunit;
 
 namespace com.csutil.tests.http {
@@ -256,70 +252,15 @@ namespace com.csutil.tests.http {
                 try { // Provoke an exception that will then be searched for on StackOverflow
                     List<string> list = new List<string>(); // List without entries
                     list.First(); // Will cause "Sequence contains no elements" exception
-                } catch (Exception e) { await e.RethrowWithAnswers(); }
+                }
+                catch (Exception e) { await e.RethrowWithAnswers(); }
 
-            } catch (Error exceptionWithAnswers) {
+            }
+            catch (Error exceptionWithAnswers) {
                 // Check that the error contains detailed answers:
                 var length = exceptionWithAnswers.Message.Length;
                 Assert.True(length > 1500, "message length=" + length);
             }
-        }
-
-        [Fact]
-        public async Task TestCookies() {
-            IoC.inject.SetSingleton<CookieJar>(new InMemoryCookieJar());
-            var cookieJar = IoC.inject.Get<CookieJar>(null, false);
-            Assert.NotNull(cookieJar);
-
-            var uri = new Uri("http://httpbin.org/cookies");
-
-            cookieJar.SetCookie(csutil.http.cookies.Cookie.NewCookie("coo1", "cooVal1", uri.Host));
-            cookieJar.SetCookie(csutil.http.cookies.Cookie.NewCookie("coo2", "cooVal2", uri.Host));
-            var resp = await uri.SendGET().GetResult<HttpbinCookieResp>();
-            Assert.Contains(resp.cookies, x => x.Key == "coo1" && x.Value == "cooVal1");
-            Assert.Contains(resp.cookies, x => x.Key == "coo2" && x.Value == "cooVal2");
-        }
-
-        private class HttpbinCookieResp { public Dictionary<string, string> cookies { get; set; } }
-
-        /// <summary> This implementation does not persist any cookies, so the callbacks are all NOOP </summary>
-        private class InMemoryCookieJar : CookieJar {
-            protected override void LoadAllCookies() { }
-            protected override bool PersistAllCookies(Dictionary<string, List<csutil.http.cookies.Cookie>> all) {
-                return true;
-            }
-            protected override void DeleteAllCookies() { }
-        }
-
-    }
-
-
-    [Collection("Sequential")] // Will execute tests in here sequentially
-    public class HasInternetTests : IHasInternetListener {
-
-        private bool hasInet;
-
-        [Fact]
-        public async Task TestInternetStateListenerOnce() {
-            InternetStateManager.AddListener(this);
-            Assert.True(await RestFactory.instance.HasInternet());
-            Assert.True(await InternetStateManager.Instance(this).HasInetAsync);
-            Assert.True(InternetStateManager.Instance(this).HasInet);
-            Assert.True(hasInet);
-            InternetStateManager.RemoveListener(this);
-        }
-
-        [Fact]
-        public async Task TestInternetStateListener20Times() {
-            for (int i = 0; i < 20; i++) {
-                await TestInternetStateListenerOnce();
-            }
-        }
-
-        Task IHasInternetListener.OnHasInternet(bool hasInet) {
-            this.hasInet = hasInet;
-            Assert.True(hasInet);
-            return Task.FromResult(true);
         }
 
     }

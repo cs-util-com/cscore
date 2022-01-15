@@ -18,7 +18,7 @@ namespace com.csutil.http.cookies {
 
         protected abstract void LoadAllCookies();
         
-        protected abstract bool PersistAllCookies(Dictionary<string, List<Cookie>> allCookies);
+        protected abstract void PersistAllCookies(Dictionary<string, List<Cookie>> allCookies);
 
         protected abstract void DeleteAllCookies();
 
@@ -91,8 +91,7 @@ namespace com.csutil.http.cookies {
         }
 
         private void SaveAllCookies() {
-            var savingWorked = PersistAllCookies(cookies);
-            if (!savingWorked) { Log.e(("Could not persist cookies")); }
+            PersistAllCookies(cookies);
             InformContentChangeListener();
         }
 
