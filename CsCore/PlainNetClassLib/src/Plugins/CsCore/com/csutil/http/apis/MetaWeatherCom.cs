@@ -33,7 +33,7 @@ namespace com.csutil.http.apis {
 
             public string location_type { get; set; }
 
-            /// <summary> Where On Earth ID - see http://developer.yahoo.com/geo/geoplanet/guide/concepts.html </summary>
+            /// <summary> Where On Earth ID - see https://en.wikipedia.org/wiki/WOEID </summary>
             public int woeid { get; set; }
 
             public string latt_long { get; set; }

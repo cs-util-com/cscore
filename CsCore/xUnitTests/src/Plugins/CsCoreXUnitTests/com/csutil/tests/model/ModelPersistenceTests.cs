@@ -60,7 +60,7 @@ namespace com.csutil.tests.model {
 
             {
                 // Url from https://gist.github.com/jsturgis/3b19447b304616f18657
-                IFileRef f = new FileRef() { url = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4" };
+                IFileRef f = new FileRef() { url = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4" };
                 Assert.True(await TestDownloadTo(f, dir));
                 Log.d("FileRef: " + JsonWriter.AsPrettyString(f));
                 Assert.False(await TestDownloadTo(f, dir)); // Second time its already cached
@@ -96,7 +96,7 @@ namespace com.csutil.tests.model {
             var dir = EnvironmentV2.instance.GetOrAddTempFolder("TestLargeFileDownloadWithProgress");
 
             // Url from https://gist.github.com/jsturgis/3b19447b304616f18657
-            var f = new FileRef() { url = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" };
+            var f = new FileRef() { url = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" };
             await Assert.ThrowsAsync<TaskCanceledException>(async () => {
                 await f.DownloadTo(dir, downloadProgress => {
                     if (downloadProgress > 5) { throw new TaskCanceledException("Download canceled after 5%"); }

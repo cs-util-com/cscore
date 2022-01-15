@@ -7,7 +7,7 @@ namespace com.csutil.math {
 
         /// <summary>
         /// This allows to calculate the mean of a list without storing all entries of the list.
-        /// See http://math.stackexchange.com/questions/106700/incremental-averageing
+        /// See https://math.stackexchange.com/questions/106700/incremental-averageing
         /// </summary>
         /// <param name="oldAverage">the old mean value</param>
         /// <param name="newValue">the new value added to the mean</param>
@@ -19,7 +19,7 @@ namespace com.csutil.math {
 
         /// <summary>
         /// Fourth order zero-phase shift low-pass Butterworth filter function by Sam Van Wassenbergh (University of Antwerp, 2007)
-        /// Source: http://www.codeproject.com/Tips/1092012/A-Butterworth-Filter-in-Csharp
+        /// Source: https://www.codeproject.com/Tips/1092012/A-Butterworth-Filter-in-Csharp
         /// </summary>
         /// <param name="self">The unfiltered data</param>
         /// <param name="dtInSec">the time between one data point and the next in seconds, is needed to calculate the sampling rate (inverse of the time step)</param>

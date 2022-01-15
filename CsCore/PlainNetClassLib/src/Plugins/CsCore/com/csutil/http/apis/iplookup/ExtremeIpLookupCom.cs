@@ -8,7 +8,7 @@ namespace com.csutil.http.apis.iplookup {
             return new Uri("https://extreme-ip-lookup.com/json/").SendGET().GetResult<Response>();
         }
 
-        public class Response { // generated via http://json2csharp.com :
+        public class Response { // generated via https://json2csharp.com :
             public string businessName { get; set; }
             public string businessWebsite { get; set; }
             public string city { get; set; }

@@ -104,7 +104,7 @@ namespace com.csutil {
             return go.activeInHierarchy || !go.IsPartOfEditorOnlyPrefab();
         }
 
-        // See http://answers.unity.com/answers/1190932/view.html
+        // See https://answers.unity.com/answers/1190932/view.html
         public static bool IsPartOfEditorOnlyPrefab(this GameObject go) {
             return go.scene.rootCount == 0 || go.scene.name == null;
         }

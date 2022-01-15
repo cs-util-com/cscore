@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 
 namespace com.csutil.model {
 
-    /// <summary> Related links: https://www.debuggex.com and https://regex101.com/ and http://regexlib.com </summary>
+    /// <summary> Related links: https://www.debuggex.com and https://regex101.com/ and https://regexlib.com </summary>
     public static class RegexTemplates {
 
         public const string EMAIL_ADDRESS = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"

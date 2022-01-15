@@ -10,9 +10,9 @@ namespace com.csutil.logging.analytics {
     public class GoogleAnalytics : DefaultAppFlowImpl {
 
         /// <summary> https://developers.google.com/analytics/devguides/collection/protocol/v1/validating-hits </summary>
-        public const string DEBUG_ENDPOINT = "http://www.google-analytics.com/debug/collect";
+        public const string DEBUG_ENDPOINT = "https://www.google-analytics.com/debug/collect";
 
-        public string url = "http://www.google-analytics.com/collect";
+        public string url = "https://www.google-analytics.com/collect";
         public string appId;
         public string appName;
         private string latestScreen;

@@ -7,7 +7,7 @@ namespace com.csutil.model {
     /// <summary>
     /// This is a dictionary that can be displayed in the Unity inspector UI. 
     /// A non generic subclass must be created for it to show correctly in the editor.
-    /// Initial idea from http://answers.unity.com/answers/809221/view.html
+    /// Initial idea from https://answers.unity.com/answers/809221/view.html
     /// </summary>
     [Serializable]
     public class SerializableDictionary<K, V, E> : Dictionary<K, V>, ISerializationCallbackReceiver

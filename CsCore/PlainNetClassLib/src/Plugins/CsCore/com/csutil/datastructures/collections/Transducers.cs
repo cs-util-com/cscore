@@ -12,7 +12,7 @@ namespace com.csutil {
     /// Related sources:
     /// - https://jrsinclair.com/articles/2019/magical-mystical-js-transducers/
     /// - https://medium.com/javascript-scene/transducers-efficient-data-processing-pipelines-in-javascript-7985330fe73d
-    /// - http://raganwald.com/2017/04/30/transducers.html
+    /// - https://raganwald.com/2017/04/30/transducers.html
     /// </summary> 
     public static class Transducers {
 

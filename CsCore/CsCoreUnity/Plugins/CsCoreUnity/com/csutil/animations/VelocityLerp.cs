@@ -8,7 +8,7 @@ namespace com.csutil {
 
     public static class VelocityLerp {
 
-        /// <summary> Critically Damped Spring Smoothing - http://mathproofs.blogspot.jp/2013/07/critically-damped-spring-smoothing.html </summary>
+        /// <summary> Critically Damped Spring Smoothing - https://mathproofs.blogspot.jp/2013/07/critically-damped-spring-smoothing.html </summary>
         /// <param name="currentVelocity"> Should be a field which is passed with every call again </param>
         /// <param name="dt"> Normally Time.deltaTime </param>
         /// <returns>the new value</returns>
@@ -20,7 +20,7 @@ namespace com.csutil {
             return self + currentVelocity * dt;
         }
 
-        /// <summary> Critically Damped Spring Smoothing - http://mathproofs.blogspot.jp/2013/07/critically-damped-spring-smoothing.html </summary>
+        /// <summary> Critically Damped Spring Smoothing - https://mathproofs.blogspot.jp/2013/07/critically-damped-spring-smoothing.html </summary>
         /// <param name="currentVelocity"> Should be a field which is passed with every call again </param>
         /// <param name="dt"> Normally Time.deltaTime </param>
         /// <param name="omega"> Try something between 10 and 100 </param>
@@ -31,7 +31,7 @@ namespace com.csutil {
             return self + currentVelocity * dt;
         }
 
-        /// <summary> Critically Damped Spring Smoothing - http://mathproofs.blogspot.jp/2013/07/critically-damped-spring-smoothing.html </summary>
+        /// <summary> Critically Damped Spring Smoothing - https://mathproofs.blogspot.jp/2013/07/critically-damped-spring-smoothing.html </summary>
         /// <param name="currentVelocity"> Should be a field which is passed with every call again </param>
         /// <returns> The same quat. for method chaining </returns>
         public static Quaternion LerpWithVelocity(this Quaternion self, Quaternion destination, ref Vector4 currentVelocity, float dt, float omega = 1) {

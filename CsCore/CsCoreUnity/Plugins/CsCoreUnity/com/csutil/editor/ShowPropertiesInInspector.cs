@@ -13,7 +13,7 @@ namespace com.csutil.editor {
     /// a property must have the [ShowInInspector] annotation to show in the Unity inspector
     /// </summary>
     internal class ShowPropertiesInInspector {
-        // Initial idea from http://wiki.unity3d.com/index.php/Expose_properties_in_inspector
+        // Initial idea from https://wiki.unity3d.com/index.php/Expose_properties_in_inspector
 
         internal static ShowPropertiesInInspector[] GetPropertiesToDraw(System.Object obj) {
             if (obj == null) { return null; }

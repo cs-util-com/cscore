@@ -29,10 +29,10 @@ namespace com.csutil.http.apis {
             return result.Map(x => x.SubstringAfter(searchTerm).Trim());
         }
 
-        // http://suggestqueries.google.com/complete/search?&output=toolbar&hl=en&q=starwars%20vs%20
+        // https://suggestqueries.google.com/complete/search?&output=toolbar&hl=en&q=starwars%20vs%20
         public static async Task<Response> GetSearchSuggestions(string search, string language = "en") {
             var q = $"&hl={language}&q={Uri.EscapeDataString(search)}";
-            var suggestionsUrl = "http://suggestqueries.google.com/complete/search?&output=toolbar";
+            var suggestionsUrl = "https://suggestqueries.google.com/complete/search?&output=toolbar";
             RestRequest request = new Uri(suggestionsUrl + q).SendGET();
             return ParseXml<Response>(await request.GetResult<Stream>());
         }

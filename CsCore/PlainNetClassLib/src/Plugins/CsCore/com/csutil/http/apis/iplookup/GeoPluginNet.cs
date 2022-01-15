@@ -8,7 +8,7 @@ namespace com.csutil.http.apis.iplookup {
             return new Uri("http://www.geoplugin.net/json.gp").SendGET().GetResult<Response>();
         }
 
-        public class Response { // generated via http://json2csharp.com :
+        public class Response { // generated via https://json2csharp.com :
             public string geoplugin_request { get; set; }
             public int geoplugin_status { get; set; }
             public string geoplugin_delay { get; set; }

@@ -8,7 +8,7 @@ namespace com.csutil.http.apis.iplookup {
             return new Uri("http://ip-api.com/json/").SendGET().GetResult<Response>();
         }
 
-        public class Response { // generated via http://json2csharp.com :
+        public class Response { // generated via https://json2csharp.com :
             public string @as { get; set; }
             public string city { get; set; }
             public string country { get; set; }

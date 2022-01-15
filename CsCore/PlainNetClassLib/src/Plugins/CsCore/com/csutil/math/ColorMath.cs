@@ -8,7 +8,7 @@ namespace com.csutil.math {
         /// Calculates the brightness using the relative luminanace:
         /// The relative brightness of any point in a colorspace, 
         /// normalized to 0 for darkest black and 1 for lightest white
-        /// see http://www.w3.org/TR/2008/REC-WCAG20-20081211/#relativeluminancedef 
+        /// see https://www.w3.org/TR/2008/REC-WCAG20-20081211/#relativeluminancedef 
         /// and https://stackoverflow.com/a/9733420/165106
         /// </summary>
         public static double CalcBrightness(double r, double g, double b) {
@@ -20,7 +20,7 @@ namespace com.csutil.math {
 
         /// <summary>
         /// see https://ux.stackexchange.com/a/82068 
-        /// and http://www.w3.org/TR/2008/REC-WCAG20-20081211/#contrast-ratiodef 
+        /// and https://www.w3.org/TR/2008/REC-WCAG20-20081211/#contrast-ratiodef 
         /// </summary>
         /// <param name="brightness1"> use CalcBrightness(r,g,b) </param>
         /// <param name="brightness2"> use CalcBrightness(r,g,b) </param>

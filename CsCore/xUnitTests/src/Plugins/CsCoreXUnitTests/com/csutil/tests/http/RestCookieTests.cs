@@ -16,7 +16,7 @@ namespace com.csutil.tests.http {
             var cookieJar = IoC.inject.Get<CookieJar>(null, false);
             Assert.NotNull(cookieJar);
 
-            var uri = new Uri("http://httpbin.org/cookies");
+            var uri = new Uri("https://httpbin.org/cookies");
 
             cookieJar.SetCookie(csutil.http.cookies.Cookie.NewCookie("coo1", "cooVal1", uri.Host));
             cookieJar.SetCookie(csutil.http.cookies.Cookie.NewCookie("coo2", "cooVal2", uri.Host));
@@ -31,7 +31,7 @@ namespace com.csutil.tests.http {
             var cookieJar = IoC.inject.Get<CookieContainer>(null, false);
             Assert.NotNull(cookieJar);
 
-            var uri = new Uri("http://httpbin.org/cookies");
+            var uri = new Uri("https://httpbin.org/cookies");
 
             cookieJar.Add(uri, new System.Net.Cookie("coo1", "cooVal1"));
             cookieJar.Add(uri, new System.Net.Cookie("coo2", "cooVal2"));

@@ -21,7 +21,7 @@ namespace com.csutil.editor {
         static void OpenFontAwesomeIcons() { Application.OpenURL("https://fontawesome.com/cheatsheet"); }
 
         [MenuItem(DIR + "Fonts/.OTF & .TTF Font Viewer")] // A generic viewer to manually load any otf or ttf file
-        static void OpenFontViewer() { Application.OpenURL("http://mathew-kurian.github.io/CharacterMap/"); }
+        static void OpenFontViewer() { Application.OpenURL("https://mathew-kurian.github.io/CharacterMap/"); }
 
         [MenuItem(DIR + "CsCore/Open GitHub page (Documentation)")]
         static void CsCoreGithubPage() { Application.OpenURL("https://github.com/cs-util-com/cscore"); }
