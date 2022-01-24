@@ -98,7 +98,7 @@ namespace com.csutil.tests.http {
             yield return pingTask.AsCoroutine();
             var pingInMs = pingTask.Result;
             Assert.AreNotEqual(-1, pingInMs);
-            Assert.True(0 <= pingInMs && pingInMs < 500, "pingInMs=" + pingInMs);
+            Assert.True(0 <= pingInMs && pingInMs < 1000, "pingInMs=" + pingInMs);
             Log.d("pingInMs took " + pingInMs + "ms");
         }
 
