@@ -14,7 +14,6 @@ namespace com.csutil.tests.ui16 {
 
         public override IEnumerator RunTest() {
             LogConsole.RegisterForAllLogEvents(this);
-            LogConsole.GetLogConsole(this).ShowConsole(false); // Hide at start
 
             DataStore<MyDataModel> store = new DataStore<MyDataModel>(Reducers.MainReducer, initialModel);
 

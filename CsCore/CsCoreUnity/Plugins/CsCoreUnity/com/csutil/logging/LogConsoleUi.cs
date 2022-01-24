@@ -11,11 +11,12 @@ namespace com.csutil.logging {
 
     public static class LogConsole {
 
-        public static void RegisterForAllLogEvents(object caller) {
+        public static void RegisterForAllLogEvents(object caller, bool hideAtStart = true) {
             var consoleUi = GetLogConsole(caller);
             var logger = new LogToLogConsoleConnector(consoleUi);
             Log.AddLoggerToLogInstances(logger);
             consoleUi.gameObject.AddOnDestroyListener(() => Log.RemoveLoggerFromLogInstances(logger));
+            consoleUi.ShowConsole(!hideAtStart);
         }
 
         public static LogConsoleUi GetLogConsole(object caller) {
@@ -89,7 +90,11 @@ namespace com.csutil.logging {
             map.Get<CanvasGroup>("MenuButtons").blocksRaycasts = isConsoleVisible;
         }
 
-        public void ClearConsole() { allData.Clear(); CellData.Clear(); ReloadData(); }
+        public void ClearConsole() {
+            allData.Clear();
+            CellData.Clear();
+            ReloadData();
+        }
 
         private Func<LogEntry, bool> NewFilter() {
             bool d = ToggleShowDebugs().isOn;
