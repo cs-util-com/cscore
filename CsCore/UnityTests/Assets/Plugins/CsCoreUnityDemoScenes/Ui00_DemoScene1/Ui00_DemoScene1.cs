@@ -19,9 +19,14 @@ namespace com.csutil.tests {
             LogConsole.RegisterForAllLogEvents(this);
 
             links = gameObject.GetLinkMap();
-            links.Get<Button>("ButtonTestJsonLib").SetOnClickAction(delegate { TestJsonSerialization().LogOnError(); });
+            links.Get<Button>("ButtonTestJsonLib").SetOnClickAction(delegate {
+                TestJsonSerialization().LogOnError();
+            });
             links.Get<Button>("ButtonTestPing").SetOnClickAction(delegate {
                 StartCoroutine(TestCurrentPing(links.Get<InputField>("IpInput").text));
+            });
+            links.Get<Button>("DefaultButtonWithIcon").SetOnClickAction(delegate {
+                Toast.Show("Hello World");
             });
 
             yield return new WaitForSeconds(0.5f);

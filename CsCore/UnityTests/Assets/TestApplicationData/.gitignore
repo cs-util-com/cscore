@@ -1,5 +1,5 @@
 *.meta
 *.regression.jpg
 *.diff.jpg
-*.example
+*.example.txt
 CachedAssetDependencyGraph.bin
