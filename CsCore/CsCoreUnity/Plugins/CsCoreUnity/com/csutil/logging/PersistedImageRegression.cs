@@ -10,6 +10,7 @@ namespace com.csutil {
     public class AssertVisually {
 
         public class Config {
+            public string instructions = "To acceppt a visual diff, replace the .regression.jpg with the new .jpg! And to use this file here for custom config remove the '.example.txt' part";
             public bool throwAssertException = false;
             public bool logAsError = true;
             public bool logAsWarning = true;
@@ -111,7 +112,7 @@ namespace com.csutil {
             if (configFile.IsNotNullAndExists()) {
                 config = configFile.LoadAs<Config>();
             } else {
-                GetFolderFor(id).GetChild(configFileName + ".example").SaveAsJson(config, asPrettyString: true);
+                GetFolderFor(id).GetChild(configFileName + ".example.txt").SaveAsJson(config, asPrettyString: true);
             }
             return config;
         }
