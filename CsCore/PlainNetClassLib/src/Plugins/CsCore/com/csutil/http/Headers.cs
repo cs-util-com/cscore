@@ -16,7 +16,11 @@ namespace com.csutil.http {
         public Headers(IEnumerable<KeyValuePair<string, IEnumerable<string>>> headers) { AddRange(headers); }
 
         public void AddRange(IEnumerable<KeyValuePair<string, string>> headers) {
-            foreach (var e in headers) { TryAdd(e.Key.ToLowerInvariant(), new string[] { e.Value }); }
+            foreach (var e in headers) {
+                if (!e.Key.IsNullOrEmpty() && !e.Value.IsNullOrEmpty()) {
+                    TryAdd(e.Key.ToLowerInvariant(), new string[] { e.Value });
+                }
+            }
         }
 
         public void AddRange(IEnumerable<KeyValuePair<string, IEnumerable<string>>> headers) {
