@@ -98,7 +98,7 @@ namespace com.csutil.ui {
         }
 
         /// <summary> Can be overwritten to customize the text and description of the "More" entry </summary>
-        internal virtual Entry NewShowMoreEntry() { return new Entry("-1", MenuIcons.More, "More", "Show all actions"); }
+        internal virtual Entry NewShowMoreEntry() { return new Entry("", MenuIcons.More, "More", "Show all actions"); }
 
         private string GetFullEntryId(Entry entry) { return menuId + " - " + entry.id; }
 
