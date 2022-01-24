@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace com.csutil.ui {
 
@@ -25,6 +26,8 @@ namespace com.csutil.ui {
         private void CalcAnchors() {
             try {
                 RectTransform rt = gameObject.GetOrAddComponent<RectTransform>();
+                if (rt.localScale.magnitude == 0) { FixLocalScale(rt); }
+
                 var canvasRect = rt.GetRootCanvas().pixelRect;
                 var safeArea = Screen.safeArea;
                 Vector2 anchorMin = safeArea.position;
@@ -45,7 +48,15 @@ namespace com.csutil.ui {
                 rt.anchorMax = anchorMax;
                 rt.SetPadding(0);
             }
-            catch (System.Exception) { }
+            catch (Exception) { }
+        }
+
+        private void FixLocalScale(RectTransform rt) {
+            try {
+                Log.w($"The local scale of {gameObject} was ZERO, will reset to 1", gameObject);
+                rt.localScale = Vector3.one;
+            }
+            catch (Exception e) { Log.e(e); }
         }
     }
 
