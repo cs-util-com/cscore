@@ -9,10 +9,12 @@ namespace com.csutil.ui.Components {
 
     public class LoadTexture2dTaskMono : MonoBehaviour {
 
+        public string imageUrlCurrentlyLoadingFrom { get; private set; }
         private Response<Texture2D> response;
 
         public Task<Texture2D> LoadFromUrl(string imageUrl, int maxNrOfRetries = 2) {
             if (imageUrl.IsNullOrEmpty()) { throw new ArgumentNullException("The passed imageUrl cant be null"); }
+            this.imageUrlCurrentlyLoadingFrom = imageUrl;
             response = new Response<Texture2D>();
             if (!gameObject.activeInHierarchy) { throw new Exception("The images GameObject is not active, cant load url"); }
             return TaskV2.TryWithExponentialBackoff(() => StartLoading(imageUrl), maxNrOfRetries: maxNrOfRetries, initialExponent: 10);
@@ -20,6 +22,7 @@ namespace com.csutil.ui.Components {
 
         private Task<Texture2D> StartLoading(string imageUrl) {
             var runningTask = this.StartCoroutineAsTask(LoadFromUrlCoroutine(imageUrl, response), () => {
+                AssertV2.AreEqual(imageUrlCurrentlyLoadingFrom, imageUrl); // Check that there was not a new url set in the meantime
                 var result = response.getResult();
                 response = null; // Set back to null to indicate the task is done
                 return result;
