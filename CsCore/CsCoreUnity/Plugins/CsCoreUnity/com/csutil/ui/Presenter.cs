@@ -22,7 +22,7 @@ namespace com.csutil {
         /// <returns> A task that can be awaited on, that returns the fully setup presenter </returns>
         public static async Task<T> LoadModelIntoView<T>(this Presenter<T> self, T model) {
             AssertV2.IsNotNull(self.targetView, "presenter.targetView");
-            AssertV2.IsNotNull(model, $"model (type={typeof(T)})");
+            if (model == null) { Log.w($"Passed model (of type={typeof(T).Name}]) was NULL"); }
 
             var presenterName = self.GetType().Name;
             var modelName = model.GetType().Name;

@@ -136,7 +136,7 @@ namespace com.csutil {
         private static string GetStringResult(UnityWebRequest self) {
             if (ResponseIsGZipped(self)) {
                 try { return Encoding.UTF8.GetString(DecompressGzip(self.downloadHandler?.data)); }
-                catch (Exception e) { Log.e(e); }
+                catch (Exception e) { Log.d("Failed to decompress gzip, will fallback to ww.text", e); }
             }
             return self.downloadHandler?.text;
         }
@@ -146,8 +146,9 @@ namespace com.csutil {
         }
 
         private static byte[] DecompressGzip(byte[] gzippedData) {
+
             using (var stream = new MemoryStream(gzippedData)) {
-                using (var gzipStream = new GZipStream(stream, CompressionMode.Decompress)) {
+                using (var gzipStream = new GZipStream(stream, CompressionMode.Decompress, leaveOpen: true)) {
                     return gzipStream.ToByteArray();
                 }
             }

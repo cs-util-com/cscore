@@ -20,8 +20,9 @@ namespace com.csutil.ui {
             }
             // Prefer canvas objects that are on the root level of the open scene:
             var canvasesOnRootOfScene = roots.Filter(x => x.gameObject.GetParent() == null);
-            if (canvasesOnRootOfScene.IsNullOrEmpty()) {
-                AssertV2.AreEqual(1, canvasesOnRootOfScene.Count(), "canvasesOnRootOfScene");
+            if (!canvasesOnRootOfScene.IsNullOrEmpty()) {
+                int nr = canvasesOnRootOfScene.Count();
+                if (nr != 1) { Log.w($"Found {nr} root-canvases on the top level of the scene. Will use the first found one.."); }
                 return canvasesOnRootOfScene.First();
             }
             // As a fallback return the first root canvas:
