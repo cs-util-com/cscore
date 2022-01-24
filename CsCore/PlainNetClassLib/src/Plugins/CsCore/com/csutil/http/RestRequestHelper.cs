@@ -10,6 +10,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Web;
 using Zio;
 
 namespace com.csutil {
@@ -22,6 +23,14 @@ namespace com.csutil {
 
         public static RestRequest WithJsonContent(this RestRequest self, string jsonContent) {
             return self.WithTextContent(jsonContent, Encoding.UTF8, "application/json");
+        }
+
+        public static Uri WithAddedQueryParams(this Uri self, Dictionary<string, object> queryParams) {
+            var uriBuilder = new UriBuilder(self);
+            var query = HttpUtility.ParseQueryString(uriBuilder.Query);
+            foreach (var param in queryParams) { query[param.Key] = "" + param.Value; }
+            uriBuilder.Query = query.ToString();
+            return uriBuilder.Uri;
         }
 
         public static string ToUriEncodedString(object o) {
