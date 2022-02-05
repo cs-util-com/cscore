@@ -5,9 +5,13 @@ namespace com.csutil {
 
     public static class GuidV2 {
 
+        /// <summary> Can be set to override the default behavior of <see cref="GuidV2.NewGuid"/> </summary>
+        public static Func<Guid> OnCreateGuidV2Request;
+
         private static long _counter = DateTimeV2.UtcNow.Ticks;
         // See idea from https://mrpmorris.blogspot.com/2020/07/generating-globally-unique-sequential.html
         private static class Counter {
+
 
             private static long _counter = DateTime.UtcNow.Ticks;
 
@@ -41,6 +45,9 @@ namespace com.csutil {
         ///     Source: https://github.com/dotnet/efcore/blob/main/src/EFCore/ValueGeneration/SequentialGuidValueGenerator.cs
         /// </summary>
         public static Guid NewGuid() {
+
+            if (OnCreateGuidV2Request != null) { return OnCreateGuidV2Request(); }
+
             var guidBytes = Guid.NewGuid().ToByteArray();
             var counterBytes = BitConverter.GetBytes(Counter.Increment());
             // var counterBytes = BitConverter.GetBytes(Interlocked.Increment(ref _counter));
