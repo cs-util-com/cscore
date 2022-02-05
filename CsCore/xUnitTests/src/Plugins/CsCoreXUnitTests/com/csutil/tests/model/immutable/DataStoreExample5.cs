@@ -18,7 +18,7 @@ namespace com.csutil.tests.model.immutable {
             var t = Log.MethodEntered("DataStoreExample1.ExampleUsage1");
 
             // Some initial state of the model (eg loaded from file when the app is started) is restored and put into the store:
-            MyUser1 carl = new MyUser1(GuidV2.NewGuid(), "Carl", 99, null);
+            MyUser1 carl = new MyUser1(GuidV2.NewGuid(), "Carl", 99, null, MyUser1.MyEnum.State1);
             var data = new MyAppState1(ImmutableDictionary<Guid, MyUser1>.Empty.Add(carl.id, carl), null);
 
             var store = new DataStore<MyAppState1>(MyReducers1.ReduceMyAppState1, data);
@@ -33,7 +33,7 @@ namespace com.csutil.tests.model.immutable {
             Assert.Equal(0, usersChangedCounter); // no change happened in the users
             Assert.Equal(a1.someId, store.GetState().someUuids.Value.Single());
 
-            MyUser1 carlsFriend = new MyUser1(GuidV2.NewGuid(), "Carls Friend", 50, null);
+            MyUser1 carlsFriend = new MyUser1(GuidV2.NewGuid(), "Carls Friend", 50, null, MyUser1.MyEnum.State1);
             store.Dispatch(new ActionOnUser.AddContact() { targetUser = carl.id, newContact = carlsFriend });
             Assert.Equal(1, usersChangedCounter);
             Assert.Equal(carlsFriend, store.GetState().users[carlsFriend.id]);
@@ -47,6 +47,10 @@ namespace com.csutil.tests.model.immutable {
             store.Dispatch(new ActionOnUser.ChangeAge() { targetUser = carlsFriend.id, newAge = null });
             Assert.Equal(3, usersChangedCounter);
             Assert.Null(store.GetState().users[carlsFriend.id].age);
+
+            Assert.NotEqual(MyUser1.MyEnum.State2, store.GetState().users[carl.id].myEnum);
+            store.Dispatch(new ActionOnUser.ChangeEnumState() { targetUser = carl.id, newEnumValue = MyUser1.MyEnum.State2 });
+            Assert.Equal(MyUser1.MyEnum.State2, store.GetState().users[carl.id].myEnum);
 
             Log.MethodDone(t);
         }
@@ -65,16 +69,20 @@ namespace com.csutil.tests.model.immutable {
 
         private class MyUser1 {
 
+            public enum MyEnum { State1, State2 }
+
             public readonly Guid id;
             public readonly string name;
             public readonly int? age;
             public readonly ImmutableList<Guid> contacts;
+            public readonly MyEnum myEnum;
 
-            public MyUser1(Guid id, string name, int? age, ImmutableList<Guid> contacts) {
+            public MyUser1(Guid id, string name, int? age, ImmutableList<Guid> contacts, MyEnum myEnum) {
                 this.id = id;
                 this.name = name;
                 this.age = age;
                 this.contacts = contacts;
+                this.myEnum = myEnum;
             }
 
         }
@@ -89,6 +97,7 @@ namespace com.csutil.tests.model.immutable {
             public class ChangeName : ActionOnUser { public string newName; }
             public class ChangeAge : ActionOnUser { public int? newAge; }
             public class AddContact : ActionOnUser { public MyUser1 newContact; }
+            public class ChangeEnumState : ActionOnUser { public MyUser1.MyEnum newEnumValue; }
         }
 
         #endregion // of example actions
@@ -134,9 +143,10 @@ namespace com.csutil.tests.model.immutable {
                 var name = user.name.Mutate(action, ReduceUserName, ref changed);
                 var age = user.age.Mutate(action, ReduceUserAge, ref changed);
                 var contacts = user.contacts.Mutate(action, ReduceContacts, ref changed);
+                var myEnum = user.myEnum.Mutate(action, ReduceMyEnum, ref changed);
                 if (changed) {
                     // user.id can never change so always take it over from last state:
-                    user = new MyUser1(user.id, name, age, contacts);
+                    user = new MyUser1(user.id, name, age, contacts, myEnum);
                 }
                 return user;
             }
@@ -153,6 +163,11 @@ namespace com.csutil.tests.model.immutable {
 
             private static ImmutableList<Guid> ReduceContacts(ImmutableList<Guid> previousState, object action) {
                 if (action is ActionOnUser.AddContact a) { return previousState.AddOrCreate(a.newContact.id); }
+                return previousState;
+            }
+
+            private static MyUser1.MyEnum ReduceMyEnum(MyUser1.MyEnum previousState, object action) {
+                if (action is ActionOnUser.ChangeEnumState a) { return a.newEnumValue; }
                 return previousState;
             }
 
