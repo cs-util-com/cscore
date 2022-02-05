@@ -1,18 +1,19 @@
 using System;
 using System.IO;
-using com.csutil;
 using Newtonsoft.Json;
 
 namespace com.csutil.json {
 
     public class JsonNetReader : IJsonReader {
 
-        private IJsonWriter debugWriter;
+        /// <summary> If set this will assert, that the passed json was fully parsed into the fields of the target class </summary>
+        public IJsonWriter debugWriter;
+
         private JsonSerializerSettings settings;
         private JsonSerializer reader;
 
         public JsonNetReader() : this(JsonNetSettings.defaultSettings) { }
-        public JsonNetReader(JsonSerializerSettings settings) : this(settings, new JsonNetWriter(settings)) { }
+        public JsonNetReader(JsonSerializerSettings settings) : this(settings, null) { }
 
         public JsonNetReader(JsonSerializerSettings settings, JsonNetWriter debugWriter) {
             this.settings = settings;
