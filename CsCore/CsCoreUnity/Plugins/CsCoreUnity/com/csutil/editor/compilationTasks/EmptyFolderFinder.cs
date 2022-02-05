@@ -10,15 +10,17 @@ namespace com.csutil.editor {
     /// </summary>
     class EmptyFolderFinder : AssetPostprocessor {
 
+#if !DISABLE_EmptyFolderFinder
         [UnityEditor.Callbacks.DidReloadScripts]
         static void DidReloadScripts() {
             LogAllEmptyFoldersIn(EditorIO.GetAssetsFolder());
         }
+#endif
 
         private static void LogAllEmptyFoldersIn(DirectoryEntry assetsFolder) {
             foreach (var d in assetsFolder.GetDirectories()) {
                 if (d.IsEmtpy()) {
-                    Log.e("Found an emtpy folder at: " + d);
+                    Log.e($"Found an emtpy folder at: {d} \n => Please delete this folder (and its .meta file)"); 
                     d.OpenInExternalApp();
                 } else {
                     LogAllEmptyFoldersIn(d);
