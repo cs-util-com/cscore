@@ -24,12 +24,16 @@ namespace com.csutil.ui {
         private PointerEventData latestPointer;
         private PointerEventData pointerUp;
 
+        public PointerEventData PointerDownEventData => pointerDown;
+
+        public PointerEventData PointerUpEventData => pointerUp;
+
         public void OnPointerDown(PointerEventData eventData) {
             pointerDown = Copy(eventData);
             latestPointer = eventData;
 
             // If last click was not too recent:
-            var msToLastClick = (Time.time - pointerUp?.clickTime) * 1000;
+            var msToLastClick = (Time.unscaledTime - pointerUp?.clickTime) * 1000;
             if (pointerUp == null || msToLastClick > doubleClickTimeoutInMs) {
                 // Start evaluating if it can become a long press, double click or click:
                 HandleLongPress().LogOnError();
@@ -92,7 +96,7 @@ namespace com.csutil.ui {
 
         /// <summary> Clones the relevant parts of the pointer event </summary>
         private PointerEventData Copy(PointerEventData e) {
-            return new PointerEventData(null) { position = e.position, clickTime = e.clickTime };
+            return new PointerEventData(null) { position = e.position, clickTime = Time.unscaledTime };
         }
 
     }
