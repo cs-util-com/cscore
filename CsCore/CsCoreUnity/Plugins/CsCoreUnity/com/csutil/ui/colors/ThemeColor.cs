@@ -44,12 +44,14 @@ namespace com.csutil.ui {
             if (_colorName.IsNullOrEmpty()) { return; }
             var theme = IoC.inject.GetOrAddComponentSingleton<Theme>(this);
             if (theme.TryGetColor(_colorName, out Color color)) {
-                ApplyColor(color);
+                var colorWasApplied = ApplyColor(color);
+#if UNITY_EDITOR
+                if (colorWasApplied) { UnityEditor.EditorUtility.SetDirty(this); }
+#endif
             } else {
                 Log.w($"Color '{_colorName}' not found in theme colors)", gameObject);
             }
 #if UNITY_EDITOR
-            UnityEditor.EditorUtility.SetDirty(this);
             DisableIfMultipleThemeColorsWithSameTarget();
 #endif
         }
@@ -66,14 +68,15 @@ namespace com.csutil.ui {
             return GetComponents<ThemeColor>().Filter(x => x != this && x.target == target && x.isActiveAndEnabled);
         }
 
-        public void ApplyColor(Color color) {
-            if (!enabled) { return; }
+        public bool ApplyColor(Color color) {
+            if (!enabled) { return false; }
             if (target == null) { target = LazyInitTarget(); }
-            if (target is Rectangle r) { SetRectangleColor(r, color); return; }
-            if (target is Graphic g) { SetGraphicColor(g, color); return; }
-            if (target is Selectable s && s.targetGraphic != null) { SetSelectableColor(s, color); return; }
+            if (target is Rectangle r) { return SetRectangleColor(r, color); }
+            if (target is Graphic g) { return SetGraphicColor(g, color); }
+            if (target is Selectable s && s.targetGraphic != null) { return SetSelectableColor(s, color); }
             Log.e($"Could not apply the ThemeColor to target='{target}'", gameObject);
             enabled = false;
+            return false;
         }
 
         private Component LazyInitTarget() {
@@ -84,20 +87,25 @@ namespace com.csutil.ui {
             return null;
         }
 
-        private static void SetSelectableColor(Selectable self, Color color) {
-            if (self.targetGraphic.color != color) { self.targetGraphic.color = color; }
+        private static bool SetSelectableColor(Selectable self, Color color) {
+            if (self.targetGraphic.color == color) { return false; }
+            self.targetGraphic.color = color;
+            return true;
         }
 
-        private static void SetGraphicColor(Graphic self, Color color) {
-            if (self.color != color) { self.color = color; }
+        private static bool SetGraphicColor(Graphic self, Color color) {
+            if (self.color == color) { return false; }
+            self.color = color;
+            return true;
         }
 
-        private static void SetRectangleColor(Rectangle self, Color color) {
-            if (self.color != color) {
-                self.ShapeProperties.OutlineColor = color;
-                self.color = color;
-            }
+        private static bool SetRectangleColor(Rectangle self, Color color) {
+            if (self.color == color) { return false; }
+            self.ShapeProperties.OutlineColor = color;
+            self.color = color;
+            return true;
         }
+
     }
 
 }
