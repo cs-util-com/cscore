@@ -21,6 +21,7 @@ namespace com.csutil {
         /// <summary> Uses the eventHistory of the eventbus to check if the event was already published at least once </summary>
         /// <returns> true if the callback was instantly invoked </returns>
         public static bool SubscribeForOnePublishOrInstantInvokeIfInHistory(this IEventBus self, string eventName, Action callback) {
+            if (!self.eventHistoryFillingEnabled) { Log.e("EvenBus.eventHistoryFilling was not enabled, enable or use SubscribeForOnePublish instead"); }
             if (self.eventHistory.Contains(eventName)) {
                 callback.InvokeIfNotNull();
                 return true;

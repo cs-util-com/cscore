@@ -14,7 +14,8 @@ namespace com.csutil {
 
         public static IEventBus instance = new EventBus();
 
-        public ConcurrentQueue<string> eventHistory { get; set; }
+        public ConcurrentQueue<string> eventHistory { get; set; } = new ConcurrentQueue<string>();
+        public bool eventHistoryFillingEnabled { get; set; } = false;
 
         /// <summary> If true all erros during publish are not only logged but rethrown. Will be true in DEBUG mode </summary>
         public bool throwPublishErrors = false;
@@ -26,7 +27,6 @@ namespace com.csutil {
             new ConcurrentDictionary<string, List<KeyValuePair<object, Delegate>>>();
 
         public EventBus() {
-            eventHistory = new ConcurrentQueue<string>();
 #if DEBUG // In debug mode throw all publish errors:
             throwPublishErrors = true;
 #endif
@@ -71,7 +71,7 @@ namespace com.csutil {
 
         public IEnumerable<object> NewPublishIEnumerable(string eventName, params object[] args) {
             lock (threadLock) {
-                eventHistory.Enqueue(eventName);
+                if (eventHistoryFillingEnabled) { eventHistory.Enqueue(eventName); }
                 List<KeyValuePair<object, Delegate>> dictForEventName;
                 map.TryGetValue(eventName, out dictForEventName);
                 if (!dictForEventName.IsNullOrEmpty()) {

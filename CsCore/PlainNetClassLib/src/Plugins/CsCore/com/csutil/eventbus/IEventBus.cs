@@ -19,6 +19,8 @@ namespace com.csutil.eventbus {
 
         /// <summary> A list of events that where already published by the event bus </summary>
         ConcurrentQueue<string> eventHistory { get; set; }
+        /// <summary> If true the <see cref="eventHistory"/> will be filled with  </summary>
+        bool eventHistoryFillingEnabled { get; set; } 
 
     }
 
