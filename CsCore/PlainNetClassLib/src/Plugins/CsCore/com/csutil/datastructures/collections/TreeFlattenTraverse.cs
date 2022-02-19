@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace com.csutil {
 
@@ -10,11 +11,11 @@ namespace com.csutil {
         public static IEnumerable<T> BreadthFirst<T>(T root, Func<T, IEnumerable<T>> childrenSelector) {
             var queue = new Queue<T>();
             queue.Enqueue(root);
-            return BreadthFirst(queue, childrenSelector);
+            return BreadthFirst(queue, childrenSelector).Cached();
         }
 
         public static IEnumerable<T> BreadthFirst<T>(IEnumerable<T> source, Func<T, IEnumerable<T>> childrenSelector) {
-            return BreadthFirst(new Queue<T>(source), childrenSelector);
+            return BreadthFirst(new Queue<T>(source), childrenSelector).Cached();
         }
 
         private static IEnumerable<T> BreadthFirst<T>(Queue<T> queue, Func<T, IEnumerable<T>> childrenSelector) {
@@ -29,7 +30,7 @@ namespace com.csutil {
         }
 
         public static IEnumerable<T> DepthFirst<T>(T root, Func<T, IEnumerable<T>> childrenSelector) {
-            return DepthFirst(new T[1] { root }, childrenSelector);
+            return DepthFirst(new T[1] { root }, childrenSelector).Cached();
         }
 
         public static IEnumerable<T> DepthFirst<T>(IEnumerable<T> source, Func<T, IEnumerable<T>> childrenSelector) {

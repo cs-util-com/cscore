@@ -95,6 +95,7 @@ namespace com.csutil {
 
         public static IEnumerable<T> Cached<T>(this IEnumerable<T> source) {
             if (source == null) { throw new ArgumentNullException("source"); }
+            if (source is CachedEnumerable<T> c) { return c; }
             return new CachedEnumerable<T>(source);
         }
 
