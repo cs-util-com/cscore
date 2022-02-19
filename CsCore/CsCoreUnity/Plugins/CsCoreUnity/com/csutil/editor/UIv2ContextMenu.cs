@@ -40,7 +40,7 @@ namespace com.csutil.editor {
         [MenuItem(UIv2menu + "DefaultActionBar", false, priorityOfUiMenu + 3)]
         static void DefaultActionBar() {
             var actionBar = AddPrefabToActiveView("DefaultActionBar");
-            var viewName = actionBar.GetViewStack().GetRootViewOf(actionBar).name;
+            var viewName = actionBar.GetViewStack()?.GetRootViewOf(actionBar).name;
             actionBar.GetLinkMap().Get<Text>("Caption").text = viewName;
         }
 
