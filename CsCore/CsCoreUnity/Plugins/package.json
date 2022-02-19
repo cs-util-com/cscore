@@ -1,6 +1,6 @@
 {
 	"name": "com.csutil.cscore.unity",
-	"version": "1.5.3",
+	"version": "1.5.4",
 	"displayName": "cscore Unity",
 	"description": "cscore is a minimal-footprint library providing commonly used helpers & patterns for your C# projects.",	
 	"unity": "2018.1",
