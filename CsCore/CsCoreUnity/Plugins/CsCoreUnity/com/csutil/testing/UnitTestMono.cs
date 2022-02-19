@@ -25,7 +25,7 @@ namespace com.csutil.tests {
         public abstract IEnumerator RunTest();
 
         public virtual IEnumerator Start() {
-            yield return new WaitForEndOfFrame();
+            yield return new WaitForSeconds(0.010f); // Wait 10ms before starting the test
             if (!isTestStarted) {
                 isTestStarted = true;
                 yield return RunTest();
