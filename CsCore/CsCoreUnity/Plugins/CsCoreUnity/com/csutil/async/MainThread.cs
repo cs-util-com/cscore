@@ -26,7 +26,6 @@ namespace com.csutil {
         private ConcurrentQueue<Action> actionsForMainThread = new ConcurrentQueue<Action>();
 
         private void Awake() {
-            // UnityEngine.Debug.Log($"MainThread_{GetHashCode()}.Awake (while Application.isPlaying={ApplicationV2.isPlaying})", gameObject);
             if (mainThreadRef != null) { throw Log.e("There is already a MainThread"); }
             mainThreadRef = Thread.CurrentThread;
         }
@@ -37,7 +36,6 @@ namespace com.csutil {
         }
 
         private void OnDestroy() {
-            // UnityEngine.Debug.Log($"MainThread_{GetHashCode()}.OnDestroy (while Application.isPlaying={ApplicationV2.isPlaying})", gameObject);
             mainThreadRef = null;
         }
 
@@ -45,12 +43,10 @@ namespace com.csutil {
             if (!actionsForMainThread.IsEmpty) {
                 stopWatch.Restart();
                 while (!actionsForMainThread.IsEmpty) {
-                    // if the tasks take too long do the rest of the waiting tasks in the next frame:
-                    if (stopWatch.ElapsedMilliseconds > maxAllowedTaskDurationInMsPerFrame) {
-                        Log.w("Will wait until next frame to run the remaining " + actionsForMainThread.Count + " tasks");
-                        break;
-                    }
-                    Action a; if (actionsForMainThread.TryDequeue(out a)) {
+                    // If the tasks take too long do the rest of the waiting tasks in the next frame to not freeze main thread:
+                    if (stopWatch.ElapsedMilliseconds > maxAllowedTaskDurationInMsPerFrame) { break; }
+                    Action a;
+                    if (actionsForMainThread.TryDequeue(out a)) {
                         try { a.Invoke(); } catch (Exception e) { Log.e(e); }
                     }
                 }
