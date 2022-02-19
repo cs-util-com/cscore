@@ -76,7 +76,7 @@ namespace com.csutil.http {
             if (typeof(T).IsCastableTo<Exception>() && resp.StatusCode.IsErrorStatus()) {
                 return (T)(object)new NoSuccessError(resp.StatusCode, await GetResult<string>());
             }
-            AssertV2.IsTrue(HttpStatusCode.OK == resp.StatusCode, "response.StatusCode=" + resp.StatusCode);
+            if (HttpStatusCode.OK != resp.StatusCode) { Log.w("response.StatusCode=" + resp.StatusCode); }
             if (TypeCheck.AreEqual<T, HttpResponseMessage>()) { return (T)(object)resp; }
             if (TypeCheck.AreEqual<T, HttpStatusCode>()) { return (T)(object)resp.StatusCode; }
             if (TypeCheck.AreEqual<T, Headers>()) { return (T)(object)await GetResultHeaders(); }
