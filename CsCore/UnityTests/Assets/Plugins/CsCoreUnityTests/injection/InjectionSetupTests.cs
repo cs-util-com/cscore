@@ -25,7 +25,7 @@ namespace com.csutil.tests.injection {
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         static void SetupAllMyInjections() {
             // In here the injection setup can be done AFTER the generic UnitySetup finished its own setup:
-            UnitySetup.InvokeAfterUnitySetupDone(() => {
+            UnitySetup.InvokeAfterUnitySetupDone(typeof(MyExampleInjectionSetup), () => {
                 var injector1 = new object();
                 IoC.inject.RegisterInjector<MyExampleClass1ToInject>(injector1, (requester, createIfNull) => {
                     return new MyExampleClass1ToInject() { myString = "Handled by MyExampleInjectionSetup" };

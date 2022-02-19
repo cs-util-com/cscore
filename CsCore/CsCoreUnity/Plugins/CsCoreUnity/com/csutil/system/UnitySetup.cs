@@ -58,8 +58,8 @@ namespace com.csutil {
         /// Ensures that the callback is invoked either directly if the UnitySetup already ran or 
         /// after the UnitySetup is fully initialized 
         /// </summary>
-        public static void InvokeAfterUnitySetupDone(Action callback) {
-            EventBus.instance.SubscribeForOnePublishOrInstantInvokeIfInHistory(UNITY_SETUP_DONE, callback);
+        public static void InvokeAfterUnitySetupDone(object caller, Action callback) {
+            EventBus.instance.SubscribeForOnePublish(caller, UNITY_SETUP_DONE, callback);
         }
 
     }

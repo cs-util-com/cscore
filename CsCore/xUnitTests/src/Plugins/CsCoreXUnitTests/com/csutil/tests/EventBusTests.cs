@@ -149,6 +149,7 @@ namespace com.csutil.tests {
         [Fact]
         public void TestSubscribeForOnePublishOrInstantInvokeIfInHistory() {
             EventBus EventBus_instance = GetEventBusForTesting();
+            EventBus_instance.eventHistoryFillingEnabled = true;
 
             { // Test subscribing for a single event that was already published:
                 var eventName1 = "TestEvent1";
