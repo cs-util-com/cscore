@@ -26,6 +26,8 @@ namespace com.csutil.http {
         private HttpClient client;
         private HttpContent httpContent;
 
+        private TaskCompletionSource<bool> waitForRequestToBeConfigured = new TaskCompletionSource<bool>();
+
         public UriRestRequest(Uri uri) { this.uri = uri; }
 
         public RestRequest WithTextContent(string textContent, Encoding encoding, string mediaType) {
@@ -72,6 +74,7 @@ namespace com.csutil.http {
         }
 
         public async Task<T> GetResult<T>() {
+            waitForRequestToBeConfigured.TrySetResult(true);
             HttpResponseMessage resp = await request;
             if (typeof(T).IsCastableTo<Exception>() && resp.StatusCode.IsErrorStatus()) {
                 return (T)(object)new NoSuccessError(resp.StatusCode, await GetResult<string>());
@@ -93,6 +96,7 @@ namespace com.csutil.http {
         }
 
         public async Task<Headers> GetResultHeaders() {
+            waitForRequestToBeConfigured.TrySetResult(true);
             HttpResponseMessage response = await request;
             var headers = new Headers(response.Headers);
             headers.AddRange(response.Content.Headers);
@@ -111,7 +115,7 @@ namespace com.csutil.http {
             };
             AddAllCookiesToRequest(handler);
             client = new HttpClient(handler);
-            await TaskV2.Delay(5); // Wait so that the created RestRequest can be modified before its sent
+            await waitForRequestToBeConfigured.Task.WithTimeout(timeoutInMs: 30000);
             httpMethod = "" + method;
             client.AddRequestHeaders(requestHeaders);
             var message = new HttpRequestMessage(method, uri);

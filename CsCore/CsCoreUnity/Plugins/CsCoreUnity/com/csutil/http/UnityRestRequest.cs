@@ -23,9 +23,12 @@ namespace com.csutil.http {
         /// <summary> A value between 0 and 100 </summary>
         public Action<float> onProgress { get; set; }
 
+        private TaskCompletionSource<bool> waitForRequestToBeConfigured = new TaskCompletionSource<bool>();
+
         public UnityRestRequest(UnityWebRequest request) { this.request = request; }
 
         public Task<T> GetResult<T>() {
+            waitForRequestToBeConfigured.TrySetResult(true);
             return MainThread.instance.ExecuteOnMainThreadAsync(async () => {
                 if (!request.isModifiable) { // Request was already sent
                     await WaitForRequestToFinish();
@@ -47,7 +50,7 @@ namespace com.csutil.http {
         }
 
         private IEnumerator PrepareRequest<T>(Response<T> response) {
-            yield return new WaitForSeconds(0.05f); // wait 5ms so that headers etc can be set
+            yield return waitForRequestToBeConfigured.Task.WithTimeout(30000).AsCoroutine();
             IEnumerable<KeyValuePair<string, IEnumerable<string>>> h = requestHeaders;
             if (form != null) {
                 h = requestHeaders.AddRangeViaUnion(form.headers.Map(ToHeader));
@@ -103,6 +106,7 @@ namespace com.csutil.http {
         }
 
         public async Task<Headers> GetResultHeaders() {
+            waitForRequestToBeConfigured.TrySetResult(true);
             if (request.isModifiable) { return await GetResult<Headers>(); }
             await WaitForRequestToFinish();
             return request.GetResponseHeadersV2();
