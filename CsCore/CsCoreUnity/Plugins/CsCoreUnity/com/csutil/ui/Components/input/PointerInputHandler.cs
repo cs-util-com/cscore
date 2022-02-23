@@ -20,21 +20,17 @@ namespace com.csutil.ui {
         enum ClickResult { up, click, longPress }
         TaskCompletionSource<ClickResult> pointerUpTask = new TaskCompletionSource<ClickResult>();
 
-        private PointerEventData pointerDown;
-        private PointerEventData latestPointer;
-        private PointerEventData pointerUp;
-
-        public PointerEventData PointerDownEventData => pointerDown;
-
-        public PointerEventData PointerUpEventData => pointerUp;
+        public PointerEventData LastPointerDown { get; private set; }
+        public PointerEventData LatestPointer { get; private set; }
+        public PointerEventData LastPointerUp { get; private set; }
 
         public void OnPointerDown(PointerEventData eventData) {
-            pointerDown = Copy(eventData);
-            latestPointer = eventData;
+            LastPointerDown = Copy(eventData);
+            LatestPointer = eventData;
 
             // If last click was not too recent:
-            var msToLastClick = (Time.unscaledTime - pointerUp?.clickTime) * 1000;
-            if (pointerUp == null || msToLastClick > doubleClickTimeoutInMs) {
+            var msToLastClick = (Time.unscaledTime - LastPointerUp?.clickTime) * 1000;
+            if (LastPointerUp == null || msToLastClick > doubleClickTimeoutInMs) {
                 // Start evaluating if it can become a long press, double click or click:
                 HandleLongPress().LogOnError();
                 DetectClickAndDoubleClick().LogOnError();
@@ -42,7 +38,7 @@ namespace com.csutil.ui {
         }
 
         public void OnPointerUp(PointerEventData eventData) {
-            pointerUp = Copy(eventData);
+            LastPointerUp = Copy(eventData);
             SetClickResult(ClickResult.up);
         }
 
@@ -59,7 +55,7 @@ namespace com.csutil.ui {
             var isPointerUpAgain = pointerUpTask.Task;
             await TaskV2.Delay(longPressDurInMs);
 
-            var distanceInPixels = latestPointer.position - pointerDown.position;
+            var distanceInPixels = LatestPointer.position - LastPointerDown.position;
             if (distanceInPixels.magnitude > maxPixelDistance) { return; }
 
             if (!isPointerUpAgain.IsCompleted) {
@@ -70,7 +66,7 @@ namespace com.csutil.ui {
             }
         }
 
-        public void OnDrag(PointerEventData eventData) { latestPointer = eventData; }
+        public void OnDrag(PointerEventData eventData) { LatestPointer = eventData; }
 
         private async Task DetectClickAndDoubleClick() {
             // Wait for first click to finish:
@@ -79,7 +75,7 @@ namespace com.csutil.ui {
             if (firstClickResult != ClickResult.up) { return; }
 
             // If the user moved the pointer to much, cancel:
-            var distanceInPixels = pointerUp.position - pointerDown.position;
+            var distanceInPixels = LastPointerUp.position - LastPointerDown.position;
             if (distanceInPixels.magnitude > maxPixelDistance) { return; }
 
             var pointerUpSecondTime = pointerUpTask;
