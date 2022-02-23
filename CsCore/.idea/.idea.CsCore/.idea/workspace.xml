@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="RunManager" selected="39c05e5e-7c80-457b-bbdb-243e0198796e">
+    <configuration name="PlainNetClassLib: FolderProfile" type="DotNetMsBuildPublish" factoryName="Publish to IIS">
+      <riderPublish publish_profile="FolderProfile.pubxml" pubxml_path="$PROJECT_DIR$/PlainNetClassLib/Properties/PublishProfiles/FolderProfile.pubxml" uuid_high="-3753493886043599125" uuid_low="-7888677145678550835" />
+      <method v="2" />
+    </configuration>
+  </component>
+</project>
