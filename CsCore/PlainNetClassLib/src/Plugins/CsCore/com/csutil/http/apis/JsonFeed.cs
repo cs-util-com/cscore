@@ -9,6 +9,11 @@ namespace com.csutil.http.apis {
         /// <summary> A jsonfeed, e.g. https://hnrss.org/frontpage.jsonfeed </summary>
         public static Task<Response> Get(Uri jsonFeedUrl) { return jsonFeedUrl.SendGET().GetResult<Response>(); }
 
+        public class Author {
+            public string name { get; set; }
+            public string url { get; set; }
+        }
+
         public class Item {
             public string id { get; set; }
             public string title { get; set; }
@@ -16,9 +21,8 @@ namespace com.csutil.http.apis {
             public string url { get; set; }
             public string external_url { get; set; }
             public DateTime date_published { get; set; }
-            public string author { get; set; }
+            public Author author { get; set; }
             public string content_text { get; set; }
-
         }
 
         public class Response {
