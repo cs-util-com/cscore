@@ -65,10 +65,14 @@ namespace com.csutil {
             return self;
         }
 
-        public static RestRequest WithRequestHeaders(this RestRequest self, params KeyValuePair<string, string>[] headers) {
+        public static RestRequest WithRequestHeaders(this RestRequest self, params KeyValuePair<string, string>[] requestHeaders) {
             var headersToAdd = new Dictionary<string, string>();
-            foreach (var header in headers) { headersToAdd.Add(header.Key, header.Value); }
-            self.WithRequestHeaders(new Headers(headersToAdd));
+            foreach (var header in requestHeaders) { headersToAdd.Add(header.Key, header.Value); }
+            return WithRequestHeaders(self, headersToAdd);
+        }
+        
+        public static RestRequest WithRequestHeaders(RestRequest self, Dictionary<string, string> requestHeaders) {
+            self.WithRequestHeaders(new Headers(requestHeaders));
             return self;
         }
 
