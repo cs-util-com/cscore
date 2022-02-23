@@ -17,6 +17,7 @@ namespace com.csutil.http {
         private UnityWebRequest request;
         private Headers requestHeaders = new Headers(new Dictionary<string, IEnumerable<string>>());
         private WWWForm form;
+        private Stream streamToSend;
 
         public string httpMethod => request.method;
 
@@ -55,6 +56,10 @@ namespace com.csutil.http {
             if (form != null) {
                 h = requestHeaders.AddRangeViaUnion(form.headers.Map(ToHeader));
                 request.uploadHandler = new UploadHandlerRaw(form.data);
+            }
+            if (streamToSend != null) {
+                if (form != null) { throw new DataMisalignedException("Cant have both a form and a stream as the request content"); }
+                request.uploadHandler = new UploadHandlerRaw(streamToSend.ToByteArray());
             }
             request.SetRequestHeaders(h);
             yield return request.SendWebRequestV2(response);
@@ -102,6 +107,11 @@ namespace com.csutil.http {
                     Log.e("Did not handle form data entry of type " + v.GetType());
                 }
             }
+            return this;
+        }
+
+        public RestRequest WithStreamContent(Stream octetStream) {
+            this.streamToSend = octetStream;
             return this;
         }
 

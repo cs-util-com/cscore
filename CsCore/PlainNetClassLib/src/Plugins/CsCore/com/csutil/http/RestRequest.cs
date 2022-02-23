@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,6 +20,8 @@ namespace com.csutil.http {
 
         RestRequest WithFormContent(Dictionary<string, object> formData);
 
+        RestRequest WithStreamContent(Stream octetStream);
+        
         RestRequest WithRequestHeaders(Headers requestHeaders);
 
         Task<T> GetResult<T>();

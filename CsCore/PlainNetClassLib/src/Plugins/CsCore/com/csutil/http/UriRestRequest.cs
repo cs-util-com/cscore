@@ -65,6 +65,12 @@ namespace com.csutil.http {
             return this;
         }
 
+        public RestRequest WithStreamContent(Stream octetStream) {
+            httpContent = new StreamContent(octetStream);
+            httpContent.Headers.Add("Content-Type", "application/octet-stream");
+            return this;
+        }
+
         public RestRequest WithRequestHeaders(Headers requestHeaders) {
             if (request.IsCompleted) {
                 throw new AccessViolationException("Request already sent, cant set requestHeaders anymore");
