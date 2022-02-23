@@ -6,7 +6,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e1d3425e-842e-40bf-84ea-4381fa556466" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/PlainNetClassLib/src/Plugins/CsCore/com/csutil/http/UriRestRequest.cs" beforeDir="false" afterPath="$PROJECT_DIR$/PlainNetClassLib/src/Plugins/CsCore/com/csutil/http/UriRestRequest.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.CsCore/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.CsCore/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../README.md" beforeDir="false" afterPath="$PROJECT_DIR$/../README.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -52,7 +52,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1645585266145</updated>
-      <workItem from="1645585266146" duration="958000" />
+      <workItem from="1645585266146" duration="1980000" />
     </task>
     <servers />
   </component>
