@@ -21,6 +21,7 @@ Source/TestConsole/Bin/
 Source/TestConsole2/Bin/
 Source/UnitTests/Bin/
 Source/packages/
+Source/RuntimeMinimal/bin/
 
 #################
 ## Eclipse
