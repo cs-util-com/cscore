@@ -28,13 +28,13 @@ namespace com.csutil.io {
 
         public override DirectoryEntry GetCurrentDirectory() {
             if (isWindows || isMacOs || isLinux || isUnityEditor) {
-                var assetFolder = new DirectoryInfo(Application.dataPath);
+                var appDataPath = new DirectoryInfo(Application.dataPath);
                 if (isUnityEditor) {
-                    // Return "/Assets/TestApplicationData" to protect the rest of the Assets folder:
-                    return assetFolder.GetChildDir("TestApplicationData").CreateV2().ToRootDirectoryEntry();
+                    // Return "/TestApplicationData" to protect the rest of the Unity project folders:
+                    return appDataPath.Parent.GetChildDir("TestApplicationData").CreateV2().ToRootDirectoryEntry();
                 }
                 // On Windows, Linux and MacOS it makes sense to return the install folder:
-                return assetFolder.ToRootDirectoryEntry();
+                return appDataPath.ToRootDirectoryEntry();
             }
             // On all other platforms there is no install folder so return the normal GetPersistentDataPath:
             return GetPersistentDataPath().ToRootDirectoryEntry();
