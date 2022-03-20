@@ -33,7 +33,7 @@ namespace com.csutil.tests.io {
         }
 
         [Test]
-        public void TestLongPathes02() {
+        public void TestLongPathes02() { // Path is exactly 259 characters long which is the max that works under Windows:
             var dir1 = CreateDirectoryForTesting("TestLongPathes");
             var subDir = dir1.GetChildDir("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
             subDir.CreateV2();
@@ -45,17 +45,6 @@ namespace com.csutil.tests.io {
 
         [Test]
         public void TestLongPathes03() {
-            var dir1 = CreateDirectoryForTesting("TestLongPathes");
-            var subDir = dir1.GetChildDir("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-            subDir.CreateV2();
-            Assert.True(subDir.Exists);
-            var file = subDir.GetChild("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.jpg");
-            using (var s = file.OpenOrCreateForWrite()) { }
-            Assert.True(file.Exists);
-        }
-
-        [Test]
-        public void TestLongPathes04() {
             var dir1 = CreateDirectoryForTesting("TestLongPathes");
             dir1 = dir1.GetChildDir("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
             dir1 = dir1.GetChildDir("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");

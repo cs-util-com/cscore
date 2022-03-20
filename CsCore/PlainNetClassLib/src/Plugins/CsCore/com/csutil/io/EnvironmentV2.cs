@@ -3,6 +3,7 @@ using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
 using Zio;
+using Zio.FileSystems;
 
 namespace com.csutil {
 
@@ -76,8 +77,20 @@ namespace com.csutil {
         }
 
         public virtual DirectoryEntry GetNewInMemorySystem() {
-            return new DirectoryEntry(new Zio.FileSystems.MemoryFileSystem(), UPath.Root);
+            return new DirectoryEntry(new MemoryFileSystem(), UPath.Root);
         }
+
+        public virtual FileSystem NewFileSystem(string fullPath) {
+            if (HasDiscPrefix(fullPath)) { return new PhysicalFileSystemV2(ExtractDiscPrefix(fullPath)); }
+            return new PhysicalFileSystem();
+        }
+
+        protected static string ExtractDiscPrefix(string absPath) {
+            if (!HasDiscPrefix(absPath)) { throw new InvalidDataException("Path does not contain a disc prefix: " + absPath); }
+            return absPath.Substring(0, 2);
+        }
+
+        protected static bool HasDiscPrefix(string absPath) { return absPath[1] == ':'; }
 
         public interface ISystemInfo {
             string oSArchitecture { get; }

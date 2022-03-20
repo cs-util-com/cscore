@@ -41,26 +41,14 @@ namespace com.csutil {
         }
 
         private static SubFileSystem NewSubFileSystemFor(string fullPath) {
-            FileSystem fileSystem = NewFileSystem(fullPath);
+            FileSystem fileSystem = EnvironmentV2.instance.NewFileSystem(fullPath);
             return new SubFileSystem(fileSystem, fileSystem.ConvertPathFromInternal(fullPath));
-        }
-
-        private static FileSystem NewFileSystem(string fullPath) {
-            if (HasDiscPrefix(fullPath)) { return new PhysicalFileSystemV2(ExtractDiscPrefix(fullPath)); }
-            return new PhysicalFileSystem();
         }
 
         /// <summary> Takes the parent dir and uses this as a root dir, only works if parent dir exists! </summary>
         public static FileEntry ToFileEntryInNewRoot(this FileInfo self) {
             return self.ParentDir().ToRootDirectoryEntry().GetChild(self.Name);
         }
-
-        private static string ExtractDiscPrefix(string absPath) {
-            if (!HasDiscPrefix(absPath)) { throw new InvalidDataException("Path does not contain a disc prefix: " + absPath); }
-            return absPath.Substring(0, 2);
-        }
-
-        private static bool HasDiscPrefix(string absPath) { return absPath[1] == ':'; }
 
         public static DirectoryEntry AsNewRootDir(this DirectoryEntry self) {
             return new SubFileSystem(self.FileSystem, self.Path).GetDirectoryEntry(UPath.Root);

@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using UnityEngine;
 using Zio;
+using Zio.FileSystems;
 
 namespace com.csutil.io {
 
@@ -38,6 +39,11 @@ namespace com.csutil.io {
             }
             // On all other platforms there is no install folder so return the normal GetPersistentDataPath:
             return GetPersistentDataPath().ToRootDirectoryEntry();
+        }
+
+        public override FileSystem NewFileSystem(string fullPath) {
+            if (HasDiscPrefix(fullPath) && this.IsWindows()) { return new PhysicalFileSystemUnityWindows(ExtractDiscPrefix(fullPath)); }
+            return base.NewFileSystem(fullPath);
         }
 
         private static DirectoryInfo GetPersistentDataPath() { return new DirectoryInfo(Application.persistentDataPath); }
