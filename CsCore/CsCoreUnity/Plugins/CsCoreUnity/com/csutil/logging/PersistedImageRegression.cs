@@ -57,11 +57,11 @@ namespace com.csutil {
             if (id.IsNullOrEmpty()) { throw new ArgumentNullException("Invalid ID passed"); }
 
             var idFolder = GetFolderFor(id);
-            var oldImg = idFolder.GetChild(id + ".regression.jpg");
-            var newImg = idFolder.GetChild(id + ".jpg");
-            var backup = idFolder.GetChild(id + ".jpg.backup");
+            var oldImg = idFolder.GetChild("Regression.jpg");
+            var newImg = idFolder.GetChild("Latest.jpg");
+            var backup = idFolder.GetChild("Previous.jpg.backup");
 
-            Config config = LoadConfigFor(id);
+            Config config = LoadConfigFor(idFolder);
 
             yield return new WaitForEndOfFrame();
             Texture2D screenShot = ScreenCapture.CaptureScreenshotAsTexture(config.screenshotUpscaleFactor);
@@ -106,13 +106,13 @@ namespace com.csutil {
             }
         }
 
-        private Config LoadConfigFor(string id) {
-            var configFile = GetFolderFor(id).GetChild(configFileName);
+        private Config LoadConfigFor(DirectoryEntry folder) {
+            var configFile = folder.GetChild(configFileName);
             Config config = this.config;
             if (configFile.IsNotNullAndExists()) {
                 config = configFile.LoadAs<Config>();
             } else {
-                GetFolderFor(id).GetChild(configFileName + ".example.txt").SaveAsJson(config, asPrettyString: true);
+                folder.GetChild(configFileName + ".example.txt").SaveAsJson(config, asPrettyString: true);
             }
             return config;
         }
