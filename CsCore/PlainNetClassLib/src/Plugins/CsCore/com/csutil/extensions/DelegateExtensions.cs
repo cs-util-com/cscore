@@ -48,6 +48,12 @@ namespace com.csutil {
             return (value) => debounced(null, value);
         }
 
+        public static Action AsThrottledDebounce(this Action self, double delayInMs) {
+            EventHandler<object> onChangedHandler = (_, args) => self();
+            EventHandler<object> debounced = onChangedHandler.AsThrottledDebounce(delayInMs);
+            return () => debounced(null, EventArgs.Empty);
+        }
+
     }
 
 }

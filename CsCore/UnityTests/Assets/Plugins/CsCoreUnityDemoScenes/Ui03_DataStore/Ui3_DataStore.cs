@@ -1,4 +1,5 @@
 ﻿using com.csutil.model.immutable;
+using com.csutil.ui;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -11,6 +12,8 @@ namespace com.csutil.tests.ui {
 
         public override IEnumerator RunTest() {
 
+            var uiRoot = RootCanvas.GetOrAddRootCanvas().gameObject;
+
             // Create an immutable datastore that will contain the data model in this example:
             var log = Middlewares.NewLoggingMiddleware<MyDataModel3>();
             IDataStore<MyDataModel3> store = new DataStore<MyDataModel3>(MainReducer, new MyDataModel3(), log);
@@ -19,7 +22,7 @@ namespace com.csutil.tests.ui {
             // Create a presenter that connectes the model with the view (the Unity UI):
             var currentUserPresenter = new MyUserUi3();
             // Set the target view by loading it from a prefab and setting the root GO:
-            currentUserPresenter.targetView = gameObject.GetViewStack().ShowView("MyUserUi1");
+            currentUserPresenter.targetView = uiRoot.GetViewStack().ShowView("MyUserUi1");
             // Connect the model changes with the presenter:
             currentUserPresenter.ListenToStoreUpdates(store, state => state.currentUser);
 

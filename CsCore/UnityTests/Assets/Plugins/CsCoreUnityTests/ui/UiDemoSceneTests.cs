@@ -31,10 +31,10 @@ namespace com.csutil.tests.ui {
             yield return UnitTestMono.RunTest<Ui7_Snackbars>(new GameObject());
         }
 
-        [UnityTest]
-        public IEnumerator Ui8_LogConsole() {
-            yield return UnitTestMono.RunTest<Ui8_LogConsole>(new GameObject());
-        }
+        //[UnityTest]
+        //public IEnumerator Ui8_LogConsole() {
+        //    yield return UnitTestMono.RunTest<Ui8_LogConsole>(new GameObject());
+        //}
 
         [UnityTest]
         public IEnumerator Ui9_AwaitDialog() {

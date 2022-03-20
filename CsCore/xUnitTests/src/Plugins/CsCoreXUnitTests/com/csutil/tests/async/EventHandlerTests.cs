@@ -15,6 +15,24 @@ namespace com.csutil.tests.async {
         [Fact]
         public async Task ThrottledDebounceExample1() {
             int counter = 0;
+            Action action = () => { Interlocked.Increment(ref counter); };
+            // Make the action throttled / debounced:
+            action = action.AsThrottledDebounce(delayInMs: 50);
+
+            // Call it multiple times with less then 50ms between the calls:
+            action(); // The first call will always be passed through
+            action(); // This one will be delayed and never called because its canceled by the next call: 
+            action(); // This one will be delayed and never called because its canceled by the next call:
+            action(); // This will be delayed for 50ms and then triggered because no additional call follows after it
+
+            // Wait a little bit until the action was triggered at least 2 times:
+            for (int i = 0; i < 50; i++) { await TaskV2.Delay(200); if (counter >= 2) { break; } }
+            Assert.Equal(2, counter);
+        }
+        
+        [Fact]
+        public async Task ThrottledDebounceExample2() {
+            int counter = 0;
             bool allWereGood = true;
             Action<string> action = (myStringParam) => {
                 // Make sure the action is never called with "bad" being passed:
