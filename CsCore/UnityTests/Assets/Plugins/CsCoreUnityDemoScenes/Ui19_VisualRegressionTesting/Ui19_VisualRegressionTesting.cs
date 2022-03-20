@@ -40,7 +40,7 @@ namespace com.csutil.tests.ui19 {
             // Now load MyUserModelv2 which creates a slightly different UI compared to MyUserModelv1:
             gameObject.AddChild(await NewUiFor<MyUserModelv2>());
             await assertVisually.AssertNoVisualChange("UserUiScreen");
-            Toast.Show("Now a visual assertion error should show in the console");
+            Toast.Show("See visual assertion error in the console");
 
         }
 
