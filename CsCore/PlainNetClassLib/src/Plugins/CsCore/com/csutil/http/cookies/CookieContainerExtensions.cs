@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net;
+using System.Runtime.Serialization.Formatters.Binary;
+using Zio;
 
 namespace com.csutil.http {
 
@@ -23,6 +26,24 @@ namespace com.csutil.http {
                 converted.Add(http.cookies.Cookie.NewCookie(c.Name, c.Value, c.Domain));
             }
             return converted;
+        }
+
+    }
+
+    public static class CookieContainerLoader {
+
+        public static CookieContainer LoadFromFile(FileEntry sourceFile) {
+            using (Stream stream = sourceFile.OpenForRead()) { return LoadFromStream(stream); }
+        }
+        public static CookieContainer LoadFromStream(Stream stream) {
+            return (CookieContainer)new BinaryFormatter().Deserialize(stream);
+        }
+
+        public static void SaveToFile(this CookieContainer self, FileEntry targetFile) {
+            using (Stream stream = targetFile.OpenOrCreateForWrite()) { SaveToStream(self, stream); }
+        }
+        public static void SaveToStream(this CookieContainer self, Stream stream) {
+            new BinaryFormatter().Serialize(stream, self);
         }
 
     }
