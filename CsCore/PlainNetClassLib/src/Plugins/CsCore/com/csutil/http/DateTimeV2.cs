@@ -51,12 +51,17 @@ namespace com.csutil {
         public ISet<string> uriBlacklist = new HashSet<string>();
         public TimeSpan? diffOfLocalToServer { get; private set; }
 
+        public bool RequestUpdateOfDiffOfLocalToServer = true;
+
         public DateTimeV2() { EventBus.instance.Subscribe(this, SERVER_UTC_DATE, (Uri uri, DateTime utcDate) => onUtcUpdate(uri, utcDate)); }
         public void Dispose() { EventBus.instance.UnsubscribeAll(this); }
 
         private void onUtcUpdate(Uri uri, DateTime serverUtcDate) {
             try {
-                if (!uriBlacklist.Contains(uri.Host)) { diffOfLocalToServer = serverUtcDate - DateTime.UtcNow; }
+                if (!uriBlacklist.Contains(uri.Host) && RequestUpdateOfDiffOfLocalToServer) {
+                    diffOfLocalToServer = serverUtcDate - DateTime.UtcNow;
+                    RequestUpdateOfDiffOfLocalToServer = false;
+                }
             } catch (Exception e) { Log.e("Error when processing server utc date from " + uri, e); }
         }
 
