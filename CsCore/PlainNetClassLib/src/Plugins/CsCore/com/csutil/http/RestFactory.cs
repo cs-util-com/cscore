@@ -1,18 +1,33 @@
 using System;
+using System.Net;
 using System.Net.Http;
 using System.Net.NetworkInformation;
 using System.Threading.Tasks;
 
 namespace com.csutil.http {
 
-    public class RestFactory {
+    public class RestFactory : IDisposable {
 
         public const int DEFAULT_PING_TIMEOUT = 1500;
 
         public static RestFactory instance { get { return IoC.inject.GetOrAddSingleton<RestFactory>(new object()); } }
 
+        private HttpClient client;
+        private HttpClientHandler handler;
+
+        public RestFactory() {
+            InitFactory();
+        }
+        
+        protected virtual void InitFactory() {
+            handler = new HttpClientHandler() {
+                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
+            };
+            client = new HttpClient(handler);
+        }
+
         public virtual RestRequest SendRequest(Uri uri, HttpMethod method) {
-            return new UriRestRequest(uri).Send(method);
+            return new UriRestRequest(uri, client, handler).Send(method);
         }
 
         public virtual async Task<long> GetCurrentPing(string ipOrUrl = "8.8.8.8", int timeoutInMs = DEFAULT_PING_TIMEOUT) {
@@ -31,6 +46,11 @@ namespace com.csutil.http {
                 noInet.InvokeIfNotNull();
                 return false;
             }
+        }
+
+        public void Dispose() {
+            client?.Dispose();
+            handler?.Dispose();
         }
 
     }
