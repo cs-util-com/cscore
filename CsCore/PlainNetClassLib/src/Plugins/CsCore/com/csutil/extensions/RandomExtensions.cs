@@ -45,6 +45,17 @@ namespace com.csutil {
             return current;
         }
 
+        public static void ShuffleList<T>(this Random self, IList<T> listToShuffle) {
+            int n = listToShuffle.Count;
+            while (n > 1) {
+                n--;
+                int k = self.Next(n + 1);
+                T value = listToShuffle[k];
+                listToShuffle[k] = listToShuffle[n];
+                listToShuffle[n] = value;
+            }
+        }
+
     }
 
 }
