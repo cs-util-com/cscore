@@ -21,8 +21,10 @@ namespace com.csutil.tests.http {
 
             DirectoryEntry dir = EnvironmentV2.instance.GetNewInMemorySystem();
             FileEntry fileToUpload = dir.GetChild("test.txt");
-            fileToUpload.SaveAsText("I am a text");
+            fileToUpload.SaveAsText(GenerateLongStringForTextFile());
             request.AddFileViaForm(fileToUpload);
+            float progressInPercent = 0;
+            request.onProgress = (newProgress) => { progressInPercent = newProgress; };
 
             string formText = "I am a string";
             request.WithFormContent(new Dictionary<string, object>() { { "formString1", formText } });
@@ -30,11 +32,18 @@ namespace com.csutil.tests.http {
             PostmanEchoResponse result = await request.GetResult<PostmanEchoResponse>();
             Log.d(JsonWriter.AsPrettyString(result));
             Assert.Single(result.form);
+            Assert.Equal(100, progressInPercent);
             Assert.Equal(formText, result.form.First().Value);
             Assert.Single(result.files);
             Assert.Equal(fileToUpload.Name, result.files.First().Key);
             Assert.True(result.headers.contentType.StartsWith("multipart/form-data"));
 
+        }
+
+        private string GenerateLongStringForTextFile() {
+            var s = "";
+            for (int i = 0; i < 30000; i++) { s += "I am a long text"; }
+            return s;
         }
 
         [Fact]
@@ -70,11 +79,15 @@ namespace com.csutil.tests.http {
 
             RestRequest uploadRequest = new Uri("https://file.io/?expires=1d").SendPOST().AddFileViaForm(fileToUpload);
             uploadRequest.WithRequestHeaderUserAgent("" + GuidV2.NewGuid());
+            float progressInPercent = 0;
+            uploadRequest.onProgress = (newProgress) => { progressInPercent = newProgress; };
+            
             FileIoResponse result = await uploadRequest.GetResult<FileIoResponse>();
 
             Log.d(JsonWriter.AsPrettyString(result));
             Assert.True(result.success);
             Assert.NotEmpty(result.link);
+            Assert.Equal(100, progressInPercent);
 
             FileEntry fileToDownloadTo = dir.GetChild("test2.txt");
             var downloadRequest = new Uri(result.link).SendGET();

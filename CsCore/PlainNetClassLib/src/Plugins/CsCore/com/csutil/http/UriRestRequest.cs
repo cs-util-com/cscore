@@ -27,6 +27,7 @@ namespace com.csutil.http {
         private HttpContent httpContent;
 
         private TaskCompletionSource<bool> waitForRequestToBeConfigured = new TaskCompletionSource<bool>();
+        public Task RequestStartedTask => waitForRequestToBeConfigured.Task;
 
         public UriRestRequest(Uri uri) { this.uri = uri; }
 

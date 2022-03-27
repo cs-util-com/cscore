@@ -25,6 +25,7 @@ namespace com.csutil.http {
         public Action<float> onProgress { get; set; }
 
         private TaskCompletionSource<bool> waitForRequestToBeConfigured = new TaskCompletionSource<bool>();
+        public Task RequestStartedTask => waitForRequestToBeConfigured.Task;
 
         public UnityRestRequest(UnityWebRequest request) { this.request = request; }
 

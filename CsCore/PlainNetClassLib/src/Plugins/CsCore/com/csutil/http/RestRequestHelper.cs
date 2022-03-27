@@ -9,6 +9,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using Zio;
@@ -54,7 +55,7 @@ namespace com.csutil {
             }
         }
 
-        public static RestRequest AddFileViaForm(this RestRequest self, FileEntry fileToUpload, string key = "file") {
+        public static RestRequest AddFileViaForm(this RestRequest self, FileEntry fileToUpload, string key = "file", CancellationTokenSource cancel = null) {
             var fileStream = fileToUpload.OpenForRead();
             var streamContent = new StreamContent(fileStream);
             streamContent.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data") {
@@ -62,6 +63,13 @@ namespace com.csutil {
                 FileName = fileToUpload.Name
             };
             self.WithFormContent(new Dictionary<string, object>() { { key, streamContent } });
+            self.RequestStartedTask.ContinueWith(delegate {
+                if (self.onProgress != null) {
+                    fileStream.MonitorPositionForProgress(progress => {
+                        self.onProgress(progress);
+                    }, cancel).LogOnError();
+                }
+            });
             return self;
         }
 

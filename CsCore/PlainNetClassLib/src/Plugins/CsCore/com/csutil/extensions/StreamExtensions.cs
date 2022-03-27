@@ -1,6 +1,6 @@
-
 using System;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace com.csutil {
@@ -44,6 +44,18 @@ namespace com.csutil {
             if (disposeOriginalStream) { stream.Dispose(); }
             seekableStream.Seek(0, SeekOrigin.Begin);
             return seekableStream;
+        }
+
+        public static async Task MonitorPositionForProgress(this Stream self, Action<long> onProgress, CancellationTokenSource cancel, int delayInMsBetweenProgress = 10) {
+            onProgress.ThrowErrorIfNull("onProgress");
+            long progress = 0;
+            do {
+                cancel?.Token.ThrowIfCancellationRequested();
+                await TaskV2.Delay(delayInMsBetweenProgress);
+                long newProgress = 100l * self.Position / self.Length;
+                if (progress != newProgress) { onProgress(newProgress); }
+                progress = newProgress;
+            } while (progress < 100);
         }
 
     }

@@ -31,6 +31,9 @@ namespace com.csutil.http {
         /// <summary> A value between 0 and 100 </summary>
         Action<float> onProgress { get; set; }
 
+        /// <summary> Can be awaited to know when the request was started/send </summary>
+        Task RequestStartedTask { get; }
+        
     }
 
 }
