@@ -24,6 +24,10 @@ namespace com.csutil {
             return dateTime.ToString("yyyy-MM-ddTHH:mm:ssZ");
         }
 
+        public static string ToReadableStringExact(this DateTime self) {
+            return self.ToString("yyyy-MM-dd_HH.mm.ss.fff");
+        }
+        
         public static long ToUnixTimestampUtc(this DateTime self) {
             var zero = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
             return Convert.ToInt64(Math.Truncate((self.ToUniversalTime().Subtract(zero)).TotalMilliseconds));
