@@ -7,12 +7,13 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Zio;
 
 namespace com.csutil.http {
 
-    public class UriRestRequest : RestRequest, IDisposable {
+    public class UriRestRequest : RestRequest {
 
         public IJsonReader jsonReader = JsonReader.GetReader();
         public Action<float> onProgress { get; set; }
@@ -28,6 +29,8 @@ namespace com.csutil.http {
 
         private TaskCompletionSource<bool> waitForRequestToBeConfigured = new TaskCompletionSource<bool>();
         public Task RequestStartedTask => waitForRequestToBeConfigured.Task;
+
+        public CancellationTokenSource CancellationTokenSource { get; } = new CancellationTokenSource();
 
         public UriRestRequest(Uri uri) { this.uri = uri; }
 
@@ -69,6 +72,13 @@ namespace com.csutil.http {
         public RestRequest WithStreamContent(Stream octetStream) {
             httpContent = new StreamContent(octetStream);
             httpContent.Headers.Add("Content-Type", "application/octet-stream");
+            RequestStartedTask.ContinueWith(delegate {
+                if (onProgress != null) {
+                    octetStream.MonitorPositionForProgress((progress) => {
+                        onProgress(progress);
+                    }, CancellationTokenSource).LogOnError();
+                }
+            });
             return this;
         }
 
@@ -128,7 +138,7 @@ namespace com.csutil.http {
             var message = new HttpRequestMessage(method, uri);
             if (httpContent != null) { message.Content = httpContent; }
             if (OnBeforeSend != null) { await OnBeforeSend(client, message); }
-            var result = await client.SendAsync(message, sendAsyncCompletedAfter);
+            var result = await client.SendAsync(message, sendAsyncCompletedAfter, CancellationTokenSource.Token);
 
             var cookieJar = IoC.inject.Get<cookies.CookieJar>(this, false);
             if (cookieJar != null) {
@@ -152,6 +162,7 @@ namespace com.csutil.http {
         }
 
         public void Dispose() {
+            CancellationTokenSource.Cancel();
             httpContent?.Dispose();
             request?.Dispose();
             client?.Dispose();

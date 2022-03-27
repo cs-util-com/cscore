@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -26,6 +27,8 @@ namespace com.csutil.http {
 
         private TaskCompletionSource<bool> waitForRequestToBeConfigured = new TaskCompletionSource<bool>();
         public Task RequestStartedTask => waitForRequestToBeConfigured.Task;
+
+        public CancellationTokenSource CancellationTokenSource { get; } = new CancellationTokenSource();
 
         public UnityRestRequest(UnityWebRequest request) { this.request = request; }
 
@@ -124,10 +127,15 @@ namespace com.csutil.http {
         }
 
         private async Task WaitForRequestToFinish() {
-            while (!request.isDone && !request.isHttpError && !request.isNetworkError) { await TaskV2.Delay(10); }
+            while (!request.isDone && !request.isHttpError && !request.isNetworkError) {
+                if (CancellationTokenSource.IsCancellationRequested) { request.Abort(); }
+                CancellationTokenSource.Token.ThrowIfCancellationRequested();
+                await TaskV2.Delay(10);
+            }
         }
 
         public void Dispose() {
+            CancellationTokenSource.Cancel();
             try { request.Abort(); } catch (Exception e) { Log.d("Could not abort request: " + e); }
         }
 

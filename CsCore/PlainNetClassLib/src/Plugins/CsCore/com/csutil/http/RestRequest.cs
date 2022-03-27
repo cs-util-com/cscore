@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace com.csutil.http {
@@ -33,6 +34,9 @@ namespace com.csutil.http {
 
         /// <summary> Can be awaited to know when the request was started/send </summary>
         Task RequestStartedTask { get; }
+        
+        /// <summary> The <see cref="cancellationTokenSource"/> to cancel the request </summary>
+        CancellationTokenSource CancellationTokenSource { get; }
         
     }
 

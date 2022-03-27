@@ -55,7 +55,7 @@ namespace com.csutil {
             }
         }
 
-        public static RestRequest AddFileViaForm(this RestRequest self, FileEntry fileToUpload, string key = "file", CancellationTokenSource cancel = null) {
+        public static RestRequest AddFileViaForm(this RestRequest self, FileEntry fileToUpload, string key = "file") {
             var fileStream = fileToUpload.OpenForRead();
             var streamContent = new StreamContent(fileStream);
             streamContent.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data") {
@@ -67,7 +67,7 @@ namespace com.csutil {
                 if (self.onProgress != null) {
                     fileStream.MonitorPositionForProgress(progress => {
                         self.onProgress(progress);
-                    }, cancel).LogOnError();
+                    }, self.CancellationTokenSource).LogOnError();
                 }
             });
             return self;
