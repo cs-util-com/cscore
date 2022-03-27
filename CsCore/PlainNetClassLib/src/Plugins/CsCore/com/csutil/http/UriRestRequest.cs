@@ -27,6 +27,7 @@ namespace com.csutil.http {
         private HttpClient client;
         private HttpClientHandler handler;
         private HttpContent httpContent;
+        private HttpRequestMessage sentRequest;
 
         private TaskCompletionSource<bool> waitForRequestToBeConfigured = new TaskCompletionSource<bool>();
         public Task RequestStartedTask => waitForRequestToBeConfigured.Task;
@@ -147,12 +148,12 @@ namespace com.csutil.http {
 
             await waitForRequestToBeConfigured.Task.WithTimeout(timeoutInMs: 30000);
             httpMethod = "" + method;
-            var message = new HttpRequestMessage(method, uri);
-            if (httpContent != null) { message.Content = httpContent; }
-            message.AddRequestHeaders(requestHeaders);
+            sentRequest = new HttpRequestMessage(method, uri);
+            if (httpContent != null) { sentRequest.Content = httpContent; }
+            sentRequest.AddRequestHeaders(requestHeaders);
 
-            if (OnBeforeSend != null) { await OnBeforeSend(client, message); }
-            var result = await client.SendAsync(message, sendAsyncCompletedAfter, CancellationTokenSource.Token);
+            if (OnBeforeSend != null) { await OnBeforeSend(client, sentRequest); }
+            var result = await client.SendAsync(sentRequest, sendAsyncCompletedAfter, CancellationTokenSource.Token);
 
             var cookieJar = IoC.inject.Get<cookies.CookieJar>(this, false);
             if (cookieJar != null) {
@@ -181,6 +182,7 @@ namespace com.csutil.http {
         public void Dispose() {
             CancellationTokenSource.Cancel();
             httpContent?.Dispose();
+            sentRequest?.Dispose();
         }
 
     }
