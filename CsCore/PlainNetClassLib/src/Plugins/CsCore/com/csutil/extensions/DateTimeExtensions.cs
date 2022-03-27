@@ -57,6 +57,10 @@ namespace com.csutil {
             return DateTimeV2.NewDateTimeFromUnixTimestamp(self.lastUpdateDate.Value);
         }
 
+        public static double TotalMillisecondsAbs(this TimeSpan self) {
+            return Math.Abs(self.TotalMilliseconds);
+        }
+
     }
 
 }

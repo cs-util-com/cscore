@@ -49,9 +49,15 @@ namespace com.csutil {
         public static DateTime Now { get { return IoC.inject.GetOrAddSingleton<DateTimeV2>(null).GetNow(); } }
 
         public ISet<string> uriBlacklist = new HashSet<string>();
+
+        /// <summary> Contains the time difference between the UTC time reported by the backend and the local clock </summary>
         public TimeSpan? diffOfLocalToServer { get; private set; }
 
+        /// <summary> This flag is set to false every time a new REST request reported a current UTC time from a backend. Can be switched back to true to repeat the remote time update </summary>
         public bool RequestUpdateOfDiffOfLocalToServer = true;
+
+        /// <summary> Can be overwritten, by default any remote time that is max 5sec different to local time is accepted </summary>
+        public Func<TimeSpan, bool> IsAcceptableDistanceToLocalTime = (diff) => diff.TotalMillisecondsAbs() < 5000;
 
         public DateTimeV2() { EventBus.instance.Subscribe(this, SERVER_UTC_DATE, (Uri uri, DateTime utcDate) => onUtcUpdate(uri, utcDate)); }
         public void Dispose() { EventBus.instance.UnsubscribeAll(this); }
@@ -60,6 +66,8 @@ namespace com.csutil {
             try {
                 if (!uriBlacklist.Contains(uri.Host) && RequestUpdateOfDiffOfLocalToServer) {
                     diffOfLocalToServer = serverUtcDate - DateTime.UtcNow;
+                    // Log.d($"Switching from local clock ({DateTime.UtcNow.ToReadableStringExact()}) to server clock ({serverUtcDate.ToReadableStringExact()}), diffOfLocalToServer={diffOfLocalToServer}");
+                    if (IsAcceptableDistanceToLocalTime(diffOfLocalToServer.Value)) { diffOfLocalToServer = null; }
                     RequestUpdateOfDiffOfLocalToServer = false;
                 }
             } catch (Exception e) { Log.e("Error when processing server utc date from " + uri, e); }
