@@ -134,9 +134,10 @@ namespace com.csutil.http {
             client = new HttpClient(handler);
             await waitForRequestToBeConfigured.Task.WithTimeout(timeoutInMs: 30000);
             httpMethod = "" + method;
-            client.AddRequestHeaders(requestHeaders);
             var message = new HttpRequestMessage(method, uri);
             if (httpContent != null) { message.Content = httpContent; }
+            message.AddRequestHeaders(requestHeaders);
+            
             if (OnBeforeSend != null) { await OnBeforeSend(client, message); }
             var result = await client.SendAsync(message, sendAsyncCompletedAfter, CancellationTokenSource.Token);
 
