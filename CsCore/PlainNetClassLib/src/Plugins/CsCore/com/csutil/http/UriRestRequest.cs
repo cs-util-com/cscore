@@ -127,8 +127,7 @@ namespace com.csutil.http {
             var message = new HttpRequestMessage(method, uri);
             if (httpContent != null) { message.Content = httpContent; }
             if (OnBeforeSend != null) { await OnBeforeSend(client, message); }
-            request = client.SendAsync(message, sendAsyncCompletedAfter);
-            var result = await request;
+            var result = await client.SendAsync(message, sendAsyncCompletedAfter);
 
             var cookieJar = IoC.inject.Get<cookies.CookieJar>(this, false);
             if (cookieJar != null) {
