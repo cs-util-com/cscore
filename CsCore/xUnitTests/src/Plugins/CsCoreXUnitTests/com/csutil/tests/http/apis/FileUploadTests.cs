@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using com.csutil.http;
 using Newtonsoft.Json;
@@ -21,8 +23,10 @@ namespace com.csutil.tests.http {
 
             DirectoryEntry dir = EnvironmentV2.instance.GetNewInMemorySystem();
             FileEntry fileToUpload = dir.GetChild("test.txt");
-            fileToUpload.SaveAsText("I am a text");
+            fileToUpload.SaveAsText(GenerateLongStringForTextFile());
             request.AddFileViaForm(fileToUpload);
+            float progressInPercent = 0;
+            request.onProgress = (newProgress) => { progressInPercent = newProgress; };
 
             string formText = "I am a string";
             request.WithFormContent(new Dictionary<string, object>() { { "formString1", formText } });
@@ -30,11 +34,18 @@ namespace com.csutil.tests.http {
             PostmanEchoResponse result = await request.GetResult<PostmanEchoResponse>();
             Log.d(JsonWriter.AsPrettyString(result));
             Assert.Single(result.form);
+            Assert.Equal(100, progressInPercent);
             Assert.Equal(formText, result.form.First().Value);
             Assert.Single(result.files);
             Assert.Equal(fileToUpload.Name, result.files.First().Key);
             Assert.True(result.headers.contentType.StartsWith("multipart/form-data"));
 
+        }
+
+        private string GenerateLongStringForTextFile() {
+            var s = "";
+            for (int i = 0; i < 30000; i++) { s += "I am a long text"; }
+            return s;
         }
 
         [Fact]
@@ -60,6 +71,34 @@ namespace com.csutil.tests.http {
         }
 
         [Fact]
+        public async Task TestOctetStreamUpload() {
+
+            DirectoryEntry dir = EnvironmentV2.instance.GetNewInMemorySystem();
+            FileEntry fileToUpload = dir.GetChild("test.jpg");
+            using (var stream = await new Uri("https://picsum.photos/50/50").SendGET().GetResult<Stream>()) {
+                await fileToUpload.SaveStreamAsync(stream); // Download a test file to use it for the upload test
+            }
+
+            using (var streamToUpload = fileToUpload.OpenForRead()) {
+                // Using https://hookbin.com/ to test application/octet-stream uploads
+                RestRequest uploadRequest = new Uri("https://hookb.in/3OLza9earmI7yakkMxO8").SendPOST();
+                uploadRequest.WithStreamContent(streamToUpload);
+                float progressInPercent = 0;
+                uploadRequest.onProgress = (newProgress) => {
+                    progressInPercent = newProgress;
+                    Log.d(newProgress + "%");
+                };
+
+                var result = await uploadRequest.GetResult<HttpStatusCode>();
+                Log.d("Result=" + await uploadRequest.GetResult<string>());
+
+                Assert.Equal(HttpStatusCode.OK, result);
+                Assert.Equal(100, progressInPercent);
+            }
+            
+        }
+
+        [Fact]
         public async Task TestFileIoUpload() {
 
             DirectoryEntry dir = EnvironmentV2.instance.GetNewInMemorySystem();
@@ -70,11 +109,15 @@ namespace com.csutil.tests.http {
 
             RestRequest uploadRequest = new Uri("https://file.io/?expires=1d").SendPOST().AddFileViaForm(fileToUpload);
             uploadRequest.WithRequestHeaderUserAgent("" + GuidV2.NewGuid());
+            float progressInPercent = 0;
+            uploadRequest.onProgress = (newProgress) => { progressInPercent = newProgress; };
+            
             FileIoResponse result = await uploadRequest.GetResult<FileIoResponse>();
 
             Log.d(JsonWriter.AsPrettyString(result));
             Assert.True(result.success);
             Assert.NotEmpty(result.link);
+            Assert.Equal(100, progressInPercent);
 
             FileEntry fileToDownloadTo = dir.GetChild("test2.txt");
             var downloadRequest = new Uri(result.link).SendGET();

@@ -4,12 +4,13 @@ using System.Text.RegularExpressions;
 
 namespace com.csutil.http.cookies {
 
+    [Obsolete("Use System.Net.CookieContainer instead")]
     public abstract class CookieJar { // Ported version of https://github.com/bmeck/node-cookiejar
 
         private const string cookiesStringPattern = "[:](?=\\s*[a-zA-Z0-9_\\-]+\\s*[=])";
 
         private object cookieJarLock = new object();
-        private Dictionary<string, List<Cookie>> cookies = new Dictionary<string, List<Cookie>>();
+        protected Dictionary<string, List<Cookie>> cookies = new Dictionary<string, List<Cookie>>();
         public Action OnCookiesChanged;
 
         public CookieJar() {

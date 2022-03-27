@@ -145,9 +145,9 @@ namespace com.csutil.tests.http {
             var serverTimeReceived = false;
             EventBus.instance.Subscribe(this, DateTimeV2.SERVER_UTC_DATE, (Uri uri, DateTime serverUtcTime) => {
                 serverTimeReceived = true;
-                var diff = DateTimeOffset.UtcNow - serverUtcTime;
-                Log.d($"Server {uri} reports server time: {serverUtcTime}, diff={diff.Milliseconds}");
-                Assert.True(Math.Abs(diff.Milliseconds) < 10000, "Difference between system time and server time was " + diff.Milliseconds);
+                var diff = DateTime.UtcNow - serverUtcTime;
+                Log.d($"Server {uri} reports server time: {serverUtcTime}, diff={diff.TotalMillisecondsAbs()}");
+                Assert.True(diff.TotalMillisecondsAbs() < 10000, "Difference between system time and server time was " + diff);
             });
 
             RestRequest request = RestFactory.instance.SendRequest(new Uri("https://httpbin.org/get"), HttpMethod.Get);
@@ -160,25 +160,68 @@ namespace com.csutil.tests.http {
 
         [Fact]
         public async Task TestDateTimeV2() {
+            GetDiffBetweenV1AndV2(); // Force lazy load/init of DateTimeV2 instance
+            // Turn off that any diff between local and server time is accepted:
+            DateTimeV2Instance().IsAcceptableDistanceToLocalTime = (_) => false;
+
             const int maxDiffInMs = 1000;
             // No diff between DateTime and DateTimeV2 until first server timestamp is received:
             var diffBetweenV1AndV2 = GetDiffBetweenV1AndV2();
             Assert.True(diffBetweenV1AndV2 < 100, "GetTimeDiff()=" + diffBetweenV1AndV2);
 
             // Trigger any REST request to get a UTC time from the used server:
-            Headers headers = await RestFactory.instance.SendRequest(new Uri("https://httpbin.org/get"), HttpMethod.Get).GetResultHeaders();
+            Headers headers = await new Uri("https://httpbin.org/get").SendGET().GetResultHeaders();
             string serverUtcString = headers.First(h => h.Key == "date").Value.First();
             DateTime serverUtcTime = DateTimeV2.ParseUtc(serverUtcString);
             Log.d("Server reported its UTC time to be: " + serverUtcTime);
-            int diffLocalAndOnline = Math.Abs(IoC.inject.Get<DateTimeV2>(this).diffOfLocalToServer.Value.Milliseconds);
-            Assert.True(diffLocalAndOnline < maxDiffInMs, $"diffLocalAndOnline {diffLocalAndOnline} > maxDiffInMs {maxDiffInMs}");
-            Assert.NotEqual(0, diffLocalAndOnline);
+            if (DateTimeV2Instance().diffOfLocalToServer != null) {
+                var diffLocalAndOnline = DateTimeV2Instance().diffOfLocalToServer.Value.TotalMillisecondsAbs();
+                Assert.True(diffLocalAndOnline < maxDiffInMs, $"diffLocalAndOnline {diffLocalAndOnline} > maxDiffInMs {maxDiffInMs}");
+                Assert.NotEqual(0, diffLocalAndOnline);
+            }
 
             // Now the server utc date should be used which will cause the diff to be larger:
             Assert.True(GetDiffBetweenV1AndV2() > diffBetweenV1AndV2, $"GetTimeDiff()={GetDiffBetweenV1AndV2()}ms < diffBetweenV1AndV2 ({diffBetweenV1AndV2}ms)");
         }
 
-        private static int GetDiffBetweenV1AndV2() { return Math.Abs((DateTime.UtcNow - DateTimeV2.UtcNow).Milliseconds); }
+        [Fact]
+        public async Task TestDateTimeV2Consinstency() {
+            for (int i = 0; i < 10; i++) {
+                var uriList = new List<Uri>();
+                uriList.Add(new Uri("https://google.com"));
+                uriList.Add(new Uri("https://httpbin.org/get"));
+                // uriList.Add(new Uri("https://wikipedia.org")); // Returns Date header in local time instead of UTC, reported at https://phabricator.wikimedia.org/T304787
+
+                new Random().ShuffleList(uriList);
+
+                var t1 = DateTimeV2.Now;
+                var utc1 = DateTimeV2.UtcNow;
+                Assert.True(DateTimeV2Instance().RequestUpdateOfDiffOfLocalToServer);
+                DateTimeV2Instance().RequestUpdateOfDiffOfLocalToServer = true;
+                foreach (var uri in uriList) {
+                    var responseHeaders = await uri.SendHEAD().GetResultHeaders();
+
+                    var t2 = DateTimeV2.Now;
+                    var utc2 = DateTimeV2.UtcNow;
+
+                    Assert.True(t1 < t2, $"t1={t1.ToReadableStringExact()}, t2={t2.ToReadableStringExact()} for uri={uri}");
+                    Assert.True(utc1 < utc2, $"utc1={utc1.ToReadableStringExact()}, utc2={utc2.ToReadableStringExact()} for uri={uri}");
+
+                    var maxDiffInMs = 10000; // 10 seconds offset between server time and local time is acceptable 
+                    var diffOfLocalToServer = DateTimeV2Instance().diffOfLocalToServer;
+                    Assert.True((t2 - t1).TotalMillisecondsAbs() < maxDiffInMs, "(t2-t1)=" + (t2 - t1));
+                    Assert.True((utc2 - utc1).TotalMillisecondsAbs() < maxDiffInMs, "(utc2 - utc1)=" + (utc2 - utc1));
+                    Assert.True(diffOfLocalToServer == null || diffOfLocalToServer.Value.TotalMillisecondsAbs() < maxDiffInMs, "diffOfLocalToServer=" + diffOfLocalToServer);
+
+                    DateTimeV2Instance().RequestUpdateOfDiffOfLocalToServer = true;
+                    utc1 = utc2;
+                }
+            }
+        }
+
+        private DateTimeV2 DateTimeV2Instance() { return IoC.inject.Get<DateTimeV2>(this); }
+
+        private static double GetDiffBetweenV1AndV2() { return (DateTime.UtcNow - DateTimeV2.UtcNow).TotalMillisecondsAbs(); }
 
         private static async Task ValidateResponse(RestRequest request) {
             var includedRequestHeaders = new Dictionary<string, string>();
@@ -244,17 +287,18 @@ namespace com.csutil.tests.http {
 
         [Fact]
         public async Task TestStackOverflowCom() {
-            if (!EnvironmentV2.isDebugMode) { Log.e("This test only works in DebugMode"); return; }
+            if (!EnvironmentV2.isDebugMode) {
+                Log.e("This test only works in DebugMode");
+                return;
+            }
             try {
 
                 try { // Provoke an exception that will then be searched for on StackOverflow
                     List<string> list = new List<string>(); // List without entries
                     list.First(); // Will cause "Sequence contains no elements" exception
-                }
-                catch (Exception e) { await e.RethrowWithAnswers(); }
+                } catch (Exception e) { await e.RethrowWithAnswers(); }
 
-            }
-            catch (Error exceptionWithAnswers) {
+            } catch (Error exceptionWithAnswers) {
                 // Check that the error contains detailed answers:
                 var length = exceptionWithAnswers.Message.Length;
                 Assert.True(length > 1500, "message length=" + length);

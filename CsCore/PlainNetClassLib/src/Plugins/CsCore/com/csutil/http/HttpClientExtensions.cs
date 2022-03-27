@@ -5,11 +5,11 @@ namespace com.csutil {
 
     public static class HttpClientExtensions {
 
-        public static bool AddRequestHeaders(this HttpClient self, Headers requestHeadersToAdd) {
+        public static bool AddRequestHeaders(this HttpRequestMessage self, Headers requestHeadersToAdd) {
             if (requestHeadersToAdd.IsNullOrEmpty()) { return false; }
             bool r = true;
             foreach (var h in requestHeadersToAdd) {
-                if (!self.DefaultRequestHeaders.TryAddWithoutValidation(h.Key, h.Value)) {
+                if (!self.Headers.TryAddWithoutValidation(h.Key, h.Value)) {
                     Log.e("Could not add header to request: " + h);
                     r = false;
                 }

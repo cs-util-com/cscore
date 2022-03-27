@@ -7,12 +7,13 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Zio;
 
 namespace com.csutil.http {
 
-    public class UriRestRequest : RestRequest, IDisposable {
+    public class UriRestRequest : RestRequest {
 
         public IJsonReader jsonReader = JsonReader.GetReader();
         public Action<float> onProgress { get; set; }
@@ -24,11 +25,23 @@ namespace com.csutil.http {
         private Headers requestHeaders = new Headers(new Dictionary<string, string>());
         private Task<HttpResponseMessage> request;
         private HttpClient client;
+        private HttpClientHandler handler;
         private HttpContent httpContent;
+        private HttpRequestMessage sentRequest;
 
         private TaskCompletionSource<bool> waitForRequestToBeConfigured = new TaskCompletionSource<bool>();
+        public Task RequestStartedTask => waitForRequestToBeConfigured.Task;
 
+        public CancellationTokenSource CancellationTokenSource { get; } = new CancellationTokenSource();
+
+        [Obsolete("Pass a reusable HttpClient instead via the other constructor")]
         public UriRestRequest(Uri uri) { this.uri = uri; }
+
+        public UriRestRequest(Uri uri, HttpClient client, HttpClientHandler handler) {
+            this.uri = uri;
+            this.client = client;
+            this.handler = handler;
+        }
 
         public RestRequest WithTextContent(string textContent, Encoding encoding, string mediaType) {
             httpContent = new StringContent(textContent, encoding, mediaType);
@@ -68,6 +81,13 @@ namespace com.csutil.http {
         public RestRequest WithStreamContent(Stream octetStream) {
             httpContent = new StreamContent(octetStream);
             httpContent.Headers.Add("Content-Type", "application/octet-stream");
+            RequestStartedTask.ContinueWith(delegate {
+                if (onProgress != null) {
+                    octetStream.MonitorPositionForProgress((progress) => {
+                        onProgress(progress);
+                    }, CancellationTokenSource).LogOnError();
+                }
+            });
             return this;
         }
 
@@ -97,8 +117,7 @@ namespace com.csutil.http {
             if (typeof(T) == typeof(string)) { return (T)(object)respText; }
             AssertV2.IsNotNull(respText, "respText");
             AssertV2.IsNotNull(respText.IsNullOrEmpty(), "respText.IsNullOrEmpty");
-            try { return jsonReader.Read<T>(respText); }
-            catch (JsonReaderException e) { throw new JsonReaderException("Cant parse to JSON: " + respText, e); }
+            try { return jsonReader.Read<T>(respText); } catch (JsonReaderException e) { throw new JsonReaderException("Cant parse to JSON: " + respText, e); }
         }
 
         public async Task<Headers> GetResultHeaders() {
@@ -116,19 +135,25 @@ namespace com.csutil.http {
         }
 
         public async Task<HttpResponseMessage> SendAsync(HttpMethod method) {
-            HttpClientHandler handler = new HttpClientHandler() {
-                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
-            };
-            AddAllCookiesToRequest(handler);
-            client = new HttpClient(handler);
+
+            if (handler == null) {
+                handler = new HttpClientHandler() {
+                    AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
+                };
+            }
+            if (client == null) {
+                client = new HttpClient(handler);
+            }
+            AddAllCookies(handler);
+
             await waitForRequestToBeConfigured.Task.WithTimeout(timeoutInMs: 30000);
             httpMethod = "" + method;
-            client.AddRequestHeaders(requestHeaders);
-            var message = new HttpRequestMessage(method, uri);
-            if (httpContent != null) { message.Content = httpContent; }
-            if (OnBeforeSend != null) { await OnBeforeSend(client, message); }
-            request = client.SendAsync(message, sendAsyncCompletedAfter);
-            var result = await request;
+            sentRequest = new HttpRequestMessage(method, uri);
+            if (httpContent != null) { sentRequest.Content = httpContent; }
+            sentRequest.AddRequestHeaders(requestHeaders);
+
+            if (OnBeforeSend != null) { await OnBeforeSend(client, sentRequest); }
+            var result = await client.SendAsync(sentRequest, sendAsyncCompletedAfter, CancellationTokenSource.Token);
 
             var cookieJar = IoC.inject.Get<cookies.CookieJar>(this, false);
             if (cookieJar != null) {
@@ -140,21 +165,24 @@ namespace com.csutil.http {
             return result;
         }
 
-        private void AddAllCookiesToRequest(HttpClientHandler handler) {
-            var reusableCookieContainer = IoC.inject.Get<CookieContainer>(this, false);
-            if (reusableCookieContainer != null) {
-                handler.CookieContainer = reusableCookieContainer;
-                // Since an existing cookie container is reused it is assumed it is already filled with the correct cookies
-            } else {
-                var cookieJar = IoC.inject.Get<cookies.CookieJar>(this, false);
-                cookieJar.LoadFromCookieJarIntoCookieContainer(uri, target: handler.CookieContainer);
+        private void AddAllCookies(HttpClientHandler handler) {
+            var injectedCookieManager = IoC.inject.Get<CookieContainer>(this, false);
+            if (injectedCookieManager != null && injectedCookieManager != handler.CookieContainer) {
+                try {
+                    handler.CookieContainer = injectedCookieManager;
+                } catch (InvalidOperationException e) {
+                    throw new InvalidOperationException("The cookie manager changes after the HttpClient was already in use, ensure the reset the "
+                        + "HttpClient singleton in the RestFactory when loading a cookie manager from disc during runtime", e);
+                }
             }
+            var cookieJar = IoC.inject.Get<cookies.CookieJar>(this, false);
+            cookieJar.LoadFromCookieJarIntoCookieContainer(uri, target: handler.CookieContainer);
         }
 
         public void Dispose() {
+            CancellationTokenSource.Cancel();
             httpContent?.Dispose();
-            request?.Dispose();
-            client?.Dispose();
+            sentRequest?.Dispose();
         }
 
     }

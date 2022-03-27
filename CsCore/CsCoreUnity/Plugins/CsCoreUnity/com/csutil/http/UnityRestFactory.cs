@@ -9,6 +9,8 @@ namespace com.csutil.http {
 
     public class UnityRestFactory : RestFactory {
 
+        protected override void InitFactory() { }
+
         public override RestRequest SendRequest(Uri uri, HttpMethod method) {
             return MainThread.instance.ExecuteOnMainThread(() => {
                 if (method.ToString() == "GET") {
