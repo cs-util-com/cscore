@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using com.csutil.http;
 using Newtonsoft.Json;
@@ -66,6 +68,34 @@ namespace com.csutil.tests.http {
             Assert.Equal(formText2, result.form.Skip(1).First().Value);
             Assert.Equal("application/x-www-form-urlencoded", result.headers.contentType);
 
+        }
+
+        [Fact]
+        public async Task TestOctetStreamUpload() {
+
+            DirectoryEntry dir = EnvironmentV2.instance.GetNewInMemorySystem();
+            FileEntry fileToUpload = dir.GetChild("test.jpg");
+            using (var stream = await new Uri("https://picsum.photos/50/50").SendGET().GetResult<Stream>()) {
+                await fileToUpload.SaveStreamAsync(stream); // Download a test file to use it for the upload test
+            }
+
+            using (var streamToUpload = fileToUpload.OpenForRead()) {
+                // Using https://hookbin.com/ to test application/octet-stream uploads
+                RestRequest uploadRequest = new Uri("https://hookb.in/3OLza9earmI7yakkMxO8").SendPOST();
+                uploadRequest.WithStreamContent(streamToUpload);
+                float progressInPercent = 0;
+                uploadRequest.onProgress = (newProgress) => {
+                    progressInPercent = newProgress;
+                    Log.d(newProgress + "%");
+                };
+
+                var result = await uploadRequest.GetResult<HttpStatusCode>();
+                Log.d("Result=" + await uploadRequest.GetResult<string>());
+
+                Assert.Equal(HttpStatusCode.OK, result);
+                Assert.Equal(100, progressInPercent);
+            }
+            
         }
 
         [Fact]
