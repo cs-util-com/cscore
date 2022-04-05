@@ -39,6 +39,7 @@ namespace com.csutil.tests.keyvaluestore {
             protected override void OnBatchWasNotYetReadyForProcessing() { DelayAndThenForceProcessBatch().LogOnError(); }
 
             private async Task DelayAndThenForceProcessBatch() {
+                Log.MethodEntered();
                 await TaskV2.Delay(2000);
                 await BatchProcess();
             }

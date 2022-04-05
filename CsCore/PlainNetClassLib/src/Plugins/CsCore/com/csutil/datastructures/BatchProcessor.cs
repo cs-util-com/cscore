@@ -54,13 +54,15 @@ namespace com.csutil {
                     var d = default(E);
                     cancel.Token.ThrowIfCancellationRequested();
                     var keys = await store.GetAllKeys();
-                    cancel.Token.ThrowIfCancellationRequested();
-                    var entriesToProcess = await keys.MapAsync(k => store.Get<E>(k, d));
-                    cancel.Token.ThrowIfCancellationRequested();
-                    var processedEntries = await Process(entriesToProcess, cancel.Token);
-                    foreach (var entryToDelete in processedEntries) {
-                        if (!await store.Remove(entryToDelete.GetId())) {
-                            await OnCouldNotRemoveProcessedEntry(entryToDelete);
+                    if (!keys.IsEmpty()) {
+                        cancel.Token.ThrowIfCancellationRequested();
+                        var entriesToProcess = await keys.MapAsync(k => store.Get<E>(k, d));
+                        cancel.Token.ThrowIfCancellationRequested();
+                        var processedEntries = await Process(entriesToProcess, cancel.Token);
+                        foreach (var entryToDelete in processedEntries) {
+                            if (!await store.Remove(entryToDelete.GetId())) {
+                                await OnCouldNotRemoveProcessedEntry(entryToDelete);
+                            }
                         }
                     }
                 } finally {
