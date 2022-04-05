@@ -14,7 +14,7 @@ namespace com.csutil.model.immutable {
         }
 
         public static Action AddAsyncStateChangeListener<T, S>(this IDataStore<T> s, Func<T, S> getSubState, Func<S, Task> onChanged) {
-            return AddStateChangeListener(s, getSubState, (subState) => { onChanged(subState); });
+            return AddStateChangeListener(s, getSubState, (subState) => { onChanged(subState).LogOnError(); });
         }
 
         public static Action AddStateChangeListener<T, S>(this IDataStore<T> self, Func<T, S> getSubState, Action<S> onChanged, bool triggerInstantToInit = true) {
