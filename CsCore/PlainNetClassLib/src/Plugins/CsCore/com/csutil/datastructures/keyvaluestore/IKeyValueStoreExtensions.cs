@@ -73,8 +73,12 @@ namespace com.csutil.keyvaluestore {
             return await GetRange<T>(self, await self.GetAllKeys());
         }
 
-        public static async Task<IEnumerable<T>> GetRange<T>(this IKeyValueStore self, IEnumerable<string> keysToGet) {
-            return await keysToGet.MapAsync(key => self.Get<T>(key, default(T)));
+        public static Task<IEnumerable<T>> GetRange<T>(this IKeyValueStore self, IEnumerable<string> keysToGet) {
+            return keysToGet.MapAsync(key => self.Get<T>(key, default(T)));
+        }
+
+        public static async Task<List<bool>> RemoveRange(this IKeyValueStore self, IEnumerable<string> keysToRemove) {
+            return (await keysToRemove.MapAsync(key => self.Remove(key))).ToList();
         }
 
         public static KeyValueStoreTypeAdapter<T> GetTypeAdapter<T>(this IKeyValueStore self) {
