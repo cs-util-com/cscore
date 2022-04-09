@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -26,10 +27,13 @@ namespace com.csutil.tests.async {
             action(); // This will be delayed for 50ms and then triggered because no additional call follows after it
 
             // Wait a little bit until the action was triggered at least 2 times:
-            for (int i = 0; i < 50; i++) { await TaskV2.Delay(200); if (counter >= 2) { break; } }
+            for (int i = 0; i < 100; i++) {
+                await TaskV2.Delay(200);
+                if (counter >= 2) { break; }
+            }
             Assert.Equal(2, counter);
         }
-        
+
         [Fact]
         public async Task ThrottledDebounceExample2() {
             int counter = 0;
@@ -48,7 +52,10 @@ namespace com.csutil.tests.async {
             action("good"); // This will be delayed for 50ms and then triggered because no additional call follows after it
 
             // Wait a little bit until the action was triggered at least 2 times:
-            for (int i = 0; i < 50; i++) { await TaskV2.Delay(200); if (counter >= 2) { break; } }
+            for (int i = 0; i < 50; i++) {
+                await TaskV2.Delay(200);
+                if (counter >= 2) { break; }
+            }
             Assert.Equal(2, counter);
             Assert.True(allWereGood);
         }
@@ -101,6 +108,29 @@ namespace com.csutil.tests.async {
         }
 
         [Fact]
+        public async Task TestThrottledDebounce0() {
+            int counter = 0;
+            EventHandler<string> action = (_, myStringParam) => {
+                Log.d("action callback with old counter=" + counter);
+                Interlocked.Increment(ref counter);
+                Log.d("... new counter=" + counter);
+                Assert.NotEqual("bad", myStringParam);
+            };
+            var throttledAction = action.AsThrottledDebounce(delayInMs: 50);
+
+            throttledAction(this, "good");
+            Assert.Equal(1, counter); // Instant trigger
+            await TaskV2.Delay(100);
+            Assert.Equal(1, counter); // Only triggered once
+
+            throttledAction(this, "bad");
+            Assert.Equal(1, counter); // Debounced, so not triggered
+            throttledAction(this, "good");
+            await TaskV2.Delay(100);
+            Assert.Equal(2, counter);
+        }
+
+        [Fact]
         public async Task TestThrottledDebounce1() {
             int counter = 0;
             EventHandler<string> action = (_, myStringParam) => {
@@ -112,21 +142,25 @@ namespace com.csutil.tests.async {
             var throttledAction = action.AsThrottledDebounce(delayInMs: 50);
 
             throttledAction(this, "good");
+            Assert.Equal(1, counter);
+
             throttledAction(this, "bad");
             throttledAction(this, "bad");
             throttledAction(this, "bad");
             throttledAction(this, "good");
-            for (int i = 0; i < 30; i++) { await TaskV2.Delay(300); if (counter >= 2) { break; } }
+            await TaskV2.Delay(300);
             Assert.Equal(2, counter);
             await TaskV2.Delay(100);
-            throttledAction(this, "good");
+            Assert.Equal(2, counter);
+            await TaskV2.Delay(100);
+
+            throttledAction(this, "bad");
             throttledAction(this, "bad");
             throttledAction(this, "good");
-            for (int i = 0; i < 30; i++) { await TaskV2.Delay(300); if (counter >= 4) { break; } }
+            await TaskV2.Delay(300);
+            Assert.Equal(3, counter);
             await TaskV2.Delay(100);
-            Assert.Equal(4, counter);
-            await TaskV2.Delay(100);
-            Assert.Equal(4, counter);
+            Assert.Equal(3, counter);
 
         }
 
@@ -145,7 +179,10 @@ namespace com.csutil.tests.async {
                 tasks.Add(TaskV2.Run(() => { throttledAction(this, myIntParam); }));
             }
             await Task.WhenAll(tasks.ToArray());
-            for (int i = 0; i < 20; i++) { await TaskV2.Delay(30); if (counter >= 2) { break; } }
+            for (int i = 0; i < 20; i++) {
+                await TaskV2.Delay(30);
+                if (counter >= 2) { break; }
+            }
             Assert.Equal(2, counter);
             await TaskV2.Delay(100);
             Assert.Equal(2, counter);
@@ -187,64 +224,113 @@ namespace com.csutil.tests.async {
 
         [Fact]
         public async Task TestThrottledDebounce4() {
-            Func<object, string> originalFunction = (object sender) => {
-                Assert.Equal("good", sender);
-                Log.d("sender=" + sender);
-                return "awesome";
+
+            int counter = 0;
+            Func<string, Task> originalFunction = async (string param) => {
+                if (param != "good") { throw new DataMisalignedException("param was " + param); }
+                counter++;
+                Log.MethodEnteredWith(param, counter);
             };
             int delayInMs = 500;
             var wrappedFunc = originalFunction.AsThrottledDebounce(delayInMs);
-            Assert.Equal("awesome", wrappedFunc("good"));
-            Assert.Null(wrappedFunc("bad"));
-            Assert.Null(wrappedFunc("bad"));
-            Assert.Null(wrappedFunc("bad"));
-            await TaskV2.Delay(delayInMs * 3);
-            Assert.Equal("awesome", wrappedFunc("good"));
-            Assert.Null(wrappedFunc("bad"));
-            Assert.Null(wrappedFunc("bad"));
-            Assert.Null(wrappedFunc("bad"));
+            {
+                var t = wrappedFunc("good");
+                Assert.Equal(1, counter); // Instant trigger
+                await t;
+                Assert.Equal(1, counter);
+            }
+            {
+
+                var badTasks = new List<Task>();
+                badTasks.Add(wrappedFunc("bad"));
+                badTasks.Add(wrappedFunc("bad"));
+                badTasks.Add(wrappedFunc("bad"));
+                var t = wrappedFunc("good");
+                Assert.Equal(1, counter); // Only triggered after delay
+                await TaskV2.Delay(delayInMs * 3);
+                Assert.Equal(2, counter);
+                await t;
+                Assert.Equal(2, counter);
+                foreach (var bad in badTasks) {
+                    Assert.True(bad.IsCompleted);
+                    Assert.True(bad.IsCanceled);
+                    Assert.False(bad.IsFaulted);
+                }
+            }
+
+            {
+                wrappedFunc("bad");
+                wrappedFunc("bad");
+                var t = wrappedFunc("good");
+                await TaskV2.Delay(delayInMs * 3);
+                await t;
+                Assert.Equal(3, counter);
+            }
+
         }
 
         [Fact]
         public async Task TestThrottledDebounce5() {
+            int counter = 0;
             int delayInMs = 200;
-            Func<object, Task> originalFunction = async (object sender) => {
-                Assert.Equal("good", sender);
+            Func<object, Task> originalFunction = async (object param) => {
+                Assert.Equal("good", param);
+                counter++;
                 await TaskV2.Delay(delayInMs * 4);
             };
-            var wrappedFunc = originalFunction.AsThrottledDebounce(10);
-
-            var t = Stopwatch.StartNew();
-            var task = wrappedFunc("good");
-            await TaskV2.Delay(delayInMs);
-            Assert.Null(wrappedFunc("bad"));
-            Assert.Null(wrappedFunc("bad"));
-            Assert.Null(wrappedFunc("bad"));
-            await task;
-            await TaskV2.Delay(delayInMs);
-            task = wrappedFunc("good");
-            Assert.NotNull(task);
-            Assert.Null(wrappedFunc("bad"));
-            Assert.Null(wrappedFunc("bad"));
-            Assert.Null(wrappedFunc("bad"));
-            await task;
-
-            Assert.True(t.ElapsedMilliseconds > 200, "ElapsedMilliseconds=" + t.ElapsedMilliseconds);
+            var wrappedFunc = originalFunction.AsThrottledDebounce(10, skipFirstEvent: true);
+            {
+                var t = Stopwatch.StartNew();
+                var task = wrappedFunc("good");
+                Assert.Equal(0, counter);
+                await task;
+                Assert.Equal(1, counter);
+                Assert.True(t.ElapsedMilliseconds > delayInMs * 2, "ElapsedMilliseconds=" + t.ElapsedMilliseconds);
+            }
+            {
+                var b = wrappedFunc("bad");
+                wrappedFunc("bad");
+                var t = wrappedFunc("good");
+                Assert.Equal(1, counter);
+                await TaskV2.Delay(delayInMs);
+                Assert.Equal(2, counter);
+                Assert.False(t.IsCompleted);
+                await t;
+                Assert.True(b.IsCompleted);
+                Assert.False(b.IsCompletedSuccessfull());
+                Assert.False(b.IsCompletedSuccessfully);
+            }
         }
 
         [Fact]
         public async Task TestThrottledDebounce6() {
-            bool wasCalled = false;
-            Func<object, Task> originalFunction = (object sender) => {
-                wasCalled = true;
+            int counter = 0;
+            Func<Task> originalFunction = () => {
+                counter++;
                 throw new NotImplementedException();
             };
             var wrappedFunc = originalFunction.AsThrottledDebounce(10);
-            Assert.NotNull(wrappedFunc);
-            Assert.False(wasCalled);
-            Assert.Null(wrappedFunc("good"));
-            Assert.True(wasCalled);
-            await TaskV2.Delay(50); // To allow the error show in the log
+
+            {
+                Assert.Equal(0, counter);
+                var t = wrappedFunc();
+                Assert.Equal(1, counter);
+                Assert.True(t.IsFaulted);
+                await Assert.ThrowsAsync<NotImplementedException>(() => t);
+            }
+
+            {
+                Assert.Equal(1, counter);
+                wrappedFunc();
+                var t = wrappedFunc();
+                Assert.Equal(1, counter);
+                Assert.False(t.IsFaulted);
+                await TaskV2.Delay(50);
+                Assert.Equal(2, counter);
+                Assert.True(t.IsFaulted);
+                await Assert.ThrowsAsync<NotImplementedException>(() => t);
+            }
+
         }
 
     }
