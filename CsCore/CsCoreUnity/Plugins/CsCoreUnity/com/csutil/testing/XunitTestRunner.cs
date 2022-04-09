@@ -1,11 +1,9 @@
-﻿using com.csutil.logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
-using UnityEngine;
 using Xunit;
 using Xunit.Abstractions;
 
