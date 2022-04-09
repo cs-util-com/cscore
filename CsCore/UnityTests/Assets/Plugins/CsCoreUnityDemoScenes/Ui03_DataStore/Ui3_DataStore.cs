@@ -67,6 +67,7 @@ namespace com.csutil.tests.ui {
                 Log.MethodEnteredWith(model);
                 await TaskV2.Delay(10); // Simulate a 10ms delay in the UI update
                 links = targetView.GetLinkMap();
+                if (model == null) { model = new MyUser3("", 0); }
                 NameUi().text = model.name;
                 AgeUi().text = "" + model.age;
                 await links.Get<Button>("Save").SetOnClickAction(delegate { UpdateUser(model); });

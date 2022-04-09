@@ -25,7 +25,7 @@ namespace com.csutil {
             if (model == null) { Log.w($"Passed model (of type={typeof(T).Name}]) was NULL"); }
 
             var presenterName = self.GetType().Name;
-            var modelName = model.GetType().Name;
+            var modelName = model?.GetType().Name;
             var viewName = self.targetView.name;
             var name = $"{presenterName}({modelName})--{viewName}";
 
