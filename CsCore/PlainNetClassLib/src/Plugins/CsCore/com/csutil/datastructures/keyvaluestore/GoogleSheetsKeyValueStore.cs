@@ -47,12 +47,11 @@ namespace com.csutil.keyvaluestore {
             dowloadOnlineDataDebounced = async () => {
                 if (latestRawSheetData.IsNullOrEmpty()) { await InternetStateManager.Instance(this).HasInetAsync; }
                 if (InternetStateManager.Instance(this).HasInet) {
-                    var downloadTask = debouncedFunc(null);
-                    if (downloadTask != null) {
-                        await downloadTask;
+                    try {
+                        await debouncedFunc(null);
                         ThrowIfSheetDataMissing();
                         return true;
-                    }
+                    } catch (TaskCanceledException) { } // If debouncing decided the task does not need to run
                 } else { // No inet, so check if cached data is present:
                     var fallbackContent = await fallbackStore.GetAllKeys();
                     if (!fallbackContent.IsNullOrEmpty()) { return false; }
@@ -83,6 +82,11 @@ namespace com.csutil.keyvaluestore {
                 }
             }
             latestRawSheetData = newRawSheetData;
+        }
+
+        private async Task DownloadOnlineDataIfNeeded() {
+            var t = dowloadOnlineDataDebounced();
+            if (latestRawSheetData == null) { await t; }
         }
 
         private static List<List<string>> FilterForChanges(List<List<string>> oldData, List<List<string>> newData) {
@@ -148,17 +152,17 @@ namespace com.csutil.keyvaluestore {
         }
 
         public async Task<bool> ContainsKey(string key) {
-            await dowloadOnlineDataDebounced();
+            await DownloadOnlineDataIfNeeded();
             return await fallbackStore.ContainsKey(key);
         }
 
         public async Task<T> Get<T>(string key, T defaultValue) {
-            await dowloadOnlineDataDebounced();
+            await DownloadOnlineDataIfNeeded();
             return Mapper.Map<T>(await fallbackStore.Get<object>(key, defaultValue));
         }
 
         public async Task<IEnumerable<string>> GetAllKeys() {
-            await dowloadOnlineDataDebounced();
+            await DownloadOnlineDataIfNeeded();
             return await fallbackStore.GetAllKeys();
         }
 

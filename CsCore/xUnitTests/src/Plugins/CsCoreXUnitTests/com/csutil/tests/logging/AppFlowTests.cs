@@ -38,7 +38,7 @@ namespace com.csutil.tests {
                 await TaskV2.Delay(500);
                 if ((await tracker.store.GetAllKeys()).Count() == 0) { break; }
             }
-            Assert.True(s.ElapsedMilliseconds < 5000, "s.ElapsedMilliseconds=" + s.ElapsedMilliseconds);
+            Assert.True(s.ElapsedMilliseconds < 5000, "5000 < s.ElapsedMilliseconds=" + s.ElapsedMilliseconds);
 
             Assert.Empty(await tracker.store.GetAllKeys());
             // Make sure the DefaultAppFlowImpl itself does not create more events while sending the existing ones: 
