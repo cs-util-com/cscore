@@ -5,6 +5,7 @@ using com.csutil.tests.model.immutable;
 using System;
 using System.Collections;
 using System.Threading.Tasks;
+using UnityEngine;
 using UnityEngine.TestTools;
 
 namespace com.csutil.tests {
@@ -24,7 +25,13 @@ namespace com.csutil.tests {
 
         [UnityTest]
         public IEnumerator RunXunitTest_RestTests() {
-            yield return RunTestsInClass(typeof(RestTests)).AsCoroutine();
+            yield return RunTestsInClass(typeof(RestTests), t => {
+                // Blacklist since it relies on being executed without any other tests:
+                if (t.name.Contains("TestDateTimeV2")) { return false; }
+                // Blacklist because UnityWebRequest does not seem to load the partial stream, so full image and only the first bytes is the same speed:
+                if (t.name.Contains("DownloadTest4_LoadOnlyImageInfo")) { return false; }
+                return true;
+            }).AsCoroutine();
         }
 
         //[UnityTest]
