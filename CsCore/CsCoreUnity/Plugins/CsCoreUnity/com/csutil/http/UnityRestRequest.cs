@@ -74,17 +74,21 @@ namespace com.csutil.http {
         }
 
         public RestRequest WithTextContent(string textContent, Encoding encoding, string mediaType) {
-            request.uploadHandler = new UploadHandlerRaw(encoding.GetBytes(textContent));
-            request.SetRequestHeader("content-type", mediaType);
-            return this;
+            return MainThread.instance.ExecuteOnMainThread(() => {
+                request.uploadHandler = new UploadHandlerRaw(encoding.GetBytes(textContent));
+                request.SetRequestHeader("content-type", mediaType);
+                return this;
+            });
         }
 
         public RestRequest WithRequestHeaders(Headers requestHeaders) {
-            if (!request.isModifiable) {
-                throw new AccessViolationException("Request already sent, cant set requestHeaders anymore");
-            }
-            this.requestHeaders = new Headers(this.requestHeaders.AddRangeViaUnion(requestHeaders));
-            return this;
+            return MainThread.instance.ExecuteOnMainThread(() => {
+                if (!request.isModifiable) {
+                    throw new AccessViolationException("Request already sent, cant set requestHeaders anymore");
+                }
+                this.requestHeaders = new Headers(this.requestHeaders.AddRangeViaUnion(requestHeaders));
+                return this;
+            });
         }
 
         public RestRequest WithFormContent(Dictionary<string, object> formData) {
@@ -119,11 +123,13 @@ namespace com.csutil.http {
             return this;
         }
 
-        public async Task<Headers> GetResultHeaders() {
-            waitForRequestToBeConfigured.TrySetResult(true);
-            if (request.isModifiable) { return await GetResult<Headers>(); }
-            await WaitForRequestToFinish();
-            return request.GetResponseHeadersV2();
+        public Task<Headers> GetResultHeaders() {
+            return MainThread.instance.ExecuteOnMainThreadAsync(async () => {
+                waitForRequestToBeConfigured.TrySetResult(true);
+                if (request.isModifiable) { return await GetResult<Headers>(); }
+                await WaitForRequestToFinish();
+                return request.GetResponseHeadersV2();
+            });
         }
 
         private async Task WaitForRequestToFinish() {

@@ -145,8 +145,9 @@ namespace com.csutil.tests.http {
             var serverTimeReceived = false;
             EventBus.instance.Subscribe(this, DateTimeV2.SERVER_UTC_DATE, (Uri uri, DateTime serverUtcTime) => {
                 serverTimeReceived = true;
-                var diff = DateTime.UtcNow - serverUtcTime;
-                Log.d($"Server {uri} reports server time: {serverUtcTime}, diff={diff.TotalMillisecondsAbs()}");
+                var now = DateTime.UtcNow;
+                var diff = now - serverUtcTime;
+                Log.d($"Server {uri} reports server time: {serverUtcTime.ToReadableStringExact()}, diff={diff.TotalMillisecondsAbs()}ms to device/system time " + now.ToReadableStringExact());
                 Assert.True(diff.TotalMillisecondsAbs() < 10000, "Difference between system time and server time was " + diff);
             });
 
