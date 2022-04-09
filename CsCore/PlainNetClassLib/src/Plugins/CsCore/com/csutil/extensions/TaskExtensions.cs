@@ -60,6 +60,11 @@ namespace com.csutil {
             } catch (Exception) { return self.ContinueWith(continuationAction); }
         }
 
+        /// <summary> Returns true if the task is completed but did not fail and was not cancelled. Same as task.IsCompletedSuccessfully </summary>
+        public static bool IsCompletedSuccessfull(this Task self) {
+            return self.IsCompleted && !(self.IsFaulted || self.IsCanceled);
+        }
+        
     }
 
 }
