@@ -9,10 +9,12 @@ namespace com.csutil {
 
         private static int lastOverhead = 0;
 
-        public static async Task Delay(int millisecondsDelay) {
+        public static Task Delay(int millisecondsDelay) { return Delay(millisecondsDelay, CancellationToken.None); }
+
+        public static async Task Delay(int millisecondsDelay, CancellationToken cancellationToken) {
             millisecondsDelay = Math.Max(millisecondsDelay - lastOverhead, 1);
             var t = Stopwatch.StartNew();
-            await IoC.inject.GetOrAddSingleton<TaskV2>(null).DelayTask(millisecondsDelay);
+            await IoC.inject.GetOrAddSingleton<TaskV2>(null).DelayTask(millisecondsDelay, cancellationToken);
             t.Stop();
             lastOverhead = (int)(t.ElapsedMilliseconds - millisecondsDelay);
             if (lastOverhead < 0) { // The wait was shorter then requested:
@@ -22,7 +24,7 @@ namespace com.csutil {
 
         public static Task Delay(TimeSpan t) { return Delay((int)t.TotalMilliseconds); }
 
-        protected virtual Task DelayTask(int millisecondsDelay) { return Task.Delay(millisecondsDelay); }
+        protected virtual Task DelayTask(int millisecondsDelay, CancellationToken cancellationToken) { return Task.Delay(millisecondsDelay, cancellationToken); }
 
         public static Task Run(Action action) {
             return IoC.inject.GetOrAddSingleton<TaskV2>(null).RunTask(action);
