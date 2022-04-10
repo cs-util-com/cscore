@@ -12,8 +12,9 @@ namespace com.csutil.ui {
         }
 
         /// <summary> Loads a new view based on its prefab name and by default hides the current one </summary>
-        /// <param name="currentViewToHide"> (Any part of) the current view that should be hidden </param>
         /// <param name="prefabName"> e.g. "Dialogs/Dialog123" </param>
+        /// <param name="currentViewToHide"> (Any part of) the current view that should be hidden </param>
+        /// <param name="siblingIndex"> Index where to add the new view in the view stack, default -1 will add it at the end </param>
         /// <returns> The newly created view </returns>
         public GameObject ShowView(string prefabName, GameObject currentViewToHide = null, int siblingIndex = -1) {
             return ShowView(ResourcesV2.LoadPrefab(prefabName), currentViewToHide, siblingIndex);
@@ -21,6 +22,8 @@ namespace com.csutil.ui {
 
         /// <summary> Adds a passed view to the view stack to show it </summary>
         /// <param name="newView"> The new view to show in the stack </param>
+        /// <param name="currentViewToHide"> Any part of the current view on the view stack that should be set to hidden </param>
+        /// <param name="siblingIndex">Index where to add the new view in the view stack, default -1 will add it at the end</param>
         public GameObject ShowView(GameObject newView, GameObject currentViewToHide = null, int siblingIndex = -1) {
 
             if (newView.IsPartOfEditorOnlyPrefab()) { // If its a prefab first create an instance from it
