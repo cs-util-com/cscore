@@ -37,7 +37,12 @@ namespace com.csutil.ui {
             var canvasesOnRootOfScene = roots.Filter(x => x.gameObject.GetParent() == null);
             if (!canvasesOnRootOfScene.IsNullOrEmpty()) {
                 int nr = canvasesOnRootOfScene.Count();
-                if (nr != 1) { Log.w($"Found {nr} root-canvases on the top level of the scene. Will use the first found one.."); }
+                if (nr != 1) {
+                    var canvasesWithViewStacks = canvasesOnRootOfScene.Filter(c => c.GetComponentInChildren<ViewStack>());
+                    if (!canvasesWithViewStacks.IsNullOrEmpty()) { canvasesOnRootOfScene = canvasesWithViewStacks; }
+                    var firstCanvasInList = canvasesOnRootOfScene.First();
+                    Log.w($"Found {nr} root-canvases on the top level of the scene. Will use the first found Canvas ({firstCanvasInList})", firstCanvasInList.gameObject);
+                }
                 return canvasesOnRootOfScene.First();
             }
             // As a fallback return the first root canvas:

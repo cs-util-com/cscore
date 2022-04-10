@@ -23,7 +23,7 @@ namespace com.csutil.ui {
             var maxOrderOfAnyCanvasFound = canvas.CalcCurrentMaxSortingOrderInLayer();
             // If overrideSorting is already active the sorting order must be at least 1 higher, equal does not work in that case:
             if (canvas.overrideSorting) { maxOrderOfAnyCanvasFound++; }
-            if (maxOrderOfAnyCanvasFound > canvas.sortingOrder) {
+            if (maxOrderOfAnyCanvasFound >= canvas.sortingOrder) {
                 canvas.overrideSorting = true;
                 canvas.sortingOrder = maxOrderOfAnyCanvasFound + 1;
             }

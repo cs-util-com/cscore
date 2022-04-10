@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using UnityEngine;
@@ -10,9 +11,17 @@ namespace com.csutil {
 
         /// <summary> Adds a child GameObject to the calling new parent GameObject </summary>
         public static GameObject AddChild(this GameObject parentGo, GameObject child, bool worldPositionStays = false, int siblingIndex = -1) {
+            AssertParentNotInChildGoTree(parentGo, child, "" + parentGo);
             child.transform.SetParent(parentGo.transform, worldPositionStays); // add it to parent
             if (siblingIndex > -1) { child.transform.SetSiblingIndex(siblingIndex); }
             return child;
+        }
+
+        [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]        
+        private static void AssertParentNotInChildGoTree(GameObject parent, GameObject child, string path) {
+            if (parent == child) { throw Log.e($"Trying to add child GO in a parent that is located in the child: " + path, parent); }
+            parent = parent.GetParent();
+            if (parent != null) { AssertParentNotInChildGoTree(parent, child, parent + " -> " + path); }
         }
 
         /// <summary> Used for lazy-initialization of a GameObject, combine with go.GetOrAddComponent </summary>

@@ -30,8 +30,9 @@ namespace com.csutil.ui {
 
         private static Task Show(string caption, string message, string confirmText, string dialogPrefabName) {
             var dialog = new DialogLoader<Dialog>(new Dialog(caption, message, confirmText));
+            var rootCanvas = RootCanvas.GetOrAddRootCanvasV2().gameObject;
             GameObject dialogUi = dialog.LoadDialogPrefab(new DefaultPresenter(), dialogPrefabName);
-            RootCanvas.GetOrAddRootCanvas().gameObject.AddChild(dialogUi); // Add dialog UI in a canvas
+            rootCanvas.AddChild(dialogUi); // Add dialog UI in the root canvas
             var d = dialog.ShowDialogAsync();
             EventBus.instance.Publish(EventConsts.catUi + UiEvents.DIALOG, dialog);
             return d;

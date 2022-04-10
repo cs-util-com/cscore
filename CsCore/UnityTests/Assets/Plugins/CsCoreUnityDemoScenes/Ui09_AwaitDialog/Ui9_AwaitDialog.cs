@@ -13,6 +13,7 @@ namespace com.csutil.tests.ui {
 
         private async Task ShowAllDialogs() {
             AssertVisually.SetupDefaultSingletonInDebugMode();
+            ViewStackHelper.MainViewStack().ShowView("Canvas/DefaultViewStackView");
             await ShowCancelConfirmDialog();
             await ShowInfoDialog();
             await ShowWarningDialog();
@@ -48,11 +49,11 @@ namespace com.csutil.tests.ui {
         /// <summary> This example shows how to use the DialogLoader manually to have full control over the UI presenter </summary>
         private async Task UseDialogLoaderManually() {
             var loader = new DialogLoader<ConfirmCancelDialog>(new ConfirmCancelDialog(caption: "I am a dialog",
-                            message: "I can be awaited in the code, the async or coroutine can wait for the user " +
-                            "to make a decision (select cancel or confirm) before the code continues!"));
-            GameObject dialogUi = loader.LoadDialogPrefab(new ConfirmCancelDialog.DefaultPresenter(),
-                            dialogPrefabName: "Dialogs/DefaultDialog1");
-            RootCanvas.GetOrAddRootCanvas().gameObject.AddChild(dialogUi); // Add dialog UI in a canvas
+                message: "I can be awaited in the code, the async or coroutine can wait for the user " +
+                "to make a decision (select cancel or confirm) before the code continues!"));
+            var rootCanvas = RootCanvas.GetOrAddRootCanvasV2().gameObject;
+            rootCanvas.AddChild(loader.LoadDialogPrefab(new ConfirmCancelDialog.DefaultPresenter(),
+                dialogPrefabName: "Dialogs/DefaultDialog1")); // Add dialog UI in a canvas
             var waitForUserInputInDialogTask = loader.ShowDialogAsync();
             AssertV2.IsFalse(loader.data.dialogWasConfirmed, "Dialog was already confirmed!");
             await SimulateConfirmButtonClick();
