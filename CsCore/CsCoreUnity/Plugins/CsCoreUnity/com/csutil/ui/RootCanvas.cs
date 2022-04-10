@@ -64,7 +64,7 @@ namespace com.csutil.ui {
             var rootCanvasesWithViewStack = roots.Filter(x => x.GetComponent<ViewStack>() != null);
             if (!rootCanvasesWithViewStack.IsNullOrEmpty()) {
                 foreach (var c in rootCanvasesWithViewStack) {
-                    throw Log.e("Found root canvas which had a ViewStack directly attached to it, consider moving the ViewStack to a direct child of the root canvas instead", c.gameObject);
+                    Log.e("Found root canvas which had a ViewStack directly attached to it, consider moving the ViewStack to a direct child of the root canvas instead", c.gameObject);
                 }
             }
         }
