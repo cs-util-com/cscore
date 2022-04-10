@@ -55,14 +55,14 @@ namespace com.csutil.ui {
         public void DestroyViewStack() { gameObject.Destroy(); }
 
         /// <summary> Will "close" the current view and jump back to the last view and set it back to active </summary>
-        /// <param name="gameObject"> The current view or any part of it </param>
+        /// <param name="gameObjectToClose"> The current view or any part of it </param>
         /// <param name="destroyFinalView"> If true and the last view on the stack is reached this last view will be destroyed too </param>
         /// <param name="hideNotDestroyCurrentView"> If set to true the current active view will not be destroyed but instead set to hidden </param>
         /// <returns></returns>
-        public bool SwitchBackToLastView(GameObject gameObject, bool destroyFinalView = false, bool hideNotDestroyCurrentView = false) {
-            var currentView = GetRootViewOf(gameObject);
+        public bool SwitchBackToLastView(GameObject gameObjectToClose, bool destroyFinalView = false, bool hideNotDestroyCurrentView = false) {
+            var currentView = GetRootViewOf(gameObjectToClose);
             if (!currentView.IsGrandChildOf(gameObject)) {
-                Log.w("A view was passed to a viewstack that did not belong to this view stack! Will not close that view");
+                Log.w("A view was passed to a viewstack that did not belong to this view stack! Will not close that view", currentView);
                 return false;
             }
             var currentIndex = currentView.transform.GetSiblingIndex();
