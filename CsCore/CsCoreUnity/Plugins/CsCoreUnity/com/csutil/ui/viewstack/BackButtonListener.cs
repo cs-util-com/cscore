@@ -20,18 +20,23 @@ namespace com.csutil.ui.viewstack {
                 var c = vs.gameObject.GetComponentInParents<Canvas>()?.rootCanvas;
                 if (c != null && c == RootCanvas.GetAllRootCanvases().First()) {
                     var sortedViews = SortByCanvasSortingOrder(vs.gameObject.GetChildrenIEnumerable());
-                    if (!vs.SwitchBackToLastView(sortedViews.First())) {
-                        // The last view was reached so the switch back could not be performed
-                        if (destroyFinalView) { vs.DestroyViewStack(); }
-                    }
+                    SwitchBackToLastViewViaBackKey(vs, sortedViews.First());
                 }
             }
         }
 
         private static IOrderedEnumerable<GameObject> SortByCanvasSortingOrder(IEnumerable<GameObject> c) {
-            return c.ToHashSet().OrderByDescending(x => x.GetComponent<Canvas>().sortingOrder);
+            return c.Filter(x => x.activeSelf).ToHashSet().OrderByDescending(x => x.GetComponent<Canvas>().sortingOrder);
         }
 
+        private void SwitchBackToLastViewViaBackKey(ViewStack viewStack, GameObject viewToClose) {
+            Log.MethodEnteredWith("ViewStack" + viewStack, "viewToClose=" + viewToClose);
+            if (!viewStack.SwitchBackToLastView(viewToClose)) {
+                // The last view was reached so the switch back could not be performed
+                if (destroyFinalView) { viewStack.DestroyViewStack(); }
+            }
+        }
+        
     }
 
 }

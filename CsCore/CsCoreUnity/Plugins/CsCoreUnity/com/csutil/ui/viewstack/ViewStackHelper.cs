@@ -7,13 +7,16 @@ namespace com.csutil.ui {
 
     public static class ViewStackHelper {
 
-        public static ViewStack MainViewStack() { return GetOrAdd("Canvas/MainViewStack"); }
+        public static ViewStack MainViewStack() {
+            return RootCanvas.GetOrAddRootCanvasV2().GetOrAddViewStack("Canvas/MainViewStack");
+        }
 
-        public static ViewStack GetOrAdd(string viewStackPrefabName) {
-            var rootCanvas = RootCanvas.GetOrAddRootCanvasV2().gameObject;
-            var viewStackGOs = rootCanvas.GetChildren();
+        public static ViewStack GetOrAddViewStack(this Canvas self, string viewStackPrefabName) {
+            AssertV2.IsTrue(self.isRootCanvas, "Passed canvas was not a root canvas", self.gameObject);
+            var rootCanvasGO = self.gameObject;
+            var viewStackGOs = rootCanvasGO.GetChildren();
             var go = viewStackGOs.SingleOrDefault(x => x.name == viewStackPrefabName);
-            var viewstack = go != null ? go.GetComponentV2<ViewStack>() : rootCanvas.AddChild(ResourcesV2.LoadPrefab(viewStackPrefabName)).GetComponentV2<ViewStack>();
+            var viewstack = go != null ? go.GetComponentV2<ViewStack>() : rootCanvasGO.AddChild(ResourcesV2.LoadPrefab(viewStackPrefabName)).GetComponentV2<ViewStack>();
             if (viewstack == null) { throw Log.e("No ViewStack found in GameObject " + go, go); }
             return viewstack;
         }
@@ -21,7 +24,7 @@ namespace com.csutil.ui {
         public static GameObject SwitchToView(this ViewStack target, string prefabName, int siblingIndex = -1) {
             return target.ShowView(prefabName, target.GetLatestView(), siblingIndex);
         }
-        
+
         public static GameObject SwitchToView(this ViewStack target, GameObject newView, int siblingIndex = -1) {
             return target.ShowView(newView, target.GetLatestView(), siblingIndex);
         }
