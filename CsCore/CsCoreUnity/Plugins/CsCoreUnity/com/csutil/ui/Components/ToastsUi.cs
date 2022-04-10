@@ -18,7 +18,7 @@ namespace com.csutil {
         }
 
         private static ToastsUi InitToastsUi() {
-            var targetCanvas = RootCanvas.GetOrAddRootCanvas().gameObject;
+            var targetCanvas = RootCanvas.GetOrAddRootCanvasV2().gameObject;
             var toastContainer = targetCanvas.AddChild(ResourcesV2.LoadPrefab("Messages/ToastContainer1"));
             return toastContainer.GetOrAddComponent<ToastsUi>();
         }
