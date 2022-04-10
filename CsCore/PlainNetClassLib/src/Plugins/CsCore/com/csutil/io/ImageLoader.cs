@@ -22,7 +22,7 @@ namespace com.csutil.io {
             AssertV2.AreNotEqual(0, stream.Length, "LoadAndDispose: stream.Length");
             var image = ImageResult.FromStream(stream, ColorComponents.RedGreenBlueAlpha);
             stream.Dispose();
-            Conversion.stbi__vertical_flip(image.Data, image.Width, image.Height, 4);
+            // Conversion.stbi__vertical_flip(image.Data, image.Width, image.Height, 4);
             return image;
         }
 

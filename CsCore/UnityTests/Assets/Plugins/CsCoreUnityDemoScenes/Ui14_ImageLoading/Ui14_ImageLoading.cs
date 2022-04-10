@@ -13,7 +13,7 @@ namespace com.csutil.tests {
 
     public class Ui14_ImageLoading : UnitTestMono {
 
-        public string testUrl = "https://github.com/cs-util-com/cscore/raw/master/CsCore/UnityTests/Assets/TestApplicationData/testImage.png";
+        public string testUrl = "https://github.com/cs-util-com/cscore/raw/master/CsCore/assets/logo-cscore1024x1024_2.png";
 
         private Dictionary<string, Link> links;
 

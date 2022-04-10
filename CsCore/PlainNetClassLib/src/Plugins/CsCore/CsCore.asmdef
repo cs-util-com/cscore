@@ -1,5 +1,6 @@
 {
     "name": "CsCore",
+    "rootNamespace": "",
     "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],
