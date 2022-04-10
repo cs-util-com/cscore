@@ -7,9 +7,10 @@
 #endif
 	enum ColorComponents
 	{
-		Grey = 1,
-		GreyAlpha = 2,
-		RedGreenBlue = 3,
-		RedGreenBlueAlpha = 4
+		Default,
+		Grey,
+		GreyAlpha,
+		RedGreenBlue,
+		RedGreenBlueAlpha
 	}
 }

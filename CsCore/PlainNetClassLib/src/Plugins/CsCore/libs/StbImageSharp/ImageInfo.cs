@@ -1,5 +1,4 @@
-﻿using StbImageSharp.Decoding;
-using System.IO;
+﻿using System.IO;
 
 namespace StbImageSharp
 {
@@ -15,36 +14,27 @@ namespace StbImageSharp
 		public ColorComponents ColorComponents;
 		public int BitsPerChannel;
 
-		public static ImageInfo? FromStream(Stream stream)
+
+		public static unsafe ImageInfo? FromStream(Stream stream)
 		{
-			ImageInfo? info = null;
+			int width, height, comp;
+			var context = new StbImage.stbi__context(stream);
 
-			if (JpgDecoder.Test(stream))
-			{
-				info = JpgDecoder.Info(stream);
-			}
-			else if (PngDecoder.Test(stream))
-			{
-				info = PngDecoder.Info(stream);
-			}
-			else if (BmpDecoder.Test(stream))
-			{
-				info = BmpDecoder.Info(stream);
-			}
-			else if (GifDecoder.Test(stream))
-			{
-				info = GifDecoder.Info(stream);
-			}
-			else if (PsdDecoder.Test(stream))
-			{
-				info = PsdDecoder.Info(stream);
-			}
-			else if (TgaDecoder.Test(stream))
-			{
-				info = TgaDecoder.Info(stream);
-			}
+			var is16Bit = StbImage.stbi__is_16_main(context) == 1;
+			StbImage.stbi__rewind(context);
 
-			return info;
+			var infoResult = StbImage.stbi__info_main(context, &width, &height, &comp);
+			StbImage.stbi__rewind(context);
+
+			if (infoResult == 0) return null;
+
+			return new ImageInfo
+			{
+				Width = width,
+				Height = height,
+				ColorComponents = (ColorComponents)comp,
+				BitsPerChannel = is16Bit ? 16 : 8
+			};
 		}
 	}
 }

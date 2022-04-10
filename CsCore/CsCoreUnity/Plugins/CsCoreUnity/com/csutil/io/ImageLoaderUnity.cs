@@ -25,7 +25,6 @@ namespace com.csutil {
         }
 
         public static Texture2D ToTexture2D(this ImageResult self) {
-            AssertV2.AreEqual(8, self.BitsPerChannel);
             Texture2D tex = new Texture2D(self.Width, self.Height, TextureFormat.RGBA32, false);
             tex.LoadRawTextureData(self.Data);
             tex.Apply();

@@ -7,9 +7,6 @@
 #endif
 	class AnimatedFrameResult : ImageResult
 	{
-		public int Delay
-		{
-			get; set;
-		}
+		public int DelayInMs { get; set; }
 	}
 }
