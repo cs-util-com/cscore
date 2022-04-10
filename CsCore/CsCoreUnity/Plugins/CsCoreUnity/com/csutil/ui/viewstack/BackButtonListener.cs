@@ -17,16 +17,20 @@ namespace com.csutil.ui.viewstack {
             if (Input.GetKeyUp(KeyCode.Escape)) { // back button pressed
                 Log.d("Back key pressed");
                 var vs = gameObject.GetComponent<ViewStack>();
-                var c = vs.gameObject.GetComponentInParents<Canvas>()?.rootCanvas;
-                if (c != null && c == RootCanvas.GetAllRootCanvases().First()) {
-                    var sortedViews = SortByCanvasSortingOrder(vs.gameObject.GetChildrenIEnumerable());
-                    SwitchBackToLastViewViaBackKey(vs, sortedViews.First());
+                var screenOnTop = GetCanvasWithHighestSortingOrder();
+                var viewToClose = vs.GetLatestView();
+                if (viewToClose.IsGrandChildOf(screenOnTop)) {
+                    SwitchBackToLastViewViaBackKey(vs, viewToClose);
+                } else {
+                    SwitchBackToLastViewViaBackKey(vs, screenOnTop);
                 }
             }
         }
 
-        private static IOrderedEnumerable<GameObject> SortByCanvasSortingOrder(IEnumerable<GameObject> c) {
-            return c.Filter(x => x.activeSelf).ToHashSet().OrderByDescending(x => x.GetComponent<Canvas>().sortingOrder);
+        private static GameObject GetCanvasWithHighestSortingOrder() {
+            var c = ResourcesV2.FindAllInScene<Canvas>();
+            c = c.Filter(x => x.gameObject.activeInHierarchy);
+            return c.OrderByDescending(x => x.sortingOrder).First().gameObject;
         }
 
         private void SwitchBackToLastViewViaBackKey(ViewStack viewStack, GameObject viewToClose) {
@@ -36,7 +40,7 @@ namespace com.csutil.ui.viewstack {
                 if (destroyFinalView) { viewStack.DestroyViewStack(); }
             }
         }
-        
+
     }
 
 }

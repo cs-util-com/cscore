@@ -76,7 +76,11 @@ namespace com.csutil {
 
         /// <summary> Returns the parent GameObject or null if top scene level is reached </summary>
         public static GameObject GetParent(this GameObject child) {
-            if (child == null || child.transform.parent == null) { return null; }
+            if (child == null) {
+                Log.e("GetParent: Passed GameObject was null");
+                return null;
+            }
+            if (child.transform.parent == null) { return null; }
             return child.transform.parent.gameObject;
         }
 
@@ -126,6 +130,12 @@ namespace com.csutil {
         /// <summary> When the target <see cref="GameObject"/> is destroyed call Dispose on a <see cref="IDisposable"/> </summary>
         public static T SetUpDisposeOnDestroy<T>(this T self, GameObject goToConnectTo) where T : IDisposable {
             return goToConnectTo.SetUpDisposeOnDestroy(self);
+        }
+
+        public static bool IsGrandChildOf(this GameObject self, GameObject potentialGrandParent) {
+            if (self == null) { return false; } // Reached root of GO tree
+            if (self == potentialGrandParent) { return true; }
+            return IsGrandChildOf(self.GetParent(), potentialGrandParent);
         }
 
     }
