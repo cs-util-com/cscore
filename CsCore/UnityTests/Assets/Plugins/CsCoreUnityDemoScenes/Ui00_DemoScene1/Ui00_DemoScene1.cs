@@ -25,8 +25,13 @@ namespace com.csutil.tests {
             links.Get<Button>("ButtonTestPing").SetOnClickAction(delegate {
                 StartCoroutine(TestCurrentPing(links.Get<InputField>("IpInput").text));
             });
-            links.Get<Button>("DefaultButtonWithIcon").SetOnClickAction(delegate {
+            links.Get<Button>("ButtonShowToast").SetOnClickAction(delegate {
                 Toast.Show("Hello World");
+            });
+            // Clicking multiple times on a button with an async action will only execute the first click:
+            links.Get<Button>("ButtonRunAsyncMethod").SetOnClickAction(async delegate {
+                await Task.Delay(2000);
+                Toast.Show("Button waited 2 seconds");
             });
 
             yield return new WaitForSeconds(0.5f);
