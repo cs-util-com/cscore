@@ -2,6 +2,7 @@
 using com.csutil.ui;
 using System;
 using System.Collections;
+using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
@@ -29,7 +30,10 @@ namespace com.csutil.tests {
         /// and when it will approximatly be done. </summary>
         private void SetupGlobalProgressUi() {
             var pm1 = new ProgressManager();
-            gameObject.GetComponentInChildren<ProgressUi>().progressManager = pm1;
+            var uisInRootCanvas = RootCanvas.GetOrAddRootCanvasV2().gameObject.GetChildren();
+            // Find the single one that has a progress UI attached to it and assume its the global process UI screen to be used:
+            var globalProgressUi = uisInRootCanvas.Single(x => x.GetComponentV2<ProgressUi>() != null).GetComponentV2<ProgressUi>();
+            globalProgressUi.progressManager = pm1;
 
             int id = 0;
             var map = gameObject.GetLinkMap();

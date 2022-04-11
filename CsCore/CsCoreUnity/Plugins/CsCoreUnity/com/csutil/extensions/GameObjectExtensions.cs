@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using UnityEngine;
@@ -10,9 +11,17 @@ namespace com.csutil {
 
         /// <summary> Adds a child GameObject to the calling new parent GameObject </summary>
         public static GameObject AddChild(this GameObject parentGo, GameObject child, bool worldPositionStays = false, int siblingIndex = -1) {
+            AssertParentNotInChildGoTree(parentGo, child, "" + parentGo);
             child.transform.SetParent(parentGo.transform, worldPositionStays); // add it to parent
             if (siblingIndex > -1) { child.transform.SetSiblingIndex(siblingIndex); }
             return child;
+        }
+
+        [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]        
+        private static void AssertParentNotInChildGoTree(GameObject parent, GameObject child, string path) {
+            if (parent == child) { throw Log.e($"Trying to add child GO in a parent that is located in the child: " + path, parent); }
+            parent = parent.GetParent();
+            if (parent != null) { AssertParentNotInChildGoTree(parent, child, parent + " -> " + path); }
         }
 
         /// <summary> Used for lazy-initialization of a GameObject, combine with go.GetOrAddComponent </summary>
@@ -67,7 +76,11 @@ namespace com.csutil {
 
         /// <summary> Returns the parent GameObject or null if top scene level is reached </summary>
         public static GameObject GetParent(this GameObject child) {
-            if (child == null || child.transform.parent == null) { return null; }
+            if (child == null) {
+                Log.e("GetParent: Passed GameObject was null");
+                return null;
+            }
+            if (child.transform.parent == null) { return null; }
             return child.transform.parent.gameObject;
         }
 
@@ -108,10 +121,21 @@ namespace com.csutil {
             self.GetOrAddComponent<OnDestroyListener>().onDestroy.AddListener(() => { onDestroyCallback(); });
         }
 
-        /// <summary> When the gameobject is destroyed call Dispose on a target <see cref="IDisposable"/> </summary>
+        /// <summary> When the <see cref="GameObject"/> is destroyed call Dispose on a target <see cref="IDisposable"/> </summary>
         public static T SetUpDisposeOnDestroy<T>(this GameObject self, T objectToDispose) where T : IDisposable {
             self.AddComponent<DisposerMono>().disposable = objectToDispose;
             return objectToDispose;
+        }
+
+        /// <summary> When the target <see cref="GameObject"/> is destroyed call Dispose on a <see cref="IDisposable"/> </summary>
+        public static T SetUpDisposeOnDestroy<T>(this T self, GameObject goToConnectTo) where T : IDisposable {
+            return goToConnectTo.SetUpDisposeOnDestroy(self);
+        }
+
+        public static bool IsGrandChildOf(this GameObject self, GameObject potentialGrandParent) {
+            if (self == null) { return false; } // Reached root of GO tree
+            if (self == potentialGrandParent) { return true; }
+            return IsGrandChildOf(self.GetParent(), potentialGrandParent);
         }
 
     }

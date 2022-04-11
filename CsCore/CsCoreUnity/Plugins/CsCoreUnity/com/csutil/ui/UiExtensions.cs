@@ -38,30 +38,36 @@ namespace com.csutil {
         }
 
         public static Task AddOnClickAction(this Button self, Action<GameObject> onClickAction) {
-            return AddOnClickAction(self, (go) => { onClickAction(go); return true; });
+            return AddOnClickAction(self, (go) => {
+                onClickAction(go);
+                return true;
+            });
         }
 
         public static Task<T> AddOnClickAction<T>(this Button self, Func<GameObject, T> onClickFunc) {
             onClickFunc.ThrowErrorIfNull("Passed onClickFunc was null");
             var tcs = new TaskCompletionSource<T>();
             var originTrace = new StackTrace();
+            Task alreadyRunningTask = null;
             self.onClick.AddListener(() => {
+                if (alreadyRunningTask != null && !alreadyRunningTask.IsCompleted) { return; }
                 EventBus.instance.Publish(EventConsts.catUi + UiEvents.BUTTON_CLICKED, self);
                 try {
                     T res = onClickFunc(self.gameObject);
                     if (res is Task<T> asyncT) {
+                        alreadyRunningTask = asyncT;
                         WaitForTaskSuccess(asyncT, originTrace, tcs).ContinueWithSameContext(wasSuccess => {
                             if (wasSuccess.Result) { tcs.TrySetResult(asyncT.Result); }
                         });
                     } else if (res is Task t) {
+                        alreadyRunningTask = t;
                         WaitForTaskSuccess(t, originTrace, tcs).ContinueWithSameContext(wasSuccess => {
                             if (wasSuccess.Result) { tcs.TrySetResult((T)(object)t); }
                         });
                     } else {
                         tcs.TrySetResult(res);
                     }
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     Log.e(e);
                     tcs.TrySetException(e);
                 }
@@ -73,8 +79,7 @@ namespace com.csutil {
             try {
                 await task;
                 return true;
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 Log.e(e);
                 if (task.IsCanceled) { tcs.TrySetCanceled(); }
                 if (task.IsFaulted) { tcs.TrySetException(task.Exception); }
@@ -265,13 +270,18 @@ namespace com.csutil {
             self.textLocalized(text);
         }
 
-        private class Wrapper { public Action stateChangeListener; }
+        private class Wrapper {
+            public Action stateChangeListener;
+        }
 
         public static void SubscribeToStateChanges<T, V>(this UnityEngine.Object self, IDataStore<T> store, Func<T, V> getSubState, Action<V> updateUi, bool triggerOnSubscribe = true, bool eventsAlwaysInMainThread = true) {
             updateUi(getSubState(store.GetState()));
             Wrapper w = new Wrapper();
             w.stateChangeListener = store.AddStateChangeListener(getSubState, newVal => {
-                if (self.IsDestroyed()) { store.onStateChanged -= w.stateChangeListener; return; }
+                if (self.IsDestroyed()) {
+                    store.onStateChanged -= w.stateChangeListener;
+                    return;
+                }
                 if (eventsAlwaysInMainThread) {
                     MainThread.Invoke(() => { OnStateChangedForUnity(updateUi, newVal, self); });
                 } else {
@@ -287,7 +297,10 @@ namespace com.csutil {
         }
 
         private static void OnSubstateChangedForUnity<V>(SubListeners<V> onStateChanged, V newVal, UnityEngine.Object context) {
-            if (context.IsDestroyed()) { onStateChanged.UnregisterFromParent(); return; }
+            if (context.IsDestroyed()) {
+                onStateChanged.UnregisterFromParent();
+                return;
+            }
             if (context is Behaviour b && !b.isActiveAndEnabled) { return; }
             if (context is GameObject go && !go.activeInHierarchy) { return; }
             onStateChanged.OnSubstateChanged(newVal);

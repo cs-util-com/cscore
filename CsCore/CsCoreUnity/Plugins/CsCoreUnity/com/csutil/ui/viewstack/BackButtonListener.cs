@@ -17,19 +17,28 @@ namespace com.csutil.ui.viewstack {
             if (Input.GetKeyUp(KeyCode.Escape)) { // back button pressed
                 Log.d("Back key pressed");
                 var vs = gameObject.GetComponent<ViewStack>();
-                var c = vs.gameObject.GetComponentInParents<Canvas>()?.rootCanvas;
-                if (c != null && c == RootCanvas.GetAllRootCanvases().First()) {
-                    var sortedViews = SortByCanvasSortingOrder(vs.gameObject.GetChildrenIEnumerable());
-                    if (!vs.SwitchBackToLastView(sortedViews.First())) {
-                        // The last view was reached so the switch back could not be performed
-                        if (destroyFinalView) { vs.DestroyViewStack(); }
-                    }
+                var screenOnTop = GetCanvasWithHighestSortingOrder();
+                var viewToClose = vs.GetLatestView();
+                if (viewToClose.IsGrandChildOf(screenOnTop)) {
+                    SwitchBackToLastViewViaBackKey(vs, viewToClose);
+                } else {
+                    SwitchBackToLastViewViaBackKey(vs, screenOnTop);
                 }
             }
         }
 
-        private static IOrderedEnumerable<GameObject> SortByCanvasSortingOrder(IEnumerable<GameObject> c) {
-            return c.ToHashSet().OrderByDescending(x => x.GetComponent<Canvas>().sortingOrder);
+        private static GameObject GetCanvasWithHighestSortingOrder() {
+            var c = ResourcesV2.FindAllInScene<Canvas>();
+            c = c.Filter(x => x.gameObject.activeInHierarchy);
+            return c.OrderByDescending(x => x.sortingOrder).First().gameObject;
+        }
+
+        private void SwitchBackToLastViewViaBackKey(ViewStack viewStack, GameObject viewToClose) {
+            Log.MethodEnteredWith("ViewStack" + viewStack, "viewToClose=" + viewToClose);
+            if (!viewStack.SwitchBackToLastView(viewToClose)) {
+                // The last view was reached so the switch back could not be performed
+                if (destroyFinalView) { viewStack.DestroyViewStack(); }
+            }
         }
 
     }

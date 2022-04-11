@@ -375,14 +375,18 @@ namespace com.csutil.tests.keyvaluestore {
             var cache = new InMemoryKeyValueStore(); // Could also persist to disc here
             var store = new GoogleSheetsKeyValueStore(cache, apiKey, sheetId, sheetName, refreshDelayInMs);
 
-            Assert.True(await store.dowloadOnlineDataDebounced());
+            var download1 = store.dowloadOnlineDataDebounced();
+            var download2 = store.dowloadOnlineDataDebounced();
+            var download3 = store.dowloadOnlineDataDebounced();
+
+            // After the refresh delay redownload was allowed again:
+            await TaskV2.Delay(refreshDelayInMs * 3);
+
+            Assert.True(await download1); // first trigger downloaded the data
             Assert.NotEmpty(store.latestRawSheetData);
             // Triggering it instant a second time will not download the data again:
-            Assert.False(await store.dowloadOnlineDataDebounced());
-
-            // Waiting the refresh delay will allow to redownload:
-            await TaskV2.Delay(refreshDelayInMs * 2);
-            Assert.True(await store.dowloadOnlineDataDebounced());
+            Assert.False(await download2); // Second trigger was skipped
+            Assert.True(await download3);
 
             var entry1 = await store.Get<MySheetEntry>("1", null);
             Assert.NotNull(entry1);

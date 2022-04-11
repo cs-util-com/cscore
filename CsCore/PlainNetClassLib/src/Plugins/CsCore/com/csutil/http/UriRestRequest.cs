@@ -160,8 +160,13 @@ namespace com.csutil.http {
                 cookieJar.SetCookies(handler.CookieContainer.GetCookiesForCookieJar(uri).ToArray());
             }
 
-            var serverUtcDate = result.Headers.Date;
-            if (serverUtcDate != null) { EventBus.instance.Publish(DateTimeV2.SERVER_UTC_DATE, uri, serverUtcDate.Value.DateTime); }
+            try {
+                var serverUtcDate = result.Headers.Date;
+                if (serverUtcDate != null) {
+                    EventBus.instance.Publish(DateTimeV2.SERVER_UTC_DATE, uri, serverUtcDate.Value.UtcDateTime);
+                }
+            }
+            catch (Exception e) { Log.e(e); }
             return result;
         }
 

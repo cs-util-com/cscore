@@ -12,8 +12,9 @@ namespace com.csutil.ui {
         }
 
         /// <summary> Loads a new view based on its prefab name and by default hides the current one </summary>
-        /// <param name="currentViewToHide"> (Any part of) the current view that should be hidden </param>
         /// <param name="prefabName"> e.g. "Dialogs/Dialog123" </param>
+        /// <param name="currentViewToHide"> (Any part of) the current view that should be hidden </param>
+        /// <param name="siblingIndex"> Index where to add the new view in the view stack, default -1 will add it at the end </param>
         /// <returns> The newly created view </returns>
         public GameObject ShowView(string prefabName, GameObject currentViewToHide = null, int siblingIndex = -1) {
             return ShowView(ResourcesV2.LoadPrefab(prefabName), currentViewToHide, siblingIndex);
@@ -21,6 +22,8 @@ namespace com.csutil.ui {
 
         /// <summary> Adds a passed view to the view stack to show it </summary>
         /// <param name="newView"> The new view to show in the stack </param>
+        /// <param name="currentViewToHide"> Any part of the current view on the view stack that should be set to hidden </param>
+        /// <param name="siblingIndex">Index where to add the new view in the view stack, default -1 will add it at the end</param>
         public GameObject ShowView(GameObject newView, GameObject currentViewToHide = null, int siblingIndex = -1) {
 
             if (newView.IsPartOfEditorOnlyPrefab()) { // If its a prefab first create an instance from it
@@ -52,12 +55,16 @@ namespace com.csutil.ui {
         public void DestroyViewStack() { gameObject.Destroy(); }
 
         /// <summary> Will "close" the current view and jump back to the last view and set it back to active </summary>
-        /// <param name="gameObject"> The current view or any part of it </param>
+        /// <param name="gameObjectToClose"> The current view or any part of it </param>
         /// <param name="destroyFinalView"> If true and the last view on the stack is reached this last view will be destroyed too </param>
         /// <param name="hideNotDestroyCurrentView"> If set to true the current active view will not be destroyed but instead set to hidden </param>
         /// <returns></returns>
-        public bool SwitchBackToLastView(GameObject gameObject, bool destroyFinalView = false, bool hideNotDestroyCurrentView = false) {
-            var currentView = GetRootViewOf(gameObject);
+        public bool SwitchBackToLastView(GameObject gameObjectToClose, bool destroyFinalView = false, bool hideNotDestroyCurrentView = false) {
+            var currentView = GetRootViewOf(gameObjectToClose);
+            if (!currentView.IsGrandChildOf(gameObject)) {
+                Log.w("A view was passed to a viewstack that did not belong to this view stack! Will not close that view", currentView);
+                return false;
+            }
             var currentIndex = currentView.transform.GetSiblingIndex();
             if (currentIndex > 0) {
                 var lastView = transform.GetChild(currentIndex - 1).gameObject;
@@ -68,8 +75,7 @@ namespace com.csutil.ui {
                     try {
                         activeCloseView = ShowView(screenToShowAsCloseView, siblingIndex: 0);
                         return true;
-                    }
-                    catch (System.Exception e) { Log.w("Could not show screenToShowAsCloseView=" + screenToShowAsCloseView, e); }
+                    } catch (System.Exception e) { Log.w("Could not show screenToShowAsCloseView=" + screenToShowAsCloseView, e); }
                 }
                 if (!destroyFinalView) { return false; }
             }
@@ -98,6 +104,7 @@ namespace com.csutil.ui {
 
         /// <summary> Moves up the tree until it reaches the direct child (the view) of the viewstack </summary>
         public GameObject GetRootViewOf(GameObject viewElement) {
+            viewElement.ThrowErrorIfNull("viewElement");
             if (viewElement == gameObject) { throw Log.e("Cant get root for ViewStack gameobject"); }
             var parent = viewElement.GetParent();
             if (parent == gameObject) { return viewElement; } // stop when the GO of the viewstack is reached

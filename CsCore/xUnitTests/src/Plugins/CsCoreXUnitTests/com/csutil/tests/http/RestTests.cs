@@ -141,21 +141,11 @@ namespace com.csutil.tests.http {
 
         [Fact]
         public async Task TestRestFactory1() {
-
-            var serverTimeReceived = false;
-            EventBus.instance.Subscribe(this, DateTimeV2.SERVER_UTC_DATE, (Uri uri, DateTime serverUtcTime) => {
-                serverTimeReceived = true;
-                var diff = DateTime.UtcNow - serverUtcTime;
-                Log.d($"Server {uri} reports server time: {serverUtcTime}, diff={diff.TotalMillisecondsAbs()}");
-                Assert.True(diff.TotalMillisecondsAbs() < 10000, "Difference between system time and server time was " + diff);
-            });
-
             RestRequest request = RestFactory.instance.SendRequest(new Uri("https://httpbin.org/get"), HttpMethod.Get);
             await ValidateResponse(request);
             Log.d("Will now call await request.GetResultHeaders..");
             var resultHeaders = await request.GetResultHeaders();
             Assert.NotEmpty(resultHeaders);
-            Assert.True(serverTimeReceived);
         }
 
         [Fact]
@@ -164,13 +154,24 @@ namespace com.csutil.tests.http {
             // Turn off that any diff between local and server time is accepted:
             DateTimeV2Instance().IsAcceptableDistanceToLocalTime = (_) => false;
 
-            const int maxDiffInMs = 1000;
+            const int maxDiffInMs = 5000;
             // No diff between DateTime and DateTimeV2 until first server timestamp is received:
             var diffBetweenV1AndV2 = GetDiffBetweenV1AndV2();
             Assert.True(diffBetweenV1AndV2 < 100, "GetTimeDiff()=" + diffBetweenV1AndV2);
 
+            var serverTimeReceived = false;
+            EventBus.instance.Subscribe(this, DateTimeV2.SERVER_UTC_DATE, (Uri uri, DateTime serverUtcTime) => {
+                serverTimeReceived = true;
+                var now = DateTime.UtcNow;
+                var diff = now - serverUtcTime;
+                Log.d($"Server {uri} reports server time: {serverUtcTime.ToReadableStringExact()}, diff={diff.TotalMillisecondsAbs()}ms to device/system time " + now.ToReadableStringExact());
+                Assert.True(diff.TotalMillisecondsAbs() < 10000, "Difference between system time and server time was " + diff);
+            });
+
             // Trigger any REST request to get a UTC time from the used server:
-            Headers headers = await new Uri("https://httpbin.org/get").SendGET().GetResultHeaders();
+            Headers headers = await new Uri("https://google.com").SendGET().GetResultHeaders();
+            Assert.True(serverTimeReceived);
+
             string serverUtcString = headers.First(h => h.Key == "date").Value.First();
             DateTime serverUtcTime = DateTimeV2.ParseUtc(serverUtcString);
             Log.d("Server reported its UTC time to be: " + serverUtcTime);
@@ -181,7 +182,8 @@ namespace com.csutil.tests.http {
             }
 
             // Now the server utc date should be used which will cause the diff to be larger:
-            Assert.True(GetDiffBetweenV1AndV2() > diffBetweenV1AndV2, $"GetTimeDiff()={GetDiffBetweenV1AndV2()}ms < diffBetweenV1AndV2 ({diffBetweenV1AndV2}ms)");
+            var t = GetDiffBetweenV1AndV2();
+            Assert.True(t > diffBetweenV1AndV2, $"GetTimeDiff()={t}ms < diffBetweenV1AndV2 ({diffBetweenV1AndV2}ms)");
         }
 
         [Fact]

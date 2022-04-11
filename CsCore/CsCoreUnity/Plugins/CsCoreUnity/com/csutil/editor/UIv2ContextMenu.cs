@@ -1,4 +1,5 @@
-﻿using com.csutil.ui;
+﻿using System;
+using com.csutil.ui;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
@@ -26,13 +27,12 @@ namespace com.csutil.editor {
 
         [MenuItem(UIv2menu + "Views/ViewStack View", false, priorityOfUiMenu + 2)]
         static void AddViewInViewStack() {
-            RootCanvas.GetOrAddRootCanvas(); // Ensure there is a root canvas
-            var view = AddViewToRootCanvas(ResourcesV2.LoadPrefab("Canvas/DefaultViewStackView"));
+            var view = AddViewToMainViewStack(() =>ResourcesV2.LoadPrefab("Canvas/DefaultViewStackView"));
             view.name = "View " + (view.transform.GetSiblingIndex() + 1);
         }
 
         [MenuItem(UIv2menu + "Views/DefaultSideBar", false, priorityOfUiMenu + 2)]
-        static void DefaultSideBar() { AddViewToRootCanvas(ResourcesV2.LoadPrefab("DefaultSideBar")); }
+        static void DefaultSideBar() { AddViewToMainViewStack(() => ResourcesV2.LoadPrefab("DefaultSideBar")); }
 
         [MenuItem(UIv2menu + "DefaultScrollView", false, priorityOfUiMenu + 3)]
         static void DefaultScrollView() { AddPrefabToActiveView("DefaultScrollView"); }
@@ -119,10 +119,11 @@ namespace com.csutil.editor {
             return go;
         }
 
-        private static GameObject AddViewToRootCanvas(GameObject viewInViewStack) {
-            Canvas rootCanvas = RootCanvas.GetOrAddRootCanvas();
-            rootCanvas.gameObject.AddChild(viewInViewStack);
-            viewInViewStack.name += " " + rootCanvas.gameObject.GetChildCount();
+        private static GameObject AddViewToMainViewStack(Func<GameObject> viewInViewStackCreator) {
+            GameObject mainViewStack = ViewStackHelper.MainViewStack().gameObject;
+            GameObject viewInViewStack = viewInViewStackCreator();
+            mainViewStack.AddChild(viewInViewStack);
+            viewInViewStack.name += " " + mainViewStack.GetChildCount();
             viewInViewStack.GetOrAddComponent<RectTransform>().SetAnchorsStretchStretch();
             SelectInHirarchyUi(viewInViewStack);
             return viewInViewStack;
@@ -136,10 +137,10 @@ namespace com.csutil.editor {
             return GetLastActiveView();
         }
 
-        private static GameObject GetLastActiveView() { return GetAllActiveViewsInViewStack().LastOrDefault(); }
+        private static GameObject GetLastActiveView() { return GetAllActiveViewsInMainViewStack().LastOrDefault(); }
 
-        private static IEnumerable<GameObject> GetAllActiveViewsInViewStack() {
-            return RootCanvas.GetOrAddRootCanvas().gameObject.GetChildrenIEnumerable().Filter(v => v.activeInHierarchy);
+        private static IEnumerable<GameObject> GetAllActiveViewsInMainViewStack() {
+            return ViewStackHelper.MainViewStack().gameObject.GetChildrenIEnumerable().Filter(v => v.activeInHierarchy);
         }
 
         private static void SelectInHirarchyUi(UnityEngine.Object objectToSelect) {

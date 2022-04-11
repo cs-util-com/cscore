@@ -42,18 +42,29 @@ namespace com.csutil {
             return false;
         }
 
-        public static Action<S> AsThrottledDebounce<S>(this Action<S> self, double delayInMs) {
+        /// <summary>
+        /// This will create an Action where the first call is executed and the last call is executed but 
+        /// every call in between that is below the passed millisecond threshold is ignored
+        /// </summary>
+        /// <param name="skipFirstEvent"> if set to true there will be no instant execution of the very first call to the debounced async func </param>
+        public static Action<S> AsThrottledDebounce<S>(this Action<S> self, double delayInMs, bool skipFirstEvent = false) {
             EventHandler<S> onChangedHandler = (_, value) => self(value);
-            EventHandler<S> debounced = onChangedHandler.AsThrottledDebounce(delayInMs);
+            EventHandler<S> debounced = onChangedHandler.AsThrottledDebounce(delayInMs, skipFirstEvent);
             return (value) => debounced(null, value);
         }
 
-        public static Action AsThrottledDebounce(this Action self, double delayInMs) {
+        /// <summary>
+        /// This will create an Action where the first call is executed and the last call is executed but 
+        /// every call in between that is below the passed millisecond threshold is ignored
+        /// </summary>
+        /// <param name="skipFirstEvent"> if set to true there will be no instant execution of the very first call to the debounced async func </param>
+        public static Action AsThrottledDebounce(this Action self, double delayInMs, bool skipFirstEvent = false) {
             EventHandler<object> onChangedHandler = (_, args) => self();
-            EventHandler<object> debounced = onChangedHandler.AsThrottledDebounce(delayInMs);
+            EventHandler<object> debounced = onChangedHandler.AsThrottledDebounce(delayInMs, skipFirstEvent);
             return () => debounced(null, EventArgs.Empty);
         }
 
+        
     }
 
 }

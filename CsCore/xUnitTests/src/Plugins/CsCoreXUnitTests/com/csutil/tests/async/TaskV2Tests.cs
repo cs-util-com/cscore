@@ -185,6 +185,20 @@ namespace com.csutil.tests.async {
             throw new Exception("task failed as requested");
         }
 
+        [Fact]
+        public async Task TestThreadSafety() {
+            int flag1 = 0;
+            Assert.True(ThreadSafety.FlipToTrue(ref flag1));
+            Assert.Equal(1, flag1);
+            Assert.False(ThreadSafety.FlipToTrue(ref flag1));
+            Assert.Equal(1, flag1);
+
+            Assert.True(ThreadSafety.FlipToFalse(ref flag1));
+            Assert.Equal(0, flag1);
+            Assert.False(ThreadSafety.FlipToFalse(ref flag1));
+            Assert.Equal(0, flag1);
+        }
+
     }
 
 }

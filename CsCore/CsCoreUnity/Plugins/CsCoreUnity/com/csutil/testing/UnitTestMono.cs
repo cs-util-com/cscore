@@ -34,7 +34,7 @@ namespace com.csutil.tests {
         }
 
         public static IEnumerator RunTest<T>(string prefabName) where T : UnitTestMono {
-            ViewStack viewStack = RootCanvas.GetOrAddRootCanvas().gameObject.GetOrAddComponent<ViewStack>();
+            ViewStack viewStack = ViewStackHelper.MainViewStack();
             yield return RunTest<T>(viewStack, prefabName);
         }
 

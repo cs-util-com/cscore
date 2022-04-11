@@ -23,7 +23,7 @@ namespace com.csutil.progress {
 
         private static ProgressUi NewGlobalProgressUi(ProgressManager pm, string prefab = "Progress/GlobalProgressOverlay1") {
             ProgressUi progressUi;
-            var go = RootCanvas.GetOrAddRootCanvas().gameObject.AddChild(ResourcesV2.LoadPrefab(prefab));
+            var go = RootCanvas.GetOrAddRootCanvasV2().gameObject.AddChild(ResourcesV2.LoadPrefab(prefab));
             progressUi = go.GetComponentInChildren<ProgressUi>();
             progressUi.progressManager = pm;
             return progressUi;
