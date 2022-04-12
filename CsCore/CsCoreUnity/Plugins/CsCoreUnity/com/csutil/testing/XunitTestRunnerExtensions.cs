@@ -24,8 +24,8 @@ namespace com.csutil.testing {
                         var testTask = testToRun.RunTest().WithTimeout(30000);
                         allTestsTasks.Add(testTask);
                         await testTask;
-                    }
-                    catch (Exception e) { Log.e(e); } // All task errors will be thrown below together 
+                    } catch (Exception) { } // All task errors will be thrown below together 
+                    await LogTaskErrorIfNeeded(testToRun);
                 }
                 await Task.WhenAll(allTestsTasks);
             }
@@ -37,14 +37,17 @@ namespace com.csutil.testing {
                 self.StartTest();
                 await self.testTask;
             }
-            if (!self.testTask.IsCompletedSuccessfull()) {
+        }
+
+        private static async Task LogTaskErrorIfNeeded(XunitTestRunner.Test self) {
+            if (!self.testTask.IsCompleted) {
+                Log.e("Test did not complete before the default timeout: " + self);
+            } else if (!self.testTask.IsCompletedSuccessfull()) {
                 Log.w("Error in test " + self);
                 await TaskV2.Delay(100);
                 var ex = self.reportedError?.SourceException;
                 if (ex == null) { ex = self.testTask.Exception; }
                 Log.e("" + self, ex);
-                await TaskV2.Delay(100);
-                self.reportedError.Throw();
             }
         }
 
