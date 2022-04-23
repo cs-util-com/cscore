@@ -226,6 +226,23 @@ namespace com.csutil.tests.model {
             public override DateTime GetUtcNow() { return mockUtcNow; }
         }
 
+        [Fact] // Event tracking should by default not interrupt the normal application flow:
+        public void TestErrorInTrackEvent() {
+            var tracker = new AppFlowThatThrowsErrors();
+            AppFlow.AddAppFlowTracker(tracker);
+            // Even though TrackEvent does not work correctly the application flow is not interrupted: 
+            AppFlow.TrackEvent("category 1", "action 1");
+            IoC.inject.Get<IAppFlow>(this).TrackEvent("category 1", "action 2");
+            // Directly using the tracker would not protect against the inner exception:
+            Assert.Throws<InvalidOperationException>(() => tracker.TrackEvent("category 1", "action 3"));
+        }
+
+        private class AppFlowThatThrowsErrors : IAppFlow {
+            public void TrackEvent(string category, string action, params object[] args) {
+                throw new InvalidOperationException();
+            }
+        }
+
     }
 
 }

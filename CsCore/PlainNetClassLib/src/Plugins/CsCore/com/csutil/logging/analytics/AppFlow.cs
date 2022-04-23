@@ -1,3 +1,4 @@
+using System;
 using com.csutil.analytics;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +14,11 @@ namespace com.csutil {
         public static IAppFlow instance(object caller) { return IoC.inject.Get<IAppFlow>(caller); }
 
         public static void TrackEvent(string category, string action, params object[] args) {
-            instance(category)?.TrackEvent(category, action, args);
+            try {
+                instance(category)?.TrackEvent(category, action, args);
+            } catch (Exception e) {
+                Log.e(e);
+            }
         }
 
         public static AppFlowMultipleTrackers AddAppFlowTracker(IAppFlow tracker) {
