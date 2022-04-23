@@ -27,16 +27,26 @@ namespace com.csutil {
 
         public static void SubscribeToTransition<T>(object subscriber, T oldState, T newState, Action<Dictionary<T, HashSet<T>>> onTransition) {
             SubscribeToAllTransitions<T>(subscriber, (sm, old, newS) => {
-                if (old.Equals(oldState) && newS.Equals(newState)) { onTransition(sm); }
+                if (old.Equals(oldState) && newS.Equals(newState)) {
+                    onTransition(sm);
+                }
             });
         }
 
         public static void SubscribeToStateEntered<T>(object subscriber, T enteredState, Action<Dictionary<T, HashSet<T>>> onTransition) {
-            SubscribeToAllTransitions<T>(subscriber, (sm, _, s) => { if (s.Equals(enteredState)) { onTransition(sm); } });
+            SubscribeToAllTransitions<T>(subscriber, (sm, _, s) => {
+                if (s.Equals(enteredState)) {
+                    onTransition(sm);
+                }
+            });
         }
 
         public static void SubscribeToStateExited<T>(object subscriber, T exitedState, Action<Dictionary<T, HashSet<T>>> onTransition) {
-            SubscribeToAllTransitions<T>(subscriber, (sm, s, _) => { if (s.Equals(exitedState)) { onTransition(sm); } });
+            SubscribeToAllTransitions<T>(subscriber, (sm, s, _) => {
+                if (s.Equals(exitedState)) {
+                    onTransition(sm);
+                }
+            });
         }
 
     }

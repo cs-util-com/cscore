@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace com.csutil.tests.system {
@@ -50,6 +51,64 @@ namespace com.csutil.tests.system {
                 if (isOrderedAfter) { isOrderedAfterCounter++; }
             }
             return isOrderedAfterCounter;
+        }
+
+        private class MyDisposable : IDisposable {
+            public bool exceptionWasDetected = false;
+            public void Dispose() {
+                #if DEBUG // If true an exception was detected in the current context:
+                exceptionWasDetected = this.DEBUG_ThrownExceptionDetectedInCurrentContext();
+                #endif
+            }
+        }
+
+        [Fact]
+        public async Task TestIDisposableWithException() {
+            { // If dispose is called because of the using block being complete the flag has to be false:
+                var d = new MyDisposable();
+                using (d) { }
+                Assert.False(d.exceptionWasDetected);
+            }
+            { // If dispose is called because of an exception the flag has to be true:
+                var d = new MyDisposable();
+                try {
+                    using (d) { throw new Exception(); }
+                } catch (Exception) { }
+                Assert.True(d.exceptionWasDetected);
+            }
+            {
+                await TestErrorDetectionWithMultipleThreads(() => { throw new Exception(); });
+                await TestErrorDetectionWithMultipleThreads(async () => { throw new Exception(); });
+                await TestErrorDetectionWithMultipleThreads(() => { return Task.FromException(new Exception()); });
+            }
+        }
+
+        [Obsolete("This test tests a method that only should be used for debugging and is permitted to be used in release builds")]
+        private static async Task TestErrorDetectionWithMultipleThreads(Func<Task> newErrorTask) {
+            var d = new MyDisposable();
+            using (d) {
+                Task t1 = TaskV2.Run(newErrorTask);
+                Task t2 = null, t3 = null;
+                try {
+                    Assert.False(d.DEBUG_ThrownExceptionDetectedInCurrentContext());
+                    t2 = TaskV2.Run(newErrorTask);
+                    Assert.False(d.DEBUG_ThrownExceptionDetectedInCurrentContext());
+                    t3 = TaskV2.Run(newErrorTask);
+                    Assert.False(d.DEBUG_ThrownExceptionDetectedInCurrentContext());
+                    await Task.WhenAll(t1, t2, t3);
+                } catch (Exception) {
+                    Assert.True(d.DEBUG_ThrownExceptionDetectedInCurrentContext());
+                }
+                Assert.False(d.DEBUG_ThrownExceptionDetectedInCurrentContext());
+                Assert.True(t1.IsCompleted);
+                Assert.True(t2.IsCompleted);
+                Assert.True(t3.IsCompleted);
+                Assert.True(t1.IsFaulted);
+                Assert.True(t2.IsFaulted);
+                Assert.True(t3.IsFaulted);
+            }
+            Assert.False(d.DEBUG_ThrownExceptionDetectedInCurrentContext());
+            Assert.False(d.exceptionWasDetected);
         }
 
     }

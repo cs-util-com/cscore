@@ -42,6 +42,7 @@ namespace com.csutil {
             fallbackStore = null;
             cachedFirstAppLaunchDate = null;
             cachedLastUpdateDate = null;
+            if (instance == this) { IoC.inject.RemoveAllInjectorsFor<IPreferences>(); }
         }
 
         public long GetFirstStartDate() {

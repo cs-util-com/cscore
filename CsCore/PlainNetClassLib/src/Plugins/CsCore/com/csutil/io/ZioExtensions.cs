@@ -41,13 +41,8 @@ namespace com.csutil {
         }
 
         private static SubFileSystem NewSubFileSystemFor(string fullPath) {
-            FileSystem fileSystem = NewFileSystem(fullPath);
+            FileSystem fileSystem = new PhysicalFileSystem();
             return new SubFileSystem(fileSystem, fileSystem.ConvertPathFromInternal(fullPath));
-        }
-
-        private static FileSystem NewFileSystem(string fullPath) {
-            if (HasDiscPrefix(fullPath)) { return new PhysicalFileSystemV2(ExtractDiscPrefix(fullPath)); }
-            return new PhysicalFileSystem();
         }
 
         /// <summary> Takes the parent dir and uses this as a root dir, only works if parent dir exists! </summary>

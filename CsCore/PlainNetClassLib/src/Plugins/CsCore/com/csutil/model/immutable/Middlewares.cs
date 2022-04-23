@@ -82,16 +82,21 @@ namespace com.csutil.model.immutable {
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_FULL_LOGGING")]
-        private static void MakeDebugCopyOfAction(object action, ref bool copyOfActionSupported, ref object actionBeforeDispatch) {
+        public static void MakeDebugCopyOfAction(object action, ref bool copyOfActionSupported, ref object actionBeforeDispatch) {
             try {
                 // If the action is a delegate it will be handled by thunk and cant be copied:
-                actionBeforeDispatch = action is Delegate ? null : action.DeepCopyViaTypedJson();
+                if (action is Delegate) { return; }
+                // Make a deep copy of the action 
+                actionBeforeDispatch = action.DeepCopyViaTypedJson();
                 if (actionBeforeDispatch != null) {
-                    copyOfActionSupported = !HasDiff(actionBeforeDispatch, action, out _);
-                    if (!copyOfActionSupported) { Log.w("Deep copy not supported for action: " + action); }
+                    copyOfActionSupported = !HasDiff(actionBeforeDispatch, action, out var diff);
+                    if (!copyOfActionSupported) {
+                        Log.w("JSON copy not supported for action: " + action + "! Unhandled JSON fields: \n" + diff);
+                    }
                 }
+            } catch (Exception e) {
+                Log.w("Failed to do a JSON copy of action: " + action + "\n", e);
             }
-            catch (Exception) { }
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_FULL_LOGGING")]
@@ -101,12 +106,12 @@ namespace com.csutil.model.immutable {
                     + "\n Diff: " + diff.ToPrettyString()
                     + "\n\n Action before dispatch: " + JsonWriter.AsPrettyString(actionBeforeDispatch)
                     + "\n\n Action after dispatch: " + JsonWriter.AsPrettyString(actionAfter)
-                    );
+                );
             }
         }
 
         private static bool HasDiff(object actionBeforeDispatch, object actionAfter, out JToken diff) {
-            diff = MergeJson.GetDiff(actionBeforeDispatch, actionAfter);
+            diff = MergeJson.GetDiff(actionAfter, actionBeforeDispatch);
             return !diff.IsNullOrEmpty();
         }
 

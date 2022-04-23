@@ -51,6 +51,7 @@ namespace com.csutil.http {
         public void Dispose() {
             client?.Dispose();
             handler?.Dispose();
+            if (IoC.inject.Get<RestFactory>(this) == this) { IoC.inject.RemoveAllInjectorsFor<RestFactory>(); }
         }
 
     }

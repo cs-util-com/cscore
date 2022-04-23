@@ -369,16 +369,6 @@ namespace com.csutil.tests {
             var dir = CreateDirectoryForTesting("TestFileSystem");
             Type fileSystem = dir.FileSystem.GetType();
             Assert.Equal(typeof(SubFileSystem), fileSystem);
-            var s = (SubFileSystem)dir.FileSystem;
-            // Use reflection to access protected parent file system:
-            var parentFileSystem = s.GetType().GetNonPublicInstanceMember("NextFileSystem").GetValue(s);
-
-            if (EnvironmentV2.instance.IsWindows()) {
-                // On Windows a PhysicalFileSystemV2 is used to handle the disc letter prefix:
-                Assert.Equal(typeof(PhysicalFileSystemV2), parentFileSystem.GetType());
-            } else { // On all other systems the normal PhysicalFileSystem is used:
-                Assert.Equal(typeof(PhysicalFileSystem), parentFileSystem.GetType());
-            }
         }
 
         [Fact]

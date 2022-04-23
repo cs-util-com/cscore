@@ -1,5 +1,37 @@
 # Changelog
 
+## 0.14.0 (4 Feb 2022)
+- Don't throw on `fs.CreateDirectory("/")` (#61)
+- Fix AggregateFileSystem not following fallbacks (#64)
+
+## 0.13.0 (31 Aug 2021)
+- Fix PhysicalFileSystem on .NET Framework 4
+
+## 0.12.0 (31 May 2021)
+- Breaking change: Add new `IFileSystem.EnumerateItems` to optimize scanning by fetching important attributes along the scan (e.g length, file or directory...etc.).
+- Breaking change: For performance reasons, `MountFileSystem`/`AggregateFileSystem` are no longer thread safe when modifying their mounts/filesystems.
+- Breaking change: `MountFileSystem`/`AggregateFileSystem` when enumerating files are no longer discarding files with different case sensitive names. Previously `a.txt` and `A.txt` would be considered as a same file.
+
+## 0.11.0 (24 Dec 2020)
+- Add overload methods to `FileSystemExtensions` to not copy attributes from source filesystem. 
+
+## 0.10.0 (23 Dec 2020)
+- Improve performance of AggregateFileSystem single file resolution
+- Add AggregateFileSystem.FindFirstFileSystemEntry
+
+## 0.9.1 (17 Jun 2020)
+- Fix AggregateFileSystem.Watch to watch only existing folders from sources.
+
+## 0.9.0 (17 Jun 2020)
+- Add FileSystem.Name for debugging purpose.
+- Add DebuggerDisplay/DebuggerTypeProxy to all FileSystem
+- Breaking change: Renaming of protected `ComposeFileSystem.NextFileSystem` to `ComposeFileSystem.Fallback`
+- Breaking Change: `FileSystem.CopyFileCross` destination IFileSystem moved to 3rd parameter instead of 2nd.
+
+## 0.8.0 (19 Apr 2020)
+- Add extension method to copy filesystem or folder to another filesystem subfolder.
+- Fix issue with SubFileSystem not throwing an exception when mounting a windows filesystem with an incorrect uppercase drive letter (e.g `/mnt/C`)
+
 ## 0.7.6 (28 Jan 2020)
 - Fix assembly to use Portable debug info.
 
