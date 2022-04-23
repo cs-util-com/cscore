@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using com.csutil.model.immutable;
 using Newtonsoft.Json.Linq;
 using Xunit;
+using Zio;
 
 namespace com.csutil.tests.model {
 
@@ -141,6 +143,45 @@ namespace com.csutil.tests.model {
 
         private TreeElem NewTreeElem(string nodeName, Func<List<TreeElem>> CreateChildren = null) {
             return new TreeElem { id = GuidV2.NewGuid().ToString(), name = nodeName, children = CreateChildren?.Invoke() };
+        }
+
+        [Fact]
+        public void TestMakeDebugCopyOfAction() {
+            {
+                var actionToClone = new TestAction1("abc");
+                bool copyOfActionSupported = false;
+                object actionBeforeDispatch = null;
+                Middlewares.MakeDebugCopyOfAction(actionToClone, ref copyOfActionSupported, ref actionBeforeDispatch);
+                Assert.False(copyOfActionSupported);
+            }
+            {
+                var actionToClone = new TestAction2("abc");
+                bool copyOfActionSupported = false;
+                object actionBeforeDispatch = null;
+                Middlewares.MakeDebugCopyOfAction(actionToClone, ref copyOfActionSupported, ref actionBeforeDispatch);
+                Assert.True(copyOfActionSupported);
+            }
+            {
+                var objectToClone = new TestAction3() { SomeDir = EnvironmentV2.instance.GetNewInMemorySystem() };
+                bool copyOfActionSupported = false;
+                object actionBeforeDispatch = null;
+                Middlewares.MakeDebugCopyOfAction(objectToClone, ref copyOfActionSupported, ref actionBeforeDispatch);
+                Assert.False(copyOfActionSupported);
+            }
+        }
+
+        public class TestAction1 {
+            public string s { get; private set; }
+            public TestAction1(string s1) { this.s = s1; }
+        }
+
+        public class TestAction2 {
+            public string s { get; set; }
+            public TestAction2(string s1) { this.s = s1; }
+        }
+
+        public class TestAction3 {
+            public DirectoryEntry SomeDir { get; set; }
         }
 
     }
