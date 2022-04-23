@@ -66,6 +66,10 @@ namespace com.csutil.io {
             }).Filter(x => x != null).Distinct();
         }
 
+        protected override IEnumerable<FileSystemItem> EnumerateItemsImpl(UPath path, SearchOption searchOption, SearchPredicate searchPredicate) {
+            throw new NotImplementedException();
+        }
+        
         protected override bool FileExistsImpl(UPath path) {
             return GetZipEntry(path) != null;
         }
