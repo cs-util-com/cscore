@@ -83,6 +83,7 @@ namespace com.csutil.tests.system {
             }
         }
 
+        [Obsolete("This test tests a method that only should be used for debugging and is permitted to be used in release builds")]
         private static async Task TestErrorDetectionWithMultipleThreads(Func<Task> newErrorTask) {
             var d = new MyDisposable();
             using (d) {
