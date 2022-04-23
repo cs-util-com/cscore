@@ -194,6 +194,15 @@ namespace com.csutil.tests {
             });
         }
 
+        [Fact]
+        public void ExampleOfExceptionInfoInMethodLogging() {
+            try { // Check the log output after running this test
+                using (Log.MethodEntered()) {
+                    throw new Exception(); // Simulate error during the method
+                }
+            } catch (Exception) { }
+        }
+
         private class LogToTestMock : LogDefaultImpl {
             private string latestLog;
             private string latestWarning;

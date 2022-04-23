@@ -82,6 +82,11 @@ namespace com.csutil.logging {
             EventBus.instance.Publish(EventConsts.catMethod + EventConsts.DONE, methodName, timing);
             var text = "    <-- " + methodName + " finished after " + timing.ElapsedMilliseconds + " ms";
             if (timingV2 != null) { text += ", " + timingV2.GetAllocatedMemBetweenStartAndStop(); }
+           #if DEBUG
+            if (DisposableExtensions.DEBUG_ThrownExceptionDetectedInCurrentContext()) {
+                text += " (DUE TO EXCEPTION THROWN)";
+            }
+           #endif
             text = $"{text} \n at {sourceFilePath}: line {sourceLineNumber}";
             Log.d(text, new StackFrame(1, true).AddTo(args));
             if (maxAllowedTimeInMs > 0) { timing.AssertUnderXms(maxAllowedTimeInMs); }
