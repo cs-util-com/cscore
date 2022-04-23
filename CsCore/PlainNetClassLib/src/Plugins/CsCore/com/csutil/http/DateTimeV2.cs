@@ -63,7 +63,10 @@ namespace com.csutil {
             EventBus.instance.Subscribe(this, SERVER_UTC_DATE, (Uri uri, DateTime utcDate) => onUtcUpdate(uri, utcDate));
         }
 
-        public void Dispose() { EventBus.instance.UnsubscribeAll(this); }
+        public void Dispose() {
+            EventBus.instance.UnsubscribeAll(this);
+            if (IoC.inject.Get<DateTimeV2>(this, false) == this) { IoC.inject.RemoveAllInjectorsFor<DateTimeV2>(); }
+        }
 
         private void onUtcUpdate(Uri uri, DateTime serverUtcDate) {
             try {
