@@ -166,5 +166,11 @@ namespace com.csutil.tests {
             public override string ToString() { return id; }
         }
 
+        [Fact]
+        public void TestToHashSet() {
+            var h = com.csutil.netstandard2_1polyfill.IEnumerableExtensions.ToHashSet(new List<string>() { "A", "B", "A", "C" });
+            Assert.Equal(3, h.Count);
+        }
+
     }
 }

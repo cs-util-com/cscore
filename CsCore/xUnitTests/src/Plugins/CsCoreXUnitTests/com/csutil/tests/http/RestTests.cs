@@ -307,6 +307,12 @@ namespace com.csutil.tests.http {
             }
         }
 
+        [Fact]
+        public async Task TestRestRequestNoSuccessError() {
+            var error = (NoSuccessError)await new Uri("https://www.csutil.com/doesNotExst").SendGET().GetResult<Exception>();
+            Assert.Equal(HttpStatusCode.NotFound, error.statusCode);
+        }
+
     }
 
 }
