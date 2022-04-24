@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -187,10 +188,16 @@ namespace com.csutil.tests {
         }
 
         [Fact]
-        public void TestThrowNullExtension() {
+        public async Task TestThrowNullExtension() {
+            object x = null;
             Assert.Throws<ArgumentNullException>(() => {
-                object x = null;
                 x.ThrowErrorIfNull("x");
+            });
+            Assert.Throws<InvalidDataException>(() => {
+                x.ThrowErrorIfNull(() => new InvalidDataException("x was null"));
+            });
+            await Assert.ThrowsAsync<InvalidDataException>(async () => {
+                await x.ThrowErrorIfNull(async () => new InvalidDataException("x was null"));
             });
         }
 
