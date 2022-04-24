@@ -172,5 +172,23 @@ namespace com.csutil.tests {
             Assert.Equal(3, h.Count);
         }
 
+        [Fact]
+        public void TestDictionaryExtensions() {
+            {
+                var a = new Dictionary<string, string>() { { "key1", "a" }, { "key2", "b" } };
+                var b = new Dictionary<string, string>() { { "key1", "a" } };
+                Assert.Equal("[key1, a]", a.Intersect(b).Single().ToString());
+                Assert.Equal("[key2, b]", a.ExceptKeys(b).Single().ToString());
+            }
+            {
+                var a = new HashSet<string>() { "a", "b" };
+                var b = new HashSet<string>() { "c", "d" };
+                Assert.True(a.AddRange(b));
+                Assert.Equal("[a, b, c, d]", a.ToStringV2(x => "" + x));
+                Assert.False(a.AddRange(b));
+                Assert.Equal("[a, b, c, d]", a.ToStringV2(x => "" + x));
+            }
+        }
+
     }
 }
