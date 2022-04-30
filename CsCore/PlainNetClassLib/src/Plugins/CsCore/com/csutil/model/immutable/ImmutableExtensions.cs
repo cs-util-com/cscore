@@ -17,10 +17,10 @@ namespace com.csutil.model.immutable {
             return self.AddStateChangeListener(getSubState, onChanged.AsThrottledDebounce(delayInMs), triggerInstantToInit);
         }
 
-        public static Action AddAsyncStateChangeListener<T, S>(this IDataStore<T> s, Func<T, S> getSubState, Func<S, Task> onChanged) {
+        public static Action AddAsyncStateChangeListener<T, S>(this IDataStore<T> s, Func<T, S> getSubState, Func<S, Task> onChanged, bool triggerInstantToInit = true) {
             return AddStateChangeListener(s, getSubState, (subState) => {
                 onChanged(subState).LogOnError();
-            });
+            }, triggerInstantToInit);
         }
 
         public static Action AddAsyncStateChangeListener<T, S>(this IDataStore<T> s, Func<T, S> getSubState, Func<S, Task<bool>> onChanged, bool triggerInstantToInit = true) {
