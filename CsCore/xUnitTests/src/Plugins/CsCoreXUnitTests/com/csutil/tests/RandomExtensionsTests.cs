@@ -2,6 +2,7 @@ using System;
 using Xunit;
 using com.csutil.random;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace com.csutil.tests.random {
 
@@ -91,7 +92,7 @@ namespace com.csutil.tests.random {
         private static void TestRandomFloat(Random random, float lowerBound, float upperBound) {
             double min = float.MaxValue;
             double max = float.MinValue;
-            var results = new List<float>();
+            var results = new List<double>();
             for (int i = 0; i < 100000; i++) {
                 float x = random.NextFloat(lowerBound, upperBound);
                 Assert.True(x <= upperBound, "x=" + x);
@@ -100,15 +101,45 @@ namespace com.csutil.tests.random {
                 if (x > max) { max = x; }
                 results.Add(x);
             }
-            Assert.True(IsUniformlyDistributed(results));
+            AssertIsRandomDistribution(results);
             var reachedUpperBound = 100d * (1d - (upperBound - max) / (upperBound - lowerBound));
             var reachedLowerBound = 100d * (1d - (min - lowerBound) / (upperBound - lowerBound));
             Assert.True(reachedLowerBound > 98 && reachedUpperBound > 98, "min%=" + reachedLowerBound + ", max%=" + reachedUpperBound);
             Assert.True(reachedLowerBound <= 100 && reachedUpperBound <= 100, "min%=" + reachedLowerBound + ", max%=" + reachedUpperBound);
         }
 
-        private static bool IsUniformlyDistributed(List<float> results) {
-            return true; // TODO
+        private static void AssertIsRandomDistribution(IEnumerable<double> results) {
+            var minVal = results.Min();
+            // Since RSD only works if mean not close to zero shift the value range into positive range if needed:
+            if (minVal < 0) {
+                minVal = Math.Abs(minVal);
+                results = results.Map(x => (x + minVal));
+            }
+            var relStandardDeviation = results.GetRelativeStandardDeviation();
+            Assert.True(0.57 < relStandardDeviation && relStandardDeviation < 0.59, "relStandardDeviation=" + relStandardDeviation + ", mean=" + results.Average());
+        }
+
+        [Fact]
+        public void TestRelativeStandardDeviation() {
+            {
+                var numbers = new List<double>();
+                for (int i = 0; i < 100000; i++) { numbers.Add(i); }
+                AssertIsRandomDistribution(numbers);
+            }
+        }
+
+        [Fact]
+        public void TestNextRndChild() {
+            var random = new Random();
+            var list = new string[] { "a", "b", "c", "d", "e", "f", "g", "h", "i" };
+            var counters = new Dictionary<string, int>();
+            for (int i = 0; i < 10000; i++) {
+                var child = random.NextRndChild(list);
+                counters[child] = counters.GetValueOrDefault(child, 0) + 1;
+            }
+            var relStandardDeviation = counters.Map(x => (double)x.Value).GetRelativeStandardDeviation();
+            // True randomness should cause all counters to be roughly the same (so RSD should be close to 0): 
+            Assert.True(relStandardDeviation < 0.05, "relStandardDeviation=" + relStandardDeviation);
         }
 
     }

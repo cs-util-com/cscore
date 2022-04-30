@@ -18,15 +18,6 @@ namespace com.csutil {
             return (float)(NextDouble(random, lowerBound, upperBound));
         }
 
-        // Returns a value between float.MinValue/2 and float.MaxValue/2
-        private static float GetRndValueInHalfFloatRange(Random random) {
-            // Source https://stackoverflow.com/a/3365388/165106 
-            double mantissa = (random.NextDouble() * 2.0) - 1.0;
-            // choose -149 instead of -126 to also generate subnormal floats (*)
-            double exponent = Math.Pow(2.0, random.Next(-126, 128));
-            return (float)(mantissa * exponent);
-        }
-
         public static bool NextBool(this Random random) {
             // Source: https://stackoverflow.com/a/19191165/165106
             return random.NextDouble() > 0.5;

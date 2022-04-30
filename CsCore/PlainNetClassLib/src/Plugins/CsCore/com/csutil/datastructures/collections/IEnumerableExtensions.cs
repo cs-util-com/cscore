@@ -32,7 +32,9 @@ namespace com.csutil {
 
         public static async Task<IEnumerable<T>> FilterAsync<T>(this IEnumerable<T> self, Func<T, Task<bool>> predicate) {
             var results = new ConcurrentQueue<T>();
-            await Task.WhenAll(self.Select(async x => { if (await predicate(x)) { results.Enqueue(x); } }));
+            await Task.WhenAll(self.Select(async x => {
+                if (await predicate(x)) { results.Enqueue(x); }
+            }));
             return results;
         }
 
@@ -70,7 +72,10 @@ namespace com.csutil {
 
         public static int IndexOf<T>(this IEnumerable<T> self, Func<T, bool> predicate) {
             var index = -1;
-            if (self.Any(x => { index++; return predicate(x); })) { return index; }
+            if (self.Any(x => {
+                    index++;
+                    return predicate(x);
+                })) { return index; }
             return -1;
         }
 
@@ -159,6 +164,20 @@ namespace com.csutil {
                 return GetEnumerator();
             }
 
+        }
+
+        public static double GetVariance(this IEnumerable<double> self) { return CalcVariance(self, self.Average()); }
+
+        public static double GetStandardDeviation(this IEnumerable<double> self) { return Math.Sqrt(GetVariance(self)); }
+
+        public static double GetRelativeStandardDeviation(this IEnumerable<double> self) {
+            double average = self.Average();
+            return Math.Abs(Math.Sqrt(CalcVariance(self, average)) / average);
+        }
+
+        private static double CalcVariance(IEnumerable<double> self, double average) {
+            double sumOfSquaresOfDifferences = self.Sum(val => (val - average) * (val - average));
+            return sumOfSquaresOfDifferences / (self.Count() - 1);
         }
 
     }
