@@ -180,6 +180,23 @@ namespace com.csutil {
             return sumOfSquaresOfDifferences / (self.Count() - 1);
         }
 
+        public static bool SequenceReferencesEqual<T>(this IEnumerable<T> self, IEnumerable<T> other) {
+            using (IEnumerator<T> iterator1 = self.GetEnumerator()) {
+                using (IEnumerator<T> iterator2 = other.GetEnumerator()) {
+                    while (true) {
+                        bool hasNext1 = iterator1.MoveNext();
+                        bool hasNext2 = iterator2.MoveNext();
+                        if (hasNext1 != hasNext2) { return false; } // Not same lenght
+                        if (!hasNext1) { break; } // Both iterators reached the end
+                        // Ensure that the references of the current 2 entries are the same: 
+                        if (!ReferenceEquals(iterator1.Current, iterator2.Current)) { return false; }
+                    }
+
+                }
+            }
+            return true;
+        }
+
     }
 
 }
