@@ -32,7 +32,9 @@ namespace com.csutil {
 
         public static async Task<IEnumerable<T>> FilterAsync<T>(this IEnumerable<T> self, Func<T, Task<bool>> predicate) {
             var results = new ConcurrentQueue<T>();
-            await Task.WhenAll(self.Select(async x => { if (await predicate(x)) { results.Enqueue(x); } }));
+            await Task.WhenAll(self.Select(async x => {
+                if (await predicate(x)) { results.Enqueue(x); }
+            }));
             return results;
         }
 
@@ -70,7 +72,10 @@ namespace com.csutil {
 
         public static int IndexOf<T>(this IEnumerable<T> self, Func<T, bool> predicate) {
             var index = -1;
-            if (self.Any(x => { index++; return predicate(x); })) { return index; }
+            if (self.Any(x => {
+                    index++;
+                    return predicate(x);
+                })) { return index; }
             return -1;
         }
 
@@ -159,6 +164,37 @@ namespace com.csutil {
                 return GetEnumerator();
             }
 
+        }
+
+        public static double GetVariance(this IEnumerable<double> self) { return CalcVariance(self, self.Average()); }
+
+        public static double GetStandardDeviation(this IEnumerable<double> self) { return Math.Sqrt(GetVariance(self)); }
+
+        public static double GetRelativeStandardDeviation(this IEnumerable<double> self) {
+            double average = self.Average();
+            return Math.Abs(Math.Sqrt(CalcVariance(self, average)) / average);
+        }
+
+        private static double CalcVariance(IEnumerable<double> self, double average) {
+            double sumOfSquaresOfDifferences = self.Sum(val => (val - average) * (val - average));
+            return sumOfSquaresOfDifferences / (self.Count() - 1);
+        }
+
+        public static bool SequenceReferencesEqual<T>(this IEnumerable<T> self, IEnumerable<T> other) {
+            using (IEnumerator<T> iterator1 = self.GetEnumerator()) {
+                using (IEnumerator<T> iterator2 = other.GetEnumerator()) {
+                    while (true) {
+                        bool hasNext1 = iterator1.MoveNext();
+                        bool hasNext2 = iterator2.MoveNext();
+                        if (hasNext1 != hasNext2) { return false; } // Not same lenght
+                        if (!hasNext1) { break; } // Both iterators reached the end
+                        // Ensure that the references of the current 2 entries are the same: 
+                        if (!ReferenceEquals(iterator1.Current, iterator2.Current)) { return false; }
+                    }
+
+                }
+            }
+            return true;
         }
 
     }

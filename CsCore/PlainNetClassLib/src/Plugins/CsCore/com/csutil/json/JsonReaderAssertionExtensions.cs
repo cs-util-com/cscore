@@ -61,7 +61,7 @@ namespace com.csutil.json {
                 var field = (DictionaryEntry)f;
                 var key = field.Key;
                 var value = field.Value;
-                value = JsonReader.convertToGenericDictionaryOrArray(value);
+                value = JsonReader.ConvertToGenericDictionaryOrArray(value);
                 if (value != null && !parsed.Contains(key)) {
                     var infoStringAboutField = "field " + path + "." + key + " = " + value;
                     if (value != null) { infoStringAboutField += ", value type=(" + value.GetType() + ")"; }
@@ -70,14 +70,14 @@ namespace com.csutil.json {
                     return false;
                 } else if (value is IDictionary) {
                     var a = value as IDictionary;
-                    var valueInParsedDict = JsonReader.convertToGenericDictionaryOrArray(parsed[key]);
+                    var valueInParsedDict = JsonReader.ConvertToGenericDictionaryOrArray(parsed[key]);
                     var b = valueInParsedDict as IDictionary;
                     var args = new StackFrame(5 + depth, true).AddTo(null);
                     AssertV2.IsNotNull(b, "Field was found but it was not a JsonObject, it was a " + valueInParsedDict.GetType(), args);
                     return JsonCouldBeFullyParsed(reader, path + "." + key, a, b, depth + 1);
                 } else if (value is IDictionary[]) {
                     var a = value as IDictionary[];
-                    var valueInParsedArray = JsonReader.convertToGenericDictionaryOrArray(parsed[key]);
+                    var valueInParsedArray = JsonReader.ConvertToGenericDictionaryOrArray(parsed[key]);
                     var b = valueInParsedArray as IDictionary[];
                     var args = new StackFrame(5 + depth, true).AddTo(null);
                     AssertV2.IsNotNull(b, "Field was found but it was not a JsonArray, it was a " + valueInParsedArray.GetType(), args);

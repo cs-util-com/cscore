@@ -9,21 +9,49 @@ namespace com.csutil.model.immutable {
 
     public static class ImmutableExtensions {
 
+        private class Wrapper { // To wrap listener actions
+            public Action stateChangeListener;
+        }
+        
         public static Action AddStateChangeListenerDebounced<T, S>(this IDataStore<T> self, Func<T, S> getSubState, Action<S> onChanged, double delayInMs, bool triggerInstantToInit = true) {
             return self.AddStateChangeListener(getSubState, onChanged.AsThrottledDebounce(delayInMs), triggerInstantToInit);
         }
 
-        public static Action AddAsyncStateChangeListener<T, S>(this IDataStore<T> s, Func<T, S> getSubState, Func<S, Task> onChanged) {
+        public static Action AddAsyncStateChangeListener<T, S>(this IDataStore<T> s, Func<T, S> getSubState, Func<S, Task> onChanged, bool triggerInstantToInit = true) {
             return AddStateChangeListener(s, getSubState, (subState) => {
                 onChanged(subState).LogOnError();
-            });
+            }, triggerInstantToInit);
         }
 
+        public static Action AddAsyncStateChangeListener<T, S>(this IDataStore<T> s, Func<T, S> getSubState, Func<S, Task<bool>> onChanged, bool triggerInstantToInit = true) {
+            var w = new Wrapper();
+            Func<S, Task> asyncOnChangedListener = async subState => {
+                 if (!await onChanged(subState)) {
+                     s.onStateChanged -= w.stateChangeListener;
+                 }
+             };
+            w.stateChangeListener = AddStateChangeListener(s, getSubState, (subState) => {
+                asyncOnChangedListener(subState).LogOnError();
+            }, triggerInstantToInit);
+            return w.stateChangeListener;
+        }
+        
         public static Action AddStateChangeListener<T, S>(this IDataStore<T> self, Func<T, S> getSubState, Action<S> onChanged, bool triggerInstantToInit = true) {
             Action newListener = NewSubstateChangeListener(() => getSubState(self.GetState()), onChanged);
             self.onStateChanged += newListener;
             if (triggerInstantToInit) { onChanged(getSubState(self.GetState())); }
             return newListener;
+        }
+        
+        public static Action AddStateChangeListener<T, S>(this IDataStore<T> self, Func<T, S> getSubState, Func<S, bool> onChanged, bool triggerInstantToInit = true) {
+            var w = new Wrapper();
+            Action<S> onChangedAction = (s) => {
+                if (!onChanged(s)) {
+                    self.onStateChanged -= w.stateChangeListener;
+                }
+            };
+            w.stateChangeListener = AddStateChangeListener(self, getSubState, onChangedAction, triggerInstantToInit);
+            return w.stateChangeListener;
         }
 
         public static Action AddStateChangeListener<T, S>(this IDataStore<T> self, S mutableObj, Action<S> onChanged, bool triggerInstantToInit = true) where S : IsMutable {

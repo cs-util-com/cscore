@@ -1,6 +1,8 @@
 using com.csutil.json;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using Newtonsoft.Json.Linq;
 using Xunit;
 
 namespace com.csutil.tests.json {
@@ -98,6 +100,22 @@ namespace com.csutil.tests.json {
         private class MyClass1JsonConverter : IJsonWriter {
             public string Write(object data) { return "[]"; }
             public void Write(object data, StreamWriter streamWriter) { throw Log.e("Not supported"); }
+        }
+
+        [Fact]
+        public void TestConvertToGenericDictionaryOrArray() {
+            {
+                var jsonString = JsonWriter.GetWriter().Write(new string[] { "a", "b" });
+                var jArray = JsonReader.GetReader().Read<JArray>(jsonString);
+                var array = (object[])JsonReader.ConvertToGenericDictionaryOrArray(jArray);
+                Assert.Equal("[a, b]", array.ToStringV2(x => "" + x));
+            }
+            {
+                var jsonString = JsonWriter.GetWriter().Write(new MyClass1() { myString = "abc" });
+                var jObject = JsonReader.GetReader().Read<JObject>(jsonString);
+                var dict = (Dictionary<string, object>)JsonReader.ConvertToGenericDictionaryOrArray(jObject);
+                Assert.Equal("abc", dict[nameof(MyClass1.myString)]);
+            }
         }
 
     }

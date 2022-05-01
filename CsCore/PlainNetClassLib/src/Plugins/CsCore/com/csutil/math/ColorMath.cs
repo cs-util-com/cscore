@@ -31,7 +31,7 @@ namespace com.csutil.math {
         }
 
         /// <summary> Can be used to invert the color to its complimentary version </summary>
-        public static void InvertHue(float[] hsv) { hsv[0] = (hsv[0] + 180) % 360; }
+        public static void InvertHue(float[] hsv) { hsv[0] = (hsv[0] + 0.5f) % 1f; }
 
         /// <summary> calculates HSV (hue, saturation, value) for a given RGB (RGB values must be 0-1) </summary>
         /// <param name="r"> A value from 0 to 1 </param>
@@ -96,8 +96,10 @@ namespace com.csutil.math {
                     b = value * (1f - saturation * (hue - i));
                     break;
             }
-            return new float[3] { r, g, b };
+            return new float[3] { Round(r), Round(g), Round(b) };
         }
+        
+        private static float Round(float f) { return (float)Math.Round(f, 6); }
 
     }
 

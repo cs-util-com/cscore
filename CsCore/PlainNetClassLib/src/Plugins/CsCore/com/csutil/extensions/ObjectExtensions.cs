@@ -13,7 +13,13 @@ namespace com.csutil {
             }
         }
 
-        public static void ThrowErrorIfNull(this object self, Func<Exception> onNull) { if (self == null) { throw onNull(); } }
+        public static void ThrowErrorIfNull(this object self, Func<Exception> onNull) {
+            if (self == null) {
+                System.Diagnostics.Debugger.Break();
+                throw onNull();
+            }
+        }
+
         public static async Task ThrowErrorIfNull(this object self, Func<Task<Exception>> onNull) {
             if (self == null) {
                 System.Diagnostics.Debugger.Break();

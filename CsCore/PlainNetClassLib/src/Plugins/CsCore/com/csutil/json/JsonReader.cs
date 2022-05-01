@@ -32,14 +32,14 @@ namespace com.csutil {
 
         /// <summary> this method makes sure that classes provided by the internal json parsing libs are converted 
         /// to generic classes like Dictionary<string, object> or Dictionary<string, object>[] </summary>
-        public static object convertToGenericDictionaryOrArray(object value) {
+        public static object ConvertToGenericDictionaryOrArray(object value) {
             if (value is JObject) { return jsonNetObjectToDictionary((JObject)value); }
             if (value is JArray) { return jsonNetArraytoArrayOfDict((JArray)value); }
             return value;
         }
 
         private static object jsonNetArraytoArrayOfDict(JArray value) {
-            try { return value.Map(x => convertToGenericDictionaryOrArray(x)).ToArray(); } catch (Exception e) { Log.w("" + e); }
+            try { return value.Map(x => ConvertToGenericDictionaryOrArray(x)).ToArray(); } catch (Exception e) { Log.w("" + e); }
             return value;
         }
         private static Dictionary<string, object> jsonNetObjectToDictionary(JObject c) { return c.ToObject<Dictionary<string, object>>(); }

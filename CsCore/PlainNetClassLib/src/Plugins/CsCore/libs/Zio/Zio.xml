@@ -2363,6 +2363,134 @@
         <member name="P:Zio.FileSystems.WrapFileSystemWatcher.IncludeSubdirectories">
             <inheritdoc />
         </member>
+        <member name="T:Zio.FileSystems.ZipArchiveFileSystem">
+            <summary>
+                Provides a <see cref="T:Zio.IFileSystem" /> for the ZipArchive filesystem.
+            </summary>
+        </member>
+        <member name="M:Zio.FileSystems.ZipArchiveFileSystem.#ctor(System.IO.Compression.ZipArchive,System.Boolean)">
+            <summary>
+                Initializes a new instance of the <see cref="T:Zio.FileSystems.ZipArchiveFileSystem" /> class.
+            </summary>
+            <param name="archive">An instance of <see cref="T:System.IO.Compression.ZipArchive" /></param>
+            <param name="isCaseSensitive">Specifies if entry names should be case sensitive</param>
+            <exception cref="T:System.ArgumentNullException"></exception>
+        </member>
+        <member name="M:Zio.FileSystems.ZipArchiveFileSystem.#ctor(System.IO.Stream,System.IO.Compression.ZipArchiveMode,System.Boolean,System.Boolean)">
+            <summary>
+                Initializes a new instance of the <see cref="T:Zio.FileSystems.ZipArchiveFileSystem" /> class.
+            </summary>
+            <param name="stream">Instance of stream to create <see cref="T:System.IO.Compression.ZipArchive" /> from</param>
+            <param name="mode">Mode of <see cref="T:System.IO.Compression.ZipArchive" /></param>
+            <param name="leaveOpen">True to leave the stream open when <see cref="T:System.IO.Compression.ZipArchive" /> is disposed</param>
+            <param name="isCaseSensitive"></param>
+        </member>
+        <member name="M:Zio.FileSystems.ZipArchiveFileSystem.#ctor(System.String,System.IO.Compression.ZipArchiveMode,System.Boolean,System.Boolean)">
+            <summary>
+                Initializes a new instance of the <see cref="T:Zio.FileSystems.ZipArchiveFileSystem" /> class from file.
+            </summary>
+            <param name="path">Path to zip file</param>
+            <param name="mode">Mode of <see cref="T:System.IO.Compression.ZipArchive" /></param>
+            <param name="leaveOpen">True to leave the stream open when <see cref="T:System.IO.Compression.ZipArchive" /> is disposed</param>
+            <param name="isCaseSensitive">Specifies if entry names should be case sensitive</param>
+        </member>
+        <member name="M:Zio.FileSystems.ZipArchiveFileSystem.#ctor(System.IO.Compression.ZipArchiveMode,System.Boolean,System.Boolean)">
+            <summary>
+                Initializes a new instance of the <see cref="T:Zio.FileSystems.ZipArchiveFileSystem" /> class with a <see cref="T:System.IO.MemoryStream" />
+            </summary>
+            <param name="mode">Mode of <see cref="T:System.IO.Compression.ZipArchive" /></param>
+            <param name="leaveOpen">True to leave the stream open when <see cref="T:System.IO.Compression.ZipArchive" /> is disposed</param>
+            <param name="isCaseSensitive">Specifies if entry names should be case sensitive</param>
+        </member>
+        <member name="M:Zio.FileSystems.ZipArchiveFileSystem.ConvertPathFromInternalImpl(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:Zio.FileSystems.ZipArchiveFileSystem.ConvertPathToInternalImpl(Zio.UPath)">
+            <inheritdoc />
+        </member>
+        <member name="M:Zio.FileSystems.ZipArchiveFileSystem.CopyFileImpl(Zio.UPath,Zio.UPath,System.Boolean)">
+            <inheritdoc />
+        </member>
+        <member name="M:Zio.FileSystems.ZipArchiveFileSystem.CreateDirectoryImpl(Zio.UPath)">
+            <inheritdoc />
+        </member>
+        <member name="M:Zio.FileSystems.ZipArchiveFileSystem.DeleteDirectoryImpl(Zio.UPath,System.Boolean)">
+            <inheritdoc />
+        </member>
+        <member name="M:Zio.FileSystems.ZipArchiveFileSystem.DeleteFileImpl(Zio.UPath)">
+            <inheritdoc />
+        </member>
+        <member name="M:Zio.FileSystems.ZipArchiveFileSystem.DirectoryExistsImpl(Zio.UPath)">
+            <inheritdoc />
+        </member>
+        <member name="M:Zio.FileSystems.ZipArchiveFileSystem.Dispose(System.Boolean)">
+            <inheritdoc />
+        </member>
+        <member name="M:Zio.FileSystems.ZipArchiveFileSystem.EnumerateItemsImpl(Zio.UPath,System.IO.SearchOption,Zio.SearchPredicate)">
+            <inheritdoc />
+        </member>
+        <member name="M:Zio.FileSystems.ZipArchiveFileSystem.EnumeratePathsImpl(Zio.UPath,System.String,System.IO.SearchOption,Zio.SearchTarget)">
+            <inheritdoc />
+        </member>
+        <member name="M:Zio.FileSystems.ZipArchiveFileSystem.FileExistsImpl(Zio.UPath)">
+            <inheritdoc />
+        </member>
+        <member name="M:Zio.FileSystems.ZipArchiveFileSystem.GetAttributesImpl(Zio.UPath)">
+            <inheritdoc />
+        </member>
+        <member name="M:Zio.FileSystems.ZipArchiveFileSystem.GetFileLengthImpl(Zio.UPath)">
+            <inheritdoc />
+        </member>
+        <member name="M:Zio.FileSystems.ZipArchiveFileSystem.GetCreationTimeImpl(Zio.UPath)">
+            <summary>
+                Not supported by zip format. Return last write time.
+            </summary>
+        </member>
+        <member name="M:Zio.FileSystems.ZipArchiveFileSystem.GetLastAccessTimeImpl(Zio.UPath)">
+            <summary>
+                Not supported by zip format. Return last write time
+            </summary>
+        </member>
+        <member name="M:Zio.FileSystems.ZipArchiveFileSystem.GetLastWriteTimeImpl(Zio.UPath)">
+            <inheritdoc />
+        </member>
+        <member name="M:Zio.FileSystems.ZipArchiveFileSystem.MoveDirectoryImpl(Zio.UPath,Zio.UPath)">
+            <inheritdoc />
+        </member>
+        <member name="M:Zio.FileSystems.ZipArchiveFileSystem.MoveFileImpl(Zio.UPath,Zio.UPath)">
+            <inheritdoc />
+        </member>
+        <member name="M:Zio.FileSystems.ZipArchiveFileSystem.OpenFileImpl(Zio.UPath,System.IO.FileMode,System.IO.FileAccess,System.IO.FileShare)">
+            <inheritdoc />
+        </member>
+        <member name="M:Zio.FileSystems.ZipArchiveFileSystem.ReplaceFileImpl(Zio.UPath,Zio.UPath,Zio.UPath,System.Boolean)">
+            <inheritdoc />
+        </member>
+        <member name="M:Zio.FileSystems.ZipArchiveFileSystem.SetAttributesImpl(Zio.UPath,System.IO.FileAttributes)">
+            <summary>
+                Implementation for <see cref="!:SetAttributes" />, <paramref name="path" /> is guaranteed to be absolute and
+                validated through <see cref="!:ValidatePath" />. Works only in Net Standard 2.1
+                Sets the specified <see cref="T:System.IO.FileAttributes" /> of the file or directory on the specified path.
+            </summary>
+            <param name="path">The path to the file or directory.</param>
+            <param name="attributes">A bitwise combination of the enumeration values.</param>
+        </member>
+        <member name="M:Zio.FileSystems.ZipArchiveFileSystem.SetCreationTimeImpl(Zio.UPath,System.DateTime)">
+            <summary>
+                Not supported by zip format. Does nothing.
+            </summary>
+        </member>
+        <member name="M:Zio.FileSystems.ZipArchiveFileSystem.SetLastAccessTimeImpl(Zio.UPath,System.DateTime)">
+            <summary>
+                Not supported by zip format. Does nothing.
+            </summary>
+        </member>
+        <member name="M:Zio.FileSystems.ZipArchiveFileSystem.SetLastWriteTimeImpl(Zio.UPath,System.DateTime)">
+            <inheritdoc />
+        </member>
+        <member name="M:Zio.FileSystems.ZipArchiveFileSystem.WatchImpl(Zio.UPath)">
+            <inheritdoc />
+        </member>
         <member name="T:Zio.FilterPattern">
             <summary>
             Filter pattern compiler used for <see cref="T:Zio.IFileSystemWatcher"/> implementation.

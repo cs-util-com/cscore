@@ -23,9 +23,11 @@ namespace com.csutil.tests.model.immutable {
 
             var store = new DataStore<MyAppState1>(MyReducers1.ReduceMyAppState1, data);
 
+            var keepListenerAlive = true;
             var usersChangedCounter = 0;
             store.AddStateChangeListener(state => state.users, (changedUsers) => {
                 usersChangedCounter++;
+                return keepListenerAlive;
             }, triggerInstantToInit: false);
 
             ActionAddSomeId a1 = new ActionAddSomeId() { someId = GuidV2.NewGuid() };
@@ -52,6 +54,15 @@ namespace com.csutil.tests.model.immutable {
             store.Dispatch(new ActionOnUser.ChangeEnumState() { targetUser = carl.id, newEnumValue = MyUser1.MyEnum.State2 });
             Assert.Equal(MyUser1.MyEnum.State2, store.GetState().users[carl.id].myEnum);
 
+            // Remove the listener from the store the next time an action is dispatched:
+            keepListenerAlive = false;
+            Assert.Equal(4, usersChangedCounter);
+            store.Dispatch(new ActionOnUser.ChangeAge() { targetUser = carlsFriend.id, newAge = 22 });
+            Assert.Equal(5, usersChangedCounter);
+            // Test that now the listener is removed and will not receive any updates anymore:
+            store.Dispatch(new ActionOnUser.ChangeAge() { targetUser = carlsFriend.id, newAge = 33 });
+            Assert.Equal(5, usersChangedCounter);
+            
             Log.MethodDone(t);
         }
 

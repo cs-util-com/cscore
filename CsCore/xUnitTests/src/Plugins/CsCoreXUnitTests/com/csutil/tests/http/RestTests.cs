@@ -307,6 +307,21 @@ namespace com.csutil.tests.http {
             }
         }
 
+        [Fact]
+        public async Task TestRestRequestNoSuccessError() {
+            var error = (NoSuccessError)await new Uri("https://www.csutil.com/doesNotExst").SendGET().GetResult<Exception>();
+            Assert.Equal(HttpStatusCode.NotFound, error.statusCode);
+        }
+
+        [Fact]
+        public async Task TestUriSendMethods() {
+            Assert.Equal(HttpStatusCode.OK, await new Uri("https://postman-echo.com/put").SendPUT().GetResult<HttpStatusCode>());
+            Assert.Equal(HttpStatusCode.OK, await new Uri("https://postman-echo.com/delete").SendDELETE().GetResult<HttpStatusCode>());
+            Assert.Equal(HttpStatusCode.OK, await new Uri("https://postman-echo.com/options").SendOPTIONS().GetResult<HttpStatusCode>());
+            Assert.Equal(HttpStatusCode.OK, await new Uri("https://postman-echo.com/patch").SendRequest(HttpMethod.Patch).GetResult<HttpStatusCode>());
+            Assert.Equal(HttpStatusCode.NotFound, await new Uri("https://postman-echo.com/delete").SendPUT().GetResult<HttpStatusCode>());
+        }
+
     }
 
 }
