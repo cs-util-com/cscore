@@ -25,7 +25,7 @@ namespace com.csutil.model.immutable {
 
         private Dispatcher ApplyMiddlewares(params Middleware<T>[] middlewares) {
             Dispatcher dispatcher = (object action) => {
-                lock (threadLock) { state = reducer(state, action); }
+                state = reducer(state, action);
                 return action;
             };
             foreach (var middleware in middlewares) { dispatcher = middleware(this)(dispatcher); }
@@ -36,7 +36,10 @@ namespace com.csutil.model.immutable {
         /// <param name="action"> The action to dispatch. </param>
         /// <returns> Varies depending on store enhancers. With no enhancers Dispatch returns the action that was passed to it. </returns>
         public object Dispatch(object action) {
-            var a = dispatcher(action);
+            object a;
+            lock (threadLock) {
+                a = dispatcher(action);
+            }
             onStateChanged?.Invoke();
             return a;
         }
