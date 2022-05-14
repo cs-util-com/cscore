@@ -74,6 +74,18 @@ namespace com.csutil.tests {
         }
 
         [Fact]
+        public void TestClearAllEntries() {
+            var dir = EnvironmentV2.instance.GetNewInMemorySystem();
+            dir.GetChild("a.txt").SaveAsText("abc");
+            var subdir = dir.GetChildDir("dir1").CreateV2();
+            subdir.GetChild("b.txt").SaveAsText("efg");
+
+            Assert.Equal(2, dir.EnumerateEntries().Count());
+            dir.ClearAllEntries();
+            Assert.Empty(dir.EnumerateEntries());
+        }
+
+        [Fact]
         public void TestFolderRename() {
 
             // Get a directory to work in:
