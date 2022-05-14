@@ -74,7 +74,7 @@ namespace com.csutil.tests.async {
             // Create both tasks at the same time:
             Task t1 = taskQueue.Run(SomeAsyncTask1);
             Task<string> t2 = taskQueue.Run(SomeAsyncTask2);
-            var t3 = taskQueue.Run(SomeAsyncTask1); // Add a 3rd task (will not be started)
+            Task t3 = taskQueue.Run(SomeAsyncTask1); // Add a 3rd task (will not be started)
 
             taskQueue.CancelAllOpenTasks();
             // Awaiting the canceled queue will throw a TaskCanceledException:
@@ -94,6 +94,69 @@ namespace com.csutil.tests.async {
             Assert.True(t2.IsCanceled);
             Assert.True(t3.IsCanceled);
 
+        }
+
+        [Fact]
+        public async Task TestCancelRequestWithCustomTokenSource() {
+
+            using var taskQueue = BackgroundTaskQueue.NewBackgroundTaskQueue(maxConcurrencyLevel: 1);
+            {
+                var t = new CancellationTokenSource();
+                Task t1 = taskQueue.Run(SomeAsyncTask1, t);
+                Task t2 = taskQueue.Run(SomeAsyncTask1, t);
+                Task<string> t3 = taskQueue.Run(SomeAsyncTask2);
+
+                t.Cancel();
+                // Since t1 is already running when cancel is called an aggregate exception is created and t1 is set to faulted:
+                var e = await Assert.ThrowsAsync<AggregateException>(() => Task.WhenAll(t1, t2, t3));
+                Assert.IsType<TaskCanceledException>(e.InnerExceptions.Single());
+
+                Assert.True(t1.IsFaulted);
+                Assert.True(t2.IsCanceled);
+                Assert.True(t3.IsCompletedSuccessfull()); // Only t1 and t2 are canceled by the custom token source
+            }
+            {
+                var t = new CancellationTokenSource();
+                Task<string> t2 = taskQueue.Run(SomeAsyncTask2, t);
+                Task<string> t3 = taskQueue.Run(SomeAsyncTask2, t);
+                Task t1 = taskQueue.Run(SomeAsyncTask1);
+
+                t.Cancel();
+                // Since t2 is already running when cancel is called an aggregate exception is created and t2 is set to faulted:
+                var e = await Assert.ThrowsAsync<AggregateException>(() => Task.WhenAll(t1, t2, t3));
+                Assert.IsType<TaskCanceledException>(e.InnerExceptions.Single());
+                Assert.True(t1.IsCompletedSuccessfull()); // Only t2 and t3 are canceled by the custom token source
+                Assert.True(t2.IsFaulted);
+                Assert.True(t3.IsCanceled);
+            }
+            {
+                var t = new CancellationTokenSource();
+                Task t1 = taskQueue.Run(SomeAsyncTask1);
+                Task<string> t2 = taskQueue.Run(SomeAsyncTask2, t);
+                Task<string> t3 = taskQueue.Run(SomeAsyncTask2, t);
+
+                t.Cancel();
+
+                // Since t2 is not yet running when cancel is called both tasks are set to canceled:
+                await Assert.ThrowsAsync<TaskCanceledException>(() => Task.WhenAll(t1, t2, t3));
+                Assert.True(t1.IsCompletedSuccessfull()); // Only t2 and t3 are canceled by the custom token source
+                Assert.True(t2.IsCanceled);
+                Assert.True(t3.IsCanceled);
+            }
+            {
+                var t = new CancellationTokenSource();
+                Task t1 = taskQueue.Run(SomeAsyncTask1);
+                Task<string> t2 = taskQueue.Run(SomeAsyncTask2, t);
+                Task<string> t3 = taskQueue.Run(SomeAsyncTask2, t);
+
+                taskQueue.CancelAllOpenTasks(); // Canceling all tasks via the task queue is still possible
+
+                var e = await Assert.ThrowsAsync<AggregateException>(() => Task.WhenAll(t1, t2, t3));
+                Assert.IsType<TaskCanceledException>(e.InnerExceptions.Single());
+                Assert.True(t1.IsFaulted);
+                Assert.True(t2.IsCanceled);
+                Assert.True(t3.IsCanceled);
+            }
         }
 
         private async Task SomeAsyncTask1(CancellationToken cancelRequest) {
