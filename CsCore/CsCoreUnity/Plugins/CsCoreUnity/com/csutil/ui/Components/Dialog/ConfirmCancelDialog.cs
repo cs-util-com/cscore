@@ -36,7 +36,7 @@ namespace com.csutil.ui {
                 var links = targetView.GetLinkMap();
                 links.Get<Text>("Caption").text = dialogData.caption;
                 links.Get<Text>("Message").text = dialogData.message;
-                if (!dialogData.confirmBtnText.IsNullOrEmpty()) { links.Get<Text>("ConfirmButton").text = dialogData.confirmBtnText; }
+                if (!dialogData.confirmBtnText.IsNullOrEmpty()) { links.Get<Text>("ConfirmButtonText").text = dialogData.confirmBtnText; }
                 var cancelTask = links.Get<Button>("CancelButton").SetOnClickAction(delegate { dialogData.dialogWasConfirmed = false; });
                 var confirmTask = links.Get<Button>("ConfirmButton").SetOnClickAction(delegate { dialogData.dialogWasConfirmed = true; });
 
