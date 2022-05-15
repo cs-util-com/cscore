@@ -15,7 +15,7 @@ namespace com.csutil.http {
         private HttpClient client;
         private HttpClientHandler handler;
 
-        public IsDisposable.State IsDisposed { get; private set; } = IsDisposable.State.Active;
+        public DisposeState IsDisposed { get; private set; } = DisposeState.Active;
         
         public RestFactory() {
             InitFactory();
@@ -51,11 +51,11 @@ namespace com.csutil.http {
         }
 
         public void Dispose() {
-            IsDisposed = IsDisposable.State.DisposingStarted;
+            IsDisposed = DisposeState.DisposingStarted;
             client?.Dispose();
             handler?.Dispose();
             if (IoC.inject.Get<RestFactory>(this) == this) { IoC.inject.RemoveAllInjectorsFor<RestFactory>(); }
-            IsDisposed = IsDisposable.State.Disposed;
+            IsDisposed = DisposeState.Disposed;
         }
 
     }

@@ -25,7 +25,7 @@ namespace com.csutil {
         private long? cachedLastUpdateDate;
         private long? cachedFirstAppLaunchDate;
 
-        public IsDisposable.State IsDisposed { get; private set; } = IsDisposable.State.Active;
+        public DisposeState IsDisposed { get; private set; } = DisposeState.Active;
 
         public Preferences(IKeyValueStore store) {
             this.fallbackStore = store;
@@ -40,13 +40,13 @@ namespace com.csutil {
         public Task<object> Set(string key, object value) { return fallbackStore.Set(key, value); }
 
         public void Dispose() {
-            IsDisposed = IsDisposable.State.DisposingStarted;
+            IsDisposed = DisposeState.DisposingStarted;
             fallbackStore.Dispose();
             fallbackStore = null;
             cachedFirstAppLaunchDate = null;
             cachedLastUpdateDate = null;
             if (instance == this) { IoC.inject.RemoveAllInjectorsFor<IPreferences>(); }
-            IsDisposed = IsDisposable.State.Disposed;
+            IsDisposed = DisposeState.Disposed;
         }
 
         public long GetFirstStartDate() {

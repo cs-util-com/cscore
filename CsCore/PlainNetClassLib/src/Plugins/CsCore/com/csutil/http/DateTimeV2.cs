@@ -56,7 +56,7 @@ namespace com.csutil {
         /// <summary> This flag is set to false every time a new REST request reported a current UTC time from a backend. Can be switched back to true to repeat the remote time update </summary>
         public bool RequestUpdateOfDiffOfLocalToServer = true;
 
-        public IsDisposable.State IsDisposed { get; private set; } = IsDisposable.State.Active;
+        public DisposeState IsDisposed { get; private set; } = DisposeState.Active;
         
         /// <summary> Can be overwritten, by default any remote time that is max 5sec different to local time is accepted </summary>
         public Func<TimeSpan, bool> IsAcceptableDistanceToLocalTime = (diff) => diff.TotalMillisecondsAbs() < 5000;
@@ -66,10 +66,10 @@ namespace com.csutil {
         }
 
         public void Dispose() {
-            IsDisposed = IsDisposable.State.DisposingStarted;
+            IsDisposed = DisposeState.DisposingStarted;
             EventBus.instance.UnsubscribeAll(this);
             if (IoC.inject.Get<DateTimeV2>(this, false) == this) { IoC.inject.RemoveAllInjectorsFor<DateTimeV2>(); }
-            IsDisposed = IsDisposable.State.Disposed;
+            IsDisposed = DisposeState.Disposed;
         }
 
         private void onUtcUpdate(Uri uri, DateTime serverUtcDate) {

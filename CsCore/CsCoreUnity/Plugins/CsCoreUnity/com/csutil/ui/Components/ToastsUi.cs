@@ -29,7 +29,7 @@ namespace com.csutil {
 
         private GameObject toastsContainer;
 
-        public IsDisposable.State IsDisposed => IsDisposable.StateFromBool(this.IsDestroyed());
+        public DisposeState IsDisposed => DisposeStateHelper.FromBool(this.IsDestroyed());
 
         private void OnEnable() { toastsContainer = gameObject.GetLinkMap().Get<GameObject>("MessageContainer"); }
 

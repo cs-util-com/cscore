@@ -4,7 +4,7 @@ namespace com.csutil.tests {
 
     public class MyExampleMono2 : MonoBehaviour, IsDisposable {
 
-        public IsDisposable.State IsDisposed => IsDisposable.StateFromBool(this.IsDestroyed());
+        public DisposeState IsDisposed => DisposeStateHelper.FromBool(this.IsDestroyed());
 
         private void OnEnable() { Log.d("MyExampleMono2 - OnEnable"); }
 

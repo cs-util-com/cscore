@@ -27,7 +27,7 @@ namespace com.csutil {
                     return SetSingleton<T, V>(self, caller, singletonInstance, false); // then retry setting the singleton
                 }
                 self.RegisterInjector<T>(caller, delegate {
-                    if (singletonInstance is IsDisposable d && !d.IsActive()) {
+                    if (singletonInstance is IsDisposable disposableObj && !disposableObj.IsAlive()) {
                         // If the found object is not active anymore destroy the singleton injector and return null
                         if (!self.RemoveAllInjectorsFor<T>()) { Log.e("Could not remove all existing injectors!"); }
                         return default;

@@ -30,7 +30,7 @@ namespace com.csutil {
 
         private GameObject snackbarsContainer;
 
-        public IsDisposable.State IsDisposed => IsDisposable.StateFromBool(this.IsDestroyed());
+        public DisposeState IsDisposed => DisposeStateHelper.FromBool(this.IsDestroyed());
 
         private void OnEnable() { snackbarsContainer = gameObject.GetLinkMap().Get<GameObject>("MessageContainer"); }
 

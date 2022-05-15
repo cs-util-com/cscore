@@ -4,12 +4,18 @@ namespace com.csutil {
 
     public interface IsDisposable {
 
-        enum State { Active, DisposingStarted, Disposed }
+        DisposeState IsDisposed { get; }
 
-        State IsDisposed { get; }
+    }
 
-        public static State StateFromBool(bool isDisposed) { return isDisposed ? State.Disposed : State.Active; }
-        
+    public enum DisposeState { Active, DisposingStarted, Disposed }
+
+    public static class DisposeStateHelper {
+
+        public static DisposeState FromBool(bool isDisposed) {
+            return isDisposed ? DisposeState.Disposed : DisposeState.Active;
+        }
+
     }
 
 }
