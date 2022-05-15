@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using com.csutil.injection;
 
 namespace com.csutil {
@@ -36,12 +37,23 @@ namespace com.csutil {
 
         public static T GetOrAddSingleton<T>(this Injector self, object caller, Func<T> createSingletonInstance) {
             lock (syncLock) {
-                if (self.TryGet(caller, out T singleton)) { return singleton; }
-                singleton = createSingletonInstance();
-                if (ReferenceEquals(null, singleton) || "null".Equals("" + singleton)) {
-                    throw new ArgumentNullException("The created singleton instance was null for type " + typeof(T));
+                if (self.TryGet(caller, out T singleton)) {
+                    AssertNotNull(singleton);
+                    return singleton;
                 }
+                singleton = createSingletonInstance();
+                AssertNotNull(singleton);
                 return self.SetSingleton(caller, singleton);
+            }
+        }
+
+        [Conditional("DEBUG")]
+        private static void AssertNotNull<T>(T singleton) {
+            if (ReferenceEquals(null, singleton)) {
+                throw new ArgumentNullException("The singleton instance was null for type " + typeof(T));
+            }
+            if ("null".Equals(singleton.ToString())) {
+                throw new ArgumentNullException("The singleton instance returns 'null' in .ToString() for type " + typeof(T));
             }
         }
 
