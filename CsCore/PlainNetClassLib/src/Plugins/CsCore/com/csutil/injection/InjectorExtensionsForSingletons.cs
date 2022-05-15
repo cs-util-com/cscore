@@ -21,6 +21,10 @@ namespace com.csutil {
         private static object SetSingleton<T, V>(this Injector self, object caller, V singletonInstance, bool overrideExisting = false) where V : T {
             lock (syncLock) {
                 singletonInstance.ThrowErrorIfNull("singletonInstance");
+                if (!overrideExisting && typeof(T).IsCastableTo<IsDisposable>()) {
+                    // Cause a injector cleanup if there is a present singleton and this singleton is disposed:
+                    self.Get<T>(caller, false); // Afterwards self.HasInjectorRegistered will be false if the singleton was disposed
+                }
                 if (self.HasInjectorRegistered<T>()) {
                     if (!overrideExisting) { throw new InvalidOperationException("Existing provider found for " + typeof(T)); }
                     if (!self.RemoveAllInjectorsFor<T>()) { Log.e("Could not remove all existing injectors!"); }
