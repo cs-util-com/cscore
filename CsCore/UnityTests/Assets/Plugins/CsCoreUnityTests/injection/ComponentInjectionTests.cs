@@ -125,6 +125,49 @@ namespace com.csutil.tests.injection {
             Assert.AreEqual(singletonInstance, a);
         }
 
+        [Test]
+        public void TestSingletonDisposeHandled() {
+            Injector injector = GetInjectorForTesting();
+
+            injector.RemoveAllInjectorsFor<MyExampleMono1>();
+            injector.RemoveAllInjectorsFor<MyExampleMono2>();
+
+            {
+                var x1 = injector.GetOrAddSingleton(this, () => new GameObject("Go1").AddComponent<MyExampleMono1>());
+                var x2 = injector.Get<MyExampleMono1>(this);
+                Assert.AreSame(x1, x2);
+                x2.gameObject.Destroy();
+
+                var x3 = injector.Get<MyExampleMono1>(this);
+                Assert.AreSame(x1, x3);
+                Assert.True(x3.IsDestroyed());
+                Assert.False(ReferenceEquals(null, x3)); // It's NOT really null
+                Assert.NotNull(x3);
+
+                var found = injector.TryGet(this, out MyExampleMono1 x4, false);
+                Assert.True(found);
+                Assert.True(x4.IsDestroyed());
+                Assert.False(ReferenceEquals(null, x4)); // It's NOT really null
+                Assert.NotNull(x4); 
+            }
+            {
+                var x1 = injector.GetOrAddSingleton(this, () => new GameObject("Go2").AddComponent<MyExampleMono2>());
+                var x2 = injector.Get<MyExampleMono2>(this);
+                Assert.AreSame(x1, x2);
+                x2.gameObject.Destroy();
+
+                var x3 = injector.Get<MyExampleMono2>(this);
+                Assert.Null(x3);
+                Assert.True(ReferenceEquals(null, x3)); // It's really null
+
+                var found = injector.TryGet(this, out MyExampleMono2 x4, false);
+                Assert.False(found);
+                Assert.Null(x4);
+                Assert.True(ReferenceEquals(null, x4)); // It's really null
+            }
+
+        }
+
     }
 
 }

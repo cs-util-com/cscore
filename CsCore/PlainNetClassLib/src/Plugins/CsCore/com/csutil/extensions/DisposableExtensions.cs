@@ -21,6 +21,8 @@ namespace com.csutil {
             return false;
         }
 
+        public static bool IsActive(this IsDisposable self) { return self.IsDisposed == IsDisposable.State.Active; }
+
     }
 
 }

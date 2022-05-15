@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace com.csutil.http {
 
-    public class RestFactory : IDisposable {
+    public class RestFactory : IDisposable, IsDisposable {
 
         public const int DEFAULT_PING_TIMEOUT = 1500;
 
@@ -15,6 +15,8 @@ namespace com.csutil.http {
         private HttpClient client;
         private HttpClientHandler handler;
 
+        public IsDisposable.State IsDisposed { get; private set; } = IsDisposable.State.Active;
+        
         public RestFactory() {
             InitFactory();
         }
@@ -49,9 +51,11 @@ namespace com.csutil.http {
         }
 
         public void Dispose() {
+            IsDisposed = IsDisposable.State.DisposingStarted;
             client?.Dispose();
             handler?.Dispose();
             if (IoC.inject.Get<RestFactory>(this) == this) { IoC.inject.RemoveAllInjectorsFor<RestFactory>(); }
+            IsDisposed = IsDisposable.State.Disposed;
         }
 
     }
