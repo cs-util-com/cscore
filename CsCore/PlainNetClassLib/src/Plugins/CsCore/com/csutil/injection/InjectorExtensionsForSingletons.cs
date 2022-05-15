@@ -26,7 +26,14 @@ namespace com.csutil {
                     if (!self.RemoveAllInjectorsFor<T>()) { Log.e("Could not remove all existing injectors!"); }
                     return SetSingleton<T, V>(self, caller, singletonInstance, false); // then retry setting the singleton
                 }
-                self.RegisterInjector<T>(caller, delegate { return singletonInstance; });
+                self.RegisterInjector<T>(caller, delegate {
+                    if (singletonInstance is IsDisposable d && !d.IsActive()) {
+                        // If the found object is not active anymore destroy the singleton injector and return null
+                        if (!self.RemoveAllInjectorsFor<T>()) { Log.e("Could not remove all existing injectors!"); }
+                        return default;
+                    }
+                    return singletonInstance;
+                });
                 return caller;
             }
         }
