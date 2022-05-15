@@ -24,6 +24,12 @@ namespace com.csutil {
             return ResolveFilePath(self, fileName);
         }
 
+        public static void ClearAllEntries(this DirectoryEntry self) {
+            foreach (var child in self.EnumerateEntries()) {
+                child.DeleteV2();
+            }
+        }
+        
         public static DirectoryEntry ResolveDirectoryPath(this DirectoryEntry self, string relativePath) {
             return new DirectoryEntry(self.FileSystem, self.Path / relativePath);
         }

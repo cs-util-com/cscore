@@ -39,14 +39,21 @@ namespace com.csutil {
 
         public bool IsAllTasksCompleted() { return GetRemainingScheduledTaskCount() == 0; }
 
-        public void CancelAllOpenTasks() { if (!Cancel.IsCancellationRequested) { Cancel.Cancel(); } }
+        public void CancelAllOpenTasks() {
+            if (!Cancel.IsCancellationRequested) { Cancel.Cancel(); }
+        }
 
-        public Task Run(Func<CancellationToken, Task> asyncAction) {
+        public Task Run(Func<CancellationToken, Task> asyncAction) { return Run(asyncAction, Cancel); }
+
+        public Task Run(Func<CancellationToken, Task> asyncAction, CancellationTokenSource cancellationTokenSource) {
+            if (!ReferenceEquals(Cancel, cancellationTokenSource)) {
+                cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationTokenSource.Token, Cancel.Token);
+            }
             var t = TaskV2.Run(async () => {
-                ThrowIfCancellationRequested(Cancel);
-                await asyncAction(Cancel.Token);
-                ThrowIfCancellationRequested(Cancel);
-            }, Cancel, Scheduler);
+                ThrowIfCancellationRequested(cancellationTokenSource);
+                await asyncAction(cancellationTokenSource.Token);
+                ThrowIfCancellationRequested(cancellationTokenSource);
+            }, cancellationTokenSource, Scheduler);
             return AddToManagedTasks(t);
         }
 
@@ -55,13 +62,18 @@ namespace com.csutil {
             cancel.Token.ThrowIfCancellationRequested();
         }
 
-        public async Task<T> Run<T>(Func<CancellationToken, Task<T>> asyncFunction) {
-            var t = TaskV2.Run(async () => {
-                ThrowIfCancellationRequested(Cancel);
-                T result = await asyncFunction(Cancel.Token);
-                ThrowIfCancellationRequested(Cancel);
+        public Task<T> Run<T>(Func<CancellationToken, Task<T>> asyncFunction) { return Run(asyncFunction, Cancel); }
+
+        public async Task<T> Run<T>(Func<CancellationToken, Task<T>> asyncFunction, CancellationTokenSource cancellationTokenSource) {
+            if (!ReferenceEquals(Cancel, cancellationTokenSource)) {
+                cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationTokenSource.Token, Cancel.Token);
+            }
+            Task<T> t = TaskV2.Run(async () => {
+                ThrowIfCancellationRequested(cancellationTokenSource);
+                T result = await asyncFunction(cancellationTokenSource.Token);
+                ThrowIfCancellationRequested(cancellationTokenSource);
                 return result;
-            }, Cancel, Scheduler);
+            }, cancellationTokenSource, Scheduler);
             await AddToManagedTasks(t);
             return await t;
         }
@@ -69,8 +81,7 @@ namespace com.csutil {
         private async Task AddToManagedTasks(Task taskToAdd) {
             Tasks.Add(taskToAdd);
             ProgressListener?.SetCount(GetCompletedTasksCount(), GetTotalTasksCount());
-            try { await taskToAdd; }
-            finally { // After the task is done update the progress listener again:
+            try { await taskToAdd; } finally { // After the task is done update the progress listener again:
                 ProgressListener?.SetCount(GetCompletedTasksCount(), GetTotalTasksCount());
             }
         }

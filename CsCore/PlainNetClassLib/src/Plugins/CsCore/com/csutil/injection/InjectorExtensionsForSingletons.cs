@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using com.csutil.injection;
 
 namespace com.csutil {
@@ -20,12 +21,23 @@ namespace com.csutil {
         private static object SetSingleton<T, V>(this Injector self, object caller, V singletonInstance, bool overrideExisting = false) where V : T {
             lock (syncLock) {
                 singletonInstance.ThrowErrorIfNull("singletonInstance");
+                if (!overrideExisting && typeof(T).IsCastableTo<IsDisposable>()) {
+                    // Cause a injector cleanup if there is a present singleton and this singleton is disposed:
+                    self.Get<T>(caller, false); // Afterwards self.HasInjectorRegistered will be false if the singleton was disposed
+                }
                 if (self.HasInjectorRegistered<T>()) {
                     if (!overrideExisting) { throw new InvalidOperationException("Existing provider found for " + typeof(T)); }
                     if (!self.RemoveAllInjectorsFor<T>()) { Log.e("Could not remove all existing injectors!"); }
                     return SetSingleton<T, V>(self, caller, singletonInstance, false); // then retry setting the singleton
                 }
-                self.RegisterInjector<T>(caller, delegate { return singletonInstance; });
+                self.RegisterInjector<T>(caller, delegate {
+                    if (singletonInstance is IsDisposable disposableObj && !disposableObj.IsAlive()) {
+                        // If the found object is not active anymore destroy the singleton injector and return null
+                        if (!self.RemoveAllInjectorsFor<T>()) { Log.e("Could not remove all existing injectors!"); }
+                        return default;
+                    }
+                    return singletonInstance;
+                });
                 return caller;
             }
         }
@@ -36,12 +48,23 @@ namespace com.csutil {
 
         public static T GetOrAddSingleton<T>(this Injector self, object caller, Func<T> createSingletonInstance) {
             lock (syncLock) {
-                if (self.TryGet(caller, out T singleton)) { return singleton; }
-                singleton = createSingletonInstance();
-                if (ReferenceEquals(null, singleton) || "null".Equals("" + singleton)) {
-                    throw new ArgumentNullException("The created singleton instance was null for type " + typeof(T));
+                if (self.TryGet(caller, out T singleton)) {
+                    AssertNotNull(singleton);
+                    return singleton;
                 }
+                singleton = createSingletonInstance();
+                AssertNotNull(singleton);
                 return self.SetSingleton(caller, singleton);
+            }
+        }
+
+        [Conditional("DEBUG")]
+        private static void AssertNotNull<T>(T singleton) {
+            if (ReferenceEquals(null, singleton)) {
+                throw new ArgumentNullException("The singleton instance was null for type " + typeof(T));
+            }
+            if ("null".Equals(singleton.ToString())) {
+                throw new ArgumentNullException("The singleton instance returns 'null' in .ToString() for type " + typeof(T));
             }
         }
 

@@ -50,7 +50,7 @@ namespace com.csutil.tests.ui {
         private async Task UseDialogLoaderManually() {
             var loader = new DialogLoader<ConfirmCancelDialog>(new ConfirmCancelDialog(caption: "I am a dialog",
                 message: "I can be awaited in the code, the async or coroutine can wait for the user " +
-                "to make a decision (select cancel or confirm) before the code continues!"));
+                "to make a decision before the code continues!", "Ok, I understand"));
             var rootCanvas = RootCanvas.GetOrAddRootCanvasV2().gameObject;
             rootCanvas.AddChild(loader.LoadDialogPrefab(new ConfirmCancelDialog.DefaultPresenter(),
                 dialogPrefabName: "Dialogs/DefaultDialog1")); // Add dialog UI in a canvas

@@ -283,5 +283,47 @@ namespace com.csutil.tests {
             Assert.Same(instance, m.First().Value.First());
         }
 
+        [Fact]
+        public void TestDisposableSingletons1() {
+            var IoC_inject = GetInjectorForTest();
+            var singletonInstance1 = new MyDisposableClass1();
+            IoC_inject.SetSingleton(singletonInstance1);
+            Assert.Throws<InvalidOperationException>(() => IoC_inject.SetSingleton(new MyDisposableClass1()));
+
+            Assert.True(IoC_inject.HasInjectorRegistered<MyDisposableClass1>());
+            Assert.Same(singletonInstance1, IoC_inject.Get<MyDisposableClass1>(this, createIfNull: false));
+            Assert.True(IoC_inject.HasInjectorRegistered<MyDisposableClass1>());
+
+            Assert.True(singletonInstance1.IsAlive());
+            singletonInstance1.IsDisposed = DisposeState.DisposingStarted;
+            Assert.False(singletonInstance1.IsAlive());
+            singletonInstance1.IsDisposed = DisposeState.Disposed;
+            Assert.False(singletonInstance1.IsAlive());
+
+            Assert.True(IoC_inject.HasInjectorRegistered<MyDisposableClass1>());
+            Assert.Null(IoC_inject.Get<MyDisposableClass1>(this, createIfNull: false));
+            // Asking for the now disposed singleton did automatically clean it:
+            Assert.False(IoC_inject.HasInjectorRegistered<MyDisposableClass1>());
+        }
+        
+        [Fact]
+        public void TestDisposableSingletons2() {
+            var IoC_inject = GetInjectorForTest();
+            var singletonInstance1 = new MyDisposableClass1();
+            IoC_inject.SetSingleton(singletonInstance1);
+
+            // Disposing the singleton does allow to replace it by a new instance right away: 
+            singletonInstance1.IsDisposed = DisposeState.DisposingStarted;
+            var singletonInstance2 = new MyDisposableClass1();
+            IoC_inject.SetSingleton(singletonInstance2);
+            Assert.Same(singletonInstance2, IoC_inject.Get<MyDisposableClass1>(this, createIfNull: false));
+        }
+
+        private class MyDisposableClass1 : IsDisposable {
+
+            public DisposeState IsDisposed { get; set; } = DisposeStateHelper.FromBool(isDisposed: false);
+
+        }
+
     }
 }

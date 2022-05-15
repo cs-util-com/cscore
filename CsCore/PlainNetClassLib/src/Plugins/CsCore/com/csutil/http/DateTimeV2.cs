@@ -9,7 +9,7 @@ namespace com.csutil {
     /// UTC timestamp that ignores if the local system time is set to an incorrect value. This ensures that timestamps recorded on clients 
     /// are always correct even if the user is using a manually set system time.
     /// </summary>
-    public class DateTimeV2 : IDisposable {
+    public class DateTimeV2 : IDisposable, IsDisposable {
 
         public static DateTime NewDateTimeFromUnixTimestamp(long unixTimeInMs, bool autoCorrectIfPassedInSeconds = true) {
             AssertV2.IsTrue(unixTimeInMs > 0, "NewDateTimeFromUnixTimestamp: unixTimeInMs was " + unixTimeInMs);
@@ -56,6 +56,8 @@ namespace com.csutil {
         /// <summary> This flag is set to false every time a new REST request reported a current UTC time from a backend. Can be switched back to true to repeat the remote time update </summary>
         public bool RequestUpdateOfDiffOfLocalToServer = true;
 
+        public DisposeState IsDisposed { get; private set; } = DisposeState.Active;
+        
         /// <summary> Can be overwritten, by default any remote time that is max 5sec different to local time is accepted </summary>
         public Func<TimeSpan, bool> IsAcceptableDistanceToLocalTime = (diff) => diff.TotalMillisecondsAbs() < 5000;
 
@@ -64,8 +66,10 @@ namespace com.csutil {
         }
 
         public void Dispose() {
+            IsDisposed = DisposeState.DisposingStarted;
             EventBus.instance.UnsubscribeAll(this);
             if (IoC.inject.Get<DateTimeV2>(this, false) == this) { IoC.inject.RemoveAllInjectorsFor<DateTimeV2>(); }
+            IsDisposed = DisposeState.Disposed;
         }
 
         private void onUtcUpdate(Uri uri, DateTime serverUtcDate) {

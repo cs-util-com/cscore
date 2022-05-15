@@ -10,7 +10,10 @@ namespace com.csutil {
             if (go == null) { go = e.pointerPress; }
             var rt = go.GetComponent<RectTransform>();
             if (rt != null) {
-                RectTransformUtility.ScreenPointToLocalPointInRectangle(rt, e.position, e.pressEventCamera, out Vector2 res);
+                var cam = e.pressEventCamera;
+                // Check if cam should be used (see https://docs.unity3d.com/ScriptReference/RectTransformUtility.ScreenPointToLocalPointInRectangle.html ):
+                if (rt.GetRootCanvas().renderMode == RenderMode.ScreenSpaceOverlay) { cam = null; }
+                RectTransformUtility.ScreenPointToLocalPointInRectangle(rt, e.position, cam, out Vector2 res);
                 // TODO get rid of ignoreGlobalScale flag (Ui21 & Ui26_circles conflict each other)
                 var scale = ignoreGlobalScale ? rt.localScale : rt.lossyScale;
                 return rt.rotation * new Vector2(res.x * scale.x, res.y * scale.y);
