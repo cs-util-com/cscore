@@ -5,7 +5,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>com.csutil.cscore</PackageId>
     <!-- https://www.nuget.org/packages/com.csutil.cscore -->
-    <Version>1.8.0</Version>
+    <Version>1.8.2</Version>
     <Authors>csutil.com</Authors>
     <Company>csutil.com</Company>
     <Product>cscore</Product>
@@ -43,13 +43,13 @@
 
   <!-- https://www.nuget.org/packages/Newtonsoft.Json -->
   <ItemGroup>
-    <!-- Version 12.0.3 chosen because https://docs.unity3d.com/Packages/com.unity.nuget.newtonsoft-json@2.0/manual/index.html 2.0.2 uses this version -->
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <!-- Version 13.0.1 chosen because https://docs.unity3d.com/Packages/com.unity.nuget.newtonsoft-json@3.0/manual/index.html 3.0.2 uses this version -->
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
   </ItemGroup>
 
   <!-- https://www.nuget.org/packages/System.Collections.Immutable/ -->
   <ItemGroup>
-    <PackageReference Include="System.Collections.Immutable" Version="1.7.0" />
+    <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
   </ItemGroup>
   
   <!-- https://www.nuget.org/packages/SharpZipLib/ -->

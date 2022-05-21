@@ -25,9 +25,12 @@ namespace com.csutil {
 
     }
 
-    public class ToastsUi : MonoBehaviour {
+    public class ToastsUi : MonoBehaviour, IsDisposable {
 
         private GameObject toastsContainer;
+
+        public DisposeState IsDisposed => DisposeStateHelper.FromBool(this.IsDestroyed());
+
         private void OnEnable() { toastsContainer = gameObject.GetLinkMap().Get<GameObject>("MessageContainer"); }
 
         public GameObject Show(string toastCaption, string toastMessage, int displayDurationInMs) {

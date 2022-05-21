@@ -26,9 +26,12 @@ namespace com.csutil {
 
     }
 
-    public class SnackbarsUi : MonoBehaviour {
+    public class SnackbarsUi : MonoBehaviour, IsDisposable {
 
         private GameObject snackbarsContainer;
+
+        public DisposeState IsDisposed => DisposeStateHelper.FromBool(this.IsDestroyed());
+
         private void OnEnable() { snackbarsContainer = gameObject.GetLinkMap().Get<GameObject>("MessageContainer"); }
 
         public GameObject Show(string snackbarMsg, string buttonMsg, Action<GameObject> snackbarAction, int displayDurationInMs) {

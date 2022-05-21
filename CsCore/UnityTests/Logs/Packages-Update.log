@@ -209,3 +209,17 @@ The following packages were updated:
   com.unity.timeline from version 1.5.5 to 1.7.0-pre.1
 The following packages were removed:
   com.unity.multiplayer-hlapi@1.0.6
+
+=== Sat May 14 14:22:36 2022
+
+Packages were changed.
+Update Mode: updateDependencies
+
+The following packages were updated:
+  com.unity.ide.rider from version 3.0.13 to 3.0.14
+  com.unity.ide.visualstudio from version 2.0.12 to 2.0.15
+  com.unity.ide.vscode from version 1.2.4 to 1.2.5
+  com.unity.mobile.android-logcat from version 1.2.3 to 1.3.2
+  com.unity.nuget.newtonsoft-json from version 2.0.2 to 3.0.2
+  com.unity.test-framework from version 1.1.30 to 1.1.31
+  com.unity.timeline from version 1.7.0-pre.1 to 1.7.1

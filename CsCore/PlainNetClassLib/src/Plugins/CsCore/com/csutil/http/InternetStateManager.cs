@@ -15,7 +15,7 @@ namespace com.csutil {
 
     }
 
-    public class InternetStateManager : IDisposable {
+    public class InternetStateManager : IDisposable, IsDisposable {
 
         public static InternetStateManager Instance(object caller) { return IoC.inject.GetOrAddSingleton<InternetStateManager>(caller); }
 
@@ -29,6 +29,8 @@ namespace com.csutil {
         public bool HasInet { get; private set; } = false;
         public Task<bool> HasInetAsync { get; private set; }
 
+        public DisposeState IsDisposed { get; private set; } = DisposeState.Active;
+
         public readonly ISet<IHasInternetListener> listeners = new HashSet<IHasInternetListener>();
         public readonly CancellationTokenSource cancelToken = new CancellationTokenSource();
 
@@ -40,8 +42,10 @@ namespace com.csutil {
         }
 
         public void Dispose() {
+            IsDisposed = DisposeState.DisposingStarted;
             cancelToken.Cancel();
             if (IoC.inject.Get<InternetStateManager>(this) == this) { IoC.inject.RemoveAllInjectorsFor<InternetStateManager>(); }
+            IsDisposed = DisposeState.Disposed;
         }
 
         private async Task RunInternetCheckLoop(Task firstInetCheck) {
