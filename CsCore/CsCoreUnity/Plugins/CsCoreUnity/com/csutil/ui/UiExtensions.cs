@@ -359,4 +359,14 @@ namespace com.csutil {
 
     }
 
+    public static class UiButtonExtensions {
+        
+        public static void SetNormalColor(this Button self, Color normalColor) {
+            var c = self.colors;
+            c.normalColor = normalColor;
+            self.colors = c;
+        }
+        
+    }
+
 }
