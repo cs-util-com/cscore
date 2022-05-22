@@ -658,7 +658,7 @@ PrefabInstance:
     - target: {fileID: 1826576467927810384, guid: 1c599e31dd8ea2d40acdfa6166c8de0d,
         type: 3}
       propertyPath: m_Text
-      value: "\U0001F32F"
+      value: "\uE5C3"
       objectReference: {fileID: 0}
     - target: {fileID: 1826576467927810384, guid: 1c599e31dd8ea2d40acdfa6166c8de0d,
         type: 3}
@@ -2519,7 +2519,7 @@ PrefabInstance:
     - target: {fileID: 1826576467927810384, guid: 1c599e31dd8ea2d40acdfa6166c8de0d,
         type: 3}
       propertyPath: m_Text
-      value: "\U0001F32F"
+      value: "\uE5C3"
       objectReference: {fileID: 0}
     - target: {fileID: 1826576467927810384, guid: 1c599e31dd8ea2d40acdfa6166c8de0d,
         type: 3}
