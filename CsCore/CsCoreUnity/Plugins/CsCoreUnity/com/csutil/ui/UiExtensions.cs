@@ -95,13 +95,13 @@ namespace com.csutil {
             return AddOnValueChangedAction(self, onValueChanged);
         }
 
-        public static UnityAction<bool> AddOnValueChangedAction(this Toggle self, Func<bool, bool> onValueChanged) {
+        public static UnityAction<bool> AddOnValueChangedAction(this Toggle self, Func<bool, bool> onValueChanged, bool skipChangesByLogic = true) {
             if (onValueChanged != null) {
                 var oldIsOn = self.isOn;
                 UnityAction<bool> newListener = (newIsOn) => {
                     if (oldIsOn == newIsOn) { return; }
                     // Ignore event event if it was triggered through code, only fire for actual user input:
-                    if (!self.ChangeWasTriggeredByUserThroughEventSystem()) { return; }
+                    if (skipChangesByLogic && !self.ChangeWasTriggeredByUserThroughEventSystem()) { return; }
                     if (!onValueChanged(newIsOn)) { // Change was rejected, revert UI:
                         self.isOn = oldIsOn;
                     } else { // Change was accepted:
@@ -123,13 +123,13 @@ namespace com.csutil {
             return AddOnValueChangedAction(self, onValueChanged);
         }
 
-        public static UnityAction<float> AddOnValueChangedAction(this Slider self, Func<float, bool> onValueChanged) {
+        public static UnityAction<float> AddOnValueChangedAction(this Slider self, Func<float, bool> onValueChanged, bool skipChangesByLogic = true) {
             if (onValueChanged != null) {
                 var oldValue = self.value;
                 UnityAction<float> newListener = (newValue) => {
                     if (SameValueAsBefore(oldValue, newValue, self.minValue, self.maxValue)) { return; }
                     // Ignore event event if it was triggered through code, only fire for actual user input:
-                    if (!self.ChangeWasTriggeredByUserThroughEventSystem()) { return; }
+                    if (skipChangesByLogic && !self.ChangeWasTriggeredByUserThroughEventSystem()) { return; }
                     if (!onValueChanged(newValue)) { // Change was rejected, revert UI:
                         self.value = oldValue;
                     } else { // Change was accepted:
@@ -193,13 +193,13 @@ namespace com.csutil {
             return AddOnValueChangedAction(self, onValueChanged);
         }
 
-        public static UnityAction<string> AddOnValueChangedAction(this InputField self, Func<string, bool> onValueChanged) {
+        public static UnityAction<string> AddOnValueChangedAction(this InputField self, Func<string, bool> onValueChanged, bool skipChangesByLogic = true) {
             if (onValueChanged != null) {
                 var oldText = self.text;
                 UnityAction<string> newListener = (newText) => {
                     if (newText == oldText) { return; }
                     // Ignore event event if it was triggered through code, only fire for actual user input:
-                    if (!self.ChangeWasTriggeredByUserThroughEventSystem()) { return; }
+                    if (skipChangesByLogic && !self.ChangeWasTriggeredByUserThroughEventSystem()) { return; }
                     if (!onValueChanged(newText)) {
                         self.text = oldText;
                     } else {
