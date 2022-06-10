@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
@@ -11,17 +12,22 @@ namespace com.csutil.ui {
 
         private void OnEnable() {
             listener = GetComponent<Toggle>().AddOnValueChangedAction(toggleIsOn => {
-                ShowToggleState(toggleIsOn);
+                OnToggleStateChanged(toggleIsOn);
+                InformParentToggleGroupListenerIfFound();
                 return true;
             }, skipChangesByLogic: false);
-            ShowToggleState(GetComponent<Toggle>().isOn);
+            OnToggleStateChanged(GetComponent<Toggle>().isOn);
+        }
+
+        private void InformParentToggleGroupListenerIfFound() {
+            gameObject.GetComponentInParents<ToggleGroupListener>()?.OnActiveToggleInGroupChanged();
         }
 
         private void OnDisable() {
             GetComponent<Toggle>().onValueChanged.RemoveListener(listener);
         }
 
-        protected abstract void ShowToggleState(bool toggleIsOn);
+        protected abstract void OnToggleStateChanged(bool toggleIsOn);
 
     }
 

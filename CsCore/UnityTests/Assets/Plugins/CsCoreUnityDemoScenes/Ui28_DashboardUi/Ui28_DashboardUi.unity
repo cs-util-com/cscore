@@ -129,6 +129,51 @@ RectTransform:
     type: 3}
   m_PrefabInstance: {fileID: 2041503132}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &78990107
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 78990108}
+  - component: {fileID: 78990109}
+  m_Layer: 0
+  m_Name: com.csutil.MainThread
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &78990108
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 78990107}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 809900142}
+  m_RootOrder: -1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &78990109
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 78990107}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 85d5e8bd7752e0340873c426a9756070, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxAllowedTaskDurationInMsPerFrame: 33
 --- !u!1 &181515658
 GameObject:
   m_ObjectHideFlags: 0
@@ -860,6 +905,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2130743872}
+  - {fileID: 78990108}
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -877,7 +923,7 @@ GameObject:
   - component: {fileID: 957832142}
   - component: {fileID: 957832141}
   m_Layer: 0
-  m_Name: Sidebar2
+  m_Name: Sidebar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1668,7 +1714,7 @@ MonoBehaviour:
   - colorName: accentContrastWeak
     colorValue: {r: 0.39607844, g: 0.39607844, b: 0.39607844, a: 1}
   - colorName: primary
-    colorValue: {r: 0.03529412, g: 0.5529412, b: 0.85882354, a: 1}
+    colorValue: {r: 0.10196079, g: 0.5529412, b: 0.65882355, a: 1}
   - colorName: primaryContrast
     colorValue: {r: 1, g: 1, b: 1, a: 1}
   - colorName: primaryContrastWeak

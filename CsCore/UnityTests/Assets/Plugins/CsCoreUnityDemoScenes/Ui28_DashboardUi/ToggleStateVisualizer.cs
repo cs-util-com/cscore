@@ -6,7 +6,7 @@ namespace com.csutil.ui {
 
         public GameObject targetToShowHide;
 
-        protected override void ShowToggleState(bool toggleIsOn) {
+        protected override void OnToggleStateChanged(bool toggleIsOn) {
             targetToShowHide.SetActiveV2(toggleIsOn);
         }
         
