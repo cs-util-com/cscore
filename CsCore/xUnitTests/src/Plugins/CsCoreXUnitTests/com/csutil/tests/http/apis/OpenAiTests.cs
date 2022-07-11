@@ -12,7 +12,7 @@ namespace com.csutil.tests.http {
 
         [Fact]
         public async Task ExampleUsage1() {
-            var openAi = new OpenAi(AppSecrets.Load()["OpenAiKey"]);
+            var openAi = new OpenAi(AppSecrets.Load("cscore-secrets-keys.txt")["OpenAiKey"]);
             var result = await openAi.Complete("Complete this funny short story: A cow walked ");
             var answer = result.choices.Single().text;
             Assert.NotEmpty(answer);

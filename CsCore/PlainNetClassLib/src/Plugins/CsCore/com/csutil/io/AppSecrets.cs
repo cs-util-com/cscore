@@ -3,14 +3,16 @@ using System.IO;
 using Zio;
 
 namespace com.csutil.io {
-    
+
     public class AppSecrets {
 
-        public static Dictionary<string, string> Load() {
-            return FindFile().LoadAs<Dictionary<string, string>>();
+        private const string DEFAULT_FILE_NAME = "Keys and secrets for local dev testing.txt";
+
+        public static Dictionary<string, string> Load(string fileName = DEFAULT_FILE_NAME) {
+            return FindFile(fileName).LoadAs<Dictionary<string, string>>();
         }
 
-        public static FileEntry FindFile(string fileName = "secrets-keys.txt") {
+        public static FileEntry FindFile(string fileName = DEFAULT_FILE_NAME) {
             var startDir = EnvironmentV2.instance.GetCurrentDirectory().GetFullFileSystemPath();
             return FindFile(fileName, new DirectoryInfo(startDir));
         }
@@ -25,5 +27,5 @@ namespace com.csutil.io {
         }
 
     }
-    
+
 }
