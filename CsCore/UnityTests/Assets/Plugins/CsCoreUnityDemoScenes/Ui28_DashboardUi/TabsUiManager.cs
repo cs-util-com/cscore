@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -6,18 +7,18 @@ using UnityEngine.UI;
 
 namespace com.csutil.ui {
 
-    public abstract class TabsUiManager : ToggleGroupListener {
+    public class TabsUiManager : ToggleGroupListener {
 
-        public Dictionary<Toggle, GameObject> tabs { get; private set; }
+        public ViewStack TargetTabsPanel;
+        private Action<ViewStack, IEnumerable<Toggle>> action;
 
         protected override void OnActiveToggleInGroupChanged(IEnumerable<Toggle> activeToggles) {
-            tabs = GetTabs();
-            var toggleForTab = activeToggles.Single();
-            foreach (var tab in tabs.Values) { tab.SetActiveV2(false); }
-            tabs[toggleForTab].SetActiveV2(true);
+            action?.Invoke(TargetTabsPanel, activeToggles);
         }
 
-        protected abstract Dictionary<Toggle, GameObject> GetTabs();
+        public void Setup(Action<ViewStack, IEnumerable<Toggle>> action) {
+            this.action = action;
+        }
 
     }
 

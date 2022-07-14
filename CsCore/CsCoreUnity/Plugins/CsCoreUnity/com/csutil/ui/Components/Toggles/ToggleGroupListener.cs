@@ -27,7 +27,7 @@ namespace com.csutil.ui {
             AssertChildrenHaveCorrectMonosAttached();
             var newActiveToggles = GetComponent<ToggleGroup>().ActiveToggles();
             if (!newActiveToggles.SequenceReferencesEqual(activeToggles)) {
-                activeToggles = newActiveToggles;
+                activeToggles = new List<Toggle>(newActiveToggles);
                 OnActiveToggleInGroupChanged(activeToggles);
             }
         }
