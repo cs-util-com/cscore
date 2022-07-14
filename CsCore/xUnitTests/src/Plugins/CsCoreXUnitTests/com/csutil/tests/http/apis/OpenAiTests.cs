@@ -1,7 +1,6 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 using com.csutil.http.apis;
-using com.csutil.io;
 using Xunit;
 
 namespace com.csutil.tests.http {
@@ -12,11 +11,12 @@ namespace com.csutil.tests.http {
 
         [Fact]
         public async Task ExampleUsage1() {
-            var openAi = new OpenAi(AppSecrets.Load("cscore-secrets-keys.txt")["OpenAiKey"]);
-            var result = await openAi.Complete("Complete this funny short story: A cow walked ");
-            var answer = result.choices.Single().text;
-            Assert.NotEmpty(answer);
-            Log.d(answer);
+            var openAi = new OpenAi(await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey"));
+            var prompt = "Complete this funny short story: A cow walked ";
+            var result = await openAi.Complete(prompt);
+            var completion = result.choices.Single().text;
+            Assert.NotEmpty(completion);
+            Log.d(prompt + completion);
         }
 
     }
