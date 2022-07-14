@@ -28,11 +28,11 @@ namespace com.csutil.ui {
             var newActiveToggles = GetComponent<ToggleGroup>().ActiveToggles();
             if (!newActiveToggles.SequenceReferencesEqual(activeToggles)) {
                 activeToggles = newActiveToggles;
-                OnActiveToggleInGroupChanged2(activeToggles);
+                OnActiveToggleInGroupChanged(activeToggles);
             }
         }
 
-        protected abstract void OnActiveToggleInGroupChanged2(IEnumerable<Toggle> activeToggles);
+        protected abstract void OnActiveToggleInGroupChanged(IEnumerable<Toggle> activeToggles);
 
     }
 
