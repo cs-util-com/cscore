@@ -20,8 +20,8 @@ namespace com.csutil.ui {
             OnToggleStateChanged(GetComponent<Toggle>().isOn);
         }
 
-        private void InformParentToggleGroupListenerIfFound() {
-            gameObject.GetComponentInParents<ToggleGroupListener>()?.OnActiveToggleInGroupChanged();
+        protected virtual void InformParentToggleGroupListenerIfFound() {
+            gameObject.GetComponentInParents<IToggleGroupListener>()?.OnActiveToggleInGroupChanged();
         }
 
         private void OnDisable() {

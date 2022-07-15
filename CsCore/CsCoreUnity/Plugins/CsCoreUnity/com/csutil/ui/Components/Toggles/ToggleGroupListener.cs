@@ -6,8 +6,12 @@ using UnityEngine.UI;
 
 namespace com.csutil.ui {
 
+    public interface IToggleGroupListener {
+        void OnActiveToggleInGroupChanged();
+    }
+    
     [RequireComponent(typeof(ToggleGroup))]
-    public abstract class ToggleGroupListener : MonoBehaviour {
+    public abstract class ToggleGroupListener : MonoBehaviour, IToggleGroupListener {
 
         public IEnumerable<Toggle> activeToggles { get; private set; } = new List<Toggle>();
 

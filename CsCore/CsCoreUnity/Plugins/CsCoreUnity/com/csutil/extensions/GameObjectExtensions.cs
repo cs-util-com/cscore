@@ -17,7 +17,7 @@ namespace com.csutil {
             return child;
         }
 
-        [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]        
+        [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         private static void AssertParentNotInChildGoTree(GameObject parent, GameObject child, string path) {
             if (parent == child) { throw Log.e($"Trying to add child GO in a parent that is located in the child: " + path, parent); }
             parent = parent.GetParent();
@@ -93,7 +93,9 @@ namespace com.csutil {
 
         public static bool Destroy(this UnityEngine.Object self, bool destroyNextFrame = false) {
             if (self == null) { return false; }
-            try { if (destroyNextFrame) { UnityEngine.Object.Destroy(self); } else { GameObject.DestroyImmediate(self); } } catch { return false; }
+            try {
+                if (destroyNextFrame) { UnityEngine.Object.Destroy(self); } else { GameObject.DestroyImmediate(self); }
+            } catch { return false; }
             AssertV2.IsTrue(destroyNextFrame || self.IsDestroyed(), "gameObject was not destroyed");
             return true;
         }
