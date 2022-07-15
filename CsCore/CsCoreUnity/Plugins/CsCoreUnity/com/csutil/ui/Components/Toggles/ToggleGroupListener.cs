@@ -11,6 +11,11 @@ namespace com.csutil.ui {
 
         public IEnumerable<Toggle> activeToggles { get; private set; } = new List<Toggle>();
 
+        /// <summary> Can be changed to define how quick after a new tab was selected the logic should be executed to
+        /// select and switch to that selected tab. Typically the default value does not need to be changed </summary>
+        public double debounceDelayInMs = 50;
+        private Action<IEnumerable<Toggle>> OnActiveToggleInGroupChangedAction;
+
         protected virtual void OnEnable() {
             AssertChildrenHaveCorrectMonosAttached();
         }
@@ -28,11 +33,19 @@ namespace com.csutil.ui {
             var newActiveToggles = GetComponent<ToggleGroup>().ActiveToggles();
             if (!newActiveToggles.SequenceReferencesEqual(activeToggles)) {
                 activeToggles = new List<Toggle>(newActiveToggles);
-                OnActiveToggleInGroupChanged(activeToggles);
+                HandleActiveToggleInGroupChanged(activeToggles);
             }
         }
 
-        protected abstract void OnActiveToggleInGroupChanged(IEnumerable<Toggle> activeToggles);
+        private void HandleActiveToggleInGroupChanged(IEnumerable<Toggle> activeToggles) {
+            if (OnActiveToggleInGroupChangedAction == null) {
+                OnActiveToggleInGroupChangedAction = OnActiveToggleInGroupChanged2;
+                OnActiveToggleInGroupChangedAction = OnActiveToggleInGroupChangedAction.AsThrottledDebounce(debounceDelayInMs, true);
+            }
+            OnActiveToggleInGroupChangedAction(activeToggles);
+        }
+
+        protected abstract void OnActiveToggleInGroupChanged2(IEnumerable<Toggle> activeToggles);
 
     }
 
