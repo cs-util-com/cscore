@@ -8,7 +8,9 @@ namespace com.csutil {
     public static class ApplicationV2 {
 
         public static bool IsAnyOf(this RuntimePlatform self, params RuntimePlatform[] platforms) {
-            foreach (var p in platforms) { if (object.Equals(self, p)) { return true; } }
+            foreach (var p in platforms) {
+                if (object.Equals(self, p)) { return true; }
+            }
             return false;
         }
 
@@ -80,6 +82,16 @@ namespace com.csutil {
             return !unityCouldCrash;
         }
 
+        public static void Quit() {
+            #if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+            #elif UNITY_WEBPLAYER
+            Application.OpenURL("about:blank");
+            #else
+            Application.Quit();
+            #endif
+        }
+        
     }
 
 }

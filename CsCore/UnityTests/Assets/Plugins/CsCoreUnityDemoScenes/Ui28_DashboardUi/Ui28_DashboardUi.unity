@@ -521,6 +521,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6267428995100036732, guid: 2110bb495e15ffb469bc9da9c99d9985,
+        type: 3}
+      propertyPath: m_Text
+      value: "\uE8AC"
+      objectReference: {fileID: 0}
     - target: {fileID: 7844991068546578296, guid: 2110bb495e15ffb469bc9da9c99d9985,
         type: 3}
       propertyPath: m_Name
@@ -652,6 +657,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6267428995100036732, guid: 2110bb495e15ffb469bc9da9c99d9985,
+        type: 3}
+      propertyPath: m_Text
+      value: "\uE0BF"
       objectReference: {fileID: 0}
     - target: {fileID: 7844991068546578296, guid: 2110bb495e15ffb469bc9da9c99d9985,
         type: 3}
@@ -1079,7 +1089,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 54e0339ed0564022ab0e8fa2c1a06995, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  TargetTabsPanel: {fileID: 1476936910}
+  targetTabsPanel: {fileID: 1476936910}
+  debounceDelayInMs: 50
 --- !u!114 &957832146
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1303,6 +1314,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6267428995100036732, guid: 2110bb495e15ffb469bc9da9c99d9985,
+        type: 3}
+      propertyPath: m_Text
+      value: "\uE8D3"
       objectReference: {fileID: 0}
     - target: {fileID: 7844991068546578296, guid: 2110bb495e15ffb469bc9da9c99d9985,
         type: 3}
@@ -1706,6 +1722,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6267428995100036732, guid: 2110bb495e15ffb469bc9da9c99d9985,
+        type: 3}
+      propertyPath: m_Text
+      value: "\uE429"
       objectReference: {fileID: 0}
     - target: {fileID: 7844991068546578296, guid: 2110bb495e15ffb469bc9da9c99d9985,
         type: 3}

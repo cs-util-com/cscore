@@ -11,7 +11,7 @@ namespace com.csutil.ui {
 
         public IEnumerable<Toggle> activeToggles { get; private set; } = new List<Toggle>();
 
-        private void OnEnable() {
+        protected virtual void OnEnable() {
             AssertChildrenHaveCorrectMonosAttached();
         }
 
