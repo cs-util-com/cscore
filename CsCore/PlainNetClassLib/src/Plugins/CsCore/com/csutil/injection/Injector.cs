@@ -59,7 +59,7 @@ namespace com.csutil.injection {
                 return true;
             }
             var r = true;
-            foreach (var subscriber in subscribers) { r = usedEventBus.Unsubscribe(subscriber, eventName) & r; }
+            foreach (var subscriber in subscribers) { r = usedEventBus.Unsubscribe(subscriber, eventName) && r; }
             // Log.d("Removed " + subscribers.Count() + " subscribers for " + typeof(T));
             return r;
         }
