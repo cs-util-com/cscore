@@ -56,11 +56,10 @@ namespace com.csutil.injection {
             var eventName = GetEventKey<T>();
             var subscribers = usedEventBus.GetSubscribersFor(eventName).ToList();
             if (subscribers.IsNullOrEmpty()) {
-                Log.w("Could not remove subscribers because there were none found for '" + eventName + "'");
-                return false;
+                return true;
             }
             var r = true;
-            foreach (var subscriber in subscribers) { r = usedEventBus.Unsubscribe(subscriber, eventName) & r; }
+            foreach (var subscriber in subscribers) { r = usedEventBus.Unsubscribe(subscriber, eventName) && r; }
             // Log.d("Removed " + subscribers.Count() + " subscribers for " + typeof(T));
             return r;
         }

@@ -217,10 +217,10 @@ namespace com.csutil.tests {
             var IoC_inject = GetInjectorForTest();
 
             var injector1 = new object();
-            Assert.False(IoC_inject.RemoveAllInjectorsFor<string>());
+            Assert.True(IoC_inject.RemoveAllInjectorsFor<string>());
             IoC_inject.RegisterInjector<string>(injector1, (c, _) => "");
             Assert.True(IoC_inject.RemoveAllInjectorsFor<string>());
-            Assert.False(IoC_inject.RemoveAllInjectorsFor<string>());
+            Assert.True(IoC_inject.RemoveAllInjectorsFor<string>());
         }
 
         private class MyClass1 { }

@@ -80,7 +80,7 @@ namespace com.csutil {
                     if (IsAcceptableDistanceToLocalTime(diffOfLocalToServer.Value)) { diffOfLocalToServer = null; }
                     RequestUpdateOfDiffOfLocalToServer = false;
                 }
-            } catch (Exception e) { Log.e("Error when processing server utc date from " + uri, e); }
+            } catch (Exception e) { Log.w("Error when processing server utc date from " + uri, e); }
         }
 
         public virtual DateTime GetUtcNow() {

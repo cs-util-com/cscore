@@ -96,6 +96,10 @@ namespace com.csutil {
         public static RestRequest WithRequestHeaderJwt(this RestRequest self, string jwt) {
             return self.WithRequestHeader("Authorization", "Bearer " + jwt);
         }
+        
+        public static RestRequest WithAuthorization(this RestRequest self, string key) {
+            return self.WithRequestHeader("Authorization", "Bearer " + key);
+        }
 
         public static bool IsErrorStatus(this HttpStatusCode statusCode) {
             if (statusCode.IsClientError()) { return true; }

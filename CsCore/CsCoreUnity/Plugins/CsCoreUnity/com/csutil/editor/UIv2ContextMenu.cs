@@ -74,6 +74,9 @@ namespace com.csutil.editor {
         [MenuItem(UIv2menu + "DefaultToggle", false, priorityOfUiMenu + 6)]
         static void DefaultToggle() { AddPrefabToActiveView("DefaultToggle"); }
 
+        [MenuItem(UIv2menu + "DefaultRadioButton", false, priorityOfUiMenu + 6)]
+        static void DefaultRadioButton() { AddPrefabToActiveView("DefaultRadioButton"); }
+        
         [MenuItem(UIv2menu + "DefaultInput", false, priorityOfUiMenu + 6)]
         static void DefaultInput() { AddPrefabToActiveView("DefaultInput"); }
 

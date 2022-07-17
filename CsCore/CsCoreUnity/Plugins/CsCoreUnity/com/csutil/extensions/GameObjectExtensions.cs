@@ -17,7 +17,7 @@ namespace com.csutil {
             return child;
         }
 
-        [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]        
+        [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         private static void AssertParentNotInChildGoTree(GameObject parent, GameObject child, string path) {
             if (parent == child) { throw Log.e($"Trying to add child GO in a parent that is located in the child: " + path, parent); }
             parent = parent.GetParent();
@@ -43,15 +43,15 @@ namespace com.csutil {
         public static int GetChildCount(this GameObject self) { return self.transform.childCount; }
 
         /// <summary> Unity returns a comp that pretents to be null so return actual null </summary>
-        public static T GetComponentV2<T>(this GameObject self) where T : Component {
+        public static T GetComponentV2<T>(this GameObject self) {
             var existingComp = self.GetComponent<T>();
-            return existingComp == null ? null : existingComp;
+            return existingComp == null ? default : existingComp;
         }
 
         /// <summary> Unity returns a comp that pretents to be null so return actual null </summary>
-        public static T GetComponentV2<T>(this Component self) where T : Component {
+        public static T GetComponentV2<T>(this Component self) {
             var existingComp = self.GetComponent<T>();
-            return existingComp == null ? (T)(object)null : existingComp;
+            return existingComp == null ? default : existingComp;
         }
 
         /// <summary> Used for lazy-initialization of a Mono, combine with go.GetOrAddChild </summary>
@@ -60,18 +60,18 @@ namespace com.csutil {
             return existingComp == null ? self.AddComponent<T>() : existingComp;
         }
 
-        public static bool HasComponent<T>(this GameObject self, out T existingComp) where T : Component {
+        public static bool HasComponent<T>(this GameObject self, out T existingComp) {
             existingComp = self.GetComponentV2<T>();
             return existingComp != null;
         }
 
         /// <summary> Searches recursively upwards in all parents until a comp of type T is found </summary>
-        public static T GetComponentInParents<T>(this GameObject gameObject) where T : Component {
+        public static T GetComponentInParents<T>(this GameObject gameObject) {
             var comp = gameObject.GetComponentV2<T>();
             if (comp != null) { return comp; }
             var parent = gameObject.GetParent();
             if (parent != null && parent != gameObject) { return parent.GetComponentInParents<T>(); }
-            return null;
+            return default;
         }
 
         /// <summary> Returns the parent GameObject or null if top scene level is reached </summary>
@@ -93,7 +93,9 @@ namespace com.csutil {
 
         public static bool Destroy(this UnityEngine.Object self, bool destroyNextFrame = false) {
             if (self == null) { return false; }
-            try { if (destroyNextFrame) { UnityEngine.Object.Destroy(self); } else { GameObject.DestroyImmediate(self); } } catch { return false; }
+            try {
+                if (destroyNextFrame) { UnityEngine.Object.Destroy(self); } else { GameObject.DestroyImmediate(self); }
+            } catch { return false; }
             AssertV2.IsTrue(destroyNextFrame || self.IsDestroyed(), "gameObject was not destroyed");
             return true;
         }
