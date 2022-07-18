@@ -18,7 +18,7 @@ namespace com.csutil.ui {
         /// <summary> Can be changed to define how quick after a new tab was selected the logic should be executed to
         /// select and switch to that selected tab. Typically the default value does not need to be changed </summary>
         public double debounceDelayInMs = 50;
-        private Action<IEnumerable<Toggle>> OnActiveToggleInGroupChangedAction;
+        private Action OnActiveToggleInGroupChangedAction;
 
         protected virtual void OnEnable() {
             AssertChildrenHaveCorrectMonosAttached();
@@ -33,23 +33,23 @@ namespace com.csutil.ui {
         }
 
         public void OnActiveToggleInGroupChanged() {
+            if (OnActiveToggleInGroupChangedAction == null) {
+                OnActiveToggleInGroupChangedAction = OnActiveToggleInGroupChangedDelayed;
+                OnActiveToggleInGroupChangedAction = OnActiveToggleInGroupChangedAction.AsThrottledDebounce(debounceDelayInMs, true);
+            }
+            OnActiveToggleInGroupChangedAction();
+        }
+
+        private void OnActiveToggleInGroupChangedDelayed() {
             AssertChildrenHaveCorrectMonosAttached();
             var newActiveToggles = GetComponent<ToggleGroup>().ActiveToggles();
             if (!newActiveToggles.SequenceReferencesEqual(activeToggles)) {
                 activeToggles = new List<Toggle>(newActiveToggles);
-                HandleActiveToggleInGroupChanged(activeToggles);
+                OnActiveToggleInGroupChanged(activeToggles);
             }
         }
 
-        private void HandleActiveToggleInGroupChanged(IEnumerable<Toggle> activeToggles) {
-            if (OnActiveToggleInGroupChangedAction == null) {
-                OnActiveToggleInGroupChangedAction = OnActiveToggleInGroupChanged2;
-                OnActiveToggleInGroupChangedAction = OnActiveToggleInGroupChangedAction.AsThrottledDebounce(debounceDelayInMs, true);
-            }
-            OnActiveToggleInGroupChangedAction(activeToggles);
-        }
-
-        protected abstract void OnActiveToggleInGroupChanged2(IEnumerable<Toggle> activeToggles);
+        protected abstract void OnActiveToggleInGroupChanged(IEnumerable<Toggle> activeToggles);
 
     }
 
