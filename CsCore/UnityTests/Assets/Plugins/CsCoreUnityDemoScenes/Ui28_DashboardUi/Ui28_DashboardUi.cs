@@ -21,16 +21,27 @@ namespace com.csutil.tests.ui {
             };
             sidebar.onCustomTabClickAction = (linkId, tabsPanel) => {
                 if (linkId == "Close Application") {
-                    CloseApp();
+                    CloseApp().LogOnError();
                 } else {
                     Log.e("Unknown linkId: " + linkId);
                 }
             };
+
+            SetupTutorial();
         }
 
         private static async Task CloseApp() {
             var userConfirmed = await ConfirmCancelDialog.Show("Quit", "Do you want to exit the application?");
             if (userConfirmed) { ApplicationV2.Quit(); }
+        }
+
+        private static async Task SetupTutorial() {
+            var step1 = Snackbar.Show("Click on the 'Users' icon to switch to tab 2", -1);
+            await UiEvents.WaitForToggleToBeChecked("Show Panel 2");
+            step1.Destroy();
+            var step2 = Snackbar.Show("Now switch back to tab 1", -1);
+            await UiEvents.WaitForToggleToBeChecked("Show Panel 1");
+            step2.Destroy();
         }
 
     }
