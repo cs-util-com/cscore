@@ -214,6 +214,7 @@ namespace com.csutil {
         }
 
         public static UnityAction<int> SetOnValueChangedAction(this Dropdown self, Func<int, bool> onValueChanged) {
+            AssertV2.IsNotNull(self,"self (Dropdown)");
             if (self.onValueChanged != null && self.onValueChanged.GetPersistentEventCount() > 0) {
                 Log.w("Overriding old onValueChanged listener for input field " + self, self.gameObject);
             }

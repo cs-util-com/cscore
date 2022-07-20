@@ -27,7 +27,7 @@ namespace com.csutil.tests.ui {
                 }
             };
 
-            SetupTutorial();
+            ShowTutorial();
         }
 
         private static async Task CloseApp() {
@@ -35,13 +35,32 @@ namespace com.csutil.tests.ui {
             if (userConfirmed) { ApplicationV2.Quit(); }
         }
 
-        private static async Task SetupTutorial() {
-            var step1 = Snackbar.Show("Click on the 'Users' icon to switch to tab 2", -1);
-            await UiEvents.WaitForToggleToBeChecked("Show Panel 2");
-            step1.Destroy();
-            var step2 = Snackbar.Show("Now switch back to tab 1", -1);
-            await UiEvents.WaitForToggleToBeChecked("Show Panel 1");
-            step2.Destroy();
+        private static async Task ShowTutorial() {
+            {
+                var instructions = Snackbar.Show("Click on the 'Users' icon to switch to tab 2", -1);
+                await UiEvents.WaitForToggle("Show Panel 2", true);
+                instructions.Destroy();
+            }
+            {
+                var instructions = Snackbar.Show("Now press the shown button", -1);
+                await UiEvents.WaitForButtonToBePressed("Panel2_Button1");
+                instructions.Destroy();
+            }
+            {
+                var instructions = Snackbar.Show("Now enter 'abc' in the input field", -1);
+                await UiEvents.WaitForInputField("Panel2_InputField1", input => "abc" == input);
+                instructions.Destroy();
+            }
+            {
+                var instructions = Snackbar.Show("Now select Option B from the dropdown", -1);
+                await UiEvents.WaitForDropDown("Panel2_DropDown1", dropDownEntry => 1 == dropDownEntry);
+                instructions.Destroy();
+            }
+            {
+                var instructions = Snackbar.Show("Now switch back to tab 1", -1);
+                await UiEvents.WaitForToggle("Show Panel 1", true);
+                instructions.Destroy();
+            }
         }
 
     }

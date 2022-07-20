@@ -64,6 +64,11 @@ namespace com.csutil {
             existingComp = self.GetComponentV2<T>();
             return existingComp != null;
         }
+        
+        public static bool HasComponent<T>(this Component self, out T existingComp) {
+            existingComp = self.GetComponentV2<T>();
+            return existingComp != null;
+        }
 
         /// <summary> Searches recursively upwards in all parents until a comp of type T is found </summary>
         public static T GetComponentInParents<T>(this GameObject gameObject) {
