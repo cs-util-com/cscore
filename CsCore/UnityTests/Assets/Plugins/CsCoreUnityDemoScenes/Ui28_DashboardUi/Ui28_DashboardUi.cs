@@ -37,7 +37,7 @@ namespace com.csutil.tests.ui {
 
         private static async Task ShowTutorial() {
             {
-                var instructions = Snackbar.Show("Click on the 'Users' icon to switch to tab 2", -1);
+                var instructions = Snackbar.Show("Click on the 'Users' icon to switch to tab 2", "Ok", ui => ui.Destroy(), -1);
                 await UiEvents.WaitForToggle("Show Panel 2", true);
                 instructions.Destroy();
             }
