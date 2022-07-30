@@ -10,7 +10,7 @@ namespace com.csutil.http {
     public class UnityRestFactoryV2 : RestFactory {
 
         public override async Task<long> GetCurrentPing(string ipOrUrl = DEFAULT_PING_IP, int timeoutInMs = DEFAULT_PING_TIMEOUT) {
-            if (ApplicationV2.platform.IsAnyOf(RuntimePlatform.WebGLPlayer)) {
+            if (ApplicationV2.platform.IsAnyOf(RuntimePlatform.WebGLPlayer) && ApplicationV2.isPlaying) {
                 return await GetCurrentPingViaHeadRequest(ipOrUrl, timeoutInMs);
             }
             var ping = await GetCurrentPingViaUnityPing(ipOrUrl, timeoutInMs);
