@@ -154,6 +154,7 @@ namespace com.csutil.tests.model {
                 Middlewares.MakeDebugCopyOfAction(actionToClone, ref copyOfActionSupported, ref actionBeforeDispatch);
                 Assert.False(copyOfActionSupported);
             }
+#if DEBUG // Middlewares.MakeDebugCopyOfAction only can be used when compiling in DEBUG mode
             {
                 var actionToClone = new TestAction2("abc");
                 bool copyOfActionSupported = false;
@@ -168,14 +169,15 @@ namespace com.csutil.tests.model {
                 Middlewares.MakeDebugCopyOfAction(objectToClone, ref copyOfActionSupported, ref actionBeforeDispatch);
                 Assert.False(copyOfActionSupported);
             }
+#endif
         }
 
-        public class TestAction1 {
+        public class TestAction1 { // Has a private setter
             public string s { get; private set; }
             public TestAction1(string s1) { this.s = s1; }
         }
 
-        public class TestAction2 {
+        public class TestAction2 { // Has a public setter
             public string s { get; set; }
             public TestAction2(string s1) { this.s = s1; }
         }
