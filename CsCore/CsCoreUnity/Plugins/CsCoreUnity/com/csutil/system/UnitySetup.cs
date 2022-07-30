@@ -29,7 +29,7 @@ namespace com.csutil {
             if (EnvironmentV2.isWebGL) { IoC.inject.SetSingleton<TaskV2>(new TaskV2WebGL(), true); }
 
             { // Setup an UnityRestFactory only if there is not already a RestFactory injected
-                var restFactory = IoC.inject.GetOrAddSingleton<RestFactory>(null, () => new UnityRestFactory());
+                var restFactory = IoC.inject.GetOrAddSingleton<IRestFactory>(null, () => new UnityRestFactory());
                 if (!(restFactory is UnityRestFactory)) {
                     Log.d($"Will NOT use {nameof(UnityRestFactory)} since a {restFactory.GetType().Name} was already present");
                 }

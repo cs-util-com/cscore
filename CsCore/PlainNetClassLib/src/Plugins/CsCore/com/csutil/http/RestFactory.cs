@@ -6,12 +6,22 @@ using System.Threading.Tasks;
 
 namespace com.csutil.http {
 
-    public class RestFactory : IDisposable, IsDisposable {
+    public interface IRestFactory : IDisposable, IsDisposable {
+
+        RestRequest SendRequest(Uri uri, HttpMethod method);
+
+        Task<long> GetCurrentPing(string ipOrUrl = RestFactory.DEFAULT_PING_IP, int timeoutInMs = RestFactory.DEFAULT_PING_TIMEOUT);
+
+        Task<bool> HasInternet(Action hasInet = null, Action noInet = null, string ip = RestFactory.DEFAULT_PING_IP, int timeoutMs = RestFactory.DEFAULT_PING_TIMEOUT);
+
+    }
+
+    public class RestFactory : IRestFactory {
+
+        public static IRestFactory instance { get { return IoC.inject.GetOrAddSingleton<IRestFactory>(new object(), () => new RestFactory()); } }
 
         public const int DEFAULT_PING_TIMEOUT = 1500;
-        protected const string DEFAULT_PING_IP = "8.8.8.8";
-
-        public static RestFactory instance { get { return IoC.inject.GetOrAddSingleton<RestFactory>(new object()); } }
+        public const string DEFAULT_PING_IP = "https://8.8.8.8";
 
         private HttpClient client;
         private HttpClientHandler handler;
@@ -55,7 +65,7 @@ namespace com.csutil.http {
             IsDisposed = DisposeState.DisposingStarted;
             client?.Dispose();
             handler?.Dispose();
-            if (IoC.inject.Get<RestFactory>(this) == this) { IoC.inject.RemoveAllInjectorsFor<RestFactory>(); }
+            if (IoC.inject.Get<IRestFactory>(this) == this) { IoC.inject.RemoveAllInjectorsFor<IRestFactory>(); }
             IsDisposed = DisposeState.Disposed;
         }
 
