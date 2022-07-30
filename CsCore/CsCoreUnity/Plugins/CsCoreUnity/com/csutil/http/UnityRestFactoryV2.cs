@@ -1,12 +1,26 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Networking;
 
 namespace com.csutil.http {
 
     public class UnityRestFactoryV2 : RestFactory {
+
+        public override RestRequest SendRequest(Uri uri, HttpMethod method) {
+            if (ApplicationV2.platform.IsAnyOf(RuntimePlatform.WebGLPlayer)) {
+                return MainThread.instance.ExecuteOnMainThread(() => {
+                    if (method.ToString() == "GET") {
+                        return new UnityRestRequest(UnityWebRequest.Get(uri));
+                    }
+                    return new UnityRestRequest(new UnityWebRequest(uri, method.ToString()));
+                });
+            }
+            return base.SendRequest(uri, method);
+        }
 
         public override async Task<long> GetCurrentPing(string ipOrUrl = DEFAULT_PING_IP, int timeoutInMs = DEFAULT_PING_TIMEOUT) {
             if (ApplicationV2.platform.IsAnyOf(RuntimePlatform.WebGLPlayer) && ApplicationV2.isPlaying) {
