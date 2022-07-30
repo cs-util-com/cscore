@@ -65,7 +65,7 @@ namespace com.csutil.keyvaluestore {
                     self.latestFallbackGetTimingInMs = (self.latestFallbackGetTimingInMs + s.ElapsedMilliseconds) / 2;
                 });
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-                await Task.WhenAny(fallbackGet, Task.Delay((int)(self.latestFallbackGetTimingInMs * multFactor)));
+                await Task.WhenAny(fallbackGet, TaskV2.Delay((int)(self.latestFallbackGetTimingInMs * multFactor)));
             }
         }
 
