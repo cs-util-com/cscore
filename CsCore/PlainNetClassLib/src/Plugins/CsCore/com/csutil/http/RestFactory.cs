@@ -21,7 +21,7 @@ namespace com.csutil.http {
         public static IRestFactory instance { get { return IoC.inject.GetOrAddSingleton<IRestFactory>(new object(), () => new RestFactory()); } }
 
         public const int DEFAULT_PING_TIMEOUT = 1500;
-        public const string DEFAULT_PING_IP = "https://8.8.8.8";
+        public const string DEFAULT_PING_IP = "8.8.8.8";
 
         private HttpClient client;
         private HttpClientHandler handler;

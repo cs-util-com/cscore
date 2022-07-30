@@ -57,7 +57,7 @@ namespace com.csutil {
             }, delayInMsBetweenIterations: 3000, cancelToken: cancelToken.Token);
         }
 
-        private async Task<bool> RunInternetCheck() {
+        protected virtual async Task<bool> RunInternetCheck() {
             var newState = await RestFactory.instance.HasInternet();
             await SetHasInet(newState);
             AssertV2.AreEqual(HasInet, newState);
