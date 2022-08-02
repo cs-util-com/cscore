@@ -1,6 +1,6 @@
-
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
@@ -25,7 +25,13 @@ namespace com.csutil.keyvaluestore {
             this.maxNrOfRetries = maxNrOfRetries;
         }
 
-        public void Dispose() { fallbackStore?.Dispose(); }
+        public DisposeState IsDisposed { get; private set; } = DisposeState.Active;
+
+        public void Dispose() {
+            IsDisposed = DisposeState.DisposingStarted;
+            fallbackStore?.Dispose();
+            IsDisposed = DisposeState.Disposed;
+        }
 
         public Task<T> Retry<T>(Func<Task<T>> taskToTry) {
             return TaskV2.TryWithExponentialBackoff<T>(taskToTry, onError, maxNrOfRetries, maxDelayInMs, initialExponent);
@@ -44,7 +50,12 @@ namespace com.csutil.keyvaluestore {
 
         public Task<bool> Remove(string key) { return Retry(() => fallbackStore.Remove(key)); }
 
-        public Task RemoveAll() { return Retry<bool>(async () => { await fallbackStore.RemoveAll(); return true; }); }
+        public Task RemoveAll() {
+            return Retry<bool>(async () => {
+                await fallbackStore.RemoveAll();
+                return true;
+            });
+        }
 
         public Task<object> Set(string key, object value) { return Retry(() => fallbackStore.Set(key, value)); }
 

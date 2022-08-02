@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 
 namespace com.csutil.keyvaluestore {
 
+    [Obsolete("Use ObservableKeyValueStore instead")]
     public class MutationObserverKeyValueStore : IKeyValueStore {
 
         public Func<string, object, object, Task> onSet;
@@ -18,7 +19,13 @@ namespace com.csutil.keyvaluestore {
 
         public Task<bool> ContainsKey(string key) { return fallbackStore.ContainsKey(key); }
 
-        public void Dispose() { fallbackStore.Dispose(); }
+        public DisposeState IsDisposed { get; private set; } = DisposeState.Active;
+
+        public void Dispose() {
+            IsDisposed = DisposeState.DisposingStarted;
+            fallbackStore?.Dispose();
+            IsDisposed = DisposeState.Disposed;
+        }
 
         public Task<T> Get<T>(string k, T def) { return fallbackStore.Get(k, def); }
 

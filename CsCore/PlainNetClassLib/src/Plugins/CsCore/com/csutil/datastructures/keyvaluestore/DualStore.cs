@@ -56,11 +56,15 @@ namespace com.csutil.keyvaluestore {
             await a;
         }
 
+        public DisposeState IsDisposed { get; private set; } = DisposeState.Active;
+
         public void Dispose() {
+            IsDisposed = DisposeState.DisposingStarted;
             fallbackStore.Dispose();
             secondStore.Dispose();
+            IsDisposed = DisposeState.Disposed;
         }
-
+        
     }
 
 }

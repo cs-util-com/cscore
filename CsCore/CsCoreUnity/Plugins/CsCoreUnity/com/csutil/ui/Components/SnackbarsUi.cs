@@ -26,7 +26,7 @@ namespace com.csutil {
 
     }
 
-    public class SnackbarsUi : MonoBehaviour, IsDisposable {
+    public class SnackbarsUi : MonoBehaviour, IDisposableV2 {
 
         private GameObject snackbarsContainer;
 
@@ -51,6 +51,8 @@ namespace com.csutil {
             return newSnackbar;
         }
 
+        public void Dispose() { this.gameObject.Destroy(); }
+        
     }
 
 }

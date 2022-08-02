@@ -19,7 +19,13 @@ namespace com.csutil.keyvaluestore {
             }
         }
 
-        public void Dispose() { wrappedStore.Dispose(); }
+        public DisposeState IsDisposed { get; private set; } = DisposeState.Active;
+
+        public void Dispose() {
+            IsDisposed = DisposeState.DisposingStarted;
+            fallbackStore?.Dispose();
+            IsDisposed = DisposeState.Disposed;
+        }
 
         private static HashSet<Type> NewDefaultErrorSet() {
             return new HashSet<Type>() { typeof(InvalidCastException), typeof(NotImplementedException) };

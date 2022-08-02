@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Threading.Tasks;
 using com.csutil.keyvaluestore;
@@ -78,9 +79,17 @@ namespace com.csutil.model {
         /// Set a listener that is triggered whenever a new event is set on the main store of the LocalAnalytics,
         /// e.g. to update a progression UI 
         /// </summary>
+        [Obsolete("Use a store like the ObservableKeyValueStore (implements INotifyCollectionChanged) to listen to changes in the store")]
         public void SetChangeListener(Func<string, object, object, Task> SetOnMainStore) {
             if (analytics.store is MutationObserverKeyValueStore l) {
                 l.onSet = SetOnMainStore;
+            }
+            if (analytics.store is INotifyCollectionChanged l2) {
+                l2.CollectionChanged += ((sender, args) => {
+                    var newItem = (KeyValuePair<string, object>)args.NewItems[0];
+                    var oldItem = (KeyValuePair<string, object>?)(args.OldItems.Count > 0 ? args.OldItems[0] : null);
+                    SetOnMainStore(newItem.Key, newItem.Value, oldItem?.Value);
+                });
             }
         }
 

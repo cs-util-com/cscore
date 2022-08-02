@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace com.csutil.http {
 
-    public interface IRestFactory : IDisposable, IsDisposable {
+    public interface IRestFactory : IDisposableV2 {
 
         RestRequest SendRequest(Uri uri, HttpMethod method);
 

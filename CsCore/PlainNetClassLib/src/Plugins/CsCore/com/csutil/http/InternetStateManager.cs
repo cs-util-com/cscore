@@ -15,7 +15,7 @@ namespace com.csutil {
 
     }
 
-    public class InternetStateManager : IDisposable, IsDisposable {
+    public class InternetStateManager : IDisposableV2 {
 
         public static InternetStateManager Instance(object caller) { return IoC.inject.GetOrAddSingleton<InternetStateManager>(caller); }
 

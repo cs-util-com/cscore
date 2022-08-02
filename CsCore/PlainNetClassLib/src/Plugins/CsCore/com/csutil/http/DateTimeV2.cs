@@ -9,7 +9,7 @@ namespace com.csutil {
     /// UTC timestamp that ignores if the local system time is set to an incorrect value. This ensures that timestamps recorded on clients 
     /// are always correct even if the user is using a manually set system time.
     /// </summary>
-    public class DateTimeV2 : IDisposable, IsDisposable {
+    public class DateTimeV2 : IDisposableV2 {
 
         public static DateTime NewDateTimeFromUnixTimestamp(long unixTimeInMs, bool autoCorrectIfPassedInSeconds = true) {
             AssertV2.IsTrue(unixTimeInMs > 0, "NewDateTimeFromUnixTimestamp: unixTimeInMs was " + unixTimeInMs);

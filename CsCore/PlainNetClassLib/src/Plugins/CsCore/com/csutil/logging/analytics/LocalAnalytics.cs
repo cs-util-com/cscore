@@ -17,7 +17,7 @@ namespace com.csutil.logging.analytics {
         };
 
         public LocalAnalytics(string dirName = DEFAULT_DIR)
-            : this(new MutationObserverKeyValueStore().WithFallbackStore(FileBasedKeyValueStore.New(dirName))) {
+            : this(new ObservableKeyValueStore(FileBasedKeyValueStore.New(dirName))) {
         }
 
         public LocalAnalytics(IKeyValueStore mainStore) : base(mainStore) { }

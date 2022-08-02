@@ -21,7 +21,13 @@ namespace com.csutil.keyvaluestore {
         private IJsonReader jsonReader = TypedJsonHelper.NewTypedJsonReader();
         private IJsonWriter jsonWriter = TypedJsonHelper.NewTypedJsonWriter();
 
-        public void Dispose() { fallbackStore?.Dispose(); }
+        public DisposeState IsDisposed { get; private set; } = DisposeState.Active;
+
+        public void Dispose() {
+            IsDisposed = DisposeState.DisposingStarted;
+            fallbackStore?.Dispose();
+            IsDisposed = DisposeState.Disposed;
+        }
 
         public async Task<T> Get<T>(string key, T defaultValue) {
             var s = this.StartFallbackStoreGetTimer();

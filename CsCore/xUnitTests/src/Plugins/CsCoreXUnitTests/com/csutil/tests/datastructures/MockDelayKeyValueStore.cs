@@ -14,7 +14,13 @@ namespace com.csutil.tests.keyvaluestore {
         public int delay = 100;
         public bool throwTimeoutError = false;
 
-        public void Dispose() { fallbackStore.Dispose(); }
+        public DisposeState IsDisposed { get; private set; } = DisposeState.Active;
+
+        public void Dispose() {
+            IsDisposed = DisposeState.DisposingStarted;
+            fallbackStore?.Dispose();
+            IsDisposed = DisposeState.Disposed;
+        }
 
         public MockDelayKeyValueStore(IKeyValueStore fallbackStore) { this.fallbackStore = fallbackStore; }
 

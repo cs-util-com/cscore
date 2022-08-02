@@ -25,7 +25,7 @@ namespace com.csutil {
 
     }
 
-    public class ToastsUi : MonoBehaviour, IsDisposable {
+    public class ToastsUi : MonoBehaviour, IDisposableV2 {
 
         private GameObject toastsContainer;
 
@@ -47,6 +47,7 @@ namespace com.csutil {
             if (text.IsNullOrEmpty()) { map.Get<GameObject>(id).SetActiveV2(false); } else { map.Get<Text>(id).text = text; }
         }
 
+        public void Dispose() { this.gameObject.Destroy(); }
     }
 
 }

@@ -143,11 +143,10 @@ namespace com.csutil.tests.model {
 
             var eventCount = 1000;
 
-            var store = new MutationObserverKeyValueStore().WithFallbackStore(new InMemoryKeyValueStore());
+            var store = new ObservableKeyValueStore(new InMemoryKeyValueStore());
             // Lets assume the users xp correlates with the number of triggered local analytics events:
-            store.onSet = delegate {
+            store.CollectionChanged += delegate {
                 xpSystem.currentXp++;
-                return Task.FromResult(true);
             };
 
             // Set the store to be the target of the local analytics so that whenever any 
