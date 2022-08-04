@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -58,6 +59,16 @@ namespace com.csutil.tests {
                 Log.d("Now simulating the user clicking the button=" + buttonName);
                 GetLink(buttonName).GetComponent<Button>().onClick.Invoke();
             }
+        }
+
+        public Task SimulateButtonClickOn(string buttonName, IList<Task> buttonClicks) {
+            return SimulateButtonClickOn(buttonName, buttonClicks.Last());
+        }
+
+        public Task SimulateButtonClickOn(string buttonName, Task buttonClickWaitTask) {
+            AssertV2.IsFalse(buttonClickWaitTask.IsCompleted, "buttonClickWaitTask was already completed");
+            SimulateButtonClickOn(buttonName);
+            return buttonClickWaitTask;
         }
 
         public static IEnumerable<Link> FindAllActiveLinks() {

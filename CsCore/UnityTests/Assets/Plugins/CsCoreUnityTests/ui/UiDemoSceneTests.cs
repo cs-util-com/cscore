@@ -60,6 +60,11 @@ namespace com.csutil.tests.ui {
         public IEnumerator Ui14_ImageLoading() {
             yield return UnitTestMono.RunTest<Ui14_ImageLoading>("Ui14_ImageLoading");
         }
+        
+        [UnityTest]
+        public IEnumerator Ui29_KeyValueStoreMonitor() {
+            yield return UnitTestMono.RunTest<Ui29_KeyValueStoreMonitor>("Ui29_KeyValueStoreMonitor");
+        }
 
     }
 
