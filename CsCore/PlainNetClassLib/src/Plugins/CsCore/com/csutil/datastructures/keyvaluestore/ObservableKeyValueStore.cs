@@ -56,7 +56,7 @@ namespace com.csutil.keyvaluestore {
 
         public async Task RemoveAll() {
             await fallbackStore.RemoveAll();
-            var e = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove);
+            var e = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset);
             CollectionChanged?.Invoke(this, e);
         }
 
