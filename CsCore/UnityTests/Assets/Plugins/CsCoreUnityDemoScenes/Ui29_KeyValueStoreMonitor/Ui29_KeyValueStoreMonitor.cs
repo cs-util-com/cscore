@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using com.csutil.keyvaluestore;
 using com.csutil.ui.debug;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace com.csutil.tests.ui {
@@ -15,7 +16,7 @@ namespace com.csutil.tests.ui {
 
             var store = new ObservableKeyValueStore(new InMemoryKeyValueStore());
 
-            await ShowDebugUiForStoreContent(store);
+            await ShowDebugUiScreen(store, gameObject);
 
             var ui = gameObject.GetLinkMap();
 
@@ -59,8 +60,9 @@ namespace com.csutil.tests.ui {
 
         }
 
-        private Task ShowDebugUiForStoreContent(ObservableKeyValueStore keyValueStoreToMonitor) {
-            return gameObject.GetLinkMap().Get<KeyValueStoreDebugListUi>("KeyValueStoreDebugListUi").SetupKeyValueStoreToShow(keyValueStoreToMonitor);
+        private static Task ShowDebugUiScreen(ObservableKeyValueStore keyValueStoreToMonitor, GameObject gameObject) {
+            var debugUiScreen = gameObject.GetViewStack().ShowView("KeyValueStoreDebugListUiScreen");
+            return debugUiScreen.GetLinkMap().Get<KeyValueStoreDebugListUi>("KeyValueStoreDebugListUi").SetupKeyValueStoreToShow(keyValueStoreToMonitor);
         }
 
     }
