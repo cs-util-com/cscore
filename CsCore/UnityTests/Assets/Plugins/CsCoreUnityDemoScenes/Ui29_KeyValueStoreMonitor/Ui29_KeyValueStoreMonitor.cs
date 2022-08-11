@@ -33,6 +33,10 @@ namespace com.csutil.tests.ui {
                 await store.Remove(key.text);
             });
 
+            var userClickedOnClearAll = ui.Get<Button>("ClearAllButton").SetOnClickActionAsync(async delegate {
+                await store.RemoveAll();
+            });
+
             if (simulateUserInput) {
                 const string SOME_KEY_1 = "Key 1";
                 const string SOME_VALUE_1 = "My Value 1";
@@ -56,6 +60,12 @@ namespace com.csutil.tests.ui {
                 await SimulateButtonClickOn("RemoveButton", userClickedOnRemove);
                 AssertV2.IsFalse(await store.ContainsKey(SOME_KEY_1), "SOME_KEY_1 STILL found in key value store");
                 AssertV2.AreEqual(null, await store.Get<string>(SOME_KEY_1, null));
+
+                await store.Set("a", "a");
+                await store.Set("b", "b");
+                AssertV2.AreEqual(2, (await store.GetAllKeys()).Count());
+                await SimulateButtonClickOn("ClearAllButton", userClickedOnClearAll);
+                AssertV2.AreEqual(0, (await store.GetAllKeys()).Count());
             }
 
         }
