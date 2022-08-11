@@ -715,21 +715,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 718614718}
     m_Modifications:
-    - target: {fileID: 150228857554736894, guid: f3b22bc68d12fa84398f2660598424a6,
-        type: 3}
-      propertyPath: m_AnchorMax.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 150228857554736894, guid: f3b22bc68d12fa84398f2660598424a6,
-        type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 150228857554736894, guid: f3b22bc68d12fa84398f2660598424a6,
-        type: 3}
-      propertyPath: m_SizeDelta.x
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 278390184088674730, guid: f3b22bc68d12fa84398f2660598424a6,
         type: 3}
       propertyPath: m_Pivot.x
@@ -835,45 +820,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 395567196859624783, guid: f3b22bc68d12fa84398f2660598424a6,
-        type: 3}
-      propertyPath: _colorName
-      value: card
-      objectReference: {fileID: 0}
-    - target: {fileID: 2645068821932258741, guid: f3b22bc68d12fa84398f2660598424a6,
-        type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: -0.000037808924
-      objectReference: {fileID: 0}
-    - target: {fileID: 4192863805267184832, guid: f3b22bc68d12fa84398f2660598424a6,
-        type: 3}
-      propertyPath: m_AnchorMax.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4192863805267184832, guid: f3b22bc68d12fa84398f2660598424a6,
-        type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4192863805267184832, guid: f3b22bc68d12fa84398f2660598424a6,
-        type: 3}
-      propertyPath: m_AnchorMin.y
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 5395143443035582007, guid: f3b22bc68d12fa84398f2660598424a6,
         type: 3}
       propertyPath: m_Name
       value: Ui29_KeyValueStoreMonitor
-      objectReference: {fileID: 0}
-    - target: {fileID: 5491161410384258550, guid: f3b22bc68d12fa84398f2660598424a6,
-        type: 3}
-      propertyPath: m_AnchorMax.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5491161410384258550, guid: f3b22bc68d12fa84398f2660598424a6,
-        type: 3}
-      propertyPath: m_SizeDelta.x
-      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6382403174188364182, guid: f3b22bc68d12fa84398f2660598424a6,
         type: 3}
@@ -882,41 +832,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6382403174188364182, guid: f3b22bc68d12fa84398f2660598424a6,
         type: 3}
-      propertyPath: m_Color.g
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6382403174188364182, guid: f3b22bc68d12fa84398f2660598424a6,
-        type: 3}
       propertyPath: m_Color.r
       value: 0.8820755
       objectReference: {fileID: 0}
-    - target: {fileID: 7752622027700492746, guid: f3b22bc68d12fa84398f2660598424a6,
-        type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7781981388688972422, guid: f3b22bc68d12fa84398f2660598424a6,
-        type: 3}
-      propertyPath: m_AnchorMax.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7781981388688972422, guid: f3b22bc68d12fa84398f2660598424a6,
-        type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7895550122787897513, guid: f3b22bc68d12fa84398f2660598424a6,
-        type: 3}
-      propertyPath: m_Size
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 7895550122787897513, guid: f3b22bc68d12fa84398f2660598424a6,
-        type: 3}
-      propertyPath: m_Value
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents:
-    - {fileID: 395567196859624783, guid: f3b22bc68d12fa84398f2660598424a6, type: 3}
+    m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []

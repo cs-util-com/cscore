@@ -16,7 +16,7 @@ namespace com.csutil.tests.ui {
 
             var store = new ObservableKeyValueStore(new InMemoryKeyValueStore());
 
-            await ShowDebugUiScreen(store, gameObject);
+            await store.ShowDebugUiScreen();
 
             var ui = gameObject.GetLinkMap();
 
@@ -58,11 +58,6 @@ namespace com.csutil.tests.ui {
                 AssertV2.AreEqual(null, await store.Get<string>(SOME_KEY_1, null));
             }
 
-        }
-
-        private static Task ShowDebugUiScreen(ObservableKeyValueStore keyValueStoreToMonitor, GameObject gameObject) {
-            var debugUiScreen = gameObject.GetViewStack().ShowView("KeyValueStoreDebugListUiScreen");
-            return debugUiScreen.GetLinkMap().Get<KeyValueStoreDebugListUi>("KeyValueStoreDebugListUi").SetupKeyValueStoreToShow(keyValueStoreToMonitor);
         }
 
     }
