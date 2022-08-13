@@ -37,6 +37,7 @@ namespace com.csutil.http {
                 AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
             };
             client = new HttpClient(handler);
+            client.Timeout = TimeSpan.FromHours(10);
         }
 
         public virtual RestRequest SendRequest(Uri uri, HttpMethod method) {

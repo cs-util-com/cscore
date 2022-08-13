@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using com.csutil.http;
 using com.csutil.http.apis;
 using com.csutil.io;
+using Newtonsoft.Json.Linq;
 using Xunit;
 
 namespace com.csutil.tests.http {
@@ -315,18 +316,60 @@ namespace com.csutil.tests.http {
 
         [Fact]
         public async Task TestUriSendMethods() {
+            Assert.Equal(HttpStatusCode.OK, await new Uri("https://httpbin.org/get").SendGET().GetResult<HttpStatusCode>());
+            Assert.Equal(HttpStatusCode.OK, await new Uri("https://httpbin.org/post").SendPOST().GetResult<HttpStatusCode>());
+            Assert.Equal(HttpStatusCode.OK, await new Uri("https://httpbin.org/put").SendPUT().GetResult<HttpStatusCode>());
+            Assert.Equal(HttpStatusCode.OK, await new Uri("https://httpbin.org/delete").SendDELETE().GetResult<HttpStatusCode>());
+            Assert.Equal(HttpStatusCode.OK, await new Uri("https://httpbin.org/patch").SendPATCH().GetResult<HttpStatusCode>());
+
             Assert.Equal(HttpStatusCode.OK, await new Uri("https://postman-echo.com/put").SendPUT().GetResult<HttpStatusCode>());
             Assert.Equal(HttpStatusCode.OK, await new Uri("https://postman-echo.com/delete").SendDELETE().GetResult<HttpStatusCode>());
             Assert.Equal(HttpStatusCode.OK, await new Uri("https://postman-echo.com/options").SendOPTIONS().GetResult<HttpStatusCode>());
             Assert.Equal(HttpStatusCode.OK, await new Uri("https://postman-echo.com/patch").SendRequest(HttpMethod.Patch).GetResult<HttpStatusCode>());
+
+            // If a route does not exist the postman-echo returns a NotFound error code:
             Assert.Equal(HttpStatusCode.NotFound, await new Uri("https://postman-echo.com/delete").SendPUT().GetResult<HttpStatusCode>());
         }
 
         [Fact]
-        public async Task TestGetResultStatusCode() {
-            RestRequest request = new Uri("https://httpbin.org/get").SendGET();
-            var code = await request.GetResult<HttpStatusCode>();
-            Assert.Equal(HttpStatusCode.OK, code);
+        public async Task TestUserAgent() {
+            var resp = await new Uri("https://httpbin.org/user-agent").SendGET().GetResult<JObject>();
+            Assert.True(resp.ContainsKey("user-agent"));
+            Log.d("User agent: " + resp["user-agent"]);
+        }
+
+        [Fact]
+        public async Task TestDifferentStatusCodes() {
+            await TestStatusCode(HttpStatusCode.OK);
+            await TestStatusCode(HttpStatusCode.Accepted);
+            await TestStatusCode(HttpStatusCode.Forbidden);
+            await TestStatusCode(HttpStatusCode.NotFound);
+            await TestStatusCode(HttpStatusCode.NoContent);
+        }
+
+        private static async Task TestStatusCode(HttpStatusCode code) {
+            Assert.Equal(code, await new Uri("https://httpbin.org/status/" + (int)code).SendGET().GetResult<HttpStatusCode>());
+        }
+
+        [Fact]
+        public async Task TestTimeouts() {
+            int requestDurationInMs = 1000;
+            int cancelTimeoutInMs = 500;
+            string urlOfRequestWithLongDuration = "https://httpbin.org/delay/" + (requestDurationInMs / 1000);
+
+            { // When setting a timeout for the request the request will be canceled before it completes
+                Assert.True(cancelTimeoutInMs < requestDurationInMs);
+                var duration = StopwatchV2.StartNewV2();
+                await Assert.ThrowsAsync<TaskCanceledException>(async () => {
+                    await new Uri(urlOfRequestWithLongDuration).SendGET().WithTimeoutInMs(cancelTimeoutInMs).GetResult<HttpStatusCode>();
+                });
+                Assert.True(duration.ElapsedMilliseconds > cancelTimeoutInMs, "duration=" + duration.ElapsedMilliseconds);
+            }
+            { // If no timeout is specified, the request will take the defined request duration: 
+                var duration = StopwatchV2.StartNewV2();
+                Assert.Equal(HttpStatusCode.OK, await new Uri(urlOfRequestWithLongDuration).SendGET().GetResult<HttpStatusCode>());
+                Assert.True(duration.ElapsedMilliseconds > requestDurationInMs, "duration=" + duration.ElapsedMilliseconds);
+            }
         }
 
     }

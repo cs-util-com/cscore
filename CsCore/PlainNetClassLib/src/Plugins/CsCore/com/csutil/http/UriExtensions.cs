@@ -13,6 +13,8 @@ namespace com.csutil {
         public static RestRequest SendPUT(this Uri self) { return RestFactory.instance.SendRequest(self, HttpMethod.Put); }
 
         public static RestRequest SendDELETE(this Uri self) { return RestFactory.instance.SendRequest(self, HttpMethod.Delete); }
+        
+        public static RestRequest SendPATCH(this Uri self) { return RestFactory.instance.SendRequest(self, new HttpMethod("PATCH")); }
 
         public static RestRequest SendHEAD(this Uri self) { return RestFactory.instance.SendRequest(self, HttpMethod.Head); }
 

@@ -25,6 +25,8 @@ namespace com.csutil.http {
         
         RestRequest WithRequestHeaders(Headers requestHeaders);
 
+        RestRequest WithTimeoutInMs(int timeoutInMs);
+
         Task<T> GetResult<T>();
 
         Task<Headers> GetResultHeaders();
