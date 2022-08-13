@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Net;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -151,6 +152,15 @@ namespace com.csutil.tests.http {
                 public string Upgrade_Insecure_Requests { get; set; }
                 public string User_Agent { get; set; }
             }
+        }
+
+        [UnityTest]
+        public IEnumerator TestGetResultStatusCode() { yield return TestGetResultStatusCodeAsync().AsCoroutine(); }
+
+        private static async Task TestGetResultStatusCodeAsync() {
+            RestRequest request = new Uri("https://httpbin.org/get").SendGET();
+            var code = await request.GetResult<HttpStatusCode>();
+            Assert.AreEqual(HttpStatusCode.OK, code);
         }
 
     }

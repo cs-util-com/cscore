@@ -322,6 +322,13 @@ namespace com.csutil.tests.http {
             Assert.Equal(HttpStatusCode.NotFound, await new Uri("https://postman-echo.com/delete").SendPUT().GetResult<HttpStatusCode>());
         }
 
+        [Fact]
+        public async Task TestGetResultStatusCode() {
+            RestRequest request = new Uri("https://httpbin.org/get").SendGET();
+            var code = await request.GetResult<HttpStatusCode>();
+            Assert.Equal(HttpStatusCode.OK, code);
+        }
+
     }
 
 }
