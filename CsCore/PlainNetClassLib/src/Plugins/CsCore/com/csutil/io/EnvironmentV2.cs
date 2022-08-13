@@ -116,7 +116,7 @@ namespace com.csutil {
             public string culture { get; set; } = "" + CultureInfo.CurrentCulture;
             public string language { get; set; } = "" + CultureInfo.CurrentCulture.EnglishName;
             public long latestLaunchDate { get; set; } = DateTimeV2.UtcNow.ToUnixTimestampUtc();
-            public int utcOffset { get; set; } = TimeZoneInfo.Local.GetUtcOffset(DateTimeV2.UtcNow).Hours;
+            public int utcOffset { get; set; } = (int)TimeZoneInfo.Local.GetUtcOffset(DateTimeV2.UtcNow).TotalHours;
             public long? lastUpdateDate => IoC.inject.Get<IPreferences>(null)?.GetLastUpdateDate();
             public long? firstLaunchDate => IoC.inject.Get<IPreferences>(null)?.GetFirstStartDate();
 

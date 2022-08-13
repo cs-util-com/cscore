@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using com.csutil.http;
 using com.csutil.http.apis;
@@ -349,14 +350,18 @@ namespace com.csutil.tests.http {
 
         private static async Task TestStatusCode(HttpStatusCode code) {
             Assert.Equal(code, await new Uri("https://httpbin.org/status/" + (int)code).SendGET().GetResult<HttpStatusCode>());
+            Assert.Equal(code, await new Uri("https://postman-echo.com/status/" + (int)code).SendGET().GetResult<HttpStatusCode>());
         }
 
         [Fact]
         public async Task TestTimeouts() {
             int requestDurationInMs = 1000;
-            int cancelTimeoutInMs = 500;
-            string urlOfRequestWithLongDuration = "https://httpbin.org/delay/" + (requestDurationInMs / 1000);
+            var requestDurationInSec = requestDurationInMs / 1000;
+            await TestTimeout("https://httpbin.org/delay/" + requestDurationInSec, requestDurationInMs, 500);
+            await TestTimeout("https://postman-echo.com/delay/" + requestDurationInSec, requestDurationInMs, 500);
+        }
 
+        private static async Task TestTimeout(string urlOfRequestWithLongDuration, int requestDurationInMs, int cancelTimeoutInMs) {
             { // When setting a timeout for the request the request will be canceled before it completes
                 Assert.True(cancelTimeoutInMs < requestDurationInMs);
                 var duration = StopwatchV2.StartNewV2();
@@ -370,6 +375,27 @@ namespace com.csutil.tests.http {
                 Assert.Equal(HttpStatusCode.OK, await new Uri(urlOfRequestWithLongDuration).SendGET().GetResult<HttpStatusCode>());
                 Assert.True(duration.ElapsedMilliseconds > requestDurationInMs, "duration=" + duration.ElapsedMilliseconds);
             }
+        }
+
+        [Fact]
+        public async Task TestDateTimeV2ParseUtc() {
+            var utcString = "Sat, 13 Aug 2022 09:43:50 GMT";
+            var utcTime = DateTimeV2.ParseUtc(utcString);
+            Assert.True(utcTime.IsUtc());
+            Assert.Equal(9, utcTime.Hour);
+            Assert.Equal(43, utcTime.Minute);
+        }
+
+        [Fact]
+        public async Task TestCurrentUTCtime() {
+            var resp = await new Uri("https://postman-echo.com/time/now").SendGET().GetResult<string>();
+            var remoteNow = DateTimeV2.ParseUtc(resp);
+            Assert.True(remoteNow.IsUtc());
+            var now = DateTimeV2.UtcNow;
+            Assert.True(now.IsUtc());
+            Assert.False(DateTimeV2.Now.IsUtc());
+            var delta = now - remoteNow;
+            Assert.True(delta.TotalMillisecondsAbs() < 1000, $"delta={delta}, now={now}, remoteNow={remoteNow} (from string '{resp}'");
         }
 
     }

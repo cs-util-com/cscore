@@ -68,7 +68,7 @@ namespace com.csutil.http {
                 request.uploadHandler = new UploadHandlerRaw(streamToSend.ToByteArray());
             }
             request.SetRequestHeaders(h);
-            if (Timeout != null) { request.timeout = Timeout.Value.Seconds; }
+            if (Timeout != null) { request.timeout = (int)Timeout.Value.TotalSeconds; }
             yield return request.SendWebRequestV2(response);
         }
 

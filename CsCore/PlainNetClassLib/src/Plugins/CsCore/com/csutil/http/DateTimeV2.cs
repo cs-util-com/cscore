@@ -35,7 +35,7 @@ namespace com.csutil {
                 // RFC1123Pattern expects GMT and crashes on UTC
                 utcTime = utcTime.Substring(0, "UTC", false) + "GMT";
             }
-            return DateTime.SpecifyKind(DateTime.Parse(utcTime), DateTimeKind.Utc);
+            return DateTime.Parse(utcTime).ToUniversalTime();
         }
 
         public static DateTime ParseLocalTime(string localTimeString) {
