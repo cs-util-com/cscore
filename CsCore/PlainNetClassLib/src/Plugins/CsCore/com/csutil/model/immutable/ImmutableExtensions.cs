@@ -37,12 +37,24 @@ namespace com.csutil.model.immutable {
         }
         
         public static Action AddStateChangeListener<T, S>(this IDataStore<T> self, Func<T, S> getSubState, Action<S> onChanged, bool triggerInstantToInit = true) {
+            AssertGetSubStateDoesNotCreateNewObjectsWithEveryCall(self, getSubState);
             Action newListener = NewSubstateChangeListener(() => getSubState(self.GetState()), onChanged);
             self.onStateChanged += newListener;
             if (triggerInstantToInit) { onChanged(getSubState(self.GetState())); }
             return newListener;
         }
         
+        [Conditional("DEBUG")]
+        private static void AssertGetSubStateDoesNotCreateNewObjectsWithEveryCall<T, S>(IDataStore<T> dataStore, Func<T, S> getSubState) {
+            var currentState = dataStore.GetState();
+            var a = getSubState(currentState);
+            var b = getSubState(currentState);
+            if (StateCompare.WasModified(a, b)) {
+                throw new InvalidOperationException("Everytime the substate function is called on the same store state it creates a "
+                    + "different object. Make sure you are not creating objects in this method (eg LINQ instantiates new enumerables)");
+            }
+        }
+
         public static Action AddStateChangeListener<T, S>(this IDataStore<T> self, Func<T, S> getSubState, Func<S, bool> onChanged, bool triggerInstantToInit = true) {
             var w = new Wrapper();
             Action<S> onChangedAction = (s) => {
