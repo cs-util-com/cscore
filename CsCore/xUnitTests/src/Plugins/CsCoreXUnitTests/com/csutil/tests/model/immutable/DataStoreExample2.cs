@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using com.csutil.http.apis;
 using com.csutil.model.immutable;
+using Newtonsoft.Json;
 using Xunit;
 
 namespace com.csutil.tests.model.immutable {
@@ -320,7 +321,10 @@ namespace com.csutil.tests.model.immutable {
             try {
                 foundLocations = await MetaWeatherLocationLookup.GetLocation(cityName);
             }
-            catch (System.Net.Http.HttpRequestException e) {
+            catch (System.Net.Http.HttpRequestException e ) {
+                Log.e("MetaWeatherLocationLookup error, is metaweather.com still down?", e);
+            }
+            catch (JsonReaderException e ) {
                 Log.e("MetaWeatherLocationLookup error, is metaweather.com still down?", e);
             }
             if (foundLocations == null) { // Assume test currently has no internet so simulate:

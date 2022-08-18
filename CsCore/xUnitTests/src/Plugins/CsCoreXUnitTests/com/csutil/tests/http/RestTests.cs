@@ -156,7 +156,7 @@ namespace com.csutil.tests.http {
             // Turn off that any diff between local and server time is accepted:
             DateTimeV2Instance().IsAcceptableDistanceToLocalTime = (_) => false;
 
-            const int maxDiffInMs = 5000;
+            const int maxDiffInMs = 10000;
             // No diff between DateTime and DateTimeV2 until first server timestamp is received:
             var diffBetweenV1AndV2 = GetDiffBetweenV1AndV2();
             Assert.True(diffBetweenV1AndV2 < 100, "GetTimeDiff()=" + diffBetweenV1AndV2);
@@ -208,13 +208,11 @@ namespace com.csutil.tests.http {
                     var t2 = DateTimeV2.Now;
                     var utc2 = DateTimeV2.UtcNow;
 
-                    Assert.True(t1 < t2, $"t1={t1.ToReadableStringExact()}, t2={t2.ToReadableStringExact()} for uri={uri}");
-                    Assert.True(utc1 < utc2, $"utc1={utc1.ToReadableStringExact()}, utc2={utc2.ToReadableStringExact()} for uri={uri}");
-
                     var maxDiffInMs = 10000; // 10 seconds offset between server time and local time is acceptable 
-                    var diffOfLocalToServer = DateTimeV2Instance().diffOfLocalToServer;
                     Assert.True((t2 - t1).TotalMillisecondsAbs() < maxDiffInMs, "(t2-t1)=" + (t2 - t1));
                     Assert.True((utc2 - utc1).TotalMillisecondsAbs() < maxDiffInMs, "(utc2 - utc1)=" + (utc2 - utc1));
+
+                    var diffOfLocalToServer = DateTimeV2Instance().diffOfLocalToServer;
                     Assert.True(diffOfLocalToServer == null || diffOfLocalToServer.Value.TotalMillisecondsAbs() < maxDiffInMs, "diffOfLocalToServer=" + diffOfLocalToServer);
 
                     DateTimeV2Instance().RequestUpdateOfDiffOfLocalToServer = true;
