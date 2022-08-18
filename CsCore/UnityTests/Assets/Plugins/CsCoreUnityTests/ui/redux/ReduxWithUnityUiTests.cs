@@ -3,7 +3,7 @@ using com.csutil.tests.ui;
 using System.Collections;
 using UnityEngine.TestTools;
 
-namespace Assets.Plugins.CsCoreUnityTests.ui.redux {
+namespace CsCoreUnityTests.ui.redux {
 
     public class ReduxWithUnityUiTests {
 

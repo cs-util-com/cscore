@@ -1,10 +1,10 @@
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace com.csutil {
 
-    public interface IKeyValueStore : IDisposable {
+    public interface IKeyValueStore : IDisposableV2 {
+        
         Task<T> Get<T>(string key, T defaultValue);
         Task<object> Set(string key, object value);
         Task<bool> Remove(string key);
@@ -13,6 +13,7 @@ namespace com.csutil {
         Task<IEnumerable<string>> GetAllKeys();
         IKeyValueStore fallbackStore { get; set; }
         long latestFallbackGetTimingInMs { get; set; }
+        
     }
 
 }

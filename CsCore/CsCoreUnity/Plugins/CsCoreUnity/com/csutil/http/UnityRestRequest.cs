@@ -1,4 +1,3 @@
-using com.csutil.http.cookies;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -29,6 +28,9 @@ namespace com.csutil.http {
         public Task RequestStartedTask => waitForRequestToBeConfigured.Task;
 
         public CancellationTokenSource CancellationTokenSource { get; } = new CancellationTokenSource();
+
+        /// <summary> The timeout for the request, the default is no timeout </summary>
+        public TimeSpan? Timeout { get; set; } = null;
 
         public UnityRestRequest(UnityWebRequest request) { this.request = request; }
 
@@ -66,6 +68,7 @@ namespace com.csutil.http {
                 request.uploadHandler = new UploadHandlerRaw(streamToSend.ToByteArray());
             }
             request.SetRequestHeaders(h);
+            if (Timeout != null) { request.timeout = (int)Timeout.Value.TotalSeconds; }
             yield return request.SendWebRequestV2(response);
         }
 
@@ -138,6 +141,11 @@ namespace com.csutil.http {
                 CancellationTokenSource.Token.ThrowIfCancellationRequested();
                 await TaskV2.Delay(10);
             }
+        }
+
+        public RestRequest WithTimeoutInMs(int timeoutInMs) {
+            Timeout = TimeSpan.FromMilliseconds(timeoutInMs);
+            return this;
         }
 
         public void Dispose() {

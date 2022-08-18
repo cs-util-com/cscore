@@ -27,7 +27,13 @@ namespace com.csutil.keyvaluestore {
 
         public FileBasedKeyValueStore(DirectoryEntry folderForAllFiles) { this.folderForAllFiles = folderForAllFiles; }
 
-        public void Dispose() { fallbackStore?.Dispose(); }
+        public DisposeState IsDisposed { get; private set; } = DisposeState.Active;
+
+        public void Dispose() {
+            IsDisposed = DisposeState.DisposingStarted;
+            fallbackStore?.Dispose();
+            IsDisposed = DisposeState.Disposed;
+        }
 
         public async Task<T> Get<T>(string key, T defaultValue) {
             var s = this.StartFallbackStoreGetTimer();

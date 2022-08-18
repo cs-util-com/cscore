@@ -21,7 +21,7 @@ namespace com.csutil {
         private static object SetSingleton<T, V>(this Injector self, object caller, V singletonInstance, bool overrideExisting = false) where V : T {
             lock (syncLock) {
                 singletonInstance.ThrowErrorIfNull("singletonInstance");
-                if (!overrideExisting && typeof(T).IsCastableTo<IsDisposable>()) {
+                if (!overrideExisting && typeof(T).IsCastableTo<IDisposableV2>()) {
                     // Cause a injector cleanup if there is a present singleton and this singleton is disposed:
                     self.Get<T>(caller, false); // Afterwards self.HasInjectorRegistered will be false if the singleton was disposed
                 }
@@ -31,7 +31,7 @@ namespace com.csutil {
                     return SetSingleton<T, V>(self, caller, singletonInstance, false); // then retry setting the singleton
                 }
                 self.RegisterInjector<T>(caller, delegate {
-                    if (singletonInstance is IsDisposable disposableObj && !disposableObj.IsAlive()) {
+                    if (singletonInstance is IDisposableV2 disposableObj && !disposableObj.IsAlive()) {
                         // If the found object is not active anymore destroy the singleton injector and return null
                         if (!self.RemoveAllInjectorsFor<T>()) { Log.e("Could not remove all existing injectors!"); }
                         return default;

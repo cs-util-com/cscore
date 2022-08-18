@@ -55,6 +55,17 @@ namespace com.csutil {
 
         public static void Invoke(Action a) { instance.ExecuteOnMainThread(a); }
 
+        public static T Invoke<T>(Func<T> a) { return instance.ExecuteOnMainThread(a); }
+
+        public static Task<T> Invoke<T>(Func<Task<T>> a) { return instance.ExecuteOnMainThreadAsync(a); }
+
+        public static Task Invoke<T>(Func<Task> a) {
+            return instance.ExecuteOnMainThreadAsync(async () => {
+                await a();
+                return true;
+            });
+        }
+
         public void ExecuteOnMainThread(Action a) {
             if (ApplicationV2.isPlaying) { AssertV2.IsNotNull(mainThreadRef, "mainThreadRef"); }
             if (WasInitializedWhilePlaying) {
@@ -70,12 +81,28 @@ namespace com.csutil {
         public T ExecuteOnMainThread<T>(Func<T> f) {
             if (isMainThread) { return f(); }
             TaskCompletionSource<T> src = new TaskCompletionSource<T>();
-            ExecuteOnMainThread(() => { try { src.SetResult(f()); } catch (Exception e) { src.SetException(e); } });
+            ExecuteOnMainThread(() => {
+                try {
+                    src.SetResult(f());
+                } catch (Exception e) {
+                    src.SetException(e);
+                }
+            });
             return src.Task.Result;
         }
 
-        public Task<T> ExecuteOnMainThreadAsync<T>(Func<Task<T>> f) {
-            return ExecuteOnMainThread(() => f());
+        public async Task<T> ExecuteOnMainThreadAsync<T>(Func<Task<T>> f) {
+            if (isMainThread) { return await f(); }
+            TaskCompletionSource<Task<T>> tcs = new TaskCompletionSource<Task<T>>();
+            ExecuteOnMainThread(() => {
+                try {
+                    tcs.SetResult(f());
+                } catch (Exception e) {
+                    tcs.SetException(e);
+                }
+            });
+            var taskT = await tcs.Task; // Wait for the tcs to be set
+            return await taskT; // Wait for the async task itself to be complete
         }
 
     }

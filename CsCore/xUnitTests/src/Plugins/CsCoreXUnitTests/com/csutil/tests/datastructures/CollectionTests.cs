@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace com.csutil.tests {
@@ -190,5 +191,31 @@ namespace com.csutil.tests {
             }
         }
 
+        [Fact]
+        public async Task PromiseMap_ExampleUsage1() {
+
+            var promiseMapCache = new PromiseMap<string, string>();
+
+            // Register a computation task in the promise map for anyone to access via the map
+            promiseMapCache["a"] = ComputeResultForA();
+
+            var s = StopwatchV2.StartNewV2();
+            Assert.Equal("1", await promiseMapCache["a"]);
+            var firstComputeTime = s.ElapsedMilliseconds;
+            Assert.True(firstComputeTime >= 100, "firstComputeTime=" + firstComputeTime);
+            Assert.True(s.IsRunning); // Keep the stopwatch running 
+
+            // The second time accessing the same computation task is completed instantly:
+            Assert.Equal("1", await promiseMapCache["a"]);
+            Assert.True(s.ElapsedMilliseconds <= firstComputeTime + 1, $"s.ElapsedMilliseconds {s.ElapsedMilliseconds} > firstComputeTime {firstComputeTime} + 5ms");
+
+        }
+
+        private async Task<string> ComputeResultForA() {
+            await TaskV2.Delay(200); // Simulates an expensive computation
+            return "1";
+        }
+
     }
+
 }

@@ -7,6 +7,7 @@ using UnityEngine.Networking;
 
 namespace com.csutil.http {
 
+    [Obsolete("Use UnityRestFactoryV2 instead")]
     public class UnityRestFactory : RestFactory {
 
         protected override void InitFactory() { }
@@ -20,14 +21,14 @@ namespace com.csutil.http {
             });
         }
 
-        public override Task<long> GetCurrentPing(string ipOrUrl = "8.8.8.8", int timeoutInMs = 1000) {
+        public override Task<long> GetCurrentPing(string ipOrUrl = DEFAULT_PING_IP, int timeoutInMs = DEFAULT_PING_TIMEOUT) {
             if (ApplicationV2.platform.IsAnyOf(RuntimePlatform.WebGLPlayer)) {
                 return GetCurrentPingViaHeadRequest(ipOrUrl);
             }
             return base.GetCurrentPing(ipOrUrl, timeoutInMs);
         }
 
-        public Task<long> GetCurrentPingViaHeadRequest(string ipOrUrl = "8.8.8.8", int timeoutInMs = 1000) {
+        public Task<long> GetCurrentPingViaHeadRequest(string ipOrUrl = DEFAULT_PING_IP, int timeoutInMs = DEFAULT_PING_TIMEOUT) {
             Stopwatch t = Stopwatch.StartNew();
             return WebRequestRunner.GetInstance(this).StartCoroutineAsTask(SendHeadReqTo(ipOrUrl), () => {
                 t.Stop();

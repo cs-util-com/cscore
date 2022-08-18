@@ -54,10 +54,10 @@ namespace com.csutil.tests.system {
         }
 
         private class MyDisposable : IDisposable {
-            public bool exceptionWasDetected = false;
+            public bool DEBUG_exceptionWasDetected = false;
             public void Dispose() {
                 #if DEBUG // If true an exception was detected in the current context:
-                exceptionWasDetected = this.DEBUG_ThrownExceptionDetectedInCurrentContext();
+                DEBUG_exceptionWasDetected = this.DEBUG_ThrownExceptionDetectedInCurrentContext();
                 #endif
             }
         }
@@ -67,14 +67,16 @@ namespace com.csutil.tests.system {
             { // If dispose is called because of the using block being complete the flag has to be false:
                 var d = new MyDisposable();
                 using (d) { }
-                Assert.False(d.exceptionWasDetected);
+                Assert.False(d.DEBUG_exceptionWasDetected);
             }
             { // If dispose is called because of an exception the flag has to be true:
                 var d = new MyDisposable();
                 try {
                     using (d) { throw new Exception(); }
                 } catch (Exception) { }
-                Assert.True(d.exceptionWasDetected);
+#if DEBUG
+                Assert.True(d.DEBUG_exceptionWasDetected);
+#endif
             }
             {
                 await TestErrorDetectionWithMultipleThreads(() => { throw new Exception(); });
@@ -97,7 +99,9 @@ namespace com.csutil.tests.system {
                     Assert.False(d.DEBUG_ThrownExceptionDetectedInCurrentContext());
                     await Task.WhenAll(t1, t2, t3);
                 } catch (Exception) {
+#if DEBUG
                     Assert.True(d.DEBUG_ThrownExceptionDetectedInCurrentContext());
+#endif
                 }
                 Assert.False(d.DEBUG_ThrownExceptionDetectedInCurrentContext());
                 Assert.True(t1.IsCompleted);
@@ -108,7 +112,7 @@ namespace com.csutil.tests.system {
                 Assert.True(t3.IsFaulted);
             }
             Assert.False(d.DEBUG_ThrownExceptionDetectedInCurrentContext());
-            Assert.False(d.exceptionWasDetected);
+            Assert.False(d.DEBUG_exceptionWasDetected);
         }
 
     }

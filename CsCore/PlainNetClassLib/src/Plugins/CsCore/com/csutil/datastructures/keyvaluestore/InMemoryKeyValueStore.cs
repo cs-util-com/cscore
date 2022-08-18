@@ -18,11 +18,15 @@ namespace com.csutil.keyvaluestore {
 
         public InMemoryKeyValueStore(Dictionary<string, object> store) { this.store = store; }
 
+        public DisposeState IsDisposed { get; private set; } = DisposeState.Active;
+
         public void Dispose() {
+            IsDisposed = DisposeState.DisposingStarted;
             // TODO iterate over entries, and dispose them if possible?
             store.Clear();
             store = null;
             fallbackStore?.Dispose();
+            IsDisposed = DisposeState.Disposed;
         }
 
         public async Task<T> Get<T>(string key, T defaultValue) {

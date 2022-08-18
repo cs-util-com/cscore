@@ -5,11 +5,9 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Zio;
 
 namespace com.csutil.http {
 
@@ -21,6 +19,9 @@ namespace com.csutil.http {
         public Uri uri { get; }
         public string httpMethod { get; private set; }
         public Func<HttpClient, HttpRequestMessage, Task> OnBeforeSend;
+
+        /// <summary> The timeout for the request, the default is no timeout </summary>
+        public TimeSpan? Timeout { get; set; } = null;
 
         private Headers requestHeaders = new Headers(new Dictionary<string, string>());
         private Task<HttpResponseMessage> request;
@@ -152,6 +153,10 @@ namespace com.csutil.http {
             if (httpContent != null) { sentRequest.Content = httpContent; }
             sentRequest.AddRequestHeaders(requestHeaders);
 
+            if (Timeout != null) {
+                CancellationTokenSource.CancelAfter(Timeout.Value);
+            }
+
             if (OnBeforeSend != null) { await OnBeforeSend(client, sentRequest); }
             var result = await client.SendAsync(sentRequest, sendAsyncCompletedAfter, CancellationTokenSource.Token);
 
@@ -165,8 +170,7 @@ namespace com.csutil.http {
                 if (serverUtcDate != null) {
                     EventBus.instance.Publish(DateTimeV2.SERVER_UTC_DATE, uri, serverUtcDate.Value.UtcDateTime);
                 }
-            }
-            catch (Exception e) { Log.e(e); }
+            } catch (Exception e) { Log.e(e); }
             return result;
         }
 
@@ -182,6 +186,11 @@ namespace com.csutil.http {
             }
             var cookieJar = IoC.inject.Get<cookies.CookieJar>(this, false);
             cookieJar.LoadFromCookieJarIntoCookieContainer(uri, target: handler.CookieContainer);
+        }
+
+        public RestRequest WithTimeoutInMs(int timeoutInMs) {
+            Timeout = TimeSpan.FromMilliseconds(timeoutInMs);
+            return this;
         }
 
         public void Dispose() {

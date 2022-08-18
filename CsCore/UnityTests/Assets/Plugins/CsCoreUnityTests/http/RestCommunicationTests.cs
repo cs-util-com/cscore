@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Net;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -90,16 +91,17 @@ namespace com.csutil.tests.http {
             while (!ping.isDone && timer.ElapsedMilliseconds < timeoutInMs) { yield return new WaitForSeconds(0.01f); }
             Assert.IsTrue(ping.isDone);
             Assert.IsTrue(ping.time >= 0);
+            Log.d("TestGetCurrentPingViaUnityPing: pingInMs took " + ping.time + "ms");
         }
 
         [UnityTest]
         public IEnumerator TestPingViaHeadRequest() {
-            var pingTask = new UnityRestFactory().GetCurrentPingViaHeadRequest("8.8.8.8");
+            var pingTask = UnityRestFactoryV2.GetCurrentPingViaHeadRequest("8.8.8.8");
             yield return pingTask.AsCoroutine();
             var pingInMs = pingTask.Result;
             Assert.AreNotEqual(-1, pingInMs);
             Assert.True(0 <= pingInMs && pingInMs < 1000, "pingInMs=" + pingInMs);
-            Log.d("pingInMs took " + pingInMs + "ms");
+            Log.d("TestPingViaHeadRequest: pingInMs took " + pingInMs + "ms");
         }
 
         [UnityTest]
@@ -114,7 +116,7 @@ namespace com.csutil.tests.http {
 
         [UnityTest]
         public IEnumerator TestGetViaUri() {
-            Assert.AreEqual(typeof(UnityRestFactory), RestFactory.instance.GetType());
+            Assert.AreEqual(typeof(UnityRestFactoryV2), RestFactory.instance.GetType());
             RestRequest request = new Uri("https://httpbin.org/get").SendGET();
             yield return AssertGetResult(request);
         }
@@ -150,6 +152,15 @@ namespace com.csutil.tests.http {
                 public string Upgrade_Insecure_Requests { get; set; }
                 public string User_Agent { get; set; }
             }
+        }
+
+        [UnityTest]
+        public IEnumerator TestGetResultStatusCode() { yield return TestGetResultStatusCodeAsync().AsCoroutine(); }
+
+        private static async Task TestGetResultStatusCodeAsync() {
+            RestRequest request = new Uri("https://httpbin.org/get").SendGET();
+            var code = await request.GetResult<HttpStatusCode>();
+            Assert.AreEqual(HttpStatusCode.OK, code);
         }
 
     }

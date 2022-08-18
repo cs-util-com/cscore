@@ -12,9 +12,13 @@ namespace com.csutil.async {
     class TaskV2WebGL : TaskV2 {
 
         protected override async Task DelayTask(int millisecondsDelay, CancellationToken cancellationToken) {
-            cancellationToken.ThrowIfCancellationRequested();
-            await StartCoroutineAsTask(DelayCoroutine(millisecondsDelay));
-            cancellationToken.ThrowIfCancellationRequested();
+            if (!ApplicationV2.isPlaying) {
+                await base.DelayTask(millisecondsDelay, cancellationToken);
+            } else {
+                cancellationToken.ThrowIfCancellationRequested();
+                await StartCoroutineAsTask(DelayCoroutine(millisecondsDelay));
+                cancellationToken.ThrowIfCancellationRequested();
+            }
         }
 
         private IEnumerator DelayCoroutine(int ms) { yield return new WaitForSeconds(ms / 1000f); }

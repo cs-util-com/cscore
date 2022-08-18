@@ -13,10 +13,10 @@ namespace com.csutil.ui {
 
         public static ViewStack GetOrAddViewStack(this Canvas self, string viewStackPrefabName) {
             AssertV2.IsTrue(self.isRootCanvas, "Passed canvas was not a root canvas", self.gameObject);
-            var rootCanvasGO = self.gameObject;
-            var viewStackGOs = rootCanvasGO.GetChildren();
+            var canvasGO = self.gameObject;
+            var viewStackGOs = canvasGO.GetChildren();
             var go = viewStackGOs.SingleOrDefault(x => x.name == viewStackPrefabName);
-            var viewstack = go != null ? go.GetComponentV2<ViewStack>() : rootCanvasGO.AddChild(ResourcesV2.LoadPrefab(viewStackPrefabName)).GetComponentV2<ViewStack>();
+            var viewstack = go != null ? go.GetComponentV2<ViewStack>() : canvasGO.AddChild(ResourcesV2.LoadPrefab(viewStackPrefabName)).GetComponentV2<ViewStack>();
             if (viewstack == null) { throw Log.e("No ViewStack found in GameObject " + go, go); }
             return viewstack;
         }

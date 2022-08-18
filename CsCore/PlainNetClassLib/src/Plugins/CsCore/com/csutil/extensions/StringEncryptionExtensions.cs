@@ -118,9 +118,9 @@ namespace com.csutil {
                 using (var decryptor = symmetricKey.CreateDecryptor(keyBytes, ivStringBytes)) {
                     using (var memoryStream = new MemoryStream(cipherTextBytes)) {
                         using (var cryptoStream = new CryptoStream(memoryStream, decryptor, CryptoStreamMode.Read)) {
-                            var plainTextBytes = new byte[cipherTextBytes.Length];
-                            var decryptedByteCount = cryptoStream.Read(plainTextBytes, 0, plainTextBytes.Length);
-                            return Encoding.UTF8.GetString(plainTextBytes, 0, decryptedByteCount);
+                            using (var streamReader = new StreamReader(cryptoStream)) {
+                                return streamReader.ReadToEnd();
+                            }
                         }
                     }
                 }

@@ -16,8 +16,8 @@ namespace com.csutil.ui {
                 InformParentToggleGroupListenerIfFound();
                 return true;
             }, skipChangesByLogic: false);
-            InformParentToggleGroupListenerIfFound();
             OnToggleStateChanged(GetComponent<Toggle>().isOn);
+            InformParentToggleGroupListenerIfFound();
         }
 
         protected virtual void InformParentToggleGroupListenerIfFound() {

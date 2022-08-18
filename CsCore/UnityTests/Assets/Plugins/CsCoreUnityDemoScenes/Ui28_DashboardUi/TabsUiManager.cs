@@ -19,7 +19,7 @@ namespace com.csutil.ui {
         /// prefab (that is returned in <see cref="onTabRequested"/>) into </summary>
         public ViewStack targetTabsPanel;
 
-        protected override void OnActiveToggleInGroupChanged2(IEnumerable<Toggle> activeToggles) {
+        protected override void OnActiveToggleInGroupChanged(IEnumerable<Toggle> activeToggles) {
             AssertV2.IsNotNull(targetTabsPanel, "TargetTabsPanel");
             var activeToggle = activeToggles.Single();
             var link = activeToggle.GetComponent<Link>();

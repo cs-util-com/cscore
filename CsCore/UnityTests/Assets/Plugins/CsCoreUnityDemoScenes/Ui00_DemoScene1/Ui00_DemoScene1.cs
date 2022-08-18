@@ -30,7 +30,7 @@ namespace com.csutil.tests {
             });
             // Clicking multiple times on a button with an async action will only execute the first click:
             links.Get<Button>("ButtonRunAsyncMethod").SetOnClickAction(async delegate {
-                await Task.Delay(2000);
+                await TaskV2.Delay(2000);
                 Toast.Show("Button waited 2 seconds");
             });
 

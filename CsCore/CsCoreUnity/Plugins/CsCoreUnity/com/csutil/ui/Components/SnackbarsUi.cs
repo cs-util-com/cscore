@@ -26,7 +26,7 @@ namespace com.csutil {
 
     }
 
-    public class SnackbarsUi : MonoBehaviour, IsDisposable {
+    public class SnackbarsUi : MonoBehaviour, IDisposableV2 {
 
         private GameObject snackbarsContainer;
 
@@ -40,15 +40,19 @@ namespace com.csutil {
             map.Get<Text>("Message").text = snackbarMsg;
             if (snackbarAction != null && !buttonMsg.IsNullOrEmpty()) {
                 map.Get<Text>("SnackbarButton").text = buttonMsg;
-                map.Get<Button>("SnackbarButton").SetOnClickAction(snackbarAction);
+                map.Get<Button>("SnackbarButton").SetOnClickAction(delegate { snackbarAction(newSnackbar); });
             } else {
                 map.Get<GameObject>("SnackbarButton").Destroy();
             }
-            newSnackbar.GetComponentV2<MonoBehaviour>().ExecuteDelayed(() => newSnackbar.Destroy(), displayDurationInMs);
+            if (displayDurationInMs > 0) {
+                newSnackbar.GetComponentV2<MonoBehaviour>().ExecuteDelayed(() => newSnackbar.Destroy(), displayDurationInMs);
+            }
             snackbarsContainer.AddChild(newSnackbar);
             return newSnackbar;
         }
 
+        public void Dispose() { this.gameObject.Destroy(); }
+        
     }
 
 }

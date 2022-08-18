@@ -32,10 +32,14 @@ namespace com.csutil.keyvaluestore {
             collection = db.GetCollection(collectionName);
         }
 
+        public DisposeState IsDisposed { get; private set; } = DisposeState.Active;
+
         public void Dispose() {
+            IsDisposed = DisposeState.DisposingStarted;
             db.Dispose();
             dbStream.Dispose();
             fallbackStore?.Dispose();
+            IsDisposed = DisposeState.Disposed;
         }
 
         private BsonDocument GetBson(string key) { return collection.FindById(key); }

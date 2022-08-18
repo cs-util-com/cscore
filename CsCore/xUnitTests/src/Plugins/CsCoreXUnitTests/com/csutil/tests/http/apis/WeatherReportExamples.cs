@@ -1,3 +1,4 @@
+using System;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,6 +13,8 @@ namespace com.csutil.tests.http {
 
         [Fact]
         public async Task MetaWeatherComExample1() {
+
+            if (DateTimeV2.Now < new DateTime(2022, 11, 01)) { return; } // MetaWeather down (temporary?)
 
             var ipLookupResult = await IpApiCom.GetResponse();
             string yourCity = ipLookupResult.city;
@@ -30,6 +33,8 @@ namespace com.csutil.tests.http {
 
         [Fact]
         public async Task MetaWeatherComTest1() {
+
+            if (DateTimeV2.Now < new DateTime(2022, 11, 01)) { return; } // MetaWeather down (temporary?)
 
             var berlinName = "Berlin";
             float berlinLatitude = 52.50f;
@@ -55,6 +60,9 @@ namespace com.csutil.tests.http {
 
         [Fact]
         public async Task MetaWeatherComTest2() {
+
+            if (DateTimeV2.Now < new DateTime(2022, 11, 01)) { return; } // MetaWeather down (temporary?)
+
             var cityName = "Berlin";
             var w = await MetaWeather.GetWeather(cityName);
             var summary1 = w.consolidated_weather.Map(report => report.weather_state_name);

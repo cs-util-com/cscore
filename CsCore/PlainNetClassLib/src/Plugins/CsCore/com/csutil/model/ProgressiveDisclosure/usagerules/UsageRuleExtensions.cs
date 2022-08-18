@@ -47,7 +47,7 @@ namespace com.csutil.model.usagerules {
 
         public static bool IsAppUsedInTheLastXDays(this UsageRule self) {
             var tSinceLatestLaunch = DateTimeV2.UtcNow - EnvironmentV2.instance.systemInfo.GetLatestLaunchDate();
-            return tSinceLatestLaunch.Days < self.days;
+            return tSinceLatestLaunch.TotalDays < self.days;
         }
 
         public static async Task<bool> IsFeatureUsedInTheLastXDays(this UsageRule self, LocalAnalytics analytics) {
@@ -55,7 +55,7 @@ namespace com.csutil.model.usagerules {
             if (allEvents.IsNullOrEmpty()) { return false; }
             DateTime lastEvent = allEvents.Last().GetDateTimeUtc();
             TimeSpan lastEventVsNow = DateTimeV2.UtcNow - lastEvent;
-            return lastEventVsNow.Days <= self.days;
+            return lastEventVsNow.TotalDays <= self.days;
         }
 
         public static async Task<bool> IsFeatureUsedXTimes(this UsageRule self, LocalAnalytics analytics) {
@@ -88,7 +88,7 @@ namespace com.csutil.model.usagerules {
             if (showEvents.IsNullOrEmpty()) { return false; }
             DateTime firstShownEvent = showEvents.First().GetDateTimeUtc();
             TimeSpan firstShownVsNow = DateTimeV2.UtcNow - firstShownEvent;
-            return firstShownVsNow.Days >= self.days;
+            return firstShownVsNow.TotalDays >= self.days;
         }
 
         private static async Task<IEnumerable<AppFlowEvent>> GetAllEventsForCategory(this LocalAnalytics self, string categoryId) {

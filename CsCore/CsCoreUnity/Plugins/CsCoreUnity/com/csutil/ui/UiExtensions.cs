@@ -2,6 +2,7 @@
 using com.csutil.model.immutable;
 using com.csutil.ui;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
@@ -18,6 +19,20 @@ namespace com.csutil {
             var vs = gameObject.GetComponentInParents<ViewStack>();
             if (vs == null) { Log.e("Not part of a UI managed by a ViewStack", gameObject); }
             return vs;
+        }
+
+        /// <summary> Returns a list of tasks that represents the numbers of clicks the user did on the button, so initially the list will be empty until the user clicked on it the first time </summary>
+        public static IList<Task> SetOnClickActionAsync(this Button self, Func<GameObject, Task> onClickAction) {
+            var clicks = new List<Task>();
+            TaskCompletionSource<bool> tcs = null; // Null so that the first click is skipped
+            var firstClickTask = self.SetOnClickAction(async go => {
+                tcs?.SetResult(true);
+                await onClickAction(go);
+                tcs = new TaskCompletionSource<bool>();
+                clicks.Add(tcs.Task);
+            });
+            clicks.Add(firstClickTask);
+            return clicks;
         }
 
         public static Task SetOnClickAction(this Button self, Action<GameObject> onClickAction) {
@@ -214,6 +229,7 @@ namespace com.csutil {
         }
 
         public static UnityAction<int> SetOnValueChangedAction(this Dropdown self, Func<int, bool> onValueChanged) {
+            AssertV2.IsNotNull(self, "self (Dropdown)");
             if (self.onValueChanged != null && self.onValueChanged.GetPersistentEventCount() > 0) {
                 Log.w("Overriding old onValueChanged listener for input field " + self, self.gameObject);
             }
@@ -360,13 +376,13 @@ namespace com.csutil {
     }
 
     public static class UiButtonExtensions {
-        
+
         public static void SetNormalColor(this Button self, Color normalColor) {
             var c = self.colors;
             c.normalColor = normalColor;
             self.colors = c;
         }
-        
+
     }
 
 }

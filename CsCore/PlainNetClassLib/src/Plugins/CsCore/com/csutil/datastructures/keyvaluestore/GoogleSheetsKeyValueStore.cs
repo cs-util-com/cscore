@@ -65,7 +65,13 @@ namespace com.csutil.keyvaluestore {
             if (latestRawSheetData == null) { throw new Exception("Could not download Google Sheet data"); }
         }
 
-        public void Dispose() { fallbackStore.Dispose(); }
+        public DisposeState IsDisposed { get; private set; } = DisposeState.Active;
+
+        public void Dispose() {
+            IsDisposed = DisposeState.DisposingStarted;
+            fallbackStore?.Dispose();
+            IsDisposed = DisposeState.Disposed;
+        }
 
         private async Task DowloadOnlineData(object _) {
             var newRawSheetData = await GoogleSheetsV4.GetSheet(apiKey, spreadsheetId, sheetName);

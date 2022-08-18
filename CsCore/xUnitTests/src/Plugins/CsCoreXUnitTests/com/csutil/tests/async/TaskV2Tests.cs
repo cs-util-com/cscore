@@ -61,7 +61,7 @@ namespace com.csutil.tests.async {
                 Assert.Equal(1, counter);
                 await TaskV2.Delay(300);
                 Assert.Equal(2, counter);
-                await TaskV2.Delay(300);
+                await TaskV2.Delay(600);
                 Assert.Equal(3, counter);
                 await TaskV2.Delay(300);
                 Assert.Equal(3, counter);

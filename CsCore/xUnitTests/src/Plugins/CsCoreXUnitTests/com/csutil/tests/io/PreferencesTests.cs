@@ -11,11 +11,10 @@ namespace com.csutil.tests {
         public PreferencesTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
         [Fact]
-
         public void ExampleUsage1() {
 
             // In the setup logic of your application set the Preferences singleton:
-            IoC.inject.GetOrAddSingleton<IPreferences>(new Preferences(new InMemoryKeyValueStore()));
+            IoC.inject.GetOrAddSingleton<IPreferences>(null, () => new Preferences(new InMemoryKeyValueStore()));
 
             string key1 = "key1";
             string value1 = "value1";

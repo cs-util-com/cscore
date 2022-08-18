@@ -9,7 +9,7 @@ namespace com.csutil {
     /// UTC timestamp that ignores if the local system time is set to an incorrect value. This ensures that timestamps recorded on clients 
     /// are always correct even if the user is using a manually set system time.
     /// </summary>
-    public class DateTimeV2 : IDisposable, IsDisposable {
+    public class DateTimeV2 : IDisposableV2 {
 
         public static DateTime NewDateTimeFromUnixTimestamp(long unixTimeInMs, bool autoCorrectIfPassedInSeconds = true) {
             AssertV2.IsTrue(unixTimeInMs > 0, "NewDateTimeFromUnixTimestamp: unixTimeInMs was " + unixTimeInMs);
@@ -35,7 +35,9 @@ namespace com.csutil {
                 // RFC1123Pattern expects GMT and crashes on UTC
                 utcTime = utcTime.Substring(0, "UTC", false) + "GMT";
             }
-            return DateTime.SpecifyKind(DateTime.Parse(utcTime), DateTimeKind.Utc);
+            var time = DateTime.Parse(utcTime);
+            if (time.Kind == DateTimeKind.Unspecified) { return DateTime.SpecifyKind(time, DateTimeKind.Utc); }
+            return time.ToUniversalTime();
         }
 
         public static DateTime ParseLocalTime(string localTimeString) {

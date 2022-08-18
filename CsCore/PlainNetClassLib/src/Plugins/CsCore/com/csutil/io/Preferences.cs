@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace com.csutil {
 
-    public interface IPreferences : IKeyValueStore, IsDisposable {
+    public interface IPreferences : IKeyValueStore, IDisposableV2 {
         long GetFirstStartDate();
         long GetLastUpdateDate();
     }

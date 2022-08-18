@@ -54,7 +54,7 @@ namespace com.csutil.tests.keyvaluestore {
             for (int i = 1; i < batchSize; i++) {
                 await processor.Add(new MyEvent() { Name = "" + i });
                 var keys = await processor.GetAllKeys();
-                await Task.Delay(20);
+                await TaskV2.Delay(20);
                 Assert.Equal(i, keys.Count());
             }
             // No event was processed yet
@@ -62,7 +62,7 @@ namespace com.csutil.tests.keyvaluestore {
 
             // Add the final element to reach the batch size:
             await processor.Add(new MyEvent() { Name = "" + batchSize });
-            await Task.Delay(20);
+            await TaskV2.Delay(20);
             Assert.Empty(await processor.GetAllKeys());
 
             // All events are processed now:

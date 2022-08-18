@@ -46,7 +46,7 @@ namespace com.csutil.tests.http {
             cookieJar.SaveToFile(cookiesFile); // Save it and then load it again
             IoC.inject.SetSingleton(CookieContainerLoader.LoadFromFile(cookiesFile));
             // Reset the rest factory now that a new CookieContainer should be used:
-            IoC.inject.SetSingleton(new RestFactory(), true);
+            IoC.inject.SetSingleton<IRestFactory>(new RestFactory(), true);
             await SendCookiesAndAssertIncluded(uri);
         }
 

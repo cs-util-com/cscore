@@ -4,10 +4,12 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using com.csutil.http;
 using com.csutil.http.apis;
 using com.csutil.io;
+using Newtonsoft.Json.Linq;
 using Xunit;
 
 namespace com.csutil.tests.http {
@@ -154,7 +156,7 @@ namespace com.csutil.tests.http {
             // Turn off that any diff between local and server time is accepted:
             DateTimeV2Instance().IsAcceptableDistanceToLocalTime = (_) => false;
 
-            const int maxDiffInMs = 5000;
+            const int maxDiffInMs = 10000;
             // No diff between DateTime and DateTimeV2 until first server timestamp is received:
             var diffBetweenV1AndV2 = GetDiffBetweenV1AndV2();
             Assert.True(diffBetweenV1AndV2 < 100, "GetTimeDiff()=" + diffBetweenV1AndV2);
@@ -206,13 +208,11 @@ namespace com.csutil.tests.http {
                     var t2 = DateTimeV2.Now;
                     var utc2 = DateTimeV2.UtcNow;
 
-                    Assert.True(t1 < t2, $"t1={t1.ToReadableStringExact()}, t2={t2.ToReadableStringExact()} for uri={uri}");
-                    Assert.True(utc1 < utc2, $"utc1={utc1.ToReadableStringExact()}, utc2={utc2.ToReadableStringExact()} for uri={uri}");
-
                     var maxDiffInMs = 10000; // 10 seconds offset between server time and local time is acceptable 
-                    var diffOfLocalToServer = DateTimeV2Instance().diffOfLocalToServer;
                     Assert.True((t2 - t1).TotalMillisecondsAbs() < maxDiffInMs, "(t2-t1)=" + (t2 - t1));
                     Assert.True((utc2 - utc1).TotalMillisecondsAbs() < maxDiffInMs, "(utc2 - utc1)=" + (utc2 - utc1));
+
+                    var diffOfLocalToServer = DateTimeV2Instance().diffOfLocalToServer;
                     Assert.True(diffOfLocalToServer == null || diffOfLocalToServer.Value.TotalMillisecondsAbs() < maxDiffInMs, "diffOfLocalToServer=" + diffOfLocalToServer);
 
                     DateTimeV2Instance().RequestUpdateOfDiffOfLocalToServer = true;
@@ -315,11 +315,85 @@ namespace com.csutil.tests.http {
 
         [Fact]
         public async Task TestUriSendMethods() {
+            Assert.Equal(HttpStatusCode.OK, await new Uri("https://httpbin.org/get").SendGET().GetResult<HttpStatusCode>());
+            Assert.Equal(HttpStatusCode.OK, await new Uri("https://httpbin.org/post").SendPOST().GetResult<HttpStatusCode>());
+            Assert.Equal(HttpStatusCode.OK, await new Uri("https://httpbin.org/put").SendPUT().GetResult<HttpStatusCode>());
+            Assert.Equal(HttpStatusCode.OK, await new Uri("https://httpbin.org/delete").SendDELETE().GetResult<HttpStatusCode>());
+            Assert.Equal(HttpStatusCode.OK, await new Uri("https://httpbin.org/patch").SendPATCH().GetResult<HttpStatusCode>());
+
             Assert.Equal(HttpStatusCode.OK, await new Uri("https://postman-echo.com/put").SendPUT().GetResult<HttpStatusCode>());
             Assert.Equal(HttpStatusCode.OK, await new Uri("https://postman-echo.com/delete").SendDELETE().GetResult<HttpStatusCode>());
             Assert.Equal(HttpStatusCode.OK, await new Uri("https://postman-echo.com/options").SendOPTIONS().GetResult<HttpStatusCode>());
             Assert.Equal(HttpStatusCode.OK, await new Uri("https://postman-echo.com/patch").SendRequest(HttpMethod.Patch).GetResult<HttpStatusCode>());
+
+            // If a route does not exist the postman-echo returns a NotFound error code:
             Assert.Equal(HttpStatusCode.NotFound, await new Uri("https://postman-echo.com/delete").SendPUT().GetResult<HttpStatusCode>());
+        }
+
+        [Fact]
+        public async Task TestUserAgent() {
+            var resp = await new Uri("https://httpbin.org/user-agent").SendGET().GetResult<JObject>();
+            Assert.True(resp.ContainsKey("user-agent"));
+            Log.d("User agent: " + resp["user-agent"]);
+        }
+
+        [Fact]
+        public async Task TestDifferentStatusCodes() {
+            await TestStatusCode(HttpStatusCode.OK);
+            await TestStatusCode(HttpStatusCode.Accepted);
+            await TestStatusCode(HttpStatusCode.Forbidden);
+            await TestStatusCode(HttpStatusCode.NotFound);
+            await TestStatusCode(HttpStatusCode.NoContent);
+        }
+
+        private static async Task TestStatusCode(HttpStatusCode code) {
+            Assert.Equal(code, await new Uri("https://httpbin.org/status/" + (int)code).SendGET().GetResult<HttpStatusCode>());
+            Assert.Equal(code, await new Uri("https://postman-echo.com/status/" + (int)code).SendGET().GetResult<HttpStatusCode>());
+        }
+
+        [Fact]
+        public async Task TestTimeouts() {
+            int requestDurationInMs = 1000;
+            var requestDurationInSec = requestDurationInMs / 1000;
+            await TestTimeout("https://httpbin.org/delay/" + requestDurationInSec, requestDurationInMs, 500);
+            await TestTimeout("https://postman-echo.com/delay/" + requestDurationInSec, requestDurationInMs, 500);
+        }
+
+        private static async Task TestTimeout(string urlOfRequestWithLongDuration, int requestDurationInMs, int cancelTimeoutInMs) {
+            { // When setting a timeout for the request the request will be canceled before it completes
+                Assert.True(cancelTimeoutInMs < requestDurationInMs);
+                var duration = StopwatchV2.StartNewV2();
+                await Assert.ThrowsAsync<TaskCanceledException>(async () => {
+                    await new Uri(urlOfRequestWithLongDuration).SendGET().WithTimeoutInMs(cancelTimeoutInMs).GetResult<HttpStatusCode>();
+                });
+                Assert.True(duration.ElapsedMilliseconds > cancelTimeoutInMs, "duration=" + duration.ElapsedMilliseconds);
+            }
+            { // If no timeout is specified, the request will take the defined request duration: 
+                var duration = StopwatchV2.StartNewV2();
+                Assert.Equal(HttpStatusCode.OK, await new Uri(urlOfRequestWithLongDuration).SendGET().GetResult<HttpStatusCode>());
+                Assert.True(duration.ElapsedMilliseconds > requestDurationInMs, "duration=" + duration.ElapsedMilliseconds);
+            }
+        }
+
+        [Fact]
+        public async Task TestDateTimeV2ParseUtc() {
+            var utcString = "Sat, 13 Aug 2022 09:43:50 GMT";
+            var utcTime = DateTimeV2.ParseUtc(utcString);
+            Assert.True(utcTime.IsUtc());
+            Assert.Equal(9, utcTime.Hour);
+            Assert.Equal(43, utcTime.Minute);
+        }
+
+        [Fact]
+        public async Task TestCurrentUTCtime() {
+            var resp = await new Uri("https://postman-echo.com/time/now").SendGET().GetResult<string>();
+            var remoteNow = DateTimeV2.ParseUtc(resp);
+            Assert.True(remoteNow.IsUtc());
+            var now = DateTimeV2.UtcNow;
+            Assert.True(now.IsUtc());
+            Assert.False(DateTimeV2.Now.IsUtc());
+            var delta = now - remoteNow;
+            Assert.True(delta.TotalMillisecondsAbs() < 1000, $"delta={delta}, now={now}, remoteNow={remoteNow} (from string '{resp}'");
         }
 
     }

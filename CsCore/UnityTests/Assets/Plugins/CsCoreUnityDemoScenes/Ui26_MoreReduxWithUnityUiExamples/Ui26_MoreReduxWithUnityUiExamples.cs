@@ -50,7 +50,7 @@ namespace com.csutil.tests.ui {
             Assert.AreEqual(oldCounterValue, userNameChangedCounter);
 
             Toast.Show("Changing user name from background thread...");
-            await Task.Delay(2000);
+            await TaskV2.Delay(2000);
 
             // When NewSubStateListener instead of NewSubStateListenerForUnity is used, the
             // event will arrive on the thread where it was dispatched:
