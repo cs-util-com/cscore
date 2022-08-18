@@ -192,10 +192,11 @@ namespace com.csutil.tests {
         [Fact]
         public void StringEncryption_Examples() {
 
-            var myString = "some text..";
+            var myString = "Some text that will be encrypted and decrypted again to demonstrate how the extension methods work..";
+            var myKey = "123";
 
             // Encrypt myString with the password "123":
-            var myEncryptedString = myString.Encrypt("123");
+            var myEncryptedString = myString.Encrypt(myKey);
 
             // The encrypted string is different to myString:
             Assert.NotEqual(myString, myEncryptedString);
@@ -203,7 +204,7 @@ namespace com.csutil.tests {
             Assert.NotEqual(myEncryptedString, myString.Encrypt("124"));
 
             // Decrypt the encrypted string back with the correct password:
-            Assert.Equal(myString, myEncryptedString.Decrypt("123"));
+            Assert.Equal(myString, myEncryptedString.Decrypt(myKey));
 
             // Using the wrong password results in an exception:
             Assert.Throws<CryptographicException>(() => {
