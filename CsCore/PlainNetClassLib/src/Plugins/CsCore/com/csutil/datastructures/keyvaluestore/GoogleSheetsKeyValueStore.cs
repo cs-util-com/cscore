@@ -19,8 +19,8 @@ namespace com.csutil.keyvaluestore {
         public string sheetName {
             get { return _sheetName; }
             set {
+                if (value != _sheetName) { InitDebouncedDownloadLogic(); }
                 _sheetName = value;
-                InitDebouncedDownloadLogic();
             }
         }
 
@@ -28,37 +28,30 @@ namespace com.csutil.keyvaluestore {
         public Func<Task<bool>> dowloadOnlineDataDebounced;
         public List<List<string>> latestRawSheetData { get; private set; }
 
-        public GoogleSheetsKeyValueStore(IKeyValueStore localCache, string apiKey,
-                    string spreadsheetId, string sheetName, double delayInMsBetweenCheck = 10000) {
+        public GoogleSheetsKeyValueStore(IKeyValueStore localCache, string apiKey, string spreadsheetId, string sheetName, double delayInMsBetweenCheck = 10000) {
             this.fallbackStore = localCache;
-            this.apiKey = apiKey;
-            this.spreadsheetId = spreadsheetId;
-            this.sheetName = sheetName;
             this.delayInMsBetweenCheck = delayInMsBetweenCheck;
             InitDebouncedDownloadLogic();
+
+            this.apiKey = apiKey;
+            this.spreadsheetId = spreadsheetId;
+            this._sheetName = sheetName;
         }
 
         private void InitDebouncedDownloadLogic() {
             latestRawSheetData = null;
             // Create a debounced func that only downloads new data max every 10 seconds and
             // trigger this method only if inet available:
-            Func<object, Task> debouncedFunc = DowloadOnlineData;
-            debouncedFunc = debouncedFunc.AsThrottledDebounce(delayInMsBetweenCheck);
-            dowloadOnlineDataDebounced = async () => {
-                if (latestRawSheetData.IsNullOrEmpty()) { await InternetStateManager.Instance(this).HasInetAsync; }
+            Func<Task> t = async () => {
+                if (latestRawSheetData.IsNullOrEmpty()) {
+                    await InternetStateManager.Instance(this).HasInetAsync;
+                }
                 if (InternetStateManager.Instance(this).HasInet) {
-                    try {
-                        await debouncedFunc(null);
-                        ThrowIfSheetDataMissing();
-                        return true;
-                    } catch (TaskCanceledException) { } // If debouncing decided the task does not need to run
-                } else { // No inet, so check if cached data is present:
-                    var fallbackContent = await fallbackStore.GetAllKeys();
-                    if (!fallbackContent.IsNullOrEmpty()) { return false; }
+                    await DowloadOnlineData();
                 }
                 ThrowIfSheetDataMissing();
-                return false;
             };
+            dowloadOnlineDataDebounced = t.AsThrottledDebounceV2(delayInMsBetweenCheck);
         }
 
         private void ThrowIfSheetDataMissing() {
@@ -73,7 +66,7 @@ namespace com.csutil.keyvaluestore {
             IsDisposed = DisposeState.Disposed;
         }
 
-        private async Task DowloadOnlineData(object _) {
+        private async Task DowloadOnlineData() {
             var newRawSheetData = await GoogleSheetsV4.GetSheet(apiKey, spreadsheetId, sheetName);
             if (!latestRawSheetData.IsNullOrEmpty()) {
                 foreach (var entry in ParseRawSheetData(FilterForChanges(latestRawSheetData, newRawSheetData))) {
@@ -106,7 +99,9 @@ namespace com.csutil.keyvaluestore {
 
         private static bool ChangeFound(List<string> oldLine, List<string> newLine) {
             if (oldLine.Count != newLine.Count) { return true; }
-            for (int i = 0; i < newLine.Count; i++) { if (oldLine[i] != newLine[i]) { return true; } }
+            for (int i = 0; i < newLine.Count; i++) {
+                if (oldLine[i] != newLine[i]) { return true; }
+            }
             return false;
         }
 
