@@ -38,7 +38,7 @@ namespace com.csutil.tests.keyvaluestore {
             storeDir.DeleteV2(); // Cleanup before tests if the test file exists
             string myKey1 = "test123";
             MyClass1 x1 = new MyClass1() { myString1 = "Abc", myString2 = "Abc2" };
-            {   // Create a fast memory store and combine it with a LiteDB store that is persisted to disk:
+            { // Create a fast memory store and combine it with a LiteDB store that is persisted to disk:
                 IKeyValueStore store = new InMemoryKeyValueStore().WithFallbackStore(new FileBasedKeyValueStore(storeDir));
                 await store.Set(myKey1, x1);
                 MyClass1 x2 = await store.Get<MyClass1>(myKey1, null);
@@ -383,7 +383,7 @@ namespace com.csutil.tests.keyvaluestore {
             await TaskV2.Delay(refreshDelayInMs * 3);
 
             Assert.True(await download1); // first trigger downloaded the data
-            Assert.NotEmpty(store.latestRawSheetData);
+            Assert.NotEmpty(await store.GetAllKeys());
             // Triggering it instant a second time will not download the data again:
             Assert.False(await download2); // Second trigger was skipped
             Assert.True(await download3);
@@ -450,7 +450,9 @@ namespace com.csutil.tests.keyvaluestore {
             public MyObj myObj1;
             public int myInt1;
             public double myDouble1;
-            public class MyObj { public string a; }
+            public class MyObj {
+                public string a;
+            }
         }
 #pragma warning restore 0649 // Variable is never assigned to, and will always have its default value
 

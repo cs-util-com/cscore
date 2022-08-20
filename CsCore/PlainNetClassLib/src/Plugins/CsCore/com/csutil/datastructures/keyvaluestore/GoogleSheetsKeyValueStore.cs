@@ -26,7 +26,7 @@ namespace com.csutil.keyvaluestore {
 
         private readonly double delayInMsBetweenCheck;
         public Func<Task<bool>> dowloadOnlineDataDebounced;
-        public List<List<string>> latestRawSheetData { get; private set; }
+        private List<List<string>> latestRawSheetData { get; set; }
 
         public GoogleSheetsKeyValueStore(IKeyValueStore localCache, string apiKey, string spreadsheetId, string sheetName, double delayInMsBetweenCheck = 10000) {
             this.fallbackStore = localCache;
