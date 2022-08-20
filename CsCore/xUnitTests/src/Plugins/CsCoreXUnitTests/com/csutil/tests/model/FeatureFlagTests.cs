@@ -18,7 +18,7 @@ namespace com.csutil.tests.model {
         public async Task ExampleUsage1() {
 
             // Get your key from https://console.developers.google.com/apis/credentials
-            var apiKey = "AIzaSyCtcFQMgRIUHhSuXggm4BtXT4eZvUrBWN0";
+            var apiKey = await IoC.inject.GetAppSecrets().GetSecret("GoogleSheetsV4Key");
             // https://docs.google.com/spreadsheets/d/1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM contains the sheetId:
             var sheetId = "1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM";
             var sheetName = "MySheet1"; // Has to match the sheet name
@@ -47,7 +47,7 @@ namespace com.csutil.tests.model {
         public async Task ExampleUsage2() {
 
             // Get your key from https://console.developers.google.com/apis/credentials
-            var apiKey = "AIzaSyCtcFQMgRIUHhSuXggm4BtXT4eZvUrBWN0";
+            var apiKey = await IoC.inject.GetAppSecrets().GetSecret("GoogleSheetsV4Key");
             // https://docs.google.com/spreadsheets/d/1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM contains the sheetId:
             var sheetId = "1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM";
             var sheetName = "MySheet1"; // Has to match the sheet name
@@ -64,7 +64,7 @@ namespace com.csutil.tests.model {
         public async Task ExtendedTest1() {
 
             // Get your key from https://console.developers.google.com/apis/credentials
-            var apiKey = "AIzaSyCtcFQMgRIUHhSuXggm4BtXT4eZvUrBWN0";
+            var apiKey = await IoC.inject.GetAppSecrets().GetSecret("GoogleSheetsV4Key");
             // See https://docs.google.com/spreadsheets/d/1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM
             var sheetId = "1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM";
             var sheetName = "MySheet1"; // Has to match the sheet name
@@ -116,7 +116,7 @@ namespace com.csutil.tests.model {
         public async Task TestProgressiveDisclosure() {
 
             // Get your key from https://console.developers.google.com/apis/credentials
-            var apiKey = "AIzaSyCtcFQMgRIUHhSuXggm4BtXT4eZvUrBWN0";
+            var apiKey = await IoC.inject.GetAppSecrets().GetSecret("GoogleSheetsV4Key");
             // https://docs.google.com/spreadsheets/d/1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM contains the sheetId:
             var sheetId = "1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM";
             var sheetName = "MySheet1"; // Has to match the sheet name
@@ -191,7 +191,7 @@ namespace com.csutil.tests.model {
         public async Task TestDefaultProgressionSystem() {
 
             // Get your key from https://console.developers.google.com/apis/credentials
-            var apiKey = "AIzaSyCtcFQMgRIUHhSuXggm4BtXT4eZvUrBWN0";
+            var apiKey = await IoC.inject.GetAppSecrets().GetSecret("GoogleSheetsV4Key");
             // https://docs.google.com/spreadsheets/d/1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM contains the sheetId:
             var sheetId = "1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM";
             var sheetName = "MySheet1"; // Has to match the sheet name
@@ -239,7 +239,7 @@ namespace com.csutil.tests.model {
         public async Task ExtensiveDefaultProgressionSystemTests() {
 
             // Get your key from https://console.developers.google.com/apis/credentials
-            var apiKey = "AIzaSyCtcFQMgRIUHhSuXggm4BtXT4eZvUrBWN0";
+            var apiKey = await IoC.inject.GetAppSecrets().GetSecret("GoogleSheetsV4Key");
             // https://docs.google.com/spreadsheets/d/1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM contains the sheetId:
             var sheetId = "1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM";
             var sheetName = "MySheet1"; // Has to match the sheet name

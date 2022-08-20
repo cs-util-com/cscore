@@ -174,7 +174,7 @@ namespace com.csutil.tests.model {
         [Fact]
         public async Task ExampleUsage2() {
             // Get your key from https://console.developers.google.com/apis/credentials
-            var apiKey = "AIzaSyCtcFQMgRIUHhSuXggm4BtXT4eZvUrBWN0";
+            var apiKey = await IoC.inject.GetAppSecrets().GetSecret("GoogleSheetsV4Key");
             // https://docs.google.com/spreadsheets/d/1rl1vi-LUhOgoY_QrMJsm2UE0SdiL4EbOtLwfNPsavxQ contains the sheetId:
             var sheetId = "1rl1vi-LUhOgoY_QrMJsm2UE0SdiL4EbOtLwfNPsavxQ";
             var sheetName = "UsageRules1"; // Has to match the sheet name

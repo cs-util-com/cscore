@@ -365,7 +365,7 @@ namespace com.csutil.tests.keyvaluestore {
         public async Task TestGoogleSheetsKeyValueStore() {
 
             // Get your key from https://console.developers.google.com/apis/credentials
-            var apiKey = "AIzaSyCtcFQMgRIUHhSuXggm4BtXT4eZvUrBWN0";
+            var apiKey = await IoC.inject.GetAppSecrets().GetSecret("GoogleSheetsV4Key");
             // See https://docs.google.com/spreadsheets/d/13R9y6lnUMgRPC0PinJ23tACC6Flgogxa7h7SVaaLhT0
             var sheetId = "13R9y6lnUMgRPC0PinJ23tACC6Flgogxa7h7SVaaLhT0";
             var sheetName = "UpdateEntriesV1"; // Has to match the sheet name

@@ -189,7 +189,7 @@ namespace com.csutil.tests {
         public async Task TestLoadRemoteLocale() {
 
             // Get your key from https://console.developers.google.com/apis/credentials
-            var apiKey = "AIzaSyCtcFQMgRIUHhSuXggm4BtXT4eZvUrBWN0";
+            var apiKey =  await IoC.inject.GetAppSecrets().GetSecret("GoogleSheetsV4Key");
             // See https://docs.google.com/spreadsheets/d/193NfNg8Prtt4XOX4WgRIBK4o53nBYbHeo7nxBrxom5A
             var sheetId = "193NfNg8Prtt4XOX4WgRIBK4o53nBYbHeo7nxBrxom5A";
 
