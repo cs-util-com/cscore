@@ -12,7 +12,8 @@ namespace com.csutil.tests.async {
         public TaskDebounceTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
         [Fact]
-        public async Task TestThrottledDebounce1() {
+        [Obsolete("Replaced by test nr 4")]
+        public async Task TestThrottledDebounce1_OldObsolete() {
 
             int counter = 0;
             Func<string, Task> originalFunction = async (string param) => {
@@ -59,7 +60,8 @@ namespace com.csutil.tests.async {
         }
 
         [Fact]
-        public async Task TestThrottledDebounce2() {
+        [Obsolete("Replaced by test nr 5")]
+        public async Task TestThrottledDebounce2_OldObsolete() {
             int counter = 0;
             int delayInMs = 200;
             Func<object, Task> originalFunction = async (object param) => {
@@ -92,7 +94,8 @@ namespace com.csutil.tests.async {
         }
 
         [Fact]
-        public async Task TestThrottledDebounce3() {
+        [Obsolete("Replaced by test nr 6")]
+        public async Task TestThrottledDebounce3_OldObsolete() {
             int counter = 0;
             Func<Task> originalFunction = () => {
                 counter++;
@@ -303,6 +306,34 @@ namespace com.csutil.tests.async {
             Assert.False(await t2);
             Assert.False(await t3);
             Assert.True(await t4);
+
+        }
+
+        [Fact]
+        public async Task TestThrottledDebounce10() {
+
+            bool entered = false;
+            var executionCounter = 0;
+            Func<Task<int>> t = async () => {
+                Assert.False(entered);
+                entered = true;
+                await TaskV2.Delay(100);
+                entered = false;
+                executionCounter++;
+                return executionCounter;
+            };
+            t = t.AsThrottledDebounceV2(200);
+
+            var t1 = t();
+            var t2 = t();
+            var t3 = t();
+            var t4 = t();
+
+            Assert.Equal(1, await t1);
+            var e = await Assert.ThrowsAsync<TaskSkippedException<int>>(() => t2);
+            Assert.Equal(1, await e.LatestRunTask);
+            await Assert.ThrowsAsync<TaskSkippedException<int>>(() => t3);
+            Assert.Equal(2, await t4);
 
         }
 
