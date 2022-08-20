@@ -53,6 +53,7 @@ namespace com.csutil {
         /// </summary>
         /// <param name="skipFirstEvent"> if set to true there will be no instant execution of the very first call to the debounced async func </param>
         /// <exception cref="TaskCanceledException"> If the func was canceled because another one after it replaced it the returned Task will indicate this </exception>
+        [Obsolete("Use AsThrottledDebounceV2 instead")]
         public static Func<Task> AsThrottledDebounce(this Func<Task> self, double delayInMs, bool skipFirstEvent = false) {
             Func<object, Task> f = (_) => self();
             Func<object, Task> d = f.AsThrottledDebounce(delayInMs, skipFirstEvent);
@@ -65,6 +66,7 @@ namespace com.csutil {
         /// </summary>
         /// <param name="skipFirstEvent"> if set to true there will be no instant execution of the very first call to the debounced async func </param>
         /// <exception cref="TaskCanceledException"> If the func was canceled because another one after it replaced it the returned Task will indicate this </exception>
+        [Obsolete("Use AsThrottledDebounceV2 instead")]
         public static Func<T, Task> AsThrottledDebounce<T>(this Func<T, Task> self, double delayInMs, bool skipFirstEvent = false) {
             int triggerFirstEvent = skipFirstEvent ? 0 : 1;
             int last = 0;
