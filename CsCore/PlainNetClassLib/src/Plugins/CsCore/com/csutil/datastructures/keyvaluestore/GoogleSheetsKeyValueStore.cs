@@ -13,7 +13,7 @@ namespace com.csutil.keyvaluestore {
         public long latestFallbackGetTimingInMs { get { return fallbackStore.latestFallbackGetTimingInMs; } set { } }
 
         private readonly string apiKey;
-        public readonly string spreadsheetId;
+        private readonly string spreadsheetId;
 
         private string _sheetName;
         public string sheetName {
@@ -24,15 +24,15 @@ namespace com.csutil.keyvaluestore {
             }
         }
 
+        public Func<Task<bool>> dowloadOnlineDataDebounced { get; private set; }
+
         private readonly double delayInMsBetweenCheck;
-        public Func<Task<bool>> dowloadOnlineDataDebounced;
         private List<List<string>> latestRawSheetData { get; set; }
 
         public GoogleSheetsKeyValueStore(IKeyValueStore localCache, string apiKey, string spreadsheetId, string sheetName, double delayInMsBetweenCheck = 10000) {
             this.fallbackStore = localCache;
             this.delayInMsBetweenCheck = delayInMsBetweenCheck;
             InitDebouncedDownloadLogic();
-
             this.apiKey = apiKey;
             this.spreadsheetId = spreadsheetId;
             this._sheetName = sheetName;
