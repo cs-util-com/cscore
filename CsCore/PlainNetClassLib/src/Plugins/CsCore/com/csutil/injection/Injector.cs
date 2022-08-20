@@ -60,11 +60,21 @@ namespace com.csutil.injection {
             }
             var r = true;
             foreach (var subscriber in subscribers) { r = usedEventBus.Unsubscribe(subscriber, eventName) && r; }
+            injectorNames = injectorNames.Remove(eventName);
             // Log.d("Removed " + subscribers.Count() + " subscribers for " + typeof(T));
             return r;
         }
 
-        public bool UnregisterInjector<T>(object injector) { return usedEventBus.Unsubscribe(injector, GetEventKey<T>()); }
+        public bool UnregisterInjector<T>(object injector) {
+            var eventName = GetEventKey<T>();
+            if (usedEventBus.Unsubscribe(injector, eventName)) {
+                if (usedEventBus.GetSubscribersFor(eventName).IsNullOrEmpty()) {
+                    injectorNames = injectorNames.Remove(eventName);
+                }
+                return true;
+            }
+            return false;
+        }
 
         /// <summary> sets up a temporary context in which injecting the defined Type returns the set myContextInstance </summary>
         public void DoWithTempContext<T>(T myContextInstance, Action runWithTemporaryContext) {
