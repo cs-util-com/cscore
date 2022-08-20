@@ -86,7 +86,7 @@ namespace com.csutil.model.usagerules {
             var allEvents = await analytics.GetAllEventsForCategory(EventConsts.catUsage);
             var showEvents = allEvents.Filter(x => x.action == EventConsts.SHOW + "_" + self.categoryId);
             if (showEvents.IsNullOrEmpty()) { return false; }
-            DateTime firstShownEvent = showEvents.First().GetDateTimeUtc();
+            DateTime firstShownEvent = showEvents.Last().GetDateTimeUtc();
             TimeSpan firstShownVsNow = DateTimeV2.UtcNow - firstShownEvent;
             return firstShownVsNow.TotalDays >= self.days;
         }

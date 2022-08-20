@@ -65,6 +65,10 @@ namespace com.csutil.tests.model {
 
                 // Simulate a second show of the notification:
                 AppFlow.TrackEvent(EventConsts.catUsage, EventConsts.SHOW + "_" + notificationId);
+                Assert.False(await notificationMinXDaysOld.IsNotificationMinXDaysOld(analytics));
+                Assert.False(await notificationMinXDaysOld.isTrue());
+                
+                t.mockUtcNow = DateTimeV2.ParseUtc("15.04.2011"); // Simulate more time passing by
                 Assert.True(await notificationMinXDaysOld.IsNotificationMinXDaysOld(analytics));
                 Assert.True(await notificationMinXDaysOld.isTrue());
             }
