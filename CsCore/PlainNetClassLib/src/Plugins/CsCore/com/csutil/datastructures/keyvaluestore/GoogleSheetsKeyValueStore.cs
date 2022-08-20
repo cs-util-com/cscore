@@ -167,11 +167,11 @@ namespace com.csutil.keyvaluestore {
             return await fallbackStore.GetAllKeys();
         }
 
-        public Task<bool> Remove(string key) { throw new NotSupportedException(); }
+        public Task<bool> Remove(string key) { throw new NotSupportedException(this + " is a readonly store"); }
 
-        public Task RemoveAll() { throw new NotSupportedException(); }
+        public Task RemoveAll() { throw new NotSupportedException(this + " is a readonly store"); }
 
-        public Task<object> Set(string key, object value) { throw new NotSupportedException(); }
+        public Task<object> Set(string key, object value) { throw new NotSupportedException(this + " is a readonly store"); }
 
     }
 
