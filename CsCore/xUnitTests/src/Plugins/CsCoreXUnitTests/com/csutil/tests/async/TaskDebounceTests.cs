@@ -49,12 +49,14 @@ namespace com.csutil.tests.async {
             }
 
             {
-                wrappedFunc("bad");
-                wrappedFunc("bad");
-                var t = wrappedFunc("good");
+                var t1 = wrappedFunc("bad");
+                var t2 = wrappedFunc("bad");
+                var t3 = wrappedFunc("good");
                 await TaskV2.Delay(delayInMs * 3);
-                await t;
+                await t3;
                 Assert.Equal(3, counter);
+                Assert.True(t1.IsCanceled);
+                Assert.True(t2.IsCanceled);
             }
 
         }
@@ -79,17 +81,19 @@ namespace com.csutil.tests.async {
                 Assert.True(t.ElapsedMilliseconds > delayInMs * 2, "ElapsedMilliseconds=" + t.ElapsedMilliseconds);
             }
             {
-                var b = wrappedFunc("bad");
-                wrappedFunc("bad");
-                var t = wrappedFunc("good");
+                var t1 = wrappedFunc("bad");
+                var t2 = wrappedFunc("bad");
+                var t3 = wrappedFunc("good");
                 Assert.Equal(1, counter);
                 await TaskV2.Delay(delayInMs);
                 Assert.Equal(2, counter);
-                Assert.False(t.IsCompleted);
-                await t;
-                Assert.True(b.IsCompleted);
-                Assert.False(b.IsCompletedSuccessfull());
-                Assert.False(b.IsCompletedSuccessfully);
+                Assert.False(t3.IsCompleted);
+                await t3;
+                Assert.True(t1.IsCompleted);
+                Assert.False(t1.IsCompletedSuccessfull());
+                Assert.False(t1.IsCompletedSuccessfully);
+                Assert.True(t1.IsCanceled);
+                Assert.True(t2.IsCanceled);
             }
         }
 
@@ -113,14 +117,15 @@ namespace com.csutil.tests.async {
 
             {
                 Assert.Equal(1, counter);
-                wrappedFunc();
-                var t = wrappedFunc();
+                var t1 = wrappedFunc();
+                var t2 = wrappedFunc();
                 Assert.Equal(1, counter);
-                Assert.False(t.IsFaulted);
+                Assert.False(t2.IsFaulted);
                 await TaskV2.Delay(50);
                 Assert.Equal(2, counter);
-                Assert.True(t.IsFaulted);
-                await Assert.ThrowsAsync<NotImplementedException>(() => t);
+                Assert.True(t2.IsFaulted);
+                await Assert.ThrowsAsync<NotImplementedException>(() => t2);
+                Assert.True(t1.IsCanceled);
             }
 
         }
@@ -163,12 +168,14 @@ namespace com.csutil.tests.async {
             }
 
             {
-                wrappedFunc("bad");
-                wrappedFunc("bad");
-                var t = wrappedFunc("good");
+                var t1 = wrappedFunc("bad");
+                var t2 = wrappedFunc("bad");
+                var t3 = wrappedFunc("good");
                 await TaskV2.Delay(delayInMs * 3);
-                await t;
+                await t3;
                 Assert.Equal(3, counter);
+                Assert.True(t1.IsCanceled);
+                Assert.True(t2.IsCanceled);
             }
 
         }
@@ -193,17 +200,19 @@ namespace com.csutil.tests.async {
                 Assert.True(t.ElapsedMilliseconds > delayInMs * 2, "ElapsedMilliseconds=" + t.ElapsedMilliseconds);
             }
             {
-                var b = wrappedFunc("bad");
-                wrappedFunc("bad");
-                var t = wrappedFunc("good");
+                var t1 = wrappedFunc("bad");
+                var t2 = wrappedFunc("bad");
+                var t3 = wrappedFunc("good");
                 Assert.Equal(1, counter);
                 await TaskV2.Delay(delayInMs);
                 Assert.Equal(2, counter);
-                Assert.False(t.IsCompleted);
-                await t;
-                Assert.True(b.IsCompleted);
-                Assert.False(b.IsCompletedSuccessfull());
-                Assert.False(b.IsCompletedSuccessfully);
+                Assert.False(t3.IsCompleted);
+                await t3;
+                Assert.True(t1.IsCompleted);
+                Assert.False(t1.IsCompletedSuccessfull());
+                Assert.False(t1.IsCompletedSuccessfully);
+                Assert.True(t1.IsCanceled);
+                Assert.True(t2.IsCanceled);
             }
         }
 
@@ -226,14 +235,15 @@ namespace com.csutil.tests.async {
 
             {
                 Assert.Equal(1, counter);
-                wrappedFunc();
-                var t = wrappedFunc();
+                var t1 = wrappedFunc();
+                var t2 = wrappedFunc();
                 Assert.Equal(1, counter);
-                Assert.False(t.IsFaulted);
+                Assert.False(t2.IsFaulted);
                 await TaskV2.Delay(50);
                 Assert.Equal(2, counter);
-                Assert.True(t.IsFaulted);
-                await Assert.ThrowsAsync<NotImplementedException>(() => t);
+                Assert.True(t2.IsFaulted);
+                await Assert.ThrowsAsync<NotImplementedException>(() => t2);
+                Assert.False(await t1); // T1 was never executed
             }
 
         }

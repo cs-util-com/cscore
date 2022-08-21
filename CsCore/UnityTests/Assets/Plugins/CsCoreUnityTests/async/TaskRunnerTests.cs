@@ -6,6 +6,7 @@ using UnityEngine.TestTools;
 
 namespace com.csutil.tests.threading {
 
+    [Obsolete("See related BackgroundTaskQueueTests that do use a BackgroundTaskQueue instead of a TaskRunner")]
     class TaskRunnerTests {
 
         [UnityTest]

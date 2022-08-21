@@ -104,7 +104,8 @@ namespace com.csutil.tests.eventbus {
                 Assert.IsTrue(MainThread.isMainThread);
                 counter++;
             });
-            yield return TaskRunner.instance.RunInBackground(async (cancel) => {
+            yield return BackgroundTaskQueue.NewBackgroundTaskQueue(1).Run(async (cancel) => {
+                Assert.IsFalse(MainThread.isMainThread);
                 EventBus.instance.Publish(eventName);
                 Assert.AreEqual(1, counter);
                 await Task.CompletedTask;

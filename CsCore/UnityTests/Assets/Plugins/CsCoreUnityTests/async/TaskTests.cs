@@ -28,7 +28,10 @@ namespace com.csutil.tests.threading {
             });
             Assert.True(b1);
 
-            Assert.AreEqual("abc", await MainThread.Invoke(async () => "abc"));
+            Assert.AreEqual("abc", await MainThread.Invoke(async () => {
+                await TaskV2.Delay(100);
+                return "abc";
+            }));
         }
 
     }
