@@ -2,7 +2,11 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
+using com.csutil.progress;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace com.csutil {
 
@@ -107,6 +111,21 @@ namespace com.csutil {
         // See https://answers.unity.com/answers/1190932/view.html
         public static bool IsPartOfEditorOnlyPrefab(this GameObject go) {
             return go.scene.rootCount == 0 || go.scene.name == null;
+        }
+
+        public static async Task<GameObject> LoadPrefabV2(string addressablePath, ProgressV2 onProgress = null) {
+            var loadTask = Addressables.InstantiateAsync(addressablePath, trackHandle: false);
+            while (!loadTask.IsDone) {
+                if (onProgress != null) { onProgress.percent = loadTask.PercentComplete; }
+                await TaskV2.Delay(10);
+            }
+            if (loadTask.Status == AsyncOperationStatus.Succeeded) {
+                var go = loadTask.Result;
+                go.AddOnDestroyListener(() => { Addressables.ReleaseInstance(go); });
+                return go;
+            } else {
+                throw loadTask.OperationException;
+            }
         }
 
     }
