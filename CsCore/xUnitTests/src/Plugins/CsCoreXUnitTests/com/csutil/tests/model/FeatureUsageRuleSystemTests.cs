@@ -196,6 +196,37 @@ namespace com.csutil.tests.model {
 
         }
 
+        /// <summary> See https://github.com/cs-util-com/cscore/issues/54 </summary>
+        [Fact]
+        public async Task ExampleUsage3_NpsScoreSystem() {
+
+            var t = new MockDateTimeV2();
+            IoC.inject.SetSingleton<DateTimeV2>(t, overrideExisting: true);
+            t.mockUtcNow = DateTimeV2.ParseUtc("01.02.2011");
+
+            var analytics = CreateLocalAnalyticsSystem();
+
+            // The user must have used the app at least on 3 different days before the NPS score should be collected
+            UsageRule appUsedInTheLastXDays = analytics.NewAppUsedXDaysRule(3);
+            Assert.False(await appUsedInTheLastXDays.isTrue());
+
+            t.mockUtcNow = DateTimeV2.ParseUtc("02.02.2011");
+            AppFlow.TrackEvent("someEventCategory1", "someAction1");
+            Assert.False(await appUsedInTheLastXDays.isTrue());
+
+            t.mockUtcNow = DateTimeV2.ParseUtc("03.02.2011");
+            AppFlow.TrackEvent("someEventCategory1", "someAction1");
+            Assert.False(await appUsedInTheLastXDays.isTrue());
+
+            t.mockUtcNow = DateTimeV2.ParseUtc("04.02.2011");
+            AppFlow.TrackEvent("someEventCategory1", "someAction1");
+            Assert.True(await appUsedInTheLastXDays.isTrue());
+            
+            // TODO make a load test that simulates app usage over many years with 1000 events per day 
+            // NewAppUsedXDaysRule uses an analytics.GetAll() call that would load all files of the entire keyvaluestore which would be very slow??
+            
+        }
+
         private static LocalAnalytics CreateLocalAnalyticsSystem() {
             LocalAnalytics analytics = new LocalAnalytics(new InMemoryKeyValueStore());
             analytics.createStoreFor = (_) => new InMemoryKeyValueStore().GetTypeAdapter<AppFlowEvent>();
