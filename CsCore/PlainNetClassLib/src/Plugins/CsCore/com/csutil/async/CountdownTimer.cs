@@ -32,7 +32,7 @@ namespace com.csutil {
         }
 
         public void AddProgressListener(IProgress targetProgressToUpdate, int updateIntervalInMs) {
-            MonitorProgress(targetProgressToUpdate, updateIntervalInMs);
+            MonitorProgress(targetProgressToUpdate, updateIntervalInMs).LogOnError();
         }
         
         private async Task NewTimerTask(int timerDurationInMs) {
