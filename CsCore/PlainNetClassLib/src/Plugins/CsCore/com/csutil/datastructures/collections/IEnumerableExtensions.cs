@@ -197,6 +197,28 @@ namespace com.csutil {
             return true;
         }
 
+        public static bool CountIsAbove(this IEnumerable self, int x) {
+            if (self is ICollection l) { return l.Count > x; }
+            var e = self.GetEnumerator();
+            var count = 0;
+            do {
+                if (count > x) { return true; }
+                count++;
+            } while (e.MoveNext());
+            return false;
+        }
+
+        public static bool CountIsBelow(this IEnumerable self, int x) {
+            if (self is ICollection l) { return l.Count < x; }
+            var e = self.GetEnumerator();
+            var count = 0;
+            do {
+                if (count >= x) { return false; }
+                count++;
+            } while (e.MoveNext());
+            return true;
+        }
+
     }
 
 }

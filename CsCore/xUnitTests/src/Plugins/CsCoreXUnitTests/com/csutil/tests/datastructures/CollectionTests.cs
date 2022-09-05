@@ -1,6 +1,8 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -214,6 +216,67 @@ namespace com.csutil.tests {
         private async Task<string> ComputeResultForA() {
             await TaskV2.Delay(200); // Simulates an expensive computation
             return "1";
+        }
+
+        [Fact]
+        public async Task TestCountIsBelowAndCountIsAbove1() {
+            var x = new List<int>();
+            AssertIsEnumerableWith0Entries(x);
+            x.Add(123);
+            AssertIsEnumerableWith1Entries(x);
+            x.Add(456);
+            AssertIsEnumerableWith2Entries(x);
+        }
+
+        [Fact]
+        public async Task TestCountIsBelowAndCountIsAbove2() {
+            AssertIsEnumerableWith0Entries(NewVerySlowEnumerableWithEntries(0));
+            AssertIsEnumerableWith1Entries(NewVerySlowEnumerableWithEntries(1));
+            AssertIsEnumerableWith2Entries(NewVerySlowEnumerableWithEntries(2));
+        }
+
+        [Fact]
+        public async Task TestCountIsBelowAndCountIsAbove3() {
+            var e = NewVerySlowEnumerableWithEntries(10);
+            var t1 = Log.MethodEnteredWith("Using .Count()");
+            Assert.True(e.Count() > 2);
+            Assert.False(e.Count() < 2);
+            Log.MethodDone(t1);
+            var t2 = Log.MethodEnteredWith("Using .CountIsAbove and .CountIsBelow");
+            Assert.True(e.CountIsAbove(2));
+            Assert.False(e.CountIsBelow(2));
+            Log.MethodDone(t2);
+
+            // The CountIsAbove and CountIsBelow must be much faster then using .Count():
+            Assert.True(t1.ElapsedMilliseconds > 5 * t2.ElapsedMilliseconds);
+        }
+
+        private IEnumerable<int> NewVerySlowEnumerableWithEntries(int count) {
+            for (int i = 0; i < count; i++) {
+                Thread.Sleep(50);
+                yield return i + 1000;
+            }
+        }
+
+        private static void AssertIsEnumerableWith0Entries(IEnumerable x) {
+            Assert.True(x.CountIsAbove(-1));
+            Assert.False(x.CountIsAbove(0));
+            Assert.True(x.CountIsBelow(1));
+            Assert.False(x.CountIsBelow(0));
+        }
+
+        private static void AssertIsEnumerableWith1Entries(IEnumerable x) {
+            Assert.True(x.CountIsBelow(2));
+            Assert.False(x.CountIsBelow(1));
+            Assert.True(x.CountIsAbove(0));
+            Assert.False(x.CountIsAbove(1));
+        }
+
+        private static void AssertIsEnumerableWith2Entries(IEnumerable x) {
+            Assert.True(x.CountIsBelow(3));
+            Assert.False(x.CountIsBelow(2));
+            Assert.True(x.CountIsAbove(1));
+            Assert.False(x.CountIsAbove(2));
         }
 
     }
