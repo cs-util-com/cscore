@@ -60,7 +60,7 @@ namespace com.csutil.model.usagerules {
 
         public static async Task<bool> IsFeatureUsedXTimes(this UsageRule self, LocalAnalytics analytics) {
             var startEvents = await analytics.GetStartEvents(self.categoryId);
-            return startEvents.Count() >= self.timesUsed.Value;
+            return startEvents.CountIsAbove(self.timesUsed.Value - 1);
         }
 
         public static async Task<IEnumerable<AppFlowEvent>> GetStartEvents(this LocalAnalytics self, string categoryId) {
@@ -74,12 +74,12 @@ namespace com.csutil.model.usagerules {
 
         public static async Task<bool> IsAppUsedXDays(this UsageRule self, LocalAnalytics analytics) {
             var allEvents = await analytics.GetAll();
-            return allEvents.GroupByDay().Count() >= self.days;
+            return allEvents.GroupByDay().CountIsAbove(self.days.Value - 1);
         }
 
         public static async Task<bool> IsFeatureUsedXDays(this UsageRule self, LocalAnalytics analytics) {
             var allEvents = await analytics.GetAllEventsForCategory(self.categoryId);
-            return allEvents.GroupByDay().Count() >= self.days;
+            return allEvents.GroupByDay().CountIsAbove(self.days.Value - 1);
         }
 
         public static async Task<bool> IsNotificationMinXDaysOld(this UsageRule self, LocalAnalytics analytics) {

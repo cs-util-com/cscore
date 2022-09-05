@@ -44,7 +44,7 @@ namespace com.csutil {
         protected virtual void OnBatchWasNotYetReadyForProcessing() { }
 
         protected virtual bool IsNextBatchReadyForProcessing(IEnumerable<string> keys) {
-            return keys.Count() >= batchSize;
+            return keys.CountIsAbove(batchSize - 1);
         }
 
         public async Task BatchProcess() {
