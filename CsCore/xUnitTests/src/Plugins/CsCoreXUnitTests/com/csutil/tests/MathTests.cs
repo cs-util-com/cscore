@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Numerics;
 using com.csutil.math;
 using Xunit;
 
@@ -87,6 +89,42 @@ namespace com.csutil.tests {
         private static void AssertEqualRgb(string rgb, float[] hsvColor) {
             var redRgb = ColorMath.HsvToRgb(hsvColor[0], hsvColor[1], hsvColor[2]);
             Assert.Equal(rgb, redRgb.ToStringV2(c => "" + c));
+        }
+
+        [Fact]
+        public static void VectorRotationTest1() {
+            float degreeToRad = MathF.PI / 180f;
+            float radToDegree = 1 / degreeToRad;
+
+            { // Test rotation in circles
+                var v1 = new Vector3(2, 0, 0);
+                var v2 = v1.Rotate(Quaternion.CreateFromAxisAngle(Vector3.UnitY, 90 * degreeToRad)).Round(4);
+                Assert.Equal(new Vector3(0, 0, -2), v2);
+                Assert.Equal(90, v2.AngleInDegreeTo(v1));
+                Assert.Equal(90, v1.AngleInDegreeTo(v2));
+
+                Assert.Equal(-90, Math.Round(v2.AngleSignedInRadTo(v1, Vector3.UnitY) * radToDegree, 4));
+                Assert.Equal(90, Math.Round(v1.AngleSignedInRadTo(v2, Vector3.UnitY) * radToDegree, 4));
+
+                var v3 = v2.Rotate(Quaternion.CreateFromAxisAngle(Vector3.UnitY, 90 * degreeToRad)).Round(4);
+                Assert.Equal(new Vector3(-2, 0, 0), v3);
+                Assert.Equal(90, v3.AngleInDegreeTo(v2));
+                Assert.Equal(180, v3.AngleInDegreeTo(v1));
+
+                Assert.Equal(180, Math.Round(v3.AngleSignedInRadTo(v1, Vector3.UnitY) * radToDegree, 4));
+                Assert.Equal(180, Math.Round(v1.AngleSignedInRadTo(v3, Vector3.UnitY) * radToDegree, 4));
+
+                var v4 = v3.Rotate(Quaternion.CreateFromAxisAngle(Vector3.UnitY, 90 * degreeToRad)).Round(4);
+                Assert.Equal(new Vector3(0, 0, 2), v4);
+                Assert.Equal(90, v4.AngleInDegreeTo(v3));
+
+                Assert.Equal(90, Math.Round(v4.AngleSignedInRadTo(v1, Vector3.UnitY) * radToDegree, 4));
+                Assert.Equal(-90, Math.Round(v1.AngleSignedInRadTo(v4, Vector3.UnitY) * radToDegree, 4));
+
+                var v1_2 = v4.Rotate(Quaternion.CreateFromAxisAngle(Vector3.UnitY, 90 * degreeToRad)).Round(4);
+                Assert.Equal(v1, v1_2);
+            }
+
         }
 
     }
