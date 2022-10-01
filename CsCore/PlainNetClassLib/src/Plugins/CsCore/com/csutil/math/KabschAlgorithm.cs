@@ -3,8 +3,13 @@ using System.Numerics;
 
 namespace com.csutil.math {
 
-    // https://en.wikipedia.org/wiki/Kabsch_algorithm
-    // https://zalo.github.io/blog/kabsch/#shape-matching
+    /// <summary>
+    /// 
+    /// Related sources:
+    /// https://en.wikipedia.org/wiki/Kabsch_algorithm
+    /// https://zalo.github.io/blog/kabsch/#shape-matching
+    /// http://nghiaho.com/?page_id=671
+    /// </summary>
     public class KabschAlgorithm {
 
         // Ported from https://github.com/zalo/MathUtilities/blob/master/Assets/Kabsch/Kabsch.cs 
