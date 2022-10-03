@@ -25,8 +25,13 @@ namespace com.csutil.tests.math {
             var output = input.Map(v => (alignmentResult * v)).ToArray();
 
             var digits = 7;
-            Assert.AreEqual(dataToAlignTo2[1], output[1]);
-            Assert.AreEqual(dataToAlignTo2[0], output[0]);
+            AssertAreEqual(dataToAlignTo2[1], (Vector3)output[1]);
+            AssertAreEqual(dataToAlignTo2[0], (Vector3)output[0]);
+        }
+
+        private void AssertAreEqual(Vector3 a, Vector3 b) {
+            var diff = a - b;
+            Assert.True(diff.magnitude < 0.00001, "diff=" + diff);
         }
 
         public class KabschSolver {
@@ -90,12 +95,18 @@ namespace com.csutil.tests.math {
                     float w = omega.magnitude;
                     if (w < 0.000000001f)
                         break;
-                    q = Quaternion.AngleAxis(w * Mathf.Rad2Deg, omega / w) * q;
-                    q = Quaternion.Lerp(q, q, 0f); //Normalizes the Quaternion; critical for error suppression
+                    var axis = omega / w;
+                    var angle = w % TWO_PI;
+                    var angleAxis = Quaternion.AngleAxis(angle * Mathf.Rad2Deg, axis);
+                    q = angleAxis * q;
+                    q.Normalize();
+                    // q = Quaternion.Lerp(q, q, 0f); //Normalizes the Quaternion; critical for error suppression
                     Profiler.EndSample();
                 }
             }
 
+            private const float TWO_PI = 2f * 3.1415926535897931f;
+            
             //Calculate Covariance Matrices --------------------------------------------------
             public static Vector3[] TransposeMultSubtract(Vector3[] vec1, Vector4[] vec2, Vector3 vec1Centroid, Vector3 vec2Centroid, Vector3[] covariance) {
                 Profiler.BeginSample("Calculate Covariance Matrix");

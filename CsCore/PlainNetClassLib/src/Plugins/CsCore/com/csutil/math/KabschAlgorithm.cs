@@ -81,15 +81,23 @@ namespace com.csutil.math {
                             Vector3.Dot(QuatBasis[2], A[2]) + 0.000000001f));
 
                     float w = omega.Length(); // magnitude
-                    if (w < 0.000000001f)
+                    if (w < 0.000000001f) {
                         break;
-                    q = Quaternion.CreateFromAxisAngle(omega / w, w) * q;
+                    }
+                    var axis = omega / w;
+                    var angle = w % TWO_PI;
+                    var fromAxisAngle = Quaternion.CreateFromAxisAngle(axis, angle);
+                    q = fromAxisAngle * q;
                     q = Quaternion.Normalize(q);
+                    // TODO keep or remove? :
                     //q = Quaternion.Lerp(q, q, 0f); //Normalizes the Quaternion; critical for error suppression
                     // Log.MethodDone(t2);
                 }
+
                 Log.MethodDone(t);
             }
+
+            private const float TWO_PI = 2f * 3.1415926535897931f;
 
             //Calculate Covariance Matrices --------------------------------------------------
             private static Vector3[] TransposeMultSubtract(Vector3[] vec1, Vector4[] vec2, Vector3 vec1Centroid, Vector3 vec2Centroid, Vector3[] covariance) {
