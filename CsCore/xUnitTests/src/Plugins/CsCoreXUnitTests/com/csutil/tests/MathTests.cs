@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using com.csutil.math;
 using Xunit;
 
 namespace com.csutil.tests {
+
     public class MathTests {
 
         public MathTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
@@ -91,10 +93,11 @@ namespace com.csutil.tests {
             Assert.Equal(rgb, redRgb.ToStringV2(c => "" + c));
         }
 
+        private const float degreeToRad = MathF.PI / 180f;
+        private const float radToDegree = 1 / degreeToRad;
+
         [Fact]
         public static void VectorRotationTest1() {
-            float degreeToRad = MathF.PI / 180f;
-            float radToDegree = 1 / degreeToRad;
 
             { // Test rotation in circles
                 var v1 = new Vector3(2, 0, 0);
@@ -127,6 +130,49 @@ namespace com.csutil.tests {
 
         }
 
+        [Fact]
+        public static void TestUnityMath_Matrix4x4_TRS() {
+
+            var translation = new Vector3(1, 2, 3);
+            var rotation = Quaternion.CreateFromYawPitchRoll(15 * degreeToRad, 45 * degreeToRad, 75 * degreeToRad);
+            var scale = new Vector3(7, 6, 5);
+
+            // TODO rename Matrix4x4_TRS to compose:
+            var matrix = UnityMath.Matrix4x4_TRS(translation, rotation, scale);
+
+            var success = Matrix4x4.Decompose(matrix, out var scale2, out var rotation2, out var translation2);
+            Assert.True(success);
+            var digits = 6;
+            Assert.True(translation.IsSimilarTo(translation2, digits: digits));
+            Assert.True(rotation.IsSimilarTo(rotation2, digits: digits));
+            Assert.True(scale.IsSimilarTo(scale2, digits: digits));
+
+        }
+
+        [Fact]
+        public static void VectorRotationTest2() {
+
+            var input = new Vector3[] {
+                new Vector3(0, 0, 0),
+                new Vector3(1, 0, 0),
+            };
+            var dataToAlignTo = new Vector4[] {
+                new Vector4(0, 0, 0, 1),
+                new Vector4(0, 0, 1, 1),
+            };
+            var solver = new KabschAlgorithm.KabschSolver();
+            var alignmentResult = solver.SolveKabsch(input, dataToAlignTo);
+
+            var dataToAlignTo2 = dataToAlignTo.Map(x => new Vector3(x.X, x.Y, x.Z)).ToArray();
+            var output = input.Map(v => Vector3.Transform(v, alignmentResult)).ToArray();
+
+            var digits = 7;
+            Assert.True(dataToAlignTo2[0].IsSimilarTo(output[0], digits));
+            Assert.True(dataToAlignTo2[1].IsSimilarTo(output[1], digits));
+
+            // TODO das mal in unity testen mit dem exakten Unity code
+
+        }
     }
 
 }

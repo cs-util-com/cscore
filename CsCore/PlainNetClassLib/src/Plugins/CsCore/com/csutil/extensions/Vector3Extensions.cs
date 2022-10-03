@@ -3,10 +3,27 @@ using System.Numerics;
 
 namespace com.csutil {
 
+    public static class QuaternionExtensions {
+
+        public static bool IsSimilarTo(this Quaternion q1, Quaternion q2, int digits) {
+            return Math.Round(q1.X, digits) == Math.Round(q2.X, digits)
+                && Math.Round(q1.Y, digits) == Math.Round(q2.Y, digits)
+                && Math.Round(q1.Z, digits) == Math.Round(q2.Z, digits)
+                && Math.Round(q1.W, digits) == Math.Round(q2.W, digits);
+        }
+
+    }
+
     public static class Vector3Extensions {
 
         public const double DEGREE_TO_RAD = Math.PI / 180d;
         public const double RAD_TO_DEGREE = 180d / Math.PI;
+
+        public static bool IsSimilarTo(this Vector3 vector1, Vector3 vector2, int digits) {
+            return Math.Round(vector1.X, digits) == Math.Round(vector2.X, digits)
+                && Math.Round(vector1.Y, digits) == Math.Round(vector2.Y, digits)
+                && Math.Round(vector1.Z, digits) == Math.Round(vector2.Z, digits);
+        }
 
         public static double AngleSignedInRadTo(this Vector3 vector1, Vector3 vector2, Vector3 axis) {
             // https://stackoverflow.com/a/33920320/165106 
