@@ -30,12 +30,12 @@ namespace com.csutil.tests.math {
         }
 
         public class KabschSolver {
-            
+
             Vector3[] QuatBasis = new Vector3[3];
             Vector3[] DataCovariance = new Vector3[3];
             Quaternion OptimalRotation = Quaternion.identity;
             public float scaleRatio = 1f;
-            
+
             public Matrix4x4 SolveKabsch(Vector3[] inPoints, Vector4[] refPoints, bool solveRotation = true, bool solveScale = false) {
                 if (inPoints.Length != refPoints.Length) { return Matrix4x4.identity; }
 
@@ -121,47 +121,16 @@ namespace com.csutil.tests.math {
                 Profiler.EndSample();
                 return covariance;
             }
-            public static Vector3[] TransposeMultSubtract(Vector3[] vec1, Vector3[] vec2, ref Vector3[] covariance) {
-                for (int i = 0; i < 3; i++) covariance[i] = Vector3.zero;
-
-                for (int k = 0; k < vec1.Length; k++) { //k is the column in this matrix
-                    Vector3 left = vec1[k];
-                    Vector3 right = vec2[k];
-
-                    covariance[0][0] += left[0] * right[0];
-                    covariance[1][0] += left[1] * right[0];
-                    covariance[2][0] += left[2] * right[0];
-                    covariance[0][1] += left[0] * right[1];
-                    covariance[1][1] += left[1] * right[1];
-                    covariance[2][1] += left[2] * right[1];
-                    covariance[0][2] += left[0] * right[2];
-                    covariance[1][2] += left[1] * right[2];
-                    covariance[2][2] += left[2] * right[2];
-                }
-                return covariance;
-            }
-
 
         }
     }
 
     internal static class FromMatrixExtension {
 
-        public static Vector3 GetVector3(this Matrix4x4 m) { return m.GetColumn(3); }
-
-        public static Quaternion GetQuaternion(this Matrix4x4 m) {
-            if (m.GetColumn(2) == m.GetColumn(1)) { return Quaternion.identity; }
-            return Quaternion.LookRotation(m.GetColumn(2), m.GetColumn(1));
-        }
-
         public static void FillMatrixFromQuaternion(this Quaternion q, ref Vector3[] covariance) {
             covariance[0] = q * Vector3.right;
             covariance[1] = q * Vector3.up;
             covariance[2] = q * Vector3.forward;
-        }
-
-        public static Matrix4x4 Lerp(Matrix4x4 a, Matrix4x4 b, float alpha) {
-            return Matrix4x4.TRS(Vector3.Lerp(a.GetVector3(), b.GetVector3(), alpha), Quaternion.Slerp(a.GetQuaternion(), b.GetQuaternion(), alpha), Vector3.one);
         }
 
     }

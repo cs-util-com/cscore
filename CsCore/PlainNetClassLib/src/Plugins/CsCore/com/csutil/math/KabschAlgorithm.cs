@@ -116,25 +116,6 @@ namespace com.csutil.math {
                 return covariance;
             }
 
-            //private static Vector3[] TransposeMultSubtract(Vector3[] vec1, Vector3[] vec2, ref Vector3[] covariance) {
-            //    for (int i = 0; i < 3; i++) covariance[i] = Vector3.Zero;
-
-            //    for (int k = 0; k < vec1.Length; k++) {//k is the column in this matrix
-            //        Vector3 left = vec1[k];
-            //        Vector3 right = vec2[k];
-
-            //        covariance[0].X += left.X * right.X;
-            //        covariance[1].X += left.Y * right.X;
-            //        covariance[2].X += left.Z * right.X;
-            //        covariance[0].Y += left.X * right.Y;
-            //        covariance[1].Y += left.Y * right.Y;
-            //        covariance[2].Y += left.Z * right.Y;
-            //        covariance[0].Z += left.X * right.Z;
-            //        covariance[1].Z += left.Y * right.Z;
-            //        covariance[2].Z += left.Z * right.Z;
-            //    }
-            //    return covariance;
-            //}
         }
 
     }
@@ -146,21 +127,6 @@ namespace com.csutil.math {
         public static readonly Vector3 Vector3_up = new Vector3(0, 1, 0);
         public static readonly Vector3 Vector3_forward = new Vector3(0, 0, 1);
 
-        // https://docs.unity3d.com/ScriptReference/Matrix4x4.GetColumn.html
-        public static Vector3 GetColumn1(this Matrix4x4 m) {
-            return new Vector3(m.M21, m.M22, m.M23); //return m.GetColumn(1);
-        }
-
-        // https://docs.unity3d.com/ScriptReference/Matrix4x4.GetColumn.html
-        public static Vector3 GetColumn2(this Matrix4x4 m) {
-            return new Vector3(m.M31, m.M32, m.M33); //return m.GetColumn(2);
-        }
-
-        // https://docs.unity3d.com/ScriptReference/Matrix4x4.GetColumn.html
-        public static Vector3 GetColumn3(this Matrix4x4 m) {
-            return new Vector3(m.M41, m.M42, m.M43); //return m.GetColumn(3);
-        }
-
         public static void FillMatrixFromQuaternion(Quaternion q, ref Vector3[] covariance) {
             covariance[0] = Vector3_right.Rotate(q);
             covariance[1] = Vector3_up.Rotate(q);
@@ -169,19 +135,6 @@ namespace com.csutil.math {
 
         public static Matrix4x4 Matrix4x4_TRS(Vector3 position, Quaternion rotation, Vector3 scale) {
             return Matrix4x4.CreateScale(scale) * Matrix4x4.CreateFromQuaternion(rotation) * Matrix4x4.CreateTranslation(position);
-        }
-
-        public static Matrix4x4 Lerp(Matrix4x4 a, Matrix4x4 b, float alpha) {
-            return Matrix4x4_TRS(Vector3.Lerp(a.GetColumn3(), b.GetColumn3(), alpha), Quaternion.Slerp(GetQuaternion(a), GetQuaternion(b), alpha), Vector3.One);
-        }
-
-        private static Quaternion GetQuaternion(Matrix4x4 m) {
-            if (m.GetColumn2() == m.GetColumn1()) { return Quaternion.Identity; }
-            return Quaternion_LookRotation(m.GetColumn2(), m.GetColumn1());
-        }
-
-        private static Quaternion Quaternion_LookRotation(Vector3 forward, Vector3 upwards) {
-            return Quaternion.CreateFromRotationMatrix(Matrix4x4.CreateLookAt(Vector3.Zero, forward, upwards));
         }
 
     }
