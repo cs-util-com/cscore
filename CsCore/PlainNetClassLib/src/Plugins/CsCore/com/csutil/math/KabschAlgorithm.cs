@@ -60,9 +60,9 @@ namespace com.csutil.math {
                     extractRotation(TransposeMultSubtract(inPoints, refPoints, inCentroid, refCentroid, DataCovariance), ref OptimalRotation);
                 }
 
-                var scale = Matrix4x4_TRS(refCentroid, Quaternion.Identity, Vector3.One * scaleRatio);
-                var rotation = Matrix4x4_TRS(Vector3.Zero, OptimalRotation, Vector3.One);
-                var translation = Matrix4x4_TRS(-inCentroid, Quaternion.Identity, Vector3.One);
+                var scale = Matrix4x4Extensions.Compose(refCentroid, Quaternion.Identity, Vector3.One * scaleRatio).Transpose();
+                var rotation = Matrix4x4.CreateFromQuaternion(OptimalRotation).Transpose();
+                var translation = Matrix4x4.CreateTranslation(-inCentroid).Transpose();
                 var result = scale * rotation * translation;
                 return Matrix4x4.Transpose(result); // Needed in System.Numerics version but not in original Unity version 
             }
@@ -119,10 +119,6 @@ namespace com.csutil.math {
                 covariance[0] = Vector3_right.Rotate(q);
                 covariance[1] = Vector3_up.Rotate(q);
                 covariance[2] = Vector3_forward.Rotate(q);
-            }
-
-            private static Matrix4x4 Matrix4x4_TRS(Vector3 position, Quaternion rotation, Vector3 scale) {
-                return Matrix4x4.Transpose(Matrix4x4Extensions.Compose(position, rotation, scale));
             }
 
         }
