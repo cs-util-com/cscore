@@ -131,7 +131,7 @@ namespace com.csutil.tests {
         }
 
         [Fact]
-        public void TestUnityMath_Matrix4x4_TRS() {
+        public void TestMatrixComposeDecompose() {
 
             var translation = new Vector3(1, 2, 3);
             var rotation = Quaternion.CreateFromYawPitchRoll(15 * degreeToRad, 45 * degreeToRad, 75 * degreeToRad);
@@ -140,7 +140,7 @@ namespace com.csutil.tests {
             // TODO rename Matrix4x4_TRS to compose:
             var matrix = Matrix4x4Extensions.Compose(translation, rotation, scale);
 
-            var success = Matrix4x4.Decompose(matrix, out var scale2, out var rotation2, out var translation2);
+            var success = matrix.Decompose(out var scale2, out var rotation2, out var translation2);
             Assert.True(success);
             var digits = 6;
             Assert.True(translation.IsSimilarTo(translation2, digits: digits));
@@ -155,10 +155,14 @@ namespace com.csutil.tests {
             var input = new Vector3[] {
                 new Vector3(0, 0, 0),
                 new Vector3(1, 0, 0),
+                new Vector3(2, 0, 0),
+                new Vector3(2, 0, -1),
             };
             var dataToAlignTo = new Vector4[] {
                 new Vector4(0, 0, 0, 1),
                 new Vector4(0, 0, 1, 1),
+                new Vector4(0, 0, 2, 1),
+                new Vector4(1, 0, 2, 1),
             };
             var solver = new KabschAlgorithm();
             var alignmentResult = solver.SolveKabsch(input, dataToAlignTo);
@@ -169,8 +173,13 @@ namespace com.csutil.tests {
             var digits = 7;
             AssertAreEqual(dataToAlignTo2[0], (output[0]));
             AssertAreEqual(dataToAlignTo2[1], (output[1]));
+            AssertAreEqual(dataToAlignTo2[2], (output[2]));
+            AssertAreEqual(dataToAlignTo2[3], (output[3]));
 
-            // TODO das mal in unity testen mit dem exakten Unity code
+            alignmentResult.Decompose(out var scale, out var rotation, out var translation);
+
+            Assert.True(translation.IsSimilarTo(Vector3.Zero, 6));
+            Assert.True(scale.IsSimilarTo(Vector3.One, 6));
 
         }
 
