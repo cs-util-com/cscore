@@ -60,11 +60,10 @@ namespace com.csutil.math {
                     extractRotation(TransposeMultSubtract(inPoints, refPoints, inCentroid, refCentroid, DataCovariance), ref OptimalRotation);
                 }
 
-                var scale = Matrix4x4Extensions.Compose(refCentroid, Quaternion.Identity, Vector3.One * scaleRatio).Transpose();
-                var rotation = Matrix4x4.CreateFromQuaternion(OptimalRotation).Transpose();
-                var translation = Matrix4x4.CreateTranslation(-inCentroid).Transpose();
-                var result = scale * rotation * translation;
-                return Matrix4x4.Transpose(result); // Needed in System.Numerics version but not in original Unity version 
+                var translation = Matrix4x4.CreateTranslation(-inCentroid);
+                var rotation = Matrix4x4.CreateFromQuaternion(OptimalRotation);
+                var scale = Matrix4x4Extensions.Compose(refCentroid, Quaternion.Identity, Vector3.One * scaleRatio);
+                return translation * rotation * scale;
             }
 
             // Uses Matthias Muller's polar decomposition solver in place of SVD
