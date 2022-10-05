@@ -71,9 +71,7 @@ namespace com.csutil.math {
             //https://animation.rwth-aachen.de/media/papers/2016-MIG-StableRotation.pdf
             //Iteratively apply torque to the basis using Cross products (in place of SVD)
             private void extractRotation(Vector3[] A, ref Quaternion q, int iterationsCount = 9) {
-                var t = Log.MethodEntered("Solve Optimal Rotation");
                 for (int iter = 0; iter < iterationsCount; iter++) {
-                    // var t2 = Log.MethodEntered("Iterate Quaternion");
                     FillMatrixFromQuaternion(q, ref QuatBasis);
                     Vector3 omega = (Vector3.Cross(QuatBasis[0], A[0]) +
                         Vector3.Cross(QuatBasis[1], A[1]) +
@@ -83,35 +81,23 @@ namespace com.csutil.math {
                             Vector3.Dot(QuatBasis[2], A[2]) + 0.000000001f));
 
                     float w = omega.Length(); // magnitude
-                    if (w < 0.000000001f) {
-                        break;
-                    }
+                    if (w < 0.000000001f) { break; }
                     var axis = omega / w;
                     var angle = w % TWO_PI;
-                    var fromAxisAngle = Quaternion.CreateFromAxisAngle(axis, angle);
-                    q = fromAxisAngle * q;
-                    q = Quaternion.Normalize(q);
-                    // TODO keep or remove? :
-                    //q = Quaternion.Lerp(q, q, 0f); //Normalizes the Quaternion; critical for error suppression
-                    // Log.MethodDone(t2);
+                    q = Quaternion.Normalize(Quaternion.CreateFromAxisAngle(axis, angle) * q);
                 }
-
-                Log.MethodDone(t);
             }
 
             private const float TWO_PI = 2f * 3.1415926535897931f;
 
             //Calculate Covariance Matrices --------------------------------------------------
             private static Vector3[] TransposeMultSubtract(Vector3[] vec1, Vector4[] vec2, Vector3 vec1Centroid, Vector3 vec2Centroid, Vector3[] covariance) {
-                var t = Log.MethodEntered("Calculate Covariance Matrix");
                 for (int i = 0; i < 3; i++) { //i is the row in this matrix
                     covariance[i] = Vector3.Zero;
                 }
-
                 for (int k = 0; k < vec1.Length; k++) { //k is the column in this matrix
                     Vector3 left = (vec1[k] - vec1Centroid) * vec2[k].W;
                     Vector3 right = (new Vector3(vec2[k].X, vec2[k].Y, vec2[k].Z) - vec2Centroid) * Math.Abs(vec2[k].W);
-
                     covariance[0].X += left.X * right.X;
                     covariance[1].X += left.Y * right.X;
                     covariance[2].X += left.Z * right.X;
@@ -122,7 +108,6 @@ namespace com.csutil.math {
                     covariance[1].Z += left.Y * right.Z;
                     covariance[2].Z += left.Z * right.Z;
                 }
-                Log.MethodDone(t);
                 return covariance;
             }
 
@@ -137,11 +122,7 @@ namespace com.csutil.math {
             }
 
             private static Matrix4x4 Matrix4x4_TRS(Vector3 position, Quaternion rotation, Vector3 scale) {
-                return Matrix4x4.Transpose(Compose(position, rotation, scale));
-            }
-
-            public static Matrix4x4 Compose(Vector3 position, Quaternion rotation, Vector3 scale) {
-                return Matrix4x4.CreateScale(scale) * Matrix4x4.CreateFromQuaternion(rotation) * Matrix4x4.CreateTranslation(position);
+                return Matrix4x4.Transpose(Matrix4x4Extensions.Compose(position, rotation, scale));
             }
 
         }

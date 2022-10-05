@@ -138,7 +138,7 @@ namespace com.csutil.tests {
             var scale = new Vector3(7, 6, 5);
 
             // TODO rename Matrix4x4_TRS to compose:
-            var matrix = KabschAlgorithm.KabschSolver.Compose(translation, rotation, scale);
+            var matrix = Matrix4x4Extensions.Compose(translation, rotation, scale);
 
             var success = Matrix4x4.Decompose(matrix, out var scale2, out var rotation2, out var translation2);
             Assert.True(success);
@@ -150,7 +150,7 @@ namespace com.csutil.tests {
         }
 
         [Fact]
-        public void VectorRotationTest2() {
+        public void TestKabschAlgorithm() {
 
             var input = new Vector3[] {
                 new Vector3(0, 0, 0),
