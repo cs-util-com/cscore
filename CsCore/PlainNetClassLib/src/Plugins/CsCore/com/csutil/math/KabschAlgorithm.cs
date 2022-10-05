@@ -74,7 +74,7 @@ namespace com.csutil.math {
                 var t = Log.MethodEntered("Solve Optimal Rotation");
                 for (int iter = 0; iter < iterationsCount; iter++) {
                     // var t2 = Log.MethodEntered("Iterate Quaternion");
-                    UnityMath.FillMatrixFromQuaternion(q, ref QuatBasis);
+                    FillMatrixFromQuaternion(q, ref QuatBasis);
                     Vector3 omega = (Vector3.Cross(QuatBasis[0], A[0]) +
                         Vector3.Cross(QuatBasis[1], A[1]) +
                         Vector3.Cross(QuatBasis[2], A[2])) *
@@ -126,25 +126,24 @@ namespace com.csutil.math {
                 return covariance;
             }
 
-        }
+            private static readonly Vector3 Vector3_right = new Vector3(1, 0, 0);
+            private static readonly Vector3 Vector3_up = new Vector3(0, 1, 0);
+            private static readonly Vector3 Vector3_forward = new Vector3(0, 0, 1);
 
-    }
+            private static void FillMatrixFromQuaternion(Quaternion q, ref Vector3[] covariance) {
+                covariance[0] = Vector3_right.Rotate(q);
+                covariance[1] = Vector3_up.Rotate(q);
+                covariance[2] = Vector3_forward.Rotate(q);
+            }
 
-    // Ported methods that do exist in Unity math but not in System Numerics
-    public static class UnityMath {
+            private static Matrix4x4 Matrix4x4_TRS(Vector3 position, Quaternion rotation, Vector3 scale) {
+                return Matrix4x4.Transpose(Compose(position, rotation, scale));
+            }
 
-        public static readonly Vector3 Vector3_right = new Vector3(1, 0, 0);
-        public static readonly Vector3 Vector3_up = new Vector3(0, 1, 0);
-        public static readonly Vector3 Vector3_forward = new Vector3(0, 0, 1);
+            public static Matrix4x4 Compose(Vector3 position, Quaternion rotation, Vector3 scale) {
+                return Matrix4x4.CreateScale(scale) * Matrix4x4.CreateFromQuaternion(rotation) * Matrix4x4.CreateTranslation(position);
+            }
 
-        public static void FillMatrixFromQuaternion(Quaternion q, ref Vector3[] covariance) {
-            covariance[0] = Vector3_right.Rotate(q);
-            covariance[1] = Vector3_up.Rotate(q);
-            covariance[2] = Vector3_forward.Rotate(q);
-        }
-
-        public static Matrix4x4 Matrix4x4_TRS(Vector3 position, Quaternion rotation, Vector3 scale) {
-            return Matrix4x4.CreateScale(scale) * Matrix4x4.CreateFromQuaternion(rotation) * Matrix4x4.CreateTranslation(position);
         }
 
     }

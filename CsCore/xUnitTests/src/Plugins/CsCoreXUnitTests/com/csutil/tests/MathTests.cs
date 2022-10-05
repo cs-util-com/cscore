@@ -131,14 +131,14 @@ namespace com.csutil.tests {
         }
 
         [Fact]
-        public static void TestUnityMath_Matrix4x4_TRS() {
+        public void TestUnityMath_Matrix4x4_TRS() {
 
             var translation = new Vector3(1, 2, 3);
             var rotation = Quaternion.CreateFromYawPitchRoll(15 * degreeToRad, 45 * degreeToRad, 75 * degreeToRad);
             var scale = new Vector3(7, 6, 5);
 
             // TODO rename Matrix4x4_TRS to compose:
-            var matrix = UnityMath.Matrix4x4_TRS(translation, rotation, scale);
+            var matrix = KabschAlgorithm.KabschSolver.Compose(translation, rotation, scale);
 
             var success = Matrix4x4.Decompose(matrix, out var scale2, out var rotation2, out var translation2);
             Assert.True(success);
@@ -150,7 +150,7 @@ namespace com.csutil.tests {
         }
 
         [Fact]
-        public static void VectorRotationTest2() {
+        public void VectorRotationTest2() {
 
             var input = new Vector3[] {
                 new Vector3(0, 0, 0),

@@ -107,7 +107,7 @@ namespace com.csutil.tests.math {
             }
 
             private const float TWO_PI = 2f * 3.1415926535897931f;
-            
+
             //Calculate Covariance Matrices --------------------------------------------------
             public static Vector3[] TransposeMultSubtract(Vector3[] vec1, Vector4[] vec2, Vector3 vec1Centroid, Vector3 vec2Centroid, Vector3[] covariance) {
                 Profiler.BeginSample("Calculate Covariance Matrix");
