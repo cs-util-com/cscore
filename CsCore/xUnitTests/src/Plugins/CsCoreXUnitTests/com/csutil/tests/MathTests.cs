@@ -160,7 +160,7 @@ namespace com.csutil.tests {
                 new Vector4(0, 0, 0, 1),
                 new Vector4(0, 0, 1, 1),
             };
-            var solver = new KabschAlgorithm.KabschSolver();
+            var solver = new KabschAlgorithm();
             var alignmentResult = solver.SolveKabsch(input, dataToAlignTo);
 
             var dataToAlignTo2 = dataToAlignTo.Map(x => new Vector3(x.X, x.Y, x.Z)).ToArray();
