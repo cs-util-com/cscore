@@ -166,15 +166,19 @@ namespace com.csutil.tests {
             var dataToAlignTo2 = dataToAlignTo.Map(x => new Vector3(x.X, x.Y, x.Z)).ToArray();
             var output = input.Map(v => Vector3.Transform(v, alignmentResult)).ToArray();
 
-            throw Log.e("output[1]=" + output[1]);
-            
             var digits = 7;
-            Assert.True(dataToAlignTo2[0].IsSimilarTo(output[0], digits));
-            Assert.True(dataToAlignTo2[1].IsSimilarTo(output[1], digits));
+            AssertAreEqual(dataToAlignTo2[0], (output[0]));
+            AssertAreEqual(dataToAlignTo2[1], (output[1]));
 
             // TODO das mal in unity testen mit dem exakten Unity code
 
         }
+
+        private static void AssertAreEqual(Vector3 a, Vector3 b) {
+            var diff = a - b;
+            Assert.True(diff.Length() < 0.00001, "diff=" + diff);
+        }
+
     }
 
 }

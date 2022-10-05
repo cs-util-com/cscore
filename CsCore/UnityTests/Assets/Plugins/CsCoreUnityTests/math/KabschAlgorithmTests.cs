@@ -74,9 +74,10 @@ namespace com.csutil.tests.math {
                     Profiler.EndSample();
                 }
 
-                return Matrix4x4.TRS(refCentroid, Quaternion.identity, Vector3.one * scaleRatio) *
-                    Matrix4x4.TRS(Vector3.zero, OptimalRotation, Vector3.one) *
-                    Matrix4x4.TRS(-inCentroid, Quaternion.identity, Vector3.one);
+                var scale = Matrix4x4.TRS(refCentroid, Quaternion.identity, Vector3.one * scaleRatio);
+                var rotation = Matrix4x4.TRS(Vector3.zero, OptimalRotation, Vector3.one);
+                var translation = Matrix4x4.TRS(-inCentroid, Quaternion.identity, Vector3.one);
+                return scale * rotation * translation;
             }
 
             //https://animation.rwth-aachen.de/media/papers/2016-MIG-StableRotation.pdf
