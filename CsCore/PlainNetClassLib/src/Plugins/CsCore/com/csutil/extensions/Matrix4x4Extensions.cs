@@ -14,6 +14,8 @@ namespace com.csutil {
             return Matrix4x4.Decompose(matrix, out scale, out rotation, out translation);
         }
 
+        public static Vector3 Transform(this Matrix4x4 transformationMatrix, Vector3 vecToTransform) { return Vector3.Transform(vecToTransform, transformationMatrix); }
+
     }
 
 }
