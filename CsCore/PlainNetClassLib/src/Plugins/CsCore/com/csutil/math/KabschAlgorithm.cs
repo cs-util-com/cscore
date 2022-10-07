@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
 
@@ -21,14 +22,15 @@ namespace com.csutil.math {
         /// <param name="solveRotation"></param>
         /// <param name="solveScale"></param>
         /// <returns></returns>
-        public Matrix4x4 SolveKabsch(Vector3[] inPoints, Vector4[] refPoints, bool solveRotation = true, bool solveScale = false) {
-            if (inPoints.Length != refPoints.Length) { throw new InvalidDataException("Length of the point lists was not equal"); }
+        public Matrix4x4 SolveKabsch(IReadOnlyList<Vector3> inPoints, IReadOnlyList<Vector4> refPoints, bool solveRotation = true, bool solveScale = false) {
+            var inPointsCount = inPoints.Count;
+            if (inPointsCount != refPoints.Count) { throw new InvalidDataException("Length of the point lists was not equal"); }
 
             //Calculate the centroid offset and construct the centroid-shifted point matrices
             Vector3 inCentroid = Vector3.Zero;
             Vector3 refCentroid = Vector3.Zero;
             float inTotal = 0f, refTotal = 0f;
-            for (int i = 0; i < inPoints.Length; i++) {
+            for (int i = 0; i < inPointsCount; i++) {
                 inCentroid += new Vector3(inPoints[i].X, inPoints[i].Y, inPoints[i].Z) * refPoints[i].W;
                 inTotal += refPoints[i].W;
                 refCentroid += new Vector3(refPoints[i].X, refPoints[i].Y, refPoints[i].Z) * refPoints[i].W;
@@ -41,7 +43,7 @@ namespace com.csutil.math {
             float scaleRatio = 1f;
             if (solveScale) {
                 float inScale = 0f, refScale = 0f;
-                for (int i = 0; i < inPoints.Length; i++) {
+                for (int i = 0; i < inPointsCount; i++) {
                     inScale += (new Vector3(inPoints[i].X, inPoints[i].Y, inPoints[i].Z) - inCentroid).Length();
                     refScale += (new Vector3(refPoints[i].X, refPoints[i].Y, refPoints[i].Z) - refCentroid).Length();
                 }
@@ -76,7 +78,7 @@ namespace com.csutil.math {
         private readonly Vector3[] _dataCovariance = new Vector3[3];
         private Vector3[] _quatBasis = new Vector3[3];
 
-        public void Solve(Vector3[] inPoints, Vector4[] refPoints, Vector3 inCentroid, Vector3 refCentroid, ref Quaternion resultOptimalRotation, int iterationsCount = 9) {
+        public void Solve(IReadOnlyList<Vector3> inPoints, IReadOnlyList<Vector4> refPoints, Vector3 inCentroid, Vector3 refCentroid, ref Quaternion resultOptimalRotation, int iterationsCount = 9) {
             ExtractRotation(TransposeMultSubtract(inPoints, refPoints, inCentroid, refCentroid, _dataCovariance), ref resultOptimalRotation, iterationsCount);
         }
 
@@ -102,11 +104,11 @@ namespace com.csutil.math {
         }
 
         /// <summary> Calculate Covariance Matrices </summary>
-        private static Vector3[] TransposeMultSubtract(Vector3[] vec1, Vector4[] vec2, Vector3 vec1Centroid, Vector3 vec2Centroid, Vector3[] covariance) {
+        private static Vector3[] TransposeMultSubtract(IReadOnlyList<Vector3> vec1, IReadOnlyList<Vector4> vec2, Vector3 vec1Centroid, Vector3 vec2Centroid, Vector3[] covariance) {
             for (var i = 0; i < 3; i++) { //i is the row in this matrix
                 covariance[i] = Vector3.Zero;
             }
-            for (var k = 0; k < vec1.Length; k++) { //k is the column in this matrix
+            for (var k = 0; k < vec1.Count; k++) { //k is the column in this matrix
                 Vector3 left = (vec1[k] - vec1Centroid) * vec2[k].W;
                 Vector3 right = (new Vector3(vec2[k].X, vec2[k].Y, vec2[k].Z) - vec2Centroid) * Math.Abs(vec2[k].W);
                 covariance[0].X += left.X * right.X;
