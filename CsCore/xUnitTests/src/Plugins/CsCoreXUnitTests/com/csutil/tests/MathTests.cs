@@ -170,7 +170,6 @@ namespace com.csutil.tests {
             var dataToAlignTo2 = dataToAlignTo.Map(x => new Vector3(x.X, x.Y, x.Z)).ToArray();
             var output = input.Map(v => Vector3.Transform(v, alignmentResult)).ToArray();
 
-            var digits = 7;
             AssertAreEqual(dataToAlignTo2[0], (output[0]));
             AssertAreEqual(dataToAlignTo2[1], (output[1]));
             AssertAreEqual(dataToAlignTo2[2], (output[2]));
@@ -183,9 +182,9 @@ namespace com.csutil.tests {
 
         }
 
-        private static void AssertAreEqual(Vector3 a, Vector3 b) {
+        private static void AssertAreEqual(Vector3 a, Vector3 b, double allowedDelta = 0.00001) {
             var diff = a - b;
-            Assert.True(diff.Length() < 0.00001, "diff=" + diff);
+            Assert.True(diff.Length() < allowedDelta, "diff=" + diff);
         }
 
     }
