@@ -14,7 +14,7 @@ namespace com.csutil.ui.viewstack {
         public bool destroyFinalView = true;
 
         public void Update() {
-            if (Input.GetKeyUp(KeyCode.Escape)) { // back button pressed
+            if (InputV2.GetKeyUp(KeyCode.Escape)) { // back button pressed
                 Log.d("Back key pressed");
                 var vs = gameObject.GetComponent<ViewStack>();
                 var screenOnTop = GetCanvasWithHighestSortingOrder();
