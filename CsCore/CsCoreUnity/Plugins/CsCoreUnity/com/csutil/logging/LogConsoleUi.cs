@@ -14,9 +14,24 @@ namespace com.csutil.logging {
         public static void RegisterForAllLogEvents(object caller, bool hideAtStart = true) {
             var consoleUi = GetLogConsole(caller);
             var logger = new LogToLogConsoleConnector(consoleUi);
-            Log.AddLoggerToLogInstances(logger);
-            consoleUi.gameObject.AddOnDestroyListener(() => Log.RemoveLoggerFromLogInstances(logger));
+            logger.RegisterForLoggingV2_AllLogEvents();
             consoleUi.ShowConsole(!hideAtStart);
+        }
+
+        /// <summary> This will only log the errors send to the csutil Log system </summary>
+        public static void RegisterForLoggingV1_OnlyExplicitLogCalls(this LogToLogConsoleConnector logger) {
+            Log.AddLoggerToLogInstances(logger);
+            logger.logUi.gameObject.AddOnDestroyListener(() => {
+                Log.RemoveLoggerFromLogInstances(logger);
+            });
+        }
+
+        /// <summary> This will log all errors send to any logging sink </summary>
+        public static void RegisterForLoggingV2_AllLogEvents(this LogToLogConsoleConnector logger) {
+            Application.logMessageReceivedThreaded += logger.HandleLogMessageReceivedThreaded;
+            logger.logUi.gameObject.AddOnDestroyListener(() => {
+                Application.logMessageReceivedThreaded -= logger.HandleLogMessageReceivedThreaded;
+            });
         }
 
         public static LogConsoleUi GetLogConsole(object caller) {
@@ -31,9 +46,10 @@ namespace com.csutil.logging {
 
     }
 
-    internal class LogToLogConsoleConnector : LogDefaultImpl {
+    public class LogToLogConsoleConnector : LogDefaultImpl {
 
-        private LogConsoleUi logUi;
+        internal LogConsoleUi logUi;
+        
         public LogToLogConsoleConnector(LogConsoleUi logConsoleUi) { this.logUi = logConsoleUi; }
 
         protected override void PrintDebugMessage(string d, params object[] args) { logUi.AddToLog(LogEntry.d(d)); }
@@ -53,6 +69,24 @@ namespace com.csutil.logging {
             logUi.AddToLog(LogEntry.d("    <-- " + methodName + " finished after " + timing.ElapsedMilliseconds + " ms" + argStr));
         }
 
+        private const string LINE_BREAK = "\n";
+        
+        public void HandleLogMessageReceivedThreaded(string condition, string stacktrace, LogType type) {
+            switch (type) {
+                case LogType.Log:
+                    PrintDebugMessage(condition + LINE_BREAK + stacktrace);
+                    break;
+                case LogType.Warning:
+                    PrintWarningMessage(condition + LINE_BREAK + stacktrace);
+                    break;
+                case LogType.Assert:
+                case LogType.Error:
+                case LogType.Exception:
+                    PrintErrorMessage(condition + LINE_BREAK + stacktrace);
+                    break;
+            }
+        }
+        
     }
 
     public class LogConsoleUi : BaseController<LogEntry> {

@@ -1,5 +1,6 @@
 ﻿using com.csutil.logging;
 using System.Collections;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -27,6 +28,16 @@ namespace com.csutil.tests.ui {
             entry.color = Color.green.GetDarkerVariant();
             LogConsole.GetLogConsole(this).AddToLog(entry);
 
+            TestIfThrownExceptionsAreShownInTheConsole().LogOnError();
+            
+            // Throw an exception that is not reported to the Log class but only detected by Unity logging:
+            throw new System.Exception("I am an exception 1"); 
+
+        }
+
+        private async Task TestIfThrownExceptionsAreShownInTheConsole() {
+            await TaskV2.Delay(500);
+            throw new System.Exception("I am an exception 2");
         }
 
     }
