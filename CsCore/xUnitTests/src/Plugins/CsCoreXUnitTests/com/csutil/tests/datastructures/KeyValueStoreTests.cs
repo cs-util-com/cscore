@@ -441,6 +441,29 @@ namespace com.csutil.tests.keyvaluestore {
 
         }
 
+        [Fact]
+        public async Task TestTypesNotLost() {
+
+            TypedJsonHelper.SetupTypedJsonWriterAndReaderSingletons(overrideExisting: true);
+            {
+                var ms = new InMemoryKeyValueStore();
+                await TestTypesNotLostWith(ms, ms);
+            }
+            {
+                var folder = EnvironmentV2.instance.GetNewInMemorySystem();
+                await TestTypesNotLostWith(new FileBasedKeyValueStore(folder), new FileBasedKeyValueStore(folder));
+            }
+            
+        }
+        
+        private static async Task TestTypesNotLostWith(IKeyValueStore s1, IKeyValueStore s2) {
+            var x = new MySheetEntry() { myInt1 = 123 };
+            await s1.Set("1", x);
+            var res = await s2.Get<object>("1", null);
+            Assert.IsType<MySheetEntry>(res);
+            Assert.Equal(x.myInt1, ((MySheetEntry)res).myInt1);
+        }
+
 #pragma warning disable 0649 // Variable is never assigned to, and will always have its default value
         // Fields must be in sync with first row in the source Google Sheet, see names in:
         // https://docs.google.com/spreadsheets/d/13R9y6lnUMgRPC0PinJ23tACC6Flgogxa7h7SVaaLhT0
