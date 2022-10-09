@@ -79,7 +79,12 @@ namespace com.csutil.logging {
             SearchInputField().SetOnValueChangedAction(delegate { UpdateFilter(NewFilter()); return true; });
         }
 
-        private void InitMap() { map = gameObject.GetComponentInParents<Canvas>().gameObject.GetLinkMap(); }
+        private void InitMap() {
+            var c = gameObject.GetComponentInParents<Canvas>();
+            AssertV2.IsNotNull(c, "Canvas in LogConsoleUi parent");
+            if (c == null) { c = gameObject.GetParent().GetComponent<Canvas>(); }
+            map = c.gameObject.GetLinkMap();
+        }
 
         private void ToggleConsoleVisibility() { ShowConsole(!gameObject.activeSelf); }
 
