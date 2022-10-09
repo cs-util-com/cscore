@@ -15,9 +15,9 @@ namespace com.csutil {
             return fix * new Quaternion(q.x, q.y, -q.z, -q.w);
         }
 
-        public static void EnableIncludingCompass(this Gyroscope self) {
+        public static void EnableIncludingCompass(this Gyroscope self, float desiredAccuracyInMeters = 10, float updateDistanceInMeters = 10) {
             Input.compass.enabled = true;
-            Input.location.Start();
+            Input.location.Start(desiredAccuracyInMeters, updateDistanceInMeters); // https://docs.unity3d.com/ScriptReference/LocationService.Start.html
             self.enabled = true;
         }
 
