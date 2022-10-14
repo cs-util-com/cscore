@@ -14,7 +14,7 @@ namespace com.csutil.math {
     public class KabschAlgorithm {
 
         private Quaternion _optimalRotation = Quaternion.Identity;
-        private readonly OptimalRotationViaPolarDecompositionSolver optimalRotationSolver = new OptimalRotationViaPolarDecompositionSolver();
+        public readonly OptimalRotationViaPolarDecompositionSolver optimalRotationSolver = new OptimalRotationViaPolarDecompositionSolver();
 
         /// <summary> </summary>
         /// <param name="inPoints"></param>
@@ -78,6 +78,8 @@ namespace com.csutil.math {
         private readonly Vector3[] _dataCovariance = new Vector3[3];
         private Vector3[] _quatBasis = new Vector3[3];
 
+        public bool ignoreYAxisForRotationSolving = false;
+
         public void Solve(IReadOnlyList<Vector3> inPoints, IReadOnlyList<Vector4> refPoints, Vector3 inCentroid, Vector3 refCentroid, ref Quaternion resultOptimalRotation, int iterationsCount = 9) {
             ExtractRotation(TransposeMultSubtract(inPoints, refPoints, inCentroid, refCentroid, _dataCovariance), ref resultOptimalRotation, iterationsCount);
         }
@@ -104,13 +106,25 @@ namespace com.csutil.math {
         }
 
         /// <summary> Calculate Covariance Matrices </summary>
-        private static Vector3[] TransposeMultSubtract(IReadOnlyList<Vector3> vec1, IReadOnlyList<Vector4> vec2, Vector3 vec1Centroid, Vector3 vec2Centroid, Vector3[] covariance) {
+        private Vector3[] TransposeMultSubtract(IReadOnlyList<Vector3> vectors1, IReadOnlyList<Vector4> vectors2, Vector3 vec1Centroid, Vector3 vec2Centroid, Vector3[] covariance) {
             for (var i = 0; i < 3; i++) { //i is the row in this matrix
                 covariance[i] = Vector3.Zero;
             }
-            for (var k = 0; k < vec1.Count; k++) { //k is the column in this matrix
-                Vector3 left = (vec1[k] - vec1Centroid) * vec2[k].W;
-                Vector3 right = (new Vector3(vec2[k].X, vec2[k].Y, vec2[k].Z) - vec2Centroid) * Math.Abs(vec2[k].W);
+
+            if (ignoreYAxisForRotationSolving) {
+                vec1Centroid.Y = 0;
+                vec2Centroid.Y = 0;
+            }
+
+            for (var k = 0; k < vectors1.Count; k++) { //k is the column in this matrix
+                var vector1 = vectors1[k];
+                var vector2 = vectors2[k];
+                if (ignoreYAxisForRotationSolving) {
+                    vector1.Y = 0;
+                    vector2.Y = 0;
+                }
+                Vector3 left = (vector1 - vec1Centroid) * vector2.W;
+                Vector3 right = (new Vector3(vector2.X, vector2.Y, vector2.Z) - vec2Centroid) * Math.Abs(vector2.W);
                 covariance[0].X += left.X * right.X;
                 covariance[1].X += left.Y * right.X;
                 covariance[2].X += left.Z * right.X;
