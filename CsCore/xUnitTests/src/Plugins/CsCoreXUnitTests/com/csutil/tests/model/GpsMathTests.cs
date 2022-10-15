@@ -30,15 +30,15 @@ namespace com.csutil.tests.gps {
             // On the relative points any normal vector math can be done, eg calculating distances:
             {
                 var fromP1ToP2 = p2 - p1;
-                int distanceInMeters = (int)fromP1ToP2.Length();
+                var distanceInMeters = fromP1ToP2.Length();
                 // Google Earth says it should be 1.064,14m
-                Assert.Equal(1065, distanceInMeters);
+                Assert.Equal(1064, Math.Round(distanceInMeters));
             }
             {
                 var fromP1ToP3 = p3 - p1;
-                int distanceInMeters = (int)fromP1ToP3.Length();
+                var distanceInMeters = fromP1ToP3.Length();
                 // Google Earth says it should be 1.067,51m
-                Assert.Equal(1066, distanceInMeters);
+                Assert.Equal(1066, Math.Round(distanceInMeters));
 
                 // GPS3 is exactly east of GPS1 so the distance on the x axis is also 1066:
                 Assert.Equal(1066, (int)fromP1ToP3.X);
@@ -79,10 +79,10 @@ namespace com.csutil.tests.gps {
             var fromP1ToP3 = p3 - p1;
 
             // Google Earth says it should be 1.064,14m
-            Assert.Equal(1064, (int)fromP1ToP2.Length());
+            Assert.Equal(1064, Math.Round(fromP1ToP2.Length()));
 
             // Google Earth says it should be 1.067,51m
-            Assert.Equal(1067, (int)fromP1ToP3.Length());
+            Assert.Equal(1067, Math.Round(fromP1ToP3.Length()));
 
         }
 

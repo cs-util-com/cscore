@@ -8,15 +8,18 @@ namespace com.csutil.gps {
         double Longitude { get; }
     }
 
+    /// <summary> 
+    /// See also https://www.jpz.se/Html_filer/wgs_84.html and https://en.wikipedia.org/wiki/Earth%27s_circumference </summary>
     public static class IHasLatLongExtensions {
 
-        // From https://en.wikipedia.org/wiki/Earth%27s_circumference
-        private const double earthCircumfenceAtEquator = 40075017;
-        private const double earthCircumfenceAtPoles = 40007863;
+        // Circumference calculated from earth equatorial radius (6378137 meters)
+        private const double EarthCircumferenceAtEquator = 40075016.6856;
+        // Circumference calculated from earth polar radius (6356752.31424518 meters)
+        private const double EarthCircumferenceAtPoles = 39940652.7422;
 
         // Meters per degree
-        private const double longi2rad = earthCircumfenceAtEquator / 360d;
-        private const double lati2rad = earthCircumfenceAtPoles / 360d;
+        private const double Longi2Rad = EarthCircumferenceAtEquator / 360d;
+        private const double Lati2Rad = EarthCircumferenceAtPoles / 360d;
 
         private const double Deg2Rad = Math.PI / 180d;
 
@@ -28,8 +31,8 @@ namespace com.csutil.gps {
         /// <exception cref="ArgumentException"></exception>
         public static void CalcGpsCoords(this IHasLatLong zeroPoint, double eastDistInMeters, double northDistInMeters, double[] resultLatLong) {
             if (resultLatLong.Length != 2) { throw new ArgumentException("Length of passed result array did not have the correct length 2"); }
-            double vall = longi2rad * Math.Cos(zeroPoint.Latitude * Deg2Rad);
-            resultLatLong[0] = northDistInMeters / lati2rad + zeroPoint.Latitude;
+            double vall = Longi2Rad * Math.Cos(zeroPoint.Latitude * Deg2Rad);
+            resultLatLong[0] = northDistInMeters / Lati2Rad + zeroPoint.Latitude;
             resultLatLong[1] = eastDistInMeters / vall + zeroPoint.Longitude;
         }
 
@@ -40,24 +43,26 @@ namespace com.csutil.gps {
         /// <param name="zeroPoint"> The reference GPS point that is used for all conversions to local 3D space </param>
         public static void CalcRelativeCoordsInMeters(this IHasLatLong self, double[] resultCoordsInMeters, IHasLatLong zeroPoint) {
             if (resultCoordsInMeters.Length != 2) { throw new ArgumentException("Length of passed result array did not have the correct length 2"); }
-            double vall = longi2rad * Math.Cos(zeroPoint.Latitude * Deg2Rad);
+            double vall = Longi2Rad * Math.Cos(zeroPoint.Latitude * Deg2Rad);
             resultCoordsInMeters[0] = (self.Longitude - zeroPoint.Longitude) * vall;
-            resultCoordsInMeters[1] = (self.Latitude - zeroPoint.Latitude) * lati2rad;
+            resultCoordsInMeters[1] = (self.Latitude - zeroPoint.Latitude) * Lati2Rad;
         }
 
     }
 
     /// <summary> WGS84 global spheroid math </summary>
-    public static class WGS84GlobalSpheroidMath {
+    public static class Wgs84GlobalSpheroidMath {
 
         /// <summary> WGS84 1984 - Semimajor axis (in meters) </summary>
-        private const double Re = 6378137;
+        private const double EarthEquatorialRadius = 6378137;
         /// <summary> WGS84 1984 - Semiminor axis (in meters) </summary>
-        private const double Rp = 6356752.31424518;
+        private const double EarthPolarRadius = 6356752.31424518;
 
         private const double Deg2Rad = Math.PI / 180d;
 
-        public static Vector3 ToEarthCenteredCoordinates(this IHasLatLong self, double altitude = 0) {
+        /// <summary> Calculates Earth-centered Earth-fixed (ECEF) coordinates.
+        /// See https://en.wikipedia.org/wiki/Earth-centered,_Earth-fixed_coordinate_system </summary>
+        public static Vector3 ToEarthCenteredCoordinates(this IHasLatLong self, double altitudeInMeters = 0) {
             // See https://stackoverflow.com/a/5983282/165106 
             double latrad = self.Latitude * Deg2Rad;
             double lonrad = self.Longitude * Deg2Rad;
@@ -67,12 +72,15 @@ namespace com.csutil.gps {
             double coslon = Math.Cos(lonrad);
             double sinlon = Math.Sin(lonrad);
 
-            double term1 = (Re * Re * coslat) / Math.Sqrt(Re * Re * coslat * coslat + Rp * Rp * sinlat * sinlat);
-            double term2 = altitude * coslat + term1;
+            var rpSquaredTimesSinLat = EarthPolarRadius * EarthPolarRadius * sinlat;
+            var reSquaredTimesCosLat = EarthEquatorialRadius * EarthEquatorialRadius * coslat;
+            var sqrt = Math.Sqrt(reSquaredTimesCosLat * coslat + rpSquaredTimesSinLat * sinlat);
+            double term1 = reSquaredTimesCosLat / sqrt;
+            double term2 = altitudeInMeters * coslat + term1;
 
             double x = coslon * term2;
             double y = sinlon * term2;
-            double z = altitude * sinlat + (Rp * Rp * sinlat) / Math.Sqrt(Re * Re * coslat * coslat + Rp * Rp * sinlat * sinlat);
+            double z = altitudeInMeters * sinlat + rpSquaredTimesSinLat / sqrt;
             return new Vector3((float)x, (float)y, (float)z);
         }
 
