@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Numerics;
 
 namespace com.csutil.gps {
 
@@ -42,6 +43,37 @@ namespace com.csutil.gps {
             double vall = longi2rad * Math.Cos(zeroPoint.Latitude * Deg2Rad);
             resultCoordsInMeters[0] = (self.Longitude - zeroPoint.Longitude) * vall;
             resultCoordsInMeters[1] = (self.Latitude - zeroPoint.Latitude) * lati2rad;
+        }
+
+    }
+
+    /// <summary> WGS84 global spheroid math </summary>
+    public static class WGS84GlobalSpheroidMath {
+
+        /// <summary> WGS84 1984 - Semimajor axis (in meters) </summary>
+        private const double Re = 6378137;
+        /// <summary> WGS84 1984 - Semiminor axis (in meters) </summary>
+        private const double Rp = 6356752.31424518;
+
+        private const double Deg2Rad = Math.PI / 180d;
+
+        public static Vector3 ToEarthCenteredCoordinates(this IHasLatLong self, double altitude = 0) {
+            // See https://stackoverflow.com/a/5983282/165106 
+            double latrad = self.Latitude * Deg2Rad;
+            double lonrad = self.Longitude * Deg2Rad;
+
+            double coslat = Math.Cos(latrad);
+            double sinlat = Math.Sin(latrad);
+            double coslon = Math.Cos(lonrad);
+            double sinlon = Math.Sin(lonrad);
+
+            double term1 = (Re * Re * coslat) / Math.Sqrt(Re * Re * coslat * coslat + Rp * Rp * sinlat * sinlat);
+            double term2 = altitude * coslat + term1;
+
+            double x = coslon * term2;
+            double y = sinlon * term2;
+            double z = altitude * sinlat + (Rp * Rp * sinlat) / Math.Sqrt(Re * Re * coslat * coslat + Rp * Rp * sinlat * sinlat);
+            return new Vector3((float)x, (float)y, (float)z);
         }
 
     }

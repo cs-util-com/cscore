@@ -13,7 +13,7 @@ namespace com.csutil.tests.gps {
         [Fact]
         public void ExampleUsage1() {
 
-            // https://goo.gl/maps/znXp1bvnJcKuDuiW8
+            // https://earth.google.com/web/search/33.75042155450956,+-112.63346603909699/@33.74626126,-112.63086178,518.16300348a,2177.5135802d,35y,359.38185805h,0t,0r
             var gps1 = new GpsPoint(33.742120845642226, -112.63922018861862);
             var gps2 = new GpsPoint(33.75042155450956, -112.63346603909699);
             var gps3 = new GpsPoint(33.74212852767701, -112.62770384672456);
@@ -31,12 +31,15 @@ namespace com.csutil.tests.gps {
             {
                 var fromP1ToP2 = p2 - p1;
                 int distanceInMeters = (int)fromP1ToP2.Length();
+                // Google Earth says it should be 1.064,14m
                 Assert.Equal(1065, distanceInMeters);
             }
             {
                 var fromP1ToP3 = p3 - p1;
                 int distanceInMeters = (int)fromP1ToP3.Length();
+                // Google Earth says it should be 1.067,51m
                 Assert.Equal(1066, distanceInMeters);
+
                 // GPS3 is exactly east of GPS1 so the distance on the x axis is also 1066:
                 Assert.Equal(1066, (int)fromP1ToP3.X);
                 // And the distance is nearly 0 meters on the north axis:
@@ -55,6 +58,31 @@ namespace com.csutil.tests.gps {
             var gps3_2 = GpsPoint.RelativePointToGpsCoords(zeroPoint, p3);
             Assert.Equal(gps3.Latitude, gps3_2.Latitude, precision: 8);
             Assert.Equal(gps3.Longitude, gps3_2.Longitude, precision: 8);
+
+        }
+
+        [Fact]
+        public void ExampleUsage2() {
+
+            // https://earth.google.com/web/search/33.75042155450956,+-112.63346603909699/@33.74626126,-112.63086178,518.16300348a,2177.5135802d,35y,359.38185805h,0t,0r
+            var gps1 = new GpsPoint(33.742120845642226, -112.63922018861862);
+            var gps2 = new GpsPoint(33.75042155450956, -112.63346603909699);
+            var gps3 = new GpsPoint(33.74212852767701, -112.62770384672456);
+
+            var zeroPoint = gps1; // Use the gps 1 point as the reference for all local math
+            var p1 = gps1.ToEarthCenteredCoordinates(518.1724045); // Altitude taken from Google Earth
+            var p2 = gps2.ToEarthCenteredCoordinates(521.633334); // Altitude taken from Google Earth
+            var p3 = gps3.ToEarthCenteredCoordinates(514.4982976); // Altitude taken from Google Earth
+
+            // On the earth centered points any normal vector math can be done, eg calculating distances:
+            var fromP1ToP2 = p2 - p1;
+            var fromP1ToP3 = p3 - p1;
+
+            // Google Earth says it should be 1.064,14m
+            Assert.Equal(1064, (int)fromP1ToP2.Length());
+
+            // Google Earth says it should be 1.067,51m
+            Assert.Equal(1067, (int)fromP1ToP3.Length());
 
         }
 
