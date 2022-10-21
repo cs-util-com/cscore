@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace com.csutil.model.immutable {
@@ -31,10 +32,26 @@ namespace com.csutil.model.immutable {
             if (oldState == null && newState == null) { return false; }
             if (oldState != null && oldState.GetType().IsPrimitiveOrSimple()) { return !Equals(oldState, newState); }
             if (newState != null && newState.GetType().IsPrimitiveOrSimple()) { return !Equals(oldState, newState); }
+            if (typeof(S).IsKeyValuePairType()) {
+                try { return CompareKeyValuePairContent(oldState, newState); } catch (Exception e) {
+                    Log.w("Accessing KeyValuePair failed: " + e);
+                    Debugger.Break();
+                }
+            }
             if (Nullable.GetUnderlyingType(typeof(S)) != null) { return !Equals(oldState, newState); }
             if (!ReferenceEquals(oldState, newState)) { return true; }
             if (oldState is IsMutable m) { return WasModifiedInLastDispatch(m); }
             return false;
+        }
+
+        private static bool CompareKeyValuePairContent<S>(S oldState, S newState) {
+            var keyProp = typeof(S).GetProperty("Key");
+            var valueProp = typeof(S).GetProperty("Value");
+            var oldKey = keyProp.GetValue(oldState, null);
+            var newKey = keyProp.GetValue(newState, null);
+            var oldValue = valueProp.GetValue(oldState, null);
+            var newValue = valueProp.GetValue(newState, null);
+            return WasModified(oldKey, newKey) || WasModified(oldValue, newValue);
         }
 
         public static bool WasModifiedInLastDispatch(IsMutable mutableData) {
