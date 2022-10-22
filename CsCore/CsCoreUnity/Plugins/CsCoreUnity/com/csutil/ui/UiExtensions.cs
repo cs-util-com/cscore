@@ -294,16 +294,20 @@ namespace com.csutil {
             updateUi(getSubState(store.GetState()));
             Wrapper w = new Wrapper();
             w.stateChangeListener = store.AddStateChangeListener(getSubState, newVal => {
-                if (self.IsDestroyed()) {
-                    store.onStateChanged -= w.stateChangeListener;
-                    return;
-                }
                 if (eventsAlwaysInMainThread) {
-                    MainThread.Invoke(() => { OnStateChangedForUnity(updateUi, newVal, self); });
+                    MainThread.Invoke(() => { SubscribeToStateChanges_OnChanged(self, store, updateUi, w, newVal); });
                 } else {
-                    OnStateChangedForUnity(updateUi, newVal, self);
+                    SubscribeToStateChanges_OnChanged(self, store, updateUi, w, newVal);
                 }
             }, triggerOnSubscribe);
+        }
+
+        private static void SubscribeToStateChanges_OnChanged<T, V>(UnityEngine.Object self, IDataStore<T> store, Action<V> updateUi, Wrapper w, V newVal) {
+            if (self.IsDestroyed()) {
+                store.onStateChanged -= w.stateChangeListener;
+                return;
+            }
+            OnStateChangedForUnity(updateUi, newVal, self);
         }
 
         private static void OnStateChangedForUnity<V>(Action<V> onStateChanged, V newVal, UnityEngine.Object context) {
