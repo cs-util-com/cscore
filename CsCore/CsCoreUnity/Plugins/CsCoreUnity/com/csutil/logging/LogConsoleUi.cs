@@ -49,7 +49,7 @@ namespace com.csutil.logging {
     public class LogToLogConsoleConnector : LogDefaultImpl {
 
         internal LogConsoleUi logUi;
-        
+
         public LogToLogConsoleConnector(LogConsoleUi logConsoleUi) { this.logUi = logConsoleUi; }
 
         protected override void PrintDebugMessage(string d, params object[] args) { logUi.AddToLog(LogEntry.d(d)); }
@@ -70,23 +70,25 @@ namespace com.csutil.logging {
         }
 
         private const string LINE_BREAK = "\n";
-        
+
         public void HandleLogMessageReceivedThreaded(string condition, string stacktrace, LogType type) {
-            switch (type) {
-                case LogType.Log:
-                    PrintDebugMessage(condition + LINE_BREAK + stacktrace);
-                    break;
-                case LogType.Warning:
-                    PrintWarningMessage(condition + LINE_BREAK + stacktrace);
-                    break;
-                case LogType.Assert:
-                case LogType.Error:
-                case LogType.Exception:
-                    PrintErrorMessage(condition + LINE_BREAK + stacktrace);
-                    break;
-            }
+            MainThread.Invoke(() => {
+                switch (type) {
+                    case LogType.Log:
+                        PrintDebugMessage(condition + LINE_BREAK + stacktrace);
+                        break;
+                    case LogType.Warning:
+                        PrintWarningMessage(condition + LINE_BREAK + stacktrace);
+                        break;
+                    case LogType.Assert:
+                    case LogType.Error:
+                    case LogType.Exception:
+                        PrintErrorMessage(condition + LINE_BREAK + stacktrace);
+                        break;
+                }
+            });
         }
-        
+
     }
 
     public class LogConsoleUi : BaseController<LogEntry> {
@@ -106,11 +108,26 @@ namespace com.csutil.logging {
             InitMap();
             map.Get<Button>("BtnClear").SetOnClickAction(delegate { ClearConsole(); });
             map.Get<Button>("BtnHideLog").SetOnClickAction(delegate { ToggleConsoleVisibility(); });
-            ToggleShowDebugs().SetOnValueChangedAction(delegate { UpdateFilter(NewFilter()); return true; });
-            ToggleShowInfos().SetOnValueChangedAction(delegate { UpdateFilter(NewFilter()); return true; });
-            ToggleShowWarngs().SetOnValueChangedAction(delegate { UpdateFilter(NewFilter()); return true; });
-            ToggleShowErrors().SetOnValueChangedAction(delegate { UpdateFilter(NewFilter()); return true; });
-            SearchInputField().SetOnValueChangedAction(delegate { UpdateFilter(NewFilter()); return true; });
+            ToggleShowDebugs().SetOnValueChangedAction(delegate {
+                UpdateFilter(NewFilter());
+                return true;
+            });
+            ToggleShowInfos().SetOnValueChangedAction(delegate {
+                UpdateFilter(NewFilter());
+                return true;
+            });
+            ToggleShowWarngs().SetOnValueChangedAction(delegate {
+                UpdateFilter(NewFilter());
+                return true;
+            });
+            ToggleShowErrors().SetOnValueChangedAction(delegate {
+                UpdateFilter(NewFilter());
+                return true;
+            });
+            SearchInputField().SetOnValueChangedAction(delegate {
+                UpdateFilter(NewFilter());
+                return true;
+            });
         }
 
         private void InitMap() {
