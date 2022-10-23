@@ -20,6 +20,7 @@ namespace com.csutil.editor {
 
         private static async Task CheckAllAssembliesInProject() {
             await Task.Delay(1000);
+            if (ApplicationV2.isPlaying) { return; }
             var allAssemblies = GetAllAssembliesInProject().Filter(ShouldBeIncludedInCheck);
             foreach (var assembly in allAssemblies) { CheckTypesInAssembly(assembly); }
         }
