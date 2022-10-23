@@ -131,6 +131,28 @@ namespace com.csutil.tests {
         }
 
         [Fact]
+        public static void TestGetRotationDelta() {
+            TestGetRotationDeltaWith(80, 100);
+            TestGetRotationDeltaWith(100, 80);
+            TestGetRotationDeltaWith(350, 10);
+            TestGetRotationDeltaWith(10, 350);
+        }
+
+        private static void TestGetRotationDeltaWith(float angle1, float angle2) {
+            var q1 = Quaternion.CreateFromAxisAngle(Vector3.UnitY, angle1 * degreeToRad);
+            var q2 = Quaternion.CreateFromAxisAngle(Vector3.UnitY, angle2 * degreeToRad);
+            var delta = q1.GetRotationDeltaTo(q2);
+
+            // Now rotate a vector by this diff and check if the signed angle between the 2 vectors makes sense:
+            var expectedAngle = (angle2 - angle1 + 360d) % 360d;
+            var a = Vector3.UnitX;
+            var b = a.Rotate(delta);
+            var angleInRad = a.AngleSignedInRadTo(b, Vector3.UnitY) * radToDegree;
+            angleInRad = (angleInRad + 360d) % 360d;
+            Assert.Equal(expectedAngle, Math.Round(angleInRad, 3));
+        }
+
+        [Fact]
         public void TestMatrixComposeDecompose() {
 
             var translation = new Vector3(1, 2, 3);

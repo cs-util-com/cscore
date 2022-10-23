@@ -12,6 +12,9 @@ namespace com.csutil {
                 && Math.Round(q1.W, digits) == Math.Round(q2.W, digits);
         }
 
+        /// <summary> diff * q1 = q2  --->  diff = q2 * inverse(q1) </summary>
+        public static Quaternion GetRotationDeltaTo(this Quaternion q1, Quaternion q2) { return Quaternion.Inverse(q1) * q2; }
+
     }
 
 }
