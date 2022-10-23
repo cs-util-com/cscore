@@ -248,7 +248,7 @@ namespace com.csutil.tests {
             Log.MethodDone(t2);
 
             // The CountIsAbove and CountIsBelow must be much faster then using .Count():
-            Assert.True(t1.ElapsedMilliseconds > 5 * t2.ElapsedMilliseconds);
+            Assert.True(t1.ElapsedMilliseconds > 2 * t2.ElapsedMilliseconds);
         }
 
         private IEnumerable<int> NewVerySlowEnumerableWithEntries(int count) {
