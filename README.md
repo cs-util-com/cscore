@@ -97,12 +97,12 @@ This will result in the following output in the Log:
     * at LogTests.TestBasicLogOutputExamples() c:\..\LogTests.cs:line 22
      ..
 
-> WARNING: I'm a warning with parmas: : [[param 1, 2, ..]]
+> WARNING: I'm a warning with params: : [[param 1, 2, ..]]
      ..
 
 >  --> TestBasicLogOutputExamples
 
->     <-- TestBasicLogOutputExamples finished after 0 ms, allocated managed mem: 525,40 KB, allocated mem: 12,00 KB 
+>    <-- TestBasicLogOutputExamples finished after 0 ms, allocated managed mem: 525,40 KB, allocated mem: 12,00 KB 
 ```
 
 Creating logging-adapters is simple, the following logging-adapters can be used out of the box (and they can be seen as examples/templates):
@@ -297,6 +297,9 @@ Assert.Equal(6, sumOfAllInts); // 1+2+3 is 6
 More usage examples can be found in the [HelperMethodTests.cs](https://github.com/cs-util-com/cscore/blob/master/CsCore/xUnitTests/src/com/csutil/tests/HelperMethodTests.cs)
 
 
+## Type IsSubclassOf & IsCastableTo
+
+See TypeExtension_Examples
 
 
 ## JSON Parsing 
@@ -479,6 +482,19 @@ Assert.Equal(copy1.myString, mergeResult1.myString);
 Assert.Equal(copy2.myString2, mergeResult1.myString2);
 ```
 
+## Data Mapping via Json 
+Mapper 
+
+See ObjectAutoMapperTests for usage examples
+
+
+## ModelToJsonSchema
+Json Schema generation
+
+See JsonSchemaTests for the pure C# part and the Unity UI example scenes.
+
+
+
 ## REST Extensions 
 ```cs
 // The property names are based on the https://httpbin.org/get json response:
@@ -634,6 +650,21 @@ Assert.Equal(6, sum);
 More examples can be found in the [TransducerTests.cs](https://github.com/cs-util-com/cscore/blob/master/CsCore/xUnitTests/src/com/csutil/tests/datastructures/TransducerTests.cs). The syntax is still work in progress and I am happy for any suggestions how to improve this. And there are some great [related sources](https://jrsinclair.com/articles/2019/magical-mystical-js-transducers/) you can read to learn more about Transducers.
 
 
+
+## I18n
+
+See I18nTests
+
+
+
+## AppUpdateChecker
+
+See AppUpdateCheckerTests
+
+
+## NewsManager
+
+See NewsManagerTests
 
 
 
