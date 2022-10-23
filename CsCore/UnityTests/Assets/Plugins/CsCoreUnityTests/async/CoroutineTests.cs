@@ -23,7 +23,7 @@ namespace com.csutil.tests {
             // Execute a task multiple times:
             myMonoBehaviour.ExecuteRepeated(() => {
                 Log.d("I am executed every 0.3 seconds until I return false");
-                return true;
+                return false;
             }, delayInMsBetweenIterations: 300, delayInMsBeforeFirstExecution: 200);
 
             yield return null;
