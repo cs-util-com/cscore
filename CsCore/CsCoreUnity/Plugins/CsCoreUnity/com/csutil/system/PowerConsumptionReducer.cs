@@ -19,8 +19,13 @@ namespace com.csutil.system {
             }, 100);
         }
 
-        // listen to all kinds of changes:
-        private void Update() { if (Input.GetMouseButton(0) || (Input.touchCount > 0)) { ExitIdleFps(); } }
+        private void Update() {
+            // listen to all kinds of user touch / mouse input:
+            if (InputV2.GetMouseButton(button: 0) || (InputV2.touchCount > 0)) {
+                ExitIdleFps();
+            }
+        }
+
         private void OnCanvasGroupChanged() { ExitIdleFps(); }
         private void OnRectTransformDimensionsChange() { ExitIdleFps(); }
         private void OnTransformChildrenChanged() { ExitIdleFps(); }

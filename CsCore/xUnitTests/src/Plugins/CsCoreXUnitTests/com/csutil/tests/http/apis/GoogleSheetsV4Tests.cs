@@ -12,7 +12,7 @@ namespace com.csutil.tests.http {
         public async Task ExampleUsage1() {
 
             // Get your key from https://console.developers.google.com/apis/credentials
-            var exampleApiKey = "AIzaSyCtcFQMgRIUHhSuXggm4BtXT4eZvUrBWN0";
+            var exampleApiKey = await IoC.inject.GetAppSecrets().GetSecret("GoogleSheetsV4Key");
             // E.g. https://docs.google.com/spreadsheets/d/1ixEZ7EkbPNrB5ZiIYL12kL25jKIIIvyz4nZKtqTDqWc
             var spreadsheetId = "1ixEZ7EkbPNrB5ZiIYL12kL25jKIIIvyz4nZKtqTDqWc";
             var sheetName = "MySheet 1"; // Has to match the sheet name

@@ -202,6 +202,23 @@ namespace com.csutil {
             return Path.GetFileNameWithoutExtension(self.Name);
         }
 
+        /// <summary> Moves up through all parents to find the parent directory with the specified name </summary>
+        public static DirectoryInfo FindParentWithName(this DirectoryInfo self, string directoryName) {
+            if (self.Name == directoryName) { return self; }
+            var p = self.Parent;
+            if (p is null) { throw new DirectoryNotFoundException($"After moving up through all parents could not find directory '{directoryName}'"); }
+            return FindParentWithName(p, directoryName);
+        }
+
+        /// <summary> Moves up through all parents to find a sibling directory in any of them with the specified name </summary>
+        public static DirectoryInfo FindSiblingInParentsWithName(this DirectoryInfo self, string siblingDirName) {
+            var siblingDir = self.GetChildDir(siblingDirName);
+            if (siblingDir.ExistsV2()) { return siblingDir; }
+            var p = self.Parent;
+            if (p is null) { throw new DirectoryNotFoundException($"After moving up through all parents could not find a sibling directory '{siblingDirName}'"); }
+            return FindSiblingInParentsWithName(p, siblingDirName);
+        }
+
     }
 
 }

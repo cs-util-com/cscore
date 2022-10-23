@@ -18,17 +18,17 @@ namespace com.csutil {
             // Log.d($"LoadPrefab '{pathInResourcesFolder}'");
             GameObject prefab = LoadV2<GameObject>(pathInResourcesFolder);
             if (prefab == null) { throw new Exception("Could not find prefab at path='" + pathInResourcesFolder + "'"); }
-#if UNITY_EDITOR
-            if (keepReferenceToEditorPrefab) {
-                var prefabInstance = UnityEditor.PrefabUtility.InstantiatePrefab(prefab) as GameObject;
-                prefabInstance.name = pathInResourcesFolder;
-                return prefabInstance;
-            }
+            var prefabInstance = InstantiatePrefab(prefab, keepReferenceToEditorPrefab);
+            prefabInstance.name = pathInResourcesFolder;
+            EventBus.instance.Publish(EventConsts.catTemplate, prefabInstance);
+            return prefabInstance;
+        }
+
+        public static GameObject InstantiatePrefab(GameObject prefab, bool keepReferenceToEditorPrefab = false) {
+ #if UNITY_EDITOR
+            if (keepReferenceToEditorPrefab) { return UnityEditor.PrefabUtility.InstantiatePrefab(prefab) as GameObject; }
 #endif
-            var go = GameObject.Instantiate(prefab);
-            go.name = pathInResourcesFolder;
-            EventBus.instance.Publish(EventConsts.catTemplate, go);
-            return go;
+            return GameObject.Instantiate(prefab);
         }
 
         /// <summary> Force AssetDB entry reload by Unity, otherwise Resources files are cached by it </summary>

@@ -35,6 +35,8 @@ namespace com.csutil {
 
         public static bool IsSystemType(this Type type) { return type.Assembly == typeof(object).Assembly; }
 
+        public static bool IsKeyValuePairType(this Type type) { return type.IsGenericType && typeof(KeyValuePair<,>) == type.GetGenericTypeDefinition(); }
+
     }
 
     public static class TypeCheck {

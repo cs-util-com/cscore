@@ -15,7 +15,7 @@ namespace com.csutil.tests.system {
         public async Task ExampleUsage1() {
 
             // Get your key from https://console.developers.google.com/apis/credentials
-            var exampleApiKey = "AIzaSyCtcFQMgRIUHhSuXggm4BtXT4eZvUrBWN0";
+            var exampleApiKey = await IoC.inject.GetAppSecrets().GetSecret("GoogleSheetsV4Key");
             // See https://docs.google.com/spreadsheets/d/1qZjRA_uLsImX-VHpJ1nnrCIASmU20Tbaakf5Le5Wrs8
             var spreadsheetId = "1qZjRA_uLsImX-VHpJ1nnrCIASmU20Tbaakf5Le5Wrs8";
             var sheetName = "UpdateEntriesV2"; // Has to match the sheet name

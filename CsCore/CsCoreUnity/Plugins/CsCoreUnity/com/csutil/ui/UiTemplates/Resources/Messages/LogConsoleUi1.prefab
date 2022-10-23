@@ -1546,7 +1546,7 @@ PrefabInstance:
     - target: {fileID: 8650711650397742012, guid: dbe80deaafbcf4d4f8d7d2af96148088,
         type: 3}
       propertyPath: m_MinWidth
-      value: 125.2
+      value: 74
       objectReference: {fileID: 0}
     - target: {fileID: 8650711650397742012, guid: dbe80deaafbcf4d4f8d7d2af96148088,
         type: 3}

@@ -16,7 +16,7 @@ namespace com.csutil.tests.system {
         public async Task ExampleUsage1() {
 
             // Get your key from https://console.developers.google.com/apis/credentials
-            var apiKey = "AIzaSyCtcFQMgRIUHhSuXggm4BtXT4eZvUrBWN0";
+            var apiKey = await IoC.inject.GetAppSecrets().GetSecret("GoogleSheetsV4Key");
             // See https://docs.google.com/spreadsheets/d/1Hwu4ZtRR0iXD65Wuj_XyJxLw4PN8SE0sRgnBKeVoq3A
             var sheetId = "1Hwu4ZtRR0iXD65Wuj_XyJxLw4PN8SE0sRgnBKeVoq3A";
             var sheetName = "MySheet1"; // Has to match the sheet name
@@ -48,7 +48,7 @@ namespace com.csutil.tests.system {
         public async Task ExampleUsage2() {
 
             // Get your key from https://console.developers.google.com/apis/credentials
-            var apiKey = "AIzaSyCtcFQMgRIUHhSuXggm4BtXT4eZvUrBWN0";
+            var apiKey = await IoC.inject.GetAppSecrets().GetSecret("GoogleSheetsV4Key");
             // See https://docs.google.com/spreadsheets/d/1Hwu4ZtRR0iXD65Wuj_XyJxLw4PN8SE0sRgnBKeVoq3A
             var sheetId = "1Hwu4ZtRR0iXD65Wuj_XyJxLw4PN8SE0sRgnBKeVoq3A";
             var sheetName = "MySheet1"; // Has to match the sheet name

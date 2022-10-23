@@ -44,7 +44,7 @@ namespace com.csutil {
         protected virtual void OnBatchWasNotYetReadyForProcessing() { }
 
         protected virtual bool IsNextBatchReadyForProcessing(IEnumerable<string> keys) {
-            return keys.Count() >= batchSize;
+            return keys.CountIsAbove(batchSize - 1);
         }
 
         public async Task BatchProcess() {
@@ -71,8 +71,9 @@ namespace com.csutil {
             }
         }
 
-        protected virtual async Task OnCouldNotRemoveProcessedEntry(E entryToDelete) {
+        protected virtual Task OnCouldNotRemoveProcessedEntry(E entryToDelete) {
             Log.w($"Could not remove Entry {entryToDelete.GetId()} {entryToDelete}");
+            return Task.CompletedTask;
         }
 
         /// <summary> Will be called once a batch of entries is ready to be batch processed </summary>

@@ -13,52 +13,45 @@ namespace com.csutil.keyvaluestore {
         public long latestFallbackGetTimingInMs { get { return fallbackStore.latestFallbackGetTimingInMs; } set { } }
 
         private readonly string apiKey;
-        public readonly string spreadsheetId;
+        private readonly string spreadsheetId;
 
         private string _sheetName;
         public string sheetName {
             get { return _sheetName; }
             set {
+                if (value != _sheetName) { InitDebouncedDownloadLogic(); }
                 _sheetName = value;
-                InitDebouncedDownloadLogic();
             }
         }
 
-        private readonly double delayInMsBetweenCheck;
-        public Func<Task<bool>> dowloadOnlineDataDebounced;
-        public List<List<string>> latestRawSheetData { get; private set; }
+        public Func<Task<bool>> dowloadOnlineDataDebounced { get; private set; }
 
-        public GoogleSheetsKeyValueStore(IKeyValueStore localCache, string apiKey,
-                    string spreadsheetId, string sheetName, double delayInMsBetweenCheck = 10000) {
+        private readonly double delayInMsBetweenCheck;
+        private List<List<string>> latestRawSheetData { get; set; }
+
+        public GoogleSheetsKeyValueStore(IKeyValueStore localCache, string apiKey, string spreadsheetId, string sheetName, double delayInMsBetweenCheck = 10000) {
             this.fallbackStore = localCache;
-            this.apiKey = apiKey;
-            this.spreadsheetId = spreadsheetId;
-            this.sheetName = sheetName;
             this.delayInMsBetweenCheck = delayInMsBetweenCheck;
             InitDebouncedDownloadLogic();
+            this.apiKey = apiKey;
+            this.spreadsheetId = spreadsheetId;
+            this._sheetName = sheetName;
         }
 
         private void InitDebouncedDownloadLogic() {
             latestRawSheetData = null;
             // Create a debounced func that only downloads new data max every 10 seconds and
             // trigger this method only if inet available:
-            Func<object, Task> debouncedFunc = DowloadOnlineData;
-            debouncedFunc = debouncedFunc.AsThrottledDebounce(delayInMsBetweenCheck);
-            dowloadOnlineDataDebounced = async () => {
-                if (latestRawSheetData.IsNullOrEmpty()) { await InternetStateManager.Instance(this).HasInetAsync; }
+            Func<Task> t = async () => {
+                if (latestRawSheetData.IsNullOrEmpty()) {
+                    await InternetStateManager.Instance(this).HasInetAsync;
+                }
                 if (InternetStateManager.Instance(this).HasInet) {
-                    try {
-                        await debouncedFunc(null);
-                        ThrowIfSheetDataMissing();
-                        return true;
-                    } catch (TaskCanceledException) { } // If debouncing decided the task does not need to run
-                } else { // No inet, so check if cached data is present:
-                    var fallbackContent = await fallbackStore.GetAllKeys();
-                    if (!fallbackContent.IsNullOrEmpty()) { return false; }
+                    await DowloadOnlineData();
                 }
                 ThrowIfSheetDataMissing();
-                return false;
             };
+            dowloadOnlineDataDebounced = t.AsThrottledDebounceV2(delayInMsBetweenCheck);
         }
 
         private void ThrowIfSheetDataMissing() {
@@ -73,7 +66,7 @@ namespace com.csutil.keyvaluestore {
             IsDisposed = DisposeState.Disposed;
         }
 
-        private async Task DowloadOnlineData(object _) {
+        private async Task DowloadOnlineData() {
             var newRawSheetData = await GoogleSheetsV4.GetSheet(apiKey, spreadsheetId, sheetName);
             if (!latestRawSheetData.IsNullOrEmpty()) {
                 foreach (var entry in ParseRawSheetData(FilterForChanges(latestRawSheetData, newRawSheetData))) {
@@ -106,7 +99,9 @@ namespace com.csutil.keyvaluestore {
 
         private static bool ChangeFound(List<string> oldLine, List<string> newLine) {
             if (oldLine.Count != newLine.Count) { return true; }
-            for (int i = 0; i < newLine.Count; i++) { if (oldLine[i] != newLine[i]) { return true; } }
+            for (int i = 0; i < newLine.Count; i++) {
+                if (oldLine[i] != newLine[i]) { return true; }
+            }
             return false;
         }
 
@@ -172,11 +167,11 @@ namespace com.csutil.keyvaluestore {
             return await fallbackStore.GetAllKeys();
         }
 
-        public Task<bool> Remove(string key) { throw new NotSupportedException(); }
+        public Task<bool> Remove(string key) { throw new NotSupportedException(this + " is a readonly store"); }
 
-        public Task RemoveAll() { throw new NotSupportedException(); }
+        public Task RemoveAll() { throw new NotSupportedException(this + " is a readonly store"); }
 
-        public Task<object> Set(string key, object value) { throw new NotSupportedException(); }
+        public Task<object> Set(string key, object value) { throw new NotSupportedException(this + " is a readonly store"); }
 
     }
 

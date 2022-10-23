@@ -38,7 +38,7 @@ namespace com.csutil.tests.keyvaluestore {
             storeDir.DeleteV2(); // Cleanup before tests if the test file exists
             string myKey1 = "test123";
             MyClass1 x1 = new MyClass1() { myString1 = "Abc", myString2 = "Abc2" };
-            {   // Create a fast memory store and combine it with a LiteDB store that is persisted to disk:
+            { // Create a fast memory store and combine it with a LiteDB store that is persisted to disk:
                 IKeyValueStore store = new InMemoryKeyValueStore().WithFallbackStore(new FileBasedKeyValueStore(storeDir));
                 await store.Set(myKey1, x1);
                 MyClass1 x2 = await store.Get<MyClass1>(myKey1, null);
@@ -365,7 +365,7 @@ namespace com.csutil.tests.keyvaluestore {
         public async Task TestGoogleSheetsKeyValueStore() {
 
             // Get your key from https://console.developers.google.com/apis/credentials
-            var apiKey = "AIzaSyCtcFQMgRIUHhSuXggm4BtXT4eZvUrBWN0";
+            var apiKey = await IoC.inject.GetAppSecrets().GetSecret("GoogleSheetsV4Key");
             // See https://docs.google.com/spreadsheets/d/13R9y6lnUMgRPC0PinJ23tACC6Flgogxa7h7SVaaLhT0
             var sheetId = "13R9y6lnUMgRPC0PinJ23tACC6Flgogxa7h7SVaaLhT0";
             var sheetName = "UpdateEntriesV1"; // Has to match the sheet name
@@ -383,7 +383,7 @@ namespace com.csutil.tests.keyvaluestore {
             await TaskV2.Delay(refreshDelayInMs * 3);
 
             Assert.True(await download1); // first trigger downloaded the data
-            Assert.NotEmpty(store.latestRawSheetData);
+            Assert.NotEmpty(await store.GetAllKeys());
             // Triggering it instant a second time will not download the data again:
             Assert.False(await download2); // Second trigger was skipped
             Assert.True(await download3);
@@ -441,6 +441,29 @@ namespace com.csutil.tests.keyvaluestore {
 
         }
 
+        [Fact]
+        public async Task TestTypesNotLost() {
+
+            TypedJsonHelper.SetupTypedJsonWriterAndReaderSingletons(overrideExisting: true);
+            {
+                var ms = new InMemoryKeyValueStore();
+                await TestTypesNotLostWith(ms, ms);
+            }
+            {
+                var folder = EnvironmentV2.instance.GetNewInMemorySystem();
+                await TestTypesNotLostWith(new FileBasedKeyValueStore(folder), new FileBasedKeyValueStore(folder));
+            }
+            
+        }
+        
+        private static async Task TestTypesNotLostWith(IKeyValueStore s1, IKeyValueStore s2) {
+            var x = new MySheetEntry() { myInt1 = 123 };
+            await s1.Set("1", x);
+            var res = await s2.Get<object>("1", null);
+            Assert.IsType<MySheetEntry>(res);
+            Assert.Equal(x.myInt1, ((MySheetEntry)res).myInt1);
+        }
+
 #pragma warning disable 0649 // Variable is never assigned to, and will always have its default value
         // Fields must be in sync with first row in the source Google Sheet, see names in:
         // https://docs.google.com/spreadsheets/d/13R9y6lnUMgRPC0PinJ23tACC6Flgogxa7h7SVaaLhT0
@@ -450,7 +473,9 @@ namespace com.csutil.tests.keyvaluestore {
             public MyObj myObj1;
             public int myInt1;
             public double myDouble1;
-            public class MyObj { public string a; }
+            public class MyObj {
+                public string a;
+            }
         }
 #pragma warning restore 0649 // Variable is never assigned to, and will always have its default value
 

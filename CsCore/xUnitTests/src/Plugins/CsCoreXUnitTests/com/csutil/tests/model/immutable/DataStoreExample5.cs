@@ -19,6 +19,7 @@ namespace com.csutil.tests.model.immutable {
 
             // Some initial state of the model (eg loaded from file when the app is started) is restored and put into the store:
             MyUser1 carl = new MyUser1(GuidV2.NewGuid(), "Carl", 99, null, MyUser1.MyEnum.State1);
+            MyUser1 carlsFriend = new MyUser1(GuidV2.NewGuid(), "Carls Friend", 50, null, MyUser1.MyEnum.State1);
             var data = new MyAppState1(ImmutableDictionary<Guid, MyUser1>.Empty.Add(carl.id, carl), null);
 
             var store = new DataStore<MyAppState1>(MyReducers1.ReduceMyAppState1, data);
@@ -30,24 +31,39 @@ namespace com.csutil.tests.model.immutable {
                 return keepListenerAlive;
             }, triggerInstantToInit: false);
 
+            var carlUpdatedCounter = 0;
+            store.AddStateChangeListenerForDictionary(state => state.users,
+                (addedUser) => {
+                    // The only user added to the store (after the initial store creation) will be carlsFriend
+                    Assert.Equal(carlsFriend.name, addedUser.Value.name);
+                }, (updatedUser) => {
+                    Assert.Equal(carl.id, updatedUser.Value.id); // Carl will be updated multiple times
+                    carlUpdatedCounter++;
+                }, (removedUser) => {
+                    throw Log.e("A user was removed from the store even though there are no remove actions");
+                });
+
             ActionAddSomeId a1 = new ActionAddSomeId() { someId = GuidV2.NewGuid() };
             store.Dispatch(a1);
             Assert.Equal(0, usersChangedCounter); // no change happened in the users
+            Assert.Equal(0, carlUpdatedCounter);
             Assert.Equal(a1.someId, store.GetState().someUuids.Value.Single());
 
-            MyUser1 carlsFriend = new MyUser1(GuidV2.NewGuid(), "Carls Friend", 50, null, MyUser1.MyEnum.State1);
             store.Dispatch(new ActionOnUser.AddContact() { targetUser = carl.id, newContact = carlsFriend });
             Assert.Equal(1, usersChangedCounter);
+            Assert.Equal(1, carlUpdatedCounter);
             Assert.Equal(carlsFriend, store.GetState().users[carlsFriend.id]);
             Assert.Contains(carlsFriend.id, store.GetState().users[carl.id].contacts);
 
             store.Dispatch(new ActionOnUser.ChangeName() { targetUser = carl.id, newName = "Karl" });
-            Assert.Equal(2, usersChangedCounter);
+            Assert.Equal(2, usersChangedCounter);            
+            Assert.Equal(2, carlUpdatedCounter);
             Assert.Equal("Karl", store.GetState().users[carl.id].name);
 
 
             store.Dispatch(new ActionOnUser.ChangeAge() { targetUser = carlsFriend.id, newAge = null });
             Assert.Equal(3, usersChangedCounter);
+            Assert.Equal(3, carlUpdatedCounter);
             Assert.Null(store.GetState().users[carlsFriend.id].age);
 
             Assert.NotEqual(MyUser1.MyEnum.State2, store.GetState().users[carl.id].myEnum);
@@ -57,11 +73,18 @@ namespace com.csutil.tests.model.immutable {
             // Remove the listener from the store the next time an action is dispatched:
             keepListenerAlive = false;
             Assert.Equal(4, usersChangedCounter);
+            Assert.Equal(4, carlUpdatedCounter);
+
             store.Dispatch(new ActionOnUser.ChangeAge() { targetUser = carlsFriend.id, newAge = 22 });
             Assert.Equal(5, usersChangedCounter);
+            Assert.Equal(5, carlUpdatedCounter);
+            
             // Test that now the listener is removed and will not receive any updates anymore:
             store.Dispatch(new ActionOnUser.ChangeAge() { targetUser = carlsFriend.id, newAge = 33 });
             Assert.Equal(5, usersChangedCounter);
+            
+            // The other listener will still be active:
+            Assert.Equal(6, carlUpdatedCounter);
             
             Log.MethodDone(t);
         }

@@ -223,10 +223,14 @@ namespace com.csutil.tests {
             Assert.True(IoC_inject.RemoveAllInjectorsFor<string>());
         }
 
-        private class MyClass1 { }
-        private class MySubClass1 : MyClass1 { }
-        private class MySubClass2 : MyClass1 { }
-        private class MyUserClass1 { }
+        private class MyClass1 {
+        }
+        private class MySubClass1 : MyClass1 {
+        }
+        private class MySubClass2 : MyClass1 {
+        }
+        private class MyUserClass1 {
+        }
 
         [Fact]
         public void TestTemporaryContext1() {
@@ -305,7 +309,7 @@ namespace com.csutil.tests {
             // Asking for the now disposed singleton did automatically clean it:
             Assert.False(IoC_inject.HasInjectorRegistered<MyDisposableV2Class1>());
         }
-        
+
         [Fact]
         public void TestDisposableSingletons2() {
             var IoC_inject = GetInjectorForTest();
@@ -317,6 +321,22 @@ namespace com.csutil.tests {
             var singletonInstance2 = new MyDisposableV2Class1();
             IoC_inject.SetSingleton(singletonInstance2);
             Assert.Same(singletonInstance2, IoC_inject.Get<MyDisposableV2Class1>(this, createIfNull: false));
+        }
+
+        [Fact]
+        public void TestInjectorNameCleanup() {
+            var IoC_inject = GetInjectorForTest();
+            Assert.Empty(IoC_inject.injectorNames);
+            var singleton = new object();
+            IoC_inject.SetSingleton(singleton);
+            Assert.Equal("InjectReq:System.Object", IoC_inject.injectorNames.Single());
+            Assert.True(IoC_inject.RemoveAllInjectorsFor<object>());
+            Assert.Empty(IoC_inject.injectorNames);
+
+            var injector = IoC_inject.SetSingleton(singleton);
+            Assert.Equal("InjectReq:System.Object", IoC_inject.injectorNames.Single());
+            Assert.True(IoC_inject.UnregisterInjector<object>(injector));
+            Assert.Empty(IoC_inject.injectorNames);
         }
 
         private class MyDisposableV2Class1 : IDisposableV2 {

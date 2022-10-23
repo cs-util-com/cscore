@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using com.csutil.model.immutable;
 using Xunit;
@@ -38,6 +39,20 @@ namespace com.csutil.tests.model.immutable {
             if (action is ResetStoreAction) { return ""; }
             if (action is string s) { return s; }
             return previousState;
+        }
+
+        [Fact]
+        public void TestAddStateChangeListener() {
+            var store = new DataStore<List<string>>(StateReducer2, new List<string>());
+            Assert.Throws<InvalidOperationException>(() => {
+                // Using list.Filter(..) would generate a new IEnumerable every time so using it for comparison if
+                // the state changes would not work, ensure that an exception is thrown to inform the developer about this:
+                store.AddStateChangeListener(x => x.Filter(s => !s.IsEmpty()), (newList) => { });
+            });
+        }
+
+        private List<string> StateReducer2(List<string> previousstate, object action) {
+            return previousstate;
         }
 
     }

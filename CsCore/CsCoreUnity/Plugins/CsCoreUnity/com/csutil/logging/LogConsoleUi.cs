@@ -14,9 +14,24 @@ namespace com.csutil.logging {
         public static void RegisterForAllLogEvents(object caller, bool hideAtStart = true) {
             var consoleUi = GetLogConsole(caller);
             var logger = new LogToLogConsoleConnector(consoleUi);
-            Log.AddLoggerToLogInstances(logger);
-            consoleUi.gameObject.AddOnDestroyListener(() => Log.RemoveLoggerFromLogInstances(logger));
+            logger.RegisterForLoggingV2_AllLogEvents();
             consoleUi.ShowConsole(!hideAtStart);
+        }
+
+        /// <summary> This will only log the errors send to the csutil Log system </summary>
+        public static void RegisterForLoggingV1_OnlyExplicitLogCalls(this LogToLogConsoleConnector logger) {
+            Log.AddLoggerToLogInstances(logger);
+            logger.logUi.gameObject.AddOnDestroyListener(() => {
+                Log.RemoveLoggerFromLogInstances(logger);
+            });
+        }
+
+        /// <summary> This will log all errors send to any logging sink </summary>
+        public static void RegisterForLoggingV2_AllLogEvents(this LogToLogConsoleConnector logger) {
+            Application.logMessageReceivedThreaded += logger.HandleLogMessageReceivedThreaded;
+            logger.logUi.gameObject.AddOnDestroyListener(() => {
+                Application.logMessageReceivedThreaded -= logger.HandleLogMessageReceivedThreaded;
+            });
         }
 
         public static LogConsoleUi GetLogConsole(object caller) {
@@ -31,9 +46,10 @@ namespace com.csutil.logging {
 
     }
 
-    internal class LogToLogConsoleConnector : LogDefaultImpl {
+    public class LogToLogConsoleConnector : LogDefaultImpl {
 
-        private LogConsoleUi logUi;
+        internal LogConsoleUi logUi;
+
         public LogToLogConsoleConnector(LogConsoleUi logConsoleUi) { this.logUi = logConsoleUi; }
 
         protected override void PrintDebugMessage(string d, params object[] args) { logUi.AddToLog(LogEntry.d(d)); }
@@ -51,6 +67,26 @@ namespace com.csutil.logging {
             if (timing is StopwatchV2 t2) { methodName = t2.methodName; }
             var argStr = args != null ? " with " + args.Filter(a => a != null).Map(a => "" + a).ToStringV2() : "";
             logUi.AddToLog(LogEntry.d("    <-- " + methodName + " finished after " + timing.ElapsedMilliseconds + " ms" + argStr));
+        }
+
+        private const string LINE_BREAK = "\n";
+
+        public void HandleLogMessageReceivedThreaded(string condition, string stacktrace, LogType type) {
+            MainThread.Invoke(() => {
+                switch (type) {
+                    case LogType.Log:
+                        PrintDebugMessage(condition + LINE_BREAK + stacktrace);
+                        break;
+                    case LogType.Warning:
+                        PrintWarningMessage(condition + LINE_BREAK + stacktrace);
+                        break;
+                    case LogType.Assert:
+                    case LogType.Error:
+                    case LogType.Exception:
+                        PrintErrorMessage(condition + LINE_BREAK + stacktrace);
+                        break;
+                }
+            });
         }
 
     }
@@ -72,14 +108,34 @@ namespace com.csutil.logging {
             InitMap();
             map.Get<Button>("BtnClear").SetOnClickAction(delegate { ClearConsole(); });
             map.Get<Button>("BtnHideLog").SetOnClickAction(delegate { ToggleConsoleVisibility(); });
-            ToggleShowDebugs().SetOnValueChangedAction(delegate { UpdateFilter(NewFilter()); return true; });
-            ToggleShowInfos().SetOnValueChangedAction(delegate { UpdateFilter(NewFilter()); return true; });
-            ToggleShowWarngs().SetOnValueChangedAction(delegate { UpdateFilter(NewFilter()); return true; });
-            ToggleShowErrors().SetOnValueChangedAction(delegate { UpdateFilter(NewFilter()); return true; });
-            SearchInputField().SetOnValueChangedAction(delegate { UpdateFilter(NewFilter()); return true; });
+            ToggleShowDebugs().SetOnValueChangedAction(delegate {
+                UpdateFilter(NewFilter());
+                return true;
+            });
+            ToggleShowInfos().SetOnValueChangedAction(delegate {
+                UpdateFilter(NewFilter());
+                return true;
+            });
+            ToggleShowWarngs().SetOnValueChangedAction(delegate {
+                UpdateFilter(NewFilter());
+                return true;
+            });
+            ToggleShowErrors().SetOnValueChangedAction(delegate {
+                UpdateFilter(NewFilter());
+                return true;
+            });
+            SearchInputField().SetOnValueChangedAction(delegate {
+                UpdateFilter(NewFilter());
+                return true;
+            });
         }
 
-        private void InitMap() { map = gameObject.GetComponentInParents<Canvas>().gameObject.GetLinkMap(); }
+        private void InitMap() {
+            var c = gameObject.GetComponentInParents<Canvas>();
+            AssertV2.IsNotNull(c, "Canvas in LogConsoleUi parent");
+            if (c == null) { c = gameObject.GetParent().GetComponent<Canvas>(); }
+            map = c.gameObject.GetLinkMap();
+        }
 
         private void ToggleConsoleVisibility() { ShowConsole(!gameObject.activeSelf); }
 

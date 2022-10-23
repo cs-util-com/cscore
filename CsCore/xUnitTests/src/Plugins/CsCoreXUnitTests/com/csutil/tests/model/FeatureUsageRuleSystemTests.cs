@@ -65,6 +65,10 @@ namespace com.csutil.tests.model {
 
                 // Simulate a second show of the notification:
                 AppFlow.TrackEvent(EventConsts.catUsage, EventConsts.SHOW + "_" + notificationId);
+                Assert.False(await notificationMinXDaysOld.IsNotificationMinXDaysOld(analytics));
+                Assert.False(await notificationMinXDaysOld.isTrue());
+                
+                t.mockUtcNow = DateTimeV2.ParseUtc("15.04.2011"); // Simulate more time passing by
                 Assert.True(await notificationMinXDaysOld.IsNotificationMinXDaysOld(analytics));
                 Assert.True(await notificationMinXDaysOld.isTrue());
             }
@@ -174,7 +178,7 @@ namespace com.csutil.tests.model {
         [Fact]
         public async Task ExampleUsage2() {
             // Get your key from https://console.developers.google.com/apis/credentials
-            var apiKey = "AIzaSyCtcFQMgRIUHhSuXggm4BtXT4eZvUrBWN0";
+            var apiKey = await IoC.inject.GetAppSecrets().GetSecret("GoogleSheetsV4Key");
             // https://docs.google.com/spreadsheets/d/1rl1vi-LUhOgoY_QrMJsm2UE0SdiL4EbOtLwfNPsavxQ contains the sheetId:
             var sheetId = "1rl1vi-LUhOgoY_QrMJsm2UE0SdiL4EbOtLwfNPsavxQ";
             var sheetName = "UsageRules1"; // Has to match the sheet name
@@ -190,6 +194,37 @@ namespace com.csutil.tests.model {
             }
             Assert.Single(rules.Filter(r => !r.andRules.IsNullOrEmpty()));
 
+        }
+
+        /// <summary> See https://github.com/cs-util-com/cscore/issues/54 </summary>
+        [Fact]
+        public async Task ExampleUsage3_NpsScoreSystem() {
+
+            var t = new MockDateTimeV2();
+            IoC.inject.SetSingleton<DateTimeV2>(t, overrideExisting: true);
+            t.mockUtcNow = DateTimeV2.ParseUtc("01.02.2011");
+
+            var analytics = CreateLocalAnalyticsSystem();
+
+            // The user must have used the app at least on 3 different days before the NPS score should be collected
+            UsageRule appUsedInTheLastXDays = analytics.NewAppUsedXDaysRule(3);
+            Assert.False(await appUsedInTheLastXDays.isTrue());
+
+            t.mockUtcNow = DateTimeV2.ParseUtc("02.02.2011");
+            AppFlow.TrackEvent("someEventCategory1", "someAction1");
+            Assert.False(await appUsedInTheLastXDays.isTrue());
+
+            t.mockUtcNow = DateTimeV2.ParseUtc("03.02.2011");
+            AppFlow.TrackEvent("someEventCategory1", "someAction1");
+            Assert.False(await appUsedInTheLastXDays.isTrue());
+
+            t.mockUtcNow = DateTimeV2.ParseUtc("04.02.2011");
+            AppFlow.TrackEvent("someEventCategory1", "someAction1");
+            Assert.True(await appUsedInTheLastXDays.isTrue());
+            
+            // TODO make a load test that simulates app usage over many years with 1000 events per day 
+            // NewAppUsedXDaysRule uses an analytics.GetAll() call that would load all files of the entire keyvaluestore which would be very slow??
+            
         }
 
         private static LocalAnalytics CreateLocalAnalyticsSystem() {

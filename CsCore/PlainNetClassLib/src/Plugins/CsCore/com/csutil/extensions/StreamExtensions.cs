@@ -52,7 +52,7 @@ namespace com.csutil {
             do {
                 cancel?.Token.ThrowIfCancellationRequested();
                 await TaskV2.Delay(delayInMsBetweenProgress);
-                long newProgress = 100l * self.Position / self.Length;
+                long newProgress = 100L * self.Position / self.Length;
                 if (progress != newProgress) { onProgress(newProgress); }
                 progress = newProgress;
             } while (progress < 100);
