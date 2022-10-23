@@ -1,3 +1,4 @@
+using System.IO;
 using UnityEngine;
 
 namespace com.csutil {
@@ -21,6 +22,20 @@ namespace com.csutil {
             self.enabled = true;
         }
 
+        public static int ToAngleInDegree(this ScreenOrientation self) {
+            switch (self) {
+                case ScreenOrientation.Portrait:
+                    return 90;
+                case ScreenOrientation.LandscapeLeft:
+                    return 180;
+                case ScreenOrientation.LandscapeRight:
+                    return 0;
+                case ScreenOrientation.PortraitUpsideDown:
+                    return -90;
+            }
+            throw new InvalidDataException("Screen.orientation=" + self);
+        }
+        
     }
 
 }
