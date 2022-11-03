@@ -372,6 +372,7 @@ namespace com.csutil {
                 if (x.sortingLayerID != self.sortingLayerID) { return false; }
                 var o = x.GetComponent<CanvasOrderOnTop>();
                 if (o != null && o.excludeFromOrderCalc) { return false; }
+                if (o != null && o.HasComponent<IgnoreRootCanvas>(out var _)) { return true; }
                 return true;
             });
             return l.Max(x => x.sortingOrder);

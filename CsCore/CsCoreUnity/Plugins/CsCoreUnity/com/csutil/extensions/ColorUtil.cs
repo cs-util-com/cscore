@@ -15,6 +15,7 @@ namespace com.csutil {
             return new Color(r < 0 ? c.r : r, g < 0 ? c.g : g, b < 0 ? c.b : b, a < 0 ? c.a : a);
         }
 
+        /// <summary> Takes an alpha value between 0 and 1 and returns a new color with this alpha </summary>
         public static Color WithAlpha(this Color self, float alpha0To1) { return self.With(a: alpha0To1); }
 
         public static Color32 WithAlpha(this Color32 self, byte alpha0To255) { return self.With(a: alpha0To255); }

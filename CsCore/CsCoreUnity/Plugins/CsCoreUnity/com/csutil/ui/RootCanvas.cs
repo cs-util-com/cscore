@@ -51,7 +51,7 @@ namespace com.csutil.ui {
 
         /// <summary> Returns a list of root canvases where the first one is the visually most top canvas </summary>
         public static IOrderedEnumerable<Canvas> GetAllRootCanvases() {
-            return ResourcesV2.FindAllInScene<Canvas>().Map(x => x.rootCanvas).ToHashSet().OrderByDescending(x => x.sortingOrder);
+            return ResourcesV2.FindAllInScene<Canvas>().Map(x => x.rootCanvas).ToHashSet().Filter(x => !x.HasComponent<IgnoreRootCanvas>(out var _)).OrderByDescending(x => x.sortingOrder);
         }
 
         public static Canvas CreateNewRootCanvas(string rootCanvasPrefab = "Canvas/DefaultRootCanvas") {
