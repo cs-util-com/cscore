@@ -16,13 +16,18 @@ namespace com.csutil.tests {
 
             List<float> someNumbers = new List<float>();
             float average = 0;
+            Assert.True(float.IsNaN(someNumbers.CalcMedian()));
+            Assert.True(float.IsNaN(someNumbers.CalcMean()));
 
             average = AddValue(someNumbers, 4, average);
             Assert.Equal(4f, average);
+            Assert.Equal(4f, someNumbers.CalcMedian());
             average = AddValue(someNumbers, 6, average);
             Assert.Equal(5f, average);
+            Assert.Equal(4f, someNumbers.CalcMedian());
             average = AddValue(someNumbers, 8, average);
             Assert.Equal(6f, average);
+            Assert.Equal(6f, someNumbers.CalcMedian());
 
         }
 
