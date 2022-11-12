@@ -222,13 +222,32 @@ namespace com.csutil {
             return ByteSizeToString.ByteSizeToReadableString(self.GetFileSize());
         }
 
+        [Obsolete("Use ExtractZipIntoDir instead")]
+        public static void ExtractIntoDir(this FileEntry self, DirectoryEntry targetDir) { ExtractZipIntoDir(self, targetDir); }
+
         /// <summary> Currently only works when working with a physical file system for the target directory </summary>
-        public static void ExtractIntoDir(this FileEntry self, DirectoryEntry targetDir) {
+        public static void ExtractZipIntoDir(this FileEntry self, DirectoryEntry targetDir) {
             if (targetDir.Exists) { throw new IOException("Target dir to extract zip into already exists: " + targetDir); }
             var fastZip = new FastZip();
             FastZip.ConfirmOverwriteDelegate confCallback = (fileName) => false;
             using (var s = self.Open(FileMode.Open, FileAccess.Read, FileShare.Read)) {
                 fastZip.ExtractZip(s, GetFullFileSystemPath(targetDir), FastZip.Overwrite.Prompt, confCallback, "", "", true, true);
+            }
+        }
+
+        /// <summary> Runs through a target zip file and returns the contained data </summary>
+        /// <param name="onLoaded"> Return false if the traversal through the zip folder should be stopped. </param>
+        public static void OpenZipForRead(this FileEntry self, Func<ZipEntry, Stream, bool> onLoaded) {
+            using (var s = self.OpenForRead()) {
+                using (var z = new ZipFile(s)) {
+                    foreach (ZipEntry entry in z) {
+                        using (var inputStream = z.GetInputStream(entry)) {
+                            if (!onLoaded(entry, inputStream)) {
+                                return; // Cancel traversal when false is returned
+                            }
+                        }
+                    }
+                }
             }
         }
 
