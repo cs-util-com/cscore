@@ -219,6 +219,26 @@ namespace com.csutil {
             return true;
         }
 
+        public static IEnumerable<T> ToIEnumerable<T>(this IEnumerator<T> enumerator) {
+            return _ToIEnumerable(enumerator).Cached();
+        }
+        
+        private static IEnumerable<T> _ToIEnumerable<T>(this IEnumerator<T> enumerator) {
+            while ( enumerator.MoveNext() ) {
+                yield return enumerator.Current;
+            }
+        }
+        
+        public static IEnumerable<T> ToIEnumerable<T>(this IEnumerator enumerator) {
+            return _ToIEnumerable(enumerator).Cast<T>().Cached();
+        }
+        
+        private static IEnumerable _ToIEnumerable(this IEnumerator enumerator) {
+            while ( enumerator.MoveNext() ) {
+                yield return enumerator.Current;
+            }
+        }
+        
     }
 
 }

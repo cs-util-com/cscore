@@ -15,8 +15,9 @@ namespace com.csutil {
             }
         }
 
-        public static void ResetStreamCurserPositionToBeginning(this Stream self) {
+        public static T ResetStreamCurserPositionToBeginning<T>(this T self) where T : Stream {
             self.Position = 0; // Move curser back to beginning after copy
+            return self;
         }
 
         public static void CopyTo(this Stream self, Stream destination, Action<long> onProgress, int bufferSize = 4096) {

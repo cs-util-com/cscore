@@ -235,22 +235,6 @@ namespace com.csutil {
             }
         }
 
-        /// <summary> Runs through a target zip file and returns the contained data </summary>
-        /// <param name="onLoaded"> Return false if the traversal through the zip folder should be stopped. </param>
-        public static void OpenZipForRead(this FileEntry self, Func<ZipEntry, Stream, bool> onLoaded) {
-            using (var s = self.OpenForRead()) {
-                using (var z = new ZipFile(s)) {
-                    foreach (ZipEntry entry in z) {
-                        using (var inputStream = z.GetInputStream(entry)) {
-                            if (!onLoaded(entry, inputStream)) {
-                                return; // Cancel traversal when false is returned
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
         /// <summary> Currently only works when working with a physical file system for the source directory </summary>
         public static void ZipToFile(this DirectoryEntry self, FileEntry targetZipFile) {
             if (targetZipFile.Exists) { throw new IOException("Target zip file already exists: " + targetZipFile); }
