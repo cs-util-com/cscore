@@ -89,6 +89,8 @@ namespace com.csutil {
         }
 
         public static void SaveStream(this FileEntry self, Stream streamToSave, Action<long> onProgress = null) {
+            self.Parent.CreateV2();
+            streamToSave.ResetStreamCurserPositionToBeginning();
             using (var fileStream = self.OpenOrCreateForWrite()) {
                 fileStream.SetLength(0); // Reset the stream in case it was opened
                 if (onProgress == null) {
@@ -97,9 +99,12 @@ namespace com.csutil {
                     streamToSave.CopyTo(fileStream, onProgress);
                 }
             }
+            streamToSave.ResetStreamCurserPositionToBeginning();
         }
 
         public static async Task SaveStreamAsync(this FileEntry self, Stream streamToSave, Action<long> onProgress = null) {
+            self.Parent.CreateV2();
+            streamToSave.ResetStreamCurserPositionToBeginning();
             using (var fileStream = self.OpenOrCreateForWrite()) {
                 fileStream.SetLength(0); // Reset the stream in case it was opened
                 if (onProgress == null) {
@@ -108,6 +113,7 @@ namespace com.csutil {
                     await streamToSave.CopyToAsync(fileStream, onProgress);
                 }
             }
+            streamToSave.ResetStreamCurserPositionToBeginning();
         }
 
         public static void SaveAsJson<T>(this StreamWriter self, T objectToSave) {
