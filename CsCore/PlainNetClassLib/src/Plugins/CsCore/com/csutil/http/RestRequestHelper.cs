@@ -51,7 +51,7 @@ namespace com.csutil {
                     if (progressInPercent.SetNewValue(percentValue)) {
                         self.onProgress?.Invoke(progressInPercent.value);
                     }
-                });
+                }, resetStreamToStart: false);
             }
         }
 

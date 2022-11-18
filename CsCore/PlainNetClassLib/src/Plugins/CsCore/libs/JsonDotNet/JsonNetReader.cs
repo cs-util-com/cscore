@@ -49,7 +49,7 @@ namespace com.csutil.json {
 
         private static string ReadFullString(StreamReader streamReader) {
             streamReader.DiscardBufferedData();
-            streamReader.BaseStream.Position = 0;
+            streamReader.BaseStream.ResetStreamCurserPositionToBeginning();
             var fullString = streamReader.ReadToEnd();
             AssertV2.IsFalse(fullString.IsNullOrEmpty(), "The string loaded from the streamReader was null or emtpy");
             return fullString;
