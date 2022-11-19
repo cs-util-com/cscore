@@ -27,8 +27,9 @@ namespace com.csutil.http.apis {
         }
 
         private static async Task<List<List<string>>> DownloadAndParseCsvSheet(Uri csvUrl) {
-            var csvStream = await csvUrl.SendGET().GetResult<Stream>();
-            return CsvParser.ReadCsvStream(csvStream);
+            using (var csvStream = await csvUrl.SendGET().GetResult<Stream>()) {
+                return CsvParser.ReadCsvStream(csvStream);
+            }
         }
 
     }
