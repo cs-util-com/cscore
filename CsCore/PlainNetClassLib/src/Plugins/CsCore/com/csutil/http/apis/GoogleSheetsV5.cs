@@ -19,8 +19,14 @@ namespace com.csutil.http.apis {
             return GoogleSheetDataParser.ParseRawSheetData(await GetSheet(csvUrl));
         }
 
-        public static async Task<List<List<string>>> GetSheet(Uri csvUrl) {
+        public static Task<List<List<string>>> GetSheet(Uri csvUrl) {
             AssertV2.IsTrue(csvUrl.Query.Contains("output=csv"), "The passed url is not a CSV export url from 'File => Publish to the web'");
+            return TaskV2.TryWithExponentialBackoff(() => DownloadAndParseCsvSheet(csvUrl), (e) => {
+                if (!(e is FormatException)) { throw e; } // For FormatException retry, for any other error stop trying 
+            }, 5);
+        }
+
+        private static async Task<List<List<string>>> DownloadAndParseCsvSheet(Uri csvUrl) {
             var csvStream = await csvUrl.SendGET().GetResult<Stream>();
             return CsvParser.ReadCsvStream(csvStream);
         }
