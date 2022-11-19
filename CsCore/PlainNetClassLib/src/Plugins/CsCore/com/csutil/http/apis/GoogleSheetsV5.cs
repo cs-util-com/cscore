@@ -5,10 +5,15 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using com.csutil.io;
+using com.csutil.json;
 
 namespace com.csutil.http.apis {
 
     public static class GoogleSheetsV5 {
+
+        public static async Task<Dictionary<string, T>> GetSheetObjects<T>(Uri csvUrl) {
+            return GoogleSheetDataParser.ParseRawSheetData<T>(await GetSheet(csvUrl));
+        }
 
         public static async Task<Dictionary<string, object>> GetSheetObjects(Uri csvUrl) {
             return GoogleSheetDataParser.ParseRawSheetData(await GetSheet(csvUrl));
@@ -23,6 +28,24 @@ namespace com.csutil.http.apis {
     }
 
     public static class GoogleSheetDataParser {
+
+        public static Dictionary<string, T> ParseRawSheetData<T>(List<List<string>> rawSheetData) {
+            var result = new Dictionary<string, T>();
+            if (rawSheetData.IsNullOrEmpty()) { return result; }
+            var fieldNames = rawSheetData.First().ToList();
+            foreach (var column in rawSheetData.Skip(1)) {
+                var key = column.First();
+                AssertV2.AreNotEqual("", key);
+                var obj = ToObject(fieldNames, column.ToList());
+                result.Add(key, ToTypedObject<T>(obj));
+            }
+            return result;
+        }
+
+        private static T ToTypedObject<T>(object o) {
+            var json = JsonWriter.GetWriter().Write(o);
+            return TypedJsonHelper.NewTypedJsonReader().Read<T>(json);
+        }
 
         public static Dictionary<string, object> ParseRawSheetData(List<List<string>> rawSheetData) {
             var result = new Dictionary<string, object>();
