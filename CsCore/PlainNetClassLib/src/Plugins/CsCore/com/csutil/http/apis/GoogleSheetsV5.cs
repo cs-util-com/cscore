@@ -69,7 +69,7 @@ namespace com.csutil.http.apis {
         private static object ToObject(List<string> names, List<string> values) {
             var nc = names.Count();
             var vCount = values.Count();
-            if (nc < vCount) { throw new IndexOutOfRangeException($"Only {nc} names but {vCount} values in row"); }
+            if (nc < vCount) { throw new IndexOutOfRangeException($"Only {nc} names but {vCount} values in row. names={names.ToStringV2(x => x)} but values={values.ToStringV2(x => x)}"); }
             var result = new Dictionary<string, object>();
             var jsonReader = JsonReader.GetReader();
             for (int i = 0; i < vCount; i++) { AddToResult(result, jsonReader, names[i], values[i].Trim()); }
