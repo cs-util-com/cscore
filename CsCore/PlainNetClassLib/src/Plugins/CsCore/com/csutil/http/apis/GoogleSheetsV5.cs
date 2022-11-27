@@ -11,22 +11,26 @@ namespace com.csutil.http.apis {
 
     public static class GoogleSheetsV5 {
 
-        public static async Task<Dictionary<string, T>> GetSheetObjects<T>(Uri csvUrl) {
-            return GoogleSheetDataParser.ParseRawSheetData<T>(await GetSheet(csvUrl));
+        public static Task<Dictionary<string, T>> GetSheetObjects<T>(Uri csvUrl) {
+            return TaskV2.TryWithExponentialBackoff(async () => {
+                return GoogleSheetDataParser.ParseRawSheetData<T>(await DownloadAndParseCsvSheet(csvUrl));
+            }, HandleError, maxNrOfRetries: 5);
         }
 
-        public static async Task<Dictionary<string, object>> GetSheetObjects(Uri csvUrl) {
-            return GoogleSheetDataParser.ParseRawSheetData(await GetSheet(csvUrl));
+        public static Task<Dictionary<string, object>> GetSheetObjects(Uri csvUrl) {
+            return TaskV2.TryWithExponentialBackoff(async () => {
+                return GoogleSheetDataParser.ParseRawSheetData(await DownloadAndParseCsvSheet(csvUrl));
+            }, HandleError, maxNrOfRetries: 5);
         }
 
-        public static Task<List<List<string>>> GetSheet(Uri csvUrl) {
-            AssertV2.IsTrue(csvUrl.Query.Contains("output=csv"), "The passed url is not a CSV export url from 'File => Publish to the web'");
-            return TaskV2.TryWithExponentialBackoff(() => DownloadAndParseCsvSheet(csvUrl), (e) => {
-                if (!(e is FormatException)) { throw e; } // For FormatException retry, for any other error stop trying 
-            }, 5);
+        private static void HandleError(Exception e) {
+            if (e is FormatException) { return; } // Retry for this type of exception
+            if (e is IndexOutOfRangeException) { return; } // Retry for this type of exception
+            throw e; // for any other error stop trying 
         }
 
         private static async Task<List<List<string>>> DownloadAndParseCsvSheet(Uri csvUrl) {
+            AssertV2.IsTrue(csvUrl.Query.Contains("output=csv"), "The passed url is not a CSV export url from 'File => Publish to the web'");
             using (var csvStream = await csvUrl.SendGET().GetResult<Stream>()) {
                 return CsvParser.ReadCsvStream(csvStream);
             }
