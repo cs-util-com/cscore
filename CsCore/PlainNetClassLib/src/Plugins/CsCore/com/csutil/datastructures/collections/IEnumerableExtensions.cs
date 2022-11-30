@@ -40,7 +40,11 @@ namespace com.csutil {
 
         public static bool IsEmpty<T>(this IEnumerable<T> self) { return !self.Any(); }
 
-        public static bool IsNullOrEmpty<T>(this IEnumerable<T> self) { return self == null || !self.Any(); }
+        public static bool IsNullOrEmpty<T>(this IEnumerable<T> self) {
+            if (self == null) { return true; }
+            if (self is ICollection<T> c) { return c.Count == 0; }
+            return !self.Any();
+        }
 
         public static IEnumerable<T> OrEmptyIfNull<T>(this IEnumerable<T> self) { return self ?? Enumerable.Empty<T>(); }
 
