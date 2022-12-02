@@ -69,7 +69,11 @@ namespace com.csutil {
         public void ExecuteOnMainThread(Action a) {
             if (ApplicationV2.isPlaying) { AssertV2.IsNotNull(mainThreadRef, "mainThreadRef"); }
             if (WasInitializedWhilePlaying) {
-                actionsForMainThread.Enqueue(a);
+                if (isMainThread) {
+                    a();
+                } else {
+                    actionsForMainThread.Enqueue(a);
+                }
             } else if (!ApplicationV2.isPlaying) {
                 Log.d("ExecuteOnMainThread: Application not playing, action will be instantly executed now");
                 a();
