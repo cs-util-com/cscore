@@ -36,16 +36,28 @@ namespace com.csutil.gps {
             resultLatLong[1] = eastDistInMeters / vall + zeroPoint.Longitude;
         }
 
+        /// <summary> Calculates the relative vector for input gps coordinates to the used <see cref="IHasLatLong"/> so that it can be shown in a 3D coordinate system </summary>
+        /// <param name="resultCoordsInMeters"> A vector with 2 values where value[0] is the distance on the axis pointing east and value[1] is the distance on the axis pointing north </param>
+        public static void CalcRelativeCoordsInMeters(this IHasLatLong zeroPoint, double latitude, double longitude, double[] resultCoordsInMeters) {
+            if (resultCoordsInMeters.Length != 2) { throw new ArgumentException("Length of passed result array did not have the correct length 2"); }
+            double vall = Longi2Rad * Math.Cos(zeroPoint.Latitude * Deg2Rad);
+            resultCoordsInMeters[0] = (longitude - zeroPoint.Longitude) * vall;
+            resultCoordsInMeters[1] = (latitude - zeroPoint.Latitude) * Lati2Rad;
+        }
+
         /// <summary> Calculates the relative point (with distance to <see cref="zeroPoint"/> in meters) based on the passed in (latitude,longitude) values so
         /// that it can be shown in a 3D coordinate system </summary>
         /// <param name="self"> The GPS coordinates to convert to local coordinates </param>
         /// <param name="resultCoordsInMeters"> A vector with 2 values where value[0] is the distance on the axis pointing east and value[1] is the distance on the axis pointing north </param>
         /// <param name="zeroPoint"> The reference GPS point that is used for all conversions to local 3D space </param>
-        public static void CalcRelativeCoordsInMeters(this IHasLatLong self, double[] resultCoordsInMeters, IHasLatLong zeroPoint) {
-            if (resultCoordsInMeters.Length != 2) { throw new ArgumentException("Length of passed result array did not have the correct length 2"); }
-            double vall = Longi2Rad * Math.Cos(zeroPoint.Latitude * Deg2Rad);
-            resultCoordsInMeters[0] = (self.Longitude - zeroPoint.Longitude) * vall;
-            resultCoordsInMeters[1] = (self.Latitude - zeroPoint.Latitude) * Lati2Rad;
+        public static void CalcRelativeCoordsInMeters(this IHasLatLong zeroPoint, IHasLatLong inputPoint, double[] resultCoordsInMeters) {
+            CalcRelativeCoordsInMeters(zeroPoint, inputPoint.Latitude, inputPoint.Longitude, resultCoordsInMeters);
+        }
+        
+        public static double DistanceInMeters(this IHasLatLong self, IHasLatLong otherGpsCoords) {
+            double[] res = new double[2];
+            self.CalcRelativeCoordsInMeters(otherGpsCoords, res);
+            return Math.Sqrt(res[0] * res[0] + res[1] * res[1]);
         }
 
     }

@@ -84,6 +84,11 @@ namespace com.csutil.tests.gps {
             // Google Earth says it should be 1.067,51m
             Assert.Equal(1067, Math.Round(fromP1ToP3.Length()));
 
+            // Distances between GPS points can also be measured like this:
+            Assert.Equal(1064, Math.Round(gps2.DistanceInMeters(gps1)));
+            Assert.Equal(1064, Math.Round(gps1.DistanceInMeters(gps2)));
+            Assert.Equal(1066, Math.Round(gps3.DistanceInMeters(gps1)));
+
         }
 
         private class GpsPoint : IHasLatLong {
@@ -99,7 +104,7 @@ namespace com.csutil.tests.gps {
             }
 
             public Vector3 ToRelativeCoordsInMeters(IHasLatLong zeroPoint) {
-                this.CalcRelativeCoordsInMeters(_relativeCoordinates, zeroPoint);
+                zeroPoint.CalcRelativeCoordsInMeters(this, _relativeCoordinates);
                 var altitudeInMeters = 0;
                 return new Vector3((float)_relativeCoordinates[0], altitudeInMeters, (float)_relativeCoordinates[1]);
             }
