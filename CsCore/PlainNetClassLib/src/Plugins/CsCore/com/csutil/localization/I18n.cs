@@ -42,7 +42,7 @@ namespace com.csutil {
         }
 
         private async Task LoadTranslationDataForLocale() {
-            AssertV2.IsNotNull(localeLoader, "localeLoader");
+            AssertV3.IsNotNull(localeLoader, "localeLoader");
             translationData = await localeLoader(currentLocale);
         }
 
@@ -107,7 +107,7 @@ namespace com.csutil {
         }
 
         private static Task<Dictionary<string, Translation>> ConvertToDictionary(IEnumerable<Translation> translations) {
-            AssertV2.AreNotEqual(0, translations.Count());
+            AssertV3.AreNotEqual(0, translations.Count());
             return Task.FromResult(translations.ToDictionary(e => e.key, e => e));
         }
 

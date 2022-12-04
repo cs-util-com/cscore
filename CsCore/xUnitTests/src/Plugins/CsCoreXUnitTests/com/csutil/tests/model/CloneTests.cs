@@ -26,7 +26,7 @@ namespace com.csutil.tests.model {
 
             MyClass1 copy = original.DeepCopyViaJson();
             Assert.Null(MergeJson.GetDiff(original, copy)); // No diff between original and copy
-            AssertV2.AreEqualJson(original, copy); // AreEqualJson will use MergeJson.GetDiff internally
+            AssertV3.AreEqualJson(original, copy); // AreEqualJson will use MergeJson.GetDiff internally
             Assert.Equal(original.child.name, copy.child.name);
             // Modify the copy, changing the copy will not change the original:
             copy.child.name = "Some new name..";

@@ -24,7 +24,7 @@ namespace com.csutil.progress {
         public double percent {
             get { return _percent; }
             set {
-                AssertV2.IsTrue((int)_percent <= (int)value, $"Warning: current {_percent}% > new {value}%");
+                AssertV3.IsTrue((int)_percent <= (int)value, () => $"Warning: current {_percent}% > new {value}%");
                 if (disposed) { throw new ObjectDisposedException($"Progress {id} already disposed!"); }
                 if (value != _percent) {
                     _percent = value;

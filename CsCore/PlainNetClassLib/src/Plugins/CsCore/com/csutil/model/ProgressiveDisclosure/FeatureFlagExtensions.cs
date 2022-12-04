@@ -6,7 +6,7 @@ namespace com.csutil.model {
 
         // if the client rnd value is below the rollout % this client gets the feature:
         public static async Task<bool> IsEnabled<T>(this T self) where T : IFeatureFlag {
-            AssertV2.AreNotEqual(0, self.localState.randomPercentage, "localState.randomPercentage");
+            AssertV3.AreNotEqual(0, self.localState.randomPercentage, "localState.randomPercentage");
             return self.localState.randomPercentage <= self.rolloutPercentage && await self.IsFeatureUnlocked();
         }
 

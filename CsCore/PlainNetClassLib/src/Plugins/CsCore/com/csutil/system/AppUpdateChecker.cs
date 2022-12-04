@@ -35,7 +35,7 @@ namespace com.csutil.system {
             if (hasInet && !hasTriedToCheckForUpdate && showUserUpdateInstructions != null) {
                 hasTriedToCheckForUpdate = true; // set it first to only try once per app lifecycle
                 var matchingUpdateEntries = await DownloadMatchingUpdateEntries();
-                AssertV2.IsTrue(matchingUpdateEntries.CountIsBelow(2), "More then one matching update entry!");
+                AssertV3.IsTrue(matchingUpdateEntries.CountIsBelow(2), () => "More then one matching update entry!");
                 if (!matchingUpdateEntries.IsNullOrEmpty()) {
                     showUserUpdateInstructions(matchingUpdateEntries);
                 }

@@ -51,7 +51,7 @@ namespace com.csutil.json {
             streamReader.DiscardBufferedData();
             streamReader.BaseStream.ResetStreamCurserPositionToBeginning();
             var fullString = streamReader.ReadToEnd();
-            AssertV2.IsFalse(fullString.IsNullOrEmpty(), "The string loaded from the streamReader was null or emtpy");
+            AssertV3.IsFalse(fullString.IsNullOrEmpty(), () => "The string loaded from the streamReader was null or emtpy");
             return fullString;
         }
     }

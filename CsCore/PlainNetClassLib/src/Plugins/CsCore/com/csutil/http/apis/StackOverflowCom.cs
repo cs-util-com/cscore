@@ -49,7 +49,7 @@ namespace com.csutil.http.apis {
             Dictionary<Item, Item> bestAnswers = new Dictionary<Item, Item>();
             foreach (Item q in questionsWithAnswers) {
                 var answers = await GetAnswersForQuestion(q.question_id, pageSize: 1);
-                AssertV2.AreEqual(1, answers.items.Count());
+                AssertV3.AreEqual(1, answers.items.Count());
                 bestAnswers.Add(q, answers.items.First());
                 if (bestAnswers.Count >= maxResults) { break; }
             }

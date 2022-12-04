@@ -194,7 +194,7 @@ namespace com.csutil.tests {
                 var dir3 = rootDir.GetChildDir("TestDir 3").CreateV2();
                 Assert.Equal("TestDir 3", dir3.Name);
                 dir3 = rootDir.CreateSubdirectory(dir3.Name);
-                AssertV2.Throws<Exception>(() => {
+                AssertV3.Throws<Exception>(() => {
                     dir1.MoveToV2(dir3, out dir1); // This should fail since dir3 already exists
                 });
                 Assert.NotEqual(dir3.FullName, dir1.FullName);

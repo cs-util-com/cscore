@@ -35,7 +35,7 @@ namespace com.csutil.tests.model {
             x1.SetPath(file1);
 
             var x2 = x1.DeepCopyViaJson();
-            AssertV2.AreEqualJson(x1, x2);
+            AssertV3.AreEqualJson(x1, x2);
             Assert.NotEmpty(x1.fileName);
             Assert.NotEmpty(x2.fileName);
 

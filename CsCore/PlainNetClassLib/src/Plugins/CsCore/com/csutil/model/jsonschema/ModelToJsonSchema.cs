@@ -57,7 +57,7 @@ namespace com.csutil.model.jsonschema {
             schemas.Add(schema.modelType, schema);
             schema.properties = new Dictionary<string, JsonSchema>();
             if (model != null) {
-                AssertV2.IsTrue(modelType == model.GetType(), $"modelType ({modelType}) != model.type ({model.GetType()})");
+                AssertV3.IsTrue(modelType == model.GetType(), () => $"modelType ({modelType}) != model.type ({model.GetType()})");
                 AddFieldsViaJson(schema, model, ToJsonModel(model));
             } else {
                 AddFieldsViaReflection(schema, modelType);
@@ -95,7 +95,7 @@ namespace com.csutil.model.jsonschema {
             MemberInfo model = parentType?.GetMember(name).First();
             Type modelType = GetModelType(model);
             JTokenType jTokenType = ToJTokenType(modelType, jpInstance);
-            AssertV2.IsNotNull(jTokenType, "jTokenType");
+            AssertV3.IsNotNull(jTokenType, "jTokenType");
             JsonSchema newField = new JsonSchema() { type = jTokenType.ToJsonSchemaType(), title = JsonSchema.ToTitle(name) };
             ExtractFieldDocu(newField, model, modelType, jTokenType, pInstance, jpInstance);
             if (model != null) {
@@ -155,7 +155,7 @@ namespace com.csutil.model.jsonschema {
                                 SetupInnerJsonSchema(childVm, child.GetType(), child);
                                 newField.items.Add(childVm);
                             }
-                            AssertV2.AreEqual(childrenInstances.Length, newField.items.Count);
+                            AssertV3.AreEqual(childrenInstances.Length, newField.items.Count);
                         }
                     } else {
                         newField.items = new List<JsonSchema>() { new JsonSchema() { type = arrayElemJType.ToJsonSchemaType() } };
@@ -201,7 +201,7 @@ namespace com.csutil.model.jsonschema {
             if (listType == null) { return null; }
             if (listType.IsArray) { return listType.GetElementType(); }
             var args = listType.GetGenericArguments();
-            AssertV2.IsTrue(args.Length == 1, "Not 1 generic list type, instead: " + args.ToStringV2(x => "" + x));
+            AssertV3.IsTrue(args.Length == 1, () => "Not 1 generic list type, instead: " + args.ToStringV2(x => "" + x));
             return args.Single();
         }
 

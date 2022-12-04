@@ -69,7 +69,7 @@ namespace com.csutil.logging {
             if (!methodName.IsNullOrEmpty()) {
                 EventBus.instance.Publish(EventConsts.catMethod + EventConsts.START, methodName, args);
             }
-            return AssertV2.TrackTiming(methodName);
+            return AssertV3.TrackTiming(methodName);
         }
 
         public virtual void LogMethodDone(Stopwatch timing, object[] args, int maxAllowedTimeInMs, string sourceMemberName, string sourceFilePath, int sourceLineNumber) {

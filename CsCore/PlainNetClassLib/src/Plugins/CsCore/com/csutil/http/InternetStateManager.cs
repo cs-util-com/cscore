@@ -60,7 +60,7 @@ namespace com.csutil {
         protected virtual async Task<bool> RunInternetCheck() {
             var newState = await RestFactory.instance.HasInternet();
             await SetHasInet(newState);
-            AssertV2.AreEqual(HasInet, newState);
+            AssertV3.AreEqual(HasInet, newState);
             return HasInet;
         }
 

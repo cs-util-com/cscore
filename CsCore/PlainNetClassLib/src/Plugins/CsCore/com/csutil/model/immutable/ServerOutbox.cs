@@ -25,7 +25,7 @@ namespace com.csutil.model.immutable {
 
         private ImmutableList<ServerAction> MutateServerActions(T store, ServerAction a) {
             if (store.serverOutbox == null) { return ImmutableList.Create<ServerAction>(a); }
-            AssertV2.IsFalse(store.serverOutbox.serverActions.Contains(a), "Action " + a + " already in the action list!");
+            AssertV3.IsFalse(store.serverOutbox.serverActions.Contains(a), () => "Action " + a + " already in the action list!");
             return store.serverOutbox.serverActions.Add(a);
         }
 

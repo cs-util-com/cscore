@@ -30,7 +30,7 @@ namespace com.csutil.http.apis {
         }
 
         private static async Task<List<List<string>>> DownloadAndParseCsvSheet(Uri csvUrl) {
-            AssertV2.IsTrue(csvUrl.Query.Contains("output=csv"), "The passed url is not a CSV export url from 'File => Publish to the web'");
+            AssertV3.IsTrue(csvUrl.Query.Contains("output=csv"), () => "The passed url is not a CSV export url from 'File => Publish to the web'");
             using (var csvStream = await csvUrl.SendGET().GetResult<Stream>()) {
                 return CsvParser.ReadCsvStream(csvStream);
             }
@@ -46,7 +46,7 @@ namespace com.csutil.http.apis {
             var fieldNames = rawSheetData.First().ToList();
             foreach (var column in rawSheetData.Skip(1)) {
                 var key = column.First();
-                AssertV2.AreNotEqual("", key);
+                AssertV3.AreNotEqual("", key);
                 var obj = ToObject(fieldNames, column.ToList());
                 result.Add(key, ToTypedObject<T>(obj));
             }
@@ -64,7 +64,7 @@ namespace com.csutil.http.apis {
             var fieldNames = rawSheetData.First().ToList();
             foreach (var column in rawSheetData.Skip(1)) {
                 var key = column.First();
-                AssertV2.AreNotEqual("", key);
+                AssertV3.AreNotEqual("", key);
                 result.Add(key, ToObject(fieldNames, column.ToList()));
             }
             return result;

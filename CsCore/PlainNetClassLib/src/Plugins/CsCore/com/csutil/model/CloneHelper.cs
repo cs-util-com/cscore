@@ -38,7 +38,7 @@ namespace com.csutil {
         public static T MapViaJsonInto<T>(this object objectToDeepCopy) { return (T)MapViaJsonInto(objectToDeepCopy, typeof(T)); }
 
         private static object MapViaJsonInto(object objectToDeepCopy, Type targetType) {
-            AssertV2.IsFalse(objectToDeepCopy is Task, "Tried to serialize a Task, missing (await ..)?!");
+            AssertV3.IsFalse(objectToDeepCopy is Task, () => "Tried to serialize a Task, missing (await ..)?!");
             if (objectToDeepCopy == null || objectToDeepCopy.GetType().IsPrimitiveOrSimple()) { return objectToDeepCopy; }
             using (var stream = new MemoryStream()) {
                 using (var writer = new StreamWriter(stream, encoding: Encoding.UTF8, bufferSize: 1024, leaveOpen: true)) {

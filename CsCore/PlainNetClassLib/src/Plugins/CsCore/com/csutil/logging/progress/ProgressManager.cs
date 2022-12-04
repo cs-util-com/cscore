@@ -28,7 +28,7 @@ namespace com.csutil.progress {
         public int finishedTasks { get; private set; }
 
         public IProgress ProgressInjectionRequest(object caller, bool createIfNull) {
-            AssertV2.IsNotNull(caller, "caller");
+            AssertV3.IsNotNull(caller, "caller");
             if (caller is string id) { return GetOrAddProgress(id, 0, createIfNull); }
             if (caller is KeyValuePair<string, double> p) { return GetOrAddProgress(p.Key, p.Value, createIfNull); }
             throw new ArgumentException($"Cant handle caller='{caller}'");

@@ -95,7 +95,7 @@ namespace com.csutil {
                     }
                     res.conflicts = properties.Map(ToMergeConflict);
                 } else if (prop.Value is JArray oldAndNewValue) {
-                    AssertV2.AreEqual(2, oldAndNewValue.Count);
+                    AssertV3.AreEqual(2, oldAndNewValue.Count);
                     res.oldValue = oldAndNewValue[0];
                     res.newValue = oldAndNewValue[1];
                 } else {

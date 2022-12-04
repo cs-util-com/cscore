@@ -42,11 +42,11 @@ namespace com.csutil {
         public static async Task DownloadTo(this RestRequest self, FileEntry targetFile) {
             using (var stream = await self.GetResult<Stream>()) {
                 float totalBytes = (await self.GetResultHeaders()).GetFileSizeInBytesOnServer();
-                AssertV2.IsTrue(totalBytes > 0, "GetFileSizeInBytesOnServer totalBytes=" + totalBytes);
+                AssertV3.IsTrue(totalBytes > 0, () => "GetFileSizeInBytesOnServer totalBytes=" + totalBytes);
                 var progressInPercent = new ChangeTracker<float>(0f);
                 await targetFile.SaveStreamAsync(stream, (savedBytes) => {
                     float percentValue = 100f * savedBytes / totalBytes;
-                    AssertV2.IsInRange(0, percentValue, 100, "percentValue");
+                    AssertV3.IsInRange(0, percentValue, 100, "percentValue");
                     percentValue = Math.Max(0f, percentValue);
                     if (progressInPercent.SetNewValue(percentValue)) {
                         self.onProgress?.Invoke(progressInPercent.value);

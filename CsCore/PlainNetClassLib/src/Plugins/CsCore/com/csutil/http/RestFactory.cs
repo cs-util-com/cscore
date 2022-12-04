@@ -52,7 +52,7 @@ namespace com.csutil.http {
 
         public virtual async Task<long> GetCurrentPing(string ipOrUrl = DEFAULT_PING_IP, int timeoutInMs = DEFAULT_PING_TIMEOUT) {
             PingReply pingReply = await new Ping().SendPingAsync(ipOrUrl, timeoutInMs);
-            AssertV2.IsNotNull(pingReply, "pingReply");
+            AssertV3.IsNotNull(pingReply, "pingReply");
             if (pingReply.Status != IPStatus.Success) { throw new TimeoutException("Ping failed: " + pingReply.Status); }
             return pingReply.RoundtripTime; // return ping in MS
         }

@@ -13,14 +13,14 @@ namespace com.csutil {
         public static DirectoryEntry GetChildDir(this DirectoryEntry self, string subDirName, bool sanitize = true) {
             subDirName.ThrowErrorIfNullOrEmpty("subDirName");
             if (sanitize) { subDirName = Sanitize.SanitizeToDirName(subDirName); }
-            AssertV2.AreEqual(subDirName, Sanitize.SanitizeToDirName(subDirName));
+            AssertV3.AreEqual(subDirName, Sanitize.SanitizeToDirName(subDirName));
             return ResolveDirectoryPath(self, subDirName);
         }
 
         public static FileEntry GetChild(this DirectoryEntry self, string fileName, bool sanitize = true) {
             fileName.ThrowErrorIfNullOrEmpty("fileName");
             if (sanitize) { fileName = Sanitize.SanitizeToFileName(fileName); }
-            AssertV2.AreEqual(fileName, Sanitize.SanitizeToFileName(fileName));
+            AssertV3.AreEqual(fileName, Sanitize.SanitizeToFileName(fileName));
             return ResolveFilePath(self, fileName);
         }
 
@@ -84,7 +84,7 @@ namespace com.csutil {
                     t.SetLength(0); // Reset the stream in case it was opened
                     using (var s = self.OpenForRead()) { s.CopyTo(t); }
                 }
-                AssertV2.IsTrue(target.Exists, "Target did not exist after copy to was done: " + target);
+                AssertV3.IsTrue(target.Exists, () => "Target did not exist after copy to was done: " + target);
                 return target;
             }
             return self.CopyTo(target.Path, replaceExisting);
@@ -114,7 +114,7 @@ namespace com.csutil {
 
         public static bool MoveToV2(this DirectoryEntry source, DirectoryEntry target, out DirectoryEntry result) {
             AssertNotIdentical(source, target);
-            AssertV2.IsTrue(source.FileSystem == target.FileSystem, "Moving between different file systems not implemented");
+            AssertV3.IsTrue(source.FileSystem == target.FileSystem, () => "Moving between different file systems not implemented");
             source.MoveTo(target.Path);
             if (!target.Exists) { throw new DirectoryNotFoundException("Could not move dir to " + target); }
             result = target;
@@ -133,7 +133,7 @@ namespace com.csutil {
             foreach (var file in source.EnumerateFiles()) {
                 var to = target.GetChild(file.Name);
                 var createdFile = file.CopyToV2(to, replaceExisting);
-                AssertV2.IsTrue(createdFile.Exists, "!createdFile.Exists: " + createdFile);
+                AssertV3.IsTrue(createdFile.Exists, () => "!createdFile.Exists: " + createdFile);
             }
             return target.Exists;
         }
@@ -205,7 +205,7 @@ namespace com.csutil {
         private static bool DeleteV2(FileSystemEntry self, Func<bool> deleteAction) {
             if (self.IsNotNullAndExists()) {
                 var res = deleteAction();
-                AssertV2.IsFalse(!res || self.Exists, "Still exists: " + self);
+                AssertV3.IsFalse(!res || self.Exists, () => "Still exists: " + self);
                 return res;
             }
             return false;

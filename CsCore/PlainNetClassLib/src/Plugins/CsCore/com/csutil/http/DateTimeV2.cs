@@ -12,7 +12,7 @@ namespace com.csutil {
     public class DateTimeV2 : IDisposableV2 {
 
         public static DateTime NewDateTimeFromUnixTimestamp(long unixTimeInMs, bool autoCorrectIfPassedInSeconds = true) {
-            AssertV2.IsTrue(unixTimeInMs > 0, "NewDateTimeFromUnixTimestamp: unixTimeInMs was " + unixTimeInMs);
+            AssertV3.IsTrue(unixTimeInMs > 0, () => "NewDateTimeFromUnixTimestamp: unixTimeInMs was " + unixTimeInMs);
             DateTime result = DateTimeOffset.FromUnixTimeMilliseconds(unixTimeInMs).UtcDateTime;
             if (result.Year == 1970) {
                 if (autoCorrectIfPassedInSeconds) {
