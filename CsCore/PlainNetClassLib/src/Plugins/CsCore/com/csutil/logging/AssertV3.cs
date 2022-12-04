@@ -7,12 +7,11 @@ using System.Runtime.CompilerServices;
 
 namespace com.csutil {
 
-    [Obsolete("Use AssertV3 instead")]
-    public static class AssertV2 {
+    public static class AssertV3 {
 
         private const string LB = "\r\n";
         private static object syncLock = new object();
-        
+
         public static bool throwExeptionIfAssertionFails = false;
 
         /// <summary> Allows an easy way to do print debugging for all successful assertions present in the 
@@ -23,10 +22,12 @@ namespace com.csutil {
         /// debugging session can stay in the code </summary>
         public static Action<string, object[]> onAssertSuccess;
 
-        private static void Assert(bool condition, string errorMsg, object[] args) {
+        private static void Assert(bool condition, Func<string> errorMsg, object[] args) {
             args = new StackTrace(2, true).AddTo(args);
-            if (!condition) { Fail(errorMsg, args); } else {
-                onAssertSuccess?.Invoke(errorMsg, args); // If callback set inform it on success
+            if (!condition) {
+                Fail(errorMsg(), args);
+            } else if (onAssertSuccess != null) {
+                onAssertSuccess(errorMsg(), args); // If callback set inform it on success
             }
         }
 
@@ -52,13 +53,13 @@ namespace com.csutil {
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
-        public static void IsTrue(bool condition, string errorMsg, params object[] args) {
-            Assert(condition, "Assert.IsTrue() FAILED: " + errorMsg, args);
+        public static void IsTrue(bool condition, Func<string> errorMsg, params object[] args) {
+            Assert(condition, () => "Assert.IsTrue() FAILED: " + errorMsg(), args);
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
-        public static void IsFalse(bool condition, string errorMsg, params object[] args) {
-            Assert(!condition, "Assert.IsFalse() FAILED: " + errorMsg, args);
+        public static void IsFalse(bool condition, Func<string> errorMsg, params object[] args) {
+            Assert(!condition, () => "Assert.IsFalse() FAILED: " + errorMsg(), args);
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
@@ -72,46 +73,40 @@ namespace com.csutil {
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         public static void IsNull(object o, string varName, params object[] args) {
-            string errorMsg = $"Assert.IsNull({varName}) FAILED";
-            Assert(o == null, errorMsg, args);
+            Assert(o == null, () => $"Assert.IsNull({varName}) FAILED", args);
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         public static void IsNotNull(object o, string varName, params object[] args) {
-            string errorMsg = $"Assert.IsNotNull({varName}) FAILED";
-            Assert(o != null, errorMsg, args);
+            Assert(o != null, () => $"Assert.IsNotNull({varName}) FAILED", args);
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         public static void AreEqual(bool expected, bool actual, string varName = "", params object[] args) {
-            var errorMsg = $"Assert.AreEqual() FAILED: expected bool {varName}= {expected} NOT equal to actual {varName}= {actual}";
-            Assert(expected == actual, errorMsg, args);
+            Assert(expected == actual, () => $"Assert.AreEqual() FAILED: expected bool {varName}= {expected} NOT equal to actual {varName}= {actual}", args);
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         public static void AreEqual(long expected, long actual, string varName = "", params object[] args) {
-            var errorMsg = $"Assert.AreEqual() FAILED: expected number {varName}= {expected} NOT equal to actual {varName}= {actual}";
-            Assert(expected == actual, errorMsg, args);
+            Assert(expected == actual, () => $"Assert.AreEqual() FAILED: expected number {varName}= {expected} NOT equal to actual {varName}= {actual}", args);
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         public static void AreEqual(double expected, double actual, string varName = "", params object[] args) {
-            var errorMsg = $"Assert.AreEqual() FAILED: expected number {varName}= {expected} NOT equal to actual {varName}= {actual}";
-            Assert(expected == actual, errorMsg, args);
+            Assert(expected == actual, () => $"Assert.AreEqual() FAILED: expected number {varName}= {expected} NOT equal to actual {varName}= {actual}", args);
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         public static void AreEqual<T>(IEnumerable<T> expected, IEnumerable<T> actual, string varName = "", params object[] args) {
             if (!expected.Equals(actual)) {
                 string errorMsg = $"Assert.AreEqual() FAILED for {varName}: {CalcMultiLineUnequalText(expected, actual)}";
-                Assert(false, errorMsg, args);
+                Assert(false, () => errorMsg, args);
             }
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         public static void AreEqual<T>(T expected, T actual, string varName = "", params object[] args) {
-            var errorMsg = $"Assert.AreEqual() FAILED: expected {typeof(T)} {varName}= {expected} NOT equal to actual {varName}= {actual}";
-            Assert(Equals(expected, actual), errorMsg, args);
+            Assert(Equals(expected, actual), () => $"Assert.AreEqual() FAILED: expected {typeof(T)} {varName}= {expected} NOT equal to actual {varName}= {actual}", args);
         }
 
         private static string CalcMultiLineUnequalText<T>(IEnumerable<T> expected, IEnumerable<T> actual, string _ = LB + "   ") {
@@ -120,9 +115,9 @@ namespace com.csutil {
             if (!(expected is string)) { spacesCount = spacesCount * 3 + 1; }
             string spaces = new string(' ', spacesCount);
             return $"{_}           {spaces}↓(pos {diffPos})" +
-                   $"{_} Expected: {expected.ToStringV2(x => "" + x)} " +
-                   $"{_} Actual:   {actual.ToStringV2(x => "" + x)}" +
-                   $"{_}           {spaces}↑(pos {diffPos})";
+                $"{_} Expected: {expected.ToStringV2(x => "" + x)} " +
+                $"{_} Actual:   {actual.ToStringV2(x => "" + x)}" +
+                $"{_}           {spaces}↑(pos {diffPos})";
         }
 
         private static int GetPosOfFirstDiff<T>(IEnumerable<T> expected, IEnumerable<T> actual) {
@@ -131,23 +126,20 @@ namespace com.csutil {
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         public static void AreNotEqual(double expected, double actual, string varName = "", params object[] args) {
-            var errorMsg = $"Assert.AreNotEqual() FAILED: expected number {varName}= {expected} IS equal to actual {varName}= {actual}";
-            Assert(!Equals(expected, actual), errorMsg, args);
+            Assert(!Equals(expected, actual), () => $"Assert.AreNotEqual() FAILED: expected number {varName}= {expected} IS equal to actual {varName}= {actual}", args);
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         public static void AreNotEqual(long expected, long actual, string varName = "", params object[] args) {
-            var errorMsg = $"Assert.AreNotEqual() FAILED: expected number {varName}= {expected} IS equal to actual {varName}= {actual}";
-            Assert(!Equals(expected, actual), errorMsg, args);
+            Assert(!Equals(expected, actual), () => $"Assert.AreNotEqual() FAILED: expected number {varName}= {expected} IS equal to actual {varName}= {actual}", args);
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         public static void AreNotEqual<T>(IEnumerable<T> expected, IEnumerable<T> actual, string varName = "", params object[] args) {
             var isNotSameRef = !ReferenceEquals(expected, actual);
-            Assert(isNotSameRef, $"Assert.AreNotEqual() FAILED: {varName} is same reference (expected {expected} == actual {actual} )", args);
+            Assert(isNotSameRef, () => $"Assert.AreNotEqual() FAILED: {varName} is same reference (expected {expected} == actual {actual} )", args);
             if (isNotSameRef) {
-                var errorMsg = $"Assert.AreNotEqual() FAILED: expected  {varName}= {expected} IS equal to actual {varName}= {actual}";
-                Assert(!Equals(expected, actual), errorMsg, args);
+                Assert(!Equals(expected, actual), () => $"Assert.AreNotEqual() FAILED: expected  {varName}= {expected} IS equal to actual {varName}= {actual}", args);
             }
         }
 
@@ -155,39 +147,36 @@ namespace com.csutil {
         public static void AreEqualJson(object a, object b, params object[] args) {
             if (ReferenceEquals(a, b)) { throw new ArgumentException("Both references pointed to the same object"); }
             var jsonDiff = MergeJson.GetDiff(a, b);
-            Assert(jsonDiff == null, "Difference found:\n" + jsonDiff?.ToPrettyString(), args);
+            Assert(jsonDiff == null, () => "Difference found:\n" + jsonDiff?.ToPrettyString(), args);
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         public static void AreNotEqualLists<T>(IEnumerable<T> expected, IEnumerable<T> actual, string varName = "", params object[] args) {
-            string msg1 = "Assert.AreNotEqual() FAILED: " + varName + " is same reference (expected == actual)";
-            Assert(expected != actual, msg1, args);
-            string msg2 = $"Assert.AreNotEqual() FAILED: expected {varName}= {expected} IS equal to actual {varName}= {actual}";
-            Assert(!expected.SequenceEqual(actual), msg2, args);
+            Assert(expected != actual, () => "Assert.AreNotEqual() FAILED: " + varName + " is same reference (expected == actual)", args);
+            Assert(!expected.SequenceEqual(actual), () => $"Assert.AreNotEqual() FAILED: expected {varName}= {expected} IS equal to actual {varName}= {actual}", args);
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         public static void IsInRange(double lowerBound, double value, double upperBound, string varName, params object[] args) {
             if (upperBound < lowerBound) { throw Log.e($"Invalid bounds: (upperBound){upperBound} < {lowerBound}(lowerBound)"); }
-            Assert(lowerBound <= value, $"Assert.IsInRange() FAILED: {varName}={value} is BELOW lower bound=" + lowerBound, args);
-            Assert(value <= upperBound, $"Assert.IsInRange() FAILED: {varName}={value} is ABOVE upper bound=" + upperBound, args);
+            Assert(lowerBound <= value, () => $"Assert.IsInRange() FAILED: {varName}={value} is BELOW lower bound=" + lowerBound, args);
+            Assert(value <= upperBound, () => $"Assert.IsInRange() FAILED: {varName}={value} is ABOVE upper bound=" + upperBound, args);
         }
 
         public static StopwatchV2 TrackTiming([CallerMemberName] string methodName = null) { return new StopwatchV2(methodName).StartV2(); }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
-        public static void AssertUnderXms(Stopwatch self, int maxTimeInMs, params object[] args) {
+        public static void AssertUnderXms(this Stopwatch self, int maxTimeInMs, params object[] args) {
             var ms = self.ElapsedMilliseconds;
             int p = (int)(ms * 100f / maxTimeInMs);
-            var errorText = $"{GetMethodName(self)} took {p}% ({ms}ms) longer then allowed ({maxTimeInMs}ms)!";
-            Assert(IsUnderXms(self, maxTimeInMs), errorText, args);
+            Assert(IsUnderXms(self, maxTimeInMs), () => $"{GetMethodName(self)} took {p}% ({ms}ms) longer then allowed ({maxTimeInMs}ms)!", args);
         }
 
         private static string GetMethodName(Stopwatch s) {
             if (s is StopwatchV2 sV2) { return sV2.methodName; } else { return new StackFrame(2).GetMethodName(false); }
         }
 
-        public static bool IsUnderXms(Stopwatch self, int maxTimeInMs) { return self.ElapsedMilliseconds <= maxTimeInMs; }
+        public static bool IsUnderXms(this Stopwatch self, int maxTimeInMs) { return self.ElapsedMilliseconds <= maxTimeInMs; }
 
         public static void ThrowExeptionIfAssertionFails(Action taskToExecute) {
             ThrowExeptionIfAssertionFails(true, taskToExecute);
@@ -202,13 +191,12 @@ namespace com.csutil {
             }
         }
 
-        /// <summary> Log out successful assetions, <see cref="AssertV2.onAssertSuccess"/> when this is useful </summary>
+        /// <summary> Log out successful assetions, <see cref="AssertV3.onAssertSuccess"/> when this is useful </summary>
         public static void SetupPrintDebuggingSuccessfulAssertions() {
-            AssertV2.onAssertSuccess = (msg, args) => {
+            AssertV3.onAssertSuccess = (msg, args) => {
                 Log.d($"SUCCESSFUL ASSERT, did NOT throw: <<<{msg}>>>", Log.ArgsPlusStackFrameIfNeeded(args, skipFrames: 3));
             };
         }
 
     }
-
 }
