@@ -19,7 +19,7 @@ namespace com.csutil.tests.threading {
             var backgroundTask1IsDone = false;
             yield return queue.Run(async (c) => {
                 Assert.IsFalse(MainThread.isMainThread);
-                await TaskV2.Delay(100);
+                await TaskV2.Delay(150);
                 backgroundTask1IsDone = true;
             }).AsCoroutine();
 
@@ -28,7 +28,7 @@ namespace com.csutil.tests.threading {
 
             var backgroundTask2 = queue.Run(async (c) => {
                 Assert.IsFalse(MainThread.isMainThread);
-                await TaskV2.Delay(100);
+                await TaskV2.Delay(150);
                 c.ThrowIfCancellationRequested();
                 return "some result";
             });
