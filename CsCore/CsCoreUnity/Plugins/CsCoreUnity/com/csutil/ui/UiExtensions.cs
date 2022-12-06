@@ -387,7 +387,8 @@ namespace com.csutil {
             // to the root of the GameObject tree to ensure there are no other canvases on the way up.
             
             // If a canvas is found in any grandparent the current canvas who thinks its a root canvas cant be one:
-            if (!self.gameObject.GetComponentsInParent<Canvas>().IsNullOrEmpty()) {
+            var parentCanvases = self.gameObject.GetParent()?.GetComponentInParents<Canvas>();
+            if (parentCanvases != null) {
                 LogWarningNotToDoUiOperationsDuringOnEnable(self);
                 return false;
             }
