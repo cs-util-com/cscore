@@ -378,6 +378,27 @@ namespace com.csutil {
             return l.Max(x => x.sortingOrder);
         }
 
+        public static bool isRootCanvasV2(this Canvas self) {
+            if (self == null) { return false; }
+            if (!self.isRootCanvas) return false;
+            
+            // There is a bug that during the onEnable phase of a MonoBehavior a canvas thinks it is a
+            // root canvas even though it is not, so additionally all parent canvases need to be collected up
+            // to the root of the GameObject tree to ensure there are no other canvases on the way up.
+            
+            // If a canvas is found in any grandparent the current canvas who thinks its a root canvas cant be one:
+            if (!self.gameObject.GetComponentsInParent<Canvas>().IsNullOrEmpty()) {
+                LogWarningNotToDoUiOperationsDuringOnEnable(self);
+                return false;
+            }
+            return true;
+        }
+
+        [Conditional("DEBUG")]
+        private static void LogWarningNotToDoUiOperationsDuringOnEnable(Canvas self) {
+            Log.w("Using operations on canvas such as .isRootCanvas during onEnable can result in incorrect UI results! If possible delay such operations until the UI is initialized", self.gameObject);
+        }
+
     }
 
     public static class UiButtonExtensions {

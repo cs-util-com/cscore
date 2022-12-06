@@ -12,7 +12,10 @@ namespace com.csutil.ui {
 
         private void OnValidate() { UpdateScaler(); } // Called in editor
 
-        public void Start() { this.ExecuteRepeated(UpdateScaler, 100); }
+        public void Start() {
+            AssertV2.IsTrue(GetComponent<Canvas>().isRootCanvasV2(), $"{nameof(CanvasScalerV2)} should be added on the root canvas level!", gameObject);
+            this.ExecuteRepeated(UpdateScaler, 100);
+        }
 
         public bool UpdateScaler() {
             if (canvasScaler == null) { LazyInitCanvasScaler(); }

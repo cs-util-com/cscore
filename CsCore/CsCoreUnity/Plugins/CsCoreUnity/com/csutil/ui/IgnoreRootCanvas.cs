@@ -9,7 +9,7 @@ namespace com.csutil {
 
 #if DEBUG
         private void Start() {
-            AssertV2.IsTrue(GetComponent<Canvas>().isRootCanvas, "IgnoreRootCanvas can only be used on a root canvas");
+            AssertV2.IsTrue(GetComponent<Canvas>().isRootCanvasV2(), "IgnoreRootCanvas can only be used on a root canvas");
         }
 #endif
 

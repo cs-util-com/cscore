@@ -13,9 +13,11 @@ namespace com.csutil.ui {
         private bool refreshing;
 
         private void OnEnable() {
-            var c = GetComponent<Canvas>();
-            AssertV2.IsTrue(c == null || !c.isRootCanvas, $"{nameof(SafeAreaResizer)} should not be added on the root canvas level!");
             Recalc();
+        }
+
+        private void Start() {
+            AssertV2.IsFalse(GetComponent<Canvas>().isRootCanvasV2(), $"{nameof(SafeAreaResizer)} should NOT be added on the root canvas level!", gameObject);
         }
 
         private void OnRectTransformDimensionsChange() { Recalc(); }
