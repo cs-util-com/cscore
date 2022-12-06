@@ -56,10 +56,15 @@ namespace com.csutil.model.immutable {
             };
         }
 
-        private static Dispatcher NewLoggingDispatcher<T>(IDataStore<T> store, Dispatcher innerDispatcher) {
+        private static Dispatcher NewLoggingDispatcher<T>(IDataStore<T> store, Dispatcher innerDispatcher, int maxMsBugetForLoggingChanges = 1000) {
+            var showChangesJson = true;
             return (action) => {
                 if (action is IsValid v && !v.IsValid()) {
                     Log.e("Invalid action: " + asJson(action.GetType().Name, action));
+                }
+
+                if (!showChangesJson) {
+                    return innerDispatcher(action);
                 }
 
                 bool copyOfActionSupported = false;
@@ -75,7 +80,13 @@ namespace com.csutil.model.immutable {
                 if (!StateCompare.WasModified(previousState, newState)) {
                     Log.w("The action  " + action + " was not handled by any of the reducers! Store=" + store);
                 } else {
+                    var t = StopwatchV2.StartNewV2("NewLoggingMiddleware->NewLoggingDispatcher");
                     ShowChanges(action, previousState, newState);
+                    t.StopV2();
+                    if (t.ElapsedMilliseconds > maxMsBugetForLoggingChanges) {
+                        showChangesJson = false;
+                        Log.e("Disabling logging of json diff from store mutation, since it became to slow (store content to large): " + t);
+                    }
                 }
                 return returnedAction;
             };
