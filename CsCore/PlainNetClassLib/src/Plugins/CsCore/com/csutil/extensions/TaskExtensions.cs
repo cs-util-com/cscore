@@ -14,16 +14,22 @@ namespace com.csutil {
             if (self.Exception != null) { throw self.Exception; }
         }
 
-        public static async Task<T> WithTimeout<T>(this Task<T> self, int timeoutInMs) {
+        public static async Task<T> WithTimeout<T>(this Task<T> self, int timeoutInMs, bool logReasonIfTimeout = true) {
             var completedTask = await Task.WhenAny(self, TaskV2.Delay(timeoutInMs));
-            if (completedTask != self) { throw new TimeoutException(); }
-            return await self;  // use await to propagate exceptions
+            if (completedTask != self) {
+                if (logReasonIfTimeout) { self.LogOnError(); }
+                throw new TimeoutException();
+            }
+            return await self; // use await to propagate exceptions
         }
 
-        public static async Task WithTimeout(this Task self, int timeoutInMs) {
+        public static async Task WithTimeout(this Task self, int timeoutInMs, bool logReasonIfTimeout = true) {
             var completedTask = await Task.WhenAny(self, TaskV2.Delay(timeoutInMs));
-            if (completedTask != self) { throw new TimeoutException(); }
-            await self;  // use await to propagate exceptions
+            if (completedTask != self) {
+                if (logReasonIfTimeout) { self.LogOnError(); }
+                throw new TimeoutException();
+            }
+            await self; // use await to propagate exceptions
         }
 
         public static Task OnError(this Task self, Func<Exception, Task> onError) {
