@@ -47,6 +47,10 @@ namespace com.csutil {
             }
         }
 
+        public static IEnumerable<P> SampleElemsToGetRandomSubset<P>(this Random self, IEnumerable<P> elements, int subsetSize) {
+            return elements.OrderBy(x => self.Next()).Take(subsetSize);
+        }
+
     }
 
 }
