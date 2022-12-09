@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Schedulers;
@@ -197,6 +198,34 @@ namespace com.csutil.tests.async {
             Assert.Equal(0, flag1);
             Assert.False(ThreadSafety.FlipToFalse(ref flag1));
             Assert.Equal(0, flag1);
+        }
+
+        [Fact]
+        public Task TestTaskWhenAnySuccessful() {
+            var r = new Random();
+            var tasks = new List<Task>();
+            for (int i = 0; i < 100; i++) {
+                tasks.Add(TestTaskWhenAnySuccessful2(r.Next(3, 500), r.Next(3, 500), r.Next(3, 500), r.Next(3, 500)));
+                ;
+            }
+            return Task.WhenAll(tasks);
+        }
+
+        private async Task TestTaskWhenAnySuccessful2(int time1, int time2, int time3, int time4) {
+            var tasks = new List<Task>() {
+                NewFailingTaskAfter(timeInMs: time1),
+                NewFailingTaskAfter(timeInMs: time2),
+                NewFailingTaskAfter(timeInMs: time3),
+            };
+            await Assert.ThrowsAsync<Exception>(() => TaskV2.WhenAnySuccessful(tasks, logErrorsForUnsuccessfuls: false));
+
+            tasks.Add(TaskV2.Delay(time4));
+            await TaskV2.WhenAnySuccessful(tasks, logErrorsForUnsuccessfuls: false);
+        }
+
+        private async Task NewFailingTaskAfter(int timeInMs) {
+            await TaskV2.Delay(30);
+            throw new Exception();
         }
 
     }
