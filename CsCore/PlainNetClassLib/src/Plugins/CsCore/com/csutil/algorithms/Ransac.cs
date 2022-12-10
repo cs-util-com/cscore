@@ -21,7 +21,6 @@ namespace com.csutil.algorithms {
             for (int i = 0; i < iterations; i++) {
                 var maybeInliers = rnd.SampleElemsToGetRandomSubset(elems, minSampleSize).ToHashSet();
                 var model = createModel(maybeInliers); // Fit that sub-sample to the model
-
                 var alsoInliers = new List<E>();
                 var outliers = new List<E>();
                 foreach (var elem in elems) {
@@ -36,7 +35,9 @@ namespace com.csutil.algorithms {
                 if (alsoInliers.Count >= d) {
                     alsoInliers.AddRange(maybeInliers); // Merge to include all inliers
                     M betterModel = createModel(alsoInliers);
-                    betterModel.totalModelError.ThrowErrorIfNull("totalModelError");
+                    if (betterModel.totalModelError == null) {
+                        throw new ArgumentNullException("The createModel function did not calculate a totalModelError for the returned model");
+                    }
                     if (bestModel == null || betterModel.totalModelError < bestModel.totalModelError) {
                         bestModel = betterModel;
                         bestModel.inliers = alsoInliers;
