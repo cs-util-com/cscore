@@ -83,15 +83,14 @@ namespace com.csutil.tests.AlgorithmTests {
 
             Assert.Equal(4, result.inliers.Count());
 
-            result.model.alignmentMatrix.Decompose(out var scale, out var rotation, out var translation);
+            result.alignmentMatrix.Decompose(out var scale, out var rotation, out var translation);
             Assert.True(translation.IsSimilarTo(Vector3.Zero, 6));
             Assert.True(scale.IsSimilarTo(Vector3.One, 6));
 
             {
-                var input = result.inliers.Map(x => x.Item1).ToList();
                 var dataToAlignTo = result.inliers.Map(x => x.Item2).ToList();
                 var dataToAlignTo2 = dataToAlignTo.Map(x => new Vector3(x.X, x.Y, x.Z)).ToArray();
-                var output = input.Map(v => Vector3.Transform(v, result.model.alignmentMatrix)).ToArray();
+                var output = result.alignedPoints;
                 AssertAreEqual(dataToAlignTo2[0], (output[0]));
                 AssertAreEqual(dataToAlignTo2[1], (output[1]));
                 AssertAreEqual(dataToAlignTo2[2], (output[2]));
@@ -135,14 +134,14 @@ namespace com.csutil.tests.AlgorithmTests {
             Assert.Equal(1, result.outliers.Count);
             Assert.Equal(new Vector4(99, 0, 3, 1), result.outliers.Single().Item2);
 
-            result.model.alignmentMatrix.Decompose(out var scale, out var rotation, out var translation);
+            result.alignmentMatrix.Decompose(out var scale, out var rotation, out var translation);
             Assert.True(translation.IsSimilarTo(Vector3.Zero, 6), "translation=" + translation);
             Assert.True(scale.IsSimilarTo(Vector3.One, 6), "scale=" + scale);
 
             {
                 var dataToAlignTo = result.inliers.Map(x => x.Item2).ToList();
                 var dataToAlignTo2 = dataToAlignTo.Map(x => new Vector3(x.X, x.Y, x.Z)).ToArray();
-                var output = result.model.alignedPoints;
+                var output = result.alignedPoints;
                 AssertAreEqual(dataToAlignTo2[0], (output[0]));
                 AssertAreEqual(dataToAlignTo2[1], (output[1]));
                 AssertAreEqual(dataToAlignTo2[2], (output[2]));
@@ -166,11 +165,13 @@ namespace com.csutil.tests.AlgorithmTests {
             };
         }
 
-        private class KabschResult : Ransac.IModel {
+        private class KabschResult : Ransac.IModel<Tuple<Vector3, Vector4>> {
             public Matrix4x4 alignmentMatrix { get; set; }
             public Vector3[] alignedPoints { get; set; }
             public double? totalModelError { get; set; }
             public double meanAlignmentError { get; set; }
+            public IEnumerable<Tuple<Vector3, Vector4>> inliers { get; set; }
+            public List<Tuple<Vector3, Vector4>> outliers { get; set; }
         }
 
         private static float CalcError(Vector4 a, Vector3 b) {
