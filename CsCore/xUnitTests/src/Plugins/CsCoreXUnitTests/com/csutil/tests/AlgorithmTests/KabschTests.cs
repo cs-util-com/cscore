@@ -72,7 +72,7 @@ namespace com.csutil.tests.AlgorithmTests {
             }
 
             var tollerance = 1;
-            var result = new Random().RunRansac(pairs, 1, subsetOfAllPairs => {
+            var result = new Random().RunRansac(pairs, 1, minSampleSize: 3, subsetOfAllPairs => {
                 var result = SolveKabschFor(subsetOfAllPairs);
                 // Since all points are perfect inliers the meanAlignmentError should always be 0 for any random subset of points:
                 Assert.Equal(0, result.meanAlignmentError, precision: 10);
@@ -124,7 +124,7 @@ namespace com.csutil.tests.AlgorithmTests {
             }
 
             var tollerance = 1;
-            var result = new Random().RunRansac(allPairs, 1, subsetOfAllPairs => {
+            var result = new Random().RunRansac(allPairs, 1, minSampleSize: 3, subsetOfAllPairs => {
                 return SolveKabschFor(subsetOfAllPairs);
             }, (model, ele) => {
                 return CalcError(ele.Item2, Vector3.Transform(ele.Item1, model.alignmentMatrix)) < model.meanAlignmentError + tollerance;

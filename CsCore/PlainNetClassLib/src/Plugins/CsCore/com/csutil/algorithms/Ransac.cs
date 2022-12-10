@@ -12,8 +12,8 @@ namespace com.csutil.algorithms {
         /// <param name="d"> Number of close data points required to assert that a model fits well to data </param>
         /// <param name="createModel"> Has to create a model based on the set of provided elements and calculate its total error </param>
         /// <param name="isInlier"> Will be called with an element and has to return true if the element is in the error margin of the current model </param>
-        public static M RunRansac<E, M>(this Random rnd, IEnumerable<E> elems, int d, Func<IEnumerable<E>, M> createModel, Func<M, E, bool> isInlier, int iterations = 1000, int minSampleSize = 3) where M : IModel<E> {
-            if (minSampleSize >= elems.Count()) {
+        public static M RunRansac<E, M>(this Random rnd, IEnumerable<E> elems, int d, int minSampleSize, Func<IEnumerable<E>, M> createModel, Func<M, E, bool> isInlier, int iterations = 1000) where M : IModel<E> {
+            if (minSampleSize > elems.Count()) {
                 throw new ArgumentOutOfRangeException($"minSampleSize must be smaller then nr of elements, otherwise ransac would not make sense: minSampleSize={minSampleSize} and elems.Count()={elems.Count()}");
             }
             AssertV3.IsTrue(iterations > 100, () => "It is recommended to have >100 iterations for ransac, iterations=" + iterations);
