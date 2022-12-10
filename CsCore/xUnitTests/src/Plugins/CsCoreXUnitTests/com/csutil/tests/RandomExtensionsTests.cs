@@ -142,6 +142,25 @@ namespace com.csutil.tests.random {
             Assert.True(relStandardDeviation < 0.05, "relStandardDeviation=" + relStandardDeviation);
         }
 
+        [Fact]
+        public void TestCollectionShuffle() {
+            var random = new Random();
+            var list = new string[] { "a", "b", "c", "d", "e" };
+            var shuffeled = random.ShuffleEntries(list);
+            for (int i = 0; i < 100; i++) {
+                Assert.Equal(shuffeled.First(), shuffeled.First());
+                Assert.Equal("a", list.First());
+                Assert.Equal(shuffeled.Last(), shuffeled.Last());
+                Assert.Equal("e", list.Last());
+            }
+            
+            var selectedOnes = new HashSet<string>();
+            for (int i = 0; i < 1000; i++) {
+                selectedOnes.Add(random.SampleElemsToGetRandomSubset(list, 1).Single());
+            }
+            Assert.Equal(list, selectedOnes.OrderBy(x => x));
+        }
+
     }
 
 }

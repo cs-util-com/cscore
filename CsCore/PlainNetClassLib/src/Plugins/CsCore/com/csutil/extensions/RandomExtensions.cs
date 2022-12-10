@@ -47,8 +47,22 @@ namespace com.csutil {
             }
         }
 
-        public static IEnumerable<P> SampleElemsToGetRandomSubset<P>(this Random self, IEnumerable<P> elements, int subsetSize) {
-            return elements.OrderBy(x => self.Next()).Take(subsetSize);
+        public static IEnumerable<T> SampleElemsToGetRandomSubset<T>(this Random self, IEnumerable<T> elements, int subsetSize) {
+            return self.ShuffleEntries(elements).Take(subsetSize);
+        }
+
+        public static IEnumerable<T> ShuffleEntries<T>(this Random self, IEnumerable<T> elementsToShuffle) {
+            return ShuffleEntriesEnumerator(self, elementsToShuffle).Cached();
+        }
+
+        private static IEnumerable<T> ShuffleEntriesEnumerator<T>(Random self, IEnumerable<T> elementsToShuffle) {
+            // From https://stackoverflow.com/a/1653204/165106
+            var buffer = elementsToShuffle.ToList();
+            for (int i = 0; i < buffer.Count; i++) {
+                int j = self.Next(i, buffer.Count);
+                yield return buffer[j];
+                buffer[j] = buffer[i];
+            }
         }
 
     }

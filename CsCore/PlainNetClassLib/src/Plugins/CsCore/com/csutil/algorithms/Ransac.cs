@@ -7,45 +7,55 @@ namespace com.csutil.algorithms {
 
     public static class Ransac {
 
+
         /// <summary> Returns a list of (randomly) sampled elements (outliers filtered out from this list). See https://en.wikipedia.org/wiki/Random_sample_consensus#Algorithm </summary>
         /// <param name="elems"> All elements </param>
+        /// <param name="d"> Number of close data points required to assert that a model fits well to data </param>
         /// <param name="createModel"> Has to create a model based on the set of provided elements and calculate its total error </param>
-        /// <param name="isElemInlier"> Will be called with an element and has to return true if the element is in the error margin of the current model </param>
-        public static Result<E> RunRansac<E>(this Random rnd, IEnumerable<E> elems, Func<IEnumerable<E>, double> createModel, Func<E, bool> isElemInlier, int iterations = 1000, int minSampleSize = 3) {
-            Result<E> bestModel = new Result<E>();
+        /// <param name="isInlier"> Will be called with an element and has to return true if the element is in the error margin of the current model </param>
+        public static Result<M, E> RunRansac<E, M>(this Random rnd, IEnumerable<E> elems, int d, Func<IEnumerable<E>, M> createModel, Func<M, E, bool> isInlier, int iterations = 1000, int minSampleSize = 3) where M : IModel {
+            if (minSampleSize >= elems.Count()) {
+                throw new ArgumentOutOfRangeException($"minSampleSize must be smaller then nr of elements, otherwise ransac would not make sense: minSampleSize={minSampleSize} and elems.Count()={elems.Count()}");
+            }
+            Result<M, E> bestModel = new Result<M, E>();
             for (int i = 0; i < iterations; i++) {
                 var maybeInliers = rnd.SampleElemsToGetRandomSubset(elems, minSampleSize).ToHashSet();
-                var maybeError = createModel(maybeInliers); // Fit that sub-sample to the model
-                if (maybeError < bestModel.error) { // Has potential to be better model then the best one
-                    var allInliers = maybeInliers;
-                    var outliers = new List<E>();
-                    foreach (var elem in elems) {
-                        if (!maybeInliers.Contains(elem)) {
-                            if (isElemInlier(elem)) {
-                                allInliers.Add(elem);
-                            } else {
-                                outliers.Add(elem);
-                            }
+                var model = createModel(maybeInliers); // Fit that sub-sample to the model
+
+                var alsoInliers = new List<E>();
+                var outliers = new List<E>();
+                foreach (var elem in elems) {
+                    if (!maybeInliers.Contains(elem)) {
+                        if (isInlier(model, elem)) {
+                            alsoInliers.Add(elem);
+                        } else {
+                            outliers.Add(elem);
                         }
                     }
-                    if (allInliers.Count >= bestModel.inliers.Count()) { // Has more inliers then best model
-                        var betterError = createModel(allInliers);
-                        if (betterError < bestModel.error) { // Has better error then best model so far
-                            bestModel = new Result<E> {
-                                inliers = allInliers,
-                                error = betterError,
-                                outliers = outliers
-                            };
-                        }
+                }
+                if (alsoInliers.Count >= d) {
+                    var allInliers = maybeInliers.Union(alsoInliers);
+                    M betterModel = createModel(allInliers);
+                    betterModel.totalModelError.ThrowErrorIfNull("totalModelError");
+                    if (bestModel.model == null || betterModel.totalModelError < bestModel.model.totalModelError) {
+                        bestModel = new Result<M, E> {
+                            model = betterModel,
+                            inliers = allInliers,
+                            outliers = outliers
+                        };
                     }
                 }
             }
             return bestModel;
         }
 
-        public class Result<E> {
-            public HashSet<E> inliers = new HashSet<E>();
-            public double error = double.MaxValue;
+        public interface IModel {
+            double? totalModelError { get; }
+        }
+
+        public class Result<M, E> {
+            public M model;
+            public IEnumerable<E> inliers;
             public List<E> outliers;
         }
 
