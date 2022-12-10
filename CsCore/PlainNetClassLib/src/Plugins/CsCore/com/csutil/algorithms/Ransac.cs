@@ -12,11 +12,10 @@ namespace com.csutil.algorithms {
         /// <param name="d"> Number of close data points required to assert that a model fits well to data </param>
         /// <param name="createModel"> Has to create a model based on the set of provided elements and calculate its total error </param>
         /// <param name="isInlier"> Will be called with an element and has to return true if the element is in the error margin of the current model </param>
-        public static M RunRansac<E, M>(this Random rnd, IEnumerable<E> elems, int d, int minSampleSize, Func<IEnumerable<E>, M> createModel, Func<M, E, bool> isInlier, int iterations = 1000) where M : IModel<E> {
+        public static M RunRansac<E, M>(this Random rnd, IEnumerable<E> elems, int d, int minSampleSize, int iterations, Func<IEnumerable<E>, M> createModel, Func<M, E, bool> isInlier) where M : IModel<E> {
             if (minSampleSize > elems.Count()) {
                 throw new ArgumentOutOfRangeException($"minSampleSize must be smaller then nr of elements, otherwise ransac would not make sense: minSampleSize={minSampleSize} and elems.Count()={elems.Count()}");
             }
-            AssertV3.IsTrue(iterations > 100, () => "It is recommended to have >100 iterations for ransac, iterations=" + iterations);
             M bestModel = default(M);
             for (int i = 0; i < iterations; i++) {
                 var maybeInliers = rnd.SampleElemsToGetRandomSubset(elems, minSampleSize).ToHashSet();
@@ -32,7 +31,7 @@ namespace com.csutil.algorithms {
                         }
                     }
                 }
-                if (alsoInliers.Count >= d) {
+                if (bestModel == null || alsoInliers.Count >= d) {
                     alsoInliers.AddRange(maybeInliers); // Merge to include all inliers
                     M betterModel = createModel(alsoInliers);
                     if (betterModel.totalModelError == null) {
@@ -50,8 +49,8 @@ namespace com.csutil.algorithms {
 
         public interface IModel<E> {
             double? totalModelError { get; }
-            List<E> inliers { set; }
-            List<E> outliers { set; }
+            ICollection<E> inliers { set; }
+            ICollection<E> outliers { set; }
         }
 
     }

@@ -72,7 +72,7 @@ namespace com.csutil.tests.AlgorithmTests {
             }
 
             var tollerance = 1;
-            var result = new Random().RunRansac(pairs, 1, minSampleSize: 3, subsetOfAllPairs => {
+            var result = new Random().RunRansac(pairs, 1, minSampleSize: 3, iterations: 100, subsetOfAllPairs => {
                 var result = SolveKabschFor(subsetOfAllPairs);
                 // Since all points are perfect inliers the meanAlignmentError should always be 0 for any random subset of points:
                 Assert.Equal(0, result.meanAlignmentError, precision: 10);
@@ -124,7 +124,7 @@ namespace com.csutil.tests.AlgorithmTests {
             }
 
             var tollerance = 1;
-            var result = new Random().RunRansac(allPairs, 1, minSampleSize: 3, subsetOfAllPairs => {
+            var result = new Random().RunRansac(allPairs, 1, minSampleSize: 3, iterations: 100, subsetOfAllPairs => {
                 return SolveKabschFor(subsetOfAllPairs);
             }, (model, ele) => {
                 return CalcError(ele.Item2, Vector3.Transform(ele.Item1, model.alignmentMatrix)) < model.meanAlignmentError + tollerance;
@@ -173,8 +173,8 @@ namespace com.csutil.tests.AlgorithmTests {
             public Vector3[] alignedPoints { get; set; }
             public double? totalModelError { get; set; }
             public double meanAlignmentError { get; set; }
-            public List<Tuple<Vector3, Vector4>> inliers { get; set; }
-            public List<Tuple<Vector3, Vector4>> outliers { get; set; }
+            public ICollection<Tuple<Vector3, Vector4>> inliers { get; set; }
+            public ICollection<Tuple<Vector3, Vector4>> outliers { get; set; }
         }
 
         private static float CalcError(Vector4 a, Vector3 b) {
