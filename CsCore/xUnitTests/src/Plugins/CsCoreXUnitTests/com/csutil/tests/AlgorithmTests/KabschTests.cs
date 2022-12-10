@@ -173,7 +173,7 @@ namespace com.csutil.tests.AlgorithmTests {
             public Vector3[] alignedPoints { get; set; }
             public double? totalModelError { get; set; }
             public double meanAlignmentError { get; set; }
-            public IEnumerable<Tuple<Vector3, Vector4>> inliers { get; set; }
+            public List<Tuple<Vector3, Vector4>> inliers { get; set; }
             public List<Tuple<Vector3, Vector4>> outliers { get; set; }
         }
 

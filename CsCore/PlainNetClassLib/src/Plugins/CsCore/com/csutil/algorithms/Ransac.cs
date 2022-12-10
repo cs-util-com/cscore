@@ -34,12 +34,12 @@ namespace com.csutil.algorithms {
                     }
                 }
                 if (alsoInliers.Count >= d) {
-                    var allInliers = maybeInliers.Union(alsoInliers);
-                    M betterModel = createModel(allInliers);
+                    alsoInliers.AddRange(maybeInliers); // Merge to include all inliers
+                    M betterModel = createModel(alsoInliers);
                     betterModel.totalModelError.ThrowErrorIfNull("totalModelError");
                     if (bestModel == null || betterModel.totalModelError < bestModel.totalModelError) {
                         bestModel = betterModel;
-                        bestModel.inliers = allInliers;
+                        bestModel.inliers = alsoInliers;
                         bestModel.outliers = outliers;
                     }
                 }
@@ -49,7 +49,7 @@ namespace com.csutil.algorithms {
 
         public interface IModel<E> {
             double? totalModelError { get; }
-            IEnumerable<E> inliers { set; }
+            List<E> inliers { set; }
             List<E> outliers { set; }
         }
 
