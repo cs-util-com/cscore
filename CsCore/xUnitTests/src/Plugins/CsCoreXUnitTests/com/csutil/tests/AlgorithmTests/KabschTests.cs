@@ -148,6 +148,9 @@ namespace com.csutil.tests.AlgorithmTests {
                 AssertAreEqual(dataToAlignTo2[3], (output[3]));
             }
 
+            // Show that if the outlier would not be filtered out the result would be much worse:
+            var modelForAllPointsIncludingOutlier = SolveKabschFor(allPairs);
+            Assert.True(modelForAllPointsIncludingOutlier.meanAlignmentError > result.meanAlignmentError * 100);
         }
 
         private static KabschResult SolveKabschFor(IEnumerable<Tuple<Vector3, Vector4>> subsetOfAllPairs) {

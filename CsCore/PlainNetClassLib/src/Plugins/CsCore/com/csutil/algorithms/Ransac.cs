@@ -7,7 +7,6 @@ namespace com.csutil.algorithms {
 
     public static class Ransac {
 
-
         /// <summary> Returns a list of (randomly) sampled elements (outliers filtered out from this list). See https://en.wikipedia.org/wiki/Random_sample_consensus#Algorithm </summary>
         /// <param name="elems"> All elements </param>
         /// <param name="d"> Number of close data points required to assert that a model fits well to data </param>
@@ -17,6 +16,7 @@ namespace com.csutil.algorithms {
             if (minSampleSize >= elems.Count()) {
                 throw new ArgumentOutOfRangeException($"minSampleSize must be smaller then nr of elements, otherwise ransac would not make sense: minSampleSize={minSampleSize} and elems.Count()={elems.Count()}");
             }
+            AssertV3.IsTrue(iterations > 100, () => "It is recommended to have >100 iterations for ransac, iterations=" + iterations);
             M bestModel = default(M);
             for (int i = 0; i < iterations; i++) {
                 var maybeInliers = rnd.SampleElemsToGetRandomSubset(elems, minSampleSize).ToHashSet();
