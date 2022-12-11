@@ -176,6 +176,48 @@ namespace com.csutil.tests {
 
         }
 
+        public class WeightedMedianTests {
+
+            public WeightedMedianTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
+
+            [Fact]
+            public void ExampleUsage1() {
+                IEnumerable<Element> elements = new List<Element>() {
+                    new Element { Value = 80, Weight = 10 },
+                    new Element { Value = 90, Weight = 10 },
+                    new Element { Value = 95, Weight = 10 }, // Should be the weighted median
+                    new Element { Value = 100, Weight = 10 },
+                    new Element { Value = 9999, Weight = 10 }, // Outlier that would impact the mean but not the median
+                    new Element { Value = 0, Weight = .1 },
+                    new Element { Value = 1, Weight = .1 },
+                    new Element { Value = 2, Weight = .1 },
+                    new Element { Value = 3, Weight = .1 },
+                    new Element { Value = 4, Weight = .1 },
+                    new Element { Value = 5, Weight = .1 },
+                };
+                elements = new Random().ShuffleEntries(elements);
+                var weightedMedian = elements.CalcWeightedMedian(x => x.Weight);
+                Assert.Equal(95, weightedMedian.Value);
+                // Calculating the normal nedian will not result in the correct value:
+                Assert.Equal(5, elements.CalcMedian(x => x.Value));
+            }
+
+            private class Element : IComparable {
+                public double Value { get; set; }
+                public double Weight { get; set; }
+
+                public int CompareTo(object obj) {
+                    if (obj is Element other) {
+                        if (Value == other.Value) { return 0; }
+                        return Value < other.Value ? -1 : 1;
+                    }
+                    throw new InvalidOperationException("Can only compare to other instances of Element");
+                }
+
+            }
+
+        }
+
     }
 
 }

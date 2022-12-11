@@ -78,6 +78,19 @@ namespace com.csutil.math {
             list[j] = temp;
         }
 
+        public static T CalcWeightedMedian<T>(this IEnumerable<T> self, Func<T, double> getWeight) where T : IComparable { // Sort the elements by their value
+            // Idea from https://stackoverflow.com/a/9794746/165106 
+            var orderedElems = self.OrderBy(x => x).ToList(); // Sort the element list by their values (not the weights)
+            double totalWeight = orderedElems.Sum(e => getWeight(e)); // Calculate the total weight
+            int k = 0;
+            double sum = totalWeight - getWeight(orderedElems[0]); // sum is the total weight of all `x[i] > x[k]`
+            while (sum > totalWeight / 2) {
+                ++k;
+                sum -= getWeight(orderedElems[k]);
+            }
+            return orderedElems[k];
+        }
+
     }
 
 }
