@@ -88,7 +88,8 @@ namespace com.csutil.math {
                 ++k;
                 sum -= getWeight(orderedElems[k]);
             }
-            if (orderedElems.Count % 2 == 0) {
+            var totalCount = orderedElems.Count;
+            if (totalCount % 2 == 0 && k < totalCount - 1) {
                 return new Tuple<T, T>(orderedElems[k], orderedElems[k + 1]);
             }
             return new Tuple<T, T>(orderedElems[k], orderedElems[k]);
