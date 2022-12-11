@@ -197,9 +197,22 @@ namespace com.csutil.tests {
                 };
                 elements = new Random().ShuffleEntries(elements);
                 var weightedMedian = elements.CalcWeightedMedian(x => x.Weight);
-                Assert.Equal(95, weightedMedian.Value);
+                Assert.Equal(95, weightedMedian.Item1.Value);
+                Assert.Equal(95, weightedMedian.Item2.Value); // Uneven nr of elems, so both results are the same
                 // Calculating the normal nedian will not result in the correct value:
                 Assert.Equal(5, elements.CalcMedian(x => x.Value));
+            }
+
+            [Fact]
+            public void ExampleUsage2() {
+                IEnumerable<Element> elements = new List<Element>() {
+                    new Element { Value = 90, Weight = 10 },
+                    new Element { Value = 100, Weight = 10 },
+                };
+                elements = new Random().ShuffleEntries(elements);
+                var weightedMedian = elements.CalcWeightedMedian(x => x.Weight);
+                // Since for an even number of elems both median candidates are returned an average can be caluclated on these:
+                Assert.Equal(95, (weightedMedian.Item1.Value + weightedMedian.Item2.Value) / 2);
             }
 
             private class Element : IComparable {
