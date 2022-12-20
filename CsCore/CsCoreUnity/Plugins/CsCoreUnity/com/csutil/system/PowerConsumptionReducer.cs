@@ -9,8 +9,12 @@ namespace com.csutil.system {
         public AnimationCurve fpsReductionOverTime = AnimationCurve.EaseInOut(0, ACTIVE_FPS, 10, IDLE_FPS);
         public float time;
         public int currentFps;
+        public bool disableInUnityEditor = true;
 
         private void Start() {
+            #if UNITY_EDITOR
+                if (disableInUnityEditor) { return; }
+            #endif
             this.ExecuteRepeated(() => {
                 currentFps = (int)fpsReductionOverTime.Evaluate(time);
                 ApplicationV2.targetFrameRateV2 = currentFps;
