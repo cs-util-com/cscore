@@ -12,15 +12,16 @@ namespace com.csutil.system {
         public bool disableInUnityEditor = true;
 
         private void Start() {
-            #if UNITY_EDITOR
-                if (disableInUnityEditor) { return; }
-            #endif
             this.ExecuteRepeated(() => {
                 currentFps = (int)fpsReductionOverTime.Evaluate(time);
                 ApplicationV2.targetFrameRateV2 = currentFps;
                 time += 0.1f;
                 return true;
             }, 100);
+            
+            #if UNITY_EDITOR
+            enabled = !disableInUnityEditor;
+            #endif
         }
 
         private void Update() {
