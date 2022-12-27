@@ -120,7 +120,7 @@ namespace com.csutil.keyvaluestore {
 
         public async Task<IEnumerable<string>> GetAllKeys() {
             await DownloadOnlineDataIfNeeded();
-            return await fallbackStore.GetAllKeys();
+            return (await fallbackStore.GetAllKeys()).Cached();
         }
 
         public Task<bool> Remove(string key) { throw new NotSupportedException(this + " is a readonly store"); }

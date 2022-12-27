@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -124,8 +125,9 @@ namespace com.csutil {
         }
 
         public static Task<Task> WhenAnySuccessful(IEnumerable<Task> tasks, bool logErrorsForUnsuccessfuls = true) {
-            if (logErrorsForUnsuccessfuls) { Task.WhenAll(tasks).LogOnError(); }
-            return WhenAnySuccessfulInner(tasks);
+            var t = tasks.Cached();
+            if (logErrorsForUnsuccessfuls) { Task.WhenAll(t).LogOnError(); }
+            return WhenAnySuccessfulInner(t);
         }
 
         private static async Task<Task> WhenAnySuccessfulInner(IEnumerable<Task> tasks) {

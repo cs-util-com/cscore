@@ -14,7 +14,9 @@ namespace com.csutil.system {
         }
 
         public override async Task<IEnumerable<UpdateEntry>> DownloadAllUpdateEntries() {
-            return await (await store.GetAllKeys()).MapAsync(key => store.Get<UpdateEntry>(key, null));
+            var allKeys = await store.GetAllKeys();
+            var updateEntries = await allKeys.MapAsync(key => store.Get<UpdateEntry>(key, null));
+            return updateEntries.Cached();
         }
 
     }

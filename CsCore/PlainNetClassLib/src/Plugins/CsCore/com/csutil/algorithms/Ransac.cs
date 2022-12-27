@@ -12,7 +12,8 @@ namespace com.csutil.algorithms {
         /// <param name="d"> Number of close data points required to assert that a model fits well to data </param>
         /// <param name="createModel"> Has to create a model based on the set of provided elements and calculate its total error </param>
         /// <param name="isInlier"> Will be called with an element and has to return true if the element is in the error margin of the current model </param>
-        public static M RunRansac<E, M>(this Random rnd, IEnumerable<E> elems, int d, int minSampleSize, int iterations, Func<IEnumerable<E>, M> createModel, Func<M, E, bool> isInlier) where M : IModel<E> {
+        public static M RunRansac<E, M>(this Random rnd, IEnumerable<E> e, int d, int minSampleSize, int iterations, Func<IEnumerable<E>, M> createModel, Func<M, E, bool> isInlier) where M : IModel<E> {
+            var elems = e.Cached();
             if (minSampleSize > elems.Count()) {
                 throw new ArgumentOutOfRangeException($"minSampleSize must be smaller then nr of elements, otherwise ransac would not make sense: minSampleSize={minSampleSize} and elems.Count()={elems.Count()}");
             }

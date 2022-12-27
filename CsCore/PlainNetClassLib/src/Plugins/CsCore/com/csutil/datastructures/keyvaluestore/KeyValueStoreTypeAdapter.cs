@@ -23,7 +23,7 @@ namespace com.csutil.keyvaluestore {
 
         public virtual Task<bool> ContainsKey(string key) { return store.ContainsKey(key); }
 
-        public virtual Task<IEnumerable<string>> GetAllKeys() { return store.GetAllKeys(); }
+        public virtual async Task<IEnumerable<string>> GetAllKeys() { return (await store.GetAllKeys()).Cached(); }
 
         public virtual Task<IEnumerable<T>> GetAll() { return store.GetAll<T>(); }
 
