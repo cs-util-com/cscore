@@ -1,8 +1,7 @@
+using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.IO;
+using System.ComponentModel;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -14,7 +13,7 @@ namespace com.csutil.tests.model.immutable {
 
         [Fact]
         public async Task ExampleUsage1() {
-            await Assert.ThrowsAsync<Xunit.Sdk.EqualException>(async () => {
+            await Assert.ThrowsAsync<InvalidAsynchronousStateException>(async () => {
                 for (int i = 0; i < 1000; i++) {
                     await RunTestOnSet(new HashSet<string>());
                 }
@@ -32,7 +31,9 @@ namespace com.csutil.tests.model.immutable {
                 tasks.Add(TaskV2.Run(async () => set.Add("abc")));
             }
             await Task.WhenAll(tasks);
-            Assert.Equal(1, tasks.Filter(x => x.Result).Count());
+            if (1 != tasks.Filter(x => x.Result).Count()) {
+                throw new InvalidAsynchronousStateException("Expected only one task to return true");
+            }
         }
 
     }
