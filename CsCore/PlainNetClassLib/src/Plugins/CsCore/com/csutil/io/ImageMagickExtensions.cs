@@ -53,8 +53,8 @@ namespace com.csutil {
                     throw new ArgumentException("Can't compare! " + diffSizesWarn);
                 }
             }
-            AssertV2.AreEqual(oldImg.Width, self.Width, "RegressionImage.Width");
-            AssertV2.AreEqual(oldImg.Height, self.Height, "RegressionImage.Height");
+            AssertV3.AreEqual(oldImg.Width, self.Width, "RegressionImage.Width");
+            AssertV3.AreEqual(oldImg.Height, self.Height, "RegressionImage.Height");
             //return oldImg.Compare(self, out imgWithDifferences);
             imgWithDifferences = new MagickImage();
             return oldImg.Compare(self, new CompareSettings() { Metric = errorMetric }, imgWithDifferences);

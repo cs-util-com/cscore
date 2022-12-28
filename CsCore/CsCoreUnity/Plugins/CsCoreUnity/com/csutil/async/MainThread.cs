@@ -55,9 +55,17 @@ namespace com.csutil {
 
         public static void Invoke(Action a) { instance.ExecuteOnMainThread(a); }
 
+        [Obsolete("It's recommended to use the async version that returns a task instead")]
         public static T Invoke<T>(Func<T> a) { return instance.ExecuteOnMainThread(a); }
 
         public static Task<T> Invoke<T>(Func<Task<T>> a) { return instance.ExecuteOnMainThreadAsync(a); }
+
+        public static Task Invoke(Func<Task> a) {
+            return instance.ExecuteOnMainThreadAsync(async () => {
+                await a();
+                return true;
+            });
+        }
 
         public static Task Invoke<T>(Func<Task> a) {
             return instance.ExecuteOnMainThreadAsync(async () => {
@@ -78,8 +86,9 @@ namespace com.csutil {
             }
         }
 
+        [Obsolete("It's recommended to use ExecuteOnMainThreadAsync instead")]
         public T ExecuteOnMainThread<T>(Func<T> f) {
-            if (isMainThread) { return f(); }
+            if (isMainThread) { return f(); } // To ensure the main thread cant block itself
             TaskCompletionSource<T> src = new TaskCompletionSource<T>();
             ExecuteOnMainThread(() => {
                 try {
@@ -92,7 +101,6 @@ namespace com.csutil {
         }
 
         public async Task<T> ExecuteOnMainThreadAsync<T>(Func<Task<T>> f) {
-            if (isMainThread) { return await f(); }
             TaskCompletionSource<Task<T>> tcs = new TaskCompletionSource<Task<T>>();
             ExecuteOnMainThread(() => {
                 try {

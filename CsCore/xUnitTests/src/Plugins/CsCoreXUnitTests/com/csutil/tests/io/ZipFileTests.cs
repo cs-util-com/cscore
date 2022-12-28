@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using com.csutil.io;
@@ -32,10 +33,9 @@ namespace com.csutil.tests {
             Assert.True(dir2.Exists);
             Assert.Equal("abc", dir2.GetChildDir("SubDir1").GetChild("t1.txt").LoadAs<string>());
 
-            { // Read content directly from zip without extraction:
+            { // Alternative 1 to read content directly from zip without extraction:
                 var zip = new ZipFile(new FileStream(zip1.GetFullFileSystemPath(), FileMode.Open, FileAccess.Read));
 
-                foreach (ZipEntry zipEntry in zip) { Log.d("entry: " + zipEntry.Name); }
                 Assert.Equal(2, zip.Count);
                 var e1 = zip.GetEntry("SubDir1/t1.txt");
                 Assert.True(e1.IsFile);
@@ -43,8 +43,26 @@ namespace com.csutil.tests {
                 var fileContent = streamReader.ReadToEnd();
                 Assert.Equal("abc", fileContent);
             }
+            { // Alternative 2 to read content directly from zip without extraction:
+                var stream = zip1.OpenForRead();
+                var zipEntries = new ZipFile(stream).GetEntries();
+                Assert.Equal(2, zipEntries.Count);
+                Assert.Equal("abc", ReadStreamAsString(zipEntries.First()));
+                Assert.Equal("def", ReadStreamAsString(zipEntries.Last()));
+
+                // Reading multiple times from the same entry works:
+                Assert.Equal("abc", ReadStreamAsString(zipEntries.First()));
+
+                // After disposal of the input stream the entries are cleaned up (& not accessible anymore):
+                stream.Dispose();
+                Assert.Throws<System.ObjectDisposedException>(() => {
+                    var _ = zipEntries.First().EntryStream;
+                });
+            }
 
         }
+
+        private static string ReadStreamAsString(ZipEntryV2 x) { return new StreamReader(x.EntryStream).ReadToEnd(); }
 
         [Fact]
         public void ExampleUsage2() {

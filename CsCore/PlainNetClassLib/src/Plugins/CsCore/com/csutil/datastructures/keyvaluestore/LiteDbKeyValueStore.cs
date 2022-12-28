@@ -105,7 +105,7 @@ namespace com.csutil.keyvaluestore {
         }
 
         private static string GetKeyFromBsonDoc(BsonDocument x) {
-            AssertV2.IsTrue(x.Keys.Any(k => k == "_id"), "No '_id' key found: " + x.Keys.ToStringV2(k => "" + k));
+            AssertV3.IsTrue(x.Keys.Any(k => k == "_id"), () => "No '_id' key found: " + x.Keys.ToStringV2(k => "" + k));
             return x["_id"].AsString;
         }
 

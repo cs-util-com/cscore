@@ -29,11 +29,12 @@ namespace com.csutil.ui {
         }
 
         private static Task Show(string caption, string message, string confirmText, string dialogPrefabName) {
-            var dialog = new DialogLoader<Dialog>(new Dialog(caption, message, confirmText));
+            var dialog = new Dialog(caption, message, confirmText);
+            var dialogLoader = new DialogLoader<Dialog>(dialog);
             var rootCanvas = RootCanvas.GetOrAddRootCanvasV2().gameObject;
-            GameObject dialogUi = dialog.LoadDialogPrefab(new DefaultPresenter(), dialogPrefabName);
+            GameObject dialogUi = dialogLoader.LoadDialogPrefab(new DefaultPresenter(), dialogPrefabName);
             rootCanvas.AddChild(dialogUi); // Add dialog UI in the root canvas
-            var d = dialog.ShowDialogAsync();
+            var d = dialogLoader.ShowDialogAsync();
             EventBus.instance.Publish(EventConsts.catUi + UiEvents.DIALOG, dialog);
             return d;
         }

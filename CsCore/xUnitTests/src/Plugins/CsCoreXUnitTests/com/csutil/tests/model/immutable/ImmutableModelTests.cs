@@ -21,7 +21,7 @@ namespace com.csutil.tests.model.immutable {
                 // The fields are immutable so the json logic has to use the constructor to init them from the json: 
                 var y = JsonReader.GetReader().Read<MyClass1>(xAsJson);
                 Assert.Equal(x.myNumber, y.myNumber);
-                AssertV2.AreEqualJson(x, y);
+                AssertV3.AreEqualJson(x, y);
             }
 
             // The constructor json logic can also be mixed with normal field json logic:
@@ -33,7 +33,7 @@ namespace com.csutil.tests.model.immutable {
 
                 // myMutableList is not required in the constructor but still correctly set by the json logic: 
                 Assert.Equal(x.myMutableList, y.myMutableList);
-                AssertV2.AreEqualJson(x, y);
+                AssertV3.AreEqualJson(x, y);
             }
         }
 

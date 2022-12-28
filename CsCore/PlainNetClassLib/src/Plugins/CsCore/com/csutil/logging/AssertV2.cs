@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 
 namespace com.csutil {
 
+    [Obsolete("Use AssertV3 instead")]
     public static class AssertV2 {
 
         private const string LB = "\r\n";
@@ -175,7 +176,7 @@ namespace com.csutil {
         public static StopwatchV2 TrackTiming([CallerMemberName] string methodName = null) { return new StopwatchV2(methodName).StartV2(); }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
-        public static void AssertUnderXms(this Stopwatch self, int maxTimeInMs, params object[] args) {
+        public static void AssertUnderXms(Stopwatch self, int maxTimeInMs, params object[] args) {
             var ms = self.ElapsedMilliseconds;
             int p = (int)(ms * 100f / maxTimeInMs);
             var errorText = $"{GetMethodName(self)} took {p}% ({ms}ms) longer then allowed ({maxTimeInMs}ms)!";
@@ -186,7 +187,7 @@ namespace com.csutil {
             if (s is StopwatchV2 sV2) { return sV2.methodName; } else { return new StackFrame(2).GetMethodName(false); }
         }
 
-        public static bool IsUnderXms(this Stopwatch self, int maxTimeInMs) { return self.ElapsedMilliseconds <= maxTimeInMs; }
+        public static bool IsUnderXms(Stopwatch self, int maxTimeInMs) { return self.ElapsedMilliseconds <= maxTimeInMs; }
 
         public static void ThrowExeptionIfAssertionFails(Action taskToExecute) {
             ThrowExeptionIfAssertionFails(true, taskToExecute);

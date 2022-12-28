@@ -7,7 +7,7 @@ using UnityEngine.Networking;
 
 namespace com.csutil.http {
 
-    [Obsolete("Use UnityRestFactoryV2 instead")]
+    [Obsolete("Use UnityRestFactoryV2 instead", true)]
     public class UnityRestFactory : RestFactory {
 
         protected override void InitFactory() { }

@@ -30,7 +30,7 @@ namespace com.csutil.logging.analytics {
                     try {
                         if (await SendEventToExternalSystem(await store.Get(key, null))) {
                             var wasRemoved = await store.Remove(key);
-                            AssertV2.IsTrue(wasRemoved, "Could not remove key " + key);
+                            AssertV3.IsTrue(wasRemoved, () => "Could not remove key " + key);
                         }
                     }
                     catch (Exception e) { Log.e(e); }

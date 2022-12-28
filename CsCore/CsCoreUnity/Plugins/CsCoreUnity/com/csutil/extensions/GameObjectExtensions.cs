@@ -99,7 +99,11 @@ namespace com.csutil {
         public static bool Destroy(this UnityEngine.Object self, bool destroyNextFrame = false) {
             if (self == null) { return false; }
             try {
-                if (destroyNextFrame) { UnityEngine.Object.Destroy(self); } else { GameObject.DestroyImmediate(self); }
+                if (destroyNextFrame) {
+                    UnityEngine.Object.Destroy(self);
+                } else {
+                    UnityEngine.Object.DestroyImmediate(self);
+                }
             } catch { return false; }
             AssertV2.IsTrue(destroyNextFrame || self.IsDestroyed(), "gameObject was not destroyed");
             return true;

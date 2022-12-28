@@ -184,10 +184,10 @@ namespace com.csutil.model.immutable {
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")] // Stripped from production code
         private static void AssertValid<T>(T oldVal, T newVal) {
             if (oldVal is IsValid v1) {
-                AssertV2.IsTrue(v1.IsValid(), "Old value before mutation invalid");
+                AssertV3.IsTrue(v1.IsValid(), () => "Old value before mutation invalid");
             }
             if (StateCompare.WasModified(oldVal, newVal) && newVal is IsValid v2) {
-                AssertV2.IsTrue(v2.IsValid(), "New value after mutation invalid");
+                AssertV3.IsTrue(v2.IsValid(), () => "New value after mutation invalid");
             }
         }
 

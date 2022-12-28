@@ -30,10 +30,12 @@ namespace com.csutil {
             return self.Substring(startIndex, length);
         }
 
-        public static string SubstringAfter(this string self, string startAfter, bool startFromBack = false) {
+        public static string SubstringAfter(this string self, string startAfter, bool startFromBack = false, bool includeStart = false) {
             var pos = startFromBack ? self.LastIndexOf(startAfter) : self.IndexOf(startAfter);
             if (pos < 0) { throw new IndexOutOfRangeException("Substring " + startAfter + " not found in " + self); }
-            return self.Substring(pos + startAfter.Length);
+            var res = self.Substring(pos + startAfter.Length);
+            if (includeStart) { return startAfter + res; }
+            return res;
         }
 
         public static bool EndsWith(this string self, char end) { return self.EndsWith("" + end); }

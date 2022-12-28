@@ -26,6 +26,12 @@ namespace com.csutil.http {
         private HttpClient client;
         private HttpClientHandler handler;
 
+        /// <summary> Set to e.g. "Mozilla/5.0 (compatible; AcmeInc/1.0)" or "MyAppAbc/1.0" </summary>
+        public string UserAgent {
+            get => client.DefaultRequestHeaders.UserAgent.ToString();
+            set => client.DefaultRequestHeaders.UserAgent.ParseAdd(value);
+        }
+
         public DisposeState IsDisposed { get; private set; } = DisposeState.Active;
         
         public RestFactory() {
@@ -46,7 +52,7 @@ namespace com.csutil.http {
 
         public virtual async Task<long> GetCurrentPing(string ipOrUrl = DEFAULT_PING_IP, int timeoutInMs = DEFAULT_PING_TIMEOUT) {
             PingReply pingReply = await new Ping().SendPingAsync(ipOrUrl, timeoutInMs);
-            AssertV2.IsNotNull(pingReply, "pingReply");
+            AssertV3.IsNotNull(pingReply, "pingReply");
             if (pingReply.Status != IPStatus.Success) { throw new TimeoutException("Ping failed: " + pingReply.Status); }
             return pingReply.RoundtripTime; // return ping in MS
         }

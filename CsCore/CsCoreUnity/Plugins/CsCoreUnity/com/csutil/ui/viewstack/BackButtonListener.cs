@@ -29,7 +29,7 @@ namespace com.csutil.ui.viewstack {
 
         private static GameObject GetCanvasWithHighestSortingOrder() {
             var c = ResourcesV2.FindAllInScene<Canvas>();
-            c = c.Filter(x => x.gameObject.activeInHierarchy);
+            c = c.Filter(x => x.gameObject.activeInHierarchy && !x.HasComponent<IgnoreRootCanvas>(out var _));
             return c.OrderByDescending(x => x.sortingOrder).First().gameObject;
         }
 

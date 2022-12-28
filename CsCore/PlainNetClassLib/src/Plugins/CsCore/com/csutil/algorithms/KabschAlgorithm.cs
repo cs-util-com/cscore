@@ -24,7 +24,7 @@ namespace com.csutil.math {
         /// <returns></returns>
         public Matrix4x4 SolveKabsch(IReadOnlyList<Vector3> inPoints, IReadOnlyList<Vector4> refPoints, bool solveRotation = true, bool solveScale = false) {
             var inPointsCount = inPoints.Count;
-            if (inPointsCount != refPoints.Count) { throw new InvalidDataException("Length of the point lists was not equal"); }
+            if (inPointsCount != refPoints.Count) { throw new InvalidDataException($"Length of the point lists was not equal: {inPointsCount} vs {refPoints.Count}"); }
 
             //Calculate the centroid offset and construct the centroid-shifted point matrices
             Vector3 inCentroid = Vector3.Zero;

@@ -40,7 +40,11 @@ namespace com.csutil {
 
         public static bool IsEmpty<T>(this IEnumerable<T> self) { return !self.Any(); }
 
-        public static bool IsNullOrEmpty<T>(this IEnumerable<T> self) { return self == null || !self.Any(); }
+        public static bool IsNullOrEmpty<T>(this IEnumerable<T> self) {
+            if (self == null) { return true; }
+            if (self is ICollection<T> c) { return c.Count == 0; }
+            return !self.Any();
+        }
 
         public static IEnumerable<T> OrEmptyIfNull<T>(this IEnumerable<T> self) { return self ?? Enumerable.Empty<T>(); }
 
@@ -57,7 +61,7 @@ namespace com.csutil {
 
         public static string ToStringV2<T>(this IEnumerable<T> args, Func<T, string> toString, string bracket1 = "[", string bracket2 = "]", string separator = ", ") {
             if (args == null) { return "null"; }
-            if (args.GetType() == typeof(string)) { return (string)(object)args; }
+            if (args is string) { return (string)(object)args; }
             if (args.IsNullOrEmpty()) { return bracket1 + bracket2; }
             var filteredResultStrings = args.Map(x => "" + toString(x)).Filter(x => !x.IsNullOrEmpty());
             if (filteredResultStrings.IsNullOrEmpty()) { return bracket1 + bracket2; }
@@ -100,7 +104,13 @@ namespace com.csutil {
 
         public static IEnumerable<T> Cached<T>(this IEnumerable<T> source) {
             if (source == null) { throw new ArgumentNullException("source"); }
-            if (source is CachedEnumerable<T> c) { return c; }
+            
+            // Check for a few IEnumerable subtypes that dont require to be cached:
+            if (source is IReadOnlyCollection<T>) { return source; }
+            if (source is ICollection<T>) { return source; }
+            if (source is ICollection) { return source; }
+            
+            if (source is CachedEnumerable<T>) { return source; }
             return new CachedEnumerable<T>(source);
         }
 
@@ -166,13 +176,17 @@ namespace com.csutil {
 
         }
 
-        public static double GetVariance(this IEnumerable<double> self) { return CalcVariance(self, self.Average()); }
+        public static double GetVariance(this IEnumerable<double> self) {
+            var values = self.Cached();
+            return CalcVariance(values, values.Average());
+        }
 
         public static double GetStandardDeviation(this IEnumerable<double> self) { return Math.Sqrt(GetVariance(self)); }
 
         public static double GetRelativeStandardDeviation(this IEnumerable<double> self) {
-            double average = self.Average();
-            return Math.Abs(Math.Sqrt(CalcVariance(self, average)) / average);
+            var values = self.Cached();
+            double average = values.Average();
+            return Math.Abs(Math.Sqrt(CalcVariance(values, average)) / average);
         }
 
         private static double CalcVariance(IEnumerable<double> self, double average) {
@@ -217,6 +231,26 @@ namespace com.csutil {
                 count++;
             } while (e.MoveNext());
             return true;
+        }
+
+        public static IEnumerable<T> ToIEnumerable<T>(this IEnumerator<T> enumerator) {
+            return _ToIEnumerable(enumerator).Cached();
+        }
+
+        private static IEnumerable<T> _ToIEnumerable<T>(this IEnumerator<T> enumerator) {
+            while (enumerator.MoveNext()) {
+                yield return enumerator.Current;
+            }
+        }
+
+        public static IEnumerable<T> ToIEnumerable<T>(this IEnumerator enumerator) {
+            return _ToIEnumerable(enumerator).Cast<T>().Cached();
+        }
+
+        private static IEnumerable _ToIEnumerable(this IEnumerator enumerator) {
+            while (enumerator.MoveNext()) {
+                yield return enumerator.Current;
+            }
         }
 
     }

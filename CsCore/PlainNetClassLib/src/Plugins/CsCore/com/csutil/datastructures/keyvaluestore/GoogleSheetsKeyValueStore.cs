@@ -30,6 +30,7 @@ namespace com.csutil.keyvaluestore {
         private List<List<string>> latestRawSheetData { get; set; }
 
         public GoogleSheetsKeyValueStore(IKeyValueStore localCache, string apiKey, string spreadsheetId, string sheetName, double delayInMsBetweenCheck = 10000) {
+            apiKey.ThrowErrorIfNullOrEmpty("apiKey");
             this.fallbackStore = localCache;
             this.delayInMsBetweenCheck = delayInMsBetweenCheck;
             InitDebouncedDownloadLogic();
@@ -69,11 +70,13 @@ namespace com.csutil.keyvaluestore {
         private async Task DowloadOnlineData() {
             var newRawSheetData = await GoogleSheetsV4.GetSheet(apiKey, spreadsheetId, sheetName);
             if (!latestRawSheetData.IsNullOrEmpty()) {
-                foreach (var entry in ParseRawSheetData(FilterForChanges(latestRawSheetData, newRawSheetData))) {
+                var sheetData = GoogleSheetDataParser.ParseRawSheetData(FilterForChanges(latestRawSheetData, newRawSheetData));
+                foreach (var entry in sheetData) {
                     await fallbackStore.Set(entry.Key, entry.Value);
                 }
             } else { // Assuming that write is much more expensive then read:
-                foreach (var newEntry in ParseRawSheetData(newRawSheetData)) {
+                var sheetData = GoogleSheetDataParser.ParseRawSheetData(newRawSheetData);
+                foreach (var newEntry in sheetData) {
                     var oldEntry = await fallbackStore.Get<object>(newEntry.Key, null);
                     if (!JsonWriter.HasEqualJson(oldEntry, newEntry)) {
                         await fallbackStore.Set(newEntry.Key, newEntry.Value);
@@ -105,53 +108,6 @@ namespace com.csutil.keyvaluestore {
             return false;
         }
 
-        private Dictionary<string, object> ParseRawSheetData(List<List<string>> rawSheetData) {
-            var result = new Dictionary<string, object>();
-            if (rawSheetData.IsNullOrEmpty()) { return result; }
-            var fieldNames = rawSheetData.First().ToList();
-            foreach (var column in rawSheetData.Skip(1)) {
-                result.Add(column.First(), ToObject(fieldNames, column.ToList()));
-            }
-            return result;
-        }
-
-        private object ToObject(List<string> names, List<string> values) {
-            var nc = names.Count();
-            var vCount = values.Count();
-            if (nc < vCount) { throw new IndexOutOfRangeException($"Only {nc} names but {vCount} values in row"); }
-            var result = new Dictionary<string, object>();
-            var jsonReader = JsonReader.GetReader();
-            for (int i = 0; i < vCount; i++) { AddToResult(result, jsonReader, names[i], values[i].Trim()); }
-            return result;
-        }
-
-        private bool AddToResult(Dictionary<string, object> result, IJsonReader jsonReader, string fieldName, string value) {
-            if (value.IsNullOrEmpty()) { return false; }
-            try {
-                if (value.StartsWith("{") && value.EndsWith("}")) {
-                    result.Add(fieldName, jsonReader.Read<Dictionary<string, object>>(value));
-                    return true;
-                }
-                if (value.StartsWith("[") && value.EndsWith("]")) {
-                    result.Add(fieldName, jsonReader.Read<List<object>>(value));
-                    return true;
-                }
-            } catch (Exception e) { Log.e(e); }
-            result.Add(fieldName, ParsePrimitive(value));
-            return true;
-        }
-
-        private static object ParsePrimitive(string value) {
-            if (bool.TryParse(value, out bool b)) { return b; }
-            if (int.TryParse(value, out int i)) { return i; }
-            if (DoubleTryParseV2(value, out double d)) { return d; }
-            return value;
-        }
-
-        private static bool DoubleTryParseV2(string value, out double d) {
-            return double.TryParse(value.Replace(",", "."), NumberStyles.Any, CultureInfo.InvariantCulture, out d);
-        }
-
         public async Task<bool> ContainsKey(string key) {
             await DownloadOnlineDataIfNeeded();
             return await fallbackStore.ContainsKey(key);
@@ -164,7 +120,7 @@ namespace com.csutil.keyvaluestore {
 
         public async Task<IEnumerable<string>> GetAllKeys() {
             await DownloadOnlineDataIfNeeded();
-            return await fallbackStore.GetAllKeys();
+            return (await fallbackStore.GetAllKeys()).Cached();
         }
 
         public Task<bool> Remove(string key) { throw new NotSupportedException(this + " is a readonly store"); }

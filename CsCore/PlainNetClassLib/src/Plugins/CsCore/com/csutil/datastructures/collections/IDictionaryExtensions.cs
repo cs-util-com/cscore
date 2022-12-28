@@ -39,6 +39,32 @@ namespace com.csutil {
             foreach (var l in e) { res &= self.Add(l); }
             return res;
         }
+        
+        public static bool RemoveRange<T>(this ISet<T> self, IEnumerable<T> e) {
+            bool res = true;
+            foreach (var l in e) { res &= self.Remove(l); }
+            return res;
+        }
+
+        public static void AddRangeOverride<K, V>(this IDictionary<K, V> self, IEnumerable<KeyValuePair<K, V>> rangeToAdd) {
+            foreach (var e in rangeToAdd) {
+                self[e.Key] = e.Value;
+            }
+        }
+
+        public static void AddRangeNewOnly<K, V>(this IDictionary<K, V> self, IEnumerable<KeyValuePair<K, V>> rangeToAdd) {
+            foreach (var e in rangeToAdd) {
+                if (!self.ContainsKey(e.Key)) {
+                    self.Add(e.Key, e.Value);
+                }
+            }
+        }
+
+        public static void AddRange<K, V>(this IDictionary<K, V> self, IEnumerable<KeyValuePair<K, V>> rangeToAdd) {
+            foreach (var e in rangeToAdd) {
+                self.Add(e.Key, e.Value);
+            }
+        }
 
     }
 

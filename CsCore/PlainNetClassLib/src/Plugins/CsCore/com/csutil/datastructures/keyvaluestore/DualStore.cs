@@ -41,7 +41,7 @@ namespace com.csutil.keyvaluestore {
         public async Task<IEnumerable<string>> GetAllKeys() {
             var a = fallbackStore.GetAllKeys();
             var b = await secondStore.GetAllKeys();
-            return b.Union(await a);
+            return b.Union(await a).Cached();
         }
 
         public async Task<bool> Remove(string key) {

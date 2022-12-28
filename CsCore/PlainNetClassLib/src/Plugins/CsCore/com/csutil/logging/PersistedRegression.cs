@@ -70,7 +70,7 @@ namespace com.csutil {
 
         private static IEnumerable<JToken> GetFilteredDiff(JToken diffToExpectedState, Func<JToken, bool> filterAcceptableDiffs) {
             return diffToExpectedState.Children().Skip(1).Filter(problem => {
-                AssertV2.AreEqual(1, problem.Count(), "The diff contained not exactly one element");
+                AssertV3.AreEqual(1, problem.Count(), "The diff contained not exactly one element");
                 return filterAcceptableDiffs(problem.First());
             });
         }

@@ -21,17 +21,14 @@ namespace com.csutil.http.apis {
             return request.WithAuthorization(apiKey).WithJsonContent(requestParams).GetResult<Text.CompletionsResponse>();
         }
 
-        public Task<LabsApi.Response> TextToImage(string prompt) {
-            return SendLabsApiRequest(new LabsApi.ApiTask() {
-                task_type = "text2im",
-                prompt = new LabsApi.ApiTask.Prompt() {
-                    caption = prompt
-                }
-            });
+        /// <summary> https://beta.openai.com/docs/api-reference/images/create </summary>
+        public Task<Image.Response> TextToImage(Image.Request requestParams) {
+            var request = new Uri("https://api.openai.com/v1/images/generations").SendPOST();
+            return request.WithAuthorization(apiKey).WithJsonContent(requestParams).GetResult<Image.Response>();
         }
 
-        public async Task<LabsApi.Response> SendLabsApiRequest(LabsApi.ApiTask text2ImRequest) {
-            var latestProgress = await CreateTextToImageTask(text2ImRequest);
+        public async Task<LabsApi.Response> SendLabsApiRequest(LabsApi.ApiTask apiTask) {
+            var latestProgress = await SendLabsApiTask(apiTask);
             while (latestProgress.status == LabsApi.Response.STATUS_PENDING) {
                 await TaskV2.Delay(2000); // Check status every 2 seconds
                 // The API currently often randomly fails with server errors, add an exponential backoff layer to ignore these:
@@ -40,7 +37,7 @@ namespace com.csutil.http.apis {
             return latestProgress;
         }
 
-        private Task<LabsApi.Response> CreateTextToImageTask(LabsApi.ApiTask taskToCreate) {
+        private Task<LabsApi.Response> SendLabsApiTask(LabsApi.ApiTask taskToCreate) {
             var createTaskUri = new Uri("https://labs.openai.com/api/labs/tasks").SendPOST();
             return createTaskUri.WithAuthorization(apiKey).WithJsonContent(taskToCreate).GetResult<LabsApi.Response>();
         }
@@ -209,6 +206,26 @@ namespace com.csutil.http.apis {
                     public int index { get; set; }
                     public object logprobs { get; set; }
                     public string finish_reason { get; set; }
+                }
+
+            }
+
+        }
+
+        public class Image {
+
+            public class Request {
+                public string prompt { get; set; }
+                public int n { get; set; } = 1;
+                public string size { get; set; } = "1024x1024";
+            }
+
+            public class Response {
+                public int created { get; set; }
+                public List<ImageEntry> data { get; set; }
+
+                public class ImageEntry {
+                    public string url { get; set; }
                 }
 
             }

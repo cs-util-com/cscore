@@ -9,10 +9,10 @@ namespace com.csutil {
         public static DirectoryInfo GetChildDir(this DirectoryInfo self, string subDirName, bool assertThatChildMustExist = false, bool sanitize = true) {
             subDirName.ThrowErrorIfNullOrEmpty("subDirName");
             if (sanitize) { subDirName = Sanitize.SanitizeToDirName(subDirName); }
-            AssertV2.AreEqual(subDirName, Sanitize.SanitizeToDirName(subDirName));
+            AssertV3.AreEqual(subDirName, Sanitize.SanitizeToDirName(subDirName));
             var c = new DirectoryInfo(self.FullPath() + subDirName);
             if (assertThatChildMustExist) {
-                AssertV2.IsTrue(c.IsNotNullAndExists(), "childFolder '" + subDirName + "' doesnt exist! Path=" + c.FullPath());
+                AssertV3.IsTrue(c.IsNotNullAndExists(), () => "childFolder '" + subDirName + "' doesnt exist! Path=" + c.FullPath());
             }
             return c;
         }
@@ -20,10 +20,10 @@ namespace com.csutil {
         public static FileInfo GetChild(this DirectoryInfo self, string fileName, bool assertThatChildMustExist = false, bool sanitize = true) {
             fileName.ThrowErrorIfNullOrEmpty("fileName");
             if (sanitize) { fileName = Sanitize.SanitizeToFileName(fileName); }
-            AssertV2.AreEqual(fileName, Sanitize.SanitizeToFileName(fileName));
+            AssertV3.AreEqual(fileName, Sanitize.SanitizeToFileName(fileName));
             var c = new FileInfo(self.FullPath() + fileName);
             if (assertThatChildMustExist) {
-                AssertV2.IsTrue(c.IsNotNullAndExists(), "childFile '" + fileName + "' doesnt exist! Path=" + c.FullPath());
+                AssertV3.IsTrue(c.IsNotNullAndExists(), () => "childFile '" + fileName + "' doesnt exist! Path=" + c.FullPath());
             }
             return c;
         }
@@ -97,7 +97,7 @@ namespace com.csutil {
             if (self != null && self.ExistsV2()) {
                 var res = deleteAction();
                 self.Refresh();
-                AssertV2.IsFalse(!res || self.ExistsV2(), "Still exists: " + self.FullName);
+                AssertV3.IsFalse(!res || self.ExistsV2(), () => "Still exists: " + self.FullName);
                 return res;
             }
             return false;
@@ -187,7 +187,7 @@ namespace com.csutil {
             target.CreateV2();
             foreach (var file in source.EnumerateFiles()) {
                 var createdFile = file.CopyTo(target.GetChild(file.Name).FullPath(), replaceExisting);
-                AssertV2.IsTrue(createdFile.ExistsV2(), "!createdFile.Exists: " + createdFile);
+                AssertV3.IsTrue(createdFile.ExistsV2(), () => "!createdFile.Exists: " + createdFile);
             }
             return target.ExistsV2();
         }

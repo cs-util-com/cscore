@@ -46,7 +46,7 @@ namespace com.csutil.tests.http {
         public async Task DownloadTest1() {
             var h = 100;
             var w = 50;
-            var stream = await new Uri("https://picsum.photos/" + w + "/" + h).SendGET().GetResult<Stream>();
+            var stream = await new Uri("https://placekitten.com/" + w + "/" + h).SendGET().GetResult<Stream>();
             var image = await ImageLoader.LoadAndDispose(stream);
             Assert.Equal(h, image.Height);
             Assert.Equal(w, image.Width);
@@ -56,7 +56,7 @@ namespace com.csutil.tests.http {
         public async Task DownloadTest2() {
             var h = 110;
             var w = 60;
-            var bytes = await new Uri("https://picsum.photos/" + w + "/" + h).SendGET().GetResult<byte[]>();
+            var bytes = await new Uri("https://placekitten.com/" + w + "/" + h).SendGET().GetResult<byte[]>();
             var image = await ImageLoader.LoadAndDispose(new MemoryStream(bytes));
             Assert.Equal(h, image.Height);
             Assert.Equal(w, image.Width);
@@ -66,7 +66,7 @@ namespace com.csutil.tests.http {
         public async Task DownloadTest3() {
             var h = 110;
             var w = 60;
-            var stream = await new Uri("https://picsum.photos/" + w + "/" + h).SendGET().GetResult<Stream>();
+            var stream = await new Uri("https://placekitten.com/" + w + "/" + h).SendGET().GetResult<Stream>();
             var image = await ImageLoader.LoadAndDispose(stream);
             Assert.Equal(h, image.Height);
             Assert.Equal(w, image.Width);
@@ -127,12 +127,11 @@ namespace com.csutil.tests.http {
 
         [Fact]
         public async Task DownloadTest5_GetOnlyHeaders2() {
-            var url = "https://picsum.photos/50/50";
+            var url = "https://loremflickr.com/50/50";
             Headers headers = await new Uri(url).SendGET().GetResult<Headers>();
             Assert.NotEmpty(headers);
             Assert.NotNull(headers.GetContentMimeType(null));
             Assert.NotEqual(-1, headers.GetContentLengthInBytes(-1));
-            Assert.False(headers.GetFileNameOnServer().IsNullOrEmpty());
         }
 
         [Fact]
@@ -394,6 +393,32 @@ namespace com.csutil.tests.http {
             Assert.False(DateTimeV2.Now.IsUtc());
             var delta = now - remoteNow;
             Assert.True(delta.TotalMillisecondsAbs() < 1000, $"delta={delta}, now={now}, remoteNow={remoteNow} (from string '{resp}'");
+        }
+
+        [Fact]
+        public async Task TestPlaceholderImageServices() {
+            var h = 100;
+            var w = 50;
+            await TestPlaceholderImageService($"https://placekitten.com/{w}/{h}", h, w);
+            await TestPlaceholderImageService($"https://loremflickr.com/{w}/{h}", h, w);
+            await TestPlaceholderImageService($"https://baconmockup.com/{w}/{h}", h, w);
+            await TestPlaceholderImageService($"https://placeimg.com/{w}/{h}/any", h, w);
+            await TestPlaceholderImageService($"https://placebear.com/{w}/{h}", h, w);
+            await TestPlaceholderImageService($"https://placebeard.it/{w}x{h}", h, w);
+            // await TestPlaceholderImageService($"https://www.placecage.com/{w}/{h}", h, w);
+            // await TestPlaceholderImageService($"https://www.fillmurray.com/{w}/{h}", h, w);
+            // await TestPlaceholderImageService($"https://www.stevensegallery.com/{w}/{h}", h, w);
+            // await TestPlaceholderImageService($"https://picsum.photos/{w}/{h}", h, w);
+        }
+
+        private static async Task TestPlaceholderImageService(string placeholderImageServiceUrl, int h, int w) {
+            using var t = Log.MethodEnteredWith(placeholderImageServiceUrl);
+            var s = await new Uri(placeholderImageServiceUrl).SendGET().GetResult<Stream>();
+            var stream = await s.CopyToSeekableStreamIfNeeded(true);
+            Log.MethodDoneWith(t, placeholderImageServiceUrl);
+            var image = await ImageLoader.LoadAndDispose(stream);
+            Assert.Equal(h, image.Height);
+            Assert.Equal(w, image.Width);
         }
 
     }

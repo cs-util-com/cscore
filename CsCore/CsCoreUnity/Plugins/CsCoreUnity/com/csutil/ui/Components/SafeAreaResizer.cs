@@ -3,6 +3,8 @@ using UnityEngine;
 
 namespace com.csutil.ui {
 
+    /// <summary> Should be added to a view stack if that collection of UI screens should automatically adapt to the safe area of the
+    /// mobile device screen to ensure all elements on the screen are visible and not behind any screen notches or similar </summary>
     public class SafeAreaResizer : MonoBehaviour {
 
         private const float MIN = 0.6f;
@@ -10,7 +12,13 @@ namespace com.csutil.ui {
 
         private bool refreshing;
 
-        private void OnEnable() { Recalc(); }
+        private void OnEnable() {
+            Recalc();
+        }
+
+        private void Start() {
+            AssertV2.IsFalse(GetComponent<Canvas>().isRootCanvasV2(), $"{nameof(SafeAreaResizer)} should NOT be added on the root canvas level!", gameObject);
+        }
 
         private void OnRectTransformDimensionsChange() { Recalc(); }
 

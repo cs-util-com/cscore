@@ -71,22 +71,22 @@ namespace com.csutil.tests {
         [Fact]
         public void TestAssertV2Methods() {
 
-            AssertV2.ThrowExeptionIfAssertionFails(() => {
-                AssertV2.IsTrue(1 + 1 == 2, "This assertion must not fail");
+            AssertV3.ThrowExeptionIfAssertionFails(() => {
+                AssertV3.IsTrue(1 + 1 == 2, () => "This assertion must not fail");
                 var s1 = "a";
-                AssertV2.AreEqual(s1, s1);
-                AssertV2.IsNull(null, "myVarX");
-                AssertV2.AreEqual(1, 1);
-                AssertV2.AreNotEqual(1, 2);
+                AssertV3.AreEqual(s1, s1);
+                AssertV3.IsNull(null, "myVarX");
+                AssertV3.AreEqual(1, 1);
+                AssertV3.AreNotEqual(1, 2);
             });
 
-            var stopWatch = AssertV2.TrackTiming();
+            var stopWatch = AssertV3.TrackTiming();
             var res = 1f;
             for (float i = 1; i < 500000; i++) { res = i / res + i; }
             Assert.NotEqual(0, res);
 
             stopWatch.Stop();
-            AssertV2.ThrowExeptionIfAssertionFails(() => { stopWatch.AssertUnderXms(200); });
+            AssertV3.ThrowExeptionIfAssertionFails(() => { stopWatch.AssertUnderXms(200); });
             Assert.True(stopWatch.IsUnderXms(200), "More time was needed than expected!");
 
         }
@@ -94,34 +94,34 @@ namespace com.csutil.tests {
         /// <summary> Prints out failing AssertV2.AreEqual to show if they are readable in the log </summary>
         [Fact]
         public void TestReadableAssertAreEqualErrorOutputs() {
-            AssertV2.AreEqual("abcd", "abce");
-            AssertV2.AreEqual(new int[4] { 1, 2, 2, 4 }, new int[4] { 1, 2, 3, 4 });
-            AssertV2.AreEqual(new int[2] { 1, 2 }, new int[2] { 1, 3 });
-            AssertV2.AreEqual(new int[6] { 1, 2, 3, 4, 5, 6 }, new int[6] { 1, 2, 3, 4, 5, 7 });
-            AssertV2.AreEqual(new int[2] { 1, 2 }, new int[1] { 1 });
-            AssertV2.AreEqual(new int[1] { 1 }, new int[2] { 1, 2 });
+            AssertV3.AreEqual("abcd", "abce");
+            AssertV3.AreEqual(new int[4] { 1, 2, 2, 4 }, new int[4] { 1, 2, 3, 4 });
+            AssertV3.AreEqual(new int[2] { 1, 2 }, new int[2] { 1, 3 });
+            AssertV3.AreEqual(new int[6] { 1, 2, 3, 4, 5, 6 }, new int[6] { 1, 2, 3, 4, 5, 7 });
+            AssertV3.AreEqual(new int[2] { 1, 2 }, new int[1] { 1 });
+            AssertV3.AreEqual(new int[1] { 1 }, new int[2] { 1, 2 });
         }
 
         [Fact]
         public void TestUsingAssertV2ForPrintDebugging() {
-            AssertV2.SetupPrintDebuggingSuccessfulAssertions(); // Turn on print debugging
+            AssertV3.SetupPrintDebuggingSuccessfulAssertions(); // Turn on print debugging
             // Then call AssertV2 methods that normally do not produce any log output (because they dont fail):
             TestAssertV2Methods();
-            AssertV2.onAssertSuccess = null; // Turn off print debugging again
+            AssertV3.onAssertSuccess = null; // Turn off print debugging again
         }
 
         [Fact]
         public void TestAssertV2Throws() {
 
-            AssertV2.ThrowExeptionIfAssertionFails(() => {
+            AssertV3.ThrowExeptionIfAssertionFails(() => {
 
                 try {
-                    AssertV2.Throws<Exception>(() => {
-                        AssertV2.AreEqual(1, 1); // this will not fail..
+                    AssertV3.Throws<Exception>(() => {
+                        AssertV3.AreEqual(1, 1); // this will not fail..
                     }); // ..so the AssertV2.Throws should fail
                     Log.e("This line should never be reached since AssertV2.Throws should fail!");
                     throw new Exception("AssertV2.Throws did not fail correctly!");
-                } catch (AssertV2.ThrowsException) { // Only catch it if its a ThrowsException
+                } catch (AssertV3.ThrowsException) { // Only catch it if its a ThrowsException
                     // AssertV2.Throws failed correctly and threw an ThrowsException error
                     Log.d("ThrowsException was expected and arrived correctly");
                 }

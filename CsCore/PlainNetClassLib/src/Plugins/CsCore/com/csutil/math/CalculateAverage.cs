@@ -1,9 +1,23 @@
-﻿using System.Collections;
-using System;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace com.csutil.math {
 
     public static class CalculateAverage {
+
+        public static float CalcMean(this IEnumerable<float> self) {
+            return (float)self.CalcMean(x => x);
+        }
+
+        public static double CalcMean(this IEnumerable<double> self) {
+            return self.CalcMean(x => x);
+        }
+
+        public static double CalcMean<T>(this IEnumerable<T> self, Func<T, double> selector) {
+            if (self.IsEmpty()) { return double.NaN; }
+            return self.Average(selector);
+        }
 
         /// <summary>
         /// This allows to calculate the mean of a list without storing all entries of the list.
@@ -30,7 +44,7 @@ namespace com.csutil.math {
             if (CutOff == 0) { return self; }
 
             double Samplingrate = 1 / dtInSec;
-            long dF2 = self.Length - 1;        // The data range is set with dF2
+            long dF2 = self.Length - 1; // The data range is set with dF2
             double[] Dat2 = new double[dF2 + 4]; // Array with 4 extra points front and back
             double[] data = self; // Ptr., changes passed data
 

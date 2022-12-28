@@ -13,7 +13,6 @@ namespace com.csutil.testing {
 
         public class Test {
 
-            public object classInstance;
             public MethodInfo methodToTest;
             public string name;
             public Task testTask;
@@ -21,8 +20,7 @@ namespace com.csutil.testing {
             public object invokeResult;
             public ExceptionDispatchInfo reportedError;
 
-            public Test(object classInstance, MethodInfo methodToTest) {
-                this.classInstance = classInstance;
+            public Test(MethodInfo methodToTest) {
                 this.methodToTest = methodToTest;
                 this.name = methodToTest.ToStringV2();
             }
@@ -34,7 +32,7 @@ namespace com.csutil.testing {
                 return res;
             }
 
-            public Task RunTestOnMethod() {
+            public Task RunTestOnMethod(object classInstance) {
                 try {
                     invokeResult = methodToTest.Invoke(classInstance, null);
                     // Its an async test so the run task should wait for the test to finish
@@ -63,11 +61,11 @@ namespace com.csutil.testing {
 
         public static IEnumerable<Test> GetIteratorOverTests(Type classToTest, IEnumerable<MethodInfo> methodsToTest, Action<Test> onTestStarted) {
             return methodsToTest.Map((methodToTest) => {
-                var test = new Test(CreateInstance(classToTest), methodToTest);
+                var test = new Test(methodToTest);
                 test.StartTest = () => {
                     ResetStaticInstances();
                     onTestStarted(test);
-                    test.testTask = test.RunTestOnMethod();
+                    test.testTask = test.RunTestOnMethod(CreateInstance(classToTest));
                 };
                 return test;
             });

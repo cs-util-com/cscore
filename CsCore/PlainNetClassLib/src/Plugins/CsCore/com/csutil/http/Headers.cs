@@ -118,7 +118,7 @@ namespace com.csutil.http {
                 if (similar.Count() == 1) { headerValues = similar.First().Value; }
             }
             if (headerValues == null) { return fallbackValue; }
-            AssertV2.AreEqual(1, headerValues.Count());
+            AssertV3.AreEqual(1, headerValues.Count());
             return headerValues.First();
         }
 
@@ -138,7 +138,7 @@ namespace com.csutil.http {
             // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type
             if (mime.Contains(";")) { mime = mime.Split(";").First(p => p.Contains("/")); }
             var x = mime.Split("/");
-            AssertV2.AreEqual(2, x.Length);
+            AssertV3.AreEqual(2, x.Length);
             return x.Last();
         }
 

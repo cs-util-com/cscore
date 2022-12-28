@@ -75,8 +75,9 @@ namespace com.csutil.tests.http {
 
             DirectoryEntry dir = EnvironmentV2.instance.GetNewInMemorySystem();
             FileEntry fileToUpload = dir.GetChild("test.jpg");
-            using (var stream = await new Uri("https://picsum.photos/50/50").SendGET().GetResult<Stream>()) {
-                await fileToUpload.SaveStreamAsync(stream); // Download a test file to use it for the upload test
+            using (var stream = await new Uri("https://placekitten.com/50/50").SendGET().GetResult<Stream>()) {
+                // Download a test file to use it for the upload test:
+                await fileToUpload.SaveStreamAsync(stream, resetStreamToStart: false); 
             }
 
             using (var streamToUpload = fileToUpload.OpenForRead()) {

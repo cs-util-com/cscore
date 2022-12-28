@@ -15,6 +15,12 @@ namespace com.csutil {
             }
         }
 
+        public static T ResetStreamCurserPositionToBeginning<T>(this T self) where T : Stream {
+            if (!self.CanSeek) { throw new InvalidOperationException("Stream not seekable, cant jump back to start of stream, first do stream.CopyToSeekableStreamIfNeeded() ?"); }
+            self.Position = 0; // Move curser back to beginning after copy
+            return self;
+        }
+
         public static void CopyTo(this Stream self, Stream destination, Action<long> onProgress, int bufferSize = 4096) {
             byte[] buffer = new byte[bufferSize];
             int numBytes;

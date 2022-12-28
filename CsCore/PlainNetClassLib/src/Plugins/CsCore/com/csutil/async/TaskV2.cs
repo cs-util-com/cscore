@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -111,6 +113,39 @@ namespace com.csutil {
                 await TaskV2.Delay(delayInMsBetweenIterations);
                 repetitions--;
             }
+        }
+
+        public static Task<Task> WhenAnySuccessful(params Task[] tasks) {
+            return WhenAnySuccessful(true, tasks);
+        }
+
+        public static Task<Task> WhenAnySuccessful(bool logErrorsForUnsuccessfuls, params Task[] tasks) {
+            if (logErrorsForUnsuccessfuls) { Task.WhenAll(tasks).LogOnError(); }
+            return WhenAnySuccessfulInner(tasks);
+        }
+
+        public static Task<Task> WhenAnySuccessful(IEnumerable<Task> tasks, bool logErrorsForUnsuccessfuls = true) {
+            var t = tasks.Cached();
+            if (logErrorsForUnsuccessfuls) { Task.WhenAll(t).LogOnError(); }
+            return WhenAnySuccessfulInner(t);
+        }
+
+        private static async Task<Task> WhenAnySuccessfulInner(IEnumerable<Task> tasks) {
+            var completedTask = await Task.WhenAny(tasks);
+            if (!completedTask.IsCompletedSuccessfull()) {
+                var allExceptFailed = new List<Task>();
+                foreach (var task in tasks) {
+                    // If any other successful task is found, directly return that one:
+                    if (task.IsCompletedSuccessfull()) { return task; }
+                    // Filter out the failed completedTask
+                    if (task != completedTask) { allExceptFailed.Add(task); }
+                }
+                if (allExceptFailed.IsNullOrEmpty()) {
+                    await completedTask; // Await the last failed one in the list to trigger an exception
+                }
+                return await WhenAnySuccessfulInner(allExceptFailed);
+            }
+            return completedTask;
         }
 
     }

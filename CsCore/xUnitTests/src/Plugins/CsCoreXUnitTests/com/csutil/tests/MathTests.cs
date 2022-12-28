@@ -16,13 +16,18 @@ namespace com.csutil.tests {
 
             List<float> someNumbers = new List<float>();
             float average = 0;
+            Assert.True(float.IsNaN(someNumbers.CalcMedian()));
+            Assert.True(float.IsNaN(someNumbers.CalcMean()));
 
             average = AddValue(someNumbers, 4, average);
             Assert.Equal(4f, average);
+            Assert.Equal(4f, someNumbers.CalcMedian());
             average = AddValue(someNumbers, 6, average);
             Assert.Equal(5f, average);
+            Assert.Equal(4f, someNumbers.CalcMedian());
             average = AddValue(someNumbers, 8, average);
             Assert.Equal(6f, average);
+            Assert.Equal(6f, someNumbers.CalcMedian());
 
         }
 
@@ -171,42 +176,59 @@ namespace com.csutil.tests {
 
         }
 
-        [Fact]
-        public void TestKabschAlgorithm() {
+        public class WeightedMedianTests {
 
-            var input = new Vector3[] {
-                new Vector3(0, 0, 0),
-                new Vector3(1, 0, 0),
-                new Vector3(2, 0, 0),
-                new Vector3(2, 0, -1),
-            };
-            var dataToAlignTo = new Vector4[] {
-                new Vector4(0, 0, 0, 1),
-                new Vector4(0, 0, 1, 1),
-                new Vector4(0, 0, 2, 1),
-                new Vector4(1, 0, 2, 1),
-            };
-            var solver = new KabschAlgorithm();
-            var alignmentResult = solver.SolveKabsch(input, dataToAlignTo);
+            public WeightedMedianTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
-            var dataToAlignTo2 = dataToAlignTo.Map(x => new Vector3(x.X, x.Y, x.Z)).ToArray();
-            var output = input.Map(v => Vector3.Transform(v, alignmentResult)).ToArray();
+            [Fact]
+            public void ExampleUsage1() {
+                IEnumerable<Element> elements = new List<Element>() {
+                    new Element { Value = 80, Weight = 10 },
+                    new Element { Value = 90, Weight = 10 },
+                    new Element { Value = 95, Weight = 10 }, // Should be the weighted median
+                    new Element { Value = 100, Weight = 10 },
+                    new Element { Value = 9999, Weight = 10 }, // Outlier that would impact the mean but not the median
+                    new Element { Value = 0, Weight = .1 },
+                    new Element { Value = 1, Weight = .1 },
+                    new Element { Value = 2, Weight = .1 },
+                    new Element { Value = 3, Weight = .1 },
+                    new Element { Value = 4, Weight = .1 },
+                    new Element { Value = 5, Weight = .1 },
+                };
+                elements = new Random().ShuffleEntries(elements);
+                var weightedMedian = elements.CalcWeightedMedian(x => x.Weight);
+                Assert.Equal(95, weightedMedian.Item1.Value);
+                Assert.Equal(95, weightedMedian.Item2.Value); // Uneven nr of elems, so both results are the same
+                // Calculating the normal nedian will not result in the correct value:
+                Assert.Equal(5, elements.CalcMedian(x => x.Value));
+            }
 
-            AssertAreEqual(dataToAlignTo2[0], (output[0]));
-            AssertAreEqual(dataToAlignTo2[1], (output[1]));
-            AssertAreEqual(dataToAlignTo2[2], (output[2]));
-            AssertAreEqual(dataToAlignTo2[3], (output[3]));
+            [Fact]
+            public void ExampleUsage2() {
+                IEnumerable<Element> elements = new List<Element>() {
+                    new Element { Value = 90, Weight = 10 },
+                    new Element { Value = 100, Weight = 10 },
+                };
+                elements = new Random().ShuffleEntries(elements);
+                var weightedMedian = elements.CalcWeightedMedian(x => x.Weight);
+                // Since for an even number of elems both median candidates are returned an average can be caluclated on these:
+                Assert.Equal(95, (weightedMedian.Item1.Value + weightedMedian.Item2.Value) / 2);
+            }
 
-            alignmentResult.Decompose(out var scale, out var rotation, out var translation);
+            private class Element : IComparable {
+                public double Value { get; set; }
+                public double Weight { get; set; }
 
-            Assert.True(translation.IsSimilarTo(Vector3.Zero, 6));
-            Assert.True(scale.IsSimilarTo(Vector3.One, 6));
+                public int CompareTo(object obj) {
+                    if (obj is Element other) {
+                        if (Value == other.Value) { return 0; }
+                        return Value < other.Value ? -1 : 1;
+                    }
+                    throw new InvalidOperationException("Can only compare to other instances of Element");
+                }
 
-        }
+            }
 
-        private static void AssertAreEqual(Vector3 a, Vector3 b, double allowedDelta = 0.00001) {
-            var diff = a - b;
-            Assert.True(diff.Length() < allowedDelta, "diff=" + diff);
         }
 
     }

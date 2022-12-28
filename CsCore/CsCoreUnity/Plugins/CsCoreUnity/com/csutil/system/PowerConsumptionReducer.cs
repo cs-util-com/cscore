@@ -9,6 +9,7 @@ namespace com.csutil.system {
         public AnimationCurve fpsReductionOverTime = AnimationCurve.EaseInOut(0, ACTIVE_FPS, 10, IDLE_FPS);
         public float time;
         public int currentFps;
+        public bool disableInUnityEditor = true;
 
         private void Start() {
             this.ExecuteRepeated(() => {
@@ -17,6 +18,10 @@ namespace com.csutil.system {
                 time += 0.1f;
                 return true;
             }, 100);
+            
+            #if UNITY_EDITOR
+            enabled = !disableInUnityEditor;
+            #endif
         }
 
         private void Update() {

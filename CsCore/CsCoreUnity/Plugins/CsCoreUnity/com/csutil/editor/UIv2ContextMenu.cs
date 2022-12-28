@@ -116,6 +116,15 @@ namespace com.csutil.editor {
         [MenuItem(UIv2menu + "DefaultVerticalGroupWithHorizontalChildren", false, priorityOfUiMenu + 8)]
         static void DefaultVerticalGroupWithHorizontalChildren() { AddPrefabToActiveView("DefaultVerticalGroupWithHorizontalChildren", false); }
 
+        [MenuItem(UIv2menu + "Add UI Save Area Resizer", false, priorityOfUiMenu + 9)]
+        static void AddUiSaveAreaResizer() {
+            if (!GetSelectedCanvasChild().HasComponent<ViewStack>(out var _)) {
+                throw new InvalidOperationException($"The {nameof(SafeAreaResizer)} should be typically added on the level of the ViewStack. "
+                    + $"But if needed you can add it manually on any other UI level as well. Dont add it on the root canvas level though!");
+            }
+            GetSelectedCanvasChild().AddComponent<SafeAreaResizer>();
+        }
+
         private static GameObject AddPrefabToActiveView(string uiPrefabName, bool keepReferenceToEditorPrefab = true) {
             var go = GetSelectedCanvasChild().AddChild(ResourcesV2.LoadPrefab(uiPrefabName, keepReferenceToEditorPrefab));
             SelectInHirarchyUi(go);

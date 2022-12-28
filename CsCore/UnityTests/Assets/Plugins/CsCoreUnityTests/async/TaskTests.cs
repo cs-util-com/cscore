@@ -1,5 +1,7 @@
-﻿using NUnit.Framework;
+﻿using System;
+using NUnit.Framework;
 using System.Collections;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -32,6 +34,47 @@ namespace com.csutil.tests.threading {
                 await TaskV2.Delay(100);
                 return "abc";
             }));
+        }
+
+        [UnityTest]
+        public IEnumerator TestOrderOfMainThreadEvents() {
+            yield return TestOrderOfMainThreadEventsAsync().AsCoroutine();
+        }
+
+        private async Task TestOrderOfMainThreadEventsAsync() {
+            await TaskV2.Run(async () => {
+                var i = 0;
+                await TaskV2.Run(() => MainThread.Invoke(SlowOperationOnMainThread(i++)));
+                await TaskV2.Run(() => MainThread.Invoke(SlowOperationOnMainThread(i++)));
+                await TaskV2.Run(() => MainThread.Invoke(SlowOperationOnMainThread(i++)));
+                await TaskV2.Run(() => MainThread.Invoke(SlowOperationOnMainThread(i++)));
+                Log.d("MainThread.Invoke");
+                MainThread.Invoke(SlowOperationOnMainThread(i++));
+                await MainThread.Invoke(() => {
+                    MainThread.Invoke(SlowOperationOnMainThread(i++));
+                    return Task.CompletedTask;
+                });
+                await TaskV2.Run(() => MainThread.Invoke(SlowOperationOnMainThread(i++)));
+                await TaskV2.Run(() => MainThread.Invoke(SlowOperationOnMainThread(i++)));
+                await TaskV2.Run(() => MainThread.Invoke(SlowOperationOnMainThread(i++)));
+                await TaskV2.Run(() => MainThread.Invoke(SlowOperationOnMainThread(i++)));
+                Log.d("MainThread.Invoke");
+                MainThread.Invoke(SlowOperationOnMainThread(i++));
+                await MainThread.Invoke(() => {
+                    MainThread.Invoke(SlowOperationOnMainThread(i++));
+                    return Task.CompletedTask;
+                });
+            });
+        }
+
+        private int currentI = -1;
+        private Action SlowOperationOnMainThread(int i) {
+            return () => {
+                Thread.Sleep(250);
+                Assert.AreEqual(currentI + 1, i, $"currentI={currentI} but i={i}");
+                currentI = i;
+                Log.d("currentI=" + currentI);
+            };
         }
 
     }

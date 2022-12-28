@@ -53,7 +53,7 @@ namespace com.csutil {
                 try {
                     var d = default(E);
                     cancel.Token.ThrowIfCancellationRequested();
-                    var keys = await store.GetAllKeys();
+                    var keys = (await store.GetAllKeys()).Cached();
                     if (!keys.IsEmpty()) {
                         cancel.Token.ThrowIfCancellationRequested();
                         var entriesToProcess = await keys.MapAsync(k => store.Get<E>(k, d));

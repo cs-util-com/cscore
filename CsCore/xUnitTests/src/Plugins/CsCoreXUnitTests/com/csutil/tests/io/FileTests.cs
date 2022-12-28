@@ -170,7 +170,7 @@ namespace com.csutil.tests {
                 var dir3 = rootDir.GetChildDir("TestDir 3").CreateV2();
                 Assert.Equal("TestDir 3", dir3.NameV2());
                 dir3 = rootDir.CreateSubdirectory(dir3.NameV2());
-                AssertV2.Throws<Exception>(() => {
+                Assert.Throws<IOException>(() => {
                     dir1.MoveToV2(dir3); // This should fail since dir3 already exists
                 });
                 Assert.NotEqual(dir3.FullPath(), dir1.FullPath());

@@ -73,7 +73,7 @@ namespace com.csutil.http.cookies {
                     return true;
                 }
                 if (receivedCookieExpired) { Log.w("Expired cookie will not be added! cookie=" + cookie); return false; }
-                AssertV2.IsFalse(cookies.ContainsKey(cookie.name), "cookies[cookie.name] was not null");
+                AssertV3.IsFalse(cookies.ContainsKey(cookie.name), () => "cookies[cookie.name] was not null");
                 if (!cookies.ContainsKey(cookie.name)) { cookies[cookie.name] = new List<Cookie>(); }
                 cookies[cookie.name].Add(cookie);
                 ShowDebugWarningIfMoreThanOneCookieWithSameName(cookie.name);
@@ -101,7 +101,7 @@ namespace com.csutil.http.cookies {
             for (int index = 0; index < cookies[name].Count; ++index) {
                 Cookie cookie = cookies[name][index];
                 if (cookie.Matches(accessInfo)) {
-                    AssertV2.IsTrue(cookie.expirationDate.ToUnixTimestampUtc() > 0, "cookie.expirationDate.toUnixTimestamp()=" + cookie.expirationDate.ToUnixTimestampUtc());
+                    AssertV3.IsTrue(cookie.expirationDate.ToUnixTimestampUtc() > 0, () => "cookie.expirationDate.toUnixTimestamp()=" + cookie.expirationDate.ToUnixTimestampUtc());
                     if (cookie.expirationDate.IsAfter(DateTimeV2.UtcNow)) {
                         return cookie;
                     } else {

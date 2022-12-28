@@ -39,7 +39,7 @@ namespace com.csutil.model.immutable {
         private void RecordEntry(object action, object dispatcherResult, string exception = null) {
             if (!isRecording) { return; }
             if (action is ResetStoreAction) { throw Log.e("The recorded actions will include a ResetStoreAction"); }
-            AssertV2.IsFalse(action is Delegate, "The recorder received a delegate action, should be prevented by Thunk");
+            AssertV3.IsFalse(action is Delegate, () => "The recorder received a delegate action, should be prevented by Thunk");
             try {
                 Entry nextEntry = new Entry() { action = action, e = "" + exception };
                 persistance.Set(GetId(recordedActionsCount), jsonWriter.Write(nextEntry));

@@ -12,7 +12,7 @@ namespace com.csutil.progress {
         public static void SetCount(this IProgress self, double current) {
             if (self.totalCount == 0) { throw new DivideByZeroException("progress.totalCount not set"); }
             self.percent = 100d * current / self.totalCount;
-            AssertV2.IsTrue(0 <= self.percent && self.percent <= 100, "" + self);
+            AssertV3.IsTrue(0 <= self.percent && self.percent <= 100, () => "" + self);
         }
 
         public static void IncrementTotalCount(this IProgress self, int incrementStep = 1) {

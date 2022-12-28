@@ -24,7 +24,7 @@ namespace com.csutil.keyvaluestore {
 
         private static bool IsDefaultValue<T>(T storeValue, T defaultValue) {
             var res = Equals(storeValue, defaultValue);
-            AssertV2.IsTrue(res == JsonWriter.HasEqualJson(storeValue, defaultValue), $"Equals says {res} but EqualJson says {!res}!");
+            AssertV3.IsTrue(res == JsonWriter.HasEqualJson(storeValue, defaultValue), () => $"Equals says {res} but EqualJson says {!res}!");
             return res;
         }
 
@@ -46,7 +46,7 @@ namespace com.csutil.keyvaluestore {
                 if (storeOldValue != null) {
                     if (oldValue == null) { oldValue = storeOldValue; }
                     if (storeOldValue != oldValue) {
-                        AssertV2.IsTrue(JsonWriter.HasEqualJson(storeOldValue, oldValue), "oldValue != store.oldValue, store value newer?"
+                        AssertV3.IsTrue(JsonWriter.HasEqualJson(storeOldValue, oldValue), () => "oldValue != store.oldValue, store value newer?"
                             + "\n storeOldValue=" + JsonWriter.AsPrettyString(storeOldValue) + "\n oldValue=" + JsonWriter.AsPrettyString(oldValue));
                     }
                 }
@@ -70,11 +70,11 @@ namespace com.csutil.keyvaluestore {
         }
 
         public static async Task<IEnumerable<T>> GetAll<T>(this IKeyValueStore self) {
-            return await GetRange<T>(self, await self.GetAllKeys());
+            return (await GetRange<T>(self, await self.GetAllKeys())).Cached();
         }
 
         public static Task<IEnumerable<T>> GetRange<T>(this IKeyValueStore self, IEnumerable<string> keysToGet) {
-            return keysToGet.MapAsync(key => self.Get<T>(key, default(T)));
+            return keysToGet.Cached().MapAsync(key => self.Get<T>(key, default(T)));
         }
 
         public static async Task<List<bool>> RemoveRange(this IKeyValueStore self, IEnumerable<string> keysToRemove) {

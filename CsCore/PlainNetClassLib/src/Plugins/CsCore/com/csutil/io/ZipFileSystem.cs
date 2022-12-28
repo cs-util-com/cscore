@@ -114,7 +114,7 @@ namespace com.csutil.io {
         protected override Stream OpenFileImpl(UPath path, FileMode mode, FileAccess access, FileShare share) {
             if (mode == FileMode.Open) {
                 var entry = zip.GetEntry(path.ToRelative().FullName);
-                AssertV2.IsTrue(entry != null && entry.IsFile, "Not a file: " + entry);
+                AssertV3.IsTrue(entry != null && entry.IsFile, () => "Not a file: " + entry);
                 return zip.GetInputStream(entry);
             }
             throw new NotImplementedException("Only read via FileMode.Open supported!");

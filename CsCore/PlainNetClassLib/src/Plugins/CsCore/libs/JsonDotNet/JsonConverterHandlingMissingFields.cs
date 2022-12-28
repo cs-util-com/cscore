@@ -17,7 +17,7 @@ namespace com.csutil.json {
 
         public override object ReadJson(Newtonsoft.Json.JsonReader reader, Type targetObjectType, object targetObjectToFill, JsonSerializer serializer) {
             targetObjectToFill = targetObjectToFill ?? Activator.CreateInstance(targetObjectType, true);
-            AssertV2.IsTrue(targetObjectToFill is HandleAdditionalJsonFields, "targetObjectToFill did not implement HandleAdditionalJsonFields");
+            AssertV3.IsTrue(targetObjectToFill is HandleAdditionalJsonFields, () => "targetObjectToFill did not implement HandleAdditionalJsonFields");
             var sourceJson = JObject.Load(reader);
             var missingFieldList = FillTargetObjectAndCollectMissingFields(targetObjectType, targetObjectToFill, sourceJson);
             if (!missingFieldList.IsNullOrEmpty()) {

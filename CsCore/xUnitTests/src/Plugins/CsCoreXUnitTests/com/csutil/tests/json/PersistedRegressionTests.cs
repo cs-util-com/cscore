@@ -39,7 +39,7 @@ namespace com.csutil.tests.json {
             // This way changes have to be manually approved by the developer
 
             // The same regression test can also be triggered through the AssertV2 helper:
-            AssertV2.IsEqualToPersisted("PersistedRegressionTests_ExampleUsage1", myState1);
+            AssertV3.IsEqualToPersisted("PersistedRegressionTests_ExampleUsage1", myState1);
 
         }
 
