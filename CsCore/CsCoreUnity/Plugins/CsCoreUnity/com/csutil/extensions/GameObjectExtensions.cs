@@ -104,7 +104,10 @@ namespace com.csutil {
                 } else {
                     UnityEngine.Object.DestroyImmediate(self);
                 }
-            } catch { return false; }
+            } catch {
+                Log.e("Cant destroy object: " + self, self);
+                return false;
+            }
             AssertV2.IsTrue(destroyNextFrame || self.IsDestroyed(), "gameObject was not destroyed");
             return true;
         }
