@@ -101,6 +101,87 @@ namespace com.csutil.math {
         
         private static float Round(float f) { return (float)Math.Round(f, 6); }
 
+        public static float[] NextRandomRgbColor(this Random self) {
+            float[] color = new float[3];
+            // The division by 3 and the addition of 0.5 serve to make the distribution more skewed towards the middle of the range
+            color[0] = MathF.Max(0, MathF.Min(1, (float)self.NextGaussian() / 3f + 0.5f)); // red
+            color[1] = MathF.Max(0, MathF.Min(1, (float)self.NextGaussian() / 3f + 0.5f)); // green
+            color[2] = MathF.Max(0, MathF.Min(1, (float)self.NextGaussian() / 3f + 0.5f)); // blue
+            return color;
+        }
+
+        private static float[] white = new float[] { 1, 1, 1 };
+        private static float[] red = new float[] { 1, 0, 0 };
+        private static float[] yellow = new float[] { 1, 1, 0 };
+        private static float[] blue = new float[] { 0.163f, 0.373f, 0.6f };
+        private static float[] violet = new float[] { 0.5f, 0, 0.5f };
+        private static float[] green = new float[] { 0, 0.66f, 0.2f };
+        private static float[] orange = new float[] { 1, 0.5f, 0 };
+        private static float[] black = new float[] { 0.2f, 0.094f, 0 };
+        /// <summary>
+        /// Returns a color with a maximized euclidean distance to the input color
+        /// See also paper "Paint Inspired Color Mixing and Compositing for Visualization"
+        /// </summary>
+        public static float[] NextColorAfter(float red, float yellow, float blue) {
+            float[] result = new float[3];
+            for (int i = 0; i <= 2; i++) {
+                result[i] = white[i] * (1 - red) * (1 - blue) * (1 - yellow) + ColorMath.red[i] * red * (1 - blue) * (1 - yellow) +
+                    ColorMath.blue[i] * (1 - red) * blue * (1 - yellow) + violet[i] * red * blue * (1 - yellow) +
+                    ColorMath.yellow[i] * (1 - red) * (1 - blue) * yellow + orange[i] * red * (1 - blue) * yellow +
+                    green[i] * (1 - red) * blue * yellow + black[i] * red * blue * yellow;
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Returns a color with a maximized euclidean distance to the input color
+        /// See also paper "Paint Inspired Color Mixing and Compositing for Visualization"
+        /// </summary>
+        public static float[] NextColorAfter(float[] previousColor) {
+            var rybColor = RgbToRyb(previousColor);
+            return NextColorAfter(rybColor[0], rybColor[1], rybColor[2]);
+        }
+
+        /// <summary> This method first separates the red, green, and blue components of the input RGB color.
+        /// It then uses these values to calculate the yellow, red, and blue components of the output RYB color.
+        /// Finally, it returns the RYB color as a float[] array.
+        /// 
+        /// Note that this conversion method is based on the RGB-RYB color space conversion algorithm described in the paper
+        /// "A Color Space Based on the Red-Yellow-Blue Color Model" by K.E. van der Weij and J.J. van Wijk
+        /// (IEEE Transactions on Visualization and Computer Graphics, vol. 15, no. 6, pp. 1453-1458, 2009).
+        /// This algorithm is designed to preserve hue and chroma while converting between the RGB and RYB color spaces. </summary>
+        public static float[] RgbToRyb(float[] rgb) {
+            float r = rgb[0];
+            float g = rgb[1];
+            float b = rgb[2];
+            float minRgb = Math.Min(r, Math.Min(g, b));
+            float minRg = Math.Min(r, g);
+            float avgRg = (r + g - minRgb) / 2;
+            float minRg2 = Math.Min(minRg, avgRg);
+            float redNoYellow = r - minRg2;
+            float blueNoYellow = b - minRg2;
+            float red = minRg2 / (minRg2 + blueNoYellow);
+            float blue = blueNoYellow / (minRg2 + blueNoYellow);
+            float yellow = minRg2 / (minRg2 + redNoYellow + blueNoYellow);
+            return new float[] { red, yellow, blue };
+        }
+
+        /// <summary> Mixing random colors with white (255, 255, 255) creates neutral pastels by increasing the
+        /// lightness while keeping the hue of the original color </summary>
+        public static float[] GetPastelColorVarianfor(float[] inputColor) {
+            return MixColors(inputColor, new float[] { 1, 1, 1 });
+        }
+
+        public static float[] MixColors(float[] color1, float[] color2) {
+            float[] result = new float[3];
+            if (color2 != null) {
+                result[0] = (int)((color1[0] + color2[0]) / 2);
+                result[1] = (int)((color1[1] + color2[1]) / 2);
+                result[2] = (int)((color1[2] + color2[2]) / 2);
+            }
+            return result;
+        }
+
     }
 
 }

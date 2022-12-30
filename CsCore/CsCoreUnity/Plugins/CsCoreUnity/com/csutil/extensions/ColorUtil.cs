@@ -1,5 +1,7 @@
-﻿using com.csutil.math;
+﻿using System.Collections.Generic;
+using com.csutil.math;
 using UnityEngine;
+using Random = System.Random;
 
 namespace com.csutil {
 
@@ -59,6 +61,10 @@ namespace com.csutil {
                 return new Color32(normV, normV, normV, alpha0To255);
             }
             float[] rgb = ColorMath.HsvToRgb(hue0To360, saturation0To1, value0To1);
+            return ToColor32(rgb, alpha0To255);
+        }
+
+        private static Color32 ToColor32(float[] rgb, byte alpha0To255 = 255) {
             return new Color32((byte)(rgb[0] * 255), (byte)(rgb[1] * 255), (byte)(rgb[2] * 255), alpha0To255);
         }
 
@@ -99,6 +105,19 @@ namespace com.csutil {
             float[] hsv = self.ToHsv();
             ColorMath.InvertHue(hsv);
             return HsvToColor32(hsv);
+        }
+
+        public static Queue<Color32> NextRandomColors(this Random self, int count, byte alpha0To255 = 255, bool onlyPastelColors = false) {
+            var c = self.NextRandomRgbColor();
+            if (onlyPastelColors) { c = ColorMath.GetPastelColorVarianfor(c); }
+            var colors = new Queue<Color32>();
+            colors.Enqueue(ToColor32(c, alpha0To255));
+            for (int i = 0; i < count - 1; i++) {
+                c = ColorMath.NextColorAfter(c);
+                if (onlyPastelColors) { c = ColorMath.GetPastelColorVarianfor(c); }
+                colors.Enqueue(ToColor32(c, alpha0To255));
+            }
+            return colors;
         }
 
     }
