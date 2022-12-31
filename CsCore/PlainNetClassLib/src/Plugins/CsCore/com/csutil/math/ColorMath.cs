@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace com.csutil.math {
 
@@ -98,8 +100,30 @@ namespace com.csutil.math {
             }
             return new float[3] { Round(r), Round(g), Round(b) };
         }
-        
+
         private static float Round(float f) { return (float)Math.Round(f, 6); }
+
+        public static ISet<float[]> NextRandomRgbColors2(this Random self, int count) {
+            var colors = new HashSet<float[]>();
+            while (colors.Count < count) {
+                colors.Add(self.NextRandomRgbColor());
+            }
+            return colors;
+        }
+
+        public static ISet<float[]> NextRandomRgbColors(this Random self, int count) {
+            var colors = new HashSet<float[]>();
+            var color = self.NextRandomRgbColor();
+            colors.Add(color);
+            while (colors.Count < count) {
+                color = self.NextColorAfter(color);
+                if (!colors.Add(color)) {
+                    Log.e("Color set already contains color " + color.ToStringV2(x => "" + x));
+                    color = self.NextRandomRgbColor();
+                }
+            }
+            return colors;
+        }
 
         public static float[] NextRandomRgbColor(this Random self) {
             float[] color = new float[3];
@@ -122,7 +146,12 @@ namespace com.csutil.math {
         /// Returns a color with a maximized euclidean distance to the input color
         /// See also paper "Paint Inspired Color Mixing and Compositing for Visualization"
         /// </summary>
-        public static float[] NextColorAfter(float red, float yellow, float blue) {
+        public static float[] NextColorAfter(this Random self, float red, float yellow, float blue) {
+
+            red += (float)self.NextDouble() * 0.3f;
+            yellow += (float)self.NextDouble() * 0.3f;
+            blue += (float)self.NextDouble() * 0.3f;
+
             float[] result = new float[3];
             for (int i = 0; i <= 2; i++) {
                 result[i] = white[i] * (1 - red) * (1 - blue) * (1 - yellow) + ColorMath.red[i] * red * (1 - blue) * (1 - yellow) +
@@ -137,9 +166,9 @@ namespace com.csutil.math {
         /// Returns a color with a maximized euclidean distance to the input color
         /// See also paper "Paint Inspired Color Mixing and Compositing for Visualization"
         /// </summary>
-        public static float[] NextColorAfter(float[] previousColor) {
+        public static float[] NextColorAfter(this Random self, float[] previousColor) {
             var rybColor = RgbToRyb(previousColor);
-            return NextColorAfter(rybColor[0], rybColor[1], rybColor[2]);
+            return self.NextColorAfter(rybColor[0], rybColor[1], rybColor[2]);
         }
 
         /// <summary> This method first separates the red, green, and blue components of the input RGB color.
@@ -168,17 +197,15 @@ namespace com.csutil.math {
 
         /// <summary> Mixing random colors with white (255, 255, 255) creates neutral pastels by increasing the
         /// lightness while keeping the hue of the original color </summary>
-        public static float[] GetPastelColorVarianfor(float[] inputColor) {
+        public static float[] GetPastelColorVariantFor(float[] inputColor) {
             return MixColors(inputColor, new float[] { 1, 1, 1 });
         }
 
         public static float[] MixColors(float[] color1, float[] color2) {
             float[] result = new float[3];
-            if (color2 != null) {
-                result[0] = (int)((color1[0] + color2[0]) / 2);
-                result[1] = (int)((color1[1] + color2[1]) / 2);
-                result[2] = (int)((color1[2] + color2[2]) / 2);
-            }
+            result[0] = (color1[0] + color2[0]) / 2f;
+            result[1] = (color1[1] + color2[1]) / 2f;
+            result[2] = (color1[2] + color2[2]) / 2f;
             return result;
         }
 
