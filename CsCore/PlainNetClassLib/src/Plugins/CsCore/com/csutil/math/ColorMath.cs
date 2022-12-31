@@ -148,9 +148,9 @@ namespace com.csutil.math {
         /// </summary>
         public static float[] NextColorAfter(this Random self, float red, float yellow, float blue) {
 
-            red += (float)self.NextDouble() * 0.3f;
-            yellow += (float)self.NextDouble() * 0.3f;
-            blue += (float)self.NextDouble() * 0.3f;
+            AssertV3.IsInRange(0, red, 1, "red");
+            AssertV3.IsInRange(0, yellow, 1, "yellow");
+            AssertV3.IsInRange(0, blue, 1, "blue");
 
             float[] result = new float[3];
             for (int i = 0; i <= 2; i++) {
@@ -171,14 +171,6 @@ namespace com.csutil.math {
             return self.NextColorAfter(rybColor[0], rybColor[1], rybColor[2]);
         }
 
-        /// <summary> This method first separates the red, green, and blue components of the input RGB color.
-        /// It then uses these values to calculate the yellow, red, and blue components of the output RYB color.
-        /// Finally, it returns the RYB color as a float[] array.
-        /// 
-        /// Note that this conversion method is based on the RGB-RYB color space conversion algorithm described in the paper
-        /// "A Color Space Based on the Red-Yellow-Blue Color Model" by K.E. van der Weij and J.J. van Wijk
-        /// (IEEE Transactions on Visualization and Computer Graphics, vol. 15, no. 6, pp. 1453-1458, 2009).
-        /// This algorithm is designed to preserve hue and chroma while converting between the RGB and RYB color spaces. </summary>
         public static float[] RgbToRyb(float[] rgb) {
             float r = rgb[0];
             float g = rgb[1];
@@ -189,9 +181,9 @@ namespace com.csutil.math {
             float minRg2 = Math.Min(minRg, avgRg);
             float redNoYellow = r - minRg2;
             float blueNoYellow = b - minRg2;
-            float red = minRg2 / (minRg2 + blueNoYellow);
-            float blue = blueNoYellow / (minRg2 + blueNoYellow);
-            float yellow = minRg2 / (minRg2 + redNoYellow + blueNoYellow);
+            float red = redNoYellow / (redNoYellow + minRg2 + blueNoYellow);
+            float blue = blueNoYellow / (redNoYellow + minRg2 + blueNoYellow);
+            float yellow = minRg2 / (redNoYellow + minRg2 + blueNoYellow);
             return new float[] { red, yellow, blue };
         }
 
