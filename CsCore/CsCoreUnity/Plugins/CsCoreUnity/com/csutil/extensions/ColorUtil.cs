@@ -112,7 +112,7 @@ namespace com.csutil {
             return HsvToColor32(hsv);
         }
 
-        public static Queue<Color32> NextRandomColors(this Random self, int count, byte alpha0To255 = 255, float range = 3f) {
+        public static Queue<Color32> NextRandomColors(this Random self, int count, byte alpha0To255 = 255, float range = 4f) {
             ISet<float[]> colors = self.NextRandomRgbColors(count, range);
             return colors.Map(c => ToColor32(c, alpha0To255)).ToQueue();
         }
