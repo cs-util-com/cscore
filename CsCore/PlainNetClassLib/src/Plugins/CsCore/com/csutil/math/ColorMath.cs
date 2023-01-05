@@ -114,9 +114,9 @@ namespace com.csutil.math {
         public static float[] NextRandomRgbColor(this Random self, float range = 4f) {
             float[] color = new float[3];
             // The division by 3 and the addition of 0.5 serve to make the distribution more skewed towards the middle of the range
-            color[0] = MathF.Max(0, MathF.Min(1, (float)self.NextGaussian() / range + 0.5f)); // red
-            color[1] = MathF.Max(0, MathF.Min(1, (float)self.NextGaussian() / range + 0.5f)); // green
-            color[2] = MathF.Max(0, MathF.Min(1, (float)self.NextGaussian() / range + 0.5f)); // blue
+            color[0] = Math.Max(0, Math.Min(1, (float)self.NextGaussian() / range + 0.5f)); // red
+            color[1] = Math.Max(0, Math.Min(1, (float)self.NextGaussian() / range + 0.5f)); // green
+            color[2] = Math.Max(0, Math.Min(1, (float)self.NextGaussian() / range + 0.5f)); // blue
             return color;
         }
 
