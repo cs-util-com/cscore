@@ -39,6 +39,8 @@ namespace com.csutil {
             return self.task.AsCoroutine(timeoutInMs, waitIntervalInMs);
         }
 
+        /// <summary> Executes a task multiple times </summary>
+        /// <param name="task"> if false is returned the execution will stop/terminate </param>
         public static Coroutine ExecuteRepeated(this MonoBehaviour self, Func<bool> task,
             int delayInMsBetweenIterations, int delayInMsBeforeFirstExecution = 0, float repetitions = -1) {
             if (!self.isActiveAndEnabled) { throw new Exception("ExecuteRepeated called on inactive mono"); }
