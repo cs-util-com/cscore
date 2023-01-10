@@ -53,8 +53,20 @@ namespace com.csutil {
         }
 
         private long GetCurrentProcessPrivateMemorySize64() {
+            
+            // WebGL does not support PrivateMemorySize64:
             if (EnvironmentV2.isWebGL) { return 0; }
-            using (var p = Process.GetCurrentProcess()) { return p.PrivateMemorySize64; }
+            
+            // In latest Unity versions PrivateMemorySize64 seems to not work anymore for Android, so disabled:
+            if (EnvironmentV2.isAndroid && !EnvironmentV2.isEditor) { return 0; }
+            
+            try {
+                using (var p = Process.GetCurrentProcess()) { return p.PrivateMemorySize64; }
+            } catch (Exception e) {
+                Log.e("GetCurrentProcessPrivateMemorySize64 failed: " + e, e);
+                return 0;
+            }
+            
         }
 
         public string GetAllocatedMemBetweenStartAndStop() {
