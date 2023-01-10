@@ -34,22 +34,23 @@ namespace com.csutil.editor {
 
         [MenuItem(DIR + "CsCore/Install default packages")]
         static void InstallDefaultPackages() {
-            // https://docs.unity3d.com/Packages/com.unity.nuget.newtonsoft-json@2.0
-            UnityPackageInstaller.AddToProjectViaPackageManager("com.unity.nuget.newtonsoft-json", "2.0.0");
-
-            // https://docs.unity3d.com/Packages/com.unity.build-report-inspector@0.2
-            UnityPackageInstaller.AddToProjectViaPackageManager("com.unity.build-report-inspector", "0.2.2-preview");
-
-            // https://docs.unity3d.com/Manual/com.unity.device-simulator.html
-            UnityPackageInstaller.AddToProjectViaPackageManager("com.unity.device-simulator", "2.2.4-preview");
+            // https://docs.unity3d.com/Packages/com.unity.device-simulator.devices@1.0
+            UnityPackageInstaller.AddToProjectViaPackageManager("com.unity.device-simulator.devices", "1.0.0");
             
-            // https://docs.unity3d.com/Manual/com.unity.mobile.android-logcat.html
-            UnityPackageInstaller.AddToProjectViaPackageManager("com.unity.mobile.android-logcat", "1.2.1");
+            // https://docs.unity3d.com/Packages/com.unity.mobile.android-logcat@1.3
+            UnityPackageInstaller.AddToProjectViaPackageManager("com.unity.mobile.android-logcat", "1.3.2");
 
-            // https://docs.unity3d.com/Packages/com.unity.automated-testing@0.2
-            UnityPackageInstaller.AddToProjectViaPackageManager("com.unity.automated-testing", "0.2.0-preview.3");
+            // Seems to cause build errors for Android, so not stable enough yet?
+            // https://docs.unity3d.com/Packages/com.unity.build-report-inspector@0.3
+            // UnityPackageInstaller.AddToProjectViaPackageManager("com.unity.build-report-inspector", "0.3.0-preview");
             
+            // Not ready yet?
+            // https://docs.unity3d.com/Packages/com.unity.vectorgraphics@2.0/manual/index.html
             // UnityPackageInstaller.AddToProjectViaPackageManager("com.unity.vectorgraphics", "2.0.0-preview.11");
+            
+            // Manual install not needed, done by Unity editor automatically: 
+            // https://docs.unity3d.com/Packages/com.unity.nuget.newtonsoft-json@3.0
+            // UnityPackageInstaller.AddToProjectViaPackageManager("com.unity.nuget.newtonsoft-json", "3.0.2");
         }
 
         [MenuItem(DIR + "Show Asset Store packages")]
