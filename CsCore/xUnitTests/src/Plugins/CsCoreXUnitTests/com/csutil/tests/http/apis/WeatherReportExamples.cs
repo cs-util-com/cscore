@@ -7,14 +7,49 @@ using com.csutil.http.apis.iplookup;
 using Xunit;
 
 namespace com.csutil.tests.http {
+    
     public class WeatherReportExamples {
 
         public WeatherReportExamples(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
         [Fact]
+        public async Task OpenMeteoComExample1() {
+            GeoPluginNet.Response response = await GeoPluginNet.GetResponse();
+            var latitude = double.Parse(response.geoplugin_latitude, CultureInfo.InvariantCulture);
+            var longitude = double.Parse(response.geoplugin_longitude, CultureInfo.InvariantCulture);
+            var report = await OpenMeteoCom.GetForecast(latitude, longitude);
+            Log.d($"Full weather report for ({latitude},{longitude}): " + JsonWriter.AsPrettyString(report));
+            Assert.NotEmpty(report.hourly.temperature_2m);
+        }
+
+        [Fact]
+        public async Task MetWeatherAPIExample1() {
+            GeoPluginNet.Response response = await GeoPluginNet.GetResponse();
+            var latitude = double.Parse(response.geoplugin_latitude, CultureInfo.InvariantCulture);
+            var longitude = double.Parse(response.geoplugin_longitude, CultureInfo.InvariantCulture);
+            var report = await MetWeatherAPI.GetLocationForecast(latitude, longitude, "ExampleUsageDemo github.com/cs-util-com/cscore");
+            Log.d($"Full weather report for ({latitude},{longitude}): " + JsonWriter.AsPrettyString(report));
+            Assert.NotEmpty(report.properties.timeseries);
+        }
+
+        [Fact]
+        public async Task WttrInApiExample1() {
+            GeoPluginNet.Response response = await GeoPluginNet.GetResponse();
+            var latitude = double.Parse(response.geoplugin_latitude, CultureInfo.InvariantCulture);
+            var longitude = double.Parse(response.geoplugin_longitude, CultureInfo.InvariantCulture);
+            var report = await WttrInApi.GetWeather(latitude, longitude);
+            Log.d($"Full weather report for ({latitude},{longitude}): " + JsonWriter.AsPrettyString(report));
+            Assert.NotEmpty(report.weather.First().hourly.First().weatherDesc);
+        }
+
+        /// <summary> MetaWeather seems to be down for quite a while, will check from time to time if its back  </summary>
+        private DateTime MetaWeatherComNextCheckIfBackOnline = new DateTime(2023, 07, 01);
+
+        [Obsolete]
+        [Fact]
         public async Task MetaWeatherComExample1() {
 
-            if (DateTimeV2.Now < new DateTime(2022, 11, 01)) { return; } // MetaWeather down (temporary?)
+            if (DateTimeV2.Now < MetaWeatherComNextCheckIfBackOnline) { return; }
 
             var ipLookupResult = await IpApiCom.GetResponse();
             string yourCity = ipLookupResult.city;
@@ -31,10 +66,11 @@ namespace com.csutil.tests.http {
 
         }
 
+        [Obsolete]
         [Fact]
         public async Task MetaWeatherComTest1() {
 
-            if (DateTimeV2.Now < new DateTime(2022, 11, 01)) { return; } // MetaWeather down (temporary?)
+            if (DateTimeV2.Now < MetaWeatherComNextCheckIfBackOnline) { return; }
 
             var berlinName = "Berlin";
             float berlinLatitude = 52.50f;
@@ -58,10 +94,11 @@ namespace com.csutil.tests.http {
 
         }
 
+        [Obsolete]
         [Fact]
         public async Task MetaWeatherComTest2() {
 
-            if (DateTimeV2.Now < new DateTime(2022, 11, 01)) { return; } // MetaWeather down (temporary?)
+            if (DateTimeV2.Now < MetaWeatherComNextCheckIfBackOnline) { return; }
 
             var cityName = "Berlin";
             var w = await MetaWeather.GetWeather(cityName);
@@ -70,4 +107,5 @@ namespace com.csutil.tests.http {
         }
 
     }
+
 }
