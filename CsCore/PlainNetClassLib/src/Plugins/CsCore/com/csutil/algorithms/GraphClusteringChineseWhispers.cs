@@ -42,7 +42,7 @@ namespace com.csutil.algorithms {
 
         private static KeyValuePair<int, double> GetMaxPair(Dictionary<int, double> dictionary) {
             double max = double.MinValue;
-            KeyValuePair<int, double> result;
+            KeyValuePair<int, double> result = default;
             foreach (KeyValuePair<int, double> pair in dictionary) {
                 if (pair.Value > max) {
                     max = pair.Value;
