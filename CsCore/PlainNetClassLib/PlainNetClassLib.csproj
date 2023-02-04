@@ -63,6 +63,11 @@
   <ItemGroup>
     <PackageReference Include="Zio" Version="0.15.0" />
   </ItemGroup>
+  
+  <!-- https://www.nuget.org/packages/ZstdSharp.Port --> 
+  <ItemGroup>
+    	<PackageReference Include="ZstdSharp.Port" Version="0.6.7" />
+  </ItemGroup>
 
   <ItemGroup>
     <!-- https://www.nuget.org/packages/Magick.NET-Q8-AnyCPU/ --> 
