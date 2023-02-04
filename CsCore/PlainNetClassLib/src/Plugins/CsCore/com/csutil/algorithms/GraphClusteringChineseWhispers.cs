@@ -6,87 +6,87 @@ namespace com.csutil.algorithms {
 
     public class GraphClusteringChineseWhispers<T> {
 
-        public static IEnumerable<IEnumerable<T>> ComputeClusters(IEnumerable<T> Collection, Func<T, T, double> WeightFunction, double Threshold, int? MaxIterations = null) {
-            return ComputeClusters(Collection, WeightFunction, (v1, v2, w) => w > Threshold, MaxIterations);
+        public static IEnumerable<IEnumerable<T>> ComputeClusters(IEnumerable<T> collection, Func<T, T, double> weightFunction, double threshold, int? maxIterations = null) {
+            return ComputeClusters(collection, weightFunction, (v1, v2, w) => w > threshold, maxIterations);
         }
 
-        public static IEnumerable<IEnumerable<T>> ComputeClusters(IEnumerable<T> Collection, Func<T, T, double> WeightFunction, Func<T, T, double, bool> ConnectionFunction = null, int? MaxIterations = null) {
-            Graph graph = CreateGraph(Collection, WeightFunction, ConnectionFunction);
+        public static IEnumerable<IEnumerable<T>> ComputeClusters(IEnumerable<T> collection, Func<T, T, double> weightFunction, Func<T, T, double, bool> connectionFunction = null, int? maxIterations = null) {
+            Graph graph = CreateGraph(collection, weightFunction, connectionFunction);
             int iterationIndex = 0;
             bool isChanged = false;
-            Dictionary<int, double> WeightMap = new Dictionary<int, double>();
+            Dictionary<int, double> weightMap = new Dictionary<int, double>();
             do {
                 isChanged = false;
                 iterationIndex++;
                 Randomize(graph.Vertices);
-                foreach (Vertex Vertex in graph.Vertices) {
-                    foreach (Edge Edge in Vertex.Edges) {
-                        if (Edge.GetVertex(Vertex).Edges.Count == 0) continue;
-                        if (!WeightMap.ContainsKey(Edge.GetVertex(Vertex).Cluster)) {
-                            WeightMap.Add(Edge.GetVertex(Vertex).Cluster, 0);
+                foreach (Vertex vertex in graph.Vertices) {
+                    foreach (Edge edge in vertex.Edges) {
+                        if (edge.GetVertex(vertex).Edges.Count == 0) continue;
+                        if (!weightMap.ContainsKey(edge.GetVertex(vertex).Cluster)) {
+                            weightMap.Add(edge.GetVertex(vertex).Cluster, 0);
                         }
-                        WeightMap[Edge.GetVertex(Vertex).Cluster] += Edge.Weight; //  Edge.GetVertex(Vertex).Edges.Sum(edge => edge.Weight);
+                        weightMap[edge.GetVertex(vertex).Cluster] += edge.Weight; //  Edge.GetVertex(Vertex).Edges.Sum(edge => edge.Weight);
                     }
-                    if (WeightMap.Count == 0) continue;
-                    KeyValuePair<int, double> Max = GetMaxPair(WeightMap);
-                    if (Max.Key != Vertex.Cluster) {
+                    if (weightMap.Count == 0) continue;
+                    KeyValuePair<int, double> max = GetMaxPair(weightMap);
+                    if (max.Key != vertex.Cluster) {
                         isChanged = true;
-                        Vertex.Cluster = Max.Key;
+                        vertex.Cluster = max.Key;
                     }
-                    WeightMap.Clear();
+                    weightMap.Clear();
                 }
-            } while (isChanged || (MaxIterations.HasValue && iterationIndex >= MaxIterations.Value));
+            } while (isChanged || (maxIterations.HasValue && iterationIndex >= maxIterations.Value));
             var clusters = graph.Vertices.GroupBy(c => c.Cluster).Select(group => group.AsEnumerable().Select(v => v.Source));
             return clusters;
         }
 
         private static KeyValuePair<int, double> GetMaxPair(Dictionary<int, double> dictionary) {
             double max = double.MinValue;
-            KeyValuePair<int, double> Result;
-            foreach (KeyValuePair<int, double> Pair in dictionary) {
-                if (Pair.Value > max) {
-                    max = Pair.Value;
-                    Result = Pair;
+            KeyValuePair<int, double> result;
+            foreach (KeyValuePair<int, double> pair in dictionary) {
+                if (pair.Value > max) {
+                    max = pair.Value;
+                    result = pair;
                 }
             }
-            return Result;
+            return result;
         }
 
-        private static Graph CreateGraph(IEnumerable<T> Collection, Func<T, T, double> WeightFunction, Func<T, T, double, bool> ConnectionFunction) {
-            Graph Graph = new Graph();
-            if (Collection is ICollection<T>) {
-                Graph.Vertices = new List<Vertex>(((ICollection<T>)Collection).Count);
+        private static Graph CreateGraph(IEnumerable<T> collection, Func<T, T, double> weightFunction, Func<T, T, double, bool> connectionFunction) {
+            Graph graph = new Graph();
+            if (collection is ICollection<T>) {
+                graph.Vertices = new List<Vertex>(((ICollection<T>)collection).Count);
             } else {
-                Graph.Vertices = new List<Vertex>();
+                graph.Vertices = new List<Vertex>();
             }
-            foreach (T Source in Collection) {
-                Vertex Vertex = new Vertex() { Source = Source };
-                Vertex.Cluster = Vertex.GetHashCode();
-                Graph.Vertices.Add(Vertex);
+            foreach (T source in collection) {
+                Vertex vertex = new Vertex() { Source = source };
+                vertex.Cluster = vertex.GetHashCode();
+                graph.Vertices.Add(vertex);
             }
-            for (int i = 0; i < Graph.Vertices.Count; i++) {
-                for (int j = i + 1; j < Graph.Vertices.Count; j++) {
-                    double Weight = WeightFunction(Graph.Vertices[i].Source, Graph.Vertices[j].Source);
-                    if (ConnectionFunction == null || ConnectionFunction(Graph.Vertices[i].Source, Graph.Vertices[j].Source, Weight)) {
-                        Edge Edge = new Edge() { Vertex1 = Graph.Vertices[i], Vertex2 = Graph.Vertices[j], Weight = Weight };
-                        Graph.Vertices[i].Edges.Add(Edge);
-                        Graph.Vertices[j].Edges.Add(Edge);
+            for (int i = 0; i < graph.Vertices.Count; i++) {
+                for (int j = i + 1; j < graph.Vertices.Count; j++) {
+                    double weight = weightFunction(graph.Vertices[i].Source, graph.Vertices[j].Source);
+                    if (connectionFunction == null || connectionFunction(graph.Vertices[i].Source, graph.Vertices[j].Source, weight)) {
+                        Edge edge = new Edge() { Vertex1 = graph.Vertices[i], Vertex2 = graph.Vertices[j], Weight = weight };
+                        graph.Vertices[i].Edges.Add(edge);
+                        graph.Vertices[j].Edges.Add(edge);
                     }
                 }
             }
-            return Graph;
+            return graph;
         }
 
         /// <summary> Uses Fisher–Yates shuffle https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle </summary>
-        private static void Randomize(List<Vertex> Vertices) {
-            Random Rand = new Random();
-            int n = Vertices.Count;
+        private static void Randomize(List<Vertex> vertices) {
+            Random rnd = new Random();
+            int n = vertices.Count;
             while (n > 1) {
                 n--;
-                int k = Rand.Next(n + 1);
-                Vertex value = Vertices[k];
-                Vertices[k] = Vertices[n];
-                Vertices[n] = value;
+                int k = rnd.Next(n + 1);
+                Vertex value = vertices[k];
+                vertices[k] = vertices[n];
+                vertices[n] = value;
             }
         }
 
