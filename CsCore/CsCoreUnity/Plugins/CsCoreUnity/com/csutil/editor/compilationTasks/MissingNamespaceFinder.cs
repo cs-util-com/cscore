@@ -12,6 +12,7 @@ namespace com.csutil.editor {
 
         /// <summary> Add assembly names to this list that should be ignored by the checker </summary>
         public static HashSet<string> blackList = new HashSet<string>() { "UnityEngine", "Unity" };
+        public static SortedSet<string> typeBlackList = new SortedSet<string>() { "UnitySourceGeneratedAssembly", "PrivateImplementationDetails" };
 
         [UnityEditor.Callbacks.DidReloadScripts]
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
@@ -33,13 +34,14 @@ namespace com.csutil.editor {
         }
 
         private static IEnumerable<Assembly> GetAllAssembliesInProject() {
-            return GameObject.FindObjectsOfType<MonoBehaviour>().Map(x => x.GetType().Assembly).Distinct();
+            return GameObject.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None).Map(x => x.GetType().Assembly).Distinct();
         }
 
         private static void CheckTypesInAssembly(Assembly assembly) {
-            foreach (var type in assembly.GetTypesWithMissingNamespace()) {
-                Debug.LogWarning("(Assembly " + assembly.GetName().Name + ") Missing namespace: " + type);
-            }
+            var typesWithMissingNamespace = assembly.GetTypesWithMissingNamespace();
+            var filteredViaTypesBlacklist = typesWithMissingNamespace.Filter(type => !typeBlackList.Any(x => type.Contains(x))).ToList();
+            if (filteredViaTypesBlacklist.IsEmpty()) { return; }
+            Debug.LogWarning("Assembly <b>" + assembly.GetName().Name + "</b> contains classes with missing namespaces:\n" + filteredViaTypesBlacklist.ToStringV2());
         }
 
     }
