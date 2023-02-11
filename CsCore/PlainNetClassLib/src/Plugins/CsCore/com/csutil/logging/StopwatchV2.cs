@@ -13,17 +13,30 @@ namespace com.csutil {
         public string methodName;
         public Action onDispose;
         private long lastLogStep = 0;
+        public bool captureMemory = ShouldCaptureMemory();
 
-        public StopwatchV2([CallerMemberName] string methodName = null) {
+        private static bool ShouldCaptureMemory() {
+            #if UNITY_EDITOR
+            {
+                // In recent versions of the Unity editor memory collection causes massive main thread
+                // freezing for at least 1 second per usage, so it cant be used anymore:
+                return false;
+            }
+            #endif
+            return true; // In all other environments logging memory usage is fine
+        }
+
+        public StopwatchV2([CallerMemberName] string methodName = null, Action onDispose = null) {
             this.methodName = methodName;
-            if (onDispose == null) { onDispose = () => Log.MethodDone(this); }
+            this.onDispose = onDispose;
+            if (this.onDispose == null) { this.onDispose = () => Log.MethodDone(this); }
         }
 
         public long allocatedManagedMemBetweenStartAndStop { get { return managedMemoryAtStop - managedMemoryAtStart; } }
         public long allocatedMemBetweenStartAndStop { get { return memoryAtStop - memoryAtStart; } }
 
         public StopwatchV2 StartV2() {
-            CaptureMemoryAtStart();
+            if (captureMemory) { CaptureMemoryAtStart(); }
             Start();
             return this;
         }
@@ -43,7 +56,7 @@ namespace com.csutil {
 
         public void StopV2() {
             Stop();
-            CaptureMemoryAtStop();
+            if (captureMemory) { CaptureMemoryAtStop(); }
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_FULL_LOGGING")]

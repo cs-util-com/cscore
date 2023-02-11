@@ -81,7 +81,7 @@ namespace com.csutil.logging {
             } else { timing.Stop(); }
             EventBus.instance.Publish(EventConsts.catMethod + EventConsts.DONE, methodName, timing);
             var text = "    <-- " + methodName + " finished after " + timing.ElapsedMilliseconds + " ms";
-            if (timingV2 != null) { text += ", " + timingV2.GetAllocatedMemBetweenStartAndStop(); }
+            if (timingV2 != null && timingV2.captureMemory) { text += ", " + timingV2.GetAllocatedMemBetweenStartAndStop(); }
            #if DEBUG
             if (DisposableExtensions.DEBUG_ThrownExceptionDetectedInCurrentContext()) {
                 text += " (DUE TO EXCEPTION THROWN)";
