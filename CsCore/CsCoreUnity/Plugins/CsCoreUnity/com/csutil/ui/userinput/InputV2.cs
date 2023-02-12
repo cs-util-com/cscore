@@ -8,6 +8,8 @@ namespace com.csutil {
         public static int touchCount => GetInputSystem().touchCount;
 
         public static bool GetKeyUp(KeyCode keyCode) { return GetInputSystem().GetKeyUp(keyCode); }
+        
+        public static bool GetKey(KeyCode keyCode) { return GetInputSystem().GetKey(keyCode); }
 
         public static bool GetMouseButton(int button) { return GetInputSystem().GetMouseButton(button); }
 
@@ -19,6 +21,7 @@ namespace com.csutil {
     public interface IUnityInputSystem {
 
         bool GetKeyUp(KeyCode keyCode);
+        bool GetKey(KeyCode keyCode);
         int touchCount { get; }
         bool GetMouseButton(int button);
 
@@ -27,6 +30,7 @@ namespace com.csutil {
     public class DefaultUnityInputSystem : IUnityInputSystem {
 
         public bool GetKeyUp(KeyCode keyCode) { return Input.GetKeyUp(keyCode); }
+        public bool GetKey(KeyCode keyCode) { return Input.GetKey(keyCode); }
         public int touchCount => Input.touchCount;
         public bool GetMouseButton(int button) { return Input.GetMouseButton(button); }
 
