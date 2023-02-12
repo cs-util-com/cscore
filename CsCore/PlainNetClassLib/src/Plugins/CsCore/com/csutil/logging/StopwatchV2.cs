@@ -13,9 +13,9 @@ namespace com.csutil {
         public string methodName;
         public Action onDispose;
         private long lastLogStep = 0;
-        public bool captureMemory = ShouldCaptureMemory();
+        public bool forceFullMemoryCollection = ShouldCaptureFullMemory();
 
-        private static bool ShouldCaptureMemory() {
+        private static bool ShouldCaptureFullMemory() {
             #if UNITY_EDITOR
             {
                 // In recent versions of the Unity editor memory collection causes massive main thread
@@ -36,17 +36,19 @@ namespace com.csutil {
         public long allocatedMemBetweenStartAndStop { get { return memoryAtStop - memoryAtStart; } }
 
         public StopwatchV2 StartV2() {
-            if (captureMemory) { CaptureMemoryAtStart(); }
+            CaptureMemoryAtStart();
             Start();
             return this;
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_FULL_LOGGING")]
         private void CaptureMemoryAtStart() {
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            GC.Collect();
-            managedMemoryAtStart = GC.GetTotalMemory(true);
+            if (forceFullMemoryCollection) {
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                GC.Collect();
+            }
+            managedMemoryAtStart = GC.GetTotalMemory(forceFullMemoryCollection);
             memoryAtStart = GetCurrentProcessPrivateMemorySize64();
         }
 
@@ -56,12 +58,12 @@ namespace com.csutil {
 
         public void StopV2() {
             Stop();
-            if (captureMemory) { CaptureMemoryAtStop(); }
+            CaptureMemoryAtStop();
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_FULL_LOGGING")]
         private void CaptureMemoryAtStop() {
-            managedMemoryAtStop = GC.GetTotalMemory(true);
+            managedMemoryAtStop = GC.GetTotalMemory(forceFullMemoryCollection);
             memoryAtStop = GetCurrentProcessPrivateMemorySize64();
         }
 
