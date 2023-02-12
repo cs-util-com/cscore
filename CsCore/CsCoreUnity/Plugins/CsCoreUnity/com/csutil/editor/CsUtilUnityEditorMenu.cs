@@ -20,9 +20,6 @@ namespace com.csutil.editor {
         [MenuItem(DIR + "Fonts/Open FontAwesome Icon Overview")]
         static void OpenFontAwesomeIcons() { Application.OpenURL("https://fontawesome.com/cheatsheet"); }
 
-        [MenuItem(DIR + "Fonts/.OTF & .TTF Font Viewer")] // A generic viewer to manually load any otf or ttf file
-        static void OpenFontViewer() { Application.OpenURL("https://mathew-kurian.github.io/CharacterMap/"); }
-        
         [MenuItem(DIR + "Fonts/Google Font Material Icons Search")] 
         static void OpenGoogleFontMaterialIconsSearch() { Application.OpenURL("https://fonts.google.com/icons"); }
 
