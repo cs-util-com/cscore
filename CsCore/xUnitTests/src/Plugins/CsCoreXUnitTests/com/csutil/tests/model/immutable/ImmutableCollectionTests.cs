@@ -13,7 +13,7 @@ namespace com.csutil.tests.model.immutable {
 
         [Fact]
         public async Task ExampleUsage1() {
-            await Assert.ThrowsAsync<InvalidAsynchronousStateException>(async () => {
+            await Assert.ThrowsAsync<InvalidOperationException>(async () => {
                 for (int i = 0; i < 1000; i++) {
                     await RunTestOnSet(new HashSet<string>());
                 }
@@ -26,13 +26,16 @@ namespace com.csutil.tests.model.immutable {
         }
 
         private static async Task RunTestOnSet(ISet<string> set) {
+            var count = 100;
             var tasks = new List<Task<bool>>();
-            for (int j = 0; j < 100; j++) {
+            for (int j = 0; j < count; j++) {
                 tasks.Add(TaskV2.Run(async () => set.Add("abc")));
             }
             await Task.WhenAll(tasks);
-            if (1 != tasks.Filter(x => x.Result).Count()) {
-                throw new InvalidAsynchronousStateException("Expected only one task to return true");
+            Assert.Equal(count, tasks.Count);
+            var successCount = tasks.Filter(x => x.Result).Count();
+            if (1 != successCount) {
+                throw new InvalidOperationException("Expected only one task to return true but instead it was " + successCount);
             }
         }
 
