@@ -18,12 +18,15 @@
     <Compile Remove="src\Plugins\CsCoreXUnitTests\com\csutil\tests\logging\http\**" />
     <EmbeddedResource Remove="src\Plugins\CsCoreXUnitTests\com\csutil\tests\logging\http\**" />
     <None Remove="src\Plugins\CsCoreXUnitTests\com\csutil\tests\logging\http\**" />
+    <Compile Remove="StrykerOutput\**" />
+    <EmbeddedResource Remove="StrykerOutput\**" />
+    <None Remove="StrykerOutput\**" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.2.0" />
     <PackageReference Include="xunit" Version="2.4.1" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5"/>
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5" />
     <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.1" />
   </ItemGroup>
 
