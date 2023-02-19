@@ -2,6 +2,7 @@ using com.csutil.eventbus;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 
@@ -13,9 +14,14 @@ namespace com.csutil.injection {
         public IEventBus usedEventBus = EventBus.instance;
         public IImmutableSet<string> injectorNames { get; private set; } = ImmutableHashSet<string>.Empty;
 
+        private IImmutableDictionary<InjectorKey, StackTrace> creationStackTraces = ImmutableDictionary<InjectorKey, StackTrace>.Empty;
+
         public void RegisterInjector<T>(object injector, Func<object, bool, T> createServiceAction) {
             var injectorName = GetEventKey<T>();
             injectorNames = injectorNames.Add(injectorName);
+            if (injector != null) {
+                creationStackTraces = creationStackTraces.Add(InjectorKey.Get<T>(injector), new StackTrace(1, true));
+            }
             if (HasInjectorRegistered<T>()) { Log.w("There are already injectors registered for " + injectorName); }
             usedEventBus.Subscribe(injector, injectorName, createServiceAction);
             EventBus.instance.Publish(EventConsts.catInjection, "Register_" + injectorName);
@@ -45,7 +51,13 @@ namespace com.csutil.injection {
         public string GetEventKey<T>() { return "InjectReq:" + typeof(T); }
 
         public bool HasInjectorRegistered<T>() {
-            return !usedEventBus.GetSubscribersFor(GetEventKey<T>()).IsNullOrEmpty();
+            var existingInjectors = usedEventBus.GetSubscribersFor(GetEventKey<T>());
+            return !existingInjectors.IsNullOrEmpty();
+        }
+
+        public bool HasInjectorRegistered<T>(out IEnumerable<object> existingInjectors) {
+            existingInjectors = usedEventBus.GetSubscribersFor(GetEventKey<T>());
+            return !existingInjectors.IsNullOrEmpty();
         }
 
         public Dictionary<string, IEnumerable<object>> GetAllInjectorsMap(object caller, bool createIfNull = false) {
@@ -54,12 +66,15 @@ namespace com.csutil.injection {
 
         public bool RemoveAllInjectorsFor<T>() {
             var eventName = GetEventKey<T>();
-            var subscribers = usedEventBus.GetSubscribersFor(eventName).ToList();
-            if (subscribers.IsNullOrEmpty()) {
+            var injectors = usedEventBus.GetSubscribersFor(eventName).ToList();
+            if (injectors.IsNullOrEmpty()) {
                 return true;
             }
             var r = true;
-            foreach (var subscriber in subscribers) { r = usedEventBus.Unsubscribe(subscriber, eventName) && r; }
+            foreach (var injector in injectors) {
+                r = usedEventBus.Unsubscribe(injector, eventName) && r;
+                TryRemoveCreationStackTrace<T>(injector);
+            }
             injectorNames = injectorNames.Remove(eventName);
             // Log.d("Removed " + subscribers.Count() + " subscribers for " + typeof(T));
             return r;
@@ -71,9 +86,17 @@ namespace com.csutil.injection {
                 if (usedEventBus.GetSubscribersFor(eventName).IsNullOrEmpty()) {
                     injectorNames = injectorNames.Remove(eventName);
                 }
+                TryRemoveCreationStackTrace<T>(injector);
                 return true;
             }
             return false;
+        }
+
+        private void TryRemoveCreationStackTrace<T>(object injector) {
+            var injectorKey = InjectorKey.Get<T>(injector);
+            if (creationStackTraces.ContainsKey(injectorKey)) {
+                creationStackTraces = creationStackTraces.Remove(injectorKey);
+            }
         }
 
         /// <summary> sets up a temporary context in which injecting the defined Type returns the set myContextInstance </summary>
@@ -88,5 +111,37 @@ namespace com.csutil.injection {
             UnregisterInjector<T>(injector);
         }
 
+        public bool TryGetCreationStackTraceFor<T>(object injector, out StackTrace stackTrace) {
+            return creationStackTraces.TryGetValue(InjectorKey.Get<T>(injector), out stackTrace);
+        }
+
+        private struct InjectorKey : IEquatable<InjectorKey> {
+
+            public static InjectorKey Get<T>(object o) { return new InjectorKey(o, typeof(T)); }
+
+            readonly Type Type;
+            readonly object Injector;
+
+            private InjectorKey(object injector, Type type) {
+                type.ThrowErrorIfNull("type");
+                injector.ThrowErrorIfNull("injector");
+                Type = type;
+                Injector = injector;
+            }
+
+            public override bool Equals(object obj) {
+                if (obj is InjectorKey other) { return Type == other.Type && Injector == other.Injector; }
+                return false;
+            }
+
+            public override int GetHashCode() { return Type.GetHashCode() + Injector.GetHashCode(); }
+
+            public bool Equals(InjectorKey other) { return Type == other.Type && Injector == other.Injector; }
+
+            public override string ToString() { return $"{Injector}<{Type}>"; }
+
+        }
+
     }
+
 }

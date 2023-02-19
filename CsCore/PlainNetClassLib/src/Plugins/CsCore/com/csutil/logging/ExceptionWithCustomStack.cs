@@ -20,4 +20,12 @@ namespace com.csutil {
 
     }
 
+    public static class StackTraceExtensions {
+
+        public static Error ToException(this StackTrace self, string message) {
+            return new Error(message, self);
+        }
+
+    }
+    
 }

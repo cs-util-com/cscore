@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Linq;
 using com.csutil.injection;
 
 namespace com.csutil {
@@ -25,8 +26,14 @@ namespace com.csutil {
                     // Cause a injector cleanup if there is a present singleton and this singleton is disposed:
                     self.Get<T>(caller, false); // Afterwards self.HasInjectorRegistered will be false if the singleton was disposed
                 }
-                if (self.HasInjectorRegistered<T>()) {
-                    if (!overrideExisting) { throw new InvalidOperationException("Existing provider found for " + typeof(T)); }
+                if (self.HasInjectorRegistered<T>(out var existingInjectors)) {
+                    if (!overrideExisting) {
+                        if (self.TryGetCreationStackTraceFor<T>(existingInjectors.First(), out StackTrace stackTrace)) {
+                            throw new InvalidOperationException("Existing provider found for " + typeof(T), stackTrace.ToException("Creation stacktrace"));
+                        } else {
+                            throw new InvalidOperationException("Existing provider found for " + typeof(T));
+                        }
+                    }
                     if (!self.RemoveAllInjectorsFor<T>()) { Log.e("Could not remove all existing injectors!"); }
                     return SetSingleton<T, V>(self, caller, singletonInstance, false); // then retry setting the singleton
                 }
