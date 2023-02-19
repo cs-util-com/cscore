@@ -96,6 +96,8 @@ namespace com.csutil.injection {
             var injectorKey = InjectorKey.Get<T>(injector);
             if (creationStackTraces.ContainsKey(injectorKey)) {
                 creationStackTraces = creationStackTraces.Remove(injectorKey);
+            } else {
+                Log.w("Could not find entry in creationStackTraces for " + injectorKey);
             }
         }
 

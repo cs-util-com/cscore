@@ -29,7 +29,8 @@ namespace com.csutil {
                 if (self.HasInjectorRegistered<T>(out var existingInjectors)) {
                     if (!overrideExisting) {
                         if (self.TryGetCreationStackTraceFor<T>(existingInjectors.First(), out StackTrace stackTrace)) {
-                            throw new InvalidOperationException("Existing provider found for " + typeof(T), stackTrace.ToException("Creation stacktrace"));
+                            var existingSingleton = stackTrace.ToException("Creation stacktrace of existing Singleton that blocked the SetSingleton call:");
+                            throw new InvalidOperationException("Existing provider found for " + typeof(T), existingSingleton);
                         } else {
                             throw new InvalidOperationException("Existing provider found for " + typeof(T));
                         }
