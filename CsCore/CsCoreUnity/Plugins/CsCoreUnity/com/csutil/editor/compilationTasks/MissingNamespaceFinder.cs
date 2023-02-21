@@ -29,12 +29,14 @@ namespace com.csutil.editor {
         /// <summary> Exclude e.g. all Unity assemblies </summary>
         private static bool ShouldBeIncludedInCheck(Assembly x) {
             var name = x.FullName;
-            foreach (string assembly in blackList) { if (name.StartsWith(assembly)) { return false; } }
+            foreach (string assembly in blackList) {
+                if (name.StartsWith(assembly)) { return false; }
+            }
             return true;
         }
 
         private static IEnumerable<Assembly> GetAllAssembliesInProject() {
-            return GameObject.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None).Map(x => x.GetType().Assembly).Distinct();
+            return GameObject.FindObjectsOfType<MonoBehaviour>(includeInactive: true).Map(x => x.GetType().Assembly).Distinct();
         }
 
         private static void CheckTypesInAssembly(Assembly assembly) {
