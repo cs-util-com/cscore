@@ -17,6 +17,8 @@ namespace com.csutil.tests.model {
         [Fact]
         public async Task ExampleUsage1() {
 
+            using var cleanup = new CleanupHelper();
+
             // Get your key from https://console.developers.google.com/apis/credentials
             var apiKey = await IoC.inject.GetAppSecrets().GetSecret("GoogleSheetsV4Key");
             // https://docs.google.com/spreadsheets/d/1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM contains the sheetId:
@@ -24,7 +26,8 @@ namespace com.csutil.tests.model {
             var sheetName = "MySheet1"; // Has to match the sheet name
             var googleSheetsStore = new GoogleSheetsKeyValueStore(new InMemoryKeyValueStore(), apiKey, sheetId, sheetName);
             var testStore = new FeatureFlagStore(new InMemoryKeyValueStore(), googleSheetsStore);
-            IoC.inject.SetSingleton<FeatureFlagManager<FeatureFlag>>(new FeatureFlagManager<FeatureFlag>(testStore));
+            var injector = IoC.inject.SetSingleton<FeatureFlagManager<FeatureFlag>>(new FeatureFlagManager<FeatureFlag>(testStore));
+            cleanup.AddInjectorCleanup<FeatureFlagManager<FeatureFlag>>(injector);
 
             // Open https://docs.google.com/spreadsheets/d/1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM for these:
             Assert.False(await FeatureFlag.IsEnabled("MyFlag1"));
@@ -46,12 +49,16 @@ namespace com.csutil.tests.model {
         [Fact]
         public async Task ExampleUsage2() {
 
+            using var cleanup = new CleanupHelper();
+
             // Get your key from https://console.developers.google.com/apis/credentials
             var apiKey = await IoC.inject.GetAppSecrets().GetSecret("GoogleSheetsV4Key");
             // https://docs.google.com/spreadsheets/d/1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM contains the sheetId:
             var sheetId = "1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM";
             var sheetName = "MySheet1"; // Has to match the sheet name
-            var xpSys = await DefaultProgressionSystem.SetupWithGSheets(apiKey, sheetId, sheetName);
+            HashSet<Tuple<object, Type>> collectedInjectors = new HashSet<Tuple<object, Type>>();
+            var xpSys = await DefaultProgressionSystem.SetupWithGSheets(apiKey, sheetId, sheetName, collectedInjectors);
+            cleanup.AddInjectorsCleanup(collectedInjectors);
 
             // The DefaultProgressionSystem will give 1 xp for each mutation:
             AppFlow.TrackEvent(EventConsts.catMutation, "Some mutation"); // Would also be triggered by DataStore
@@ -62,6 +69,8 @@ namespace com.csutil.tests.model {
 
         [Fact]
         public async Task ExtendedTest1() {
+
+            using var cleanup = new CleanupHelper();
 
             // Get your key from https://console.developers.google.com/apis/credentials
             var apiKey = await IoC.inject.GetAppSecrets().GetSecret("GoogleSheetsV4Key");
@@ -74,7 +83,8 @@ namespace com.csutil.tests.model {
             var localStore = new InMemoryKeyValueStore();
             var testStore = new FeatureFlagStore(localStore, googleSheetsStore);
 
-            IoC.inject.SetSingleton<FeatureFlagManager<FeatureFlag>>(new FeatureFlagManager<FeatureFlag>(testStore));
+            var injector1 = IoC.inject.SetSingleton<FeatureFlagManager<FeatureFlag>>(new FeatureFlagManager<FeatureFlag>(testStore));
+            cleanup.AddInjectorCleanup<FeatureFlagManager<FeatureFlag>>(injector1);
 
             var key1 = "MyFlag1";
             var key2 = "MyFlag2";
@@ -115,6 +125,8 @@ namespace com.csutil.tests.model {
         [Fact]
         public async Task TestProgressiveDisclosure() {
 
+            using var cleanup = new CleanupHelper();
+
             // Get your key from https://console.developers.google.com/apis/credentials
             var apiKey = await IoC.inject.GetAppSecrets().GetSecret("GoogleSheetsV4Key");
             // https://docs.google.com/spreadsheets/d/1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM contains the sheetId:
@@ -122,7 +134,8 @@ namespace com.csutil.tests.model {
             var sheetName = "MySheet1"; // Has to match the sheet name
             var googleSheetsStore = new GoogleSheetsKeyValueStore(new InMemoryKeyValueStore(), apiKey, sheetId, sheetName);
             var testStore = new FeatureFlagStore(new InMemoryKeyValueStore(), googleSheetsStore);
-            IoC.inject.SetSingleton<FeatureFlagManager<FeatureFlag>>(new FeatureFlagManager<FeatureFlag>(testStore));
+            var injector1 = IoC.inject.SetSingleton<FeatureFlagManager<FeatureFlag>>(new FeatureFlagManager<FeatureFlag>(testStore));
+            cleanup.AddInjectorCleanup<FeatureFlagManager<FeatureFlag>>(injector1);
 
             // Make sure user would normally be included in the rollout:
             var flagId4 = "MyFlag4";
@@ -136,7 +149,9 @@ namespace com.csutil.tests.model {
 
             // Setup progression system and check again:
             var xpSystem = new TestXpSystem();
-            IoC.inject.SetSingleton<IProgressionSystem<FeatureFlag>>(xpSystem);
+            var injector2 = IoC.inject.SetSingleton<IProgressionSystem<FeatureFlag>>(xpSystem);
+            cleanup.AddInjectorCleanup<IProgressionSystem<FeatureFlag>>(injector2);
+
             // Now that there is a progression system 
             Assert.False(await flag4.IsFeatureUnlocked());
             Assert.False(await FeatureFlag.IsEnabled(flagId4));
@@ -190,6 +205,8 @@ namespace com.csutil.tests.model {
         [Fact]
         public async Task TestDefaultProgressionSystem() {
 
+            using var cleanup = new CleanupHelper();
+
             // Get your key from https://console.developers.google.com/apis/credentials
             var apiKey = await IoC.inject.GetAppSecrets().GetSecret("GoogleSheetsV4Key");
             // https://docs.google.com/spreadsheets/d/1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM contains the sheetId:
@@ -197,12 +214,14 @@ namespace com.csutil.tests.model {
             var sheetName = "MySheet1"; // Has to match the sheet name
             var googleSheetsStore = new GoogleSheetsKeyValueStore(new InMemoryKeyValueStore(), apiKey, sheetId, sheetName);
             var ffm = new FeatureFlagManager<FeatureFlag>(new FeatureFlagStore(new InMemoryKeyValueStore(), googleSheetsStore));
-            IoC.inject.SetSingleton<FeatureFlagManager<FeatureFlag>>(ffm);
+            var injector1 = IoC.inject.SetSingleton<FeatureFlagManager<FeatureFlag>>(ffm);
+            cleanup.AddInjectorCleanup<FeatureFlagManager<FeatureFlag>>(injector1);
 
             LocalAnalytics analytics = new LocalAnalytics();
             AppFlow.AddAppFlowTracker(new AppFlowToStore(analytics));
             var xpSystem = new ProgressionSystem<FeatureFlag>(analytics, ffm);
-            IoC.inject.SetSingleton<IProgressionSystem<FeatureFlag>>(xpSystem);
+            var injector2 = IoC.inject.SetSingleton<IProgressionSystem<FeatureFlag>>(xpSystem);
+            cleanup.AddInjectorCleanup<IProgressionSystem<FeatureFlag>>(injector2);
 
             await CleanupFilesFromTest(analytics, xpSystem);
 
@@ -238,12 +257,16 @@ namespace com.csutil.tests.model {
         [Fact]
         public async Task ExtensiveDefaultProgressionSystemTests() {
 
+            using var cleanup = new CleanupHelper();
+            HashSet<Tuple<object, Type>> collectedInjectors = new HashSet<Tuple<object, Type>>();
+
             // Get your key from https://console.developers.google.com/apis/credentials
             var apiKey = await IoC.inject.GetAppSecrets().GetSecret("GoogleSheetsV4Key");
             // https://docs.google.com/spreadsheets/d/1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM contains the sheetId:
             var sheetId = "1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM";
             var sheetName = "MySheet1"; // Has to match the sheet name
-            ProgressionSystem<FeatureFlag> xpSys = await NewInMemoryTestXpSystem(apiKey, sheetId, sheetName);
+            ProgressionSystem<FeatureFlag> xpSys = await NewInMemoryTestXpSystem(apiKey, sheetId, sheetName, collectedInjectors);
+            cleanup.AddInjectorsCleanup(collectedInjectors);
 
             Assert.Empty(await xpSys.analytics.GetStoreForCategory(EventConsts.catMutation).GetAllKeys());
             Assert.Equal(0, await xpSys.GetLatestXp());
@@ -287,14 +310,14 @@ namespace com.csutil.tests.model {
             Log.MethodDone(t);
         }
 
-        private static async Task<ProgressionSystem<FeatureFlag>> NewInMemoryTestXpSystem(string apiKey, string sheetId, string sheetName) {
+        private static async Task<ProgressionSystem<FeatureFlag>> NewInMemoryTestXpSystem(string apiKey, string sheetId, string sheetName, HashSet<Tuple<object, Type>> collectedInjectors = null) {
             var cachedFlags = new InMemoryKeyValueStore();
             var googleSheetsStore = new GoogleSheetsKeyValueStore(cachedFlags, apiKey, sheetId, sheetName);
             var cachedFlagsLocalData = new InMemoryKeyValueStore();
             var analytics = new LocalAnalytics(new InMemoryKeyValueStore());
             analytics.createStoreFor = (_ => new InMemoryKeyValueStore().GetTypeAdapter<AppFlowEvent>());
             var featureFlagStore = new FeatureFlagStore(cachedFlagsLocalData, googleSheetsStore);
-            return await DefaultProgressionSystem.Setup(featureFlagStore, analytics);
+            return await DefaultProgressionSystem.Setup(featureFlagStore, analytics, collectedInjectors);
         }
 
     }

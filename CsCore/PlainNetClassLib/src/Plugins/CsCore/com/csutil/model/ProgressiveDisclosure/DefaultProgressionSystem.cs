@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using com.csutil.keyvaluestore;
 using com.csutil.logging.analytics;
@@ -37,23 +39,25 @@ namespace com.csutil.model {
 
     public static class DefaultProgressionSystem {
 
-        public static async Task<ProgressionSystem<FeatureFlag>> SetupWithGSheets(string apiKey, string sheetId, string sheetName) {
+        public static async Task<ProgressionSystem<FeatureFlag>> SetupWithGSheets(string apiKey, string sheetId, string sheetName, HashSet<Tuple<object, Type>> collectedInjectors = null) {
             var cachedFlags = FileBasedKeyValueStore.New("FeatureFlags");
             var cachedFlagsLocalData = FileBasedKeyValueStore.New("FeatureFlags_LocalData");
             var googleSheetsStore = new GoogleSheetsKeyValueStore(cachedFlags, apiKey, sheetId, sheetName);
-            return await Setup(new FeatureFlagStore(cachedFlagsLocalData, googleSheetsStore));
+            return await Setup(new FeatureFlagStore(cachedFlagsLocalData, googleSheetsStore), collectedInjectors);
         }
 
-        public static async Task<ProgressionSystem<FeatureFlag>> Setup(KeyValueStoreTypeAdapter<FeatureFlag> featureFlagStore) {
-            return await Setup(featureFlagStore, new LocalAnalytics());
+        public static async Task<ProgressionSystem<FeatureFlag>> Setup(KeyValueStoreTypeAdapter<FeatureFlag> featureFlagStore, HashSet<Tuple<object, Type>> collectedInjectors = null) {
+            return await Setup(featureFlagStore, new LocalAnalytics(), collectedInjectors);
         }
 
-        public static async Task<ProgressionSystem<FeatureFlag>> Setup(KeyValueStoreTypeAdapter<FeatureFlag> featureFlagStore, LocalAnalytics analytics) {
+        public static async Task<ProgressionSystem<FeatureFlag>> Setup(KeyValueStoreTypeAdapter<FeatureFlag> featureFlagStore, LocalAnalytics analytics, HashSet<Tuple<object, Type>> collectedInjectors = null) {
             var ffm = new FeatureFlagManager<FeatureFlag>(featureFlagStore);
-            IoC.inject.SetSingleton(ffm);
+            var injector1 = IoC.inject.SetSingleton(ffm);
+            collectedInjectors?.Add(new Tuple<object, Type>(injector1, typeof(FeatureFlagManager<FeatureFlag>)));
             AppFlow.AddAppFlowTracker(new AppFlowToStore(analytics).WithBasicTrackingActive());
             var xpSystem = new ProgressionSystem<FeatureFlag>(analytics, ffm);
-            IoC.inject.SetSingleton<IProgressionSystem<FeatureFlag>>(xpSystem);
+            var injector2 = IoC.inject.SetSingleton<IProgressionSystem<FeatureFlag>>(xpSystem);
+            collectedInjectors?.Add(new Tuple<object, Type>(injector2, typeof(IProgressionSystem<FeatureFlag>)));
             await xpSystem.UpdateCurrentCategoryCounts();
             return xpSystem;
         }
