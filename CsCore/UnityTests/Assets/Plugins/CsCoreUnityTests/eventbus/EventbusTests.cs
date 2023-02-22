@@ -94,10 +94,11 @@ namespace com.csutil.tests.eventbus {
 
         [UnityTest]
         public IEnumerator TestSubscribeOnMainThread() {
+            Assert.IsFalse(EnvironmentV2.isWebGL, "This test will not work in webgl mode");
             string eventName = "EventSendFromBackgroundThread";
             var counter = 0;
             EventBus.instance.Subscribe(new object(), eventName, () => {
-                Assert.IsFalse(MainThread.isMainThread);
+                Assert.IsFalse(MainThread.isMainThread, "Event callback did happen on main thread");
                 counter++;
             });
             EventBus.instance.SubscribeOnMainThread(new object(), eventName, () => {
@@ -105,7 +106,7 @@ namespace com.csutil.tests.eventbus {
                 counter++;
             });
             yield return BackgroundTaskQueue.NewBackgroundTaskQueue(1).Run(async (cancel) => {
-                Assert.IsFalse(MainThread.isMainThread);
+                Assert.IsFalse(MainThread.isMainThread, "BackgroundTaskQueue Run was not executed in background");
                 EventBus.instance.Publish(eventName);
                 Assert.AreEqual(1, counter);
                 await Task.CompletedTask;
