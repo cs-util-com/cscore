@@ -13,10 +13,23 @@ namespace com.csutil {
         public string methodName;
         public Action onDispose;
         private long lastLogStep = 0;
+        public bool forceFullMemoryCollection = ShouldCaptureFullMemory();
 
-        public StopwatchV2([CallerMemberName] string methodName = null) {
+        private static bool ShouldCaptureFullMemory() {
+            #if UNITY_EDITOR
+            {
+                // In recent versions of the Unity editor memory collection causes massive main thread
+                // freezing for at least 1 second per usage, so it cant be used anymore:
+                return false;
+            }
+            #endif
+            return true; // In all other environments logging memory usage is fine
+        }
+
+        public StopwatchV2([CallerMemberName] string methodName = null, Action onDispose = null) {
             this.methodName = methodName;
-            if (onDispose == null) { onDispose = () => Log.MethodDone(this); }
+            this.onDispose = onDispose;
+            if (this.onDispose == null) { this.onDispose = () => Log.MethodDone(this); }
         }
 
         public long allocatedManagedMemBetweenStartAndStop { get { return managedMemoryAtStop - managedMemoryAtStart; } }
@@ -30,10 +43,12 @@ namespace com.csutil {
 
         [Conditional("DEBUG"), Conditional("ENFORCE_FULL_LOGGING")]
         private void CaptureMemoryAtStart() {
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            GC.Collect();
-            managedMemoryAtStart = GC.GetTotalMemory(true);
+            if (forceFullMemoryCollection) {
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                GC.Collect();
+            }
+            managedMemoryAtStart = GC.GetTotalMemory(forceFullMemoryCollection);
             memoryAtStart = GetCurrentProcessPrivateMemorySize64();
         }
 
@@ -48,13 +63,25 @@ namespace com.csutil {
 
         [Conditional("DEBUG"), Conditional("ENFORCE_FULL_LOGGING")]
         private void CaptureMemoryAtStop() {
-            managedMemoryAtStop = GC.GetTotalMemory(true);
+            managedMemoryAtStop = GC.GetTotalMemory(forceFullMemoryCollection);
             memoryAtStop = GetCurrentProcessPrivateMemorySize64();
         }
 
         private long GetCurrentProcessPrivateMemorySize64() {
+            
+            // WebGL does not support PrivateMemorySize64:
             if (EnvironmentV2.isWebGL) { return 0; }
-            using (var p = Process.GetCurrentProcess()) { return p.PrivateMemorySize64; }
+            
+            // In latest Unity versions PrivateMemorySize64 seems to not work anymore for Android, so disabled:
+            if (EnvironmentV2.isAndroid && !EnvironmentV2.isEditor) { return 0; }
+            
+            try {
+                using (var p = Process.GetCurrentProcess()) { return p.PrivateMemorySize64; }
+            } catch (Exception e) {
+                Log.e("GetCurrentProcessPrivateMemorySize64 failed: " + e, e);
+                return 0;
+            }
+            
         }
 
         public string GetAllocatedMemBetweenStartAndStop() {

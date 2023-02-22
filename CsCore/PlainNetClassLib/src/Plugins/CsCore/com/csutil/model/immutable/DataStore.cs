@@ -24,12 +24,20 @@ namespace com.csutil.model.immutable {
         }
 
         private Dispatcher ApplyMiddlewares(params Middleware<T>[] middlewares) {
-            Dispatcher dispatcher = (object action) => {
+            Dispatcher createdDispatcher = (object action) => {
                 state = reducer(state, action);
                 return action;
             };
-            foreach (var middleware in middlewares) { dispatcher = middleware(this)(dispatcher); }
-            return dispatcher;
+            foreach (var middleware in middlewares) {
+                createdDispatcher = ApplyMiddleware(createdDispatcher, middleware);
+            }
+            return createdDispatcher;
+        }
+
+        private Dispatcher ApplyMiddleware(Dispatcher wrappedDispatcher, Middleware<T> middleware) {
+            return middleware(this)((object action) => {
+                return wrappedDispatcher(action);
+            });
         }
 
         /// <summary> Dispatches an action to the store. </summary>
@@ -40,8 +48,12 @@ namespace com.csutil.model.immutable {
             lock (threadLock) {
                 a = dispatcher(action);
             }
-            onStateChanged?.Invoke();
+            UpdateListeners();
             return a;
+        }
+
+        public virtual void UpdateListeners() {
+            onStateChanged?.Invoke();
         }
 
         /// <summary> Gets the current state tree. </summary>

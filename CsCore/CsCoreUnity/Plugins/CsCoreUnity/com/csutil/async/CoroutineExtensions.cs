@@ -11,11 +11,13 @@ namespace com.csutil {
 
     public static class CoroutineExtensions {
 
+        /// <summary> Monitors the task object in a couroutine which only completes when the task is done </summary>
         public static IEnumerator AsCoroutine(this Task self, int timeoutInMs = -1, int waitIntervalInMs = 20) {
             Action<Exception> defaultOnErrorAction = (e) => { throw e; };
             yield return AsCoroutine(self, defaultOnErrorAction, timeoutInMs, waitIntervalInMs);
         }
 
+        /// <summary> Monitors the task object in a couroutine which only completes when the task is done </summary>
         public static IEnumerator AsCoroutine(this Task self, Action<Exception> onError, int timeoutInMs = -1, int waitIntervalInMs = 20) {
             var waitIntervalBeforeNextCheck = new WaitForSeconds(waitIntervalInMs / 1000f);
             Stopwatch timer = timeoutInMs > 0 ? Stopwatch.StartNew() : null;
@@ -39,6 +41,8 @@ namespace com.csutil {
             return self.task.AsCoroutine(timeoutInMs, waitIntervalInMs);
         }
 
+        /// <summary> Executes a task multiple times </summary>
+        /// <param name="task"> if false is returned the execution will stop/terminate </param>
         public static Coroutine ExecuteRepeated(this MonoBehaviour self, Func<bool> task,
             int delayInMsBetweenIterations, int delayInMsBeforeFirstExecution = 0, float repetitions = -1) {
             if (!self.isActiveAndEnabled) { throw new Exception("ExecuteRepeated called on inactive mono"); }
@@ -89,6 +93,10 @@ namespace com.csutil {
 
         public static IEnumerator WaitForRunningCoroutinesToFinish(this IEnumerable<Coroutine> self) {
             foreach (var c in self) { yield return c; }
+        }
+
+        public static Coroutine TrackTask(this MonoBehaviour self, Task task) {
+            return self.StartCoroutine(task.AsCoroutine());
         }
 
         public static Task StartCoroutineAsTask(this MonoBehaviour self, IEnumerator routine) {

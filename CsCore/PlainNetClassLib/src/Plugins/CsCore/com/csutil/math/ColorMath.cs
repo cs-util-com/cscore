@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace com.csutil.math {
 
@@ -98,8 +100,39 @@ namespace com.csutil.math {
             }
             return new float[3] { Round(r), Round(g), Round(b) };
         }
-        
+
         private static float Round(float f) { return (float)Math.Round(f, 6); }
+
+        public static ISet<float[]> NextRandomRgbColors(this Random self, int count, float range = 4f) {
+            var colors = new HashSet<float[]>();
+            while (colors.Count < count) {
+                colors.Add(self.NextRandomRgbColor(range));
+            }
+            return colors;
+        }
+
+        public static float[] NextRandomRgbColor(this Random self, float range = 4f) {
+            float[] color = new float[3];
+            // The division by 3 and the addition of 0.5 serve to make the distribution more skewed towards the middle of the range
+            color[0] = Math.Max(0, Math.Min(1, (float)self.NextGaussian() / range + 0.5f)); // red
+            color[1] = Math.Max(0, Math.Min(1, (float)self.NextGaussian() / range + 0.5f)); // green
+            color[2] = Math.Max(0, Math.Min(1, (float)self.NextGaussian() / range + 0.5f)); // blue
+            return color;
+        }
+
+        /// <summary> Mixing random colors with white (255, 255, 255) creates neutral pastels by increasing the
+        /// lightness while keeping the hue of the original color </summary>
+        public static float[] GetPastelColorVariantFor(float[] inputColor, float whiteAmount = 1) {
+            return MixColors(inputColor, new float[] { whiteAmount, whiteAmount, whiteAmount });
+        }
+
+        public static float[] MixColors(float[] color1, float[] color2) {
+            float[] result = new float[3];
+            result[0] = (color1[0] + color2[0]) / 2f;
+            result[1] = (color1[1] + color2[1]) / 2f;
+            result[2] = (color1[2] + color2[2]) / 2f;
+            return result;
+        }
 
     }
 

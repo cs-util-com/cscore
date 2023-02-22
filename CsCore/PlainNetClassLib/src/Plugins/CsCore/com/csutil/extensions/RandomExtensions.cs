@@ -65,6 +65,16 @@ namespace com.csutil {
             }
         }
 
+        public static double NextGaussian(this Random random, double mean = 0, double standardDeviation = 1) {
+            // generate random numbers with a uniform distribution
+            double u1 = 1.0 - random.NextDouble();
+            double u2 = 1.0 - random.NextDouble();
+            // use the Box-Muller transform to convert the uniform distribution to a Gaussian distribution
+            double randStdNormal = Math.Sqrt(-2.0 * Math.Log(u1)) * Math.Sin(2.0 * Math.PI * u2);
+            // scale and shift the distribution to the desired mean and standard deviation
+            return mean + standardDeviation * randStdNormal;
+        }
+        
     }
 
 }

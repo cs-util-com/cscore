@@ -73,7 +73,7 @@ namespace com.csutil {
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         public static void IsNull(object o, string varName, params object[] args) {
-            Assert(o == null, () => $"Assert.IsNull({varName}) FAILED", args);
+            Assert(o == null, () => $"Assert.IsNull({varName}) FAILED, instead was: " + o, args);
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]

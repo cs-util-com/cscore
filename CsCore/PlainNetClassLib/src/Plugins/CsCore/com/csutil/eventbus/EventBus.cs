@@ -17,7 +17,7 @@ namespace com.csutil {
         public ConcurrentQueue<string> eventHistory { get; set; } = new ConcurrentQueue<string>();
         public bool eventHistoryFillingEnabled { get; set; } = false;
 
-        /// <summary> If true all erros during publish are not only logged but rethrown. Will be true in DEBUG mode </summary>
+        /// <summary> If true all errors during publish are not only logged but rethrown. Will be true in DEBUG mode </summary>
         public bool throwPublishErrors = false;
 
         /// <summary> sync subscribing and publishing to not happen at the same time </summary>

@@ -13,7 +13,11 @@ namespace com.csutil.tests.http {
 
         [Fact]
         public async Task ExampleUsage() {
-            IoC.inject.SetSingleton(new CookieContainer());
+
+            using var cleanup = new CleanupHelper();
+            var injector1 = IoC.inject.SetSingleton(new CookieContainer());
+            cleanup.AddInjectorCleanup<CookieContainer>(injector1);
+
             var cookieJar = IoC.inject.Get<CookieContainer>(null, false);
             Assert.NotNull(cookieJar);
 
@@ -24,11 +28,16 @@ namespace com.csutil.tests.http {
             await SendCookiesAndAssertIncluded(uri);
             // CookieContainer will be used every time & will include all cookies received by the backend:
             await SendCookiesAndAssertIncluded(uri);
+            
+            IoC.inject.Get<IRestFactory>(this).Dispose(); // Cleanup
         }
 
         [Fact]
         public async Task TestCookieContainer() {
-            IoC.inject.SetSingleton(new CookieContainer());
+            using var cleanup = new CleanupHelper();
+            var injector = IoC.inject.SetSingleton(new CookieContainer());
+            cleanup.AddInjectorCleanup<CookieContainer>(injector);
+
             var cookieJar = IoC.inject.Get<CookieContainer>(null, false);
             Assert.NotNull(cookieJar);
 
@@ -48,11 +57,16 @@ namespace com.csutil.tests.http {
             // Reset the rest factory now that a new CookieContainer should be used:
             IoC.inject.SetSingleton<IRestFactory>(new RestFactory(), true);
             await SendCookiesAndAssertIncluded(uri);
+            
+            IoC.inject.Get<IRestFactory>(this).Dispose(); // Cleanup
         }
 
         [Fact]
         public async Task TestCookieJar() { // Deprecated in favor of System.Net.CookieContainer
-            IoC.inject.SetSingleton<CookieJar>(new InMemoryCookieJar());
+            using var cleanup = new CleanupHelper();
+            var injector = IoC.inject.SetSingleton<CookieJar>(new InMemoryCookieJar());
+            cleanup.AddInjectorCleanup<CookieContainer>(injector);
+
             var cookieJar = IoC.inject.Get<CookieJar>(null, false);
             Assert.NotNull(cookieJar);
 
@@ -63,6 +77,8 @@ namespace com.csutil.tests.http {
             var resp = await uri.SendGET().GetResult<HttpbinCookieResp>();
             Assert.Contains(resp.cookies, x => x.Key == "coo1" && x.Value == "cooVal1");
             Assert.Contains(resp.cookies, x => x.Key == "coo2" && x.Value == "cooVal2");
+            
+            IoC.inject.Get<IRestFactory>(this).Dispose(); // Cleanup
         }
 
         private static async Task SendCookiesAndAssertIncluded(Uri uri) {

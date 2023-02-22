@@ -289,30 +289,14 @@ MonoBehaviour:
     pertinax at sed, an veniam percipitur qui. Wisi essent te nam. In ius quem meis
     noluisse. No maluisset adipiscing his, putent diceret argumentum ex cum.
 
-    
 
-    Sed
-    velit iriure dissentiet no, nostro iriure euripidis ea has. Mundi graece duo
-    no. No exerci neglegentur vim. Omnium iriure sed te, pri an diam essent animal.
-    Pri cibo legere et, ius an cibo appareat.'
---- !u!114 &713339917746026507
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6665319576234055982}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9e4098e9116567e49ba973b4e3f07e72, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  switchDirection: 1
-  nextScreenPrefabName: 
-  forceAddingAction: 1
-  destroyViewStackWhenLastScreenReached: 0
-  hideCurrentView: 1
-  hideNotDestroyCurrentViewWhenGoingBackwards: 0
+    <b><size="8"><color="#FF000055">Some
+    red text</color></size></b>
+
+    <b>Important:</b> Something!
+
+    <b>Also important:</b>
+    Something else!'
 --- !u!1001 &4134384382063712971
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -436,19 +420,45 @@ PrefabInstance:
       value: Next step
       objectReference: {fileID: 0}
     m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 7286736682265068517, guid: 7099ab4aea109b243a409d9f127e826e,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 713339917746026507}
   m_SourcePrefab: {fileID: 100100000, guid: 7099ab4aea109b243a409d9f127e826e, type: 3}
---- !u!1 &6665319576234055982 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 7286736682265068517, guid: 7099ab4aea109b243a409d9f127e826e,
-    type: 3}
-  m_PrefabInstance: {fileID: 4134384382063712971}
-  m_PrefabAsset: {fileID: 0}
 --- !u!224 &214048228873114165 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 4294247159623846142, guid: 7099ab4aea109b243a409d9f127e826e,
     type: 3}
   m_PrefabInstance: {fileID: 4134384382063712971}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &6665319576234055982 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7286736682265068517, guid: 7099ab4aea109b243a409d9f127e826e,
+    type: 3}
+  m_PrefabInstance: {fileID: 4134384382063712971}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &713339917746026507
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6665319576234055982}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e4098e9116567e49ba973b4e3f07e72, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  switchDirection: 1
+  nextScreenPrefab: {fileID: 0}
+  nextScreenPrefabName: 
+  forceAddingAction: 1
+  destroyViewStackWhenLastScreenReached: 0
+  hideCurrentView: 1
+  hideNotDestroyCurrentViewWhenGoingBackwards: 0
 --- !u!1001 &7752909834965366090
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -16,19 +16,21 @@ namespace com.csutil.tests {
         public LogTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
         [Fact]
-        public void TestBasicLogOutputExamples() { InnerMethod1(); }
-        private static void InnerMethod1() { InnerMethod2(); }
-        private static void InnerMethod2() { InnerMethod3(); }
-        private static void InnerMethod3() {
+        void TestBasicLogOutputExamples() { InnerMethod1(); }
+        void InnerMethod1() { InnerMethod2(); }
+        void InnerMethod2() { InnerMethod3(); }
+        void InnerMethod3() {
             Log.d("I'm a log message");
             Log.i("I'm an info message");
             Log.w("I'm a warning");
             Log.e("I'm an error");
             Log.e(new Exception("I'm an exception"));
             Log.w("I'm a warning with params:", "param 1", 2, "..");
-            using (Log.MethodEntered()) {
-                // Some method body (duration and memory will be logged)
-            }
+            MyMethod1();
+        }
+        void MyMethod1() {
+            using StopwatchV2 timing = Log.MethodEntered();
+            // Some method body (duration and memory will be logged)
         }
 
         [Fact]

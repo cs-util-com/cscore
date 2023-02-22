@@ -253,6 +253,10 @@ namespace com.csutil {
             }
         }
 
+        public static Queue<T> ToQueue<T>(this IEnumerable<T> self) {
+            return new Queue<T>(self);
+        }
+
     }
 
 }

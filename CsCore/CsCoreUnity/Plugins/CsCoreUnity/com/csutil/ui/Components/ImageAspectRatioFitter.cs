@@ -7,9 +7,9 @@ namespace com.csutil.ui.Components {
     [RequireComponent(typeof(AspectRatioFitter))]
     class ImageAspectRatioFitter : MonoBehaviour {
 
-        /// <summary> Set this to 0 to disable vertical parallax </summary>
+        /// <summary> Set this to 0 to disable vertical parallax, try out -0.6 as a start </summary>
         [Range(-1, 1)]
-        public float verticalParallaxStrength = -0.6f;
+        public float verticalParallaxStrength = 0;
 
         private Image img;
         private AspectRatioFitter aspectRatioFitter;

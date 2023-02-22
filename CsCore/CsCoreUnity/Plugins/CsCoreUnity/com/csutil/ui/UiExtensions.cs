@@ -21,15 +21,16 @@ namespace com.csutil {
             return vs;
         }
 
-        /// <summary> Returns a list of tasks that represents the numbers of clicks the user did on the button, so initially the list will be empty until the user clicked on it the first time </summary>
+        /// <summary> Returns a list of tasks that represents the numbers of clicks the user did on the button </summary>
         public static IList<Task> SetOnClickActionAsync(this Button self, Func<GameObject, Task> onClickAction) {
             var clicks = new List<Task>();
-            TaskCompletionSource<bool> tcs = null; // Null so that the first click is skipped
+            TaskCompletionSource<bool> tcs = null; // Set to null to skip the first .SetFromTask() below
             var firstClickTask = self.SetOnClickAction(async go => {
-                tcs?.SetResult(true);
-                await onClickAction(go);
+                var t = onClickAction(go);
+                tcs?.SetFromTask(t);
                 tcs = new TaskCompletionSource<bool>();
-                clicks.Add(tcs.Task);
+                clicks.Add(tcs.Task); // Always add the next not yet used task to the list so that the last Task is always pending
+                await t;
             });
             clicks.Add(firstClickTask);
             return clicks;

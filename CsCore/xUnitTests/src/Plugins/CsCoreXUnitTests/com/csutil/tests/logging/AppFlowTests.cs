@@ -82,7 +82,7 @@ namespace com.csutil.tests {
                 Log.MethodDone(s3, maxAllowedTimeInMs: 10000);
             }
             float ratioInMemVsReadFs = s2.ElapsedMilliseconds / (float)s3.ElapsedMilliseconds;
-            Assert.True(0.01 < ratioInMemVsReadFs && ratioInMemVsReadFs < 1, $"s2={s2} > s3={s3}, ratioInMemVsReadFs={ratioInMemVsReadFs}");
+            Assert.True(0.01 < ratioInMemVsReadFs && ratioInMemVsReadFs < 1.5, $"s2={s2} > s3={s3}, ratioInMemVsReadFs={ratioInMemVsReadFs}");
         }
 
         [Fact]

@@ -25,6 +25,26 @@ namespace com.csutil {
             }
         }
 
+        public static bool isAndroid {
+            get {
+#if UNITY_ANDROID
+                return true;
+#else
+                return false;
+#endif
+            }
+        }
+
+        public static bool isEditor {
+            get {
+#if UNITY_EDITOR
+                return true;
+#else
+                return false;
+#endif
+            }
+        }
+
         public static bool isDebugMode {
             get {
 #if DEBUG

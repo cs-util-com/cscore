@@ -1,5 +1,8 @@
-﻿using com.csutil.math;
+﻿using System.Collections.Generic;
+using System.Linq;
+using com.csutil.math;
 using UnityEngine;
+using Random = System.Random;
 
 namespace com.csutil {
 
@@ -59,7 +62,15 @@ namespace com.csutil {
                 return new Color32(normV, normV, normV, alpha0To255);
             }
             float[] rgb = ColorMath.HsvToRgb(hue0To360, saturation0To1, value0To1);
+            return ToColor32(rgb, alpha0To255);
+        }
+
+        private static Color32 ToColor32(float[] rgb, byte alpha0To255 = 255) {
             return new Color32((byte)(rgb[0] * 255), (byte)(rgb[1] * 255), (byte)(rgb[2] * 255), alpha0To255);
+        }
+
+        private static float[] ToFloatArray(this Color32 c) {
+            return new float[] { c.r / 255f, c.g / 255f, c.b / 255f };
         }
 
         public static double GetBrightness(this Color self) {
@@ -99,6 +110,15 @@ namespace com.csutil {
             float[] hsv = self.ToHsv();
             ColorMath.InvertHue(hsv);
             return HsvToColor32(hsv);
+        }
+
+        public static Queue<Color32> NextRandomColors(this Random self, int count, byte alpha0To255 = 255, float range = 4f) {
+            ISet<float[]> colors = self.NextRandomRgbColors(count, range);
+            return colors.Map(c => ToColor32(c, alpha0To255)).ToQueue();
+        }
+
+        public static IEnumerable<Color32> GetPastelColorVariantFor(this IEnumerable<Color32> self, float whiteAmount = 1) {
+            return self.Map(c => ToColor32(ColorMath.GetPastelColorVariantFor(c.ToFloatArray(), whiteAmount)));
         }
 
     }

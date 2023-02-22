@@ -12,6 +12,8 @@ namespace com.csutil.tests.threading {
 
         [UnityTest]
         public IEnumerator TestMixingBackgroundAndMainThread() {
+            Assert.IsFalse(EnvironmentV2.isWebGL, "This test will not work in webgl mode");
+
             var timing = Log.MethodEntered("TestMixingBackgroundAndMainThread");
 
             var queue = BackgroundTaskQueue.NewBackgroundTaskQueue(1);
@@ -42,6 +44,8 @@ namespace com.csutil.tests.threading {
 
         [UnityTest]
         public IEnumerator TestTaskCancel1() {
+            Assert.IsFalse(EnvironmentV2.isWebGL, "This test will not work in webgl mode");
+
             var timing = Log.MethodEntered("TestTaskCancel");
 
             BackgroundTaskQueue queue = BackgroundTaskQueue.NewBackgroundTaskQueue(1);
@@ -70,6 +74,8 @@ namespace com.csutil.tests.threading {
 
         [UnityTest]
         public IEnumerator TestTaskCancel2() {
+            Assert.IsFalse(EnvironmentV2.isWebGL, "This test will not work in webgl mode");
+
             var timing = Log.MethodEntered("TestTaskCancel");
 
             GameObject queueGo = new GameObject("BackgroundTaskQueue");
@@ -137,6 +143,7 @@ namespace com.csutil.tests.threading {
 
         [UnityTest]
         public IEnumerator TestMainThread() {
+            Assert.IsFalse(EnvironmentV2.isWebGL, "This test will not work in webgl mode");
 
             var queue = BackgroundTaskQueue.NewBackgroundTaskQueue(1);
 

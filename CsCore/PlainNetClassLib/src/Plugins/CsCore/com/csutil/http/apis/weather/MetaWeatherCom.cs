@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace com.csutil.http.apis {
 
+    [Obsolete("MetaWeather seems to be down for quite a while, will check from time to time if its back")]
     public static class MetaWeather {
 
         public static async Task<MetaWeatherReport.Report> GetWeather(string cityName) {
@@ -16,6 +17,7 @@ namespace com.csutil.http.apis {
 
     }
 
+    [Obsolete("MetaWeather seems to be down for quite a while, will check from time to time if its back")]
     public static class MetaWeatherLocationLookup {
 
         public static Task<List<LocationResp>> GetLocation(float latitude, float longiude) {
@@ -41,6 +43,7 @@ namespace com.csutil.http.apis {
 
     }
 
+    [Obsolete("MetaWeather seems to be down for quite a while, will check from time to time if its back")]
     public static class MetaWeatherReport {
 
         public static Task<Report> GetReport(int woeid) {
