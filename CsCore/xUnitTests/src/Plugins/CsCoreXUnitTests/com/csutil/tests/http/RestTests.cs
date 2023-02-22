@@ -393,7 +393,7 @@ namespace com.csutil.tests.http {
             Assert.True(now.IsUtc());
             Assert.False(DateTimeV2.Now.IsUtc());
             var delta = now - remoteNow;
-            Assert.True(delta.TotalMillisecondsAbs() < 30000, $"delta={delta}, now={now}, remoteNow={remoteNow} (from string '{resp}'");
+            Assert.True(delta.TotalMillisecondsAbs() < 10000, $"delta={delta}, now={now}, remoteNow={remoteNow} (from string '{resp}'");
         }
 
         [Fact]

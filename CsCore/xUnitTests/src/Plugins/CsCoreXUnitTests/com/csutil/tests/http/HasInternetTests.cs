@@ -11,6 +11,9 @@ namespace com.csutil.tests.http {
 
         [Fact]
         public async Task TestInternetStateListenerOnce() {
+            // First reset state of InternetStateManager to avoid side effects from other tests executed before this one:
+            IoC.inject.RemoveAllInjectorsFor<InternetStateManager>();
+
             InternetStateManager.AddListener(this);
             Assert.True(await RestFactory.instance.HasInternet());
             Assert.True(await InternetStateManager.Instance(this).HasInetAsync);

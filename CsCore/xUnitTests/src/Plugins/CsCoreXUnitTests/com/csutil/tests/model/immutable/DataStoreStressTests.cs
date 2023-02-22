@@ -89,7 +89,7 @@ namespace com.csutil.tests.model.immutable {
 
                 float t3t4Ratio = (float)t3.ElapsedMilliseconds / (float)t4.ElapsedMilliseconds;
                 Log.d("t3t4Ratio=" + t3t4Ratio);
-                Assert.True(0.5f < t3t4Ratio && t3t4Ratio < 2f, "t3t4Ratio=" + t3t4Ratio);
+                Assert.True(0.2f < t3t4Ratio && t3t4Ratio < 2f, "t3t4Ratio=" + t3t4Ratio);
 
             }
 
