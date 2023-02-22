@@ -54,6 +54,7 @@ namespace com.csutil.tests.ui {
                 value.text = SOME_VALUE_2;
                 await SimulateButtonClickOn("SetButton", userClickedOnSet);
                 AssertV2.AreEqual(3, userClickedOnSet.Count);
+                AssertV2.AreEqual(2, userClickedOnSet.Filter(t => t.IsCompleted).Count());
                 AssertV2.AreEqual(SOME_VALUE_2, await store.Get<string>(SOME_KEY_1, null));
 
                 AssertV2.IsTrue(await store.ContainsKey(SOME_KEY_1), "SOME_KEY_1 NOT found in key value store");
