@@ -95,10 +95,9 @@ Log.w("I'm a warning");
 Log.e("I'm an error");
 Log.e(new Exception("I'm an exception"));
 Log.w("I'm a warning with params:", "param 1", 2, "..");
-```
 
-// Performance logging:
-```cs
+
+// Performance (timings & memory) logging example:
 void MyMethod1() {
     using (Log.MethodEntered()) {
         // Some method body (duration and memory will be logged)
@@ -133,12 +132,12 @@ This will result in the following output in the Log:
     * at LogTests.TestBasicLogOutputExamples() c:\..\LogTests.cs:line 22
      ..
 
-> WARNING: I'm a warning with parmas: : [[param 1, 2, ..]]
+> WARNING: I'm a warning with params: : [[param 1, 2, ..]]
      ..
 
->  --> TestBasicLogOutputExamples
-
->     <-- TestBasicLogOutputExamples finished after 0 ms, allocated managed mem: 525,40 KB, allocated mem: 12,00 KB 
+--> MyMethod1
+     ..
+<-- MyMethod1 finished after 3 ms, allocated managed mem: 525,40 KB, allocated mem: 12,00 KB 
 ```
 
 Creating logging-adapters is simple, the following logging-adapters can be used out of the box (and they can be seen as examples/templates):
