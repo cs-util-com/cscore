@@ -32,7 +32,7 @@ The following summary gives a quick overview of all library features:
 ### Pure C# Components
 The aim of the cscore package as to stay is slim/minimal as possible while including the feature and functionality typical projects would benefit from.
 
-* [Log](#logging) - A minimalistic logging wrapper + [AssertV2](#assertv2) to add saveguards anywhere in your logic
+* [Log](#logging) - A minimalistic logging wrapper + [AssertV3](#assertv3) to add saveguards anywhere in your logic
 * [EventBus](#The-EventBus) - Publish and subscribe to global events from anywhere in your code. Handles **1 million events a second** with minimal memory footprint!
 * [Injection Logic](#Injection-Logic) - A simple inversion of control pattern that does not rely on magic. Relies on the EventBus system, so it has the same speed as well!
 * [JSON Parsing](#JSON-Parsing) - Reading and writing JSON through a simple interface. Default implementation uses [Json.NET](https://github.com/JamesNK/Newtonsoft.Json) to ensure high performance
@@ -72,9 +72,22 @@ Log.w("I'm a warning");
 Log.e("I'm an error");
 Log.e(new Exception("I'm an exception"));
 Log.w("I'm a warning with params:", "param 1", 2, "..");
-using (Log.MethodEntered()) {
+```
+
+// Performance logging:
+```cs
+void MyMethod1() {
+    using (Log.MethodEntered()) {
+        // Some method body (duration and memory will be logged)
+    }
+}
+
+// Or written with a different using syntax: 
+void MyMethod1(int myVar123) {
+    using Stopwatch timing = Log.MethodEnteredWith(myVar123);
     // Some method body (duration and memory will be logged)
 }
+
 ```
 
 This will result in the following output in the Log:
@@ -118,16 +131,17 @@ Through this abstraction it becomes easy to later switch to more complex logging
 
 
 
-### AssertV2
+### AssertV3
 
-- `AssertV2` can be used anywhere in your code 
+- `AssertV3` can be used anywhere in your code 
 - Will be automatically removed/stripped from your production code
 - Can be configured to `Log.e` an error (the default) or to throw an exception 
-- Use `AssertV2` in places where you would otherwise add a temporary `Log` line while testing. `AssertV2` can stay in your code and will let you know of any unexpected behaviour 
+- Use `AssertV3` in places where you would otherwise add a temporary `Log` line while testing. `AssertV3` can stay in your code and will let you know of any unexpected behaviour 
 - Will automatically pause the Debugger if it fails while debugging
+- The error message string will only be evaluated if the assertion fails, to prevent unnecessary memory allocations or performance issues when logging is active.
 
 ```cs
-AssertV2.IsTrue(1 + 1 == 3, "This assertion will fail");
+AssertV3.IsTrue(1 + 1 == 3, () => "This assertion will fail");
 ```
 See [here](https://github.com/cs-util-com/cscore/blob/master/CsCore/xUnitTests/src/Plugins/CsCoreXUnitTests/com/csutil/tests/LogTests.cs#L63) for more examples.
 
