@@ -352,7 +352,14 @@ Assert.Equal(6, sumOfAllInts); // 1+2+3 is 6
 
 More usage examples can be found in the [HelperMethodTests.cs](https://github.com/cs-util-com/cscore/blob/master/CsCore/xUnitTests/src/com/csutil/tests/HelperMethodTests.cs)
 
+## Type IsSubclassOf & IsCastableTo
+Extension methods to check if a type is a subclass of another type:
 
+```cs
+Type MySubClass1 = typeof(MySubClass1);
+Assert.True(MySubClass1.IsSubclassOf<MyClass1>());
+Assert.True(typeof(MySubClass1).IsCastableTo<MyClass1>());
+```
 
 
 ## JSON Parsing 
