@@ -13,6 +13,7 @@ namespace com.csutil {
     public static class ActionMenuExtensions {
 
         public static async Task<ActionMenu.Entry> ShowActionMenu(this ViewStack self, ActionMenu menu, string menuPrefabName = ActionMenu.DEFAULT_MENU) {
+            self.ThrowErrorIfNull("ViewStack");
             var eventName = "ShowActionMenu " + menu.menuId;
             var timing = Log.MethodEntered(eventName);
             var menuUiGo = self.ShowView(menuPrefabName);
@@ -31,6 +32,11 @@ namespace com.csutil {
                 Log.MethodDone(timing);
                 return null;
             }
+        }
+        
+        public static ActionMenu.Entry AddEntry(this ActionMenu self, ActionMenu.Entry entryToAdd) {
+            self.entries.Add(entryToAdd);
+            return entryToAdd;
         }
 
     }
