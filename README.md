@@ -38,6 +38,15 @@ deep knowledge about the full cscore library required.
 
 
 
+# [Test cscore in the browser](https://github.com/cs-util-com/cscore-playground#readme)
+
+Go to the [cscore-playground](https://github.com/cs-util-com/cscore-playground#readme) to 
+test the library in your browser (via GitHub codespaces):
+
+[![Where to find the 'Open in a codespace' button](https://raw.githubusercontent.com/cs-util-com/cscore-playground/main/Other%20files/How-to-open-GitHub-codespace.png)](https://github.com/cs-util-com/cscore-playground#readme)
+
+
+
 #  Overview 
 The following summary gives a quick overview of all library features:
 
