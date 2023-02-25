@@ -15,6 +15,8 @@
 [**Examples**](#-usage--examples) 
 **•**
 [**Getting started**](#-getting-started)
+**•**
+[**Demo (in your browser)**](#test-cscore-in-the-browser)
 
 `cscore` is a lightweight library providing commonly used helpers & patterns for both your pure `C#` and `Unity` projects.
 
