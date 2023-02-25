@@ -15,6 +15,8 @@
 [**Examples**](#-usage--examples) 
 **•**
 [**Getting started**](#-getting-started)
+**•**
+[**Demo (in your browser)**](#test-cscore-in-the-browser)
 
 `cscore` is a lightweight library providing commonly used helpers & patterns for both your pure `C#` and `Unity` projects.
 
@@ -35,6 +37,15 @@ coverage mutation testing is used (thanks to [Stryker](https://github.com/stryke
 
 All components are loosly coupled so that components can be used individually when needed without 
 deep knowledge about the full cscore library required. 
+
+
+
+# [Test cscore in the browser](https://github.com/cs-util-com/cscore-playground#readme)
+
+Go to the [cscore-playground](https://github.com/cs-util-com/cscore-playground#readme) to 
+test the library in your browser (via GitHub codespaces):
+
+[![Where to find the 'Open in a codespace' button](https://raw.githubusercontent.com/cs-util-com/cscore-playground/main/Other%20files/How-to-open-GitHub-codespace.png)](https://github.com/cs-util-com/cscore-playground#readme)
 
 
 
