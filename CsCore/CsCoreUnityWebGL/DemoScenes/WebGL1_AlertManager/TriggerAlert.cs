@@ -15,7 +15,7 @@ namespace com.csutil.tests.ui {
 
 
         public void alertBrowserFromTextField() {
-            alertManager.GetComponent<AlertManager>().sendAlert(textField.GetComponent<InputField>().text);
+            alertManager.GetComponent<AlertManager>().triggerBrowserAlert(textField.GetComponent<InputField>().text);
         }
 
 
