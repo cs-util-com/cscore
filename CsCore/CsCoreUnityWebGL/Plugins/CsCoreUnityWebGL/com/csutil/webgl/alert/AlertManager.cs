@@ -20,13 +20,13 @@ namespace com.csutil.webgl.alert {
         private static extern void createOnUnload();
 
         [DllImport("__Internal")]
-        private static extern void triggerAlert(string message);
+        private static extern void triggerBrowserAlertjs(string message);
 
         [DllImport("__Internal")]
-        private static extern void deactivateOnSavedWarning();
+        private static extern void deactivateOnQuitPromptjs();
 
         [DllImport("__Internal")]
-        private static extern void activateOnSavedWarning();
+        private static extern void activateOnQuitPromptjs();
         #endregion
 
 
@@ -39,31 +39,31 @@ namespace com.csutil.webgl.alert {
         /// <param name="message">
         /// Alert message
         /// </param>
-        public void sendAlert(string message) {
-            triggerAlert(message);
+        public void triggerBrowserAlert(string message) {
+            triggerBrowserAlertjs(message);
         }
 
         /// <summary>
         /// This function is triggered if the user tries to close the browser window
         /// </summary>
-        void onClose() {
+        void onTabCloseAttempt() {
             Debug.Log("The user attempted to close the tab");
         }
 
         /// <summary>
         /// Deactivates the unsaved changes warning 
         /// </summary>
-        public void deactivate() {
+        public void deactivateOnQuitPrompt() {
             Debug.Log("Deactivate from Unity");
-            deactivateOnSavedWarning();
+            deactivateOnQuitPromptjs();
         }
 
         /// <summary>
         /// Activates the unsaved changes warning 
         /// </summary>
-        public void activate() {
+        public void activateOnQuitPrompt() {
             Debug.Log("Activate from Unity");
-            activateOnSavedWarning();
+            activateOnQuitPromptjs();
         }
     }
 

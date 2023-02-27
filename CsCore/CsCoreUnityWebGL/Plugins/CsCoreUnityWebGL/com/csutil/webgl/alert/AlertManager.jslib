@@ -17,7 +17,7 @@ mergeInto(LibraryManager.library, {
 
             //Send a message back to the unitySide to inform the 
             //Programm that the user attempts to close the tab
-            SendMessage("AlertManager", "onClose");
+            SendMessage("AlertManager", "onTabCloseAttempt");
 
             if (!this._OnUnloadManager_PreventClosing) {
                 return null;
@@ -31,14 +31,14 @@ mergeInto(LibraryManager.library, {
     /**
      * After this has been called there will a warning
      */
-    activateOnSavedWarning: function () {
+    activateOnQuitPromptjs: function () {
         this._OnUnloadManager_PreventClosing = true;
     },
 
     /**
      * After this has been called there will be no warning
      */
-    deactivateOnSavedWarning: function () {
+    deactivateOnQuitPromptjs: function () {
         this._OnUnloadManager_PreventClosing = false;
     },
 
@@ -46,7 +46,7 @@ mergeInto(LibraryManager.library, {
      * This function creates a browser warning message
      * @param messagePtr Pointer to the string location from the C# part
      */
-    triggerAlert: function (messagePtr) {
+    triggerBrowserAlertjs: function (messagePtr) {
         alert(UTF8ToString(messagePtr));
     }
 });
