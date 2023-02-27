@@ -1,0 +1,56 @@
+This asset is governed by the Asset Store EULA; however, the following components are governed by the licenses indicated below:
+
+A. DiffMatchPatch
+Apache-2.0 
+Copyright (c) Google
+https://github.com/cs-util/diff-match-patch/blob/master/LICENSE
+
+B. FuzzySearchFuze
+Apache-2.0 
+Copyright (c) Conna Wiles - kurozael
+https://github.com/cs-util/Fuse.NET/blob/master/LICENSE
+
+C. Newtonsoft.Json (Json.NET)
+MIT
+Copyright (c) 2007 James Newton-King
+https://github.com/cs-util/Newtonsoft.Json/blob/master/LICENSE.md
+
+D. Magick.NET
+Apache-2.0 
+Copyright 2013-2020 Dirk Lemstra
+https://github.com/cs-util/Magick.NET/blob/master/License.txt 
+
+E. parallel-extensions-extras
+MICROSOFT LIMITED PUBLIC LICENSE version 1.1
+Copyright (c) Microsoft Corporation
+https://github.com/cs-util/parallel-extensions-extras/blob/master/LICENSE.txt
+
+F. SharpZipLib
+MIT
+Copyright (c) 2000-2018 SharpZipLib Contributors
+https://github.com/cs-util/SharpZipLib/blob/master/LICENSE.txt
+
+G. SafeStbImageSharp
+Public Domain
+Copyright (c) StbSharp
+https://github.com/cs-util/SafeStbImageSharp/blob/master/README.md#license
+
+H. System.Collections.Immutable
+MIT
+Copyright (c) Microsoft Corporation
+https://www.nuget.org/packages/System.Collections.Immutable/
+
+I. UltraLiteDB
+MIT
+Copyright (c) 2014-2015 Mauricio David
+https://github.com/cs-util/UltraLiteDB/blob/master/LICENSE
+
+J. Zio
+BSD 2-Clause "Simplified" License
+Copyright (c) 2017-2019, Alexandre Mutel
+https://github.com/cs-util/zio/blob/master/license.txt
+
+L. cscore
+Apache-2.0
+Copyright (c) csutil.com
+https://github.com/cs-util-com/cscore/blob/master/LICENSE
