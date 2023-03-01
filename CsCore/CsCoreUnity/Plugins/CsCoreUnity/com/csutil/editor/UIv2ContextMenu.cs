@@ -144,7 +144,7 @@ namespace com.csutil.editor {
         /// <summary> Returns the current selected element in a canvas or a view in a view stack </summary>
         private static GameObject GetSelectedCanvasChild() {
             GameObject selectedGo = Selection.activeGameObject;
-            if (selectedGo?.GetComponent<RectTransform>() != null) { return selectedGo; }
+            if (selectedGo?.GetComponentV2<RectTransform>() != null) { return selectedGo; }
             if (GetLastActiveView() == null) { AddViewInViewStack(); }
             return GetLastActiveView();
         }

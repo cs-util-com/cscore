@@ -9,7 +9,7 @@ namespace com.csutil.ui {
 
         private void OnEnable() {
             var group = GetToggleGroup();
-            GetComponent<Toggle>().group = group;
+            gameObject.GetComponentV2<Toggle>().group = group;
         }
 
         public ToggleGroup GetToggleGroup() {

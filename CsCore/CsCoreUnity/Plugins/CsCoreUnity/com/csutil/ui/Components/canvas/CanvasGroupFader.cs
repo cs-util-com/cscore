@@ -26,7 +26,7 @@ namespace com.csutil.ui {
 
         public CanvasGroup GetCanvasGroup() {
             if (canvasGroup == null) {
-                canvasGroup = GetComponent<CanvasGroup>();
+                canvasGroup = gameObject.GetComponentV2<CanvasGroup>();
                 initialAlpha = canvasGroup.alpha;
                 targetAlpha = initialAlpha;
             }

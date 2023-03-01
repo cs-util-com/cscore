@@ -42,7 +42,7 @@ namespace com.csutil {
 
         public static T Get<T>(this Link self) {
             if (typeof(T) == typeof(GameObject)) { return (T)(object)self.gameObject; }
-            var comp = self.GetComponent<T>();
+            var comp = self.GetComponentV2<T>();
             return comp == null ? (T)(object)null : comp;
         }
     }

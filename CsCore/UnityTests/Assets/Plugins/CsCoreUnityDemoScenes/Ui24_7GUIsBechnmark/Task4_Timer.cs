@@ -33,7 +33,7 @@ namespace com.csutil.tests {
             public Task OnLoad(MyModel model) {
                 var map = targetView.GetLinkMap();
                 elapsedTimeProgress = map.Get<Slider>("ElapsedTimeProgress");
-                handleText = elapsedTimeProgress.handleRect.GetComponent<Text>();
+                handleText = elapsedTimeProgress.handleRect.GetComponentV2<Text>();
                 durationSlider = map.Get<Slider>("DurationSlider");
                 timerText = map.Get<Text>("TimerLabel");
 

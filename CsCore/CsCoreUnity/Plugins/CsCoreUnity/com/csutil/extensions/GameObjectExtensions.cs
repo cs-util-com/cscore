@@ -45,13 +45,26 @@ namespace com.csutil {
         /// <summary> Unity returns a comp that pretents to be null so return actual null </summary>
         public static T GetComponentV2<T>(this GameObject self) {
             var existingComp = self.GetComponent<T>();
-            return existingComp == null ? default : existingComp;
+            return IsComponentNull(existingComp) ? default : existingComp;
+        }
+
+        private static bool IsComponentNull(object existingComp) {
+            var isNull = existingComp == null;
+            // Check if the component is really accessible: 
+            if (!isNull && existingComp is Component c) {
+                try {
+                    isNull = c.gameObject == null; // This access will cause an exception if the component is null
+                } catch (Exception) {
+                    isNull = true;
+                }
+            }
+            return isNull;
         }
 
         /// <summary> Unity returns a comp that pretents to be null so return actual null </summary>
         public static T GetComponentV2<T>(this Component self) {
             var existingComp = self.GetComponent<T>();
-            return existingComp == null ? default : existingComp;
+            return IsComponentNull(existingComp) ? default : existingComp;
         }
 
         /// <summary> Used for lazy-initialization of a Mono, combine with go.GetOrAddChild </summary>

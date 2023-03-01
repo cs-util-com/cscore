@@ -69,7 +69,7 @@ namespace com.csutil.tests.Task7 {
                 var cellsWithUi = GetSubscribedCells(uiRows).Map(c => c.cellPos);
                 var newCellsInModel = Cells.Keys.Except(cellsWithUi);
                 foreach (var newCellInModel in newCellsInModel) {
-                    GetCellUi(newCellInModel).GetComponent<CellPresenter>().SubscribeToSetCell();
+                    GetCellUi(newCellInModel).GetComponentV2<CellPresenter>().SubscribeToSetCell();
                 }
             }
 
@@ -87,7 +87,7 @@ namespace com.csutil.tests.Task7 {
                             columnNameUi.GetComponentInChildren<Text>().text = columnId;
                         } else {
                             var cellGo = row.AddChild(ResourcesV2.LoadPrefab("CellUiEntry"));
-                            var cell = cellGo.GetComponent<CellPresenter>();
+                            var cell = cellGo.GetComponentV2<CellPresenter>();
                             cell.cellPos = new CellPos(columnId, rowNr);
                             cell.store = store;
                         }

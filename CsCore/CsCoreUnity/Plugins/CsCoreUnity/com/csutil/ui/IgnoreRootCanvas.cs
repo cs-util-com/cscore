@@ -9,7 +9,7 @@ namespace com.csutil {
 
 #if DEBUG
         private void Start() {
-            AssertV2.IsTrue(GetComponent<Canvas>().isRootCanvasV2(), "IgnoreRootCanvas can only be used on a root canvas");
+            AssertV2.IsTrue(gameObject.GetComponentV2<Canvas>().isRootCanvasV2(), "IgnoreRootCanvas can only be used on a root canvas");
         }
 #endif
 

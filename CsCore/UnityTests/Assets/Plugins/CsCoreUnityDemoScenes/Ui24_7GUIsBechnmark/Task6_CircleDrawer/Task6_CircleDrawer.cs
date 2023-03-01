@@ -73,7 +73,7 @@ namespace com.csutil.tests {
                 Log.MethodEntered();
 
                 // Create a lookup dictionary for all canvas children to quickly get the GOs for each circle id:
-                circleGOs = circleCanvas.GetChildren().ToDictionary(go => go.GetComponent<CircleUi>().circleId, go => go);
+                circleGOs = circleCanvas.GetChildren().ToDictionary(go => go.GetComponentV2<CircleUi>().circleId, go => go);
 
                 // Check which entries from the UI are no longer in the model, which means they were removed in the 
                 // model and now have to be removed in the UI too:
@@ -87,8 +87,8 @@ namespace com.csutil.tests {
                 foreach (var circle in model.circles) {
                     if (circleGOs.TryGetValue(circle.id, out GameObject circleGO)) {
                         // The cicle from the model is already in the UI, just update its position and size:
-                        SetCircleUiPosAndSizeFromCircleModel(circle, circleGO.GetComponent<RectTransform>());
-                        circleGO.GetComponent<CircleUi>().VisualizeCircleAsSelected(circle.id.Equals(selectedCircleId));
+                        SetCircleUiPosAndSizeFromCircleModel(circle, circleGO.GetComponentV2<RectTransform>());
+                        circleGO.GetComponentV2<CircleUi>().VisualizeCircleAsSelected(circle.id.Equals(selectedCircleId));
                     } else { // The circle in the model is not yet in the UI, add a new GO:
                         var newCircleGo = CreateNewCircleUi(circle);
                         circleCanvas.AddChild(newCircleGo); // Add to UI
@@ -110,7 +110,7 @@ namespace com.csutil.tests {
                     if (wasRightClick) { ShowDiameterEditUi(); }
                 };
                 circleUi.VisualizeCircleAsSelected(circle.id.Equals(store.GetState().selectedCircle));
-                SetCircleUiPosAndSizeFromCircleModel(circle, circleUi.GetComponent<RectTransform>());
+                SetCircleUiPosAndSizeFromCircleModel(circle, circleUi.GetComponentV2<RectTransform>());
                 return newCircleUi;
             }
 
@@ -138,7 +138,7 @@ namespace com.csutil.tests {
                 slider.SetOnValueChangedAction((newDiameter) => {
                     // Use the GameObject lookup dictionary to access the UI GO efficiently:
                     var selectedCircleGo = circleGOs[selectedCircleId()];
-                    SetSizeOfCircleUi(selectedCircleGo.GetComponent<RectTransform>(), newDiameter);
+                    SetSizeOfCircleUi(selectedCircleGo.GetComponentV2<RectTransform>(), newDiameter);
                     return true;
                 });
 

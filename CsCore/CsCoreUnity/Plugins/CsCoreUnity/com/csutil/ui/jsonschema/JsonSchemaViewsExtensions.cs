@@ -48,7 +48,7 @@ namespace com.csutil.ui.jsonschema {
             ChangeTracker<string> changeTracker = new ChangeTracker<string>(null);
             self.input.AddOnValueChangedActionThrottled(newValue => {
                 if (self.IsDestroyed()) { return; }
-                var regexValidator = self.GetComponent<RegexValidator>();
+                var regexValidator = self.GetComponentV2<RegexValidator>();
                 if (regexValidator != null && !regexValidator.CheckIfCurrentInputValid()) { return; }
                 if (changeTracker.SetNewValue(newValue)) { onValueChanged(newValue); }
             });

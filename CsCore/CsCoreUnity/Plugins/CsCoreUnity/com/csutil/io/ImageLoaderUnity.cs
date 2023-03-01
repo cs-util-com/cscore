@@ -34,10 +34,10 @@ namespace com.csutil {
 
         public static async Task<Texture2D> LoadFromUrl(this Image self, string imageUrl) {
             if (imageUrl.IsNullOrEmpty()) { throw new ArgumentNullException("The passed imageUrl cant be null"); }
-            self.GetComponent<LoadTexture2dTaskMono>().Destroy(); // Cancel previous task if possible
+            self.GetComponentV2<LoadTexture2dTaskMono>().Destroy(); // Cancel previous task if possible
             var textureLoader = self.gameObject.GetOrAddComponent<LoadTexture2dTaskMono>();
             Texture2D texture2d = await textureLoader.LoadFromUrl(imageUrl);
-            var downloadedTextureStillNeededByImage = self.GetComponent<LoadTexture2dTaskMono>().imageUrlCurrentlyLoadingFrom == imageUrl;
+            var downloadedTextureStillNeededByImage = self.GetComponentV2<LoadTexture2dTaskMono>().imageUrlCurrentlyLoadingFrom == imageUrl;
             if (downloadedTextureStillNeededByImage) {
                 self.sprite = texture2d.ToSprite();
             } else {

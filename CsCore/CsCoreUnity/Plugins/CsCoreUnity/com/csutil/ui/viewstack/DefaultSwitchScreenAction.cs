@@ -23,7 +23,7 @@ namespace com.csutil.ui.viewstack {
         public bool hideNotDestroyCurrentViewWhenGoingBackwards = false;
 
         private void Start() {
-            var b = GetComponent<Button>();
+            var b = gameObject.GetComponentV2<Button>();
             if (b == null) { throw Log.e("No button found, cant setup automatic switch trigger", gameObject); }
             if (b.onClick.GetPersistentEventCount() == 0 || forceAddingAction) {
                 b.AddOnClickAction(delegate { TriggerSwitchView(); });

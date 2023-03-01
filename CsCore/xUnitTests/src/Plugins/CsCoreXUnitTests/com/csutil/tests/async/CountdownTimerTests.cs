@@ -39,7 +39,7 @@ namespace com.csutil.tests.async {
             timer.AddProgressListener(p, updateIntervalInMs: 5);
             Assert.True(10 < p.percent); // 10% of the countdown must already have passed
             await timer.timerTask; // Wait for the end of the timer
-            await TaskV2.Delay(20); // Delay to ensure at least one more update to p happened
+            await TaskV2.Delay(40); // Delay to ensure at least one more update to p happened
             Assert.Equal(100, p.percent);
             Assert.True(p.IsComplete());
         }

@@ -7,7 +7,7 @@ namespace com.csutil.ui.localization {
     [RequireComponent(typeof(Text))]
     public class TextLocalizer : MonoBehaviour {
 
-        private void Start() { GetComponent<Text>().textLocalized(GetComponent<Text>().text); }
+        private void Start() { gameObject.GetComponentV2<Text>().textLocalized(gameObject.GetComponentV2<Text>().text); }
 
     }
 

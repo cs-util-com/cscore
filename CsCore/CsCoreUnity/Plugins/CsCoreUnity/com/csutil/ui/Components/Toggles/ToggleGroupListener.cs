@@ -26,7 +26,7 @@ namespace com.csutil.ui {
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         private void AssertChildrenHaveCorrectMonosAttached() {
-            foreach (var t in GetComponent<ToggleGroup>().ActiveToggles()) {
+            foreach (var t in gameObject.GetComponentV2<ToggleGroup>().ActiveToggles()) {
                 AssertV2.IsTrue(t.GetComponentV2<ToggleListener>() != null, "Missing ToggleListener MonoBehaviour for child of ToggleGroup", t.gameObject);
                 AssertV2.IsTrue(t.GetComponentV2<RadioButton>() != null, "Missing RadioButton MonoBehaviour for child of ToggleGroup", t.gameObject);
             }
@@ -42,7 +42,7 @@ namespace com.csutil.ui {
 
         private void OnActiveToggleInGroupChangedDelayed() {
             AssertChildrenHaveCorrectMonosAttached();
-            var newActiveToggles = GetComponent<ToggleGroup>().ActiveToggles();
+            var newActiveToggles = gameObject.GetComponentV2<ToggleGroup>().ActiveToggles();
             if (!newActiveToggles.SequenceReferencesEqual(activeToggles)) {
                 activeToggles = new List<Toggle>(newActiveToggles);
                 OnActiveToggleInGroupChanged(activeToggles);
