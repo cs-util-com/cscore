@@ -1,6 +1,7 @@
 ﻿using com.csutil.ui;
 using NUnit.Framework;
 using System.Collections;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.TestTools;
 
@@ -72,5 +73,52 @@ namespace com.csutil.tests.ui {
 
             yield return null;
         }
+
+        [UnityTest]
+        public IEnumerator TestViewStack2() {
+
+            string defaultViewStackView = "Canvas/DefaultViewStackView";
+
+            var newMainViewStack = ViewStackHelper.MainViewStack();
+            Assert.AreSame(newMainViewStack, ViewStackHelper.MainViewStack());
+
+            Assert.AreEqual(1, RootCanvas.GetAllRootCanvases().Count());
+
+            // THe main view stack itself does not have a canvas:
+            Assert.Null(newMainViewStack.GetComponent<Canvas>());
+
+            var view1 = newMainViewStack.ShowView(defaultViewStackView);
+            Assert.AreEqual(1, RootCanvas.GetAllRootCanvases().Count());
+
+            // The canvas of the view is not a root canvas:
+            Assert.False(view1.GetComponent<Canvas>().isRootCanvasV2());
+            Assert.False(view1.GetComponent<Canvas>().isRootCanvas);
+
+            Toast.Show("Some toast 1", "Lorem ipsum 1");
+            yield return new WaitForSeconds(0.3f);
+
+            var view2 = ViewStackHelper.MainViewStack().SwitchToView(defaultViewStackView);
+
+            var rootCanvases = RootCanvas.GetAllRootCanvases();
+            if (rootCanvases.Count() > 1) {
+                foreach (var canvas in rootCanvases) {
+                    Log.w("Found canvas: " + canvas, canvas);
+                }
+            }
+            Assert.False(view2.GetComponent<Canvas>().isRootCanvasV2());
+            Assert.False(view1.GetComponent<Canvas>().isRootCanvasV2());
+            Assert.AreEqual(1, RootCanvas.GetAllRootCanvases().Count());
+            Assert.False(view2.GetComponent<Canvas>().isRootCanvas);
+            Assert.False(view1.GetComponent<Canvas>().isRootCanvas);
+
+            var allRootCanvases = RootCanvas.GetAllRootCanvases();
+            allRootCanvases.Single().gameObject.Destroy();
+
+            var newMainViewStack2 = ViewStackHelper.MainViewStack();
+            Assert.AreEqual(1, RootCanvas.GetAllRootCanvases().Count());
+
+        }
+
     }
+
 }
