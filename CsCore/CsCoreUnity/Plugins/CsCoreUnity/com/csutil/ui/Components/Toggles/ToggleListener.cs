@@ -11,12 +11,12 @@ namespace com.csutil.ui {
         private UnityAction<bool> listener;
 
         private void OnEnable() {
-            listener = GetComponent<Toggle>().AddOnValueChangedAction(toggleIsOn => {
+            listener = gameObject.GetComponentV2<Toggle>().AddOnValueChangedAction(toggleIsOn => {
                 OnToggleStateChanged(toggleIsOn);
                 InformParentToggleGroupListenerIfFound();
                 return true;
             }, skipChangesByLogic: false);
-            OnToggleStateChanged(GetComponent<Toggle>().isOn);
+            OnToggleStateChanged(gameObject.GetComponentV2<Toggle>().isOn);
             InformParentToggleGroupListenerIfFound();
         }
 
@@ -25,7 +25,7 @@ namespace com.csutil.ui {
         }
 
         private void OnDisable() {
-            GetComponent<Toggle>().onValueChanged.RemoveListener(listener);
+            gameObject.GetComponentV2<Toggle>().onValueChanged.RemoveListener(listener);
         }
 
         protected abstract void OnToggleStateChanged(bool toggleIsOn);

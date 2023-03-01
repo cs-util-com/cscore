@@ -19,7 +19,7 @@ namespace com.csutil.ui {
         private void Start() { SetCanvasSortingOrderOnTop(); }
 
         private void SetCanvasSortingOrderOnTop() {
-            var canvas = GetComponent<Canvas>();
+            var canvas = gameObject.GetComponentV2<Canvas>();
             var maxOrderOfAnyCanvasFound = canvas.CalcCurrentMaxSortingOrderInLayer();
             // If overrideSorting is already active the sorting order must be at least 1 higher, equal does not work in that case:
             if (canvas.overrideSorting) { maxOrderOfAnyCanvasFound++; }

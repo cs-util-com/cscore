@@ -14,7 +14,7 @@ namespace com.csutil {
 
         private bool UpdateHeight() {
             if (!enabled) { return false; }
-            var grid = GetComponent<GridLayoutGroup>();
+            var grid = gameObject.GetComponentV2<GridLayoutGroup>();
             if (grid.constraint == GridLayoutGroup.Constraint.Flexible) {
                 var activeChildCount = grid.gameObject.GetChildrenIEnumerable().Filter(c => c.activeSelf).Count();
 
@@ -23,7 +23,7 @@ namespace com.csutil {
                 int cellCountX = Mathf.Max(1, Mathf.FloorToInt((width - grid.padding.horizontal + grid.spacing.x + 0.001f) / (grid.cellSize.x + grid.spacing.x)));
                 var minRows = Mathf.CeilToInt(activeChildCount / (float)cellCountX);
                 var calculatedMinRequiredHeight = grid.padding.vertical + (grid.cellSize.y + grid.spacing.y) * minRows - grid.spacing.y;
-                var ele = GetComponent<LayoutElement>();
+                var ele = gameObject.GetComponentV2<LayoutElement>();
                 if (calculatedMinRequiredHeight != ele.minHeight) { ele.minHeight = calculatedMinRequiredHeight; }
             } else {
                 Log.e("GridLayoutGroupAutoHeight only works with GridLayoutGroup.Constraint.Flexible for now");

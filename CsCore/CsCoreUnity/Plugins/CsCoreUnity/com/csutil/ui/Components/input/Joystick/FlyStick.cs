@@ -24,12 +24,12 @@ namespace com.csutil.ui {
         private float moveSpeed;
 
         private void OnEnable() {
-            if (target == null) { target = Camera.main?.GetComponent<Rigidbody>(); }
-            GetComponent<JoystickUi>().onJoystickChanged.AddListener(OnForceChange);
+            if (target == null) { target = Camera.main?.GetComponentV2<Rigidbody>(); }
+            gameObject.GetComponentV2<JoystickUi>().onJoystickChanged.AddListener(OnForceChange);
         }
 
         private void OnDisable() {
-            GetComponent<JoystickUi>().onJoystickChanged.RemoveListener(OnForceChange);
+            gameObject.GetComponentV2<JoystickUi>().onJoystickChanged.RemoveListener(OnForceChange);
         }
 
         private void OnForceChange(bool isNowDragging, Vector2 newForce) {

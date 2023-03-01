@@ -20,9 +20,9 @@ namespace com.csutil.ui.Components {
         private Sprite lastSprite;
 
         private void OnEnable() {
-            img = GetComponent<Image>();
-            aspectRatioFitter = GetComponent<AspectRatioFitter>();
-            rt = GetComponent<RectTransform>();
+            img = gameObject.GetComponentV2<Image>();
+            aspectRatioFitter = gameObject.GetComponentV2<AspectRatioFitter>();
+            rt = gameObject.GetComponentV2<RectTransform>();
             parentRt = transform.parent as RectTransform;
             this.ExecuteRepeated(Refresh, delayInMsBetweenIterations: 5);
         }

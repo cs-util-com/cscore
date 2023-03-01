@@ -371,7 +371,7 @@ namespace com.csutil {
                 if (!x.enabled) { return false; } // Only include currently active ones
                 if (!x.gameObject.activeInHierarchy) { return false; }
                 if (x.sortingLayerID != self.sortingLayerID) { return false; }
-                var o = x.GetComponent<CanvasOrderOnTop>();
+                var o = x.GetComponentV2<CanvasOrderOnTop>();
                 if (o != null && o.excludeFromOrderCalc) { return false; }
                 if (o != null && o.HasComponent<IgnoreRootCanvas>(out var _)) { return true; }
                 return true;

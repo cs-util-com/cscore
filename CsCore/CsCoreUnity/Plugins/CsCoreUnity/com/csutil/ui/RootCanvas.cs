@@ -24,7 +24,7 @@ namespace com.csutil.ui {
             var roots = GetAllRootCanvases();
             if (roots.IsNullOrEmpty()) { return CreateNewRootCanvas(); }
             // Check if there is a root canvas that has a ViewStack attached:
-            var rootCanvasesWithViewStack = roots.Filter(x => x.GetComponent<ViewStack>() != null);
+            var rootCanvasesWithViewStack = roots.Filter(x => x.GetComponentV2<ViewStack>() != null);
             if (!rootCanvasesWithViewStack.IsNullOrEmpty()) {
                 AssertV2.AreEqual(1, rootCanvasesWithViewStack.Count(), "rootCanvasesWithViewStack");
                 return rootCanvasesWithViewStack.First();
@@ -66,7 +66,7 @@ namespace com.csutil.ui {
         /// <summary> Assert that none of the root canvases has a viewstack directly attached to the same level </summary>
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         private static void AssertNoViewStacksOnRootCanvasLevel(IOrderedEnumerable<Canvas> roots) {
-            var rootCanvasesWithViewStack = roots.Filter(x => x.GetComponent<ViewStack>() != null);
+            var rootCanvasesWithViewStack = roots.Filter(x => x.GetComponentV2<ViewStack>() != null);
             if (!rootCanvasesWithViewStack.IsNullOrEmpty()) {
                 foreach (var c in rootCanvasesWithViewStack) {
                     Log.e("Found root canvas which had a ViewStack directly attached to it, consider moving the ViewStack to a direct child of the root canvas instead", c.gameObject);

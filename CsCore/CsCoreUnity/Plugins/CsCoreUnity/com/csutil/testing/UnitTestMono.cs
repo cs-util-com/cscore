@@ -57,7 +57,7 @@ namespace com.csutil.tests {
         public void SimulateButtonClickOn(string buttonName) {
             if (simulateUserInput) {
                 Log.d("Now simulating the user clicking the button=" + buttonName);
-                GetLink(buttonName).GetComponent<Button>().onClick.Invoke();
+                GetLink(buttonName).GetComponentV2<Button>().onClick.Invoke();
             }
         }
 

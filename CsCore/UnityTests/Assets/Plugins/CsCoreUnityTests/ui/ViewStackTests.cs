@@ -85,14 +85,13 @@ namespace com.csutil.tests.ui {
             Assert.AreEqual(1, RootCanvas.GetAllRootCanvases().Count());
 
             // THe main view stack itself does not have a canvas:
-            Assert.Null(newMainViewStack.GetComponent<Canvas>());
+            Assert.Null(newMainViewStack.GetComponentV2<Canvas>());
 
             var view1 = newMainViewStack.ShowView(defaultViewStackView);
             Assert.AreEqual(1, RootCanvas.GetAllRootCanvases().Count());
 
             // The canvas of the view is not a root canvas:
-            Assert.False(view1.GetComponent<Canvas>().isRootCanvasV2());
-            Assert.False(view1.GetComponent<Canvas>().isRootCanvas);
+            Assert.False(view1.GetComponentV2<Canvas>().isRootCanvasV2());
 
             Toast.Show("Some toast 1", "Lorem ipsum 1");
             yield return new WaitForSeconds(0.3f);
@@ -105,11 +104,9 @@ namespace com.csutil.tests.ui {
                     Log.w("Found canvas: " + canvas, canvas);
                 }
             }
-            Assert.False(view2.GetComponent<Canvas>().isRootCanvasV2());
-            Assert.False(view1.GetComponent<Canvas>().isRootCanvasV2());
+            Assert.False(view2.GetComponentV2<Canvas>().isRootCanvasV2());
+            Assert.False(view1.GetComponentV2<Canvas>().isRootCanvasV2());
             Assert.AreEqual(1, RootCanvas.GetAllRootCanvases().Count());
-            Assert.False(view2.GetComponent<Canvas>().isRootCanvas);
-            Assert.False(view1.GetComponent<Canvas>().isRootCanvas);
 
             var allRootCanvases = RootCanvas.GetAllRootCanvases();
             allRootCanvases.Single().gameObject.Destroy();

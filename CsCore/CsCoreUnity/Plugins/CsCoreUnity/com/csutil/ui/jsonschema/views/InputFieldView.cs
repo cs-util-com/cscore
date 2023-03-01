@@ -20,7 +20,7 @@ namespace com.csutil.ui.jsonschema {
         }
 
         private void SetupRegexValidator() {
-            var regexValidator = GetComponent<RegexValidator>();
+            var regexValidator = gameObject.GetComponentV2<RegexValidator>();
             if (regexValidator == null) {
                 Log.w($"Can't enforce regex, no validator found in FieldView {this}", gameObject);
                 return;
@@ -66,7 +66,7 @@ namespace com.csutil.ui.jsonschema {
         }
 
         private static void ForceRecalculateNeededHeightOfInputField(InputField i) {
-            i.onValueChanged.AddListener(_ => { LayoutRebuilder.MarkLayoutForRebuild(i.GetComponent<RectTransform>()); });
+            i.onValueChanged.AddListener(_ => { LayoutRebuilder.MarkLayoutForRebuild(i.GetComponentV2<RectTransform>()); });
         }
 
     }
