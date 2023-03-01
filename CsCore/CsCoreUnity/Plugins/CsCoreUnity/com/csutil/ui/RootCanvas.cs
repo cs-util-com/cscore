@@ -51,7 +51,7 @@ namespace com.csutil.ui {
 
         /// <summary> Returns a list of root canvases where the first one is the visually most top canvas </summary>
         public static IOrderedEnumerable<Canvas> GetAllRootCanvases() {
-            return ResourcesV2.FindAllInScene<Canvas>().Map(x => x.rootCanvas).ToHashSet().Filter(x => !x.HasComponent<IgnoreRootCanvas>(out var _)).OrderByDescending(x => x.sortingOrder);
+            return ResourcesV2.FindAllInScene<Canvas>().Map(x => x.rootCanvasV2()).ToHashSet().Filter(x => !x.HasComponent<IgnoreRootCanvas>(out var _)).OrderByDescending(x => x.sortingOrder);
         }
 
         public static Canvas CreateNewRootCanvas(string rootCanvasPrefab = "Canvas/DefaultRootCanvas") {
@@ -72,6 +72,17 @@ namespace com.csutil.ui {
                     Log.e("Found root canvas which had a ViewStack directly attached to it, consider moving the ViewStack to a direct child of the root canvas instead", c.gameObject);
                 }
             }
+        }
+
+        public static Canvas rootCanvasV2(this Canvas self) {
+            var rootCanvas = self.rootCanvas;
+            if (self == rootCanvas) {
+                if (!rootCanvas.isRootCanvasV2()) {
+                    var realRootCanvas = SearchForParentCanvas(rootCanvas);
+                    return realRootCanvas;
+                }
+            }
+            return rootCanvas;
         }
 
         public static bool isRootCanvasV2(this Canvas self) {
