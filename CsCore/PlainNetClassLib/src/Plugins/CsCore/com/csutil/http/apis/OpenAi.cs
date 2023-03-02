@@ -13,6 +13,8 @@ namespace com.csutil.http.apis {
         /// <param name="apiKey"> See https://beta.openai.com/docs/api-reference/authentication and https://beta.openai.com/account/api-keys </param>
         public OpenAi(string apiKey) { this.apiKey = apiKey; }
 
+        /// <summary> See also https://platform.openai.com/docs/guides/chat/chat-vs-completions : "Because gpt-3.5-turbo performs at a
+        /// similar capability to text-davinci-003 but at 10% the price per token, we recommend gpt-3.5-turbo for most use cases." </summary>
         public Task<Text.CompletionsResponse> Complete(string prompt) {
             return Complete(new Text.CompletionsRequest() { prompt = prompt });
         }
@@ -28,6 +30,7 @@ namespace com.csutil.http.apis {
             return request.WithAuthorization(apiKey).WithJsonContent(requestParams).GetResult<Image.Response>();
         }
 
+        /// <summary> See https://platform.openai.com/docs/guides/chat </summary>
         public Task<ChatGpt.Response> ChatGpt(ChatGpt.Request conversation) {
             var request = new Uri("https://api.openai.com/v1/chat/completions").SendPOST();
             return request.WithAuthorization(apiKey).WithJsonContent(conversation).GetResult<ChatGpt.Response>();
