@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using com.csutil.http.apis;
 using Xunit;
@@ -25,7 +26,7 @@ namespace com.csutil.tests.http {
             // test request performed on https://labs.openai.com/ since the DallE 2 service is not yet released with official API access
             var openAi = new OpenAi(await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey"));
             var prompt = "A very cute cat with a cowboy hat in cartoon style";
-            var result = await openAi.TextToImage(new OpenAi.Image.Request(){ prompt = prompt });
+            var result = await openAi.TextToImage(new OpenAi.Image.Request() { prompt = prompt });
             Assert.NotEmpty(result.data);
             var generatedImageUrls = result.data.Map(x => x.url);
             Assert.NotEmpty(generatedImageUrls);
