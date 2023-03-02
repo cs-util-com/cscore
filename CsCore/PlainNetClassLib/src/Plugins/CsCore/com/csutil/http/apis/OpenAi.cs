@@ -28,6 +28,9 @@ namespace com.csutil.http.apis {
             return request.WithAuthorization(apiKey).WithJsonContent(requestParams).GetResult<Image.Response>();
         }
 
+        public Task<ChatGpt.Response> ChatGpt(ChatGpt.Request conversation) {
+            var request = new Uri("https://api.openai.com/v1/chat/completions").SendPOST();
+            return request.WithAuthorization(apiKey).WithJsonContent(conversation).GetResult<ChatGpt.Response>();
         }
 
         public class Text {
@@ -138,6 +141,75 @@ namespace com.csutil.http.apis {
                     public string url { get; set; }
                 }
 
+            }
+
+        }
+
+    }
+
+    public class ChatGpt {
+
+        public class Line {
+
+            public readonly string role;
+            public readonly string content;
+
+            [JsonConstructor]
+            public Line(string role, string content) {
+                this.role = role;
+                this.content = content;
+            }
+
+            public Line(Role role, string content) {
+                this.role = role.ToString();
+                this.content = content;
+            }
+
+        }
+
+        public enum Role { system, user, assistant }
+
+        public class Request {
+
+            /// <summary> See https://beta.openai.com/docs/models/overview </summary>
+            public string model = "gpt-3.5-turbo";
+
+            /// <summary> The maximum number of tokens to generate in the completion.
+            /// The token count of your prompt plus max_tokens cannot exceed the model's context length.
+            /// Most models have a context length of 2048 tokens (except for the newest models, which support 4096). </summary>
+            public int max_tokens { get; set; }
+            public List<Line> messages { get; set; }
+
+            public Request(List<Line> messages, int max_tokens = 4096) {
+                var tokenCountForMessages = JsonWriter.GetWriter(this).Write(messages).Length;
+                if (max_tokens + tokenCountForMessages > 4096) {
+                    max_tokens = 4096 - tokenCountForMessages;
+                }
+                this.messages = messages;
+                this.max_tokens = max_tokens;
+            }
+
+        }
+
+        public class Response {
+
+            public string id { get; set; }
+            public string @object { get; set; }
+            public int created { get; set; }
+            public string model { get; set; }
+            public Usage usage { get; set; }
+            public List<Choice> choices { get; set; }
+
+            public class Choice {
+                public Line message { get; set; }
+                public string finish_reason { get; set; }
+                public int index { get; set; }
+            }
+
+            public class Usage {
+                public int prompt_tokens { get; set; }
+                public int completion_tokens { get; set; }
+                public int total_tokens { get; set; }
             }
 
         }
