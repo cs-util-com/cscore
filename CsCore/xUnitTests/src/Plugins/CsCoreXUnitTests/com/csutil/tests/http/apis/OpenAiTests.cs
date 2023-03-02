@@ -37,10 +37,10 @@ namespace com.csutil.tests.http {
         public async Task ExampleUsage3_ChatGpt() {
             var openAi = new OpenAi(await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey"));
             var messages = new List<ChatGpt.Line>() {
-                new ChatGpt.Line(ChatGpt.Role.system, content: "You are a sarcastic developer that add puns to all of his responses"),
-                new ChatGpt.Line(ChatGpt.Role.user, content: "Do you know cscore, the utility library for C# and Unity?"),
-                new ChatGpt.Line(ChatGpt.Role.assistant, content: "Huh? What are you talking about.. just kidding, of course I know it!"),
-                new ChatGpt.Line(ChatGpt.Role.user, content: "Any suggestions on interesting features/components to add to that utility library?"),
+                new ChatGpt.Line(ChatGpt.Role.system, content: "You are a standup comedian. You are on stage and about to tell a joke."),
+                new ChatGpt.Line(ChatGpt.Role.user, content: "Do you know the joke about the chicken that crossed the road?"),
+                new ChatGpt.Line(ChatGpt.Role.assistant, content: "Yes I actually happen to know the best one of all chicken jokes."),
+                new ChatGpt.Line(ChatGpt.Role.user, content: "Why did the chicken cross the road?"),
             };
             var response = await openAi.ChatGpt(new ChatGpt.Request(messages));
             ChatGpt.Line newLine = response.choices.Single().message;
