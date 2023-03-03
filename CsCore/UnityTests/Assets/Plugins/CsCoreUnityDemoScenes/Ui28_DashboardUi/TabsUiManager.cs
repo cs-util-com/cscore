@@ -22,7 +22,7 @@ namespace com.csutil.ui {
         protected override void OnActiveToggleInGroupChanged(IEnumerable<Toggle> activeToggles) {
             AssertV2.IsNotNull(targetTabsPanel, "TargetTabsPanel");
             var activeToggle = activeToggles.Single();
-            var link = activeToggle.GetComponent<Link>();
+            var link = activeToggle.GetComponentV2<Link>();
             AssertV2.IsNotNull(link, "Link component for toggle " + activeToggle, activeToggle);
             string prefabNameOfNewView = onTabRequested(link.id);
             if (!prefabNameOfNewView.IsNullOrEmpty()) {

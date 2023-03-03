@@ -371,34 +371,12 @@ namespace com.csutil {
                 if (!x.enabled) { return false; } // Only include currently active ones
                 if (!x.gameObject.activeInHierarchy) { return false; }
                 if (x.sortingLayerID != self.sortingLayerID) { return false; }
-                var o = x.GetComponent<CanvasOrderOnTop>();
+                var o = x.GetComponentV2<CanvasOrderOnTop>();
                 if (o != null && o.excludeFromOrderCalc) { return false; }
                 if (o != null && o.HasComponent<IgnoreRootCanvas>(out var _)) { return true; }
                 return true;
             });
             return l.Max(x => x.sortingOrder);
-        }
-
-        public static bool isRootCanvasV2(this Canvas self) {
-            if (self == null) { return false; }
-            if (!self.isRootCanvas) return false;
-            
-            // There is a bug that during the onEnable phase of a MonoBehavior a canvas thinks it is a
-            // root canvas even though it is not, so additionally all parent canvases need to be collected up
-            // to the root of the GameObject tree to ensure there are no other canvases on the way up.
-            
-            // If a canvas is found in any grandparent the current canvas who thinks its a root canvas cant be one:
-            var parentCanvases = self.gameObject.GetParent()?.GetComponentInParents<Canvas>();
-            if (parentCanvases != null) {
-                LogWarningNotToDoUiOperationsDuringOnEnable(self);
-                return false;
-            }
-            return true;
-        }
-
-        [Conditional("DEBUG")]
-        private static void LogWarningNotToDoUiOperationsDuringOnEnable(Canvas self) {
-            Log.w("Using operations on canvas such as .isRootCanvas during onEnable can result in incorrect UI results! If possible delay such operations until the UI is initialized", self.gameObject);
         }
 
     }

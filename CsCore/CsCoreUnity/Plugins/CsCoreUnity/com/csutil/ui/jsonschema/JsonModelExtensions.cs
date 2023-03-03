@@ -68,7 +68,7 @@ namespace com.csutil.ui.jsonschema {
 
         /// <summary> fills the schema dictionary of the generator with the schemas found in the target view </summary>
         private static void SetupSchemaDictionary(this JsonSchemaToView self, GameObject targetView) {
-            AddToSchemaDictionary(self, targetView.GetComponent<ObjectFieldView>());
+            AddToSchemaDictionary(self, targetView.GetComponentV2<ObjectFieldView>());
             foreach (var fieldView in targetView.GetComponentsInChildren<ObjectFieldView>(includeInactive: true)) {
                 AddToSchemaDictionary(self, fieldView);
             }
@@ -101,7 +101,7 @@ namespace com.csutil.ui.jsonschema {
         private static void RestorePropertiesFromChildrenGOs(ObjectFieldView targetFieldView) {
             AssertV2.IsNotNull(targetFieldView, "targetFieldView");
             if (targetFieldView.field.properties.IsNullOrEmpty()) {
-                var children = targetFieldView.mainLink.gameObject.GetChildren().Map(c => c.GetComponent<FieldView>()).Filter(x => x != null);
+                var children = targetFieldView.mainLink.gameObject.GetChildren().Map(c => c.GetComponentV2<FieldView>()).Filter(x => x != null);
                 if (children.IsNullOrEmpty()) {
                     Log.w(targetFieldView.fieldName + " had no children fieldViews");
                 } else {

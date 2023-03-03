@@ -16,7 +16,7 @@ namespace com.csutil.ui.viewstack {
         public void Update() {
             if (InputV2.GetKeyUp(KeyCode.Escape)) { // back button pressed
                 Log.d("Back key pressed");
-                var vs = gameObject.GetComponent<ViewStack>();
+                var vs = gameObject.GetComponentV2<ViewStack>();
                 var screenOnTop = GetCanvasWithHighestSortingOrder();
                 var viewToClose = vs.GetLatestView();
                 if (viewToClose.IsGrandChildOf(screenOnTop)) {

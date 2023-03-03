@@ -17,7 +17,7 @@ namespace com.csutil.ui {
         }
 
         private void Start() {
-            AssertV2.IsFalse(GetComponent<Canvas>().isRootCanvasV2(), $"{nameof(SafeAreaResizer)} should NOT be added on the root canvas level!", gameObject);
+            AssertV2.IsFalse(gameObject.GetComponentV2<Canvas>().isRootCanvasV2(), $"{nameof(SafeAreaResizer)} should NOT be added on the root canvas level!", gameObject);
         }
 
         private void OnRectTransformDimensionsChange() { Recalc(); }

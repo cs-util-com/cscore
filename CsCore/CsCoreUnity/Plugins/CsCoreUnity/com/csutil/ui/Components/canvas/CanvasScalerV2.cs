@@ -13,7 +13,7 @@ namespace com.csutil.ui {
         private void OnValidate() { UpdateScaler(); } // Called in editor
 
         public void Start() {
-            AssertV2.IsTrue(GetComponent<Canvas>().isRootCanvasV2(), $"{nameof(CanvasScalerV2)} should be added on the root canvas level!", gameObject);
+            AssertV2.IsTrue(gameObject.GetComponentV2<Canvas>().isRootCanvasV2(), $"{nameof(CanvasScalerV2)} should be added on the root canvas level!", gameObject);
             this.ExecuteRepeated(UpdateScaler, 100);
         }
 
@@ -26,7 +26,7 @@ namespace com.csutil.ui {
         }
 
         private void LazyInitCanvasScaler() {
-            canvasScaler = GetComponent<CanvasScaler>();
+            canvasScaler = gameObject.GetComponentV2<CanvasScaler>();
             if (canvasScaler.uiScaleMode != CanvasScaler.ScaleMode.ScaleWithScreenSize) {
                 Log.w("Fixed that CanvasScaler not set to ScaleWithScreenSize! Old scaleMode=" + canvasScaler.uiScaleMode);
                 canvasScaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;

@@ -15,7 +15,7 @@ namespace com.csutil.tests {
             });
             input.onLongPressEnd.AddListener(() => {
                 Toast.Show("onLongPressEnd");
-                input.gameObject.GetComponent<UiDragHandler>().Destroy();
+                input.gameObject.GetComponentV2<UiDragHandler>().Destroy();
             });
             yield return null;
         }

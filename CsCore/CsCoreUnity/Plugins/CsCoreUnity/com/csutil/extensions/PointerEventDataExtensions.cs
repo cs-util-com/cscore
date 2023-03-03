@@ -8,7 +8,7 @@ namespace com.csutil {
         public static Vector3 localPosition(this PointerEventData e, bool ignoreGlobalScale = false) {
             var go = e.pointerEnter;
             if (go == null) { go = e.pointerPress; }
-            var rt = go.GetComponent<RectTransform>();
+            var rt = go.GetComponentV2<RectTransform>();
             if (rt != null) {
                 var cam = e.pressEventCamera;
                 // Check if cam should be used (see https://docs.unity3d.com/ScriptReference/RectTransformUtility.ScreenPointToLocalPointInRectangle.html ):

@@ -24,7 +24,7 @@ namespace com.csutil.ui {
             var roots = GetAllRootCanvases();
             if (roots.IsNullOrEmpty()) { return CreateNewRootCanvas(); }
             // Check if there is a root canvas that has a ViewStack attached:
-            var rootCanvasesWithViewStack = roots.Filter(x => x.GetComponent<ViewStack>() != null);
+            var rootCanvasesWithViewStack = roots.Filter(x => x.GetComponentV2<ViewStack>() != null);
             if (!rootCanvasesWithViewStack.IsNullOrEmpty()) {
                 AssertV2.AreEqual(1, rootCanvasesWithViewStack.Count(), "rootCanvasesWithViewStack");
                 return rootCanvasesWithViewStack.First();
@@ -51,7 +51,7 @@ namespace com.csutil.ui {
 
         /// <summary> Returns a list of root canvases where the first one is the visually most top canvas </summary>
         public static IOrderedEnumerable<Canvas> GetAllRootCanvases() {
-            return ResourcesV2.FindAllInScene<Canvas>().Map(x => x.rootCanvas).ToHashSet().Filter(x => !x.HasComponent<IgnoreRootCanvas>(out var _)).OrderByDescending(x => x.sortingOrder);
+            return ResourcesV2.FindAllInScene<Canvas>().Map(x => x.rootCanvasV2()).ToHashSet().Filter(x => !x.HasComponent<IgnoreRootCanvas>(out var _)).OrderByDescending(x => x.sortingOrder);
         }
 
         public static Canvas CreateNewRootCanvas(string rootCanvasPrefab = "Canvas/DefaultRootCanvas") {
@@ -66,12 +66,50 @@ namespace com.csutil.ui {
         /// <summary> Assert that none of the root canvases has a viewstack directly attached to the same level </summary>
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         private static void AssertNoViewStacksOnRootCanvasLevel(IOrderedEnumerable<Canvas> roots) {
-            var rootCanvasesWithViewStack = roots.Filter(x => x.GetComponent<ViewStack>() != null);
+            var rootCanvasesWithViewStack = roots.Filter(x => x.GetComponentV2<ViewStack>() != null);
             if (!rootCanvasesWithViewStack.IsNullOrEmpty()) {
                 foreach (var c in rootCanvasesWithViewStack) {
                     Log.e("Found root canvas which had a ViewStack directly attached to it, consider moving the ViewStack to a direct child of the root canvas instead", c.gameObject);
                 }
             }
+        }
+
+        public static Canvas rootCanvasV2(this Canvas self) {
+            var rootCanvas = self.rootCanvas;
+            if (self == rootCanvas) {
+                if (!rootCanvas.isRootCanvasV2()) {
+                    var realRootCanvas = SearchForParentCanvas(rootCanvas);
+                    return realRootCanvas;
+                }
+            }
+            return rootCanvas;
+        }
+
+        public static bool isRootCanvasV2(this Canvas self) {
+            if (self == null) { return false; }
+            if (!self.isRootCanvas) return false;
+
+            // There is a bug that during the onEnable phase of a MonoBehavior a canvas thinks it is a
+            // root canvas even though it is not, so additionally all parent canvases need to be collected up
+            // to the root of the GameObject tree to ensure there are no other canvases on the way up.
+
+            // If a canvas is found in any grandparent the current canvas who thinks its a root canvas cant be one:
+            var parentCanvas = SearchForParentCanvas(self);
+            if (parentCanvas != null) {
+                LogWarningNotToDoUiOperationsDuringOnEnable(self);
+                return false;
+            }
+            return true;
+        }
+
+        private static Canvas SearchForParentCanvas(Canvas self) {
+            var parent = self.gameObject.GetParent();
+            return parent?.GetComponentInParents<Canvas>();
+        }
+
+        [Conditional("DEBUG")]
+        private static void LogWarningNotToDoUiOperationsDuringOnEnable(Canvas self) {
+            Log.w("Using operations on canvas such as .isRootCanvas during onEnable can result in incorrect UI results! If possible delay such operations until the UI is initialized", self.gameObject);
         }
 
     }
