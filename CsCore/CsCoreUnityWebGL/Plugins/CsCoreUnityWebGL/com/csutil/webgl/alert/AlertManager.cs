@@ -15,9 +15,13 @@ namespace com.csutil.webgl.alert {
         /// <summary>
         /// Import JSLib functions
         /// </summary>
+        /// This is where we reference the javaScript funtctions we have written
+        /// into our .jslib file. If you have included cscore as a module, the
+        /// javaScript code will automatically be served to the browser. More info at:
+        /// https://docs.unity3d.com/Manual/webgl-interactingwithbrowserscripting.html
         #region jsFunctionImports
         [DllImport("__Internal")]
-        private static extern void createOnUnload();
+        private static extern void createOnUnloadHandlerjs();
 
         [DllImport("__Internal")]
         private static extern void triggerBrowserAlertjs(string message);
@@ -31,7 +35,7 @@ namespace com.csutil.webgl.alert {
 
 
         void Start() {
-            createOnUnload();
+            createOnUnloadHandlerjs();
         }
         /// <summary>
         /// Send alert message to JSLib File

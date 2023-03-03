@@ -1,6 +1,7 @@
 /**
  * This is how javascript functions are implemented in a way that
- * makes them callable from within the C# code
+ * makes them callable from within the C# code. More info at:
+ * https://docs.unity3d.com/Manual/webgl-interactingwithbrowserscripting.html
  */
 mergeInto(LibraryManager.library, {
 
@@ -8,7 +9,7 @@ mergeInto(LibraryManager.library, {
      * This function is executed to add a listener to the onClose 
      * Event that is provided by the browser
      */
-    createOnUnload: function () {
+    createOnUnloadHandlerjs: function () {
         // Initialized this variable so it's not ambiguous
         this._OnUnloadManager_PreventClosing = false;
 
