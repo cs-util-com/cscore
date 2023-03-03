@@ -8,5 +8,9 @@
 	"author": {
 		"name": "csutil.com",
 		"url": "https://github.com/cs-util-com/cscore"
+	},
+	"dependencies": {
+		"com.csutil.cscore": "1.8.8",
+		"com.csutil.cscore.unity": "1.8.8"
 	}
 }
