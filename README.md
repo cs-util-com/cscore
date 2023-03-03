@@ -1139,12 +1139,12 @@ Your can also manually open your `manifest.json` file with a text editor and add
 { 
   "dependencies": { 
     ...
-	"com.csutil.cscore": "https://github.com/cs-util-com/cscore.git?path=CsCore/PlainNetClassLib/src/Plugins",
-	"com.csutil.cscore.unity": "https://github.com/cs-util-com/cscore.git?path=CsCore/CsCoreUnity/Plugins",
-	"com.csutil.cscore.tests": "https://github.com/cs-util-com/cscore.git?path=CsCore/xUnitTests/src/Plugins",
+    "com.csutil.cscore": "https://github.com/cs-util-com/cscore.git?path=CsCore/PlainNetClassLib/src/Plugins",
+    "com.csutil.cscore.unity": "https://github.com/cs-util-com/cscore.git?path=CsCore/CsCoreUnity/Plugins",
+    "com.csutil.cscore.tests": "https://github.com/cs-util-com/cscore.git?path=CsCore/xUnitTests/src/Plugins",
     "com.csutil.cscore.unity.demos": "https://github.com/cs-util-com/cscore.git?path=CsCore/UnityTests/Assets/Plugins/CsCoreUnityDemoScenes",
-	"com.csutil.cscore.unity.tests": "https://github.com/cs-util-com/cscore.git?path=CsCore/UnityTests/Assets/Plugins/CsCoreUnityTests",
-  "com.csutil.cscore.unity.webgl": "https://github.com/cs-util-com/cscore.git?path=CsCore/CsCoreUnityWebGL/Plugins",
+    "com.csutil.cscore.unity.tests": "https://github.com/cs-util-com/cscore.git?path=CsCore/UnityTests/Assets/Plugins/CsCoreUnityTests",
+    "com.csutil.cscore.unity.webgl": "https://github.com/cs-util-com/cscore.git?path=CsCore/CsCoreUnityWebGL/Plugins",
     ...
   } 
 }
