@@ -14,6 +14,12 @@ namespace com.csutil.ui {
         /// include this canvas in the calculation of the max order </summary>
         public bool excludeFromOrderCalc = false;
 
+        /// <summary> Can be used to influence the order if many Canvases using a CanvasOrderOnTop are
+        /// shown at the same time. E.g toass should be shown on top of Dialogs but both have a CanvasOrderOnTop.
+        /// So toasts will use an orderOffset of 20 and Dialogs only 10 so that a shown toast will always be
+        /// on top of a dialog shown at the same time </summary>
+        public int orderOffset = 1;
+        
         private void OnEnable() { SetCanvasSortingOrderOnTop(); }
 
         private void Start() { SetCanvasSortingOrderOnTop(); }
@@ -25,7 +31,7 @@ namespace com.csutil.ui {
             if (canvas.overrideSorting) { maxOrderOfAnyCanvasFound++; }
             if (maxOrderOfAnyCanvasFound >= canvas.sortingOrder) {
                 canvas.overrideSorting = true;
-                canvas.sortingOrder = maxOrderOfAnyCanvasFound + 1;
+                canvas.sortingOrder = maxOrderOfAnyCanvasFound + orderOffset;
             }
             gameObject.GetOrAddComponent<GraphicRaycaster>();
         }
