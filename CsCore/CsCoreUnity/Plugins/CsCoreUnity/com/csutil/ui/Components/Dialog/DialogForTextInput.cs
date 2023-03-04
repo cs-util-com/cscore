@@ -76,7 +76,7 @@ namespace com.csutil.ui {
                 await Task.WhenAny(cancelTask, confirmTask); // Wait for the user to make a choise (cancel or confirm)
 
                 // If any of the 2 buttons were clicked, but the input is not approved, continue waiting: 
-                if (!userWantsToCancelDialog && !IsUserInputValid(dialogData, inputField.text)) {
+                if (!userWantsToCancelDialog && !dialogData.dialogResult.dialogWasConfirmed) {
                     await WaitForCancelOrOk(dialogData, links, inputField);
                 }
             }
