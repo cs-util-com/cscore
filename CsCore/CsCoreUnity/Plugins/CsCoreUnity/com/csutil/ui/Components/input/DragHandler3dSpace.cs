@@ -6,7 +6,9 @@ namespace com.csutil.ui {
 
     public class DragHandler3dSpace : MonoBehaviour, IBeginDragHandler, IDragHandler {
 
+        public bool keepDistance = true;
         private Vector3 localDragStartOffsetOnRt;
+        private float distanceAtDragStart;
 
         private void OnEnable() {
             AssertCamWithPhysicsRaycasterFoundInScene();
@@ -26,6 +28,7 @@ namespace com.csutil.ui {
 
         public void OnBeginDrag(PointerEventData e) {
             localDragStartOffsetOnRt = transform.position - e.pointerCurrentRaycast.worldPosition;
+            distanceAtDragStart = (e.pressEventCamera.transform.position - transform.position).magnitude;
         }
 
         public void OnDrag(PointerEventData e) {
@@ -33,7 +36,13 @@ namespace com.csutil.ui {
             var newWorldPos = e.pointerCurrentRaycast.worldPosition + localDragStartOffsetOnRt;
             var dragDistance = (newWorldPos - transform.position).magnitude;
             if (dragDistance <= 0) { return; }
-            transform.position = newWorldPos;
+            if (keepDistance) {
+                var camPos = e.pressEventCamera.transform.position;
+                var direction = (newWorldPos - camPos).normalized;
+                transform.position = camPos + direction * distanceAtDragStart;
+            } else {
+                transform.position = newWorldPos;
+            }
         }
 
     }

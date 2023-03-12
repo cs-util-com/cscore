@@ -790,6 +790,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a1960506ab9f413c925b894a9363fd3a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  keepDistance: 1
 --- !u!54 &876232888
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -935,6 +936,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a1960506ab9f413c925b894a9363fd3a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  keepDistance: 1
 --- !u!1 &1263220679
 GameObject:
   m_ObjectHideFlags: 0
