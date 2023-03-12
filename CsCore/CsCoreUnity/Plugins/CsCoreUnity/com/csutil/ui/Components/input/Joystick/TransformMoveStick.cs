@@ -2,22 +2,26 @@ using UnityEngine;
 
 namespace com.csutil.ui {
 
+    /// <summary> Allows to use the joystick to move a transform with respect to the current camera view direction </summary>
     [RequireComponent(typeof(JoystickUi))]
     public class TransformMoveStick : MonoBehaviour {
 
         public Camera camera;
         public Transform target;
-        public float joystickYAxisSpeed = 1f;
+        /// <summary> Left/right (x axis) movement speed </summary>
         public float joystickXAxisSpeed = 1f;
+        public float joystickYAxisSpeed = 1f;
         /// <summary> If true the up down in the UI will be applied to the up/down (z axis) of the target, else up down will be used for the y axis </summary>
         public bool isUpDownStick = true;
 
+        private Transform camTransform;
         private bool isCurrentlyDragging = false;
         private Vector2 delta;
 
         private void OnEnable() {
             camera.ThrowErrorIfNull("camera");
             if (target == null) { target = camera.transform; }
+            camTransform = camera.transform;
             gameObject.GetComponentV2<JoystickUi>().onJoystickChanged.AddListener(OnForceChange);
         }
 
@@ -32,17 +36,14 @@ namespace com.csutil.ui {
 
         private void Update() {
             if (isCurrentlyDragging) {
-                var y = isUpDownStick ? delta.y * joystickYAxisSpeed : 0;
-                var z = isUpDownStick ? 0 : delta.y * joystickYAxisSpeed;
-
-                var forward = camera.transform.right * delta.x * joystickXAxisSpeed;
-                var dir = forward;
+                // Add left/right direction:
+                var dir = camTransform.right * delta.x * joystickXAxisSpeed;
                 if (isUpDownStick) {
-                    var up = camera.transform.up * delta.y * joystickYAxisSpeed;
-                    dir += up;
+                    // Add up direction:
+                    dir += camTransform.up * delta.y * joystickYAxisSpeed;
                 } else {
-                    var right = camera.transform.forward * delta.y * joystickYAxisSpeed;
-                    dir += right;
+                    // Add forward direction:
+                    dir += camTransform.forward * delta.y * joystickYAxisSpeed;
                 }
                 target.position += dir * Time.deltaTime;
             }

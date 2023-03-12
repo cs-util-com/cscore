@@ -392,8 +392,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 304346491}
-  m_LocalRotation: {x: -0, y: -0.44505268, z: -0, w: 0.8955044}
-  m_LocalPosition: {x: 4.351, y: -0.403, z: 1.347}
+  m_LocalRotation: {x: -0.15672174, y: 0.47819906, z: -0.08717058, w: -0.8597472}
+  m_LocalPosition: {x: 4.7811, y: 1.4303267, z: 1.2479277}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1092,8 +1092,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   camera: {fileID: 304346493}
   target: {fileID: 876232886}
-  joystickYAxisSpeed: 2
   joystickXAxisSpeed: 2
+  joystickYAxisSpeed: 2
   isUpDownStick: 0
 --- !u!1 &1584784907
 GameObject:
