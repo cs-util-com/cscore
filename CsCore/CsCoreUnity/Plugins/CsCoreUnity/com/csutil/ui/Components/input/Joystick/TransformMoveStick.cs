@@ -20,9 +20,12 @@ namespace com.csutil.ui {
 
         private void OnEnable() {
             camera.ThrowErrorIfNull("camera");
-            if (target == null) { target = camera.transform; }
             camTransform = camera.transform;
             gameObject.GetComponentV2<JoystickUi>().onJoystickChanged.AddListener(OnForceChange);
+        }
+
+        private void Start() {
+            if (target == null) { Log.e("No target transform was set for the joystick!", gameObject); }
         }
 
         private void OnDisable() {
