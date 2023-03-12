@@ -696,7 +696,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetToDrag: {fileID: 0}
-  keepDistance: 0
+  keepDistanceToCam: 0
 --- !u!1 &929104211
 GameObject:
   m_ObjectHideFlags: 0
@@ -816,7 +816,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetToDrag: {fileID: 1705083012}
-  keepDistance: 1
+  keepDistanceToCam: 1
 --- !u!1 &1263220679
 GameObject:
   m_ObjectHideFlags: 0

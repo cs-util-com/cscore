@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -10,13 +9,14 @@ namespace com.csutil.ui {
     public class DragHandler3dSpace : MonoBehaviour, IBeginDragHandler, IDragHandler {
 
         public Transform targetToDrag;
-        public bool keepDistance = true;
+        public bool keepDistanceToCam = true;
 
         private Vector3 localDragStartOffsetOnRt;
         private float distanceAtDragStart;
 
         private void Start() {
             AssertCamWithPhysicsRaycasterFoundInScene();
+            // If no target is set explicitly then use the transform of this gameobject:
             if (targetToDrag == null) { targetToDrag = transform; }
         }
 
@@ -40,9 +40,7 @@ namespace com.csutil.ui {
         public void OnDrag(PointerEventData e) {
             if (e.pointerCurrentRaycast.worldPosition == Vector3.zero) { return; }
             var newWorldPos = e.pointerCurrentRaycast.worldPosition + localDragStartOffsetOnRt;
-            var dragDistance = (newWorldPos - targetToDrag.position).magnitude;
-            if (dragDistance <= 0) { return; }
-            if (keepDistance) {
+            if (keepDistanceToCam) {
                 var camPos = e.pressEventCamera.transform.position;
                 var direction = (newWorldPos - camPos).normalized;
                 targetToDrag.position = camPos + direction * distanceAtDragStart;
