@@ -63,7 +63,7 @@ namespace com.csutil.model.immutable {
                     Log.e("Invalid action: " + asJson(action.GetType().Name, action));
                 }
 
-                if (!showChangesJson) {
+                if (!showChangesJson || (action is IDontLogDispatch)) {
                     return innerDispatcher(action);
                 }
 
@@ -137,6 +137,9 @@ namespace com.csutil.model.immutable {
 
         private static string asJson(string varName, object result) { return varName + "=" + JsonWriter.AsPrettyString(result); }
 
+    /// <summary> Can be implemented by an action to prevent any default logging by the default logger middleware for this action </summary>
+    public class IDontLogDispatch { }
+    
     }
 
 }
