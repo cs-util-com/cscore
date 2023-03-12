@@ -1,17 +1,23 @@
+using System;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
 namespace com.csutil.ui {
 
+    /// <summary> Allows dragging objects in 3D space </summary>
+    [RequireComponent(typeof(Collider))]
     public class DragHandler3dSpace : MonoBehaviour, IBeginDragHandler, IDragHandler {
 
+        public Transform targetToDrag;
         public bool keepDistance = true;
+
         private Vector3 localDragStartOffsetOnRt;
         private float distanceAtDragStart;
 
-        private void OnEnable() {
+        private void Start() {
             AssertCamWithPhysicsRaycasterFoundInScene();
+            if (targetToDrag == null) { targetToDrag = transform; }
         }
 
         private static void AssertCamWithPhysicsRaycasterFoundInScene() {
@@ -27,21 +33,21 @@ namespace com.csutil.ui {
         }
 
         public void OnBeginDrag(PointerEventData e) {
-            localDragStartOffsetOnRt = transform.position - e.pointerCurrentRaycast.worldPosition;
-            distanceAtDragStart = (e.pressEventCamera.transform.position - transform.position).magnitude;
+            localDragStartOffsetOnRt = targetToDrag.position - e.pointerCurrentRaycast.worldPosition;
+            distanceAtDragStart = (e.pressEventCamera.transform.position - targetToDrag.position).magnitude;
         }
 
         public void OnDrag(PointerEventData e) {
             if (e.pointerCurrentRaycast.worldPosition == Vector3.zero) { return; }
             var newWorldPos = e.pointerCurrentRaycast.worldPosition + localDragStartOffsetOnRt;
-            var dragDistance = (newWorldPos - transform.position).magnitude;
+            var dragDistance = (newWorldPos - targetToDrag.position).magnitude;
             if (dragDistance <= 0) { return; }
             if (keepDistance) {
                 var camPos = e.pressEventCamera.transform.position;
                 var direction = (newWorldPos - camPos).normalized;
-                transform.position = camPos + direction * distanceAtDragStart;
+                targetToDrag.position = camPos + direction * distanceAtDragStart;
             } else {
-                transform.position = newWorldPos;
+                targetToDrag.position = newWorldPos;
             }
         }
 
