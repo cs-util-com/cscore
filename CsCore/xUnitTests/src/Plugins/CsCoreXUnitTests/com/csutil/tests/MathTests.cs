@@ -9,6 +9,9 @@ namespace com.csutil.tests {
 
     public class MathTests {
 
+        private const float radToDegree = 180f / MathF.PI;
+        private const float degreeToRad = MathF.PI / 180f;
+
         public MathTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
         [Fact]
@@ -98,8 +101,6 @@ namespace com.csutil.tests {
             Assert.Equal(rgb, redRgb.ToStringV2(c => "" + c));
         }
 
-        private const float degreeToRad = MathF.PI / 180f;
-        private const float radToDegree = 1 / degreeToRad;
 
         [Fact]
         public static void VectorRotationTest1() {
@@ -174,6 +175,58 @@ namespace com.csutil.tests {
             Assert.True(rotation.IsSimilarTo(rotation2, digits: digits));
             Assert.True(scale.IsSimilarTo(scale2, digits: digits));
 
+        }
+
+        [Fact]
+        public void TestGetEulerAngles1() {
+            TestGetEulerAnglesWith(90.000015f, -159.58305f, 140.32559f);
+            TestGetEulerAnglesWith(89.99931f, -132.24231f, 113.949486f);
+            TestGetEulerAnglesWith(61, 111, 87);
+            TestGetEulerAnglesWith(90.012695f, -73.464935f, 157.1788f);
+            TestGetEulerAnglesWith(90.004265f, 21.351936f, 15.406252f);
+            var rnd = new Random();
+            for (int i = 0; i < 100000; i++) {
+                // Generate different angles in degrees for TestGetEulerAngles2: 
+                var pitch = rnd.NextFloat(-180, 180);
+                var yaw = rnd.NextFloat(-180, 180);
+                var roll = rnd.NextFloat(-180, 180);
+                TestGetEulerAnglesWith(pitch, yaw, roll);
+            }
+            TestGetEulerAnglesWith(45, 15, 75);
+        }
+
+        [Fact]
+        public void TestGetEulerAngles2() {
+            TestGetEulerAnglesWith(90, -139, 127);
+            TestGetEulerAnglesWith(0, -180, -39);
+            TestGetEulerAnglesWith(90, -46, 13);
+            TestGetEulerAnglesWith(-90, 130, 158);
+            TestGetEulerAnglesWith(90, -69, -74);
+            var rnd = new Random();
+            for (int i = 0; i < 100000; i++) {
+                // Generate different angles in degrees for TestGetEulerAngles2: 
+                var pitch = rnd.Next(-180, 180);
+                var yaw = rnd.Next(-180, 180);
+                var roll = rnd.Next(-180, 180);
+                TestGetEulerAnglesWith(pitch, yaw, roll);
+            }
+        }
+
+        private static void TestGetEulerAnglesWith(float pitch, float yaw, float roll) {
+            var inputEulers = new Vector3(pitch, yaw, roll);
+            var digits = 2;
+            var rotation = Quaternion.CreateFromYawPitchRoll(yaw * degreeToRad, pitch * degreeToRad, roll * degreeToRad);
+            var eulers = rotation.GetEulerAnglesAsPitchYawRoll();
+            var rotation2 = Quaternion.CreateFromYawPitchRoll(eulers.Y * degreeToRad, eulers.X * degreeToRad, eulers.Z * degreeToRad);
+            var eulers2 = rotation.GetEulerAnglesAsPitchYawRoll();
+            var diff = rotation.GetRotationDeltaTo(rotation2);
+
+            // Inverting the quaternion is the same rotation
+            if (Math.Sign(diff.W) == -1) { diff = -diff; }
+
+            Assert.True(diff.IsSimilarTo(Quaternion.Identity, digits: digits), $"diff={diff} from \n rotation ={rotation} (eulers={inputEulers}) to \n rotation2={rotation2} (eulers={eulers2})");
+            // Assert.True(eulers.IsSimilarTo(inputEulers, digits: digits), $"Eulers: {eulers} != {inputEulers}");
+            // Assert.True(eulers.IsSimilarTo(eulers2, digits: digits), $"Eulers: {eulers} != {eulers2}");
         }
 
         public class WeightedMedianTests {
