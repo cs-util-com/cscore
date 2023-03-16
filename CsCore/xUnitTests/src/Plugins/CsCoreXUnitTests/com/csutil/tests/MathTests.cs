@@ -218,7 +218,7 @@ namespace com.csutil.tests {
             var rotation = Quaternion.CreateFromYawPitchRoll(yaw * degreeToRad, pitch * degreeToRad, roll * degreeToRad);
             var eulers = rotation.GetEulerAnglesAsPitchYawRoll();
             var rotation2 = Quaternion.CreateFromYawPitchRoll(eulers.Y * degreeToRad, eulers.X * degreeToRad, eulers.Z * degreeToRad);
-            var eulers2 = rotation.GetEulerAnglesAsPitchYawRoll();
+            var eulers2 = rotation2.GetEulerAnglesAsPitchYawRoll();
             var diff = rotation.GetRotationDeltaTo(rotation2);
 
             // Inverting the quaternion is the same rotation
