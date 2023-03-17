@@ -374,7 +374,7 @@ Assert.True(typeof(MySubClass1).IsCastableTo<MyClass1>());
 
 
 ## JSON Parsing 
-- The `JsonWriter` and `JsonReader` interfaces are an abstraction that should be flexiable enough to be used for most usecases. 
+- The `JsonWriter` and `JsonReader` interfaces are an abstraction that should be flexible enough to be used for most usecases. 
 - The underlying implementation can easily be swapped if needed and the default implementation uses [Json.NET](https://github.com/JamesNK/Newtonsoft.Json).
 
 ```cs
@@ -1019,6 +1019,22 @@ Assert.AreEqual(myObjectToSave.myInt, objLoadedAgain.myInt);
 ```
 
 
+## `WebGL Helpers` 
+
+Unity does not offer a way to expose some native browser functionality to the user. Therefore we created a concise JavaScript library and a C# wrapper that exposes commonly used browser functionality:
+  - Emitting Browser alerts
+  - Creating a popup when the user wants to quit a page
+  - Writing and retrieving data from the browser history
+  ```cs
+//Add the AlertManager Script to any GameObject. Then you can call
+gameObj.GetComponent<AlertManager>().activateOnQuitPrompt()
+
+//Or to deactivate it 
+gameObj.GetComponent<AlertManager>().deactivateOnQuitPrompt()
+  ```
+
+To use the functionality you need to [install the WebGL module into your Unity project](#Install-cscore-into-your-Unity-project). There are Demo scenes to get familiar with the functionality.
+
 
 ## Running xUnit tests in Unity
 
@@ -1112,6 +1128,9 @@ There are different ways how to add cscore to your project, first the **recommen
    5. Insert https://github.com/cs-util-com/cscore.git?path=CsCore/UnityTests/Assets/Plugins/CsCoreUnityTests
       - (*Optional*) Contains the **Unity tests** of cscore to run with the Unity test runner
 
+   6. Insert https://github.com/cs-util-com/cscore.git?path=CsCore/CsCoreUnityWebGL/Plugins
+      - (*Optional*) Contains the Unity **WebGL** specific classes
+
 **The result** will be that the manifest file which is located in your project at 
 `YourUnityProject123/Packages/manifest.json` has some new dependencies added. 
 
@@ -1120,11 +1139,12 @@ Your can also manually open your `manifest.json` file with a text editor and add
 { 
   "dependencies": { 
     ...
-	"com.csutil.cscore": "https://github.com/cs-util-com/cscore.git?path=CsCore/PlainNetClassLib/src/Plugins",
-	"com.csutil.cscore.unity": "https://github.com/cs-util-com/cscore.git?path=CsCore/CsCoreUnity/Plugins",
-	"com.csutil.cscore.tests": "https://github.com/cs-util-com/cscore.git?path=CsCore/xUnitTests/src/Plugins",
+    "com.csutil.cscore": "https://github.com/cs-util-com/cscore.git?path=CsCore/PlainNetClassLib/src/Plugins",
+    "com.csutil.cscore.unity": "https://github.com/cs-util-com/cscore.git?path=CsCore/CsCoreUnity/Plugins",
+    "com.csutil.cscore.tests": "https://github.com/cs-util-com/cscore.git?path=CsCore/xUnitTests/src/Plugins",
     "com.csutil.cscore.unity.demos": "https://github.com/cs-util-com/cscore.git?path=CsCore/UnityTests/Assets/Plugins/CsCoreUnityDemoScenes",
-	"com.csutil.cscore.unity.tests": "https://github.com/cs-util-com/cscore.git?path=CsCore/UnityTests/Assets/Plugins/CsCoreUnityTests",
+    "com.csutil.cscore.unity.tests": "https://github.com/cs-util-com/cscore.git?path=CsCore/UnityTests/Assets/Plugins/CsCoreUnityTests",
+    "com.csutil.cscore.unity.webgl": "https://github.com/cs-util-com/cscore.git?path=CsCore/CsCoreUnityWebGL/Plugins",
     ...
   } 
 }
