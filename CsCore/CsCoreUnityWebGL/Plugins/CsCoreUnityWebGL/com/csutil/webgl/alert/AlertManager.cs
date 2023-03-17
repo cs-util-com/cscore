@@ -1,25 +1,23 @@
-using System.Collections;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
-/// <summary>
-/// This is a script that manages the connection from unity to the alert functions 
-/// of a browser, when the project is being compiled to WebGL
-/// </summary>
-///
 namespace com.csutil.webgl.alert {
 
+    /// <summary> This is a script that manages the connection from unity to the alert functions 
+    /// of a browser, when the project is being compiled to WebGL </summary>
     public class AlertManager : MonoBehaviour {
 
-        /// <summary>
-        /// Import JSLib functions
-        /// </summary>
+        /// <summary> Import JSLib functions:
+        /// 
         /// This is where we reference the javaScript funtctions we have written
         /// into our .jslib file. If you have included cscore as a module, the
-        /// javaScript code will automatically be served to the browser. More info at:
+        /// javaScript code will automatically be served to the browser.
+        ///
+        /// More info at:
         /// https://docs.unity3d.com/Manual/webgl-interactingwithbrowserscripting.html
+        /// </summary>
         #region jsFunctionImports
+
         [DllImport("__Internal")]
         private static extern void createOnUnloadHandlerjs();
 
@@ -31,44 +29,36 @@ namespace com.csutil.webgl.alert {
 
         [DllImport("__Internal")]
         private static extern void activateOnQuitPromptjs();
-        #endregion
 
+        #endregion
 
         void Start() {
             createOnUnloadHandlerjs();
         }
-        /// <summary>
-        /// Send alert message to JSLib File
-        /// </summary>
-        /// <param name="message">
-        /// Alert message
-        /// </param>
-        public void triggerBrowserAlert(string message) {
-            triggerBrowserAlertjs(message);
+
+        /// <summary> Send alert message to JSLib File </summary>
+        public void triggerBrowserAlert(string alertMessage) {
+            triggerBrowserAlertjs(alertMessage);
         }
 
-        /// <summary>
-        /// This function is triggered if the user tries to close the browser window
-        /// </summary>
+        /// <summary> This function is triggered if the user tries to close the browser window </summary>
         void onTabCloseAttempt() {
-            Debug.Log("The user attempted to close the tab");
+            Log.e("The user attempted to close the tab");
+            // TODO forward to a function that can be set from the unity editor
         }
 
-        /// <summary>
-        /// Deactivates the unsaved changes warning 
-        /// </summary>
+        /// <summary> Deactivates the unsaved changes warning </summary>
         public void deactivateOnQuitPrompt() {
             Debug.Log("Deactivate from Unity");
             deactivateOnQuitPromptjs();
         }
 
-        /// <summary>
-        /// Activates the unsaved changes warning 
-        /// </summary>
+        /// <summary> Show an "unsaved changes" warning </summary>
         public void activateOnQuitPrompt() {
-            Debug.Log("Activate from Unity");
+            Log.d("Show an 'unsaved changes' warning");
             activateOnQuitPromptjs();
         }
+
     }
 
 }
