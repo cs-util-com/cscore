@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace com.csutil.webgl {
 
@@ -32,6 +33,18 @@ namespace com.csutil.webgl {
 
         #endregion
 
+        /// <summary> Fires when the closes the browser window </summary>
+        public OnBrowserCloseEvent onBrowserClose = new OnBrowserCloseEvent();
+
+        private bool _showUnsavedChangesWarningOnPageClose = false;
+        public bool ShowUnsavedChangesWarningOnPageClose {
+            set {
+                if (value) { activateOnQuitPromptjs(); } else { deactivateOnQuitPromptjs(); }
+                _showUnsavedChangesWarningOnPageClose = value;
+            }
+            get => _showUnsavedChangesWarningOnPageClose;
+        }
+
         void Start() {
             IoC.inject.SetSingleton(this);
             if (!EnvironmentV2.isEditor) {
@@ -40,26 +53,17 @@ namespace com.csutil.webgl {
         }
 
         /// <summary> Send alert message to JSLib File </summary>
-        public void triggerBrowserAlert(string alertMessage) {
+        public void ShowBrowserAlertMessage(string alertMessage) {
             triggerBrowserAlertjs(alertMessage);
         }
 
         /// <summary> This function is triggered if the user tries to close the browser window </summary>
         void onTabCloseAttempt() {
-            Log.e("The user attempted to close the tab");
-            // TODO forward to a function that can be set from the unity editor
+            onBrowserClose?.Invoke();
         }
 
-        /// <summary> Deactivates the unsaved changes warning </summary>
-        public void deactivateOnQuitPrompt() {
-            Debug.Log("Deactivate from Unity");
-            deactivateOnQuitPromptjs();
-        }
-
-        /// <summary> Show an "unsaved changes" warning </summary>
-        public void activateOnQuitPrompt() {
-            Log.d("Show an 'unsaved changes' warning");
-            activateOnQuitPromptjs();
+        [System.Serializable]
+        public class OnBrowserCloseEvent : UnityEvent {
         }
 
     }

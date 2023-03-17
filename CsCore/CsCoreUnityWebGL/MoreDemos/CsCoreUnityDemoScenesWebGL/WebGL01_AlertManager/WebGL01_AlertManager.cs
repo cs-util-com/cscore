@@ -12,14 +12,14 @@ namespace com.csutil.tests.ui {
             var links = gameObject.GetLinkMap();
 
             links.Get<Button>("ActivateWarning").SetOnClickAction(delegate {
-                GetAlertManager().activateOnQuitPrompt();
+                GetAlertManager().ShowUnsavedChangesWarningOnPageClose = true;
             });
             links.Get<Button>("DeactivateWarning").SetOnClickAction(delegate {
-                GetAlertManager().deactivateOnQuitPrompt();
+                GetAlertManager().ShowUnsavedChangesWarningOnPageClose = false;
             });
             links.Get<InputField>("AlertTextInput").SetOnValueChangedActionThrottled(newText => {
                 Log.MethodEnteredWith(newText);
-                GetAlertManager().triggerBrowserAlert(newText);
+                GetAlertManager().ShowBrowserAlertMessage(newText);
             }, 2000); // after 2 seconds delay show the entered text
 
         }
