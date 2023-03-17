@@ -5,7 +5,9 @@
         "CsCore",
         "CsCoreUnity"
     ],
-    "includePlatforms": [],
+    "includePlatforms": [
+        "WebGL"
+    ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,
