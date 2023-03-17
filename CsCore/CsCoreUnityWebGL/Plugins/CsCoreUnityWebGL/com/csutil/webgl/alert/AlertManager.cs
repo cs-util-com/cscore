@@ -1,7 +1,7 @@
 using System.Runtime.InteropServices;
 using UnityEngine;
 
-namespace com.csutil.webgl.alert {
+namespace com.csutil.webgl {
 
     /// <summary> This is a script that manages the connection from unity to the alert functions 
     /// of a browser, when the project is being compiled to WebGL </summary>
@@ -33,7 +33,10 @@ namespace com.csutil.webgl.alert {
         #endregion
 
         void Start() {
-            createOnUnloadHandlerjs();
+            IoC.inject.SetSingleton(this);
+            if (!EnvironmentV2.isEditor) {
+                createOnUnloadHandlerjs();
+            }
         }
 
         /// <summary> Send alert message to JSLib File </summary>
