@@ -178,6 +178,36 @@ namespace com.csutil.tests {
         }
 
         [Fact]
+        public void ExampleUsageOfEulerAngles() {
+            {
+                var yaw = 180f;
+                var rotation = Quaternion.CreateFromYawPitchRoll(yaw * degreeToRad, 0, 0);
+                var eulerAngles = rotation.GetEulerAnglesAsPitchYawRoll();
+                Assert.Equal(new Vector3(0, yaw, 0), eulerAngles);
+
+                // Rotating the x axis by 180 degree results in the x axis pointing backwards:
+                var vector = Vector3.UnitX;
+                var rotated = rotation.Rotate(vector);
+                Assert.Equal(vector * -1, rotated);
+
+                Log.d($"Rotating the vector {vector} by {eulerAngles.Y} degree results in {rotated}");
+            }
+            {
+                var pitch = 90f;
+                var rotation = Quaternion.CreateFromYawPitchRoll(0, pitch * degreeToRad, 0);
+                var eulerAngles = rotation.GetEulerAnglesAsPitchYawRoll();
+                Assert.Equal(new Vector3(pitch, 0, 0), eulerAngles);
+
+                // Rotating the Up vector forward by 90 degree results in the Forward vector:
+                var vector = Vector3.UnitY;
+                var rotated = rotation.Rotate(vector);
+                Assert.Equal(Vector3.UnitZ, rotated);
+
+                Log.d($"Rotating the vector {vector} forward by {eulerAngles.X} degree results in {rotated}");
+            }
+        }
+
+        [Fact]
         public void TestGetEulerAngles1() {
             TestGetEulerAnglesWith(90.000015f, -159.58305f, 140.32559f);
             TestGetEulerAnglesWith(89.99931f, -132.24231f, 113.949486f);
