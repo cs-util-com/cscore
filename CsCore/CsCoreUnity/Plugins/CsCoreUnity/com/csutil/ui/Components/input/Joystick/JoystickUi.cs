@@ -14,6 +14,9 @@ namespace com.csutil.ui {
         public RectTransform joystickCenterImg;
         public RectTransform joystickImg;
 
+        /// <summary> Can be accessed during dragging </summary>
+        public PointerEventData currentDragEventData { get; private set; }
+        
         private RectTransform _rt;
         private int fingerId;
         private Vector3 centerResetPos;
@@ -45,6 +48,7 @@ namespace com.csutil.ui {
 
         public void OnPointerDown(PointerEventData eventData) {
             isDragging = true;
+            currentDragEventData = eventData;
             fingerId = eventData.pointerId;
             startPos = eventData.position;
             centerResetPos = joystickCenterImg.position;
@@ -55,6 +59,7 @@ namespace com.csutil.ui {
 
         public void OnDrag(PointerEventData eventData) {
             if (eventData.pointerId != fingerId) { return; }
+            currentDragEventData = eventData;
             currentPos = eventData.position;
             absDelta = currentPos - startPos;
             if (absDelta.magnitude > maxDist) { absDelta = absDelta.normalized * maxDist; }
@@ -73,6 +78,7 @@ namespace com.csutil.ui {
             joystickImg.position = joystickResetPos;
             isDragging = false;
             UpdateListeners();
+            currentDragEventData = null; // Reset since is should only be accessible during dragging
         }
 
         private void UpdateListeners() {

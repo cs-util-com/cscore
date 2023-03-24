@@ -80,6 +80,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dfffc504ed7df954f9bc50e07ee2f064, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  excludeFromOrderCalc: 1
+  orderOffset: 20
 --- !u!1 &1206465171782906
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,25 +1,24 @@
-using System.Collections;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
+using UnityEngine.Events;
 
-/// <summary>
-/// This is a script that manages the connection from unity to the alert functions 
-/// of a browser, when the project is being compiled to WebGL
-/// </summary>
-///
-namespace com.csutil.webgl.alert {
+namespace com.csutil.webgl {
 
+    /// <summary> This is a script that manages the connection from unity to the alert functions 
+    /// of a browser, when the project is being compiled to WebGL </summary>
     public class AlertManager : MonoBehaviour {
 
-        /// <summary>
-        /// Import JSLib functions
-        /// </summary>
+        /// <summary> Import JSLib functions:
+        /// 
         /// This is where we reference the javaScript funtctions we have written
         /// into our .jslib file. If you have included cscore as a module, the
-        /// javaScript code will automatically be served to the browser. More info at:
+        /// javaScript code will automatically be served to the browser.
+        ///
+        /// More info at:
         /// https://docs.unity3d.com/Manual/webgl-interactingwithbrowserscripting.html
+        /// </summary>
         #region jsFunctionImports
+
         [DllImport("__Internal")]
         private static extern void createOnUnloadHandlerjs();
 
@@ -31,44 +30,42 @@ namespace com.csutil.webgl.alert {
 
         [DllImport("__Internal")]
         private static extern void activateOnQuitPromptjs();
+
         #endregion
 
+        /// <summary> Fires when the closes the browser window </summary>
+        public OnBrowserCloseEvent onBrowserClose = new OnBrowserCloseEvent();
+
+        private bool _showUnsavedChangesWarningOnPageClose = false;
+        public bool ShowUnsavedChangesWarningOnPageClose {
+            set {
+                if (value) { activateOnQuitPromptjs(); } else { deactivateOnQuitPromptjs(); }
+                _showUnsavedChangesWarningOnPageClose = value;
+            }
+            get => _showUnsavedChangesWarningOnPageClose;
+        }
 
         void Start() {
-            createOnUnloadHandlerjs();
-        }
-        /// <summary>
-        /// Send alert message to JSLib File
-        /// </summary>
-        /// <param name="message">
-        /// Alert message
-        /// </param>
-        public void triggerBrowserAlert(string message) {
-            triggerBrowserAlertjs(message);
+            IoC.inject.SetSingleton(this);
+            if (!EnvironmentV2.isEditor) {
+                createOnUnloadHandlerjs();
+            }
         }
 
-        /// <summary>
-        /// This function is triggered if the user tries to close the browser window
-        /// </summary>
+        /// <summary> Send alert message to JSLib File </summary>
+        public void ShowBrowserAlertMessage(string alertMessage) {
+            triggerBrowserAlertjs(alertMessage);
+        }
+
+        /// <summary> This function is triggered if the user tries to close the browser window </summary>
         void onTabCloseAttempt() {
-            Debug.Log("The user attempted to close the tab");
+            onBrowserClose?.Invoke();
         }
 
-        /// <summary>
-        /// Deactivates the unsaved changes warning 
-        /// </summary>
-        public void deactivateOnQuitPrompt() {
-            Debug.Log("Deactivate from Unity");
-            deactivateOnQuitPromptjs();
+        [System.Serializable]
+        public class OnBrowserCloseEvent : UnityEvent {
         }
 
-        /// <summary>
-        /// Activates the unsaved changes warning 
-        /// </summary>
-        public void activateOnQuitPrompt() {
-            Debug.Log("Activate from Unity");
-            activateOnQuitPromptjs();
-        }
     }
 
 }

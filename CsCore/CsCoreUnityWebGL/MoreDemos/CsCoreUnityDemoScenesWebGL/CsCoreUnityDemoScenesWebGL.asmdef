@@ -1,7 +1,8 @@
 {
-    "name": "CsCoreUnityWebGL",
+    "name": "CsCoreUnityDemoScenesWebGL",
     "rootNamespace": "",
     "references": [
+        "CsCoreUnityWebGL",
         "CsCore",
         "CsCoreUnity"
     ],

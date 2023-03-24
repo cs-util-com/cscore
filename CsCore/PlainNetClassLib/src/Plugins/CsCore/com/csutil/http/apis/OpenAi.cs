@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace com.csutil.http.apis {
 
@@ -12,6 +13,8 @@ namespace com.csutil.http.apis {
         /// <param name="apiKey"> See https://beta.openai.com/docs/api-reference/authentication and https://beta.openai.com/account/api-keys </param>
         public OpenAi(string apiKey) { this.apiKey = apiKey; }
 
+        /// <summary> See also https://platform.openai.com/docs/guides/chat/chat-vs-completions : "Because gpt-3.5-turbo performs at a
+        /// similar capability to text-davinci-003 but at 10% the price per token, we recommend gpt-3.5-turbo for most use cases." </summary>
         public Task<Text.CompletionsResponse> Complete(string prompt) {
             return Complete(new Text.CompletionsRequest() { prompt = prompt });
         }
@@ -27,97 +30,10 @@ namespace com.csutil.http.apis {
             return request.WithAuthorization(apiKey).WithJsonContent(requestParams).GetResult<Image.Response>();
         }
 
-        public async Task<LabsApi.Response> SendLabsApiRequest(LabsApi.ApiTask apiTask) {
-            var latestProgress = await SendLabsApiTask(apiTask);
-            while (latestProgress.status == LabsApi.Response.STATUS_PENDING) {
-                await TaskV2.Delay(2000); // Check status every 2 seconds
-                // The API currently often randomly fails with server errors, add an exponential backoff layer to ignore these:
-                latestProgress = await TaskV2.TryWithExponentialBackoff(() => GetLatestTaskProgress(latestProgress.id), maxNrOfRetries: 5, initialExponent: 10);
-            }
-            return latestProgress;
-        }
-
-        private Task<LabsApi.Response> SendLabsApiTask(LabsApi.ApiTask taskToCreate) {
-            var createTaskUri = new Uri("https://labs.openai.com/api/labs/tasks").SendPOST();
-            return createTaskUri.WithAuthorization(apiKey).WithJsonContent(taskToCreate).GetResult<LabsApi.Response>();
-        }
-
-        private Task<LabsApi.Response> GetLatestTaskProgress(string taskId) {
-            var taskProgressUri = new Uri("https://labs.openai.com/api/labs/tasks/" + taskId).SendGET();
-            return taskProgressUri.WithAuthorization(apiKey).GetResult<LabsApi.Response>();
-        }
-
-        public class LabsApi {
-
-            public class ApiTask {
-
-                /// <summary> Tasks available are "text2im" or "inpainting" </summary>
-                public string task_type { get; set; }
-                public Prompt prompt { get; set; }
-
-                public class Prompt {
-                    public string caption { get; set; }
-                    public int batch_size { get; set; } = 2;
-                }
-
-                // TODO add inpainting Prompt subclass with additional image and
-                // masked_image fields, see eg https://github.com/charlesjlee/twitter_dalle2_bot/blob/main/dalle2.py#L115
-
-            }
-
-            public class Response {
-
-                public const string STATUS_SUCCESS = "succeeded";
-                public const string STATUS_PENDING = "pending";
-                public const string STATUS_FAILED = "failed";
-
-                public string @object { get; set; }
-                public string id { get; set; }
-                public int created { get; set; }
-                public string task_type { get; set; }
-                /// <summary> Is "pending" until "succeeded" (then also the generations will be filled) </summary>
-                public string status { get; set; }
-                public StatusInformation status_information { get; set; }
-                public string prompt_id { get; set; }
-                public Prompt prompt { get; set; }
-
-                public Generations generations { get; set; }
-
-                public class Prompt {
-                    public string id { get; set; }
-                    public string @object { get; set; }
-                    public int created { get; set; }
-                    public string prompt_type { get; set; }
-                    public Prompt prompt { get; set; }
-                    public object parent_generation_id { get; set; }
-                    public string caption { get; set; }
-                }
-
-                public class StatusInformation {
-                }
-
-                public class Generation {
-                    public string id { get; set; }
-                    public string @object { get; set; }
-                    public int created { get; set; }
-                    public string generation_type { get; set; }
-                    public GenerationData generation { get; set; }
-                    public string task_id { get; set; }
-                    public string prompt_id { get; set; }
-                    public bool is_public { get; set; }
-                }
-
-                public class GenerationData {
-                    public string image_path { get; set; }
-                }
-
-                public class Generations {
-                    public string @object { get; set; }
-                    public List<Generation> data { get; set; }
-                }
-
-            }
-
+        /// <summary> See https://platform.openai.com/docs/guides/chat </summary>
+        public Task<ChatGpt.Response> ChatGpt(ChatGpt.Request conversation) {
+            var request = new Uri("https://api.openai.com/v1/chat/completions").SendPOST();
+            return request.WithAuthorization(apiKey).WithJsonContent(conversation).GetResult<ChatGpt.Response>();
         }
 
         public class Text {
@@ -131,7 +47,7 @@ namespace com.csutil.http.apis {
                 public string prompt { get; set; }
 
                 /// <summary> See https://beta.openai.com/docs/models/overview </summary>
-                public string model { get; set; } = "text-davinci-002";
+                public string model { get; set; } = "text-davinci-003";
 
                 /// <summary> What sampling temperature to use. Higher values means the model will take more risks.
                 /// Try 0.9 for more creative applications, and 0 (argmax sampling) for ones with a well-defined answer.
@@ -226,6 +142,179 @@ namespace com.csutil.http.apis {
 
                 public class ImageEntry {
                     public string url { get; set; }
+                }
+
+            }
+
+        }
+
+    }
+
+    public class ChatGpt {
+
+        public class Line {
+
+            public readonly string role;
+            public readonly string content;
+
+            [JsonConstructor]
+            public Line(string role, string content) {
+                this.role = role;
+                this.content = content;
+            }
+
+            public Line(Role role, string content) {
+                this.role = role.ToString();
+                this.content = content;
+            }
+
+        }
+
+        public enum Role { system, user, assistant }
+
+        public class Request {
+
+            /// <summary> See https://beta.openai.com/docs/models/overview </summary>
+            public string model = "gpt-3.5-turbo";
+
+            /// <summary> The maximum number of tokens to generate in the completion.
+            /// The token count of your prompt plus max_tokens cannot exceed the model's context length.
+            /// Most models have a context length of 2048 tokens (except for the newest models, which support 4096). </summary>
+            public int max_tokens { get; set; }
+            public List<Line> messages { get; set; }
+
+            public Request(List<Line> messages, int max_tokens = 4096) {
+                var tokenCountForMessages = JsonWriter.GetWriter(this).Write(messages).Length;
+                if (max_tokens + tokenCountForMessages > 4096) {
+                    max_tokens = 4096 - tokenCountForMessages;
+                }
+                this.messages = messages;
+                this.max_tokens = max_tokens;
+            }
+
+        }
+
+        public class Response {
+
+            public string id { get; set; }
+            public string @object { get; set; }
+            public int created { get; set; }
+            public string model { get; set; }
+            public Usage usage { get; set; }
+            public List<Choice> choices { get; set; }
+
+            public class Choice {
+                public Line message { get; set; }
+                public string finish_reason { get; set; }
+                public int index { get; set; }
+            }
+
+            public class Usage {
+                public int prompt_tokens { get; set; }
+                public int completion_tokens { get; set; }
+                public int total_tokens { get; set; }
+            }
+
+        }
+
+    }
+
+    [Obsolete("Not needed anymore, use the OpenAi class instead")]
+    public class OpenAiLabs {
+
+        private string apiKey;
+
+        /// <summary> </summary>
+        /// <param name="apiKey"> See https://beta.openai.com/docs/api-reference/authentication and https://beta.openai.com/account/api-keys </param>
+        public OpenAiLabs(string apiKey) { this.apiKey = apiKey; }
+
+        public async Task<LabsApi.Response> SendLabsApiRequest(LabsApi.ApiTask apiTask) {
+            var latestProgress = await SendLabsApiTask(apiTask);
+            while (latestProgress.status == LabsApi.Response.STATUS_PENDING) {
+                await TaskV2.Delay(2000); // Check status every 2 seconds
+                // The API currently often randomly fails with server errors, add an exponential backoff layer to ignore these:
+                latestProgress = await TaskV2.TryWithExponentialBackoff(() => GetLatestTaskProgress(latestProgress.id), maxNrOfRetries: 5, initialExponent: 10);
+            }
+            return latestProgress;
+        }
+
+        private Task<LabsApi.Response> SendLabsApiTask(LabsApi.ApiTask taskToCreate) {
+            var createTaskUri = new Uri("https://labs.openai.com/api/labs/tasks").SendPOST();
+            return createTaskUri.WithAuthorization(apiKey).WithJsonContent(taskToCreate).GetResult<LabsApi.Response>();
+        }
+
+        private Task<LabsApi.Response> GetLatestTaskProgress(string taskId) {
+            var taskProgressUri = new Uri("https://labs.openai.com/api/labs/tasks/" + taskId).SendGET();
+            return taskProgressUri.WithAuthorization(apiKey).GetResult<LabsApi.Response>();
+        }
+
+        public class LabsApi {
+
+            public class ApiTask {
+
+                /// <summary> Tasks available are "text2im" or "inpainting" </summary>
+                public string task_type { get; set; }
+                public Prompt prompt { get; set; }
+
+                public class Prompt {
+                    public string caption { get; set; }
+                    public int batch_size { get; set; } = 2;
+                }
+
+                // TODO add inpainting Prompt subclass with additional image and
+                // masked_image fields, see eg https://github.com/charlesjlee/twitter_dalle2_bot/blob/main/dalle2.py#L115
+
+            }
+
+            public class Response {
+
+                public const string STATUS_SUCCESS = "succeeded";
+                public const string STATUS_PENDING = "pending";
+                public const string STATUS_FAILED = "failed";
+
+                public string @object { get; set; }
+                public string id { get; set; }
+                public int created { get; set; }
+                public string task_type { get; set; }
+                /// <summary> Is "pending" until "succeeded" (then also the generations will be filled) </summary>
+                public string status { get; set; }
+                public StatusInformation status_information { get; set; }
+                public string prompt_id { get; set; }
+                public Prompt prompt { get; set; }
+
+                public Generations generations { get; set; }
+
+                public class Prompt {
+                    public string id { get; set; }
+                    public string @object { get; set; }
+                    public int created { get; set; }
+                    public string prompt_type { get; set; }
+                    public Prompt prompt { get; set; }
+                    public object parent_generation_id { get; set; }
+                    public string caption { get; set; }
+                }
+
+                public class StatusInformation {
+                }
+
+                public class Generation {
+                    public string id { get; set; }
+                    public string @object { get; set; }
+                    public int created { get; set; }
+                    public string generation_type { get; set; }
+                    public GenerationData generation { get; set; }
+                    public string task_id { get; set; }
+                    public string prompt_id { get; set; }
+                    public bool is_public { get; set; }
+                }
+
+                public class GenerationData {
+                    public string image_path { get; set; }
+                }
+
+                public class Generations {
+                    public string @object { get; set; }
+                    public List<Generation> data { get; set; }
                 }
 
             }
