@@ -4,6 +4,17 @@
  * https://docs.unity3d.com/Manual/webgl-interactingwithbrowserscripting.html
  */
 mergeInto(LibraryManager.library, {
+
+  /**
+   * This functions checks if the browser has the canShare functions
+   * @returns true if the canShare function exists in the browser
+   */
+  canSharejs : function () {
+    if (navigator.canShare) {
+      return true;
+    } else return false;
+  },
+  
   /**
    * This function uses the JavaScript Share API to share a URL
    * @param titlePtr Pointer to the string location from the C# title
@@ -15,7 +26,9 @@ mergeInto(LibraryManager.library, {
    */
   sharejs: function (titlePtr, textPtr, urlPtr, base64FilePtr, fileNamePtr) {
 
-    if (!canSharejs()) {
+    
+    
+    if (!navigator.canShare) {
       return false
     }
     //Convert pointer to Strings and only ads attribute to share data if its not empty (default)
@@ -104,15 +117,5 @@ mergeInto(LibraryManager.library, {
       return true 
     } else return false
 
-  },
- 
-  /**
-   * This functions checks if the browser has the canShare functions
-   * @returns true if the canShare function exists in the browser
-   */
-  canSharejs: function () {
-    if (navigator.canShare) {
-      return true;
-    } else return false;
-  }
+  } 
 });
