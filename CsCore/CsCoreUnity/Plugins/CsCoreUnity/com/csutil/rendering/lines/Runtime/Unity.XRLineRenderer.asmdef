@@ -1,0 +1,8 @@
+{
+    "name": "Unity.XRLineRenderer",
+    "references": [],
+    "optionalUnityReferences": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false
+}
