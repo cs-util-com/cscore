@@ -1,6 +1,0 @@
-﻿{
-    "name": "Unity.XRLineRenderer.Tests",
-    "optionalUnityReferences": [
-        "TestAssemblies"
-    ]
-}

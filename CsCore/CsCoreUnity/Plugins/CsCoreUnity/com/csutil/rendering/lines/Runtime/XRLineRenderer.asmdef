@@ -1,11 +1,8 @@
 {
-    "name": "Unity.XRLineRenderer.Editor",
-    "references": [
-        "Unity.XRLineRenderer"
-    ],
-    "includePlatforms": [
-        "Editor"
-    ],
+    "name": "XRLineRenderer",
+    "rootNamespace": "",
+    "references": [],
+    "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,
