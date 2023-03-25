@@ -109,7 +109,7 @@ namespace com.csutil.ui {
 
         [Conditional("DEBUG")]
         private static void LogWarningNotToDoUiOperationsDuringOnEnable(Canvas self) {
-            Log.w("Using operations on canvas such as .isRootCanvas during onEnable can result in incorrect UI results! If possible delay such operations until the UI is initialized", self.gameObject);
+            // Log.w("Using operations on canvas such as .isRootCanvas during onEnable can result in incorrect UI results! If possible delay such operations until the UI is initialized", self.gameObject);
         }
 
     }
