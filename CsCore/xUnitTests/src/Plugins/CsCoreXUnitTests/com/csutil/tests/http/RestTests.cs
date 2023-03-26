@@ -221,7 +221,7 @@ namespace com.csutil.tests.http {
             }
         }
 
-        private DateTimeV2 DateTimeV2Instance() { return IoC.inject.Get<DateTimeV2>(this); }
+        private DateTimeV2 DateTimeV2Instance() { return IoC.inject.Get<IClock>(this) as DateTimeV2; }
 
         private static double GetDiffBetweenV1AndV2() { return (DateTime.UtcNow - DateTimeV2.UtcNow).TotalMillisecondsAbs(); }
 

@@ -21,7 +21,7 @@ namespace com.csutil.tests.model {
             var analytics = CreateLocalAnalyticsSystem();
 
             var t = new MockDateTimeV2();
-            IoC.inject.SetSingleton<DateTimeV2>(t, overrideExisting: true);
+            IoC.inject.SetSingleton<IClock>(t, overrideExisting: true);
 
             string featureId = "feature1";
 
@@ -214,7 +214,7 @@ namespace com.csutil.tests.model {
         public async Task ExampleUsage3_NpsScoreSystem() {
 
             var t = new MockDateTimeV2();
-            IoC.inject.SetSingleton<DateTimeV2>(t, overrideExisting: true);
+            IoC.inject.SetSingleton<IClock>(t, overrideExisting: true);
             t.mockUtcNow = DateTimeV2.ParseUtc("01.02.2011");
 
             var analytics = CreateLocalAnalyticsSystem();
