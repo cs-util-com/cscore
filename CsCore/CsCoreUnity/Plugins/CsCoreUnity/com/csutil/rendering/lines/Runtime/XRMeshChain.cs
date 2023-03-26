@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace Unity.XRTools.Rendering
+namespace com.csutil.rendering
 {
     /// <summary>
     /// The mesh chain handles all the translation between Unity's mesh class,

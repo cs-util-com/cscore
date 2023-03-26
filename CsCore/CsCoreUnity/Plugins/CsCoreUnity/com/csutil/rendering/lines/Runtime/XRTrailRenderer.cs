@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace Unity.XRTools.Rendering
+namespace com.csutil.rendering
 {
     /// <summary>
     /// An XR-Focused drop-in replacement for the Trail Renderer
