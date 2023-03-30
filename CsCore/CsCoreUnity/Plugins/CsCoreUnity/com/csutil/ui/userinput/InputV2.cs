@@ -14,7 +14,8 @@ namespace com.csutil {
         public static bool GetMouseButton(int button) { return GetInputSystem().GetMouseButton(button); }
 
         private static readonly Func<IUnityInputSystem> DefaultInputSystemFactory = () => new DefaultUnityInputSystem();
-        private static IUnityInputSystem GetInputSystem() { return IoC.inject.GetOrAddSingleton(null, DefaultInputSystemFactory); }
+        
+        public static IUnityInputSystem GetInputSystem() { return IoC.inject.GetOrAddSingleton(null, DefaultInputSystemFactory); }
 
     }
 
