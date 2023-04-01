@@ -100,6 +100,10 @@ namespace com.csutil.ui.jsonschema {
 
         public static bool IsInChildObject(this FieldView self) { return self.fieldName != self.fullPath; }
 
+        public static Task<T> ShowGeneratedViewFor<T>(this ViewStack viewStack, T model) {
+            return JsonSchemaToView.NewViewGenerator().ShowModelInViewStack(model, viewStack);
+        }
+
         public static async Task<T> ShowModelInViewStack<T>(this JsonSchemaToView viewGenerator, T model, ViewStack viewStack) {
             var uiView = await viewGenerator.GenerateViewFrom<T>(keepReferenceToEditorPrefab: false);
             viewStack.ShowView(uiView);
