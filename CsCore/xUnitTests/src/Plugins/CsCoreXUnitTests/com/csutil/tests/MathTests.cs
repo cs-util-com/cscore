@@ -159,6 +159,19 @@ namespace com.csutil.tests {
         }
 
         [Fact]
+        public void TestIsAlmostEqual() {
+
+            var vec1 = new Vector3(1, 1, 3);
+            var vec2 = new Vector3(1, 1, 3.01f);
+            
+            Assert.True(vec1.IsAlmostEqual(vec2, 1));
+            Assert.False(vec1.IsAlmostEqual(vec2, 2));
+            Assert.True(vec1.IsAlmostEqual(vec2, 0.01f));
+            Assert.False(vec1.IsAlmostEqual(vec2, 0.009f));
+
+        }
+
+        [Fact]
         public void TestMatrixComposeDecompose() {
 
             var translation = new Vector3(1, 2, 3);
@@ -171,9 +184,9 @@ namespace com.csutil.tests {
             var success = matrix.Decompose(out var scale2, out var rotation2, out var translation2);
             Assert.True(success);
             var digits = 6;
-            Assert.True(translation.IsSimilarTo(translation2, digits: digits));
+            Assert.True(translation.IsAlmostEqual(translation2, decimals: digits));
             Assert.True(rotation.IsSimilarTo(rotation2, digits: digits));
-            Assert.True(scale.IsSimilarTo(scale2, digits: digits));
+            Assert.True(scale.IsAlmostEqual(scale2, decimals: digits));
 
         }
 
