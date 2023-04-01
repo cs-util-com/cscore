@@ -100,6 +100,22 @@ namespace com.csutil.ui.jsonschema {
 
         public static bool IsInChildObject(this FieldView self) { return self.fieldName != self.fullPath; }
 
+        public static async Task<T> ShowModelInViewStack<T>(this JsonSchemaToView viewGenerator, T model, ViewStack viewStack) {
+            var uiView = await viewGenerator.GenerateViewFrom<T>(keepReferenceToEditorPrefab: false);
+            viewStack.ShowView(uiView);
+            return await viewGenerator.ShowModelInView(model, uiView);
+        }
+
+        public static async Task<T> ShowModelInView<T>(this JsonSchemaToView viewGenerator, T model, GameObject uiView) {
+            JsonSchemaPresenter p = new JsonSchemaPresenter(viewGenerator);
+            p.targetView = uiView;
+            try { // Show the view and wait until The user is done with it:
+                return await p.LoadViaJsonIntoView(model);
+            } finally { // Now that the user done with the UI destroy it:
+                uiView.Destroy();
+            }
+        }
+
     }
 
 }
