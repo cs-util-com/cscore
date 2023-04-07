@@ -191,6 +191,53 @@ namespace com.csutil.tests {
         }
 
         [Fact]
+        public void TestBezierTrajectoryDeformation() {
+            List<Matrix4x4> trajectory = new List<Matrix4x4>();
+            // All individual points are titled 45 degree but are they are all on a straight line so this rotation does not affect the trajectory
+            var inputRot = Quaternion.CreateFromYawPitchRoll(0, 45, 0);
+            trajectory.Add(Matrix4x4Extensions.Compose(Vector3.Zero, inputRot, Vector3.One));
+            trajectory.Add(Matrix4x4Extensions.Compose(new Vector3(0.5f, 0.5f, 0.5f), inputRot, Vector3.One));
+            trajectory.Add(Matrix4x4Extensions.Compose(new Vector3(1, 1, 1), inputRot, Vector3.One));
+            trajectory.Add(Matrix4x4Extensions.Compose(new Vector3(1.5f, 1.5f, 1.5f), inputRot, Vector3.One));
+            var endPose = Matrix4x4Extensions.Compose(new Vector3(2, 2, 2), inputRot, Vector3.One);
+            trajectory.Add(endPose);
+
+            // Moving the last point to 4,4,4 would be a pure stretch transformation that is easy to assert below
+            var correctedEndPos = new Vector3(4, 4, 4);
+            var correctedEndPose = Matrix4x4Extensions.Compose(correctedEndPos, inputRot, Vector3.One);
+            var corrected = trajectory.CalcBezierTrajectoryDeformation(correctedEndPose).ToList();
+
+            { // First point should not be changed
+                Assert.Equal(trajectory.First(), corrected.First());
+            }
+            { // The second point should be double the distance from zero now:
+                corrected.Skip(1).First().Decompose(out var scale, out var rotation, out var translation);
+                Assert.True(translation.IsAlmostEqual(new Vector3(1, 1, 1), 4));
+                Assert.True(rotation.GetRotationDeltaTo(inputRot).GetEulerAnglesAsPitchYawRoll().IsAlmostEqual(Vector3.Zero, 4));
+                Assert.True(scale.IsAlmostEqual(Vector3.One, decimals: 4));
+            }
+            { // The third point should be double the distance from zero now:
+                corrected.Skip(2).First().Decompose(out var scale, out var rotation, out var translation);
+                Assert.True(translation.IsAlmostEqual(new Vector3(2, 2, 2), 4));
+                Assert.True(rotation.GetRotationDeltaTo(inputRot).GetEulerAnglesAsPitchYawRoll().IsAlmostEqual(Vector3.Zero, 4));
+                Assert.True(scale.IsAlmostEqual(Vector3.One, decimals: 4));
+            }
+            { // The fourth point should be double the distance from zero now:
+                corrected.Skip(3).First().Decompose(out var scale, out var rotation, out var translation);
+                Assert.True(translation.IsAlmostEqual(new Vector3(3, 3, 3), 4));
+                Assert.True(rotation.GetRotationDeltaTo(inputRot).GetEulerAnglesAsPitchYawRoll().IsAlmostEqual(Vector3.Zero, 4));
+                Assert.True(scale.IsAlmostEqual(Vector3.One, decimals: 4));
+            }
+            { // The last point should be the corrected end pose:
+                corrected.Last().Decompose(out var scale, out var rotation, out var translation);
+                Assert.True(rotation.GetRotationDeltaTo(inputRot).GetEulerAnglesAsPitchYawRoll().IsAlmostEqual(Vector3.Zero, 4));
+                Assert.True(scale.IsAlmostEqual(Vector3.One, decimals: 4));
+                Assert.True(translation.IsAlmostEqual(correctedEndPos, 4), $"Expected {correctedEndPos} but got {translation}");
+            }
+
+        }
+
+        [Fact]
         public void ExampleUsageOfEulerAngles() {
             {
                 var yaw = 180f;
