@@ -178,7 +178,6 @@ namespace com.csutil.tests {
             var rotation = Quaternion.CreateFromYawPitchRoll(15 * degreeToRad, 45 * degreeToRad, 75 * degreeToRad);
             var scale = new Vector3(7, 6, 5);
 
-            // TODO rename Matrix4x4_TRS to compose:
             var matrix = Matrix4x4Extensions.Compose(translation, rotation, scale);
 
             var success = matrix.Decompose(out var scale2, out var rotation2, out var translation2);
