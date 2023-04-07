@@ -66,6 +66,14 @@ namespace com.csutil {
             }
         }
 
+        public static void RemoveSingleton<V>(this Injector self, V singletonInstance) {
+            var i = self.Get<V>(null);
+            if (!ReferenceEquals(i, singletonInstance)) {
+                throw new InvalidOperationException("Could not remove singleton " + singletonInstance + " because it was not the current singleton");
+            }
+            self.RemoveAllInjectorsFor<V>();
+        }
+
         [Conditional("DEBUG")]
         private static void AssertNotNull<T>(T singleton) {
             if (ReferenceEquals(null, singleton)) {
