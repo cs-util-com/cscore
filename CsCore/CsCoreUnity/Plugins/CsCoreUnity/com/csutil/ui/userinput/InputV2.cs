@@ -5,12 +5,16 @@ namespace com.csutil {
 
     public class InputV2 {
 
+        [Obsolete("Instead use instance version by first calling GetInputSystem()")]
         public static int touchCount => GetInputSystem().touchCount;
 
+        [Obsolete("Instead use instance version by first calling GetInputSystem()")]
         public static bool GetKeyUp(KeyCode keyCode) { return GetInputSystem().GetKeyUp(keyCode); }
         
+        [Obsolete("Instead use instance version by first calling GetInputSystem()")]
         public static bool GetKey(KeyCode keyCode) { return GetInputSystem().GetKey(keyCode); }
 
+        [Obsolete("Instead use instance version by first calling GetInputSystem()")]
         public static bool GetMouseButton(int button) { return GetInputSystem().GetMouseButton(button); }
 
         private static readonly Func<IUnityInputSystem> DefaultInputSystemFactory = () => new DefaultUnityInputSystem();

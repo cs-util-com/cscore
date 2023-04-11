@@ -1,6 +1,7 @@
 ﻿#if !UNITY_2021_2_OR_NEWER
 using com.csutil.netstandard2_1polyfill;
 #endif
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -13,8 +14,14 @@ namespace com.csutil.ui.viewstack {
 
         public bool destroyFinalView = true;
 
+        private IUnityInputSystem input;
+        
+        private void OnEnable() {
+            input = InputV2.GetInputSystem();
+        }
+
         public void Update() {
-            if (InputV2.GetKeyUp(KeyCode.Escape)) { // back button pressed
+            if (input.GetKeyUp(KeyCode.Escape)) { // back button pressed
                 Log.d("Back key pressed");
                 var vs = gameObject.GetComponentV2<ViewStack>();
                 var screenOnTop = GetCanvasWithHighestSortingOrder();
