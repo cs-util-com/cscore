@@ -7,6 +7,8 @@ namespace com.csutil.tests.http {
     [Collection("Sequential")] // Will execute tests in here sequentially
     public class HasInternetTests : IHasInternetListener {
 
+        public HasInternetTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
+
         private bool hasInet;
 
         [Fact]
