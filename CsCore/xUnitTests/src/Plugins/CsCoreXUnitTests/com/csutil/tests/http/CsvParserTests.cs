@@ -14,6 +14,7 @@ namespace com.csutil.tests.http {
 
         [Fact]
         public async Task ExampleUsage() {
+
             string sampleCsvData = "Name,Age,Location\nAlice,25,New York\nBob,30,San Francisco\n";
 
             using var stream = new MemoryStream(Encoding.Default.GetBytes(sampleCsvData));
@@ -33,6 +34,27 @@ namespace com.csutil.tests.http {
             var json = CsvParser.ConvertToJson(parsedData);
             Log.d(JsonWriter.AsPrettyString(json));
 
+        }
+
+        [Fact]
+        public async Task ExampleUsage2() {
+
+            string sampleCsvData = "Name,Age,Location\nAlice,25,New York\nBob,30,San Francisco\n";
+            using var stream = new MemoryStream(Encoding.Default.GetBytes(sampleCsvData));
+            List<Person> parsedData = CsvParser.ReadCsvStreamAs<List<Person>>(stream);
+
+            Assert.Equal(2, parsedData.Count);
+            var alice = parsedData[0];
+            Assert.Equal("Alice", alice.Name);
+            Assert.Equal(25, alice.Age);
+            Assert.Equal("New York", alice.Location);
+
+        }
+
+        private class Person {
+            public string Name { get; set; }
+            public int Age { get; set; }
+            public string Location { get; set; }
         }
 
     }

@@ -21,16 +21,20 @@ namespace com.csutil.io {
             return rawSheetData;
         }
 
-        public static List<JObject> ReadCsvStreamAsJson(Stream csvStream) {
+        public static JArray ReadCsvStreamAsJson(Stream csvStream) {
             return ConvertToJson(ReadCsvStream(csvStream));
         }
 
-        public static List<JObject> ConvertToJson(List<List<string>> parsedData) {
-            List<JObject> jsonObjects = new List<JObject>();
-            if (parsedData.IsNullOrEmpty()) { return jsonObjects; }
-            List<string> headers = parsedData[0];
-            for (int i = 1; i < parsedData.Count; i++) {
-                List<string> row = parsedData[i];
+        public static T ReadCsvStreamAs<T>(Stream csvStream) {
+            return ReadCsvStreamAsJson(csvStream).ToObject<T>();
+        }
+
+        public static JArray ConvertToJson(List<List<string>> parsedCsvData) {
+            JArray jsonObjects = new JArray();
+            if (parsedCsvData.IsNullOrEmpty()) { return jsonObjects; }
+            List<string> headers = parsedCsvData[0];
+            for (int i = 1; i < parsedCsvData.Count; i++) {
+                List<string> row = parsedCsvData[i];
                 JObject jsonObject = new JObject();
                 for (int j = 0; j < headers.Count; j++) {
                     jsonObject[headers[j]] = j < row.Count ? row[j] : null;
