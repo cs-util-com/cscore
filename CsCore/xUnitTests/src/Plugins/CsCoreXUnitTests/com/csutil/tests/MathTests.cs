@@ -164,8 +164,8 @@ namespace com.csutil.tests {
             var vec1 = new Vector3(1, 1, 3);
             var vec2 = new Vector3(1, 1, 3.01f);
             
-            Assert.True(vec1.IsAlmostEqual(vec2, 1));
-            Assert.False(vec1.IsAlmostEqual(vec2, 2));
+            Assert.True(vec1.IsAlmostEqual(vec2, 2));
+            Assert.False(vec1.IsAlmostEqual(vec2, 3));
             Assert.True(vec1.IsAlmostEqual(vec2, 0.01f));
             Assert.False(vec1.IsAlmostEqual(vec2, 0.009f));
 

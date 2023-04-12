@@ -11,7 +11,7 @@ namespace com.csutil {
         /// <summary> Checks if the Euclidean distance between two Vectors is less than a specified maximum </summary>
         /// <param name="decimals"> Required accuracy after the comma </param>
         public static bool IsAlmostEqual(this Vector3 vector1, Vector3 vector2, int decimals) {
-            float maxDiff = (float)Math.Pow(10, -(decimals + 1));
+            float maxDiff = (float)Math.Pow(10, -(decimals));
             return IsAlmostEqual(vector1, vector2, maxDiff);
         }
 
