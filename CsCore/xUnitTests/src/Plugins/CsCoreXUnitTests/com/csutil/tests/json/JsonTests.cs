@@ -118,6 +118,29 @@ namespace com.csutil.tests.json {
             }
         }
 
+        /// <summary> This test uses a JObject to parse the json data </summary>
+        [Fact]
+        public void TestDynamicJsonParsing() {
+            var json = @"{""name"":""John"",""age"":30,""cars"":[ ""Ford"", ""BMW"" ]}";
+            var jObject = JsonReader.GetReader().Read<JObject>(json);
+            Assert.Equal("John", jObject["name"].Value<string>());
+            Assert.Equal(30, jObject["age"].Value<int>());
+            Assert.Equal("Ford", jObject["cars"][0].Value<string>());
+            Assert.Equal("BMW", jObject["cars"][1].Value<string>());
+        }
+
+        /// <summary> This test uses a dictionary to parse the json data </summary>
+        [Fact]
+        public void TestDynamicJsonParsing2() {
+            var json = @"{""name"":""John"",""age"":30,""cars"":[ ""Ford"", ""BMW"" ]}";
+            var dict = JsonReader.GetReader().Read<Dictionary<string, object>>(json);
+            Assert.Equal("John", dict["name"]);
+            Assert.Equal(30l, dict["age"]);
+            JArray cars = dict["cars"] as JArray;
+            Assert.Equal("Ford", cars[0].Value<string>());
+            Assert.Equal("BMW", cars[1].Value<string>());
+        }
+
     }
 
 }
