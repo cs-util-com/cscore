@@ -29,6 +29,10 @@ namespace com.csutil.tests.http {
             Assert.Equal("Alice", parsedData[1][0]);
             Assert.Equal("25", parsedData[1][1]);
             Assert.Equal("New York", parsedData[1][2]);
+
+            var json = CsvParser.ConvertToJson(parsedData);
+            Log.d(JsonWriter.AsPrettyString(json));
+
         }
 
     }
