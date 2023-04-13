@@ -27,8 +27,9 @@ namespace com.csutil {
         /// </summary>
         /// <param name="returnDegree"> false to return the angles in radians </param>
         public static Vector3 GetEulerAnglesAsPitchYawRoll(this Quaternion rotation, bool returnDegree = true) {
-            if (Math.Abs(rotation.LengthSquared() - 1.0f) > 0.000001f) {
-                throw new ArgumentException("Invalid rotation quaternion (length!=1)", nameof(rotation));
+            var length = rotation.LengthSquared();
+            if (Math.Abs(length - 1.0f) > 0.00001f) {
+                throw new ArgumentException($"Invalid rotation quaternion (length not 1 but {length})", nameof(rotation));
             }
 
             float sqx = rotation.X * rotation.X;
