@@ -235,6 +235,14 @@ namespace com.csutil {
             }
         }
 
+        public static DirectoryEntry GetRootDirectory(this ZipArchiveFileSystem self) {
+            return new DirectoryEntry(self, UPath.Root);
+        }
+
+        public static ZipArchiveFileSystem OpenAsZip(this FileEntry self) {
+            return new ZipArchiveFileSystem(self.OpenOrCreateForReadWrite());
+        }
+
         /// <summary> Currently only works when working with a physical file system for the source directory </summary>
         public static void ZipToFile(this DirectoryEntry self, FileEntry targetZipFile) {
             if (targetZipFile.Exists) { throw new IOException("Target zip file already exists: " + targetZipFile); }

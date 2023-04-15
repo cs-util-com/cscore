@@ -29,7 +29,7 @@ namespace com.csutil.keyvaluestore {
 
         public DisposeState IsDisposed { get; private set; } = DisposeState.Active;
 
-        public void Dispose() {
+        public virtual void Dispose() {
             IsDisposed = DisposeState.DisposingStarted;
             fallbackStore?.Dispose();
             IsDisposed = DisposeState.Disposed;
