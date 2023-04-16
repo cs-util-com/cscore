@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace NeoSmart.AsyncLock
+namespace com.csutil
 {
     public class AsyncLock
     {

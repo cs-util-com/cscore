@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace NeoSmart.AsyncLock
+namespace com.csutil
 {
     sealed class NullDisposable : IDisposable
     {
