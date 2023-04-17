@@ -100,6 +100,13 @@ namespace com.csutil.tests {
             ReadAllFilesFrom(root);
         }
 
+        [Fact]
+        public async Task SpeedTestInMemoryFileSystemAsync() {
+            var root = EnvironmentV2.instance.GetNewInMemorySystem();
+            await WriteFilesTo(root);
+            ReadAllFilesFrom(root);
+        }
+
         private static void ReadAllFilesFrom(DirectoryEntry zip) {
             using var t = Log.MethodEnteredWith($"Read with count {FILE_COUNT}");
             var allFilesInZip = zip.EnumerateEntries().Cast<FileEntry>().ToList();
