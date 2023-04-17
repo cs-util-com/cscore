@@ -81,7 +81,7 @@ namespace com.csutil
                 return this;
             }
 
-            internal async Task<IDisposable?> TryObtainLockAsync(TimeSpan timeout)
+            internal async Task<IDisposable> TryObtainLockAsync(TimeSpan timeout)
             {
                 // In case of zero-timeout, don't even wait for protective lock contention
                 if (timeout == TimeSpan.Zero)
@@ -126,7 +126,7 @@ namespace com.csutil
                 return null;
             }
 
-            internal async Task<IDisposable?> TryObtainLockAsync(CancellationToken cancel)
+            internal async Task<IDisposable> TryObtainLockAsync(CancellationToken cancel)
             {
                 try
                 {
@@ -159,7 +159,7 @@ namespace com.csutil
                 return this;
             }
 
-            internal IDisposable? TryObtainLock(TimeSpan timeout)
+            internal IDisposable TryObtainLock(TimeSpan timeout)
             {
                 // In case of zero-timeout, don't even wait for protective lock contention
                 if (timeout == TimeSpan.Zero)
@@ -344,7 +344,7 @@ namespace com.csutil
                 {
                     if (state.Exception is AggregateException ex)
                     {
-                        ExceptionDispatchInfo.Capture(ex.InnerException!).Throw();
+                        ExceptionDispatchInfo.Capture(ex.InnerException).Throw();
                     }
                     var disposableLock = state.Result;
                     if (disposableLock is null)
@@ -374,9 +374,9 @@ namespace com.csutil
             return @lock.TryObtainLockAsync(timeout)
                 .ContinueWith(state =>
                 {
-                    if (state.Exception is AggregateException ex)
+                    if (state.Exception is AggregateException ex1)
                     {
-                        ExceptionDispatchInfo.Capture(ex.InnerException!).Throw();
+                        ExceptionDispatchInfo.Capture(ex1.InnerException).Throw();
                     }
                     var disposableLock = state.Result;
                     if (disposableLock is null)
@@ -389,9 +389,9 @@ namespace com.csutil
                         {
                             disposableLock.Dispose();
 
-                            if (result.Exception is AggregateException ex)
+                            if (result.Exception is AggregateException ex2)
                             {
-                                ExceptionDispatchInfo.Capture(ex.InnerException!).Throw();
+                                ExceptionDispatchInfo.Capture(ex2.InnerException).Throw();
                             }
 
                             return true;
@@ -411,7 +411,7 @@ namespace com.csutil
                 {
                     if (state.Exception is AggregateException ex)
                     {
-                        ExceptionDispatchInfo.Capture(ex.InnerException!).Throw();
+                        ExceptionDispatchInfo.Capture(ex.InnerException).Throw();
                     }
                     var disposableLock = state.Result;
                     if (disposableLock is null)
@@ -441,9 +441,9 @@ namespace com.csutil
             return @lock.TryObtainLockAsync(cancel)
                 .ContinueWith(state =>
                 {
-                    if (state.Exception is AggregateException ex)
+                    if (state.Exception is AggregateException ex1)
                     {
-                        ExceptionDispatchInfo.Capture(ex.InnerException!).Throw();
+                        ExceptionDispatchInfo.Capture(ex1.InnerException).Throw();
                     }
                     var disposableLock = state.Result;
                     if (disposableLock is null)
@@ -456,9 +456,9 @@ namespace com.csutil
                         {
                             disposableLock.Dispose();
 
-                            if (result.Exception is AggregateException ex)
+                            if (result.Exception is AggregateException ex2)
                             {
-                                ExceptionDispatchInfo.Capture(ex.InnerException!).Throw();
+                                ExceptionDispatchInfo.Capture(ex2.InnerException).Throw();
                             }
 
                             return true;
