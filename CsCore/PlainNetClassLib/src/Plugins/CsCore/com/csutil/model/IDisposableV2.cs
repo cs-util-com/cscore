@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using com.csutil.keyvaluestore;
 
 namespace com.csutil {
 
@@ -16,6 +18,40 @@ namespace com.csutil {
 
         public static DisposeState FromBool(bool isDisposed) {
             return isDisposed ? DisposeState.Disposed : DisposeState.Active;
+        }
+
+    }
+
+    public class IDisposableCollection : IDisposableV2 {
+
+        public DisposeState IsDisposed { get; private set; }
+        public ICollection<IDisposable> Children { get; }
+
+        public IDisposableCollection() {
+            Children = new List<IDisposable>();
+        }
+
+        public IDisposableCollection(ICollection<IDisposable> children) {
+            Children = children;
+        }
+
+        public void Dispose() {
+            if (IsDisposed != DisposeState.Active) {
+                throw new InvalidOperationException("IDisposableCollection state was already " + IsDisposed);
+            }
+            IsDisposed = DisposeState.DisposingStarted;
+            foreach (var child in Children) {
+                try {
+                    child.Dispose();
+                } catch (Exception e) {
+                    Log.e(e);
+                }
+            }
+            IsDisposed = DisposeState.Disposed;
+        }
+
+        public void Add(IDisposable disposable) {
+            Children.Add(disposable);
         }
 
     }
