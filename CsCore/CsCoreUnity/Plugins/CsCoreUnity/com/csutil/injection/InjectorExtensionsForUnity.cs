@@ -35,7 +35,7 @@ namespace com.csutil {
         private static GameObject GetSingletonGameObject(string goName) {
             var go = GameObject.Find(goName);
             if (go != null) { return go; }
-            var list = ResourcesV2.FindAllGOsInScene().Filter(g => g.name == goName && g.GetParent() == null);
+            var list = Resources.FindObjectsOfTypeAll<GameObject>().Filter(x => x.name == goName).ToList();
             if (!list.IsEmpty()) {
                 go = list.Single(); // Must be exactly 1
                 Log.d($"GameObject.Find could not find '{goName} but FindAllGOsInScene did'", go);
