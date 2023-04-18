@@ -37,9 +37,6 @@ namespace com.csutil.editor {
             // https://docs.unity3d.com/Packages/com.unity.mobile.android-logcat@1.3
             UnityPackageInstaller.AddToProjectViaPackageManager("com.unity.mobile.android-logcat", "1.3.2");
 
-            // Efficient code recompiling via https://github.com/handzlikchris/FastScriptReload
-            UnityPackageInstaller.AddToProjectViaPackageManager("com.fastscriptreload", "https://github.com/handzlikchris/FastScriptReload.git?path=Assets");
-            
             // FPS monitoring via https://github.com/Tayx94/graphy
             UnityPackageInstaller.AddToProjectViaPackageManager("com.tayx.graphy", "https://github.com/Tayx94/graphy.git");
             
