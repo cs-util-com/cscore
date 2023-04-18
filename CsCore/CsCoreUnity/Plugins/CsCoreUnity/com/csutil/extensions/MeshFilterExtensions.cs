@@ -16,7 +16,9 @@ namespace com.csutil {
             triangulator.transform.rotation = Quaternion.identity;
             triangulator.transform.scale(Vector3.one);
             triangulator.points = polygonPoints;
+#if UNITY_2022_1_OR_NEWER
             triangulator.useDelaunayMesh = true;
+#endif
             var result = triangulator.CreateMesh(false, false);
             triangulator.transform.ApplyPose(oldPose);
             return result;
