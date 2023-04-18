@@ -63,7 +63,7 @@ namespace com.csutil {
         public static Task<T> AddOnClickAction<T>(this Button self, Func<GameObject, T> onClickFunc) {
             onClickFunc.ThrowErrorIfNull("Passed onClickFunc was null");
             var tcs = new TaskCompletionSource<T>();
-            var originTrace = new StackTrace();
+            StackTrace originTrace = null; // new StackTrace();
             Task alreadyRunningTask = null;
             self.onClick.AddListener(() => {
                 if (alreadyRunningTask != null && !alreadyRunningTask.IsCompleted) { return; }
