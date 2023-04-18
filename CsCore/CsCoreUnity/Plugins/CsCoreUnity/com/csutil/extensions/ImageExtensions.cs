@@ -98,7 +98,7 @@ namespace com.csutil {
                 RenderTexture.active = tempRenderTex;
                 Graphics.Blit(self, tempRenderTex);
                 self.filterMode = filter;
-#if UNITY_2022_1_OR_NEWER
+#if UNITY_2021_2_OR_NEWER
                 if (!self.Reinitialize((int)width, (int)height, self.format, hasMipMap)) { return false; }
 #else
                 if (!self.Resize((int)width, (int)height, self.format, hasMipMap)) { return false; }
