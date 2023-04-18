@@ -27,11 +27,7 @@ namespace com.csutil {
 
     public class ToastsUi : MonoBehaviour, IDisposableV2 {
 
-        private GameObject toastsContainer;
-
         public DisposeState IsDisposed => DisposeStateHelper.FromBool(this.IsDestroyed());
-
-        private void OnEnable() { toastsContainer = gameObject.GetLinkMap().Get<GameObject>("MessageContainer"); }
 
         public GameObject Show(string toastCaption, string toastMessage, int displayDurationInMs) {
             var newToast = ResourcesV2.LoadPrefab("Messages/Toast");
@@ -39,6 +35,7 @@ namespace com.csutil {
             InitText(toastUiElems, "Caption", toastCaption);
             InitText(toastUiElems, "Message", toastMessage);
             newToast.GetComponentV2<MonoBehaviour>().ExecuteDelayed(() => newToast.Destroy(), displayDurationInMs);
+            var toastsContainer = gameObject.GetLinkMap().Get<GameObject>("MessageContainer");
             toastsContainer.AddChild(newToast);
             return newToast;
         }
