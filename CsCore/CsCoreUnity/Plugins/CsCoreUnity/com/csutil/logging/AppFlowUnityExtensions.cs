@@ -68,8 +68,8 @@ namespace com.csutil {
                 var action = UiEvents.CONFIRM_CANCEL_DIALOG + "_" + d.caption + (d.dialogWasConfirmed ? " CONFIRMED" : " CANCELED");
                 self.TrackEvent(EventConsts.catUi, action, d);
             });
-            EventBus.instance.Subscribe(self, EventConsts.catUi + UiEvents.INPUT_DIALOG, (ConfirmCancelDialog d) => {
-                var action = UiEvents.INPUT_DIALOG + "_" + d.caption + (d.dialogWasConfirmed ? " CONFIRMED" : " CANCELED");
+            EventBus.instance.Subscribe(self, EventConsts.catUi + UiEvents.INPUT_DIALOG, (DialogForTextInput d) => {
+                var action = UiEvents.INPUT_DIALOG + "_" + d.caption;
                 self.TrackEvent(EventConsts.catUi, action, d);
             });
         }
