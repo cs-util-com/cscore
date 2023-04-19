@@ -65,10 +65,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- https://www.nuget.org/packages/Magick.NET-Q8-AnyCPU/ --> 
-    <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="7.19.0" />
     <!-- https://www.nuget.org/packages/Magick.NET.Core/ --> 
-    <PackageReference Include="Magick.NET.Core" Version="2.0.0" />
+    <PackageReference Include="Magick.NET.Core" Version="13.0.1" />
+    <!-- https://www.nuget.org/packages/Magick.NET-Q8-AnyCPU/ --> 
+    <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="13.0.1" />
   </ItemGroup>
 
 </Project>
