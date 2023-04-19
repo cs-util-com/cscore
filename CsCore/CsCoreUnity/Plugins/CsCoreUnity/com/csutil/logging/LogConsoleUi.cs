@@ -72,6 +72,7 @@ namespace com.csutil.logging {
         private const string LINE_BREAK = "\n";
 
         public void HandleLogMessageReceivedThreaded(string condition, string stacktrace, LogType type) {
+            if (!ApplicationV2.isPlaying) { return; }
             MainThread.Invoke(() => {
                 switch (type) {
                     case LogType.Log:
@@ -175,6 +176,7 @@ namespace com.csutil.logging {
         }
 
         public void AddToLog(LogEntry logMessage) {
+            if (!ApplicationV2.isPlaying) { return; }
             allData.Add(logMessage);
             if (filter(logMessage)) {
                 CellData.Add(logMessage);
