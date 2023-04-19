@@ -2368,7 +2368,7 @@
                 Provides a <see cref="T:Zio.IFileSystem" /> for the ZipArchive filesystem.
             </summary>
         </member>
-        <member name="M:Zio.FileSystems.ZipArchiveFileSystem.#ctor(System.IO.Compression.ZipArchive,System.Boolean)">
+        <member name="M:Zio.FileSystems.ZipArchiveFileSystem.#ctor(System.IO.Compression.ZipArchive,System.Boolean,System.IO.Compression.CompressionLevel)">
             <summary>
                 Initializes a new instance of the <see cref="T:Zio.FileSystems.ZipArchiveFileSystem" /> class.
             </summary>
@@ -2376,7 +2376,7 @@
             <param name="isCaseSensitive">Specifies if entry names should be case sensitive</param>
             <exception cref="T:System.ArgumentNullException"></exception>
         </member>
-        <member name="M:Zio.FileSystems.ZipArchiveFileSystem.#ctor(System.IO.Stream,System.IO.Compression.ZipArchiveMode,System.Boolean,System.Boolean)">
+        <member name="M:Zio.FileSystems.ZipArchiveFileSystem.#ctor(System.IO.Stream,System.IO.Compression.ZipArchiveMode,System.Boolean,System.Boolean,System.IO.Compression.CompressionLevel)">
             <summary>
                 Initializes a new instance of the <see cref="T:Zio.FileSystems.ZipArchiveFileSystem" /> class.
             </summary>
@@ -2385,7 +2385,7 @@
             <param name="leaveOpen">True to leave the stream open when <see cref="T:System.IO.Compression.ZipArchive" /> is disposed</param>
             <param name="isCaseSensitive"></param>
         </member>
-        <member name="M:Zio.FileSystems.ZipArchiveFileSystem.#ctor(System.String,System.IO.Compression.ZipArchiveMode,System.Boolean,System.Boolean)">
+        <member name="M:Zio.FileSystems.ZipArchiveFileSystem.#ctor(System.String,System.IO.Compression.ZipArchiveMode,System.Boolean,System.Boolean,System.IO.Compression.CompressionLevel)">
             <summary>
                 Initializes a new instance of the <see cref="T:Zio.FileSystems.ZipArchiveFileSystem" /> class from file.
             </summary>
@@ -2394,7 +2394,7 @@
             <param name="leaveOpen">True to leave the stream open when <see cref="T:System.IO.Compression.ZipArchive" /> is disposed</param>
             <param name="isCaseSensitive">Specifies if entry names should be case sensitive</param>
         </member>
-        <member name="M:Zio.FileSystems.ZipArchiveFileSystem.#ctor(System.IO.Compression.ZipArchiveMode,System.Boolean,System.Boolean)">
+        <member name="M:Zio.FileSystems.ZipArchiveFileSystem.#ctor(System.IO.Compression.ZipArchiveMode,System.Boolean,System.Boolean,System.IO.Compression.CompressionLevel)">
             <summary>
                 Initializes a new instance of the <see cref="T:Zio.FileSystems.ZipArchiveFileSystem" /> class with a <see cref="T:System.IO.MemoryStream" />
             </summary>
