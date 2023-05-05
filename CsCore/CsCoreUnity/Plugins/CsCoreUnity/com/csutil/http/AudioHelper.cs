@@ -12,12 +12,15 @@ namespace com.csutil {
             return TryGetAudioTypeFor(self.ExtensionWithoutDot(), out audioType);
         }
 
-        public static bool TryGetAudioTypeFor(string extension, out AudioType audioType) {
-            switch (extension) {
+        public static bool TryGetAudioTypeFor(string fileExtension, out AudioType audioType) {
+            switch (fileExtension) {
                 case "mp3":
                     audioType = AudioType.MPEG;
                     return true;
                 case "mpeg":
+                    audioType = AudioType.MPEG;
+                    return true;
+                case "mpg": // mp3= MPEG-1 Layer 3
                     audioType = AudioType.MPEG;
                     return true;
                 case "ogg":
@@ -43,6 +46,9 @@ namespace com.csutil {
                     return true;
                 case "xm":
                     audioType = AudioType.XM;
+                    return true;
+                case "xma":
+                    audioType = AudioType.XMA;
                     return true;
                 default:
                     audioType = AudioType.UNKNOWN;

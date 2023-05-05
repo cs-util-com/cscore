@@ -51,8 +51,8 @@ namespace com.csutil.tests.io {
         private async Task TestPlayingAudioFromUrl(bool playAudioClip = false) {
             using var t = Log.MethodEntered();
             var url = "https://download.samplelib.com/mp3/sample-3s.mp3";
-            if (AudioHelper.TryGetAudioTypeFor("mp3", out var type)) {
-                var audioClip = await UnityWebRequestMultimedia.GetAudioClip(url, type).SendV2().GetResult<AudioClip>();
+            if (AudioHelper.TryGetAudioTypeFor("mp3", out var audioType)) {
+                var audioClip = await UnityWebRequestMultimedia.GetAudioClip(url, audioType).SendV2().GetResult<AudioClip>();
                 await TestWithAudioClip(audioClip, playAudioClip);
             } else {
                 throw new InvalidDataException("Failed to load audio from url=" + url);
