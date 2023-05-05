@@ -1,7 +1,5 @@
-﻿using System.Collections;
-using System.IO;
+﻿using System.IO;
 using System.Threading.Tasks;
-using com.csutil.http;
 using UnityEngine;
 using UnityEngine.Networking;
 using Zio;
@@ -11,7 +9,10 @@ namespace com.csutil {
     public static class AudioHelper {
 
         public static bool TryGetAudioTypeForFileExtension(this FileEntry self, out AudioType audioType) {
-            string extension = self.ExtensionWithoutDot();
+            return TryGetAudioTypeFor(self.ExtensionWithoutDot(), out audioType);
+        }
+
+        public static bool TryGetAudioTypeFor(string extension, out AudioType audioType) {
             switch (extension) {
                 case "mp3":
                     audioType = AudioType.MPEG;
@@ -47,13 +48,11 @@ namespace com.csutil {
                     audioType = AudioType.UNKNOWN;
                     return false;
             }
-
         }
 
-        public static async Task<AudioClip> LoadAudioClip(this FileEntry self) {
+        public static Task<AudioClip> LoadAudioClip(this FileEntry self) {
             if (self.TryGetAudioTypeForFileExtension(out var audioType)) {
-                var query = UnityWebRequestMultimedia.GetAudioClip(self.GetFileUri(), audioType);
-                return await query.SendV2().GetResult<AudioClip>();
+                return UnityWebRequestMultimedia.GetAudioClip(self.GetFileUri(), audioType).SendV2().GetResult<AudioClip>();
             }
             throw new InvalidDataException("The file is not a supported audio file: " + self);
         }
