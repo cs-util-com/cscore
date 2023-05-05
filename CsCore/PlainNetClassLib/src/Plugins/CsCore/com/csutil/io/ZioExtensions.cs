@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using Zio;
 using Zio.FileSystems;
 
@@ -268,7 +269,38 @@ namespace com.csutil {
 
         public static bool HasExtension(this FileEntry self) { return self.NameWithoutExtension != self.Name; }
 
+        public static string ExtensionWithoutDot(this FileEntry self) {
+            var ext = self.ExtensionWithDot;
+            return ext != null && ext.StartsWith(".") ? ext.Substring(1) : ext;
+        }
+
+        /// <summary> Returns an URI string that starts with file://.. </summary>
+        public static string GetFileUri(this FileSystemEntry self) {
+
+            // Does not handle % encoding correctly (e.g. 'C:\%51.txt' should become 'file:///C:/%2551.txt')
+            // return new Uri(self.GetFullFileSystemPath(), UriKind.Absolute).ToString();
+
+            // From https://stackoverflow.com/a/35734486/165106
+            var filePath = self.GetFullFileSystemPath();
+            StringBuilder uri = new StringBuilder();
+            foreach (char v in filePath) {
+                if ((v >= 'a' && v <= 'z') || (v >= 'A' && v <= 'Z') || (v >= '0' && v <= '9') ||
+                    v == '+' || v == '/' || v == ':' || v == '.' || v == '-' || v == '_' || v == '~' ||
+                    v > '\xFF') {
+                    uri.Append(v);
+                } else if (v == Path.DirectorySeparatorChar || v == Path.AltDirectorySeparatorChar) {
+                    uri.Append('/');
+                } else {
+                    uri.Append(String.Format("%{0:X2}", (int)v));
+                }
+            }
+            if (uri.Length >= 2 && uri[0] == '/' && uri[1] == '/') // UNC path
+                uri.Insert(0, "file:");
+            else
+                uri.Insert(0, "file:///");
+            return uri.ToString();
+        }
+
     }
 
 }
-

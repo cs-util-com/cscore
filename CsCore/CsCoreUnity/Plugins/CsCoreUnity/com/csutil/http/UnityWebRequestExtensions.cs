@@ -119,6 +119,12 @@ namespace com.csutil {
                 return (T)(object)h.texture;
                 //return (T)(object)DownloadHandlerTexture.GetContent(self);
             }
+            if (typeof(AudioClip).IsCastableTo(typeof(T))) {
+                AssertV2.IsTrue(self.downloadHandler is DownloadHandlerAudioClip,
+                    "self.downloadHandler was not a DownloadHandlerTexture but a " + self.downloadHandler.GetType());
+                var h = (DownloadHandlerAudioClip)self.downloadHandler;
+                return (T)(object)h.audioClip;
+            }
             if (typeof(T).IsCastableTo<Exception>() && self.GetStatusCode().IsErrorStatus()) {
                 return (T)(object)new NoSuccessError(self.GetStatusCode(), self.GetResult<string>());
             }
