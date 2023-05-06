@@ -27,7 +27,7 @@ namespace com.csutil.tests.model.esc {
                 Id = "" + GuidV2.NewGuid(),
                 LocalPose = Matrix4x4.CreateTranslation(1, 2, 3),
                 Components = new List<IComponentData>() {
-                    new EnemyComp() { Id = "c1", Health = 100 }
+                    new EnemyComp() { Id = "c1", Health = 100, Mana = 10 }
                 }
             };
 
@@ -40,7 +40,7 @@ namespace com.csutil.tests.model.esc {
 
             // Create a variant2 of the variant1
             Entity variant2 = ecs.CreateVariantOf(variant1);
-            (variant2.Components.Single() as EnemyComp).Health = 300;
+            (variant2.Components.Single() as EnemyComp).Mana = 20;
             ecs.Save(variant2);
 
             // Another instance that is identical to the template:
@@ -53,16 +53,24 @@ namespace com.csutil.tests.model.esc {
             var ids = ecs2.GetAllEntityIds().ToList();
             Assert.Equal(4, ids.Count());
             Entity v1 = await ecs2.Load(variant1.Id);
-            Assert.Equal(200, (v1.Components.Single() as EnemyComp).Health);
+            var enemyComp1 = v1.Components.Single() as EnemyComp;
+            Assert.Equal(200, enemyComp1.Health);
+            Assert.Equal(10, enemyComp1.Mana);
 
             Entity v2 = await ecs2.Load(variant2.Id);
-            Assert.Equal(300, (v2.Components.Single() as EnemyComp).Health);
+            var enemyComp2 = v2.Components.Single() as EnemyComp;
+            Assert.Equal(200, enemyComp2.Health);
+            Assert.Equal(20, enemyComp2.Mana);
+
+            entitiesDir.OpenInExternalApp();
+
+        }
 
         }
 
         private class Entity : IEntityData {
             public string Id { get; set; }
-            public string TemplateId { get; }
+            public string TemplateId { get; set; }
             public Matrix4x4? LocalPose { get; set; }
             public IList<IComponentData> Components { get; set; }
             public IList<string> ChildrenIds { get; set; }
@@ -73,6 +81,7 @@ namespace com.csutil.tests.model.esc {
 
         private class EnemyComp : IComponentData {
             public string Id { get; set; }
+            public int Mana { get; set; }
             public int Health;
             public string GetId() { return Id; }
         }

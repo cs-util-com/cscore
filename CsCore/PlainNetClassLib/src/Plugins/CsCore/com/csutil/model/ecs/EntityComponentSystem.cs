@@ -50,7 +50,7 @@ namespace com.csutil.model.ecs {
             var json = ToJToken(instance, GetJsonSerializer());
             var templateId = instance.TemplateId;
             if (templateId != null) {
-                var template = JTokens[templateId];
+                var template = ComposeFullJToken(templateId);
                 json = JonDiffPatch.Diff(template, json);
             }
             UpdateJTokens(entityId, json);
