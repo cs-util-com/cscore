@@ -84,15 +84,31 @@ namespace com.csutil.tests.model.esc {
             // Composing full scene graphs by using the ChildrenIds property:
 
             var entitiesDir = EnvironmentV2.instance.GetNewInMemorySystem();
-            var ecs = new TemplatesIO<Entity>(entitiesDir);
 
-            var enemyTemplate = new Entity() {
+            var esc = new EntityComponentSystem<Entity>(new TemplatesIO<Entity>(entitiesDir));
+
+            await esc.LoadSceneGraphFromDisk();
+
+            var e1 = esc.Add(new Entity() {
                 Id = "" + GuidV2.NewGuid(),
-                LocalPose = Matrix4x4.CreateTranslation(1, 2, 3),
-                Components = new List<IComponentData>() {
-                    new EnemyComp() { Id = "c1", Health = 100 }
-                }
-            };
+                LocalPose = Matrix4x4.CreateTranslation(0, 0, 0),
+            });
+            var e2 = esc.Add(new Entity() {
+                Id = "" + GuidV2.NewGuid(),
+                LocalPose = Matrix4x4.CreateTranslation(1, 0, 0),
+            });
+            var entityGroup = esc.Add(new Entity() {
+                Id = "" + GuidV2.NewGuid(),
+                ChildrenIds = new List<string>() { e1.Id, e2.Id },
+                LocalPose = Matrix4x4.CreateRotationY(MathF.PI / 2) // 90 degree rotation around y axis
+            });
+
+            IEnumerable<IEntity<Entity>> children = entityGroup.GetChildren();
+            Assert.Equal(2, children.Count());
+            Assert.Equal(e1.Id, children.First().GetId());
+            Assert.Equal(e2.Id, children.Last().GetId());
+            Assert.Same(e1.GetParent(), entityGroup);
+            Assert.Same(e2.GetParent(), entityGroup);
 
         }
 

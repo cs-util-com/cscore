@@ -12,6 +12,72 @@ using Newtonsoft.Json.Linq;
 
 namespace com.csutil.model.ecs {
 
+    public static class IEntityExtensions {
+
+        public static IEnumerable<IEntity<T>> GetChildren<T>(this IEntity<T> self) where T : IEntityData {
+            return self.ChildrenIds.Map(x => self.Ecs.GetEntity(x));
+        }
+
+        public static IEntity<T> GetParent<T>(this IEntity<T> self) where T : IEntityData {
+            return self.Ecs.GetParentOf(self.Id);
+        }
+
+    }
+
+    public class EntityComponentSystem<T> where T : IEntityData {
+
+        private class Entity : IEntity<T> {
+
+            public string GetId() { return Data.GetId(); }
+            public T Data { get; set; }
+            public EntityComponentSystem<T> Ecs { get; set; }
+
+            public string Id => Data.Id;
+            public string TemplateId => Data.TemplateId;
+            public Matrix4x4? LocalPose => Data.LocalPose;
+            public IList<IComponentData> Components => Data.Components;
+            public IList<string> ChildrenIds => Data.ChildrenIds;
+            public IList<string> Tags => Data.Tags;
+
+        }
+
+        public TemplatesIO<T> TemplatesIo { get; private set; }
+
+        private readonly Dictionary<string, IEntity<T>> Entities = new Dictionary<string, IEntity<T>>();
+        private readonly Dictionary<string, string> ParentIds = new Dictionary<string, string>();
+
+        public EntityComponentSystem(TemplatesIO<T> templatesIo) {
+            this.TemplatesIo = templatesIo;
+        }
+
+        public IEntity<T> Add(T entityData) {
+            return AddEntity(new Entity() { Data = entityData, Ecs = this });
+        }
+
+        private IEntity<T> AddEntity(Entity entity) {
+            var entityId = entity.Id;
+            entityId.ThrowErrorIfNullOrEmpty("entityData.Id");
+            Entities[entityId] = entity;
+            if (entity.ChildrenIds != null) {
+                foreach (var childId in entity.ChildrenIds) { ParentIds[childId] = entityId; }
+            }
+            return entity;
+        }
+
+        public async Task LoadSceneGraphFromDisk() {
+            await TemplatesIo.LoadAllTemplateFilesIntoMemory();
+        }
+
+        public IEntity<T> GetEntity(string entityId) {
+            return Entities[entityId];
+        }
+
+        public IEntity<T> GetParentOf(string childId) {
+            return GetEntity(ParentIds[childId]);
+        }
+
+    }
+
     public class TemplatesIO<T> where T : IEntityData {
 
         private readonly DirectoryEntry EntityDir;
@@ -130,6 +196,13 @@ namespace com.csutil.model.ecs {
             }
             return json;
         }
+
+    }
+
+    public interface IEntity<T> : IEntityData where T : IEntityData {
+
+        T Data { get; }
+        EntityComponentSystem<T> Ecs { get; }
 
     }
 
