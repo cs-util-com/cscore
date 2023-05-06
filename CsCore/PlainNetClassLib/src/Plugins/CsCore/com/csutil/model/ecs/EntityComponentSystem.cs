@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
 using com.csutil.json;
@@ -20,6 +21,12 @@ namespace com.csutil.model.ecs {
 
         public static IEntity<T> GetParent<T>(this IEntity<T> self) where T : IEntityData {
             return self.Ecs.GetParentOf(self.Id);
+        }
+
+        public static IEntity<T> AddChild<T>(this IEntity<T> parent, T childData, Func<IEntity<T>, T, T> mutateChildrenListInParentEntity) where T : IEntityData {
+            var newChild = parent.Ecs.Add(childData);
+            parent.Ecs.Update(mutateChildrenListInParentEntity(parent, childData));
+            return newChild;
         }
 
     }
@@ -42,7 +49,7 @@ namespace com.csutil.model.ecs {
         }
 
         private readonly TemplatesIO<T> TemplatesIo;
-        private readonly Dictionary<string, IEntity<T>> Entities = new Dictionary<string, IEntity<T>>();
+        private readonly Dictionary<string, Entity> Entities = new Dictionary<string, Entity>();
         private readonly Dictionary<string, string> ParentIds = new Dictionary<string, string>();
 
         public EntityComponentSystem(TemplatesIO<T> templatesIo) {
@@ -57,10 +64,28 @@ namespace com.csutil.model.ecs {
             var entityId = entity.Id;
             entityId.ThrowErrorIfNullOrEmpty("entityData.Id");
             Entities[entityId] = entity;
-            if (entity.ChildrenIds != null) {
-                foreach (var childId in entity.ChildrenIds) { ParentIds[childId] = entityId; }
-            }
+            UpdateParentIds(entityId, entity);
             return entity;
+        }
+
+        private void UpdateParentIds(string parentId, Entity parent) {
+            if (parent.ChildrenIds != null) {
+                foreach (var childId in parent.ChildrenIds) { ParentIds[childId] = parentId; }
+            }
+        }
+
+        public void Update(T updatedEntityData) {
+            var entityId = updatedEntityData.Id;
+            var entity = Entities[entityId];
+            var oldEntry = entity.Data;
+            entity.Data = updatedEntityData;
+
+            // Remove outdated parent ids and add new ones:
+            if (oldEntry.ChildrenIds != null) {
+                var removedChildrenIds = oldEntry.ChildrenIds.Except(updatedEntityData.ChildrenIds);
+                foreach (var childId in removedChildrenIds) { ParentIds.Remove(childId); }
+            }
+            UpdateParentIds(entityId, entity);
         }
 
         public async Task LoadSceneGraphFromDisk() {

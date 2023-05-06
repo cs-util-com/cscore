@@ -89,21 +89,20 @@ namespace com.csutil.tests.model.esc {
 
             await esc.LoadSceneGraphFromDisk();
 
-            var e1 = esc.Add(new Entity() {
-                Id = "" + GuidV2.NewGuid(),
-                LocalPose = Matrix4x4.CreateTranslation(0, 0, 0),
-            });
-            var e2 = esc.Add(new Entity() {
-                Id = "" + GuidV2.NewGuid(),
-                LocalPose = Matrix4x4.CreateTranslation(1, 0, 0),
-            });
             var entityGroup = esc.Add(new Entity() {
                 Id = "" + GuidV2.NewGuid(),
-                ChildrenIds = new List<string>() { e1.Id, e2.Id },
                 LocalPose = Matrix4x4.CreateRotationY(MathF.PI / 2) // 90 degree rotation around y axis
             });
+            var e1 = entityGroup.AddChild(new Entity() {
+                Id = "" + GuidV2.NewGuid(),
+                LocalPose = Matrix4x4.CreateTranslation(0, 0, 0),
+            }, MutateChildrenListInParentEntity);
+            var e2 = entityGroup.AddChild(new Entity() {
+                Id = "" + GuidV2.NewGuid(),
+                LocalPose = Matrix4x4.CreateTranslation(1, 0, 0),
+            }, MutateChildrenListInParentEntity);
 
-            IEnumerable<IEntity<Entity>> children = entityGroup.GetChildren();
+            var children = entityGroup.GetChildren();
             Assert.Equal(2, children.Count());
             Assert.Same(e1, children.First());
             Assert.Same(e2, children.Last());
@@ -112,12 +111,19 @@ namespace com.csutil.tests.model.esc {
 
         }
 
+        private static Entity MutateChildrenListInParentEntity(IEntity<Entity> parent, Entity addedChild) {
+            var parentData = parent.Data;
+            parentData.MutablehildrenIds.Add(addedChild.Id);
+            return parentData;
+        }
+
         private class Entity : IEntityData {
             public string Id { get; set; }
             public string TemplateId { get; set; }
             public Matrix4x4? LocalPose { get; set; }
             public IReadOnlyList<IComponentData> Components { get; set; }
-            public IReadOnlyList<string> ChildrenIds { get; set; }
+            public List<string> MutablehildrenIds { get; } = new List<string>();
+            public IReadOnlyList<string> ChildrenIds => MutablehildrenIds;
             public IReadOnlyList<string> Tags { get; set; }
 
             public string GetId() { return Id; }
