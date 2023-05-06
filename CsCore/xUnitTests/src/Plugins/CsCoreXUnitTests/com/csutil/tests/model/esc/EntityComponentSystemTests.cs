@@ -85,11 +85,11 @@ namespace com.csutil.tests.model.esc {
 
             var entitiesDir = EnvironmentV2.instance.GetNewInMemorySystem();
 
-            var esc = new EntityComponentSystem<Entity>(new TemplatesIO<Entity>(entitiesDir));
+            var ecs = new EntityComponentSystem<Entity>(new TemplatesIO<Entity>(entitiesDir));
 
-            await esc.LoadSceneGraphFromDisk();
+            await ecs.LoadSceneGraphFromDisk();
 
-            var entityGroup = esc.Add(new Entity() {
+            var entityGroup = ecs.Add(new Entity() {
                 Id = "" + GuidV2.NewGuid(),
                 LocalPose = Matrix4x4.CreateRotationY(MathF.PI / 2) // 90 degree rotation around y axis
             });
@@ -108,7 +108,6 @@ namespace com.csutil.tests.model.esc {
             Assert.Same(e2, children.Last());
             Assert.Same(e1.GetParent(), entityGroup);
             Assert.Same(e2.GetParent(), entityGroup);
-
         }
 
         private static Entity MutateChildrenListInParentEntity(IEntity<Entity> parent, Entity addedChild) {

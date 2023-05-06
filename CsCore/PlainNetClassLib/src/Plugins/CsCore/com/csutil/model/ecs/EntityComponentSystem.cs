@@ -49,8 +49,10 @@ namespace com.csutil.model.ecs {
         }
 
         private readonly TemplatesIO<T> TemplatesIo;
-        private readonly Dictionary<string, Entity> Entities = new Dictionary<string, Entity>();
+        private readonly Dictionary<string, IEntity<T>> Entities = new Dictionary<string, IEntity<T>>();
         private readonly Dictionary<string, string> ParentIds = new Dictionary<string, string>();
+
+        public IReadOnlyDictionary<string, IEntity<T>> AllEntities => Entities;
 
         public EntityComponentSystem(TemplatesIO<T> templatesIo) {
             TemplatesIo = templatesIo;
@@ -68,7 +70,7 @@ namespace com.csutil.model.ecs {
             return entity;
         }
 
-        private void UpdateParentIds(string parentId, Entity parent) {
+        private void UpdateParentIds(string parentId, IEntity<T> parent) {
             if (parent.ChildrenIds != null) {
                 foreach (var childId in parent.ChildrenIds) { ParentIds[childId] = parentId; }
             }
@@ -76,7 +78,8 @@ namespace com.csutil.model.ecs {
 
         public void Update(T updatedEntityData) {
             var entityId = updatedEntityData.Id;
-            var entity = Entities[entityId];
+            var entity = (Entity)Entities[entityId];
+
             var oldEntry = entity.Data;
             entity.Data = updatedEntityData;
 
