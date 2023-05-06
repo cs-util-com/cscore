@@ -113,6 +113,8 @@ namespace com.csutil.tests.model.esc {
             e1.RemoveFromParent(RemoveFromChildrenListOfParent);
             // e1 is removed from its parent but still in the scene graph:
             Assert.Equal(3, ecs.AllEntities.Count);
+            Assert.Same(e2, entityGroup.GetChildren().Single());
+            Assert.Null(e1.GetParent());
             e1.Destroy(RemoveFromChildrenListOfParent);
             // e1 is now fully removed from the scene graph and destroyed:
             Assert.Equal(2, ecs.AllEntities.Count);

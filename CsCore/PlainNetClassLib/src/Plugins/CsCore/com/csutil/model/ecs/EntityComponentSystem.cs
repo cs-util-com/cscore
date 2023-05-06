@@ -20,7 +20,7 @@ namespace com.csutil.model.ecs {
         }
 
         public static IEntity<T> GetParent<T>(this IEntity<T> self) where T : IEntityData {
-            if (!self.Ecs.AllEntities.ContainsKey(self.Id)) { return null; }
+            if (!self.Ecs.AllParentIds.ContainsKey(self.Id)) { return null; }
             return self.Ecs.GetParentOf(self.Id);
         }
 
@@ -41,6 +41,7 @@ namespace com.csutil.model.ecs {
                 var updatedParent = removeFromParent(parent.Data, child.Id);
                 child.Ecs.Update(updatedParent);
             }
+            child.Ecs.Update(child.Data);
         }
 
 
@@ -68,6 +69,7 @@ namespace com.csutil.model.ecs {
         private readonly Dictionary<string, string> ParentIds = new Dictionary<string, string>();
 
         public IReadOnlyDictionary<string, IEntity<T>> AllEntities => Entities;
+        public IReadOnlyDictionary<string, string> AllParentIds => ParentIds;
 
         public EntityComponentSystem(TemplatesIO<T> templatesIo) {
             TemplatesIo = templatesIo;
@@ -98,6 +100,10 @@ namespace com.csutil.model.ecs {
             var oldEntry = entity.Data;
             entity.Data = updatedEntityData;
 
+            if (ParentIds.TryGetValue(entityId, out string parentId)) {
+                // Remove from ParentIds cache if parent does not contain the child anymore:
+                if (!Entities[parentId].Data.ChildrenIds.Contains(entityId)) { ParentIds.Remove(entityId); }
+            }
             // Remove outdated parent ids and add new ones:
             if (oldEntry.ChildrenIds != null) {
                 var removedChildrenIds = oldEntry.ChildrenIds.Except(updatedEntityData.ChildrenIds);
