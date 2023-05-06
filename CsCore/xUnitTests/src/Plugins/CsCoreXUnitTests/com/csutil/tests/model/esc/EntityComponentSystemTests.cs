@@ -105,8 +105,8 @@ namespace com.csutil.tests.model.esc {
 
             IEnumerable<IEntity<Entity>> children = entityGroup.GetChildren();
             Assert.Equal(2, children.Count());
-            Assert.Equal(e1.Id, children.First().GetId());
-            Assert.Equal(e2.Id, children.Last().GetId());
+            Assert.Same(e1, children.First());
+            Assert.Same(e2, children.Last());
             Assert.Same(e1.GetParent(), entityGroup);
             Assert.Same(e2.GetParent(), entityGroup);
 
@@ -116,9 +116,9 @@ namespace com.csutil.tests.model.esc {
             public string Id { get; set; }
             public string TemplateId { get; set; }
             public Matrix4x4? LocalPose { get; set; }
-            public IList<IComponentData> Components { get; set; }
-            public IList<string> ChildrenIds { get; set; }
-            public IList<string> Tags { get; set; }
+            public IReadOnlyList<IComponentData> Components { get; set; }
+            public IReadOnlyList<string> ChildrenIds { get; set; }
+            public IReadOnlyList<string> Tags { get; set; }
 
             public string GetId() { return Id; }
         }

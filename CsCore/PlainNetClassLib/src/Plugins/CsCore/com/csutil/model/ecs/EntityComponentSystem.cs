@@ -35,19 +35,18 @@ namespace com.csutil.model.ecs {
             public string Id => Data.Id;
             public string TemplateId => Data.TemplateId;
             public Matrix4x4? LocalPose => Data.LocalPose;
-            public IList<IComponentData> Components => Data.Components;
-            public IList<string> ChildrenIds => Data.ChildrenIds;
-            public IList<string> Tags => Data.Tags;
+            public IReadOnlyList<IComponentData> Components => Data.Components;
+            public IReadOnlyList<string> ChildrenIds => Data.ChildrenIds;
+            public IReadOnlyList<string> Tags => Data.Tags;
 
         }
 
-        public TemplatesIO<T> TemplatesIo { get; private set; }
-
+        private readonly TemplatesIO<T> TemplatesIo;
         private readonly Dictionary<string, IEntity<T>> Entities = new Dictionary<string, IEntity<T>>();
         private readonly Dictionary<string, string> ParentIds = new Dictionary<string, string>();
 
         public EntityComponentSystem(TemplatesIO<T> templatesIo) {
-            this.TemplatesIo = templatesIo;
+            TemplatesIo = templatesIo;
         }
 
         public IEntity<T> Add(T entityData) {
@@ -211,9 +210,9 @@ namespace com.csutil.model.ecs {
         string Id { get; }
         string TemplateId { get; }
         Matrix4x4? LocalPose { get; }
-        IList<IComponentData> Components { get; }
-        IList<string> ChildrenIds { get; }
-        IList<string> Tags { get; }
+        IReadOnlyList<IComponentData> Components { get; }
+        IReadOnlyList<string> ChildrenIds { get; }
+        IReadOnlyList<string> Tags { get; }
 
     }
 
