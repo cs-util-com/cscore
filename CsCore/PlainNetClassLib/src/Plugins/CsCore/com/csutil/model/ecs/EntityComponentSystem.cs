@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Numerics;
 using System.Threading.Tasks;
@@ -65,7 +66,20 @@ namespace com.csutil.model.ecs {
             var json = ToJToken(entity, serializer);
             json["Id"] = "" + GuidV2.NewGuid();
             json["TemplateId"] = entity.GetId();
-            return json.ToObject<T>(serializer);
+            return ToObject(json, serializer);
+        }
+
+        private T ToObject(JToken json, JsonSerializer serializer) {
+            T entity = json.ToObject<T>(serializer);
+            AssertAllFieldsWereDeserialized(entity, json);
+            return entity;
+        }
+
+        [Conditional("DEBUG")]
+        private void AssertAllFieldsWereDeserialized(T entity, JToken json) {
+            var backtoJToken = ToJToken(entity, GetJsonSerializer());
+            var diff = JonDiffPatch.Diff(json, backtoJToken);
+            if (diff != null) { throw new Exception("Not all fields were deserialized: " + diff); }
         }
 
         public IEnumerable<string> GetAllEntityIds() {
@@ -73,7 +87,7 @@ namespace com.csutil.model.ecs {
         }
 
         public async Task<T> Load(string entityId) {
-            return ComposeFullJToken(entityId).ToObject<T>(GetJsonSerializer());
+            return ToObject(ComposeFullJToken(entityId), GetJsonSerializer());
         }
 
         /// <summary> Recursively composes the full json for the given entity id by applying the templates </summary>
