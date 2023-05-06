@@ -59,12 +59,12 @@ namespace com.csutil.tests.model.esc {
             Assert.Equal(4, ids.Count());
             Entity v1 = await ecs2.Load(variant1.Id);
             var enemyComp1 = v1.Components.Single() as EnemyComp;
-            Assert.Equal(200, enemyComp1.Health);
+            Assert.Equal(300, enemyComp1.Health);
             Assert.Equal(10, enemyComp1.Mana);
 
             Entity v2 = await ecs2.Load(variant2.Id);
             var enemyComp2 = v2.Components.Single() as EnemyComp;
-            Assert.Equal(200, enemyComp2.Health);
+            Assert.Equal(300, enemyComp2.Health);
             Assert.Equal(20, enemyComp2.Mana);
 
             entitiesDir.OpenInExternalApp();
