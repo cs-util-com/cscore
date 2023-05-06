@@ -34,12 +34,12 @@ namespace com.csutil.tests.model.esc {
             ecs.Save(enemyTemplate);
 
             // An instance that has a different health value than the template:
-            Entity variant1 = ecs.CreateVariantOf(enemyTemplate);
+            Entity variant1 = ecs.CreateInstanceOf(enemyTemplate);
             (variant1.Components.Single() as EnemyComp).Health = 200;
-            ecs.Save(variant1);
+            ecs.Save(variant1); // Save it as a variant of the enemyTemplate
 
             // Create a variant2 of the variant1
-            Entity variant2 = ecs.CreateVariantOf(variant1);
+            Entity variant2 = ecs.CreateInstanceOf(variant1);
             (variant2.Components.Single() as EnemyComp).Mana = 20;
             ecs.Save(variant2);
 
@@ -50,11 +50,11 @@ namespace com.csutil.tests.model.esc {
             Assert.Equal(300, (variant2.Components.Single() as EnemyComp).Health);
 
             // Another instance that is identical to the template:
-            Entity variant3 = ecs.CreateVariantOf(enemyTemplate);
+            Entity variant3 = ecs.CreateInstanceOf(enemyTemplate);
             ecs.Save(variant3);
 
             var ecs2 = new EntityComponentSystem<Entity>(entitiesDir);
-            await ecs2.LoadAllJTokens();
+            await ecs2.LoadAllTemplatesIntoMemory();
             var ids = ecs2.GetAllEntityIds().ToList();
             Assert.Equal(4, ids.Count());
             Entity v1 = await ecs2.Load(variant1.Id);

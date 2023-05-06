@@ -16,7 +16,9 @@ namespace com.csutil.model.ecs {
 
         private readonly DirectoryEntry EntityDir;
         private readonly JsonDiffPatch JonDiffPatch = new JsonDiffPatch();
-        private readonly Dictionary<string, JToken> JTokens = new Dictionary<string, JToken>();
+
+        /// <summary> A cache of all loaded templates as they are stored on disk, these need to be combined with all parents to get the full entity data </summary>
+        private readonly Dictionary<string, JToken> LoadedTemplates = new Dictionary<string, JToken>();
 
         private Func<JsonSerializer> GetJsonSerializer = () => JsonSerializer.Create(JsonNetSettings.typedJsonSettings);
 
@@ -24,7 +26,8 @@ namespace com.csutil.model.ecs {
             this.EntityDir = entityDir;
         }
 
-        public async Task LoadAllJTokens() {
+        /// <summary> Loads all template files from disk into memory </summary>
+        public async Task LoadAllTemplatesIntoMemory() {
             var jsonSerializer = GetJsonSerializer();
             var tasks = new List<Task>();
             foreach (var templateFile in EntityDir.EnumerateFiles()) {
@@ -35,37 +38,52 @@ namespace com.csutil.model.ecs {
 
         private void LoadJTokenFromFile(FileEntry templateFile, JsonSerializer jsonSerializer) {
             using (var stream = templateFile.OpenForRead()) {
-                JToken templateJToken = jsonSerializer.Deserialize<JToken>(new JsonTextReader(new StreamReader(stream)));
-                UpdateJTokens(templateFile.Name, templateJToken);
+                JToken template = jsonSerializer.Deserialize<JToken>(new JsonTextReader(new StreamReader(stream)));
+                UpdateTemplateCache(templateFile.Name, template);
             }
         }
 
-        private void UpdateJTokens(string id, JToken jtoken) {
-            JTokens[id] = jtoken;
+        private void UpdateTemplateCache(string id, JToken template) {
+            LoadedTemplates[id] = template;
         }
 
         public void Save(T instance) {
             var entityId = instance.GetId();
             entityId.ThrowErrorIfNullOrEmpty("entity.Id");
-            var file = EntityDir.GetChild(entityId);
+            var file = GetEntityFileForId(entityId);
             var json = ToJToken(instance, GetJsonSerializer());
             var templateId = instance.TemplateId;
             if (templateId != null) {
-                var template = ComposeFullJToken(templateId);
+                var template = ComposeFullJson(templateId, allowLazyLoadFromDisk: true);
                 json = JonDiffPatch.Diff(template, json);
             }
-            UpdateJTokens(entityId, json);
             file.SaveAsJson(json);
+            UpdateTemplateCache(entityId, json);
         }
 
-        private JToken ToJToken(T instance, JsonSerializer serializer) { return JToken.FromObject(instance, serializer); }
+        private FileEntry GetEntityFileForId(string entityId) {
+            return EntityDir.GetChild(entityId);
+        }
 
-        public T CreateVariantOf(T entity) {
-            if (!JTokens.ContainsKey(entity.GetId())) { throw new KeyNotFoundException("Template not found: " + entity.GetId()); }
+        public void Delete(string entityId) {
+            if (LoadedTemplates.Remove(entityId)) {
+                GetEntityFileForId(entityId).DeleteV2();
+            }
+        }
+
+        private JToken ToJToken(T instance, JsonSerializer serializer) {
+            return JToken.FromObject(instance, serializer);
+        }
+
+        public T CreateInstanceOf(T entity) {
+            var templateId = entity.GetId();
+            if (!LoadedTemplates.ContainsKey(templateId)) {
+                throw new KeyNotFoundException("Template not found: " + templateId);
+            }
             JsonSerializer serializer = GetJsonSerializer();
             var json = ToJToken(entity, serializer);
             json["Id"] = "" + GuidV2.NewGuid();
-            json["TemplateId"] = entity.GetId();
+            json["TemplateId"] = templateId;
             return ToObject(json, serializer);
         }
 
@@ -79,24 +97,33 @@ namespace com.csutil.model.ecs {
         private void AssertAllFieldsWereDeserialized(JToken sourceJson, T resultingEntity) {
             var backAsJson = ToJToken(resultingEntity, GetJsonSerializer());
             var diff = JonDiffPatch.Diff(sourceJson, backAsJson);
-            if (diff != null) { throw new Exception("Not all fields were deserialized: " + diff); }
+            if (diff != null) { throw new Exception("Not all props were deserialized, missing set/get for:" + diff); }
         }
 
         public IEnumerable<string> GetAllEntityIds() {
-            return JTokens.Keys;
+            return EntityDir.EnumerateFiles().Map(x => x.Name);
         }
 
-        public async Task<T> Load(string entityId) {
-            return ToObject(ComposeFullJToken(entityId), GetJsonSerializer());
+        /// <summary> Creates an entity instance based on the involved templates </summary>
+        /// <param name="entityId"> The id of the entity to load </param>
+        /// <param name="allowLazyLoadFromDisk"> if false its is expected all entities were already loaded into memory via <see cref="LoadAllTemplatesIntoMemory"/> </param>
+        public async Task<T> Load(string entityId, bool allowLazyLoadFromDisk = true) {
+            return ToObject(ComposeFullJson(entityId, allowLazyLoadFromDisk), GetJsonSerializer());
         }
 
         /// <summary> Recursively composes the full json for the given entity id by applying the templates </summary>
-        private JToken ComposeFullJToken(string entityId) {
-            if (!JTokens.ContainsKey(entityId)) { throw new KeyNotFoundException("Entity not found: " + entityId); }
-            var json = JTokens[entityId];
+        private JToken ComposeFullJson(string entityId, bool allowLazyLoadFromDisk) {
+            if (!LoadedTemplates.ContainsKey(entityId)) {
+                if (allowLazyLoadFromDisk) {
+                    LoadJTokenFromFile(GetEntityFileForId(entityId), GetJsonSerializer());
+                } else {
+                    throw new KeyNotFoundException("Entity not found: " + entityId);
+                }
+            }
+            var json = LoadedTemplates[entityId];
             if (json["TemplateId"] is JArray templateIdArray) {
                 var templateId = templateIdArray[1].Value<string>();
-                var template = ComposeFullJToken(templateId);
+                var template = ComposeFullJson(templateId, allowLazyLoadFromDisk);
                 json = JonDiffPatch.Patch(template, json);
             }
             return json;
