@@ -47,7 +47,7 @@ namespace com.csutil.model.ecs {
             LoadedTemplates[id] = template;
         }
 
-        public void Save(T instance) {
+        public void SaveAsTemplate(T instance) {
             var entityId = instance.GetId();
             entityId.ThrowErrorIfNullOrEmpty("entity.Id");
             var file = GetEntityFileForId(entityId);
@@ -75,13 +75,13 @@ namespace com.csutil.model.ecs {
             return JToken.FromObject(instance, serializer);
         }
 
-        public T CreateInstanceOf(T entity) {
-            var templateId = entity.GetId();
+        public T CreateVariantInstanceOf(T template) {
+            var templateId = template.GetId();
             if (!LoadedTemplates.ContainsKey(templateId)) {
                 throw new KeyNotFoundException("Template not found: " + templateId);
             }
             JsonSerializer serializer = GetJsonSerializer();
-            var json = ToJToken(entity, serializer);
+            var json = ToJToken(template, serializer);
             json["Id"] = "" + GuidV2.NewGuid();
             json["TemplateId"] = templateId;
             return ToObject(json, serializer);
@@ -104,10 +104,10 @@ namespace com.csutil.model.ecs {
             return EntityDir.EnumerateFiles().Map(x => x.Name);
         }
 
-        /// <summary> Creates an entity instance based on the involved templates </summary>
+        /// <summary> Creates a template instance based on the involved templates </summary>
         /// <param name="entityId"> The id of the entity to load </param>
         /// <param name="allowLazyLoadFromDisk"> if false its is expected all entities were already loaded into memory via <see cref="LoadAllTemplatesIntoMemory"/> </param>
-        public async Task<T> Load(string entityId, bool allowLazyLoadFromDisk = true) {
+        public T LoadTemplateInstance(string entityId, bool allowLazyLoadFromDisk = true) {
             return ToObject(ComposeFullJson(entityId, allowLazyLoadFromDisk), GetJsonSerializer());
         }
 
