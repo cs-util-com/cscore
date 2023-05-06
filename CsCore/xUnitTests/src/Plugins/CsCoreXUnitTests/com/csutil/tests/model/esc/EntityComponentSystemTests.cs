@@ -96,11 +96,11 @@ namespace com.csutil.tests.model.esc {
             var e1 = entityGroup.AddChild(new Entity() {
                 Id = "" + GuidV2.NewGuid(),
                 LocalPose = Matrix4x4.CreateTranslation(0, 0, 0),
-            }, MutateChildrenListInParentEntity);
+            }, AddToChildrenListOfParent);
             var e2 = entityGroup.AddChild(new Entity() {
                 Id = "" + GuidV2.NewGuid(),
                 LocalPose = Matrix4x4.CreateTranslation(1, 0, 0),
-            }, MutateChildrenListInParentEntity);
+            }, AddToChildrenListOfParent);
 
             var children = entityGroup.GetChildren();
             Assert.Equal(2, children.Count());
@@ -108,12 +108,26 @@ namespace com.csutil.tests.model.esc {
             Assert.Same(e2, children.Last());
             Assert.Same(e1.GetParent(), entityGroup);
             Assert.Same(e2.GetParent(), entityGroup);
+
+            Assert.Equal(3, ecs.AllEntities.Count);
+            e1.RemoveFromParent(RemoveFromChildrenListOfParent);
+            // e1 is removed from its parent but still in the scene graph:
+            Assert.Equal(3, ecs.AllEntities.Count);
+            e1.Destroy(RemoveFromChildrenListOfParent);
+            // e1 is now fully removed from the scene graph and destroyed:
+            Assert.Equal(2, ecs.AllEntities.Count);
+
+
         }
 
-        private static Entity MutateChildrenListInParentEntity(IEntity<Entity> parent, Entity addedChild) {
-            var parentData = parent.Data;
-            parentData.MutablehildrenIds.Add(addedChild.Id);
-            return parentData;
+        private static Entity AddToChildrenListOfParent(Entity parent, string addedChildId) {
+            parent.MutablehildrenIds.Add(addedChildId);
+            return parent;
+        }
+
+        private Entity RemoveFromChildrenListOfParent(Entity parent, string childIdToRemove) {
+            parent.MutablehildrenIds.Remove(childIdToRemove);
+            return parent;
         }
 
         private class Entity : IEntityData {

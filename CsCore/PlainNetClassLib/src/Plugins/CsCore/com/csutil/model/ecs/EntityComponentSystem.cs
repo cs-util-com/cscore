@@ -20,14 +20,29 @@ namespace com.csutil.model.ecs {
         }
 
         public static IEntity<T> GetParent<T>(this IEntity<T> self) where T : IEntityData {
+            if (!self.Ecs.AllEntities.ContainsKey(self.Id)) { return null; }
             return self.Ecs.GetParentOf(self.Id);
         }
 
-        public static IEntity<T> AddChild<T>(this IEntity<T> parent, T childData, Func<IEntity<T>, T, T> mutateChildrenListInParentEntity) where T : IEntityData {
+        public static IEntity<T> AddChild<T>(this IEntity<T> parent, T childData, Func<T, string, T> mutateChildrenListInParentEntity) where T : IEntityData {
             var newChild = parent.Ecs.Add(childData);
-            parent.Ecs.Update(mutateChildrenListInParentEntity(parent, childData));
+            parent.Ecs.Update(mutateChildrenListInParentEntity(parent.Data, childData.Id));
             return newChild;
         }
+
+        public static void Destroy<T>(this IEntity<T> self, Func<T, string, T> removeFromParent) where T : IEntityData {
+            self.RemoveFromParent(removeFromParent);
+            self.Ecs.Destroy(self.Id);
+        }
+
+        public static void RemoveFromParent<T>(this IEntity<T> child, Func<T, string, T> removeFromParent) where T : IEntityData {
+            var parent = child.GetParent();
+            if (parent != null) {
+                var updatedParent = removeFromParent(parent.Data, child.Id);
+                child.Ecs.Update(updatedParent);
+            }
+        }
+
 
     }
 
@@ -103,6 +118,10 @@ namespace com.csutil.model.ecs {
             return GetEntity(ParentIds[childId]);
         }
 
+        public void Destroy(string entityId) {
+            Entities.Remove(entityId);
+            ParentIds.Remove(entityId);
+        }
     }
 
     public class TemplatesIO<T> where T : IEntityData {
