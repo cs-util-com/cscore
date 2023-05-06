@@ -12,7 +12,7 @@ using Newtonsoft.Json.Linq;
 
 namespace com.csutil.model.ecs {
 
-    public class EntityComponentSystem<T> where T : IEntityData {
+    public class TemplatesIO<T> where T : IEntityData {
 
         private readonly DirectoryEntry EntityDir;
         private readonly JsonDiffPatch JonDiffPatch = new JsonDiffPatch();
@@ -22,12 +22,12 @@ namespace com.csutil.model.ecs {
 
         private Func<JsonSerializer> GetJsonSerializer = () => JsonSerializer.Create(JsonNetSettings.typedJsonSettings);
 
-        public EntityComponentSystem(DirectoryEntry entityDir) {
+        public TemplatesIO(DirectoryEntry entityDir) {
             this.EntityDir = entityDir;
         }
 
         /// <summary> Loads all template files from disk into memory </summary>
-        public async Task LoadAllTemplatesIntoMemory() {
+        public async Task LoadAllTemplateFilesIntoMemory() {
             var jsonSerializer = GetJsonSerializer();
             var tasks = new List<Task>();
             foreach (var templateFile in EntityDir.EnumerateFiles()) {
@@ -37,9 +37,11 @@ namespace com.csutil.model.ecs {
         }
 
         private void LoadJTokenFromFile(FileEntry templateFile, JsonSerializer jsonSerializer) {
+            var templateId = templateFile.Name;
+            if (LoadedTemplates.ContainsKey(templateId)) { return; }
             using (var stream = templateFile.OpenForRead()) {
                 JToken template = jsonSerializer.Deserialize<JToken>(new JsonTextReader(new StreamReader(stream)));
-                UpdateTemplateCache(templateFile.Name, template);
+                UpdateTemplateCache(templateId, template);
             }
         }
 
@@ -78,7 +80,7 @@ namespace com.csutil.model.ecs {
         public T CreateVariantInstanceOf(T template) {
             var templateId = template.GetId();
             if (!LoadedTemplates.ContainsKey(templateId)) {
-                throw new KeyNotFoundException("Template not found: " + templateId);
+                throw new InvalidOperationException("The passed instance first needs to be stored as a template");
             }
             JsonSerializer serializer = GetJsonSerializer();
             var json = ToJToken(template, serializer);
@@ -106,7 +108,7 @@ namespace com.csutil.model.ecs {
 
         /// <summary> Creates a template instance based on the involved templates </summary>
         /// <param name="entityId"> The id of the entity to load </param>
-        /// <param name="allowLazyLoadFromDisk"> if false its is expected all entities were already loaded into memory via <see cref="LoadAllTemplatesIntoMemory"/> </param>
+        /// <param name="allowLazyLoadFromDisk"> if false its is expected all entities were already loaded into memory via <see cref="LoadAllTemplateFilesIntoMemory"/> </param>
         public T LoadTemplateInstance(string entityId, bool allowLazyLoadFromDisk = true) {
             return ToObject(ComposeFullJson(entityId, allowLazyLoadFromDisk), GetJsonSerializer());
         }

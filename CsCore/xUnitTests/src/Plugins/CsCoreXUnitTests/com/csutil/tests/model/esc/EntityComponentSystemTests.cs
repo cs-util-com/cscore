@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
-using com.csutil.json;
 using com.csutil.model.ecs;
 using Xunit;
-using Zio;
 
 namespace com.csutil.tests.model.esc {
 
@@ -15,14 +13,14 @@ namespace com.csutil.tests.model.esc {
         public EntityComponentSystemTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
         [Fact]
-        public async Task ExampleUsage1() {
+        public async Task ExampleUsageOfTemplatesIO() {
 
             var rootDir = EnvironmentV2.instance.GetOrAddTempFolder("EntityComponentSystemTests_ExampleUsage1");
-            var entitiesDir = rootDir.GetChildDir("Entities");
-            entitiesDir.DeleteV2();
-            entitiesDir.CreateV2();
+            var templatesDir = rootDir.GetChildDir("Templates");
+            templatesDir.DeleteV2();
+            templatesDir.CreateV2();
 
-            var templates = new EntityComponentSystem<Entity>(entitiesDir);
+            var templates = new TemplatesIO<Entity>(templatesDir);
 
             var enemyTemplate = new Entity() {
                 Id = "" + GuidV2.NewGuid(),
@@ -31,7 +29,6 @@ namespace com.csutil.tests.model.esc {
                     new EnemyComp() { Id = "c1", Health = 100, Mana = 10 }
                 }
             };
-
             templates.SaveAsTemplate(enemyTemplate);
 
             // An instance that has a different health value than the template:
@@ -50,31 +47,35 @@ namespace com.csutil.tests.model.esc {
             variant2 = templates.LoadTemplateInstance(variant2.Id);
             Assert.Equal(300, (variant2.Components.Single() as EnemyComp).Health);
 
-            // Another instance that is identical to the template:
-            Entity instance3 = templates.CreateVariantInstanceOf(enemyTemplate);
-            // instance3 is not saved as a variant 
-            // Creating an instance of an instance is not allowed:
-            Assert.Throws<KeyNotFoundException>(() => templates.CreateVariantInstanceOf(instance3));
-            // Instead the parent template should be used to create another instance:
-            Entity instance4 = templates.CreateVariantInstanceOf(templates.LoadTemplateInstance(instance3.TemplateId));
-            Assert.Equal(instance3.TemplateId, instance4.TemplateId);
-            Assert.NotEqual(instance3.Id, instance4.Id);
+            {
+                // Another instance that is identical to the template:
+                Entity instance3 = templates.CreateVariantInstanceOf(enemyTemplate);
+                // instance3 is not saved as a variant 
+                // Creating an instance of an instance is not allowed:
+                Assert.Throws<InvalidOperationException>(() => templates.CreateVariantInstanceOf(instance3));
+                // Instead the parent template should be used to create another instance:
+                Entity instance4 = templates.CreateVariantInstanceOf(templates.LoadTemplateInstance(instance3.TemplateId));
+                Assert.Equal(instance3.TemplateId, instance4.TemplateId);
+                Assert.NotEqual(instance3.Id, instance4.Id);
+            }
 
-            var ecs2 = new EntityComponentSystem<Entity>(entitiesDir);
-            await ecs2.LoadAllTemplatesIntoMemory();
+            var ecs2 = new TemplatesIO<Entity>(templatesDir);
+
             var ids = ecs2.GetAllEntityIds().ToList();
             Assert.Equal(3, ids.Count());
+
             Entity v1 = ecs2.LoadTemplateInstance(variant1.Id);
             var enemyComp1 = v1.Components.Single() as EnemyComp;
             Assert.Equal(300, enemyComp1.Health);
             Assert.Equal(10, enemyComp1.Mana);
 
+            // Alternatively to automatically lazy loading the templates can be loaded into memory all at once: 
+            await ecs2.LoadAllTemplateFilesIntoMemory();
+
             Entity v2 = ecs2.LoadTemplateInstance(variant2.Id);
             var enemyComp2 = v2.Components.Single() as EnemyComp;
             Assert.Equal(300, enemyComp2.Health);
             Assert.Equal(20, enemyComp2.Mana);
-
-            entitiesDir.OpenInExternalApp();
 
         }
 
@@ -83,7 +84,7 @@ namespace com.csutil.tests.model.esc {
             // Composing full scene graphs by using the ChildrenIds property:
 
             var entitiesDir = EnvironmentV2.instance.GetNewInMemorySystem();
-            var ecs = new EntityComponentSystem<Entity>(entitiesDir);
+            var ecs = new TemplatesIO<Entity>(entitiesDir);
 
             var enemyTemplate = new Entity() {
                 Id = "" + GuidV2.NewGuid(),
