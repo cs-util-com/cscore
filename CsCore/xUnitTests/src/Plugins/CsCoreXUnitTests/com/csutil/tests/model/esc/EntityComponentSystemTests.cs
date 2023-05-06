@@ -43,10 +43,15 @@ namespace com.csutil.tests.model.esc {
             (variant2.Components.Single() as EnemyComp).Mana = 20;
             ecs.Save(variant2);
 
+            // Updating variant 1 should also update variant2:
+            (variant1.Components.Single() as EnemyComp).Health = 300;
+            ecs.Save(variant1);
+            variant2 = await ecs.Load(variant2.Id);
+            Assert.Equal(300, (variant2.Components.Single() as EnemyComp).Health);
+
             // Another instance that is identical to the template:
             Entity variant3 = ecs.CreateVariantOf(enemyTemplate);
             ecs.Save(variant3);
-
 
             var ecs2 = new EntityComponentSystem<Entity>(entitiesDir);
             await ecs2.LoadAllJTokens();
@@ -65,6 +70,21 @@ namespace com.csutil.tests.model.esc {
             entitiesDir.OpenInExternalApp();
 
         }
+
+        [Fact]
+        public async Task ExampleUsage2() {
+            // Composing full scene graphs by using the ChildrenIds property:
+
+            var entitiesDir = EnvironmentV2.instance.GetNewInMemorySystem();
+            var ecs = new EntityComponentSystem<Entity>(entitiesDir);
+
+            var enemyTemplate = new Entity() {
+                Id = "" + GuidV2.NewGuid(),
+                LocalPose = Matrix4x4.CreateTranslation(1, 2, 3),
+                Components = new List<IComponentData>() {
+                    new EnemyComp() { Id = "c1", Health = 100 }
+                }
+            };
 
         }
 

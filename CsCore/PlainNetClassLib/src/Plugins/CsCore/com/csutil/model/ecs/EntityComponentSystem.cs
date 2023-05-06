@@ -71,14 +71,14 @@ namespace com.csutil.model.ecs {
 
         private T ToObject(JToken json, JsonSerializer serializer) {
             T entity = json.ToObject<T>(serializer);
-            AssertAllFieldsWereDeserialized(entity, json);
+            AssertAllFieldsWereDeserialized(json, entity);
             return entity;
         }
 
         [Conditional("DEBUG")]
-        private void AssertAllFieldsWereDeserialized(T entity, JToken json) {
-            var backtoJToken = ToJToken(entity, GetJsonSerializer());
-            var diff = JonDiffPatch.Diff(json, backtoJToken);
+        private void AssertAllFieldsWereDeserialized(JToken sourceJson, T resultingEntity) {
+            var backAsJson = ToJToken(resultingEntity, GetJsonSerializer());
+            var diff = JonDiffPatch.Diff(sourceJson, backAsJson);
             if (diff != null) { throw new Exception("Not all fields were deserialized: " + diff); }
         }
 
