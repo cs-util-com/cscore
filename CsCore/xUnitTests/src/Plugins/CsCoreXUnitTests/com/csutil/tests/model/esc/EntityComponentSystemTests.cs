@@ -92,7 +92,7 @@ namespace com.csutil.tests.model.esc {
                 LocalPose = Matrix4x4.CreateRotationY(MathF.PI / 2) // 90 degree rotation around y axis
             });
             var e1 = entityGroup.AddChild(new Entity() {
-                LocalPose = Matrix4x4.CreateTranslation(0, 0, 0),
+                LocalPose = Matrix4x4.CreateRotationY(-MathF.PI / 2), // -90 degree rotation around y axis
             }, AddToChildrenListOfParent);
             var e2 = entityGroup.AddChild(new Entity() {
                 LocalPose = Matrix4x4.CreateTranslation(1, 0, 0),
@@ -105,18 +105,46 @@ namespace com.csutil.tests.model.esc {
             Assert.Same(e1.GetParent(), entityGroup);
             Assert.Same(e2.GetParent(), entityGroup);
 
+            { // Local and global poses can be accessed like this:
+                var rot90Degree = Quaternion.CreateFromYawPitchRoll(MathF.PI / 2, 0, 0);
+                Assert.Equal(rot90Degree, entityGroup.GlobalPose().rotation);
+                Assert.Equal(rot90Degree, entityGroup.LocalPose().rotation);
+
+                // e2 does not have a local rot so the global rot is the same as of the parent:
+                Assert.Equal(rot90Degree, e2.GlobalPose().rotation);
+                Assert.Equal(Quaternion.Identity, e2.LocalPose().rotation);
+
+                // e1 has a local rotation that is opposite of the parent 90 degree, the 2 cancel each other out:
+                Assert.Equal(Quaternion.Identity, e1.GlobalPose().rotation);
+                var rotMinus90Degree = Quaternion.CreateFromYawPitchRoll(-MathF.PI / 2, 0, 0);
+                Assert.Equal(rotMinus90Degree, e1.LocalPose().rotation);
+
+                // e1 is in the center of the parent, its global pos isnt affected by the rotation of the parent:
+                Assert.Equal(Vector3.Zero, e1.GlobalPose().position);
+                Assert.Equal(Vector3.Zero, e1.LocalPose().position);
+
+                // Due to the rotation of the parent the global position of e2 is now (0,0,1):
+                Assert.Equal(new Vector3(1, 0, 0), e2.LocalPose().position);
+                Assert.Equal(new Vector3(0, 0, 1), e2.GlobalPose().position);
+
+                // The scales are all 1:
+                Assert.Equal(Vector3.One, e1.GlobalPose().scale);
+                Assert.Equal(Vector3.One, e1.LocalPose().scale);
+            }
+
             Assert.Equal(3, ecs.AllEntities.Count);
             e1.RemoveFromParent(RemoveChildIdFromParent);
             // e1 is removed from its parent but still in the scene graph:
             Assert.Equal(3, ecs.AllEntities.Count);
             Assert.Same(e2, entityGroup.GetChildren().Single());
             Assert.Null(e1.GetParent());
-            e1.Destroy(RemoveChildIdFromParent);
+            Assert.True(e1.Destroy(RemoveChildIdFromParent));
+            Assert.False(e1.Destroy(RemoveChildIdFromParent));
             // e1 is now fully removed from the scene graph and destroyed:
             Assert.Equal(2, ecs.AllEntities.Count);
 
             Assert.False(e2.IsDestroyed());
-            e2.Destroy(RemoveChildIdFromParent);
+            Assert.True(e2.Destroy(RemoveChildIdFromParent));
             Assert.Equal(1, ecs.AllEntities.Count);
             Assert.Empty(entityGroup.GetChildren());
             Assert.True(e2.IsDestroyed());
