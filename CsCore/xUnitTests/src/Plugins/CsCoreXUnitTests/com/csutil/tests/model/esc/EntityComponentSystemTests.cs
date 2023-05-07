@@ -80,20 +80,17 @@ namespace com.csutil.tests.model.esc {
 
         [Fact]
         public async Task ExampleUsageOfEcs() {
-            // Composing full scene graphs by using the ChildrenIds property:
 
-            var entitiesDir = EnvironmentV2.instance.GetNewInMemorySystem();
-
-            var ecs = new EntityComponentSystem<Entity>(new TemplatesIO<Entity>(entitiesDir));
-
-            await ecs.LoadSceneGraphFromDisk();
+            var ecs = new EntityComponentSystem<Entity>(null);
 
             var entityGroup = ecs.Add(new Entity() {
                 LocalPose = Matrix4x4.CreateRotationY(MathF.PI / 2) // 90 degree rotation around y axis
             });
+
             var e1 = entityGroup.AddChild(new Entity() {
                 LocalPose = Matrix4x4.CreateRotationY(-MathF.PI / 2), // -90 degree rotation around y axis
             }, AddToChildrenListOfParent);
+
             var e2 = entityGroup.AddChild(new Entity() {
                 LocalPose = Matrix4x4.CreateTranslation(1, 0, 0),
             }, AddToChildrenListOfParent);
@@ -151,7 +148,47 @@ namespace com.csutil.tests.model.esc {
 
         }
 
-        private void Assert_AlmostEqual(Vector3 a, Vector3 b, float allowedDelta = 0.0000001f) {
+        [Fact]
+        public async Task TestEcsPoseMath() {
+            
+            /* A test that composes a complex nested scene graph and checks if the
+             * global pose of the most inner entity is back at the origin (validated that
+             * same result is achieved with Unity) */
+
+            var ecs = new EntityComponentSystem<Entity>(null);
+
+            var e1 = ecs.Add(new Entity() {
+                LocalPose = NewPose(new Vector3(0, 1, 0))
+            });
+
+            var e2 = e1.AddChild(new Entity() {
+                LocalPose = NewPose(new Vector3(0, 1, 0), 90)
+            }, AddToChildrenListOfParent);
+
+            var e3 = e2.AddChild(new Entity() {
+                LocalPose = NewPose(new Vector3(0, 0, 2), 0, 2)
+            }, AddToChildrenListOfParent);
+
+            var e4 = e3.AddChild(new Entity() {
+                LocalPose = NewPose(new Vector3(0, 0, -1), -90)
+            }, AddToChildrenListOfParent);
+
+            var e5 = e4.AddChild(new Entity() {
+                LocalPose = NewPose(new Vector3(0, -1, 0), 0, 0.5f)
+            }, AddToChildrenListOfParent);
+
+            var pose = e5.GlobalPose();
+            Assert.Equal(Quaternion.Identity, pose.rotation);
+            Assert_AlmostEqual(Vector3.One, pose.scale);
+            Assert.Equal(Vector3.Zero, pose.position);
+
+        }
+
+        private Matrix4x4 NewPose(Vector3 pos, float rot = 0, float scale = 1f) {
+            return Matrix4x4Extensions.Compose(pos, Quaternion.CreateFromYawPitchRoll(rot, 0, 0), new Vector3(scale, scale, scale));
+        }
+
+        private void Assert_AlmostEqual(Vector3 a, Vector3 b, float allowedDelta = 0.000001f) {
             var length = (a - b).Length();
             Assert.True(length < allowedDelta, $"Expected {a} to be almost equal to {b} but the length of the difference is {length}");
         }

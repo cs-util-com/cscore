@@ -52,16 +52,16 @@ namespace com.csutil.model.ecs {
         }
 
         /// <summary> Combines the local pose of the entity with the pose of all its parents </summary>
-        public static Matrix4x4 Pose<T>(this IEntity<T> self) where T : IEntityData {
+        public static Matrix4x4 GlobalPoseMatrix<T>(this IEntity<T> self) where T : IEntityData {
             var lp = self.LocalPose;
             Matrix4x4 localPose = lp.HasValue ? lp.Value : Matrix4x4.Identity;
             var parent = self.GetParent();
             if (parent == null) { return localPose; }
-            return localPose * parent.Pose();
+            return localPose * parent.GlobalPoseMatrix();
         }
 
         public static Pose GlobalPose<T>(this IEntity<T> self) where T : IEntityData {
-            self.Pose().Decompose(out Vector3 scale, out Quaternion rotation, out Vector3 position);
+            self.GlobalPoseMatrix().Decompose(out Vector3 scale, out Quaternion rotation, out Vector3 position);
             return new Pose(position, rotation, scale);
         }
 
