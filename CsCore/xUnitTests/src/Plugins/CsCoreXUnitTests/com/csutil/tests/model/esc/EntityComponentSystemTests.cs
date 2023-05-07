@@ -125,7 +125,7 @@ namespace com.csutil.tests.model.esc {
 
                 // Due to the rotation of the parent the global position of e2 is now (0,0,1):
                 Assert.Equal(new Vector3(1, 0, 0), e2.LocalPose().position);
-                Assert.Equal(new Vector3(0, 0, 1), e2.GlobalPose().position);
+                Assert_AlmostEqual(new Vector3(0, 0, -1), e2.GlobalPose().position);
 
                 // The scales are all 1:
                 Assert.Equal(Vector3.One, e1.GlobalPose().scale);
@@ -149,6 +149,11 @@ namespace com.csutil.tests.model.esc {
             Assert.Empty(entityGroup.GetChildren());
             Assert.True(e2.IsDestroyed());
 
+        }
+
+        private void Assert_AlmostEqual(Vector3 a, Vector3 b, float allowedDelta = 0.0000001f) {
+            var length = (a - b).Length();
+            Assert.True(length < allowedDelta, $"Expected {a} to be almost equal to {b} but the length of the difference is {length}");
         }
 
         private static Entity AddToChildrenListOfParent(Entity parent, string addedChildId) {

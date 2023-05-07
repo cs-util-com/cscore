@@ -57,7 +57,7 @@ namespace com.csutil.model.ecs {
             Matrix4x4 localPose = lp.HasValue ? lp.Value : Matrix4x4.Identity;
             var parent = self.GetParent();
             if (parent == null) { return localPose; }
-            return parent.Pose() * localPose;
+            return localPose * parent.Pose();
         }
 
         public static Pose GlobalPose<T>(this IEntity<T> self) where T : IEntityData {
