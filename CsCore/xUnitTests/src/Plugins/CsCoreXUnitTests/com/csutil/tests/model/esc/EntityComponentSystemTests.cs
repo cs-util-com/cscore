@@ -23,7 +23,6 @@ namespace com.csutil.tests.model.esc {
             var templates = new TemplatesIO<Entity>(templatesDir);
 
             var enemyTemplate = new Entity() {
-                Id = "" + GuidV2.NewGuid(),
                 LocalPose = Matrix4x4.CreateTranslation(1, 2, 3),
                 Components = new List<IComponentData>() {
                     new EnemyComp() { Id = "c1", Health = 100, Mana = 10 }
@@ -80,7 +79,7 @@ namespace com.csutil.tests.model.esc {
         }
 
         [Fact]
-        public async Task ExampleUsage2() {
+        public async Task ExampleUsageOfEcs() {
             // Composing full scene graphs by using the ChildrenIds property:
 
             var entitiesDir = EnvironmentV2.instance.GetNewInMemorySystem();
@@ -90,15 +89,12 @@ namespace com.csutil.tests.model.esc {
             await ecs.LoadSceneGraphFromDisk();
 
             var entityGroup = ecs.Add(new Entity() {
-                Id = "" + GuidV2.NewGuid(),
                 LocalPose = Matrix4x4.CreateRotationY(MathF.PI / 2) // 90 degree rotation around y axis
             });
             var e1 = entityGroup.AddChild(new Entity() {
-                Id = "" + GuidV2.NewGuid(),
                 LocalPose = Matrix4x4.CreateTranslation(0, 0, 0),
             }, AddToChildrenListOfParent);
             var e2 = entityGroup.AddChild(new Entity() {
-                Id = "" + GuidV2.NewGuid(),
                 LocalPose = Matrix4x4.CreateTranslation(1, 0, 0),
             }, AddToChildrenListOfParent);
 
@@ -110,15 +106,20 @@ namespace com.csutil.tests.model.esc {
             Assert.Same(e2.GetParent(), entityGroup);
 
             Assert.Equal(3, ecs.AllEntities.Count);
-            e1.RemoveFromParent(RemoveFromChildrenListOfParent);
+            e1.RemoveFromParent(RemoveChildIdFromParent);
             // e1 is removed from its parent but still in the scene graph:
             Assert.Equal(3, ecs.AllEntities.Count);
             Assert.Same(e2, entityGroup.GetChildren().Single());
             Assert.Null(e1.GetParent());
-            e1.Destroy(RemoveFromChildrenListOfParent);
+            e1.Destroy(RemoveChildIdFromParent);
             // e1 is now fully removed from the scene graph and destroyed:
             Assert.Equal(2, ecs.AllEntities.Count);
 
+            Assert.False(e2.IsDestroyed());
+            e2.Destroy(RemoveChildIdFromParent);
+            Assert.Equal(1, ecs.AllEntities.Count);
+            Assert.Empty(entityGroup.GetChildren());
+            Assert.True(e2.IsDestroyed());
 
         }
 
@@ -127,13 +128,13 @@ namespace com.csutil.tests.model.esc {
             return parent;
         }
 
-        private Entity RemoveFromChildrenListOfParent(Entity parent, string childIdToRemove) {
+        private Entity RemoveChildIdFromParent(Entity parent, string childIdToRemove) {
             parent.MutablehildrenIds.Remove(childIdToRemove);
             return parent;
         }
 
         private class Entity : IEntityData {
-            public string Id { get; set; }
+            public string Id { get; set; } = "" + GuidV2.NewGuid();
             public string TemplateId { get; set; }
             public Matrix4x4? LocalPose { get; set; }
             public IReadOnlyList<IComponentData> Components { get; set; }

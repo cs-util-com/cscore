@@ -30,9 +30,13 @@ namespace com.csutil.model.ecs {
             return newChild;
         }
 
-        public static void Destroy<T>(this IEntity<T> self, Func<T, string, T> removeFromParent) where T : IEntityData {
-            self.RemoveFromParent(removeFromParent);
+        public static void Destroy<T>(this IEntity<T> self, Func<T, string, T> removeChildIdFromParent) where T : IEntityData {
+            self.RemoveFromParent(removeChildIdFromParent);
             self.Ecs.Destroy(self.Id);
+        }
+
+        public static bool IsDestroyed<T>(this IEntity<T> self) where T : IEntityData {
+            return self.Ecs == null;
         }
 
         public static void RemoveFromParent<T>(this IEntity<T> child, Func<T, string, T> removeFromParent) where T : IEntityData {
@@ -43,7 +47,6 @@ namespace com.csutil.model.ecs {
             }
             child.Ecs.Update(child.Data);
         }
-
 
     }
 
@@ -125,9 +128,26 @@ namespace com.csutil.model.ecs {
         }
 
         public void Destroy(string entityId) {
+            var entity = Entities[entityId] as Entity;
             Entities.Remove(entityId);
             ParentIds.Remove(entityId);
+            entity.Ecs = null;
+            if (entity.Data.Components != null) {
+                foreach (var comp in entity.Data.Components) {
+                    DisposeIfPossible(comp);
+                }
+            }
+            DisposeIfPossible(entity.Data);
         }
+
+        private static void DisposeIfPossible(object x) {
+            if (x is IDisposableV2 d2) {
+                d2.DisposeV2();
+            } else if (x is IDisposable d1) {
+                d1.Dispose();
+            }
+        }
+
     }
 
     public class TemplatesIO<T> where T : IEntityData {
