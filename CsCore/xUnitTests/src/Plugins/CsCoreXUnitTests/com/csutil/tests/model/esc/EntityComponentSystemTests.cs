@@ -141,16 +141,25 @@ namespace com.csutil.tests.model.esc {
             Assert.Equal(2, ecs.AllEntities.Count);
 
             Assert.False(e2.IsDestroyed());
+
+            var e3 = e2.AddChild(new Entity(), AddToChildrenListOfParent);
+            var e4 = e3.AddChild(new Entity(), AddToChildrenListOfParent);
+
             Assert.True(e2.Destroy(RemoveChildIdFromParent));
-            Assert.Equal(1, ecs.AllEntities.Count);
             Assert.Empty(entityGroup.GetChildren());
+            
             Assert.True(e2.IsDestroyed());
+            Assert.Equal(1, ecs.AllEntities.Count);
+
+            // Since e3 and e4 are in the subtree of e2 they are also destroyed:
+            Assert.True(e3.IsDestroyed());
+            Assert.True(e4.IsDestroyed());
 
         }
 
         [Fact]
         public async Task TestEcsPoseMath() {
-            
+
             /* A test that composes a complex nested scene graph and checks if the
              * global pose of the most inner entity is back at the origin (validated that
              * same result is achieved with Unity) */

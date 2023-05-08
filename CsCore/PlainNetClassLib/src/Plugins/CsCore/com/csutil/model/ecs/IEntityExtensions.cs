@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 
 namespace com.csutil.model.ecs {
-    
+
     public static class IEntityExtensions {
 
         public static IEnumerable<IEntity<T>> GetChildren<T>(this IEntity<T> self) where T : IEntityData {
+            if (self.ChildrenIds == null) { return null; }
             return self.ChildrenIds.Map(x => self.Ecs.GetEntity(x));
         }
 
@@ -24,8 +26,18 @@ namespace com.csutil.model.ecs {
         public static bool Destroy<T>(this IEntity<T> self, Func<T, string, T> removeChildIdFromParent) where T : IEntityData {
             if (self.IsDestroyed()) { return false; }
             self.RemoveFromParent(removeChildIdFromParent);
+            self.DestroyAllChildrenRecursively(removeChildIdFromParent);
             self.Ecs.Destroy(self.Id);
             return true;
+        }
+
+        private static void DestroyAllChildrenRecursively<T>(this IEntity<T> self, Func<T, string, T> removeChildIdFromParent) where T : IEntityData {
+            var children = self.GetChildren().ToList();
+            if (children != null) {
+                foreach (var child in children) {
+                    child.Destroy(removeChildIdFromParent);
+                }
+            }
         }
 
         public static bool IsDestroyed<T>(this IEntity<T> self) where T : IEntityData {
@@ -64,5 +76,5 @@ namespace com.csutil.model.ecs {
         }
 
     }
-    
+
 }
