@@ -75,6 +75,26 @@ namespace com.csutil.model.ecs {
             return new Pose(position, rotation, scale);
         }
 
+        public static void SaveChanges<T>(this IEntity<T> self) where T : IEntityData {
+            self.Ecs.SaveChanges(self.Data);
+        }
+
+        public static IEntity<T> CreateVariant<T>(this IEntity<T> self) where T : IEntityData {
+            return self.Ecs.CreateVariant(self.Data);
+        }
+
+        public static IEntity<T> GetChild<T>(this IEntity<T> mageEnemy, string name) where T : IEntityData {
+            return mageEnemy.GetChildren().Single(x => x.Name == name);
+        }
+
+    }
+
+    public static class IEntityDataExtensions {
+
+        public static V GetComponent<V>(this IEntityData self) where V : class {
+            return self.Components.Single(c => c is V) as V;
+        }
+
     }
 
 }

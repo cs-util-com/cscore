@@ -15,11 +15,11 @@ namespace com.csutil.model.ecs {
             public EntityComponentSystem<T> Ecs { get; set; }
 
             public string Id => Data.Id;
+            public string Name => Data.Name;
             public string TemplateId => Data.TemplateId;
             public Matrix4x4? LocalPose => Data.LocalPose;
             public IReadOnlyList<IComponentData> Components => Data.Components;
             public IReadOnlyList<string> ChildrenIds => Data.ChildrenIds;
-            public IReadOnlyList<string> Tags => Data.Tags;
 
         }
 
@@ -104,6 +104,15 @@ namespace com.csutil.model.ecs {
             }
         }
 
+        public IEntity<T> CreateVariant(T entityData) {
+            var variant = TemplatesIo.CreateVariantInstanceOf(entityData);
+            return Add(variant);
+        }
+
+        public void SaveChanges(T entityData) {
+            TemplatesIo.SaveAsTemplate(entityData);
+        }
+        
     }
 
 }
