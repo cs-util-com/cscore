@@ -11,7 +11,9 @@ using Zio;
 
 namespace com.csutil.model.ecs {
 
-    public class TemplatesIO<T> where T : IEntityData {
+    public class TemplatesIO<T> : IDisposableV2 where T : IEntityData {
+
+        public DisposeState IsDisposed { get; set; } = DisposeState.Active;
 
         private readonly DirectoryEntry EntityDir;
         private readonly JsonDiffPatch JonDiffPatch = new JsonDiffPatch();
@@ -22,7 +24,11 @@ namespace com.csutil.model.ecs {
         private Func<JsonSerializer> GetJsonSerializer = () => JsonSerializer.Create(JsonNetSettings.typedJsonSettings);
 
         public TemplatesIO(DirectoryEntry entityDir) {
-            this.EntityDir = entityDir;
+            EntityDir = entityDir;
+        }
+
+        public void Dispose() {
+            LoadedTemplates.Clear();
         }
 
         /// <summary> Loads all template files from disk into memory </summary>
@@ -130,6 +136,12 @@ namespace com.csutil.model.ecs {
             return json;
         }
 
+        public bool HasChanges(T oldState, T newState) {
+            var s = GetJsonSerializer();
+            var diff = JonDiffPatch.Diff(ToJToken(oldState, s), ToJToken(newState, s));
+            return diff != null;
+        }
+        
     }
 
 }

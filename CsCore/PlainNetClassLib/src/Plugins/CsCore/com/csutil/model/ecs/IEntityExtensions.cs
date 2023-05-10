@@ -23,6 +23,11 @@ namespace com.csutil.model.ecs {
             return newChild;
         }
 
+        public static IEntity<T> AddChild<T>(this IEntity<T> parent, IEntity<T> existingChild, Func<T, string, T> mutateChildrenListInParentEntity) where T : IEntityData {
+            parent.Ecs.Update(mutateChildrenListInParentEntity(parent.Data, existingChild.Id));
+            return existingChild;
+        }
+
         public static bool Destroy<T>(this IEntity<T> self, Func<T, string, T> removeChildIdFromParent) where T : IEntityData {
             if (self.IsDestroyed()) { return false; }
             self.RemoveFromParent(removeChildIdFromParent);
@@ -76,6 +81,10 @@ namespace com.csutil.model.ecs {
         }
 
         public static void SaveChanges<T>(this IEntity<T> self) where T : IEntityData {
+            var children = self.GetChildren();
+            if (children != null) {
+                foreach (var child in children) { child.SaveChanges(); }
+            }
             self.Ecs.SaveChanges(self.Data);
         }
 
@@ -85,6 +94,14 @@ namespace com.csutil.model.ecs {
 
         public static IEntity<T> GetChild<T>(this IEntity<T> mageEnemy, string name) where T : IEntityData {
             return mageEnemy.GetChildren().Single(x => x.Name == name);
+        }
+
+    }
+
+    public static class EcsExtensions {
+
+        public static IEnumerable<IEntity<T>> FindEntitiesWithName<T>(this EntityComponentSystem<T> ecs, string name) where T : IEntityData {
+            return ecs.AllEntities.Values.Filter(x => x.Name == name);
         }
 
     }

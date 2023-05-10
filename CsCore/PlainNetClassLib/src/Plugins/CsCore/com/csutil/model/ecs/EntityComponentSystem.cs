@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace com.csutil.model.ecs {
 
-    public class EntityComponentSystem<T> where T : IEntityData {
+    public class EntityComponentSystem<T> : IDisposableV2 where T : IEntityData {
 
         private class Entity : IEntity<T> {
 
@@ -23,15 +23,24 @@ namespace com.csutil.model.ecs {
 
         }
 
+        public DisposeState IsDisposed { get; set; } = DisposeState.Active;
+
         private readonly TemplatesIO<T> TemplatesIo;
         private readonly Dictionary<string, IEntity<T>> Entities = new Dictionary<string, IEntity<T>>();
         private readonly Dictionary<string, string> ParentIds = new Dictionary<string, string>();
+        private readonly Dictionary<string, HashSet<string>> Variants = new Dictionary<string, HashSet<string>>();
 
         public IReadOnlyDictionary<string, IEntity<T>> AllEntities => Entities;
         public IReadOnlyDictionary<string, string> AllParentIds => ParentIds;
 
         public EntityComponentSystem(TemplatesIO<T> templatesIo) {
             TemplatesIo = templatesIo;
+        }
+
+        public void Dispose() {
+            TemplatesIo.DisposeV2();
+            Entities.Clear();
+            ParentIds.Clear();
         }
 
         public IEntity<T> Add(T entityData) {
@@ -42,8 +51,15 @@ namespace com.csutil.model.ecs {
             var entityId = entity.Id;
             entityId.ThrowErrorIfNullOrEmpty("entityData.Id");
             Entities[entityId] = entity;
+            UpdateVariantsLookup(entity.Data);
             UpdateParentIds(entityId, entity);
             return entity;
+        }
+
+        private void UpdateVariantsLookup(T entity) {
+            if (entity.TemplateId != null) {
+                Variants.AddToValues(entity.TemplateId, entity.Id);
+            }
         }
 
         private void UpdateParentIds(string parentId, IEntity<T> parent) {
@@ -56,23 +72,44 @@ namespace com.csutil.model.ecs {
             var entityId = updatedEntityData.Id;
             var entity = (Entity)Entities[entityId];
 
-            var oldEntry = entity.Data;
+            var oldEntryData = entity.Data;
             entity.Data = updatedEntityData;
 
             if (ParentIds.TryGetValue(entityId, out string parentId)) {
                 // Remove from ParentIds cache if parent does not contain the child anymore:
                 if (!Entities[parentId].Data.ChildrenIds.Contains(entityId)) { ParentIds.Remove(entityId); }
             }
+
+            // e.g. if the entries are mutable this will often be true:
+            var oldAndNewSameEntry = ReferenceEquals(oldEntryData, updatedEntityData);
+
             // Remove outdated parent ids and add new ones:
-            if (oldEntry.ChildrenIds != null) {
-                var removedChildrenIds = oldEntry.ChildrenIds.Except(updatedEntityData.ChildrenIds);
+            if (!oldAndNewSameEntry && oldEntryData.ChildrenIds != null) {
+                var removedChildrenIds = oldEntryData.ChildrenIds.Except(updatedEntityData.ChildrenIds);
                 foreach (var childId in removedChildrenIds) { ParentIds.Remove(childId); }
             }
             UpdateParentIds(entityId, entity);
+
+            if (!oldAndNewSameEntry) {
+                // Compute json diff to know if the entry really changed and if not skip informing all variants about the change:
+                // This can happen eg if the variant overwrites the field that was just changed in the template
+                if (!TemplatesIo.HasChanges(oldEntryData, updatedEntityData)) { return; }
+            }
+            // If the entry is a template for other entries:
+            if (Variants.TryGetValue(updatedEntityData.Id, out var variantIds)) {
+                foreach (var variantId in variantIds) {
+                    var newVariantState = TemplatesIo.LoadTemplateInstance(variantId);
+                    Update(newVariantState);
+                }
+            }
+
         }
 
         public async Task LoadSceneGraphFromDisk() {
             await TemplatesIo.LoadAllTemplateFilesIntoMemory();
+            foreach (var entityId in TemplatesIo.GetAllEntityIds()) {
+                Add(TemplatesIo.LoadTemplateInstance(entityId));
+            }
         }
 
         public IEntity<T> GetEntity(string entityId) {
@@ -87,6 +124,9 @@ namespace com.csutil.model.ecs {
             var entity = Entities[entityId] as Entity;
             Entities.Remove(entityId);
             ParentIds.Remove(entityId);
+            if (entity.TemplateId != null) {
+                Variants.Remove(entity.TemplateId);
+            }
             entity.Ecs = null;
             if (entity.Data.Components != null) {
                 foreach (var comp in entity.Data.Components) {
@@ -111,8 +151,9 @@ namespace com.csutil.model.ecs {
 
         public void SaveChanges(T entityData) {
             TemplatesIo.SaveAsTemplate(entityData);
+            Update(entityData);
         }
-        
+
     }
 
 }

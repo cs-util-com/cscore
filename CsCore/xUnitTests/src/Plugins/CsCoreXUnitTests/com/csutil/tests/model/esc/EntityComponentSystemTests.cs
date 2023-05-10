@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
+using com.csutil.model;
 using com.csutil.model.ecs;
 using Newtonsoft.Json;
 using Xunit;
@@ -200,43 +201,71 @@ namespace com.csutil.tests.model.esc {
 
             // First the user creates a scene at runtime:
             var dir = EnvironmentV2.instance.GetNewInMemorySystem();
-            var templatesIo = new TemplatesIO<Entity>(dir);
-            var ecs = new EntityComponentSystem<Entity>(templatesIo);
+            {
+                var ecs = new EntityComponentSystem<Entity>(new TemplatesIO<Entity>(dir));
 
-            // He defines a few of the entities as templates and other as variants
+                // He defines a few of the entities as templates and other as variants
 
-            // Define a base enemy template with a sword:
-            var baseEnemy = ecs.Add(new Entity() {
-                Name = "EnemyTemplate",
-                Components = new[] { new EnemyComponent() { Health = 100, Mana = 0 } }
-            });
-            baseEnemy.AddChild(new Entity() {
-                Name = "Sword",
-                Components = new[] { new SwordComponent() { Damage = 10 } }
-            }, AddToChildrenListOfParent);
-            baseEnemy.SaveChanges();
+                // Define a base enemy template with a sword:
+                var baseEnemy = ecs.Add(new Entity() {
+                    Name = "EnemyTemplate",
+                    Components = new[] { new EnemyComponent() { Health = 100, Mana = 0 } }
+                });
+                baseEnemy.AddChild(new Entity() {
+                    Name = "Sword",
+                    Components = new[] { new SwordComponent() { Damage = 10 } }
+                }, AddToChildrenListOfParent);
+                baseEnemy.SaveChanges();
 
-            // Define a variant of the base enemy which is stronger and has a shield:
-            var bossEnemy = baseEnemy.CreateVariant();
-            bossEnemy.Data.Name = "BossEnemy";
-            bossEnemy.GetComponent<EnemyComponent>().Health = 200;
-            bossEnemy.AddChild(new Entity() {
-                Name = "Shield",
-                Components = new[] { new ShieldComponent() { Defense = 10 } }
-            }, AddToChildrenListOfParent);
-            bossEnemy.SaveChanges();
+                // Define a variant of the base enemy which is stronger and has a shield:
+                var bossEnemy = baseEnemy.CreateVariant();
+                bossEnemy.Data.Name = "BossEnemy";
+                bossEnemy.GetComponent<EnemyComponent>().Health = 200;
+                bossEnemy.AddChild(new Entity() {
+                    Name = "Shield",
+                    Components = new[] { new ShieldComponent() { Defense = 10 } }
+                }, AddToChildrenListOfParent);
+                bossEnemy.SaveChanges();
 
-            // Define a mage variant that has mana but no sword
-            var mageEnemy = baseEnemy.CreateVariant();
-            mageEnemy.Data.Name = "MageEnemy";
-            mageEnemy.GetComponent<EnemyComponent>().Mana = 100;
-            mageEnemy.GetChild("Sword").RemoveFromParent(RemoveChildIdFromParent);
-            mageEnemy.SaveChanges();
+                // Define a mage variant that has mana but no sword
+                var mageEnemy = baseEnemy.CreateVariant();
+                mageEnemy.Data.Name = "MageEnemy";
+                mageEnemy.GetComponent<EnemyComponent>().Mana = 100;
+                mageEnemy.GetChild("Sword").RemoveFromParent(RemoveChildIdFromParent);
+                mageEnemy.SaveChanges();
 
+                // Updates to the prefabs also result in the variants being updated
+                baseEnemy.GetComponent<EnemyComponent>().Health = 150;
+                baseEnemy.SaveChanges();
+                // The mage enemy health wasnt overwritten so with the template update it now has also 150 health:
+                Assert.Equal(150, mageEnemy.GetComponent<EnemyComponent>().Health);
 
+                // All created entities are added to the scene graph and persisted to disk
+                var scene = ecs.Add(new Entity() { Name = "Scene" });
+                var enemy1 = scene.AddChild(baseEnemy.CreateVariant(), AddToChildrenListOfParent);
+                enemy1.Data.LocalPose = NewPose(new Vector3(1, 0, 0));
+                var enemy2 = scene.AddChild(bossEnemy.CreateVariant(), AddToChildrenListOfParent);
+                enemy2.Data.LocalPose = NewPose(new Vector3(0, 0, 1));
+                var enemy3 = scene.AddChild(mageEnemy.CreateVariant(), AddToChildrenListOfParent);
+                enemy3.Data.LocalPose = NewPose(new Vector3(-1, 0, 0));
 
+                scene.SaveChanges();
+
+                // Simulate the user closing the application and starting it again
+                ecs.Dispose();
+            }
+            {
+                var ecs = new EntityComponentSystem<Entity>(new TemplatesIO<Entity>(dir));
+                Assert.Empty(ecs.AllEntities);
+                await ecs.LoadSceneGraphFromDisk();
+                Assert.Equal(9, dir.EnumerateFiles().Count());
+                Assert.Equal(9, ecs.AllEntities.Count);
+                // The user loads the scene from disk and can continue editing it
+
+                var scene = ecs.FindEntitiesWithName("Scene").Single();
+
+            }
         }
-
 
         private Matrix4x4 NewPose(Vector3 pos, float rot = 0, float scale = 1f) {
             return Matrix4x4Extensions.Compose(pos, Quaternion.CreateFromYawPitchRoll(rot, 0, 0), new Vector3(scale, scale, scale));
