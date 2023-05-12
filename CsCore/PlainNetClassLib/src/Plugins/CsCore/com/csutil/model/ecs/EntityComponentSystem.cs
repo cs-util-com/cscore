@@ -33,6 +33,10 @@ namespace com.csutil.model.ecs {
         public IReadOnlyDictionary<string, IEntity<T>> AllEntities => Entities;
         public IReadOnlyDictionary<string, string> AllParentIds => ParentIds;
 
+        /// <summary> Triggered when the entity is directly or indirectly changed (e.g. when a template entity is changed).
+        /// Will path the IEntity wrapper, the old and the new data </summary>
+        public event Action<IEntity<T>, T, T> OnEntityChanged;
+
         public EntityComponentSystem(TemplatesIO<T> templatesIo) {
             TemplatesIo = templatesIo;
         }
@@ -95,14 +99,17 @@ namespace com.csutil.model.ecs {
                 // This can happen eg if the variant overwrites the field that was just changed in the template
                 if (!TemplatesIo.HasChanges(oldEntryData, updatedEntityData)) { return; }
             }
-            // If the entry is a template for other entries:
+
+            // At this point in the update method it is known that the entity really changed and 
+            OnEntityChanged.InvokeIfNotNull(entity, oldEntryData, updatedEntityData);
+
+            // If the entry is a template for other entries, then all variants need to be updated:
             if (Variants.TryGetValue(updatedEntityData.Id, out var variantIds)) {
                 foreach (var variantId in variantIds) {
                     var newVariantState = TemplatesIo.LoadTemplateInstance(variantId);
                     Update(newVariantState);
                 }
             }
-
         }
 
         public async Task LoadSceneGraphFromDisk() {

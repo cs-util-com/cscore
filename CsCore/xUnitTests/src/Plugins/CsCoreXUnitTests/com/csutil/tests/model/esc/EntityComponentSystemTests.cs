@@ -169,23 +169,23 @@ namespace com.csutil.tests.model.esc {
             var ecs = new EntityComponentSystem<Entity>(null);
 
             var e1 = ecs.Add(new Entity() {
-                LocalPose = NewPose(new Vector3(0, 1, 0))
+                LocalPose = Pose.NewMatrix(new Vector3(0, 1, 0))
             });
 
             var e2 = e1.AddChild(new Entity() {
-                LocalPose = NewPose(new Vector3(0, 1, 0), 90)
+                LocalPose = Pose.NewMatrix(new Vector3(0, 1, 0), 90)
             }, AddToChildrenListOfParent);
 
             var e3 = e2.AddChild(new Entity() {
-                LocalPose = NewPose(new Vector3(0, 0, 2), 0, 2)
+                LocalPose = Pose.NewMatrix(new Vector3(0, 0, 2), 0, 2)
             }, AddToChildrenListOfParent);
 
             var e4 = e3.AddChild(new Entity() {
-                LocalPose = NewPose(new Vector3(0, 0, -1), -90)
+                LocalPose = Pose.NewMatrix(new Vector3(0, 0, -1), -90)
             }, AddToChildrenListOfParent);
 
             var e5 = e4.AddChild(new Entity() {
-                LocalPose = NewPose(new Vector3(0, -1, 0), 0, 0.5f)
+                LocalPose = Pose.NewMatrix(new Vector3(0, -1, 0), 0, 0.5f)
             }, AddToChildrenListOfParent);
 
             var pose = e5.GlobalPose();
@@ -243,11 +243,11 @@ namespace com.csutil.tests.model.esc {
                 // All created entities are added to the scene graph and persisted to disk
                 var scene = ecs.Add(new Entity() { Name = "Scene" });
                 var enemy1 = scene.AddChild(baseEnemy.CreateVariant(), AddToChildrenListOfParent);
-                enemy1.Data.LocalPose = NewPose(new Vector3(1, 0, 0));
+                enemy1.Data.LocalPose = Pose.NewMatrix(new Vector3(1, 0, 0));
                 var enemy2 = scene.AddChild(bossEnemy.CreateVariant(), AddToChildrenListOfParent);
-                enemy2.Data.LocalPose = NewPose(new Vector3(0, 0, 1));
+                enemy2.Data.LocalPose = Pose.NewMatrix(new Vector3(0, 0, 1));
                 var enemy3 = scene.AddChild(mageEnemy.CreateVariant(), AddToChildrenListOfParent);
-                enemy3.Data.LocalPose = NewPose(new Vector3(-1, 0, 0));
+                enemy3.Data.LocalPose = Pose.NewMatrix(new Vector3(-1, 0, 0));
 
                 scene.SaveChanges();
 
@@ -264,16 +264,17 @@ namespace com.csutil.tests.model.esc {
 
                 var scene = ecs.FindEntitiesWithName("Scene").Single();
 
+                Assert.Equal(3, scene.GetChildren().Count());
+                var enemy1 = scene.GetChildren().ElementAt(0);
+                Assert.Equal(new Vector3(1, 0, 0), enemy1.LocalPose().position);
+                var enemy2 = scene.GetChildren().ElementAt(1);
+                Assert.NotNull(enemy2.GetComponentInChildren<Entity, ShieldComponent>());
             }
-        }
-
-        private Matrix4x4 NewPose(Vector3 pos, float rot = 0, float scale = 1f) {
-            return Matrix4x4Extensions.Compose(pos, Quaternion.CreateFromYawPitchRoll(rot, 0, 0), new Vector3(scale, scale, scale));
         }
 
         private void Assert_AlmostEqual(Vector3 a, Vector3 b, float allowedDelta = 0.000001f) {
             var length = (a - b).Length();
-            Assert.True(length < allowedDelta, $"Expected {a} to be almost equal to {b} but the length of the difference is {length}");
+            Assert.True(length < allowedDelta, $"Expected {a} to be almost equal to {b} but the difference is {length}");
         }
 
         private static Entity AddToChildrenListOfParent(Entity parent, string addedChildId) {
@@ -287,15 +288,16 @@ namespace com.csutil.tests.model.esc {
         }
 
         private class Entity : IEntityData {
+
             public string Id { get; set; } = "" + GuidV2.NewGuid();
             public string Name { get; set; }
             public string TemplateId { get; set; }
             public Matrix4x4? LocalPose { get; set; }
             public IReadOnlyList<IComponentData> Components { get; set; }
 
-            [JsonIgnore]
-            public List<string> MutablehildrenIds { get; } = new List<string>();
             public IReadOnlyList<string> ChildrenIds => MutablehildrenIds;
+            [JsonIgnore] // Dont include the children ids two times
+            public List<string> MutablehildrenIds { get; } = new List<string>();
 
             public string GetId() { return Id; }
 

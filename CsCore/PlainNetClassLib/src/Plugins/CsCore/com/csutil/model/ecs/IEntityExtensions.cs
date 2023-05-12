@@ -81,11 +81,8 @@ namespace com.csutil.model.ecs {
         }
 
         public static void SaveChanges<T>(this IEntity<T> self) where T : IEntityData {
-            var children = self.GetChildren();
-            if (children != null) {
-                foreach (var child in children) { child.SaveChanges(); }
-            }
-            self.Ecs.SaveChanges(self.Data);
+            var fullSubtree = self.GetChildrenTreeBreadthFirst();
+            foreach (var e in fullSubtree) { e.Ecs.SaveChanges(e.Data); }
         }
 
         public static IEntity<T> CreateVariant<T>(this IEntity<T> self) where T : IEntityData {
@@ -94,6 +91,21 @@ namespace com.csutil.model.ecs {
 
         public static IEntity<T> GetChild<T>(this IEntity<T> mageEnemy, string name) where T : IEntityData {
             return mageEnemy.GetChildren().Single(x => x.Name == name);
+        }
+
+        /// <summary> Returns the full subtree under the entity in a depth first order </summary>
+        public static IEnumerable<IEntity<T>> GetChildrenTreeBreadthFirst<T>(this IEntity<T> self) where T : IEntityData {
+            return TreeFlattenTraverse.BreadthFirst(self, x => x.GetChildren());
+        }
+
+        /// <summary> Recursively searches for all components of the specified type in the entity and all its children </summary>
+        public static IEnumerable<V> GetComponentsInChildren<T, V>(this IEntity<T> self) where T : IEntityData where V : IComponentData {
+            return self.GetChildrenTreeBreadthFirst().SelectMany(x => x.Components).Where(c => c is V).Cast<V>();
+        }
+
+        /// <summary> Recursively searches the entity and all its children until a component of the specified type is found </summary>
+        public static V GetComponentInChildren<T, V>(this IEntity<T> self) where T : IEntityData where V : IComponentData {
+            return self.GetComponentsInChildren<T, V>().FirstOrDefault();
         }
 
     }
