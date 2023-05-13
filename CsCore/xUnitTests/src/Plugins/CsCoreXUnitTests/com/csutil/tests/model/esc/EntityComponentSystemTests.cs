@@ -277,14 +277,14 @@ namespace com.csutil.tests.model.esc {
             Assert.True(length < allowedDelta, $"Expected {a} to be almost equal to {b} but the difference is {length}");
         }
 
-        private static Entity AddToChildrenListOfParent(Entity parent, string addedChildId) {
-            parent.MutablehildrenIds.Add(addedChildId);
-            return parent;
+        private static Entity AddToChildrenListOfParent(IEntity<Entity> parent, string addedChildId) {
+            parent.Data.MutablehildrenIds.Add(addedChildId);
+            return parent.Data;
         }
 
-        private Entity RemoveChildIdFromParent(Entity parent, string childIdToRemove) {
-            parent.MutablehildrenIds.Remove(childIdToRemove);
-            return parent;
+        private Entity RemoveChildIdFromParent(IEntity<Entity> parent, string childIdToRemove) {
+            parent.Data.MutablehildrenIds.Remove(childIdToRemove);
+            return parent.Data;
         }
 
         private class Entity : IEntityData {

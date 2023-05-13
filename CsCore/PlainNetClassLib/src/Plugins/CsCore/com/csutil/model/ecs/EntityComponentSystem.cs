@@ -35,7 +35,14 @@ namespace com.csutil.model.ecs {
 
         /// <summary> Triggered when the entity is directly or indirectly changed (e.g. when a template entity is changed).
         /// Will path the IEntity wrapper, the old and the new data </summary>
-        public event Action<IEntity<T>, T, T> OnEntityChanged;
+        public event IEntityUpdateListener OnIEntityUpdated;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public delegate void IEntityUpdateListener(IEntity<T> iEntityWrapper, UpdateType type, T oldState, T newState);
+
+        public enum UpdateType { Add, Remove, Update }
 
         public EntityComponentSystem(TemplatesIO<T> templatesIo) {
             TemplatesIo = templatesIo;
@@ -54,9 +61,12 @@ namespace com.csutil.model.ecs {
         private IEntity<T> AddEntity(Entity entity) {
             var entityId = entity.Id;
             entityId.ThrowErrorIfNullOrEmpty("entityData.Id");
+            var hasOldEntity = Entities.TryGetValue(entityId, out var oldEntity);
+            T oldEntityData = hasOldEntity ? oldEntity.Data : default;
             Entities[entityId] = entity;
             UpdateVariantsLookup(entity.Data);
             UpdateParentIds(entityId, entity);
+            OnIEntityUpdated?.Invoke(entity, UpdateType.Add, oldEntityData, entity.Data);
             return entity;
         }
 
@@ -101,7 +111,7 @@ namespace com.csutil.model.ecs {
             }
 
             // At this point in the update method it is known that the entity really changed and 
-            OnEntityChanged.InvokeIfNotNull(entity, oldEntryData, updatedEntityData);
+            OnIEntityUpdated?.Invoke(entity, UpdateType.Update, oldEntryData, updatedEntityData);
 
             // If the entry is a template for other entries, then all variants need to be updated:
             if (Variants.TryGetValue(updatedEntityData.Id, out var variantIds)) {
@@ -129,6 +139,7 @@ namespace com.csutil.model.ecs {
 
         public void Destroy(string entityId) {
             var entity = Entities[entityId] as Entity;
+            OnIEntityUpdated?.Invoke(entity, UpdateType.Remove, entity.Data, default);
             Entities.Remove(entityId);
             ParentIds.Remove(entityId);
             if (entity.TemplateId != null) {

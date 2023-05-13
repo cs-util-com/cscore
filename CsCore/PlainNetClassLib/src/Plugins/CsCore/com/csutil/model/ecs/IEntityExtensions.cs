@@ -17,18 +17,18 @@ namespace com.csutil.model.ecs {
             return self.Ecs.GetParentOf(self.Id);
         }
 
-        public static IEntity<T> AddChild<T>(this IEntity<T> parent, T childData, Func<T, string, T> mutateChildrenListInParentEntity) where T : IEntityData {
+        public static IEntity<T> AddChild<T>(this IEntity<T> parent, T childData, Func<IEntity<T>, string, T> mutateChildrenListInParentEntity) where T : IEntityData {
             var newChild = parent.Ecs.Add(childData);
-            parent.Ecs.Update(mutateChildrenListInParentEntity(parent.Data, childData.Id));
+            parent.Ecs.Update(mutateChildrenListInParentEntity(parent, childData.Id));
             return newChild;
         }
 
-        public static IEntity<T> AddChild<T>(this IEntity<T> parent, IEntity<T> existingChild, Func<T, string, T> mutateChildrenListInParentEntity) where T : IEntityData {
-            parent.Ecs.Update(mutateChildrenListInParentEntity(parent.Data, existingChild.Id));
+        public static IEntity<T> AddChild<T>(this IEntity<T> parent, IEntity<T> existingChild, Func<IEntity<T>, string, T> mutateChildrenListInParentEntity) where T : IEntityData {
+            parent.Ecs.Update(mutateChildrenListInParentEntity(parent, existingChild.Id));
             return existingChild;
         }
 
-        public static bool Destroy<T>(this IEntity<T> self, Func<T, string, T> removeChildIdFromParent) where T : IEntityData {
+        public static bool Destroy<T>(this IEntity<T> self, Func<IEntity<T>, string, T> removeChildIdFromParent) where T : IEntityData {
             if (self.IsDestroyed()) { return false; }
             self.RemoveFromParent(removeChildIdFromParent);
             self.DestroyAllChildrenRecursively(removeChildIdFromParent);
@@ -36,7 +36,7 @@ namespace com.csutil.model.ecs {
             return true;
         }
 
-        private static void DestroyAllChildrenRecursively<T>(this IEntity<T> self, Func<T, string, T> removeChildIdFromParent) where T : IEntityData {
+        private static void DestroyAllChildrenRecursively<T>(this IEntity<T> self, Func<IEntity<T>, string, T> removeChildIdFromParent) where T : IEntityData {
             var children = self.GetChildren().ToList();
             if (children != null) {
                 foreach (var child in children) {
@@ -49,10 +49,10 @@ namespace com.csutil.model.ecs {
             return self.Ecs == null;
         }
 
-        public static void RemoveFromParent<T>(this IEntity<T> child, Func<T, string, T> removeFromParent) where T : IEntityData {
+        public static void RemoveFromParent<T>(this IEntity<T> child, Func<IEntity<T>, string, T> removeFromParent) where T : IEntityData {
             var parent = child.GetParent();
             if (parent != null) {
-                var updatedParent = removeFromParent(parent.Data, child.Id);
+                var updatedParent = removeFromParent(parent, child.Id);
                 child.Ecs.Update(updatedParent);
             }
             // The parent cant tell the ecs anymore that the ParentIds list needs to be updated so the child needs to do this: 

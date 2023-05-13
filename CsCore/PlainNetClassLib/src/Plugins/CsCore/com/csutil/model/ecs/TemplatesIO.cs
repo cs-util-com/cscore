@@ -141,7 +141,7 @@ namespace com.csutil.model.ecs {
             var diff = JonDiffPatch.Diff(ToJToken(oldState, s), ToJToken(newState, s));
             return diff != null;
         }
-        
+
     }
 
 }
