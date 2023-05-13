@@ -31,6 +31,8 @@ namespace com.csutil.model.ecs {
         private readonly Dictionary<string, HashSet<string>> Variants = new Dictionary<string, HashSet<string>>();
 
         public IReadOnlyDictionary<string, IEntity<T>> AllEntities => Entities;
+        
+        /// <summary> Lookup of parent id for a given child id </summary>
         public IReadOnlyDictionary<string, string> AllParentIds => ParentIds;
 
         /// <summary> Triggered when the entity is directly or indirectly changed (e.g. when a template entity is changed).

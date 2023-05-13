@@ -24,8 +24,19 @@ namespace com.csutil.model.ecs {
         }
 
         public static IEntity<T> AddChild<T>(this IEntity<T> parent, IEntity<T> existingChild, Func<IEntity<T>, string, T> mutateChildrenListInParentEntity) where T : IEntityData {
+            if (parent.Ecs.AllParentIds.ContainsKey(existingChild.Id)) {
+                throw new InvalidOperationException("The child is already connected to a parent");
+            }
             parent.Ecs.Update(mutateChildrenListInParentEntity(parent, existingChild.Id));
             return existingChild;
+        }
+
+        // SetParent:
+        public static IEntity<T> SetParent<T>(this IEntity<T> child, IEntity<T> newParent, Func<IEntity<T>, string, T> removeChildIdFromOldParent, Func<IEntity<T>, string, T> mutateChildrenListInNewParent) where T : IEntityData {
+            if (child.Ecs.AllParentIds.ContainsKey(child.Id)) {
+                child.RemoveFromParent(removeChildIdFromOldParent);
+            }
+            return newParent.AddChild(child, mutateChildrenListInNewParent);
         }
 
         public static bool Destroy<T>(this IEntity<T> self, Func<IEntity<T>, string, T> removeChildIdFromParent) where T : IEntityData {

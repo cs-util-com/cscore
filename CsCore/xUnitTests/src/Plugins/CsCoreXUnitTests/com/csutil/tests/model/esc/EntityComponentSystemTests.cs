@@ -231,7 +231,15 @@ namespace com.csutil.tests.model.esc {
                 var mageEnemy = baseEnemy.CreateVariant();
                 mageEnemy.Data.Name = "MageEnemy";
                 mageEnemy.GetComponent<EnemyComponent>().Mana = 100;
-                mageEnemy.GetChild("Sword").RemoveFromParent(RemoveChildIdFromParent);
+                var sword = mageEnemy.GetChild("Sword");
+                
+                // Switching the parent of the sword from the mage to the boss enemy should fail
+                Assert.Throws<InvalidOperationException>(() => bossEnemy.AddChild(sword, AddToChildrenListOfParent));
+                // Instead the sword first needs to be removed and then added to the new parent:
+                sword.RemoveFromParent(RemoveChildIdFromParent);
+                bossEnemy.AddChild(sword, AddToChildrenListOfParent);
+                
+                bossEnemy.SaveChanges();
                 mageEnemy.SaveChanges();
 
                 // Updates to the prefabs also result in the variants being updated
