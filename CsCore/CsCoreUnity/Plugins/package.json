@@ -10,7 +10,7 @@
 		"url": "https://github.com/cs-util-com/cscore"
 	},
 	"dependencies": {
-		"com.csutil.cscore": "1.8.8",
+		"com.csutil.cscore": "1.8.9",
 		"com.unity.modules.screencapture": "1.0.0",
 		"com.unity.modules.physics": "1.0.0",
 		"com.unity.modules.physics2d": "1.0.0",
