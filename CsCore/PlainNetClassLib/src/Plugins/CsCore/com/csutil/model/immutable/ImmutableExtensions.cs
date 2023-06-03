@@ -122,6 +122,19 @@ namespace com.csutil.model.immutable {
             }
             return list;
         }
+        
+        public static ImmutableList<T> MutateEntries<T>(this ImmutableList<T> list, object action, StateReducer<T> reducer, ref bool changed) {
+            if (list != null) {
+                foreach (var elem in list) {
+                    var newElem = reducer(elem, action);
+                    if (StateCompare.WasModified(elem, newElem)) {
+                        list = list.Replace(elem, newElem);
+                        changed = true;
+                    }
+                }
+            }
+            return list;
+        }
 
         [Obsolete("Typically not needed, since the key should be used to modify the specific entries of the Dict instead of iterating over all")]
         public static ImmutableDictionary<T, V> MutateEntries<T, V>(this ImmutableDictionary<T, V> dict, object action, StateReducer<V> reducer) {
