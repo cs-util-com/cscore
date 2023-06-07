@@ -129,6 +129,28 @@ namespace com.csutil.tests.model {
 
         }
 
+        // [Fact] // the offline test requires help from the developer so its disabled by default 
+        public async Task TestOfflineAccessToCachedDownload() {
+
+            var root = EnvironmentV2.instance.GetOrAddTempFolder("TestFileDownload");
+            var dir = root.GetChildDir("SubDir1");
+            dir.DeleteV2();
+            dir.CreateV2();
+
+            // Url from https://gist.github.com/jsturgis/3b19447b304616f18657
+            IFileRef f = new FileRef() { url = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4" };
+            Assert.True(await TestDownloadTo(f, dir));
+            Log.d("FileRef: " + JsonWriter.AsPrettyString(f));
+
+            // Wait until the internet is disconnected
+            while (InternetStateManager.Instance(this).HasInet) {
+                await TaskV2.Delay(1000);
+            }
+
+            // Second time its already cached
+            Assert.False(await TestDownloadTo(f, dir));
+        }
+
         private class FileRef : IFileRef {
             public string dir { get; set; }
             public string fileName { get; set; }

@@ -58,11 +58,11 @@ namespace com.csutil.http {
         }
 
         public async Task<bool> HasInternet(Action hasInet = null, Action noInet = null, string ip = DEFAULT_PING_IP, int timeoutMs = DEFAULT_PING_TIMEOUT) {
-            var ping = await GetCurrentPing(ip, timeoutMs);
-            if (ping >= 0) {
+            try {
+                var ping = await GetCurrentPing(ip, timeoutMs);
                 hasInet.InvokeIfNotNull();
                 return true;
-            } else {
+            } catch (TimeoutException e) {
                 noInet.InvokeIfNotNull();
                 return false;
             }

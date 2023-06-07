@@ -73,7 +73,7 @@ namespace com.csutil.model {
 
         public static async Task<bool> DownloadTo(this IFileRef self, RestRequest request, DirectoryEntry targetDir, int maxNrOfRetries) {
             self.AssertValidDirectory(targetDir);
-            var fileName = CalculateFileName(self, await request.GetResultHeaders());
+            var fileName = await CalculateFileName(self, request);
             var targetFile = targetDir.GetChild(fileName);
             bool downloadWasNeeded;
             if (maxNrOfRetries == 0) {
@@ -91,6 +91,10 @@ namespace com.csutil.model {
         }
 
         public static async Task<bool> DownloadTo(this IFileRef self, RestRequest request, FileEntry targetFile) {
+            if (!await InternetStateManager.Instance(self).HasInetAsync && targetFile.Exists) {
+                self.SetLocalFileInfosFrom(targetFile);
+                return false;
+            }
             var headers = await request.GetResultHeaders();
             var isAlreadyDownloaded = self.IsAlreadyDownloaded(headers, targetFile);
             if (!isAlreadyDownloaded) {
@@ -137,14 +141,20 @@ namespace com.csutil.model {
         }
 
         private static void SetLocalFileInfosFrom(this IFileRef self, Headers headers, FileEntry targetFile) {
-            self.AssertValidDirectory(targetFile.Parent);
-            self.dir = targetFile.Parent.FullName;
-            self.fileName = targetFile.Name;
-            self.mimeType = headers.GetContentMimeType(null);
+            SetLocalFileInfosFrom(self, targetFile);
+            self.mimeType = headers.GetContentMimeType(self.mimeType);
             if (headers.GetRawLastModifiedString() != null) {
                 targetFile.LastWriteTime = headers.GetLastModifiedUtcDate(DateTime.MinValue);
             }
-            if (headers.GetEtagHeader() != null) { self.AddCheckSum(CHECKSUM_ETAG, headers.GetEtagHeader()); }
+            if (headers.GetEtagHeader() != null) {
+                self.AddCheckSum(CHECKSUM_ETAG, headers.GetEtagHeader());
+            }
+        }
+
+        private static void SetLocalFileInfosFrom(this IFileRef self, FileEntry targetFile) {
+            self.AssertValidDirectory(targetFile.Parent);
+            self.dir = targetFile.Parent.FullName;
+            self.fileName = targetFile.Name;
         }
 
         private static void AssertValidDirectory(this IFileRef self, DirectoryEntry targetDirectory) {
@@ -156,12 +166,17 @@ namespace com.csutil.model {
             }
         }
 
-        private static string CalculateFileName(IFileRef self, Headers headers) {
+        private static async Task<string> CalculateFileName(IFileRef self, RestRequest request) {
             if (!self.fileName.IsNullOrEmpty()) { return self.fileName; }
-            var nameOnServer = headers.GetFileNameOnServer();
-            if (!nameOnServer.IsNullOrEmpty()) { return nameOnServer; }
-            var hashedHeaders = headers.GenerateHashNameFromHeaders();
-            if (!hashedHeaders.IsNullOrEmpty()) { return hashedHeaders; }
+            try {
+                Headers headers = await request.GetResultHeaders();
+                var nameOnServer = headers.GetFileNameOnServer();
+                if (!nameOnServer.IsNullOrEmpty()) { return nameOnServer; }
+                var hashedHeaders = headers.GenerateHashNameFromHeaders();
+                if (!hashedHeaders.IsNullOrEmpty()) { return hashedHeaders; }
+            } catch (Exception e) {
+                Log.w("Error while accessing remote request headers:", e);
+            }
             return self.url.GetMD5Hash();
         }
 
