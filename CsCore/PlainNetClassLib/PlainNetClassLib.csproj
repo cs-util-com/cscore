@@ -45,8 +45,8 @@
 
   <!-- https://www.nuget.org/packages/Newtonsoft.Json -->
   <ItemGroup>
-    <!-- Version 13.0.1 chosen because https://docs.unity3d.com/Packages/com.unity.nuget.newtonsoft-json@3.0/manual/index.html 3.0.2 uses this version -->
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <!-- Version 13.0.2 chosen because https://docs.unity3d.com/Packages/com.unity.nuget.newtonsoft-json@3.2/manual/index.html 3.2.1 uses this version -->
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
   </ItemGroup>
 
   <!-- https://www.nuget.org/packages/System.Collections.Immutable/ -->
