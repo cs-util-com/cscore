@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 namespace com.csutil {
@@ -33,7 +34,12 @@ namespace com.csutil {
                 return false;
             }
         }
-        
+
+        public static IDisposableV2 ToDisposableV2(this IDisposable self) {
+            if (self is IDisposableV2 d2) { return d2; }
+            return new IDisposableCollection(new List<IDisposable>() { self });
+        }
+
     }
 
 }

@@ -24,6 +24,10 @@ namespace com.csutil {
             return Vector2.Angle(self, to);
         }
 
+        public static Vector3 WithLenght(this Vector3 input, float length) {
+            return input.normalized * length;
+        }
+        
     }
 
 }

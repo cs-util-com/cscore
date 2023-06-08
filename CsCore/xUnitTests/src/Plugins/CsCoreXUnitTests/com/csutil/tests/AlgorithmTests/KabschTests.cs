@@ -40,8 +40,8 @@ namespace com.csutil.tests.AlgorithmTests {
 
             alignmentResult.Decompose(out var scale, out var rotation, out var translation);
 
-            Assert.True(translation.IsSimilarTo(Vector3.Zero, 6));
-            Assert.True(scale.IsSimilarTo(Vector3.One, 6));
+            Assert.True(translation.IsAlmostEqual(Vector3.Zero, 6));
+            Assert.True(scale.IsAlmostEqual(Vector3.One, 6));
 
         }
 
@@ -84,8 +84,8 @@ namespace com.csutil.tests.AlgorithmTests {
             Assert.Equal(4, result.inliers.Count());
 
             result.alignmentMatrix.Decompose(out var scale, out var rotation, out var translation);
-            Assert.True(translation.IsSimilarTo(Vector3.Zero, 6));
-            Assert.True(scale.IsSimilarTo(Vector3.One, 6));
+            Assert.True(translation.IsAlmostEqual(Vector3.Zero, 6));
+            Assert.True(scale.IsAlmostEqual(Vector3.One, 6));
 
             {
                 var dataToAlignTo = result.inliers.Map(x => x.Item2).ToList();
@@ -135,8 +135,8 @@ namespace com.csutil.tests.AlgorithmTests {
             Assert.Equal(new Vector4(99, 0, 3, 1), result.outliers.Single().Item2);
 
             result.alignmentMatrix.Decompose(out var scale, out var rotation, out var translation);
-            Assert.True(translation.IsSimilarTo(Vector3.Zero, 6), "translation=" + translation);
-            Assert.True(scale.IsSimilarTo(Vector3.One, 6), "scale=" + scale);
+            Assert.True(translation.IsAlmostEqual(Vector3.Zero, 6), "translation=" + translation);
+            Assert.True(scale.IsAlmostEqual(Vector3.One, 6), "scale=" + scale);
 
             {
                 var dataToAlignTo = result.inliers.Map(x => x.Item2).ToList();

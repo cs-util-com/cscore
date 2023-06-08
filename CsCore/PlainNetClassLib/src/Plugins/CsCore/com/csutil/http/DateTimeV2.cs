@@ -3,13 +3,18 @@ using System.Collections.Generic;
 
 namespace com.csutil {
 
+    public interface IClock {
+        DateTime GetNow();
+        DateTime GetUtcNow();
+    }
+
     /// <summary>
     /// This class will use the received external UTC times from any performed web requests to correct any local incorrect time settings. 
     /// DateTimeV2.UtcNow is a direct replacement for DateTime.UtcNow and will return once the first web request was performed a corrected 
     /// UTC timestamp that ignores if the local system time is set to an incorrect value. This ensures that timestamps recorded on clients 
     /// are always correct even if the user is using a manually set system time.
     /// </summary>
-    public class DateTimeV2 : IDisposableV2 {
+    public class DateTimeV2 : IClock, IDisposableV2 {
 
         public static DateTime NewDateTimeFromUnixTimestamp(long unixTimeInMs, bool autoCorrectIfPassedInSeconds = true) {
             AssertV3.IsTrue(unixTimeInMs > 0, () => "NewDateTimeFromUnixTimestamp: unixTimeInMs was " + unixTimeInMs);
@@ -46,9 +51,9 @@ namespace com.csutil {
 
         public const string SERVER_UTC_DATE = "SERVER_UTC_DATE";
 
-        public static DateTime UtcNow { get { return IoC.inject.GetOrAddSingleton<DateTimeV2>(null).GetUtcNow(); } }
+        public static DateTime UtcNow { get { return IoC.inject.GetOrAddSingleton<IClock>(null, () => new DateTimeV2()).GetUtcNow(); } }
 
-        public static DateTime Now { get { return IoC.inject.GetOrAddSingleton<DateTimeV2>(null).GetNow(); } }
+        public static DateTime Now { get { return IoC.inject.GetOrAddSingleton<IClock>(null, () => new DateTimeV2()).GetNow(); } }
 
         public ISet<string> uriBlacklist = new HashSet<string>();
 
@@ -70,7 +75,7 @@ namespace com.csutil {
         public void Dispose() {
             IsDisposed = DisposeState.DisposingStarted;
             EventBus.instance.UnsubscribeAll(this);
-            if (IoC.inject.Get<DateTimeV2>(this, false) == this) { IoC.inject.RemoveAllInjectorsFor<DateTimeV2>(); }
+            if (IoC.inject.Get<IClock>(this, false) == this) { IoC.inject.RemoveAllInjectorsFor<IClock>(); }
             IsDisposed = DisposeState.Disposed;
         }
 

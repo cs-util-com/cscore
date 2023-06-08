@@ -9,6 +9,9 @@ namespace com.csutil.tests {
 
     public class MathTests {
 
+        private const float radToDegree = 180f / MathF.PI;
+        private const float degreeToRad = MathF.PI / 180f;
+
         public MathTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
         [Fact]
@@ -98,8 +101,6 @@ namespace com.csutil.tests {
             Assert.Equal(rgb, redRgb.ToStringV2(c => "" + c));
         }
 
-        private const float degreeToRad = MathF.PI / 180f;
-        private const float radToDegree = 1 / degreeToRad;
 
         [Fact]
         public static void VectorRotationTest1() {
@@ -158,22 +159,163 @@ namespace com.csutil.tests {
         }
 
         [Fact]
+        public void TestIsAlmostEqual() {
+
+            var vec1 = new Vector3(1, 1, 3);
+            var vec2 = new Vector3(1, 1, 3.01f);
+            
+            Assert.True(vec1.IsAlmostEqual(vec2, 2));
+            Assert.False(vec1.IsAlmostEqual(vec2, 3));
+            Assert.True(vec1.IsAlmostEqual(vec2, 0.01f));
+            Assert.False(vec1.IsAlmostEqual(vec2, 0.009f));
+
+        }
+
+        [Fact]
         public void TestMatrixComposeDecompose() {
 
             var translation = new Vector3(1, 2, 3);
             var rotation = Quaternion.CreateFromYawPitchRoll(15 * degreeToRad, 45 * degreeToRad, 75 * degreeToRad);
             var scale = new Vector3(7, 6, 5);
 
-            // TODO rename Matrix4x4_TRS to compose:
             var matrix = Matrix4x4Extensions.Compose(translation, rotation, scale);
 
             var success = matrix.Decompose(out var scale2, out var rotation2, out var translation2);
             Assert.True(success);
             var digits = 6;
-            Assert.True(translation.IsSimilarTo(translation2, digits: digits));
+            Assert.True(translation.IsAlmostEqual(translation2, decimals: digits));
             Assert.True(rotation.IsSimilarTo(rotation2, digits: digits));
-            Assert.True(scale.IsSimilarTo(scale2, digits: digits));
+            Assert.True(scale.IsAlmostEqual(scale2, decimals: digits));
 
+        }
+
+        [Fact]
+        public void TestBezierTrajectoryDeformation() {
+            List<Matrix4x4> trajectory = new List<Matrix4x4>();
+            // All individual points are titled 45 degree but are they are all on a straight line so this rotation does not affect the trajectory
+            var inputRot = Quaternion.CreateFromYawPitchRoll(0, 45, 0);
+            trajectory.Add(Matrix4x4Extensions.Compose(Vector3.Zero, inputRot, Vector3.One));
+            trajectory.Add(Matrix4x4Extensions.Compose(new Vector3(0.5f, 0.5f, 0.5f), inputRot, Vector3.One));
+            trajectory.Add(Matrix4x4Extensions.Compose(new Vector3(1, 1, 1), inputRot, Vector3.One));
+            trajectory.Add(Matrix4x4Extensions.Compose(new Vector3(1.5f, 1.5f, 1.5f), inputRot, Vector3.One));
+            var endPose = Matrix4x4Extensions.Compose(new Vector3(2, 2, 2), inputRot, Vector3.One);
+            trajectory.Add(endPose);
+
+            // Moving the last point to 4,4,4 would be a pure stretch transformation that is easy to assert below
+            var correctedEndPos = new Vector3(4, 4, 4);
+            var correctedEndPose = Matrix4x4Extensions.Compose(correctedEndPos, inputRot, Vector3.One);
+            var corrected = trajectory.CalcBezierTrajectoryDeformation(correctedEndPose).ToList();
+
+            { // First point should not be changed
+                Assert.Equal(trajectory.First(), corrected.First());
+            }
+            { // The second point should be double the distance from zero now:
+                corrected.Skip(1).First().Decompose(out var scale, out var rotation, out var translation);
+                Assert.True(translation.IsAlmostEqual(new Vector3(1, 1, 1), 4));
+                Assert.True(rotation.GetRotationDeltaTo(inputRot).GetEulerAnglesAsPitchYawRoll().IsAlmostEqual(Vector3.Zero, 4));
+                Assert.True(scale.IsAlmostEqual(Vector3.One, decimals: 4));
+            }
+            { // The third point should be double the distance from zero now:
+                corrected.Skip(2).First().Decompose(out var scale, out var rotation, out var translation);
+                Assert.True(translation.IsAlmostEqual(new Vector3(2, 2, 2), 4));
+                Assert.True(rotation.GetRotationDeltaTo(inputRot).GetEulerAnglesAsPitchYawRoll().IsAlmostEqual(Vector3.Zero, 4));
+                Assert.True(scale.IsAlmostEqual(Vector3.One, decimals: 4));
+            }
+            { // The fourth point should be double the distance from zero now:
+                corrected.Skip(3).First().Decompose(out var scale, out var rotation, out var translation);
+                Assert.True(translation.IsAlmostEqual(new Vector3(3, 3, 3), 4));
+                Assert.True(rotation.GetRotationDeltaTo(inputRot).GetEulerAnglesAsPitchYawRoll().IsAlmostEqual(Vector3.Zero, 4));
+                Assert.True(scale.IsAlmostEqual(Vector3.One, decimals: 4));
+            }
+            { // The last point should be the corrected end pose:
+                corrected.Last().Decompose(out var scale, out var rotation, out var translation);
+                Assert.True(rotation.GetRotationDeltaTo(inputRot).GetEulerAnglesAsPitchYawRoll().IsAlmostEqual(Vector3.Zero, 4));
+                Assert.True(scale.IsAlmostEqual(Vector3.One, decimals: 4));
+                Assert.True(translation.IsAlmostEqual(correctedEndPos, 4), $"Expected {correctedEndPos} but got {translation}");
+            }
+
+        }
+
+        [Fact]
+        public void ExampleUsageOfEulerAngles() {
+            {
+                var yaw = 180f;
+                var rotation = Quaternion.CreateFromYawPitchRoll(yaw * degreeToRad, 0, 0);
+                var eulerAngles = rotation.GetEulerAnglesAsPitchYawRoll();
+                Assert.Equal(new Vector3(0, yaw, 0), eulerAngles);
+
+                // Rotating the x axis by 180 degree results in the x axis pointing backwards:
+                var vector = Vector3.UnitX;
+                var rotated = rotation.Rotate(vector);
+                Assert.Equal(vector * -1, rotated);
+
+                Log.d($"Rotating the vector {vector} by {eulerAngles.Y} degree results in {rotated}");
+            }
+            {
+                var pitch = 90f;
+                var rotation = Quaternion.CreateFromYawPitchRoll(0, pitch * degreeToRad, 0);
+                var eulerAngles = rotation.GetEulerAnglesAsPitchYawRoll();
+                Assert.Equal(new Vector3(pitch, 0, 0), eulerAngles);
+
+                // Rotating the Up vector forward by 90 degree results in the Forward vector:
+                var vector = Vector3.UnitY;
+                var rotated = rotation.Rotate(vector);
+                Assert.Equal(Vector3.UnitZ, rotated);
+
+                Log.d($"Rotating the vector {vector} forward by {eulerAngles.X} degree results in {rotated}");
+            }
+        }
+
+        [Fact]
+        public void TestGetEulerAngles1() {
+            TestGetEulerAnglesWith(90.000015f, -159.58305f, 140.32559f);
+            TestGetEulerAnglesWith(89.99931f, -132.24231f, 113.949486f);
+            TestGetEulerAnglesWith(61, 111, 87);
+            TestGetEulerAnglesWith(90.012695f, -73.464935f, 157.1788f);
+            TestGetEulerAnglesWith(90.004265f, 21.351936f, 15.406252f);
+            var rnd = new Random();
+            for (int i = 0; i < 100000; i++) {
+                // Generate different angles in degrees for TestGetEulerAngles2: 
+                var pitch = rnd.NextFloat(-180, 180);
+                var yaw = rnd.NextFloat(-180, 180);
+                var roll = rnd.NextFloat(-180, 180);
+                TestGetEulerAnglesWith(pitch, yaw, roll);
+            }
+            TestGetEulerAnglesWith(45, 15, 75);
+        }
+
+        [Fact]
+        public void TestGetEulerAngles2() {
+            TestGetEulerAnglesWith(90, -139, 127);
+            TestGetEulerAnglesWith(0, -180, -39);
+            TestGetEulerAnglesWith(90, -46, 13);
+            TestGetEulerAnglesWith(-90, 130, 158);
+            TestGetEulerAnglesWith(90, -69, -74);
+            var rnd = new Random();
+            for (int i = 0; i < 100000; i++) {
+                // Generate different angles in degrees for TestGetEulerAngles2: 
+                var pitch = rnd.Next(-180, 180);
+                var yaw = rnd.Next(-180, 180);
+                var roll = rnd.Next(-180, 180);
+                TestGetEulerAnglesWith(pitch, yaw, roll);
+            }
+        }
+
+        private static void TestGetEulerAnglesWith(float pitch, float yaw, float roll) {
+            var inputEulers = new Vector3(pitch, yaw, roll);
+            var digits = 2;
+            var rotation = Quaternion.CreateFromYawPitchRoll(yaw * degreeToRad, pitch * degreeToRad, roll * degreeToRad);
+            var eulers = rotation.GetEulerAnglesAsPitchYawRoll();
+            var rotation2 = Quaternion.CreateFromYawPitchRoll(eulers.Y * degreeToRad, eulers.X * degreeToRad, eulers.Z * degreeToRad);
+            var eulers2 = rotation2.GetEulerAnglesAsPitchYawRoll();
+            var diff = rotation.GetRotationDeltaTo(rotation2);
+
+            // Inverting the quaternion is the same rotation
+            if (Math.Sign(diff.W) == -1) { diff = -diff; }
+
+            Assert.True(diff.IsSimilarTo(Quaternion.Identity, digits: digits), $"diff={diff} from \n rotation ={rotation} (eulers={inputEulers}) to \n rotation2={rotation2} (eulers={eulers2})");
+            // Assert.True(eulers.IsSimilarTo(inputEulers, digits: digits), $"Eulers: {eulers} != {inputEulers}");
+            // Assert.True(eulers.IsSimilarTo(eulers2, digits: digits), $"Eulers: {eulers} != {eulers2}");
         }
 
         public class WeightedMedianTests {

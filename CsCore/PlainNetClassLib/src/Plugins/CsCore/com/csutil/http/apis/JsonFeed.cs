@@ -6,7 +6,7 @@ namespace com.csutil.http.apis {
 
     public static class JsonFeed {
 
-        /// <summary> A jsonfeed, e.g. https://hnrss.org/frontpage.jsonfeed </summary>
+        /// <summary> An RSS feed in the jsonfeed format, e.g. https://hnrss.org/frontpage.jsonfeed </summary>
         public static Task<Response> Get(Uri jsonFeedUrl) { return jsonFeedUrl.SendGET().GetResult<Response>(); }
 
         public class Author {

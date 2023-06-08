@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using com.csutil.math;
 using Xunit;
 
 namespace com.csutil.tests {
@@ -50,6 +51,27 @@ namespace com.csutil.tests {
             // Now the queue is emtpy and will return null when dequeued:
             Assert.Null(queue.Dequeue());
 
+        }
+
+        [Fact]
+        public void FixedSizedQueue_Examples2() {
+            var queue = new FixedSizedQueue<float>(5);
+            Assert.Equal(double.NaN, queue.CalcMedian());
+
+            queue.Enqueue(2);
+            Assert.Equal(2, queue.CalcMedian());
+            queue.Enqueue(2);
+            Assert.Equal(2, queue.CalcMedian());
+
+            // Start adding 5s to the queue:
+            queue.Enqueue(5);
+            Assert.Equal(2, queue.CalcMedian());
+            queue.Enqueue(5);
+            Assert.Equal(2, queue.CalcMedian());
+            queue.Enqueue(5);
+
+            // Now there are more 5s than 2s in the queue, so the median will switch to 5:
+            Assert.Equal(5, queue.CalcMedian());
         }
 
         [Fact]

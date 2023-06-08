@@ -5,7 +5,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>com.csutil.cscore</PackageId>
     <!-- https://www.nuget.org/packages/com.csutil.cscore -->
-    <Version>1.8.9</Version>
+    <Version>1.8.10</Version>
     <Authors>csutil.com</Authors>
     <Company>csutil.com</Company>
     <Product>cscore</Product>
@@ -56,19 +56,19 @@
   
   <!-- https://www.nuget.org/packages/SharpZipLib/ -->
   <ItemGroup>
-    <PackageReference Include="SharpZipLib" Version="1.3.3" />
+    <PackageReference Include="SharpZipLib" Version="1.4.2" />
   </ItemGroup>
 
   <!-- https://www.nuget.org/packages/Zio/ --> 
   <ItemGroup>
-    <PackageReference Include="Zio" Version="0.15.0" />
+    <PackageReference Include="Zio" Version="0.16.2" />
   </ItemGroup>
 
   <ItemGroup>
-    <!-- https://www.nuget.org/packages/Magick.NET-Q8-AnyCPU/ --> 
-    <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="7.19.0" />
     <!-- https://www.nuget.org/packages/Magick.NET.Core/ --> 
-    <PackageReference Include="Magick.NET.Core" Version="2.0.0" />
+    <PackageReference Include="Magick.NET.Core" Version="13.0.1" />
+    <!-- https://www.nuget.org/packages/Magick.NET-Q8-AnyCPU/ --> 
+    <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="13.0.1" />
   </ItemGroup>
 
 </Project>

@@ -8,18 +8,18 @@ You will have to open the following links and there click the "Download package"
 download the 2 needed .nupkg files. These downloaded .nupkg file can be opened with any 
 zip application like 7zip ( https://www.7-zip.org/ )
 
-https://www.nuget.org/packages/Magick.NET-Q8-AnyCPU/ 
-(This contains the native C++ library with all the image loading logic)
-1. Copy the complete \runtimes folder into your project (to 
-   Assets\Plugins\CsCore\libs\Magick_NET\runtimes\).
-2. On Windows: If you have a 32bit system delete the \win-x64 folder, if you have a 64bit 
-   system delete the \win-x86 folder (Alternatively to deleting you can also configure Unity
-   to use the correct DLL if you want to include it in a built)
-3. Navitate to the folder \lib\netstandard20\ and extract the DLL in
-   there into your project (to Assets\Plugins\CsCore\libs\Magick_NET).
-
 https://www.nuget.org/packages/Magick.NET.Core/
 (This contains pure C# code and is the wrapper for the native C++ library)
+1. Navitate to the folder \lib\netstandard20\ and extract the DLL in
+   there into your project (to Assets\Plugins\CsCore\libs\Magick_NET).
+
+https://www.nuget.org/packages/Magick.NET-Q8-AnyCPU/ 
+(This contains the native C++ library with all the image loading logic)
+2. Copy the complete \runtimes folder into your project (to 
+   Assets\Plugins\CsCore\libs\Magick_NET\runtimes\).
+3. On Windows: If you have a 32bit system delete the \win-x64 folder, if you have a 64bit 
+   system delete the \win-x86 folder (Alternatively to deleting you can also configure Unity
+   to use the correct DLL if you want to include it in a built)
 4. Navitate to the folder \lib\netstandard20\ and extract the DLL in
    there into your project (to Assets\Plugins\CsCore\libs\Magick_NET).
 

@@ -11,7 +11,10 @@ namespace com.csutil.system {
         public int currentFps;
         public bool disableInUnityEditor = true;
 
+        private IUnityInputSystem input;
+
         private void Start() {
+            input = InputV2.GetInputSystem();
             this.ExecuteRepeated(() => {
                 currentFps = (int)fpsReductionOverTime.Evaluate(time);
                 ApplicationV2.targetFrameRateV2 = currentFps;
@@ -26,7 +29,7 @@ namespace com.csutil.system {
 
         private void Update() {
             // listen to all kinds of user touch / mouse input:
-            if (InputV2.GetMouseButton(button: 0) || (InputV2.touchCount > 0)) {
+            if (input.GetMouseButton(button: 0) || (input.touchCount > 0)) {
                 ExitIdleFps();
             }
         }

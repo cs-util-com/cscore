@@ -4,6 +4,8 @@ namespace com.csutil.progress {
 
     public static class IProgressExtensions {
 
+        private static object threadLock = new object();
+
         public static void SetCount(this IProgress self, double current, double total) {
             self.totalCount = total;
             self.SetCount(current);
@@ -16,11 +18,15 @@ namespace com.csutil.progress {
         }
 
         public static void IncrementTotalCount(this IProgress self, int incrementStep = 1) {
-            self.totalCount = self.totalCount + incrementStep;
+            lock (threadLock) {
+                self.totalCount = self.totalCount + incrementStep;
+            }
         }
 
         public static void IncrementCount(this IProgress self, int incrementStep = 1) {
-            self.SetCount(self.GetCount() + incrementStep);
+            lock (threadLock) {
+                self.SetCount(self.GetCount() + incrementStep);
+            }
         }
 
         public static double GetCount(this IProgress self) {

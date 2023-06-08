@@ -70,6 +70,7 @@ namespace com.csutil.tests {
             if (!imgFile.Exists || imgFile.GetFileSize() == 0) {
                 Log.d("Saving random image for testing to: " + imgFile.GetFullFileSystemPath());
                 var stream = await new Uri("https://placekitten.com/4000/4000").SendGET().GetResult<Stream>();
+                stream = await stream.CopyToSeekableStreamIfNeeded(true);
                 imgFile.SaveStream(stream);
                 stream.Dispose();
             }

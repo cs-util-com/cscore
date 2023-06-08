@@ -41,7 +41,11 @@ namespace com.csutil.http {
                     await WaitForRequestToFinish();
                     return request.GetResult<T>();
                 }
-                return await SendRequest(new Response<T>());
+                var response = new Response<T>();
+                if (request.downloadHandler != null) {
+                    response.createDownloadHandler = () => request.downloadHandler;
+                }
+                return await SendRequest(response);
             });
         }
 

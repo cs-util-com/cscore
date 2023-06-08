@@ -598,6 +598,11 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.x
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 1413903235389133767, guid: 5e47b68f728a8f448b43a9e3fde04086,
+        type: 3}
+      propertyPath: _colorName
+      value: accent
+      objectReference: {fileID: 0}
     - target: {fileID: 1803113208941725832, guid: 5e47b68f728a8f448b43a9e3fde04086,
         type: 3}
       propertyPath: m_Name
@@ -747,6 +752,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Color.r
       value: 0.32941177
+      objectReference: {fileID: 0}
+    - target: {fileID: 6475869215483518163, guid: 5e47b68f728a8f448b43a9e3fde04086,
+        type: 3}
+      propertyPath: _colorName
+      value: accentContrast
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

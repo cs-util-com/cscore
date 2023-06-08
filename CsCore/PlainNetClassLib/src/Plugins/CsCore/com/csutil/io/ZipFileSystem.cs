@@ -8,6 +8,7 @@ using Zio.FileSystems;
 
 namespace com.csutil.io {
 
+    [Obsolete("Use ZipArchiveFileSystem instead")] 
     public class ZipFileReadSystem : FileSystem {
 
         private readonly ZipFile zip;

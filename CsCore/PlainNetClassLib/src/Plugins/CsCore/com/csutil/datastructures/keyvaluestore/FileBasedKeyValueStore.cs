@@ -11,10 +11,12 @@ namespace com.csutil.keyvaluestore {
 
         /// <summary> Will create a new store instance </summary>
         /// <param name="dirName"> e.g. "MyPersistedElems1" </param>
+        [Obsolete("Use constructor directly")]
         public static FileBasedKeyValueStore New(string dirName) {
             return New(EnvironmentV2.instance.systemInfo.appId, dirName);
         }
 
+        [Obsolete("Use constructor directly")]
         public static FileBasedKeyValueStore New(string appId, string dirName) {
             return new FileBasedKeyValueStore(EnvironmentV2.instance.GetOrAddAppDataFolder(appId).GetChildDir(dirName));
         }
@@ -29,7 +31,7 @@ namespace com.csutil.keyvaluestore {
 
         public DisposeState IsDisposed { get; private set; } = DisposeState.Active;
 
-        public void Dispose() {
+        public virtual void Dispose() {
             IsDisposed = DisposeState.DisposingStarted;
             fallbackStore?.Dispose();
             IsDisposed = DisposeState.Disposed;

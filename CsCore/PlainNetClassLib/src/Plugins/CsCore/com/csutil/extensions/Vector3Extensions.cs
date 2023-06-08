@@ -8,10 +8,17 @@ namespace com.csutil {
         public const double DEGREE_TO_RAD = Math.PI / 180d;
         public const double RAD_TO_DEGREE = 180d / Math.PI;
 
-        public static bool IsSimilarTo(this Vector3 vector1, Vector3 vector2, int digits) {
-            return Math.Round(vector1.X, digits) == Math.Round(vector2.X, digits)
-                && Math.Round(vector1.Y, digits) == Math.Round(vector2.Y, digits)
-                && Math.Round(vector1.Z, digits) == Math.Round(vector2.Z, digits);
+        /// <summary> Checks if the Euclidean distance between two Vectors is less than a specified maximum </summary>
+        /// <param name="decimals"> Required accuracy after the comma </param>
+        public static bool IsAlmostEqual(this Vector3 vector1, Vector3 vector2, int decimals) {
+            float maxDiff = (float)Math.Pow(10, -(decimals));
+            return IsAlmostEqual(vector1, vector2, maxDiff);
+        }
+
+        /// <summary> Checks if the Euclidean distance between two Vectors is less than a specified maxDiff </summary>
+        public static bool IsAlmostEqual(this Vector3 vector1, Vector3 vector2, float maxDiff) {
+            var distance = Vector3.Distance(vector1, vector2);
+            return distance < maxDiff;
         }
 
         public static double AngleSignedInRadTo(this Vector3 vector1, Vector3 vector2, Vector3 axis) {

@@ -1,0 +1,20 @@
+{
+    "name": "CsCoreUnityDemoScenesWebGL",
+    "rootNamespace": "",
+    "references": [
+        "CsCoreUnityWebGL",
+        "CsCore",
+        "CsCoreUnity"
+    ],
+    "includePlatforms": [
+        "WebGL"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

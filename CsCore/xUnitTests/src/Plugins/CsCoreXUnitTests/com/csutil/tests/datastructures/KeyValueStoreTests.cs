@@ -101,13 +101,20 @@ namespace com.csutil.tests.keyvaluestore {
             await TestIKeyValueStoreImplementation(NewFileBasedKeyValueStore("TestAllIKeyValueStoreImplementations_FileDB"));
             await TestIKeyValueStoreImplementation(NewLiteDbStoreForTesting("TestAllIKeyValueStoreImplementations_LiteDB"));
             await TestIKeyValueStoreImplementation(new DualStore(new InMemoryKeyValueStore(), new InMemoryKeyValueStore()));
+            await TestIKeyValueStoreImplementation(NewZipFileBasedKeyValueStore("TestAllIKeyValueStoreImplementations_ZipFileDB"));
         }
-
 
         private static FileBasedKeyValueStore NewFileBasedKeyValueStore(string storeFolderName) {
             var dbFolder = EnvironmentV2.instance.GetOrAddTempFolder("KeyValueStoreTests").GetChildDir(storeFolderName);
             dbFolder.DeleteV2();
             return new FileBasedKeyValueStore(dbFolder);
+        }
+
+        private static ZipFileBasedKeyValueStore NewZipFileBasedKeyValueStore(string storeFolderName) {
+            var dbFolder = EnvironmentV2.instance.GetOrAddTempFolder("KeyValueStoreTests").GetChildDir(storeFolderName);
+            dbFolder.DeleteV2();
+            var zipFile = dbFolder.CreateV2().GetChild("MyZipFile.zip");
+            return ZipFileBasedKeyValueStore.New(zipFile);
         }
 
         private static LiteDbKeyValueStore NewLiteDbStoreForTesting(string storeFileName) {

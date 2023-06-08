@@ -1,0 +1,16 @@
+{
+	"name": "com.csutil.cscore.unity.webgl",
+	"version": "1.8.8",
+	"displayName": "cscore Unity WebGL",
+	"description": "cscore is a minimal-footprint library providing commonly used helpers & patterns for your C# projects. This module contains classes and patterns that expose native browser functionality to the user.",
+	"unity": "2022.2",
+	"license": "Apache License 2.0",
+	"author": {
+		"name": "csutil.com",
+		"url": "https://github.com/cs-util-com/cscore"
+	},
+	"dependencies": {
+		"com.csutil.cscore": "1.8.8",
+		"com.csutil.cscore.unity": "1.8.8"
+	}
+}

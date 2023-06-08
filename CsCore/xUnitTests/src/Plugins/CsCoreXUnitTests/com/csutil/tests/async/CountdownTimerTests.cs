@@ -19,7 +19,7 @@ namespace com.csutil.tests.async {
             });
 
             await TaskV2.Delay(10);
-            Assert.True(timer.ElapsedMilliseconds >= 10);
+            Assert.True(timer.ElapsedMilliseconds >= 10, "timer.ElapsedMilliseconds=" + timer.ElapsedMilliseconds);
 
             await timer.timerTask; // Wait for the end of the timer
 

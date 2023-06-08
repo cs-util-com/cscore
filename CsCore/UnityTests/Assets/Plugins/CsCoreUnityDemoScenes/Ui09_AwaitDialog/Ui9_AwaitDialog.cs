@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace com.csutil.tests.ui {
 
@@ -14,11 +15,14 @@ namespace com.csutil.tests.ui {
         private async Task ShowAllDialogs() {
             AssertVisually.SetupDefaultSingletonInDebugMode();
             ViewStackHelper.MainViewStack().ShowView("Canvas/DefaultViewStackView");
+
             await ShowCancelConfirmDialog();
             await ShowInfoDialog();
             await ShowWarningDialog();
             await ShowErrorDialog();
             await UseDialogLoaderManually();
+            await ShowDialogForTextInput1();
+            await ShowDialogForTextInput2();
         }
 
         private async Task ShowCancelConfirmDialog() {
@@ -46,6 +50,28 @@ namespace com.csutil.tests.ui {
             await showDialogTask; // Wait until the dialog is closed
         }
 
+        private async Task ShowDialogForTextInput1() {
+            var showDialogTask = DialogForTextInput.Show("I am a dialog", "Please enter 'abc'");
+            await SimulateConfirmButtonClick();
+            var dialogResult = await showDialogTask; // Wait until the dialog is closed
+            AssertV2.IsTrue(dialogResult.dialogWasConfirmed, "User did not confirm dialog"); // Check if user clicked confirm
+            Toast.Show("The entered text was: '" + dialogResult.enteredText + "'");
+        }
+
+        private async Task ShowDialogForTextInput2() {
+            var showDialogTask = DialogForTextInput.Show("I am a dialog", "Please enter 'abc'", validate: input => {
+                if (input == "abc") { return true; }
+                Toast.Show("Error: Input must be 'abc'");
+                return false;
+            });
+            if (simulateUserInput) {
+                GetLink(DialogForTextInput.TEXT_INPUT_FIELD_ID).GetComponentV2<InputField>().text = "abc"; // Let the user enter the correct text 
+                await SimulateConfirmButtonClick();
+            }
+            var dialogResult = await showDialogTask; // Wait until the dialog is closed
+            AssertV2.IsTrue(dialogResult.dialogWasConfirmed, "User did not confirm dialog"); // Check if user clicked confirm
+        }
+        
         /// <summary> This example shows how to use the DialogLoader manually to have full control over the UI presenter </summary>
         private async Task UseDialogLoaderManually() {
             var loader = new DialogLoader<ConfirmCancelDialog>(new ConfirmCancelDialog(caption: "I am a dialog",

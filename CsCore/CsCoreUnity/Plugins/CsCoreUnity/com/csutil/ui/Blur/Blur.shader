@@ -1,4 +1,4 @@
-Shader "Ui/Blur" {
+Shader "UI/Blur" {
 	Properties{
 		_Size("Blur", Range(0, 40)) = 1
 		[HideInInspector] _MainTex("Masking Texture", 2D) = "white" {}

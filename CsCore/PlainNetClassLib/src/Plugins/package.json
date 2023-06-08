@@ -1,6 +1,6 @@
 {
 	"name": "com.csutil.cscore",
-	"version": "1.8.9",
+	"version": "1.8.10",
 	"displayName": "cscore",
 	"description": "cscore is a minimal-footprint library providing commonly used helpers & patterns for your C# projects.",	
 	"unity": "2018.1",
@@ -10,6 +10,6 @@
 		"url": "https://github.com/cs-util-com/cscore"
 	},
 	"dependencies": {
-    	"com.unity.nuget.newtonsoft-json": "2.0.2"
+    	"com.unity.nuget.newtonsoft-json": "3.2.1"
     }
 }

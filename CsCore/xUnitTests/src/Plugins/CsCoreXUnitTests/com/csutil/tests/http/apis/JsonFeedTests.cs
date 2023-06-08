@@ -11,6 +11,7 @@ namespace com.csutil.tests.http {
 
         [Fact]
         public async Task ExampleUsage1() {
+            // HackerNews as an example input feed:
             var feed = await JsonFeed.Get(new Uri("https://hnrss.org/frontpage.jsonfeed"));
             Assert.NotEmpty(feed.items);
             foreach (var item in feed.items) { Log.d(item.title + " - " + item.url); }
