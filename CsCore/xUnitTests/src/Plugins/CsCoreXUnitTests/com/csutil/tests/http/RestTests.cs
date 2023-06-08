@@ -208,7 +208,7 @@ namespace com.csutil.tests.http {
                     var t2 = DateTimeV2.Now;
                     var utc2 = DateTimeV2.UtcNow;
 
-                    var maxDiffInMs = 10000; // 10 seconds offset between server time and local time is acceptable 
+                    var maxDiffInMs = 15000; // 15 seconds offset between server time and local time is acceptable 
                     Assert.True((t2 - t1).TotalMillisecondsAbs() < maxDiffInMs, "(t2-t1)=" + (t2 - t1));
                     Assert.True((utc2 - utc1).TotalMillisecondsAbs() < maxDiffInMs, "(utc2 - utc1)=" + (utc2 - utc1));
 

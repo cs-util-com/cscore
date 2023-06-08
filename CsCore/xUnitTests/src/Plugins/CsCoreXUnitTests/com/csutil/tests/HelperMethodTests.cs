@@ -228,7 +228,7 @@ namespace com.csutil.tests {
             Log.MethodDone(t);
             t = Log.MethodEntered("TestTaskWithTimeout Part 2");
             await Assert.ThrowsAsync<TimeoutException>(async () => {
-                Task t2 = TaskV2.Delay(300);
+                Task t2 = TaskV2.Delay(5000);
                 await t2.WithTimeout(50);
                 Log.MethodDone(t);
             });

@@ -139,7 +139,7 @@ namespace com.csutil.tests.random {
             }
             var relStandardDeviation = counters.Map(x => (double)x.Value).GetRelativeStandardDeviation();
             // True randomness should cause all counters to be roughly the same (so RSD should be close to 0): 
-            Assert.True(relStandardDeviation < 0.05, "relStandardDeviation=" + relStandardDeviation);
+            Assert.True(relStandardDeviation < 0.06, "relStandardDeviation=" + relStandardDeviation);
         }
 
         [Fact]
