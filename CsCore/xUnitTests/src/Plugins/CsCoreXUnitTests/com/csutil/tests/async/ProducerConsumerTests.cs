@@ -10,28 +10,42 @@ namespace com.csutil.tests.async {
 
         public ProducerConsumerTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
-        /// <summary> See https://learn.microsoft.com/en-us/dotnet/core/extensions/channels </summary>
+        /// <summary> See https://learn.microsoft.com/en-us/dotnet/core/extensions/channels
+        /// and https://learn.microsoft.com/en-us/shows/on-net/working-with-channels-in-net </summary>
         [Fact]
         public async Task ExampleUsageOfChannels() {
+            var count = 10000;
+            {
+                var producerConsumerChannel = Channel.CreateUnbounded<MyClass1>();
+                await WriteAllEventsToChannel(producerConsumerChannel, count);
+                await ReadAllEventsFromChannel(producerConsumerChannel, count);
+            }
+            {
+                var producerConsumerChannel = Channel.CreateUnbounded<MyClass1>();
+                var readTask = ReadAllEventsFromChannel(producerConsumerChannel, count);
+                var writeTask = WriteAllEventsToChannel(producerConsumerChannel, count);
+                await writeTask;
+                await readTask;
+            }
+            { // Only allow a single item to be in the channel at once:
+                var producerConsumerChannel = Channel.CreateBounded<MyClass1>(1);
+                var readTask = ReadAllEventsFromChannel(producerConsumerChannel, count);
+                var writeTask = WriteAllEventsToChannel(producerConsumerChannel, count);
+                await writeTask; // Since the continuous reader is already set up, write can be awaited here
+                await readTask;
+            }
+        }
 
-            var producerConsumerChannel = Channel.CreateUnbounded<MyClass1>();
-            var count = 100000;
-
-            var readTask = ReadAllEventsFromChannel(producerConsumerChannel, count);
-
+        private static async Task WriteAllEventsToChannel(Channel<MyClass1> producerConsumerChannel, int count) {
+            // Writing should be awaited in case only a limited number of elements is allowed to be added to the channel at once:
             for (int i = 1; i <= count; i++) {
-                ValueTask _ = producerConsumerChannel.Writer.WriteAsync(new MyClass1() { Id = i });
+                await producerConsumerChannel.Writer.WriteAsync(new MyClass1() { Id = i });
             }
             // No further events will be written (allows the async channel reader to complete): 
             producerConsumerChannel.Writer.Complete();
-
-            // The read task will be able to complete now successfully:
-            await readTask;
-
-
         }
 
-        private static async Task ReadAllEventsFromChannel(Channel<MyClass1> producerConsumerChannel, int count) { // Start reading all events from the channel: 
+        private static async Task ReadAllEventsFromChannel(Channel<MyClass1> producerConsumerChannel, int count) {
             MyClass1 y1 = null;
             while (await producerConsumerChannel.Reader.WaitToReadAsync()) {
                 while (producerConsumerChannel.Reader.TryRead(out var y2)) {
