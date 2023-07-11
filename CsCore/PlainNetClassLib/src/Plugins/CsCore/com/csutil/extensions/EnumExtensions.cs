@@ -46,6 +46,7 @@ namespace com.csutil {
 
         public static bool IsEnum<T>() { return typeof(T).IsEnum; }
 
+        /// <summary> Checks if a given "flag" value is contained in the enum flags </summary>
         public static bool ContainsFlag<T>(this T self, T flag) where T : struct
 #if CSHARP_7_3 // Using Enum as a generic type constraint is only available in C# 7.3+
             , Enum 
