@@ -53,7 +53,19 @@ namespace com.csutil {
 #endif 
         {
             EnforceMustBeEnum<T>();
+            EnforceEnumEntriesMustBePowerOfTwo<T>();
             return ((Enum)(object)self).HasFlag((Enum)(object)flag);
+        }
+
+        /// <summary> The developer needs to ensure himself that all enum values are a power of two, ensure this by calling this method </summary>
+        private static void EnforceEnumEntriesMustBePowerOfTwo<T>() where T : struct {
+            foreach (T entry in Enum.GetValues(typeof(T))) {
+                int entryAsInt = (int)(object)entry;
+                if (entryAsInt == 0) { continue; } // 0 is always a power of two
+                if ((entryAsInt & (entryAsInt - 1)) != 0) { // Check if the entry is a power of two:
+                    throw Log.e($"Enum {typeof(T)} cant be used with .ContainsFlag() because not all entries are a power of two, e.g. {entry}={entryAsInt}");
+                }
+            }
         }
 
         public static string GetEntryName<T>(this T entry) where T : struct
