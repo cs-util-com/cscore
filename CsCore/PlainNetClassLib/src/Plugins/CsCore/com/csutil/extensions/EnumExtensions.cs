@@ -57,7 +57,8 @@ namespace com.csutil {
             return ((Enum)(object)self).HasFlag((Enum)(object)flag);
         }
 
-        /// <summary> The developer needs to ensure himself that all enum values are a power of two, ensure this by calling this method </summary>
+        /// <summary> All enum values must have a power of two int value to be usable as flags </summary>
+        [Conditional("DEBUG")]
         private static void EnforceEnumEntriesMustBePowerOfTwo<T>() where T : struct {
             foreach (T entry in Enum.GetValues(typeof(T))) {
                 int entryAsInt = (int)(object)entry;
