@@ -111,7 +111,7 @@ namespace com.csutil.model.ecs {
 
         /// <summary> Recursively searches for all components of the specified type in the entity and all its children </summary>
         public static IEnumerable<V> GetComponentsInChildren<T, V>(this IEntity<T> self) where T : IEntityData where V : IComponentData {
-            return self.GetChildrenTreeBreadthFirst().SelectMany(x => x.Components).Where(c => c is V).Cast<V>();
+            return self.GetChildrenTreeBreadthFirst().SelectMany(x => x.Components.Values).Where(c => c is V).Cast<V>();
         }
 
         /// <summary> Recursively searches the entity and all its children until a component of the specified type is found </summary>
@@ -132,7 +132,7 @@ namespace com.csutil.model.ecs {
     public static class IEntityDataExtensions {
 
         public static V GetComponent<V>(this IEntityData self) where V : class {
-            return self.Components.Single(c => c is V) as V;
+            return self.Components.Values.Single(c => c is V) as V;
         }
 
     }

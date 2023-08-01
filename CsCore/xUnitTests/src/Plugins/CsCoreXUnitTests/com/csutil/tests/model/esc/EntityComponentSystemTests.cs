@@ -26,27 +26,27 @@ namespace com.csutil.tests.model.esc {
 
             var enemyTemplate = new Entity() {
                 LocalPose = Matrix4x4.CreateTranslation(1, 2, 3),
-                Components = new List<IComponentData>() {
+                Components = CreateComponents(
                     new EnemyComponent() { Id = "c1", Health = 100, Mana = 10 }
-                }
+                )
             };
             templates.SaveAsTemplate(enemyTemplate);
 
             // An instance that has a different health value than the template:
             Entity variant1 = templates.CreateVariantInstanceOf(enemyTemplate);
-            (variant1.Components.Single() as EnemyComponent).Health = 200;
+            (variant1.Components.Single().Value as EnemyComponent).Health = 200;
             templates.SaveAsTemplate(variant1); // Save it as a variant of the enemyTemplate
 
             // Create a variant2 of the variant1
             Entity variant2 = templates.CreateVariantInstanceOf(variant1);
-            (variant2.Components.Single() as EnemyComponent).Mana = 20;
+            (variant2.Components.Single().Value as EnemyComponent).Mana = 20;
             templates.SaveAsTemplate(variant2);
 
             // Updating variant 1 should also update variant2:
-            (variant1.Components.Single() as EnemyComponent).Health = 300;
+            (variant1.Components.Single().Value as EnemyComponent).Health = 300;
             templates.SaveAsTemplate(variant1);
             variant2 = templates.LoadTemplateInstance(variant2.Id);
-            Assert.Equal(300, (variant2.Components.Single() as EnemyComponent).Health);
+            Assert.Equal(300, (variant2.Components.Single().Value as EnemyComponent).Health);
 
             {
                 // Another instance that is identical to the template:
@@ -66,7 +66,7 @@ namespace com.csutil.tests.model.esc {
             Assert.Equal(3, ids.Count());
 
             Entity v1 = ecs2.LoadTemplateInstance(variant1.Id);
-            var enemyComp1 = v1.Components.Single() as EnemyComponent;
+            var enemyComp1 = v1.Components.Single().Value as EnemyComponent;
             Assert.Equal(300, enemyComp1.Health);
             Assert.Equal(10, enemyComp1.Mana);
 
@@ -74,7 +74,7 @@ namespace com.csutil.tests.model.esc {
             await ecs2.LoadAllTemplateFilesIntoMemory();
 
             Entity v2 = ecs2.LoadTemplateInstance(variant2.Id);
-            var enemyComp2 = v2.Components.Single() as EnemyComponent;
+            var enemyComp2 = v2.Components.Single().Value as EnemyComponent;
             Assert.Equal(300, enemyComp2.Health);
             Assert.Equal(20, enemyComp2.Mana);
 
@@ -209,11 +209,11 @@ namespace com.csutil.tests.model.esc {
                 // Define a base enemy template with a sword:
                 var baseEnemy = ecs.Add(new Entity() {
                     Name = "EnemyTemplate",
-                    Components = new[] { new EnemyComponent() { Health = 100, Mana = 0 } }
+                    Components = CreateComponents(new EnemyComponent() { Health = 100, Mana = 0 })
                 });
                 baseEnemy.AddChild(new Entity() {
                     Name = "Sword",
-                    Components = new[] { new SwordComponent() { Damage = 10 } }
+                    Components = CreateComponents( new SwordComponent() { Damage = 10 } )
                 }, AddToChildrenListOfParent);
                 baseEnemy.SaveChanges();
 
@@ -223,7 +223,7 @@ namespace com.csutil.tests.model.esc {
                 bossEnemy.GetComponent<EnemyComponent>().Health = 200;
                 bossEnemy.AddChild(new Entity() {
                     Name = "Shield",
-                    Components = new[] { new ShieldComponent() { Defense = 10 } }
+                    Components = CreateComponents( new ShieldComponent() { Defense = 10 } )
                 }, AddToChildrenListOfParent);
                 bossEnemy.SaveChanges();
 
@@ -232,13 +232,13 @@ namespace com.csutil.tests.model.esc {
                 mageEnemy.Data.Name = "MageEnemy";
                 mageEnemy.GetComponent<EnemyComponent>().Mana = 100;
                 var sword = mageEnemy.GetChild("Sword");
-                
+
                 // Switching the parent of the sword from the mage to the boss enemy should fail
                 Assert.Throws<InvalidOperationException>(() => bossEnemy.AddChild(sword, AddToChildrenListOfParent));
                 // Instead the sword first needs to be removed and then added to the new parent:
                 sword.RemoveFromParent(RemoveChildIdFromParent);
                 bossEnemy.AddChild(sword, AddToChildrenListOfParent);
-                
+
                 bossEnemy.SaveChanges();
                 mageEnemy.SaveChanges();
 
@@ -279,6 +279,13 @@ namespace com.csutil.tests.model.esc {
                 Assert.NotNull(enemy2.GetComponentInChildren<Entity, ShieldComponent>());
             }
         }
+        
+        private IReadOnlyDictionary<string, IComponentData> CreateComponents(IComponentData component) {
+            component.GetId().ThrowErrorIfNullOrEmpty("component.GetId()");
+            var dict = new Dictionary<string, IComponentData>();
+            dict.Add(component.GetId(), component);
+            return dict;
+        }
 
         private void Assert_AlmostEqual(Vector3 a, Vector3 b, float allowedDelta = 0.000001f) {
             var length = (a - b).Length();
@@ -301,7 +308,7 @@ namespace com.csutil.tests.model.esc {
             public string Name { get; set; }
             public string TemplateId { get; set; }
             public Matrix4x4? LocalPose { get; set; }
-            public IReadOnlyList<IComponentData> Components { get; set; }
+            public IReadOnlyDictionary<string, IComponentData> Components { get; set; }
 
             public IReadOnlyList<string> ChildrenIds => MutablehildrenIds;
             [JsonIgnore] // Dont include the children ids two times
@@ -312,20 +319,20 @@ namespace com.csutil.tests.model.esc {
         }
 
         private class EnemyComponent : IComponentData {
-            public string Id { get; set; }
+            public string Id { get; set; } = "" + GuidV2.NewGuid();
             public int Mana { get; set; }
             public int Health;
             public string GetId() { return Id; }
         }
 
         private class SwordComponent : IComponentData {
-            public string Id { get; set; }
+            public string Id { get; set; } = "" + GuidV2.NewGuid();
             public int Damage { get; set; }
             public string GetId() { return Id; }
         }
 
         private class ShieldComponent : IComponentData {
-            public string Id { get; set; }
+            public string Id { get; set; } = "" + GuidV2.NewGuid();
             public int Defense { get; set; }
             public string GetId() { return Id; }
         }
