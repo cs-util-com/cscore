@@ -130,7 +130,8 @@ namespace com.csutil.model.immutable {
         private static void ShowChanges<T>(object action, T previousState, T newState) {
             try {
                 JToken diff = MergeJson.GetDiff(previousState, newState);
-                Log.d(asJson("" + action.GetType().Name, action), asJson("previousState -> newState diff", diff));
+                Log.d(asJson("" + action.GetType().Name, action));
+                Log.d(asJson("previousState -> newState diff", diff));
             }
             catch (Exception e) { Log.e(e); }
         }
