@@ -105,13 +105,11 @@ namespace com.csutil.model.immutable {
         }
 
         public static SubState<T, SubSub> GetSubState<T, Sub, SubSub>(this SubState<T, Sub> self, Func<Sub, SubSub> getSubSubState) {
-            var subSubState = new SubState<T, SubSub>(self.Store, (state) => {
+            SubState<T, SubSub> subSubState = new SubState<T, SubSub>(self.Store, (state) => {
                 var subState = self.SubStateFunc(state);
                 return getSubSubState(subState);
             });
-            self.AddStateChangeListener(getSubSubState, (subSub) => {
-                subSubState.OnSubstateChanged(subSub);
-            }, triggerInstantToInit: false);
+            self.AddStateChangeListener(getSubSubState, subSubState.OnSubstateChanged, triggerInstantToInit: false);
             return subSubState;
         }
 
