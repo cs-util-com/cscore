@@ -11,6 +11,9 @@ namespace com.csutil.model.immutable {
         public S State => SubStateFunc(Store.GetState());
 
         public Action<S> onStateChanged { get; set; }
+        
+        /// <summary> After calling this method, no further state change events will be triggered on this substate </summary>
+        public Action RemoveFromParent { get; set; }
 
         public SubState(IDataStore<T> store, Func<T, S> subStateFunc) {
             Store = store;
@@ -28,7 +31,7 @@ namespace com.csutil.model.immutable {
             return result;
         }
 
-        public void OnSubstateChanged(S newSubState) {
+        public void TriggerOnSubstateChanged(S newSubState) {
             onStateChanged?.Invoke(newSubState);
         }
 

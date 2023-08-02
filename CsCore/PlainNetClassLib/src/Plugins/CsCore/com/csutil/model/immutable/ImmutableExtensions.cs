@@ -95,13 +95,14 @@ namespace com.csutil.model.immutable {
 
         public static SubState<T, S> GetSubState<T, S>(this IDataStore<T> self, Func<T, S> getSubState) {
             var subState = new SubState<T, S>(self, getSubState);
-            self.AddSubStateAsListener(subState);
+            var listenerInStore = self.AddSubStateAsListener(subState);
+            subState.RemoveFromParent = () => { self.onStateChanged -= listenerInStore; };
             return subState;
         }
 
         private static Action AddSubStateAsListener<T, S>(this IDataStore<T> self, SubState<T, S> subState, bool triggerInstantToInit = true) {
             // TODO check if substate already added as listener to store
-            return self.AddStateChangeListener(subState.SubStateFunc, subState.OnSubstateChanged, triggerInstantToInit);
+            return self.AddStateChangeListener(subState.SubStateFunc, subState.TriggerOnSubstateChanged, triggerInstantToInit);
         }
 
         public static SubState<T, SubSub> GetSubState<T, Sub, SubSub>(this SubState<T, Sub> self, Func<Sub, SubSub> getSubSubState) {
@@ -109,7 +110,8 @@ namespace com.csutil.model.immutable {
                 var subState = self.SubStateFunc(state);
                 return getSubSubState(subState);
             });
-            self.AddStateChangeListener(getSubSubState, subSubState.OnSubstateChanged, triggerInstantToInit: false);
+            var listenerInParent = self.AddStateChangeListener(getSubSubState, subSubState.TriggerOnSubstateChanged, triggerInstantToInit: false);
+            subSubState.RemoveFromParent = () => { self.onStateChanged -= listenerInParent; };
             return subSubState;
         }
 
