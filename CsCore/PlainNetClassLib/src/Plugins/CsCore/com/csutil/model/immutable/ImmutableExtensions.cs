@@ -12,7 +12,7 @@ namespace com.csutil.model.immutable {
         private class Wrapper { // To wrap listener actions
             public Action stateChangeListener;
         }
-        
+
         public static Action AddStateChangeListenerDebounced<T, S>(this IDataStore<T> self, Func<T, S> getSubState, Action<S> onChanged, double delayInMs, bool triggerInstantToInit = true) {
             return self.AddStateChangeListener(getSubState, onChanged.AsThrottledDebounce(delayInMs), triggerInstantToInit);
         }
@@ -26,16 +26,16 @@ namespace com.csutil.model.immutable {
         public static Action AddAsyncStateChangeListener<T, S>(this IDataStore<T> s, Func<T, S> getSubState, Func<S, Task<bool>> onChanged, bool triggerInstantToInit = true) {
             var w = new Wrapper();
             Func<S, Task> asyncOnChangedListener = async subState => {
-                 if (!await onChanged(subState)) {
-                     s.onStateChanged -= w.stateChangeListener;
-                 }
-             };
+                if (!await onChanged(subState)) {
+                    s.onStateChanged -= w.stateChangeListener;
+                }
+            };
             w.stateChangeListener = AddStateChangeListener(s, getSubState, (subState) => {
                 asyncOnChangedListener(subState).LogOnError();
             }, triggerInstantToInit);
             return w.stateChangeListener;
         }
-        
+
         public static Action AddStateChangeListener<T, S>(this IDataStore<T> self, Func<T, S> getSubState, Action<S> onChanged, bool triggerInstantToInit = true) {
             AssertGetSubStateDoesNotCreateNewObjectsWithEveryCall(self, getSubState);
             Action newListener = NewSubstateChangeListener(() => getSubState(self.GetState()), onChanged);
@@ -43,7 +43,7 @@ namespace com.csutil.model.immutable {
             if (triggerInstantToInit) { onChanged(getSubState(self.GetState())); }
             return newListener;
         }
-        
+
         [Conditional("DEBUG")]
         private static void AssertGetSubStateDoesNotCreateNewObjectsWithEveryCall<T, S>(IDataStore<T> dataStore, Func<T, S> getSubState) {
             var currentState = dataStore.GetState();
@@ -77,6 +77,7 @@ namespace com.csutil.model.immutable {
             return newListener;
         }
 
+        [Obsolete("Use .GetSubState() instead")]
         public static SubListeners<S> NewSubStateListener<T, S>(this IDataStore<T> self, Func<T, S> getSubState) {
             var subListener = new SubListeners<S>(getSubState(self.GetState()));
             var ownListenerInParent = self.AddStateChangeListener(getSubState, newSubState => { subListener.OnSubstateChanged(newSubState); });
@@ -84,11 +85,27 @@ namespace com.csutil.model.immutable {
             return subListener;
         }
 
+        [Obsolete("Use .GetSubState() instead")]
         public static SubListeners<S> NewSubStateListener<T, S>(this SubListeners<T> self, Func<T, S> getSubState) {
             var subListener = new SubListeners<S>(getSubState(self.latestSubState));
             var ownListenerInParent = self.AddStateChangeListener(getSubState, newSubState => { subListener.OnSubstateChanged(newSubState); });
             subListener.SetUnregisterInParentAction(() => { self.innerListeners -= ownListenerInParent; });
             return subListener;
+        }
+
+        public static SubState<T, S> GetSubState<T, S>(this IDataStore<T> self, Func<T, S> getSubState) {
+            return new SubState<T, S>(self, getSubState);
+        }
+
+        public static SubState<T, SubSub> GetSubState<T, Sub, SubSub>(this SubState<T, Sub> self, Func<Sub, SubSub> getSubState) {
+            var subSubState = new SubState<T, SubSub>(self.Store, (state) => {
+                var subState = self.GetSubState(state);
+                return getSubState(subState);
+            });
+            self.AddStateChangeListener(getSubState, (subSub) => {
+                subSubState.OnSubstateChanged(subSub);
+            }, triggerInstantToInit: false);
+            return subSubState;
         }
 
         internal static Action NewSubstateChangeListener<S>(Func<S> getSubstate, Action<S> onChanged) {
@@ -122,7 +139,7 @@ namespace com.csutil.model.immutable {
             }
             return list;
         }
-        
+
         public static ImmutableList<T> MutateEntries<T>(this ImmutableList<T> list, object action, StateReducer<T> reducer, ref bool changed) {
             if (list != null) {
                 foreach (var elem in list) {
