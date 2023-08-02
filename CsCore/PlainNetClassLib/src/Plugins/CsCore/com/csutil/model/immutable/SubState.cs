@@ -7,47 +7,48 @@ namespace com.csutil.model.immutable {
 
         public IDataStore<T> Store { get; }
 
-        public Func<T, S> GetSubState { get; }
-        public S State => GetSubState(Store.GetState());
+        public Func<T, S> SubStateFunc { get; }
+        public S State => SubStateFunc(Store.GetState());
 
-        private Action _innerListeners;
-        
-        public SubState(IDataStore<T> store, Func<T, S> getSubState) {
+        public Action<S> onStateChanged { get; set; }
+
+        public SubState(IDataStore<T> store, Func<T, S> subStateFunc) {
             Store = store;
-            GetSubState = getSubState;
+            SubStateFunc = subStateFunc;
         }
 
-        public object Dispatch(object actionToDispatch) {
+        public object Dispatch(object actionToDispatch, bool throwExceptionIfActionDoesNotChangeSubState = true) {
             var store = Store;
-            var oldStateInStore = GetSubState(store.GetState());
+            var oldStateInStore = SubStateFunc(store.GetState());
             var result = store.Dispatch(actionToDispatch);
-            var newStateInStore = GetSubState(store.GetState());
-            if (ReferenceEquals(oldStateInStore, newStateInStore)) {
+            var newStateInStore = SubStateFunc(store.GetState());
+            if (throwExceptionIfActionDoesNotChangeSubState && !StateCompare.WasModified(oldStateInStore, newStateInStore)) {
                 throw new InvalidOperationException("Dispatching the action on the entity did not cause the entity to change, actionToDispatch=" + actionToDispatch);
             }
             return result;
         }
 
-        public Action AddStateChangeListener<T>(Func<S, T> getSubSubState, Action<T> onChanged, bool triggerInstantToInit = true) {
-            Action newListener = ImmutableExtensions.NewSubstateChangeListener(() => getSubSubState(State), onChanged);
-            _innerListeners += newListener;
+        public void OnSubstateChanged(S newSubState) {
+            onStateChanged?.Invoke(newSubState);
+        }
+
+        public Action<S> AddStateChangeListener<SubSub>(Func<S, SubSub> getSubSubState, Action<SubSub> onChanged, bool triggerInstantToInit = true) {
+            Action<S> newListener = (s) => ImmutableExtensions.NewSubstateChangeListener(() => getSubSubState(State), onChanged);
+            onStateChanged += newListener;
             if (triggerInstantToInit) { onChanged(getSubSubState(State)); }
             return newListener;
         }
-        
-        public void OnSubstateChanged(S newSubState) {
-            _innerListeners.InvokeIfNotNull();
-        }
 
-        // public Action AddStateChangeListener<S>(S mutableObj, Action<S> onChanged, bool triggerInstantToInit = true) where S : IsMutable {
-        //     Action newListener = () => {
-        //         if (StateCompare.WasModifiedInLastDispatch(mutableObj)) { onChanged(mutableObj); }
-        //     };
-        //     _innerListeners += newListener;
-        //     if (triggerInstantToInit) { onChanged(mutableObj); }
-        //     return newListener;
-        // }
-        
+        /// <summary> If both the substate and the passed in mutable object change (eg because the mutable object is
+        /// a child of the substate) then this listener will be triggered </summary>
+        public Action<S> AddStateChangeListener<M>(M mutableObj, Action<M> onChanged, bool triggerInstantToInit = true) where M : IsMutable {
+            Action<S> newListener = (s) => {
+                if (StateCompare.WasModifiedInLastDispatch(mutableObj)) { onChanged(mutableObj); }
+            };
+            onStateChanged += newListener;
+            if (triggerInstantToInit) { onChanged(mutableObj); }
+            return newListener;
+        }
 
     }
 

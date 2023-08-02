@@ -94,15 +94,22 @@ namespace com.csutil.model.immutable {
         }
 
         public static SubState<T, S> GetSubState<T, S>(this IDataStore<T> self, Func<T, S> getSubState) {
-            return new SubState<T, S>(self, getSubState);
+            var subState = new SubState<T, S>(self, getSubState);
+            self.AddSubStateAsListener(subState);
+            return subState;
         }
 
-        public static SubState<T, SubSub> GetSubState<T, Sub, SubSub>(this SubState<T, Sub> self, Func<Sub, SubSub> getSubState) {
+        private static Action AddSubStateAsListener<T, S>(this IDataStore<T> self, SubState<T, S> subState, bool triggerInstantToInit = true) {
+            // TODO check if substate already added as listener to store
+            return self.AddStateChangeListener(subState.SubStateFunc, subState.OnSubstateChanged, triggerInstantToInit);
+        }
+
+        public static SubState<T, SubSub> GetSubState<T, Sub, SubSub>(this SubState<T, Sub> self, Func<Sub, SubSub> getSubSubState) {
             var subSubState = new SubState<T, SubSub>(self.Store, (state) => {
-                var subState = self.GetSubState(state);
-                return getSubState(subState);
+                var subState = self.SubStateFunc(state);
+                return getSubSubState(subState);
             });
-            self.AddStateChangeListener(getSubState, (subSub) => {
+            self.AddStateChangeListener(getSubSubState, (subSub) => {
                 subSubState.OnSubstateChanged(subSub);
             }, triggerInstantToInit: false);
             return subSubState;
@@ -114,10 +121,11 @@ namespace com.csutil.model.immutable {
             Action newListener = () => {
                 var newState = getSubstate();
                 bool stateChanged = StateCompare.WasModified(oldState, newState);
-                if (stateChanged || StateCompare.WasModified(oldMonitor, GetMonitorFor(newState))) {
+                var newMonitor = GetMonitorFor(newState);
+                if (stateChanged || StateCompare.WasModified(oldMonitor, newMonitor)) {
                     onChanged(newState);
                     oldState = newState;
-                    oldMonitor = GetMonitorFor(newState);
+                    oldMonitor = newMonitor;
                 }
             };
             return newListener;
