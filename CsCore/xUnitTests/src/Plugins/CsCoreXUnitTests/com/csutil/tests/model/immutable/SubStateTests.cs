@@ -19,19 +19,26 @@ namespace com.csutil.tests.model.immutable {
 
             // Create some example app state and put it into a store:
             var state = new MyAppState1(user: new MyUser(userName: "Bob", dog: null), someNumber: 123);
-            var store = new DataStore<MyAppState1>(MyReducers1.ReduceMyAppState1, state);
+            DataStore<MyAppState1> store = new DataStore<MyAppState1>(MyReducers1.ReduceMyAppState1, state);
 
             // Accessing sub states of the entire state is done via the GetSubState method:
-            var user = store.GetSubState(data => data.User);
-            Assert.Equal("Bob", user.GetState().UserName);
+            SubState<MyAppState1, MyUser> userState = store.GetSubState(data => data.User);
+            
+            // The most relevant property of the SubState is the GetState Func which
+            // will always return the latest state from the store if used like this:
+            Func<MyUser> user = userState.GetState;
+            Assert.Equal("Bob", user().UserName);
+            // Using the Func like this (user().UserName) is a little bit more readable compared to
+            // going through userState every time but results in the same:
+            Assert.Equal("Bob", userState.GetState().UserName);
 
             // Every time the user changes in the store the onStateChanged listener will be triggered:
             int userChangedCounter = 0;
-            user.onStateChanged += () => { userChangedCounter++; };
+            userState.onStateChanged += () => { userChangedCounter++; };
 
             // The same way as listening to the store, the user substate can be listened to:
             int userNameCounter = 0;
-            user.AddStateChangeListener(user => user.UserName, userName => {
+            userState.AddStateChangeListener(u => u.UserName, userName => {
                 userNameCounter++;
                 // First time name will be Bob and second time Alice:
                 if (userNameCounter == 1) { Assert.Equal("Bob", userName); }
@@ -39,38 +46,40 @@ namespace com.csutil.tests.model.immutable {
             }, triggerInstantToInit: true);
 
             // The user has a dog that can be observed via another substate object:
-            var dog = user.GetSubState(user => user.Dog);
-
+            SubState<MyAppState1, Dog> dogState = userState.GetSubState(u => u.Dog);
+            Func<Dog> dog = dogState.GetState;
+            
             // Since the dog substate object was created as a child of the user substate object,
             // its onStateChanged listener will only be triggered if the user substate object changes:
             int dogChangedCounter = 0;
-            dog.onStateChanged += () => { dogChangedCounter++; };
-            dog.AddStateChangeListener(dog => dog?.Name, dogName => {
+            dogState.onStateChanged += () => { dogChangedCounter++; };
+            dogState.AddStateChangeListener(d => d?.Name, dogName => {
                 // First the user has no dog, then a dog named Max, then a dog named Rex:
                 if (dogChangedCounter == 1) { Assert.Equal("Max", dogName); }
                 if (dogChangedCounter == 2) { Assert.Equal("Rex", dogName); }
             }, triggerInstantToInit: false);
 
-            Assert.Equal("Bob", user.GetState().UserName);
             Assert.Equal(0, userChangedCounter);
             // Because triggerInstantToInit was set to true the name counter will already be triggered once:
             Assert.Equal(1, userNameCounter);
 
-            user.Dispatch(new ActionChangeName("Alice"));
-            Assert.Equal("Alice", user.GetState().UserName);
+            Assert.Equal("Bob", user().UserName);
+            userState.Dispatch(new ActionChangeName("Alice"));
+            Assert.Equal("Alice", user().UserName);
+            
             Assert.Equal(2, userNameCounter);
             Assert.Equal(1, userChangedCounter);
 
-            Assert.Null(dog.GetState());
             Assert.Equal(0, dogChangedCounter);
 
-            user.Dispatch(new ActionAdoptDog(new Dog("Max")));
-            Assert.Equal("Max", dog.GetState().Name);
+            Assert.Null(dog());
+            userState.Dispatch(new ActionAdoptDog(new Dog("Max")));
+            Assert.Equal("Max", dog().Name);
             Assert.Equal(1, dogChangedCounter);
             Assert.Equal(2, userChangedCounter);
 
-            user.Dispatch(new ActionAdoptDog(new Dog("Rex")));
-            Assert.Equal("Rex", dog.GetState().Name);
+            userState.Dispatch(new ActionAdoptDog(new Dog("Rex")));
+            Assert.Equal("Rex", dog().Name);
             Assert.Equal(2, dogChangedCounter);
             Assert.Equal(3, userChangedCounter);
 
@@ -82,12 +91,16 @@ namespace com.csutil.tests.model.immutable {
             Assert.Equal(456, store.GetState().SomeNumber);
             Assert.Equal(3, userChangedCounter);
 
+            // Over all the mutations that happened on the user and dog the state object and functions did not change:
+            Assert.Same(user, userState.GetState);
+            Assert.Same(dog, dogState.GetState);
+            
             // Disposing the user SubState will make it (and all its SubSubStates) unusable:
-            user.Dispose();
-            Assert.Equal(DisposeState.Disposed, user.IsDisposed);
-            Assert.Throws<ObjectDisposedException>(() => { user.Dispatch(new ActionChangeName("Alice")); });
-            Assert.Throws<ObjectDisposedException>(() => { user.GetState(); });
-            Assert.Throws<ObjectDisposedException>(() => { dog.GetState(); });
+            userState.Dispose();
+            Assert.Equal(DisposeState.Disposed, userState.IsDisposed);
+            Assert.Throws<ObjectDisposedException>(() => { userState.Dispatch(new ActionChangeName("Alice")); });
+            Assert.Throws<ObjectDisposedException>(() => { user(); });
+            Assert.Throws<ObjectDisposedException>(() => { dog(); });
             store.Dispatch(new ActionAdoptDog(new Dog("Max")));
             store.Dispatch(new ActionChangeName("Bob"));
             // The userChangedCounter will not be triggered because the user was disposed:
@@ -97,8 +110,8 @@ namespace com.csutil.tests.model.immutable {
             Assert.Equal(2, dogChangedCounter);
 
             // The dog substate is already unusable but still can be disposed
-            dog.Dispose();
-            Assert.Equal(DisposeState.Disposed, dog.IsDisposed);
+            dogState.Dispose();
+            Assert.Equal(DisposeState.Disposed, dogState.IsDisposed);
 
         }
 
