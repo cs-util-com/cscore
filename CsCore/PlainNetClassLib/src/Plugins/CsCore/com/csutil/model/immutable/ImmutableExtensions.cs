@@ -95,20 +95,19 @@ namespace com.csutil.model.immutable {
 
         public static SubState<T, S> GetSubState<T, S>(this IDataStore<T> self, Func<T, S> getSubState) {
             var subState = new SubState<T, S>(self, getSubState);
-            var listenerInStore = self.AddSubStateAsListener(subState);
-            subState.RemoveFromParent = () => { self.onStateChanged -= listenerInStore; };
+            self.AddSubStateAsListener(subState);
             return subState;
         }
 
-        private static Action AddSubStateAsListener<T, S>(this IDataStore<T> self, SubState<T, S> subState, bool triggerInstantToInit = true) {
-            // TODO check if substate already added as listener to store
-            return self.AddStateChangeListener(subState.SubStateFunc, subState.TriggerOnSubstateChanged, triggerInstantToInit);
+        public static void AddSubStateAsListener<T, S>(this IDataStore<T> self, SubState<T, S> subState, bool triggerInstantToInit = true) {
+            var listenerInStore = self.AddStateChangeListener((_) => subState.GetState(), subState.TriggerOnSubstateChanged, triggerInstantToInit);
+            subState.RemoveFromParent = () => { self.onStateChanged -= listenerInStore; };
         }
 
         public static SubState<T, SubSub> GetSubState<T, Sub, SubSub>(this SubState<T, Sub> self, Func<Sub, SubSub> getSubSubState) {
             SubState<T, SubSub> subSubState = new SubState<T, SubSub>(self.Store, (state) => {
                 if (self.IsDisposed != DisposeState.Active) { throw new ObjectDisposedException("Substate is disposed"); }
-                var subState = self.SubStateFunc(state);
+                var subState = self.GetState();
                 return getSubSubState(subState);
             });
             var listenerInParent = self.AddStateChangeListener(getSubSubState, subSubState.TriggerOnSubstateChanged, triggerInstantToInit: false);

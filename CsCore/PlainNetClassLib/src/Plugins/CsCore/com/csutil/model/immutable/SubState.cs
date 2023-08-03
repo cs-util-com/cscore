@@ -4,10 +4,9 @@ namespace com.csutil.model.immutable {
 
     public class SubState<T, S> : IDisposableV2 {
 
-        public IDataStore<T> Store { get; }
+        public readonly IDataStore<T> Store;
 
-        public Func<T, S> SubStateFunc { get; private set; }
-        public S State => GetState();
+        public readonly Func<S> GetState;
 
         public Action onStateChanged { get; set; }
 
@@ -18,12 +17,10 @@ namespace com.csutil.model.immutable {
 
         public SubState(IDataStore<T> store, Func<T, S> subStateFunc) {
             Store = store;
-            SubStateFunc = subStateFunc;
-        }
-
-        public S GetState() {
-            ThrowIfDisposed();
-            return SubStateFunc(Store.GetState());
+            GetState = () => {
+                ThrowIfDisposed();
+                return subStateFunc(Store.GetState());
+            };
         }
 
         public object Dispatch(object actionToDispatch, bool throwExceptionIfActionDoesNotChangeSubState = true) {
@@ -39,10 +36,10 @@ namespace com.csutil.model.immutable {
         public Action AddStateChangeListener<SubSub>(Func<S, SubSub> getSubSubState, Action<SubSub> onChanged, bool triggerInstantToInit = true) {
             Action newListener = ImmutableExtensions.NewSubstateChangeListener(() => {
                 ThrowIfDisposed();
-                return getSubSubState(State);
+                return getSubSubState(GetState());
             }, onChanged);
             onStateChanged += newListener;
-            if (triggerInstantToInit) { onChanged(getSubSubState(State)); }
+            if (triggerInstantToInit) { onChanged(getSubSubState(GetState())); }
             return newListener;
         }
 
@@ -66,7 +63,6 @@ namespace com.csutil.model.immutable {
             IsDisposed = DisposeState.DisposingStarted;
             RemoveFromParent?.Invoke();
             RemoveFromParent = null;
-            SubStateFunc = null;
             IsDisposed = DisposeState.Disposed;
         }
 

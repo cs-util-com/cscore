@@ -23,7 +23,7 @@ namespace com.csutil.tests.model.immutable {
 
             // Accessing sub states of the entire state is done via the GetSubState method:
             var user = store.GetSubState(data => data.User);
-            Assert.Equal("Bob", user.State.UserName);
+            Assert.Equal("Bob", user.GetState().UserName);
 
             // Every time the user changes in the store the onStateChanged listener will be triggered:
             int userChangedCounter = 0;
@@ -51,26 +51,26 @@ namespace com.csutil.tests.model.immutable {
                 if (dogChangedCounter == 2) { Assert.Equal("Rex", dogName); }
             }, triggerInstantToInit: false);
 
-            Assert.Equal("Bob", user.State.UserName);
+            Assert.Equal("Bob", user.GetState().UserName);
             Assert.Equal(0, userChangedCounter);
             // Because triggerInstantToInit was set to true the name counter will already be triggered once:
             Assert.Equal(1, userNameCounter);
 
             user.Dispatch(new ActionChangeName("Alice"));
-            Assert.Equal("Alice", user.State.UserName);
+            Assert.Equal("Alice", user.GetState().UserName);
             Assert.Equal(2, userNameCounter);
             Assert.Equal(1, userChangedCounter);
 
-            Assert.Null(dog.State);
+            Assert.Null(dog.GetState());
             Assert.Equal(0, dogChangedCounter);
 
             user.Dispatch(new ActionAdoptDog(new Dog("Max")));
-            Assert.Equal("Max", dog.State.Name);
+            Assert.Equal("Max", dog.GetState().Name);
             Assert.Equal(1, dogChangedCounter);
             Assert.Equal(2, userChangedCounter);
 
             user.Dispatch(new ActionAdoptDog(new Dog("Rex")));
-            Assert.Equal("Rex", dog.State.Name);
+            Assert.Equal("Rex", dog.GetState().Name);
             Assert.Equal(2, dogChangedCounter);
             Assert.Equal(3, userChangedCounter);
 
@@ -86,8 +86,8 @@ namespace com.csutil.tests.model.immutable {
             user.Dispose();
             Assert.Equal(DisposeState.Disposed, user.IsDisposed);
             Assert.Throws<ObjectDisposedException>(() => { user.Dispatch(new ActionChangeName("Alice")); });
-            Assert.Throws<ObjectDisposedException>(() => { var _ = user.State; });
-            Assert.Throws<ObjectDisposedException>(() => { var _ = dog.State; });
+            Assert.Throws<ObjectDisposedException>(() => { user.GetState(); });
+            Assert.Throws<ObjectDisposedException>(() => { dog.GetState(); });
             store.Dispatch(new ActionAdoptDog(new Dog("Max")));
             store.Dispatch(new ActionChangeName("Bob"));
             // The userChangedCounter will not be triggered because the user was disposed:
