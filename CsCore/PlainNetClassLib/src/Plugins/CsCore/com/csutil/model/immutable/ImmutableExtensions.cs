@@ -107,6 +107,7 @@ namespace com.csutil.model.immutable {
 
         public static SubState<T, SubSub> GetSubState<T, Sub, SubSub>(this SubState<T, Sub> self, Func<Sub, SubSub> getSubSubState) {
             SubState<T, SubSub> subSubState = new SubState<T, SubSub>(self.Store, (state) => {
+                if (self.IsDisposed != DisposeState.Active) { throw new ObjectDisposedException("Substate is disposed"); }
                 var subState = self.SubStateFunc(state);
                 return getSubSubState(subState);
             });

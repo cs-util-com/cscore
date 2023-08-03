@@ -7,7 +7,7 @@ namespace com.csutil.model.immutable {
         public IDataStore<T> Store { get; }
 
         public Func<T, S> SubStateFunc { get; private set; }
-        public S State => SubStateFunc(Store.GetState());
+        public S State => GetState();
 
         public Action onStateChanged { get; set; }
 
@@ -21,12 +21,18 @@ namespace com.csutil.model.immutable {
             SubStateFunc = subStateFunc;
         }
 
+        public S GetState() {
+            ThrowIfDisposed();
+            return SubStateFunc(Store.GetState());
+        }
+
         public object Dispatch(object actionToDispatch, bool throwExceptionIfActionDoesNotChangeSubState = true) {
             ThrowIfDisposed();
             return Store.Dispatch(actionToDispatch);
         }
 
         public void TriggerOnSubstateChanged(S newSubState) {
+            ThrowIfDisposed();
             onStateChanged?.Invoke();
         }
 

@@ -1,4 +1,5 @@
-﻿using com.csutil.model.immutable;
+﻿using System;
+using com.csutil.model.immutable;
 using Xunit;
 
 namespace com.csutil.tests.model.immutable {
@@ -80,6 +81,24 @@ namespace com.csutil.tests.model.immutable {
             store.Dispatch(new ActionChangeNumber(456));
             Assert.Equal(456, store.GetState().SomeNumber);
             Assert.Equal(3, userChangedCounter);
+
+            // Disposing the user SubState will make it (and all its SubSubStates) unusable:
+            user.Dispose();
+            Assert.Equal(DisposeState.Disposed, user.IsDisposed);
+            Assert.Throws<ObjectDisposedException>(() => { user.Dispatch(new ActionChangeName("Alice")); });
+            Assert.Throws<ObjectDisposedException>(() => { var _ = user.State; });
+            Assert.Throws<ObjectDisposedException>(() => { var _ = dog.State; });
+            store.Dispatch(new ActionAdoptDog(new Dog("Max")));
+            store.Dispatch(new ActionChangeName("Bob"));
+            // The userChangedCounter will not be triggered because the user was disposed:
+            Assert.Equal(3, userChangedCounter);
+            Assert.Equal(2, userNameCounter);
+            // The dogChangedCounter will also not be triggered because the user was disposed:
+            Assert.Equal(2, dogChangedCounter);
+
+            // The dog substate is already unusable but still can be disposed
+            dog.Dispose();
+            Assert.Equal(DisposeState.Disposed, dog.IsDisposed);
 
         }
 
