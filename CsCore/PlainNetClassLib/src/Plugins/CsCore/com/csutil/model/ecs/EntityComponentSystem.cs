@@ -57,6 +57,11 @@ namespace com.csutil.model.ecs {
         }
 
         public IEntity<T> Add(T entityData) {
+            // First check if the entity already exists:
+            if (Entities.TryGetValue(entityData.Id, out var existingEntity)) {
+                if (ReferenceEquals(existingEntity, entityData)) { return existingEntity; }
+                throw new InvalidOperationException("Entity already exists with id '" + entityData.Id + "' old=" + existingEntity.Data + " new=" + entityData);
+            }
             return AddEntity(new Entity() { Data = entityData, Ecs = this });
         }
 
@@ -89,6 +94,7 @@ namespace com.csutil.model.ecs {
             var entity = (Entity)Entities[entityId];
 
             var oldEntryData = entity.Data;
+            if (ReferenceEquals(oldEntryData, updatedEntityData)) { return; } // No change
             entity.Data = updatedEntityData;
 
             if (ParentIds.TryGetValue(entityId, out string parentId)) {
