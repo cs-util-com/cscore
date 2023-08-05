@@ -203,7 +203,10 @@ namespace com.csutil.model.immutable {
         }
 
         public static T Mutate<T>(this T self, object action, StateReducer<T> reducer, ref bool changed) {
-            return self.Mutate<T>(true, action, reducer, ref changed);
+            var newVal = reducer(self, action);
+            changed = changed || StateCompare.WasModified(self, newVal);
+            AssertValid(self, newVal);
+            return newVal;
         }
 
         public static T Mutate<T>(this T self, bool applyReducer, object action, StateReducer<T> reducer, ref bool changed) {
@@ -216,7 +219,9 @@ namespace com.csutil.model.immutable {
 
         /// <summary> Helpfull when the parent object is needed to mutate a field</summary>
         public static T MutateField<P, T>(this P self, T field, object action, FieldReducer<P, T> reducer, ref bool changed) {
-            return field.Mutate(action, (previousState, a) => { return reducer(self, previousState, a); }, ref changed);
+            return field.Mutate(action, (previousState, a) => {
+                return reducer(self, previousState, a);
+            }, ref changed);
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")] // Stripped from production code
