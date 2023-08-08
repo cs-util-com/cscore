@@ -6,7 +6,7 @@ namespace com.csutil.keyvaluestore {
     public class ZipFileBasedKeyValueStore : FileBasedKeyValueStore {
 
         public static ZipFileBasedKeyValueStore New(FileEntry zipFile) {
-            var zipFileSystem = zipFile.OpenAsZip();
+            var zipFileSystem = zipFile.OpenOrCreateAsZip();
             var zipRootDir = zipFileSystem.GetRootDirectory();
             var store = new ZipFileBasedKeyValueStore(zipRootDir);
             store.SourceZipFile = zipFile;

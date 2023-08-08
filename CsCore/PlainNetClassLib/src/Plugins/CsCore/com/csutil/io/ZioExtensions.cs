@@ -182,7 +182,10 @@ namespace com.csutil {
         }
 
         public static bool DeleteV2(this FileSystemEntry self) {
-            return DeleteV2(self, () => { self.Delete(); return true; });
+            return DeleteV2(self, () => {
+                self.Delete();
+                return true;
+            });
         }
 
         public static bool DeleteV2(this DirectoryEntry self, bool deleteAlsoIfNotEmpty = true) {
@@ -194,7 +197,10 @@ namespace com.csutil {
                     }
                 }
                 if (!self.IsEmtpy()) { throw new IOException("Cant delete non-emtpy dir: " + self); }
-                try { self.Delete(); return true; } catch (Exception e) { Log.e(e); }
+                try {
+                    self.Delete();
+                    return true;
+                } catch (Exception e) { Log.e(e); }
                 return false;
             });
         }
@@ -240,8 +246,17 @@ namespace com.csutil {
             return new DirectoryEntry(self, UPath.Root);
         }
 
+        [Obsolete("Use file.OpenOrCreateAsZip() instead")]
         public static ZipArchiveFileSystem OpenAsZip(this FileEntry self) {
-            return new ZipArchiveFileSystem(self.OpenOrCreateForReadWrite());
+            return OpenOrCreateAsZip(self);
+        }
+
+        public static ZipArchiveFileSystem OpenOrCreateAsZip(this FileEntry self) {
+            if (self.Parent != null && !self.Parent.Exists) {
+                throw new IOException("Parent directory does not exist: " + self.Parent);
+            }
+            var openedOrCreatedStream = self.OpenOrCreateForReadWrite();
+            return new ZipArchiveFileSystem(openedOrCreatedStream);
         }
 
         /// <summary> Currently only works when working with a physical file system for the source directory </summary>
