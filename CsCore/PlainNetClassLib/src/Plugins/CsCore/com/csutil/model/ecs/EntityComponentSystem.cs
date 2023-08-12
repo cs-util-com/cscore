@@ -19,6 +19,7 @@ namespace com.csutil.model.ecs {
             public string TemplateId => Data.TemplateId;
             public Matrix4x4? LocalPose => Data.LocalPose;
             public IReadOnlyDictionary<string, IComponentData> Components => Data.Components;
+            public string ParentId => Data.ParentId;
             public IReadOnlyList<string> ChildrenIds => Data.ChildrenIds;
 
         }
@@ -27,14 +28,10 @@ namespace com.csutil.model.ecs {
 
         private readonly TemplatesIO<T> TemplatesIo;
         private readonly Dictionary<string, IEntity<T>> Entities = new Dictionary<string, IEntity<T>>();
-        private readonly Dictionary<string, string> ParentIds = new Dictionary<string, string>();
         private readonly Dictionary<string, HashSet<string>> Variants = new Dictionary<string, HashSet<string>>();
 
         public IReadOnlyDictionary<string, IEntity<T>> AllEntities => Entities;
         
-        /// <summary> Lookup of parent id for a given child id </summary>
-        public IReadOnlyDictionary<string, string> AllParentIds => ParentIds;
-
         /// <summary> Triggered when the entity is directly or indirectly changed (e.g. when a template entity is changed).
         /// Will path the IEntity wrapper, the old and the new data </summary>
         public event IEntityUpdateListener OnIEntityUpdated;
@@ -53,7 +50,6 @@ namespace com.csutil.model.ecs {
         public void Dispose() {
             TemplatesIo.DisposeV2();
             Entities.Clear();
-            ParentIds.Clear();
         }
 
         public IEntity<T> Add(T entityData) {
@@ -72,7 +68,6 @@ namespace com.csutil.model.ecs {
             T oldEntityData = hasOldEntity ? oldEntity.Data : default;
             Entities[entityId] = entity;
             UpdateVariantsLookup(entity.Data);
-            UpdateParentIds(entityId, entity);
             OnIEntityUpdated?.Invoke(entity, UpdateType.Add, oldEntityData, entity.Data);
             return entity;
         }
@@ -80,12 +75,6 @@ namespace com.csutil.model.ecs {
         private void UpdateVariantsLookup(T entity) {
             if (entity.TemplateId != null) {
                 Variants.AddToValues(entity.TemplateId, entity.Id);
-            }
-        }
-
-        private void UpdateParentIds(string parentId, IEntity<T> parent) {
-            if (parent.ChildrenIds != null) {
-                foreach (var childId in parent.ChildrenIds) { ParentIds[childId] = parentId; }
             }
         }
 
@@ -97,20 +86,8 @@ namespace com.csutil.model.ecs {
             if (ReferenceEquals(oldEntryData, updatedEntityData)) { return; } // No change
             entity.Data = updatedEntityData;
 
-            if (ParentIds.TryGetValue(entityId, out string parentId)) {
-                // Remove from ParentIds cache if parent does not contain the child anymore:
-                if (!Entities[parentId].Data.ChildrenIds.Contains(entityId)) { ParentIds.Remove(entityId); }
-            }
-
             // e.g. if the entries are mutable this will often be true:
             var oldAndNewSameEntry = ReferenceEquals(oldEntryData, updatedEntityData);
-
-            // Remove outdated parent ids and add new ones:
-            if (!oldAndNewSameEntry && oldEntryData.ChildrenIds != null) {
-                var removedChildrenIds = oldEntryData.ChildrenIds.Except(updatedEntityData.ChildrenIds);
-                foreach (var childId in removedChildrenIds) { ParentIds.Remove(childId); }
-            }
-            UpdateParentIds(entityId, entity);
 
             if (!oldAndNewSameEntry) {
                 // Compute json diff to know if the entry really changed and if not skip informing all variants about the change:
@@ -141,15 +118,10 @@ namespace com.csutil.model.ecs {
             return Entities[entityId];
         }
 
-        public IEntity<T> GetParentOf(string childId) {
-            return GetEntity(ParentIds[childId]);
-        }
-
         public void Destroy(string entityId) {
             var entity = Entities[entityId] as Entity;
             OnIEntityUpdated?.Invoke(entity, UpdateType.Remove, entity.Data, default);
             Entities.Remove(entityId);
-            ParentIds.Remove(entityId);
             if (entity.TemplateId != null) {
                 Variants.Remove(entity.TemplateId);
             }

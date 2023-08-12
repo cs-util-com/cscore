@@ -91,11 +91,11 @@ namespace com.csutil.tests.model.esc {
 
             var e1 = entityGroup.AddChild(new Entity() {
                 LocalPose = Matrix4x4.CreateRotationY(-MathF.PI / 2), // -90 degree rotation around y axis
-            }, AddToChildrenListOfParent);
+            });
 
             var e2 = entityGroup.AddChild(new Entity() {
                 LocalPose = Matrix4x4.CreateTranslation(1, 0, 0),
-            }, AddToChildrenListOfParent);
+            });
 
             var children = entityGroup.GetChildren();
             Assert.Equal(2, children.Count());
@@ -132,22 +132,22 @@ namespace com.csutil.tests.model.esc {
             }
 
             Assert.Equal(3, ecs.AllEntities.Count);
-            e1.RemoveFromParent(RemoveChildIdFromParent);
+            e1.RemoveFromParent();
             // e1 is removed from its parent but still in the scene graph:
             Assert.Equal(3, ecs.AllEntities.Count);
             Assert.Same(e2, entityGroup.GetChildren().Single());
             Assert.Null(e1.GetParent());
-            Assert.True(e1.Destroy(RemoveChildIdFromParent));
-            Assert.False(e1.Destroy(RemoveChildIdFromParent));
+            Assert.True(e1.Destroy());
+            Assert.False(e1.Destroy());
             // e1 is now fully removed from the scene graph and destroyed:
             Assert.Equal(2, ecs.AllEntities.Count);
 
             Assert.False(e2.IsDestroyed());
 
-            var e3 = e2.AddChild(new Entity(), AddToChildrenListOfParent);
-            var e4 = e3.AddChild(new Entity(), AddToChildrenListOfParent);
+            var e3 = e2.AddChild(new Entity());
+            var e4 = e3.AddChild(new Entity());
 
-            Assert.True(e2.Destroy(RemoveChildIdFromParent));
+            Assert.True(e2.Destroy());
             Assert.Empty(entityGroup.GetChildren());
 
             Assert.True(e2.IsDestroyed());
@@ -174,19 +174,19 @@ namespace com.csutil.tests.model.esc {
 
             var e2 = e1.AddChild(new Entity() {
                 LocalPose = Pose.NewMatrix(new Vector3(0, 1, 0), 90)
-            }, AddToChildrenListOfParent);
+            });
 
             var e3 = e2.AddChild(new Entity() {
                 LocalPose = Pose.NewMatrix(new Vector3(0, 0, 2), 0, 2)
-            }, AddToChildrenListOfParent);
+            });
 
             var e4 = e3.AddChild(new Entity() {
                 LocalPose = Pose.NewMatrix(new Vector3(0, 0, -1), -90)
-            }, AddToChildrenListOfParent);
+            });
 
             var e5 = e4.AddChild(new Entity() {
                 LocalPose = Pose.NewMatrix(new Vector3(0, -1, 0), 0, 0.5f)
-            }, AddToChildrenListOfParent);
+            });
 
             var pose = e5.GlobalPose();
             Assert.Equal(Quaternion.Identity, pose.rotation);
@@ -213,8 +213,8 @@ namespace com.csutil.tests.model.esc {
                 });
                 baseEnemy.AddChild(new Entity() {
                     Name = "Sword",
-                    Components = CreateComponents( new SwordComponent() { Damage = 10 } )
-                }, AddToChildrenListOfParent);
+                    Components = CreateComponents(new SwordComponent() { Damage = 10 })
+                });
                 baseEnemy.SaveChanges();
 
                 // Define a variant of the base enemy which is stronger and has a shield:
@@ -223,8 +223,8 @@ namespace com.csutil.tests.model.esc {
                 bossEnemy.GetComponent<EnemyComponent>().Health = 200;
                 bossEnemy.AddChild(new Entity() {
                     Name = "Shield",
-                    Components = CreateComponents( new ShieldComponent() { Defense = 10 } )
-                }, AddToChildrenListOfParent);
+                    Components = CreateComponents(new ShieldComponent() { Defense = 10 })
+                });
                 bossEnemy.SaveChanges();
 
                 // Define a mage variant that has mana but no sword
@@ -234,10 +234,10 @@ namespace com.csutil.tests.model.esc {
                 var sword = mageEnemy.GetChild("Sword");
 
                 // Switching the parent of the sword from the mage to the boss enemy should fail
-                Assert.Throws<InvalidOperationException>(() => bossEnemy.AddChild(sword, AddToChildrenListOfParent));
+                Assert.Throws<InvalidOperationException>(() => bossEnemy.AddChild(sword));
                 // Instead the sword first needs to be removed and then added to the new parent:
-                sword.RemoveFromParent(RemoveChildIdFromParent);
-                bossEnemy.AddChild(sword, AddToChildrenListOfParent);
+                sword.RemoveFromParent();
+                bossEnemy.AddChild(sword);
 
                 bossEnemy.SaveChanges();
                 mageEnemy.SaveChanges();
@@ -250,11 +250,11 @@ namespace com.csutil.tests.model.esc {
 
                 // All created entities are added to the scene graph and persisted to disk
                 var scene = ecs.Add(new Entity() { Name = "Scene" });
-                var enemy1 = scene.AddChild(baseEnemy.CreateVariant(), AddToChildrenListOfParent);
+                var enemy1 = scene.AddChild(baseEnemy.CreateVariant());
                 enemy1.Data.LocalPose = Pose.NewMatrix(new Vector3(1, 0, 0));
-                var enemy2 = scene.AddChild(bossEnemy.CreateVariant(), AddToChildrenListOfParent);
+                var enemy2 = scene.AddChild(bossEnemy.CreateVariant());
                 enemy2.Data.LocalPose = Pose.NewMatrix(new Vector3(0, 0, 1));
-                var enemy3 = scene.AddChild(mageEnemy.CreateVariant(), AddToChildrenListOfParent);
+                var enemy3 = scene.AddChild(mageEnemy.CreateVariant());
                 enemy3.Data.LocalPose = Pose.NewMatrix(new Vector3(-1, 0, 0));
 
                 scene.SaveChanges();
@@ -279,7 +279,7 @@ namespace com.csutil.tests.model.esc {
                 Assert.NotNull(enemy2.GetComponentInChildren<Entity, ShieldComponent>());
             }
         }
-        
+
         private IReadOnlyDictionary<string, IComponentData> CreateComponents(IComponentData component) {
             component.GetId().ThrowErrorIfNullOrEmpty("component.GetId()");
             var dict = new Dictionary<string, IComponentData>();
@@ -290,32 +290,6 @@ namespace com.csutil.tests.model.esc {
         private void Assert_AlmostEqual(Vector3 a, Vector3 b, float allowedDelta = 0.000001f) {
             var length = (a - b).Length();
             Assert.True(length < allowedDelta, $"Expected {a} to be almost equal to {b} but the difference is {length}");
-        }
-
-        private static Entity AddToChildrenListOfParent(IEntity<Entity> parent, string addedChildId) {
-            parent.Data.MutablehildrenIds.Add(addedChildId);
-            return parent.Data;
-        }
-
-        private Entity RemoveChildIdFromParent(IEntity<Entity> parent, string childIdToRemove) {
-            parent.Data.MutablehildrenIds.Remove(childIdToRemove);
-            return parent.Data;
-        }
-
-        private class Entity : IEntityData {
-
-            public string Id { get; set; } = "" + GuidV2.NewGuid();
-            public string Name { get; set; }
-            public string TemplateId { get; set; }
-            public Matrix4x4? LocalPose { get; set; }
-            public IReadOnlyDictionary<string, IComponentData> Components { get; set; }
-
-            public IReadOnlyList<string> ChildrenIds => MutablehildrenIds;
-            [JsonIgnore] // Dont include the children ids two times
-            public List<string> MutablehildrenIds { get; } = new List<string>();
-
-            public string GetId() { return Id; }
-
         }
 
         private class EnemyComponent : IComponentData {
@@ -335,6 +309,64 @@ namespace com.csutil.tests.model.esc {
             public string Id { get; set; } = "" + GuidV2.NewGuid();
             public int Defense { get; set; }
             public string GetId() { return Id; }
+        }
+
+    }
+
+    public class Entity : IEntityData {
+
+        public string Id { get; set; } = "" + GuidV2.NewGuid();
+        public string Name { get; set; }
+        public string TemplateId { get; set; }
+        public Matrix4x4? LocalPose { get; set; }
+        public IReadOnlyDictionary<string, IComponentData> Components { get; set; }
+
+        public string ParentId { get; set; }
+
+        public IReadOnlyList<string> ChildrenIds => MutablehildrenIds;
+        [JsonIgnore] // Dont include the children ids two times
+        public List<string> MutablehildrenIds { get; } = new List<string>();
+
+        public string GetId() { return Id; }
+
+    }
+
+    public static class EntityExtensions {
+
+        public static IEntity<Entity> AddChild(this IEntity<Entity> parent, Entity childData) {
+            return parent.AddChild(childData, SetParentIdInChild, AddToChildrenListOfParent);
+        }
+
+        public static IEntity<Entity> AddChild(this IEntity<Entity> parent, IEntity<Entity> childData) {
+            return parent.AddChild(childData, SetParentIdInChild, AddToChildrenListOfParent);
+        }
+
+        public static void RemoveFromParent(this IEntity<Entity> child) {
+            child.RemoveFromParent(RemoveParentIdFromChild, RemoveChildIdFromParent);
+        }
+
+        public static bool Destroy(this IEntity<Entity> self) {
+            return self.Destroy(RemoveChildIdFromParent);
+        }
+
+        private static Entity SetParentIdInChild(IEntity<Entity> child, string newParentId) {
+            child.Data.ParentId = newParentId;
+            return child.Data;
+        }
+
+        private static Entity AddToChildrenListOfParent(IEntity<Entity> parent, string addedChildId) {
+            parent.Data.MutablehildrenIds.Add(addedChildId);
+            return parent.Data;
+        }
+
+        private static Entity RemoveParentIdFromChild(IEntity<Entity> child) {
+            child.Data.ParentId = null;
+            return child.Data;
+        }
+
+        private static Entity RemoveChildIdFromParent(IEntity<Entity> parent, string childIdToRemove) {
+            parent.Data.MutablehildrenIds.Remove(childIdToRemove);
+            return parent.Data;
         }
 
     }

@@ -16,6 +16,7 @@ namespace com.csutil.model.ecs {
         string TemplateId { get; }
         Matrix4x4? LocalPose { get; }
         IReadOnlyDictionary<string, IComponentData> Components { get; }
+        string ParentId { get; }
         IReadOnlyList<string> ChildrenIds { get; }
         string Name { get; }
 
