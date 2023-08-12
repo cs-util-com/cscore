@@ -23,7 +23,10 @@ namespace com.csutil.gps {
 
         private const double Deg2Rad = Math.PI / 180d;
 
-        /// <summary> Calculates GPS coordinates of a relative point that lives in the coordinate space of the <see cref="zeroPoint"/> </summary>
+        /// <summary> Calculates GPS coordinates of a relative point that lives in the coordinate space of the <see cref="zeroPoint"/>.
+        /// This concept is also known as (Local tangent plane coordinates (LTP), local ellipsoidal system,
+        /// local geodetic coordinate system, or local vertical, local horizontal coordinates (LVLH)
+        /// https://en.wikipedia.org/wiki/Local_tangent_plane_coordinates ) </summary>
         /// <param name="zeroPoint"> The reference GPS position the relative coordinates live in </param>
         /// <param name="eastDistInMeters"> Distance in meters on axis pointing to east </param>
         /// <param name="northDistInMeters"> Distance in meters on axis pointing to north </param>
@@ -36,8 +39,13 @@ namespace com.csutil.gps {
             resultLatLong[1] = eastDistInMeters / vall + zeroPoint.Longitude;
         }
 
-        /// <summary> Calculates the relative vector for input gps coordinates to the used <see cref="IHasLatLong"/> so that it can be shown in a 3D coordinate system </summary>
-        /// <param name="resultCoordsInMeters"> A vector with 2 values where value[0] is the distance on the axis pointing east and value[1] is the distance on the axis pointing north </param>
+        /// <summary> Calculates the relative vector for input gps coordinates to the used <see cref="IHasLatLong"/>
+        /// so that it can be shown in a 3D coordinate system. 
+        /// This concept is also known as (Local tangent plane coordinates (LTP), local ellipsoidal system,
+        /// local geodetic coordinate system, or local vertical, local horizontal coordinates (LVLH)
+        /// https://en.wikipedia.org/wiki/Local_tangent_plane_coordinates ) </summary>
+        /// <param name="resultCoordsInMeters"> A vector with 2 values where value[0] is the distance on the axis pointing east and
+        /// value[1] is the distance on the axis pointing north </param>
         public static void CalcRelativeCoordsInMeters(this IHasLatLong zeroPoint, double latitude, double longitude, double[] resultCoordsInMeters) {
             if (resultCoordsInMeters.Length != 2) { throw new ArgumentException("Length of passed result array did not have the correct length 2"); }
             double vall = Longi2Rad * Math.Cos(zeroPoint.Latitude * Deg2Rad);
