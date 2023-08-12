@@ -31,7 +31,10 @@ namespace com.csutil.model.ecs {
         private readonly Dictionary<string, HashSet<string>> Variants = new Dictionary<string, HashSet<string>>();
 
         public IReadOnlyDictionary<string, IEntity<T>> AllEntities => Entities;
-        
+
+        /// <summary> If set to true the T class used in IEntity<T> must be immutable in all fields </summary>
+        public readonly bool IsModelImmutable;
+
         /// <summary> Triggered when the entity is directly or indirectly changed (e.g. when a template entity is changed).
         /// Will path the IEntity wrapper, the old and the new data </summary>
         public event IEntityUpdateListener OnIEntityUpdated;
@@ -43,8 +46,9 @@ namespace com.csutil.model.ecs {
 
         public enum UpdateType { Add, Remove, Update }
 
-        public EntityComponentSystem(TemplatesIO<T> templatesIo) {
+        public EntityComponentSystem(TemplatesIO<T> templatesIo, bool isModelImmutable) {
             TemplatesIo = templatesIo;
+            IsModelImmutable = isModelImmutable;
         }
 
         public void Dispose() {
@@ -55,7 +59,6 @@ namespace com.csutil.model.ecs {
         public IEntity<T> Add(T entityData) {
             // First check if the entity already exists:
             if (Entities.TryGetValue(entityData.Id, out var existingEntity)) {
-                if (ReferenceEquals(existingEntity, entityData)) { return existingEntity; }
                 throw new InvalidOperationException("Entity already exists with id '" + entityData.Id + "' old=" + existingEntity.Data + " new=" + entityData);
             }
             return AddEntity(new Entity() { Data = entityData, Ecs = this });
@@ -83,18 +86,18 @@ namespace com.csutil.model.ecs {
             var entity = (Entity)Entities[entityId];
 
             var oldEntryData = entity.Data;
-            if (ReferenceEquals(oldEntryData, updatedEntityData)) { return; } // No change
-            entity.Data = updatedEntityData;
 
-            // e.g. if the entries are mutable this will often be true:
+            // e.g. if the entries are mutable this will mostly be true:
             var oldAndNewSameEntry = ReferenceEquals(oldEntryData, updatedEntityData);
-
+            if (IsModelImmutable && oldAndNewSameEntry) {
+                return; // only for immutable data it is now clear that no update is required
+            }
             if (!oldAndNewSameEntry) {
                 // Compute json diff to know if the entry really changed and if not skip informing all variants about the change:
                 // This can happen eg if the variant overwrites the field that was just changed in the template
                 if (!TemplatesIo.HasChanges(oldEntryData, updatedEntityData)) { return; }
             }
-
+            entity.Data = updatedEntityData;
             // At this point in the update method it is known that the entity really changed and 
             OnIEntityUpdated?.Invoke(entity, UpdateType.Update, oldEntryData, updatedEntityData);
 

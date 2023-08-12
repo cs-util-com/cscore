@@ -83,7 +83,7 @@ namespace com.csutil.tests.model.esc {
         [Fact]
         public async Task ExampleUsageOfEcs() {
 
-            var ecs = new EntityComponentSystem<Entity>(null);
+            var ecs = new EntityComponentSystem<Entity>(null, isModelImmutable: false);
 
             var entityGroup = ecs.Add(new Entity() {
                 LocalPose = Matrix4x4.CreateRotationY(MathF.PI / 2) // 90 degree rotation around y axis
@@ -166,7 +166,7 @@ namespace com.csutil.tests.model.esc {
              * global pose of the most inner entity is back at the origin (validated that
              * same result is achieved with Unity) */
 
-            var ecs = new EntityComponentSystem<Entity>(null);
+            var ecs = new EntityComponentSystem<Entity>(null, isModelImmutable: false);
 
             var e1 = ecs.Add(new Entity() {
                 LocalPose = Pose.NewMatrix(new Vector3(0, 1, 0))
@@ -202,7 +202,7 @@ namespace com.csutil.tests.model.esc {
             // First the user creates a scene at runtime:
             var dir = EnvironmentV2.instance.GetNewInMemorySystem();
             {
-                var ecs = new EntityComponentSystem<Entity>(new TemplatesIO<Entity>(dir));
+                var ecs = new EntityComponentSystem<Entity>(new TemplatesIO<Entity>(dir), isModelImmutable: false);
 
                 // He defines a few of the entities as templates and other as variants
 
@@ -263,7 +263,7 @@ namespace com.csutil.tests.model.esc {
                 ecs.Dispose();
             }
             {
-                var ecs = new EntityComponentSystem<Entity>(new TemplatesIO<Entity>(dir));
+                var ecs = new EntityComponentSystem<Entity>(new TemplatesIO<Entity>(dir), isModelImmutable: false);
                 Assert.Empty(ecs.AllEntities);
                 await ecs.LoadSceneGraphFromDisk();
                 Assert.Equal(9, dir.EnumerateFiles().Count());
