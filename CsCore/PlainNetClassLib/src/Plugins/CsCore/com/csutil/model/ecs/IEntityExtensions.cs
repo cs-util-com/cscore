@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 
@@ -17,7 +18,7 @@ namespace com.csutil.model.ecs {
             return self.Ecs.AllEntities[self.ParentId];
         }
 
-        public static T GetParent<T>(this T self, IDictionary<string, T> allEntities) where T : IEntityData {
+        public static T GetParent<T>(this T self, IReadOnlyDictionary<string, T> allEntities) where T : IEntityData {
             if (self.ParentId == null) { return default; }
             return allEntities[self.ParentId];
         }
@@ -109,7 +110,7 @@ namespace com.csutil.model.ecs {
         }
 
         /// <summary> Combines the local pose of the entity with the pose of all its parents </summary>
-        public static Matrix4x4 GlobalPoseMatrix<T>(this T self, IDictionary<string, T> allEntities) where T : IEntityData {
+        public static Matrix4x4 GlobalPoseMatrix<T>(this T self, IReadOnlyDictionary<string, T> allEntities) where T : IEntityData {
             var lp = self.LocalPose;
             Matrix4x4 localPose = lp.HasValue ? lp.Value : Matrix4x4.Identity;
             var parent = self.GetParent(allEntities);
@@ -122,7 +123,7 @@ namespace com.csutil.model.ecs {
             return new Pose(position, rotation, scale);
         }
 
-        public static Pose GlobalPose<T>(this T self, IDictionary<string, T> allEntities) where T : IEntityData {
+        public static Pose GlobalPose<T>(this T self, IReadOnlyDictionary<string, T> allEntities) where T : IEntityData {
             self.GlobalPoseMatrix(allEntities).Decompose(out Vector3 scale, out Quaternion rotation, out Vector3 position);
             return new Pose(position, rotation, scale);
         }
@@ -175,7 +176,16 @@ namespace com.csutil.model.ecs {
     public static class IEntityDataExtensions {
 
         public static V GetComponent<V>(this IEntityData self) where V : class {
-            return self.Components.Values.Single(c => c is V) as V;
+            AssertOnlySingleCompOfType<V>(self);
+            return self.Components.Values.First(c => c is V) as V;
+        }
+        
+        [Conditional("DEBUG")]
+        private static void AssertOnlySingleCompOfType<V>(IEntityData self) where V : class {
+            var compTypeCount = self.Components.Values.Count(c => c is V);
+            if (compTypeCount > 1) {
+                throw new ArgumentException($"The entity {self.Id} has {compTypeCount} components of type {typeof(V).Name} but only one is allowed");
+            }
         }
 
     }

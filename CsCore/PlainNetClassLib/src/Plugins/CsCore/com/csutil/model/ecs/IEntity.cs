@@ -50,6 +50,10 @@ namespace com.csutil.model.ecs {
             return Matrix4x4Extensions.Compose(position, rotation, scale);
         }
 
+        public static Pose NewPosition(Vector3 position) {
+            return new Pose(position, Quaternion.Identity, Vector3.One);
+        }
+
     }
 
 }
