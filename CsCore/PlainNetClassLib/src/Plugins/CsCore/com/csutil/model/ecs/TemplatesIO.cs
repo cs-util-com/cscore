@@ -55,6 +55,10 @@ namespace com.csutil.model.ecs {
         }
 
         public void SaveAsTemplate(T instance) {
+            SaveToFile(instance);
+        }
+        
+        public void SaveToFile(T instance) {
             var entityId = instance.GetId();
             entityId.ThrowErrorIfNullOrEmpty("entity.Id");
             var file = GetEntityFileForId(entityId);

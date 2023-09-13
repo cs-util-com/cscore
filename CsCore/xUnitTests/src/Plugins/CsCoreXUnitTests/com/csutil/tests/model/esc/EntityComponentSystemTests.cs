@@ -245,8 +245,10 @@ namespace com.csutil.tests.model.esc {
                 // Updates to the prefabs also result in the variants being updated
                 baseEnemy.GetComponent<EnemyComponent>().Health = 150;
                 baseEnemy.SaveChanges();
-                // The mage enemy health wasnt overwritten so with the template update it now has also 150 health:
+                // The mage enemy health wasnt modified so with the template update it now has also 150 health:
                 Assert.Equal(150, mageEnemy.GetComponent<EnemyComponent>().Health);
+                // The boss enemy was modified so it still has 200 health:
+                Assert.Equal(200, bossEnemy.GetComponent<EnemyComponent>().Health);
 
                 // All created entities are added to the scene graph and persisted to disk
                 var scene = ecs.Add(new Entity() { Name = "Scene" });
