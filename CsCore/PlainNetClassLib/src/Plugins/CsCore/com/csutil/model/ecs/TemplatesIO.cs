@@ -57,7 +57,7 @@ namespace com.csutil.model.ecs {
         public void SaveAsTemplate(T instance) {
             SaveToFile(instance);
         }
-        
+
         public void SaveToFile(T instance) {
             var entityId = instance.GetId();
             entityId.ThrowErrorIfNullOrEmpty("entity.Id");
@@ -126,7 +126,11 @@ namespace com.csutil.model.ecs {
         private JToken ComposeFullJson(string entityId, bool allowLazyLoadFromDisk) {
             if (!LoadedTemplates.ContainsKey(entityId)) {
                 if (allowLazyLoadFromDisk) {
-                    LoadJTokenFromFile(GetEntityFileForId(entityId), GetJsonSerializer());
+                    var entityFile = GetEntityFileForId(entityId);
+                    if (!entityFile.Exists) {
+                        throw new KeyNotFoundException("Entity never stored to disk: " + entityId);
+                    }
+                    LoadJTokenFromFile(entityFile, GetJsonSerializer());
                 } else {
                     throw new KeyNotFoundException("Entity not found: " + entityId);
                 }

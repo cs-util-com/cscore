@@ -231,6 +231,8 @@ namespace com.csutil.tests.model.esc {
                 var mageEnemy = baseEnemy.CreateVariant();
                 mageEnemy.Data.Name = "MageEnemy";
                 mageEnemy.GetComponent<EnemyComponent>().Mana = 100;
+                mageEnemy.SaveChanges();
+                
                 var sword = mageEnemy.GetChild("Sword");
 
                 // Switching the parent of the sword from the mage to the boss enemy should fail
@@ -245,6 +247,7 @@ namespace com.csutil.tests.model.esc {
                 // Updates to the prefabs also result in the variants being updated
                 baseEnemy.GetComponent<EnemyComponent>().Health = 150;
                 baseEnemy.SaveChanges();
+                
                 // The mage enemy health wasnt modified so with the template update it now has also 150 health:
                 Assert.Equal(150, mageEnemy.GetComponent<EnemyComponent>().Health);
                 // The boss enemy was modified so it still has 200 health:
