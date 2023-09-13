@@ -331,6 +331,8 @@ namespace com.csutil.tests.model.esc {
 
         public string GetId() { return Id; }
 
+        public override string ToString() { return $"{Name} ({Id})"; }
+
     }
 
     public static class EntityExtensions {

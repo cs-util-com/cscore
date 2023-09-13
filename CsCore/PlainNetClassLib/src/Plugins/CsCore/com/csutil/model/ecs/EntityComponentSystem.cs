@@ -22,6 +22,8 @@ namespace com.csutil.model.ecs {
             public string ParentId => Data.ParentId;
             public IReadOnlyList<string> ChildrenIds => Data.ChildrenIds;
 
+            public override string ToString() { return Data.ToString(); }
+
         }
 
         public DisposeState IsDisposed { get; set; } = DisposeState.Active;
