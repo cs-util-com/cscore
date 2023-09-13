@@ -177,7 +177,7 @@ namespace com.csutil.model.ecs {
 
         public static V GetComponent<V>(this IEntityData self) where V : class {
             AssertOnlySingleCompOfType<V>(self);
-            return self.Components.Values.First(c => c is V) as V;
+            return self.Components.Values.Single(c => c is V) as V;
         }
         
         [Conditional("DEBUG")]
