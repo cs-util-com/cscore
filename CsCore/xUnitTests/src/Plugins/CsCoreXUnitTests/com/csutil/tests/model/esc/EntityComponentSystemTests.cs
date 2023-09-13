@@ -30,21 +30,21 @@ namespace com.csutil.tests.model.esc {
                     new EnemyComponent() { Id = "c1", Health = 100, Mana = 10 }
                 )
             };
-            templates.SaveAsTemplate(enemyTemplate);
+            templates.Save(enemyTemplate);
 
             // An instance that has a different health value than the template:
             Entity variant1 = templates.CreateVariantInstanceOf(enemyTemplate);
             (variant1.Components.Single().Value as EnemyComponent).Health = 200;
-            templates.SaveAsTemplate(variant1); // Save it as a variant of the enemyTemplate
+            templates.Save(variant1); // Save it as a variant of the enemyTemplate
 
             // Create a variant2 of the variant1
             Entity variant2 = templates.CreateVariantInstanceOf(variant1);
             (variant2.Components.Single().Value as EnemyComponent).Mana = 20;
-            templates.SaveAsTemplate(variant2);
+            templates.Save(variant2);
 
             // Updating variant 1 should also update variant2:
             (variant1.Components.Single().Value as EnemyComponent).Health = 300;
-            templates.SaveAsTemplate(variant1);
+            templates.Save(variant1);
             variant2 = templates.LoadTemplateInstance(variant2.Id);
             Assert.Equal(300, (variant2.Components.Single().Value as EnemyComponent).Health);
 

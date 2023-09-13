@@ -156,7 +156,7 @@ namespace com.csutil.model.ecs {
         }
 
         public void SaveChanges(T entityData) {
-            TemplatesIo.SaveToFile(entityData);
+            TemplatesIo.Save(entityData);
             Update(entityData);
         }
 
