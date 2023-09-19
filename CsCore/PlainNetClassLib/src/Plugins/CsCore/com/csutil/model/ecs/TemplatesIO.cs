@@ -59,20 +59,24 @@ namespace com.csutil.model.ecs {
         }
 
         public void SaveToFile(T instance) {
-            var entityId = instance.GetId();
-            entityId.ThrowErrorIfNullOrEmpty("entity.Id");
-            var file = GetEntityFileForId(entityId);
+            var file = GetEntityFileForId(instance.GetId());
+            var json = UpdateJsonState(instance);
+            file.SaveAsJson(json);
+        }
+
+        private JToken UpdateJsonState(T instance) {
             var json = ToJToken(instance, GetJsonSerializer());
             var templateId = instance.TemplateId;
             if (templateId != null) {
                 var template = ComposeFullJson(templateId, allowLazyLoadFromDisk: true);
                 json = JonDiffPatch.Diff(template, json);
             }
-            file.SaveAsJson(json);
-            UpdateTemplateCache(entityId, json);
+            UpdateTemplateCache(instance.GetId(), json);
+            return json;
         }
 
         private FileEntry GetEntityFileForId(string entityId) {
+            entityId.ThrowErrorIfNullOrEmpty("entityId");
             return EntityDir.GetChild(entityId);
         }
 
