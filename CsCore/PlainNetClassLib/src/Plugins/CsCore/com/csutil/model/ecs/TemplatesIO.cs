@@ -18,8 +18,9 @@ namespace com.csutil.model.ecs {
         private readonly DirectoryEntry EntityDir;
         private readonly JsonDiffPatch JonDiffPatch = new JsonDiffPatch();
 
-        /// <summary> A cache of all loaded templates as they are stored on disk, these need to be combined with all parents to get the full entity data </summary>
-        private readonly Dictionary<string, JToken> LoadedTemplates = new Dictionary<string, JToken>();
+        /// <summary> A cache of all loaded templates and variants,
+        /// these need to be combined with all parent entities to get the full entity data </summary>
+        private readonly Dictionary<string, JToken> EntityCache = new Dictionary<string, JToken>();
 
         private Func<JsonSerializer> GetJsonSerializer = () => JsonSerializer.Create(JsonNetSettings.typedJsonSettings);
 
@@ -28,7 +29,7 @@ namespace com.csutil.model.ecs {
         }
 
         public void Dispose() {
-            LoadedTemplates.Clear();
+            EntityCache.Clear();
         }
 
         /// <summary> Loads all template files from disk into memory </summary>
@@ -43,35 +44,40 @@ namespace com.csutil.model.ecs {
 
         private void LoadJTokenFromFile(FileEntry templateFile, JsonSerializer jsonSerializer) {
             var templateId = templateFile.Name;
-            if (LoadedTemplates.ContainsKey(templateId)) { return; }
+            if (EntityCache.ContainsKey(templateId)) { return; }
             using (var stream = templateFile.OpenForRead()) {
                 JToken template = jsonSerializer.Deserialize<JToken>(new JsonTextReader(new StreamReader(stream)));
-                UpdateTemplateCache(templateId, template);
+                UpdateEntitiesCache(templateId, template);
             }
         }
 
-        private void UpdateTemplateCache(string id, JToken template) {
-            LoadedTemplates[id] = template;
+        private void UpdateEntitiesCache(string id, JToken entity) {
+            EntityCache[id] = entity;
+        }
+
+        public void Update(T instance) {
+            var templateFile = GetEntityFileForId(instance.GetId());
+            var json = UpdateJsonState(instance);
+            // If the entity is a template, save also its file:
+            if (templateFile.Exists) {
+                templateFile.SaveAsJson(json);
+            }
         }
 
         public void SaveAsTemplate(T instance) {
-            SaveToFile(instance);
-        }
-
-        public void SaveToFile(T instance) {
             var file = GetEntityFileForId(instance.GetId());
             var json = UpdateJsonState(instance);
             file.SaveAsJson(json);
         }
 
-        private JToken UpdateJsonState(T instance) {
-            var json = ToJToken(instance, GetJsonSerializer());
-            var templateId = instance.TemplateId;
+        private JToken UpdateJsonState(T entity) {
+            var json = ToJToken(entity, GetJsonSerializer());
+            var templateId = entity.TemplateId;
             if (templateId != null) {
-                var template = ComposeFullJson(templateId, allowLazyLoadFromDisk: true);
+                var template = ComposeFullJsonFromDisk(templateId, allowLazyLoadFromDisk: true);
                 json = JonDiffPatch.Diff(template, json);
             }
-            UpdateTemplateCache(instance.GetId(), json);
+            UpdateEntitiesCache(entity.GetId(), json);
             return json;
         }
 
@@ -81,8 +87,11 @@ namespace com.csutil.model.ecs {
         }
 
         public void Delete(string entityId) {
-            if (LoadedTemplates.Remove(entityId)) {
-                GetEntityFileForId(entityId).DeleteV2();
+            if (EntityCache.Remove(entityId)) {
+                var templateFile = GetEntityFileForId(entityId);
+                if (templateFile.Exists) {
+                    templateFile.DeleteV2();
+                }
             }
         }
 
@@ -92,14 +101,18 @@ namespace com.csutil.model.ecs {
 
         public T CreateVariantInstanceOf(T template) {
             var templateId = template.GetId();
-            if (!LoadedTemplates.ContainsKey(templateId)) {
-                throw new InvalidOperationException("The passed instance first needs to be stored as a template");
+            if (!IsTemplate(templateId)) {
+                throw new InvalidOperationException($"The passed entity {template} first needs to be saved as a template");
             }
             JsonSerializer serializer = GetJsonSerializer();
             var json = ToJToken(template, serializer);
             json["Id"] = "" + GuidV2.NewGuid();
             json["TemplateId"] = templateId;
             return ToObject(json, serializer);
+        }
+
+        private bool IsTemplate(string templateId) {
+            return GetEntityFileForId(templateId).Exists;
         }
 
         private T ToObject(JToken json, JsonSerializer serializer) {
@@ -123,12 +136,12 @@ namespace com.csutil.model.ecs {
         /// <param name="entityId"> The id of the entity to load </param>
         /// <param name="allowLazyLoadFromDisk"> if false its is expected all entities were already loaded into memory via <see cref="LoadAllTemplateFilesIntoMemory"/> </param>
         public T LoadTemplateInstance(string entityId, bool allowLazyLoadFromDisk = true) {
-            return ToObject(ComposeFullJson(entityId, allowLazyLoadFromDisk), GetJsonSerializer());
+            return ToObject(ComposeFullJsonFromDisk(entityId, allowLazyLoadFromDisk), GetJsonSerializer());
         }
 
         /// <summary> Recursively composes the full json for the given entity id by applying the templates </summary>
-        private JToken ComposeFullJson(string entityId, bool allowLazyLoadFromDisk) {
-            if (!LoadedTemplates.ContainsKey(entityId)) {
+        private JToken ComposeFullJsonFromDisk(string entityId, bool allowLazyLoadFromDisk) {
+            if (!EntityCache.ContainsKey(entityId)) {
                 if (allowLazyLoadFromDisk) {
                     var entityFile = GetEntityFileForId(entityId);
                     if (!entityFile.Exists) {
@@ -139,11 +152,32 @@ namespace com.csutil.model.ecs {
                     throw new KeyNotFoundException("Entity not found: " + entityId);
                 }
             }
-            var json = LoadedTemplates[entityId];
+            var json = EntityCache[entityId];
             if (json["TemplateId"] is JArray templateIdArray) {
                 var templateId = templateIdArray[1].Value<string>();
-                var template = ComposeFullJson(templateId, allowLazyLoadFromDisk);
+                var template = ComposeFullJsonFromDisk(templateId, allowLazyLoadFromDisk);
                 json = JonDiffPatch.Patch(template, json);
+            }
+            return json;
+        }
+
+        public T RecreateVariantInstance(string entityId) {
+            return ToObject(ComposeFullJsonOnlyFromMemory(entityId), GetJsonSerializer());
+        }
+
+        private JToken ComposeFullJsonOnlyFromMemory(string entityId) {
+            if (!EntityCache.ContainsKey(entityId)) {
+                throw new KeyNotFoundException("Entity not found in memory: " + entityId);
+            }
+            var json = EntityCache[entityId];
+            if (json["TemplateId"] is JArray templateIdArray) {
+                var templateId = templateIdArray[1].Value<string>();
+                var template = ComposeFullJsonOnlyFromMemory(templateId);
+                try {
+                    json = JonDiffPatch.Patch(template, json);
+                } catch (Exception e) {
+                    throw;
+                }
             }
             return json;
         }

@@ -253,6 +253,18 @@ namespace com.csutil.tests.model.esc {
                 // The boss enemy was modified so it still has 200 health:
                 Assert.Equal(200, bossEnemy.GetComponent<EnemyComponent>().Health);
 
+                // If a change to a variant is done but not persisted via save changes and then a parent template of
+                // that variant is changed the variant is reconstructed from the latest stored state and with that the
+                // unsaved changes to the variant are lost:
+                bossEnemy.GetComponent<EnemyComponent>().Health = 300;
+                bossEnemy.GetComponent<EnemyComponent>().Mana = 50;
+                // These boss enemy changes are NOT persisted (no call to SaveChanges) so they are lost once
+                // baseEnemy saves its changes (and with that also updates all direct and indirect variants):
+                baseEnemy.SaveChanges();
+                // The health is back to the 200 value as it was before and the mana is back to 0:
+                Assert.Equal(200, bossEnemy.GetComponent<EnemyComponent>().Health);
+                Assert.Equal(0, bossEnemy.GetComponent<EnemyComponent>().Mana);
+
                 // All created entities are added to the scene graph and persisted to disk
                 var scene = ecs.Add(new Entity() { Name = "Scene" });
                 var enemy1 = scene.AddChild(baseEnemy.CreateVariant());
