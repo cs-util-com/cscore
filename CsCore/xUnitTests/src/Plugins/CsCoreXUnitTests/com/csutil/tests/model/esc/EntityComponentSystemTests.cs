@@ -33,12 +33,12 @@ namespace com.csutil.tests.model.esc {
             templates.SaveAsTemplate(enemyTemplate);
 
             // An instance that has a different health value than the template:
-            Entity variant1 = templates.CreateVariantInstanceOf(enemyTemplate);
+            Entity variant1 = templates.CreateVariantInstanceOf(enemyTemplate, NewIdDict(enemyTemplate));
             (variant1.Components.Single().Value as EnemyComponent).Health = 200;
             templates.SaveAsTemplate(variant1); // Save it as a variant of the enemyTemplate
 
             // Create a variant2 of the variant1
-            Entity variant2 = templates.CreateVariantInstanceOf(variant1);
+            Entity variant2 = templates.CreateVariantInstanceOf(variant1, NewIdDict(variant1));
             (variant2.Components.Single().Value as EnemyComponent).Mana = 20;
             templates.SaveAsTemplate(variant2);
 
@@ -50,12 +50,13 @@ namespace com.csutil.tests.model.esc {
 
             {
                 // Another instance that is identical to the template:
-                Entity instance3 = templates.CreateVariantInstanceOf(enemyTemplate);
+                Entity instance3 = templates.CreateVariantInstanceOf(enemyTemplate, NewIdDict(enemyTemplate));
                 // instance3 is not saved as a variant 
                 // Creating an instance of an instance is not allowed:
-                Assert.Throws<InvalidOperationException>(() => templates.CreateVariantInstanceOf(instance3));
+                Assert.Throws<InvalidOperationException>(() => templates.CreateVariantInstanceOf(instance3, NewIdDict(instance3)));
                 // Instead the parent template should be used to create another instance:
-                Entity instance4 = templates.CreateVariantInstanceOf(templates.ComposeEntityInstance(instance3.TemplateId));
+                var template = templates.ComposeEntityInstance(instance3.TemplateId);
+                Entity instance4 = templates.CreateVariantInstanceOf(template, NewIdDict(template));
                 Assert.Equal(instance3.TemplateId, instance4.TemplateId);
                 Assert.NotEqual(instance3.Id, instance4.Id);
             }
@@ -78,6 +79,10 @@ namespace com.csutil.tests.model.esc {
             Assert.Equal(300, enemyComp2.Health);
             Assert.Equal(20, enemyComp2.Mana);
 
+        }
+        
+        private Dictionary<string, string> NewIdDict(Entity original) {
+            return new Dictionary<string, string>() { { original.Id, "" + GuidV2.NewGuid() } };
         }
 
         [Fact]
@@ -248,6 +253,7 @@ namespace com.csutil.tests.model.esc {
                 sword.RemoveFromParent();
                 Assert.Empty(mageEnemy.ChildrenIds);
 
+                // Now that the sword is removed from the mage it can be added to the boss enemy: 
                 bossEnemy.AddChild(sword);
 
                 bossEnemy.SaveChanges();

@@ -29,9 +29,9 @@ namespace com.csutil.model.ecs {
         public DisposeState IsDisposed { get; set; } = DisposeState.Active;
 
         private readonly TemplatesIO<T> TemplatesIo;
-        
+
         private readonly Dictionary<string, IEntity<T>> Entities = new Dictionary<string, IEntity<T>>();
-        
+
         /// <summary> A lookup from templateId to all entityIds that are variants of that template </summary>
         private readonly Dictionary<string, HashSet<string>> Variants = new Dictionary<string, HashSet<string>>();
 
@@ -150,8 +150,8 @@ namespace com.csutil.model.ecs {
             }
         }
 
-        public IEntity<T> CreateVariant(T entityData) {
-            var variant = TemplatesIo.CreateVariantInstanceOf(entityData);
+        public IEntity<T> CreateVariant(T entityData, Dictionary<string, string> newIdsLookup) {
+            var variant = TemplatesIo.CreateVariantInstanceOf(entityData, newIdsLookup);
             return Add(variant);
         }
 
@@ -159,7 +159,7 @@ namespace com.csutil.model.ecs {
             TemplatesIo.Update(entityData);
             Update(entityData);
         }
-        
+
         public void SaveAsTemplate(T entityData) {
             TemplatesIo.SaveAsTemplate(entityData);
             Update(entityData);

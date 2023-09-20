@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using com.csutil.json;
 using JsonDiffPatchDotNet;
@@ -100,15 +101,22 @@ namespace com.csutil.model.ecs {
             return JToken.FromObject(instance, serializer);
         }
 
-        public T CreateVariantInstanceOf(T template) {
+        public T CreateVariantInstanceOf(T template, Dictionary<string, string> newIdsLookup) {
             var templateId = template.GetId();
             if (!IsTemplate(templateId)) {
                 throw new InvalidOperationException($"The passed entity {template} first needs to be saved as a template");
             }
             JsonSerializer serializer = GetJsonSerializer();
             var json = ToJToken(template, serializer);
-            json["Id"] = "" + GuidV2.NewGuid();
+            json["Id"] = newIdsLookup[template.Id];
             json["TemplateId"] = templateId;
+            if (template.ParentId != null) {
+                json["ParentId"] = newIdsLookup[template.ParentId];
+            }
+            if (!template.ChildrenIds.IsNullOrEmpty()) {
+                var newChildrenIds = template.ChildrenIds.Map(x => newIdsLookup[x]);
+                json["ChildrenIds"] = (JArray)JToken.FromObject(newChildrenIds, serializer);
+            }
             return ToObject(json, serializer);
         }
 

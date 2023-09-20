@@ -139,21 +139,29 @@ namespace com.csutil.model.ecs {
             var fullSubtree = self.GetChildrenTreeBreadthFirst();
             foreach (var e in fullSubtree) { e.Ecs.SaveAsTemplate(e.Data); }
         }
-        
+
         public static void SaveChanges<T>(this IEntity<T> self) where T : IEntityData {
             var fullSubtree = self.GetChildrenTreeBreadthFirst();
             foreach (var e in fullSubtree) { e.Ecs.SaveChanges(e.Data); }
         }
 
+        /// <summary>
+        /// Recursively creates variants of all entities in the subtree of the entity and returns a new root entity that has the variant ids in its children lists
+        /// </summary>
         public static IEntity<T> CreateVariant<T>(this IEntity<T> self) where T : IEntityData {
-            return self.Ecs.CreateVariant(self.Data);
+            var fullSubtree = self.GetChildrenTreeBreadthFirst().ToList();
+            var newIdsLookup = fullSubtree.ToDictionary(x => x.Id, x => "" + GuidV2.NewGuid());
+            foreach (var e in fullSubtree) {
+                e.Ecs.CreateVariant(e.Data, newIdsLookup);
+            }
+            return self.Ecs.CreateVariant(self.Data, newIdsLookup);
         }
 
         public static IEntity<T> GetChild<T>(this IEntity<T> mageEnemy, string name) where T : IEntityData {
             return mageEnemy.GetChildren().Single(x => x.Name == name);
         }
 
-        /// <summary> Returns the full subtree under the entity in a depth first order </summary>
+        /// <summary> Returns the full subtree under the entity in a breath first order </summary>
         public static IEnumerable<IEntity<T>> GetChildrenTreeBreadthFirst<T>(this IEntity<T> self) where T : IEntityData {
             return TreeFlattenTraverse.BreadthFirst(self, x => x.GetChildren());
         }
@@ -184,7 +192,7 @@ namespace com.csutil.model.ecs {
             AssertOnlySingleCompOfType<V>(self);
             return self.Components.Values.Single(c => c is V) as V;
         }
-        
+
         [Conditional("DEBUG")]
         private static void AssertOnlySingleCompOfType<V>(IEntityData self) where V : class {
             var compTypeCount = self.Components.Values.Count(c => c is V);
