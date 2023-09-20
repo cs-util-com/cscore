@@ -215,7 +215,7 @@ namespace com.csutil.tests.model.esc {
                     Name = "Sword",
                     Components = CreateComponents(new SwordComponent() { Damage = 10 })
                 });
-                baseEnemy.SaveChanges();
+                baseEnemy.SaveAsTemplate();
 
                 // Define a variant of the base enemy which is stronger and has a shield:
                 var bossEnemy = baseEnemy.CreateVariant();

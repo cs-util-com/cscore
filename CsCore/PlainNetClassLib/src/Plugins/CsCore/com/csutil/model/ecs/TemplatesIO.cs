@@ -56,10 +56,11 @@ namespace com.csutil.model.ecs {
         }
 
         public void Update(T instance) {
-            var templateFile = GetEntityFileForId(instance.GetId());
+            var entityId = instance.GetId();
             var json = UpdateJsonState(instance);
             // If the entity is a template, save also its file:
-            if (templateFile.Exists) {
+            if (IsTemplate(entityId)) {
+                var templateFile = GetEntityFileForId(entityId);
                 templateFile.SaveAsJson(json);
             }
         }

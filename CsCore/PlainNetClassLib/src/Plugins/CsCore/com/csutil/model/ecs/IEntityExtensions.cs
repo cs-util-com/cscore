@@ -135,6 +135,11 @@ namespace com.csutil.model.ecs {
             return new Pose(position, rotation, scale);
         }
 
+        public static void SaveAsTemplate<T>(this IEntity<T> self) where T : IEntityData {
+            var fullSubtree = self.GetChildrenTreeBreadthFirst();
+            foreach (var e in fullSubtree) { e.Ecs.SaveAsTemplate(e.Data); }
+        }
+        
         public static void SaveChanges<T>(this IEntity<T> self) where T : IEntityData {
             var fullSubtree = self.GetChildrenTreeBreadthFirst();
             foreach (var e in fullSubtree) { e.Ecs.SaveChanges(e.Data); }
