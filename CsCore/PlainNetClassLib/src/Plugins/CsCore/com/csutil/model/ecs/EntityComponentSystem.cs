@@ -118,7 +118,7 @@ namespace com.csutil.model.ecs {
         public async Task LoadSceneGraphFromDisk() {
             await TemplatesIo.LoadAllTemplateFilesIntoMemory();
             foreach (var entityId in TemplatesIo.GetAllEntityIds()) {
-                Add(TemplatesIo.LoadTemplateInstance(entityId));
+                Add(TemplatesIo.ComposeEntityInstance(entityId));
             }
         }
 

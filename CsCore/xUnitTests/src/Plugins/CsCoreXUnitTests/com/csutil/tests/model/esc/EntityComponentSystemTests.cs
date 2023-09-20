@@ -45,7 +45,7 @@ namespace com.csutil.tests.model.esc {
             // Updating variant 1 should also update variant2:
             (variant1.Components.Single().Value as EnemyComponent).Health = 300;
             templates.SaveAsTemplate(variant1);
-            variant2 = templates.LoadTemplateInstance(variant2.Id);
+            variant2 = templates.ComposeEntityInstance(variant2.Id);
             Assert.Equal(300, (variant2.Components.Single().Value as EnemyComponent).Health);
 
             {
@@ -55,7 +55,7 @@ namespace com.csutil.tests.model.esc {
                 // Creating an instance of an instance is not allowed:
                 Assert.Throws<InvalidOperationException>(() => templates.CreateVariantInstanceOf(instance3));
                 // Instead the parent template should be used to create another instance:
-                Entity instance4 = templates.CreateVariantInstanceOf(templates.LoadTemplateInstance(instance3.TemplateId));
+                Entity instance4 = templates.CreateVariantInstanceOf(templates.ComposeEntityInstance(instance3.TemplateId));
                 Assert.Equal(instance3.TemplateId, instance4.TemplateId);
                 Assert.NotEqual(instance3.Id, instance4.Id);
             }
@@ -65,7 +65,7 @@ namespace com.csutil.tests.model.esc {
             var ids = ecs2.GetAllEntityIds().ToList();
             Assert.Equal(3, ids.Count());
 
-            Entity v1 = ecs2.LoadTemplateInstance(variant1.Id);
+            Entity v1 = ecs2.ComposeEntityInstance(variant1.Id);
             var enemyComp1 = v1.Components.Single().Value as EnemyComponent;
             Assert.Equal(300, enemyComp1.Health);
             Assert.Equal(10, enemyComp1.Mana);
@@ -73,7 +73,7 @@ namespace com.csutil.tests.model.esc {
             // Alternatively to automatically lazy loading the templates can be loaded into memory all at once: 
             await ecs2.LoadAllTemplateFilesIntoMemory();
 
-            Entity v2 = ecs2.LoadTemplateInstance(variant2.Id);
+            Entity v2 = ecs2.ComposeEntityInstance(variant2.Id);
             var enemyComp2 = v2.Components.Single().Value as EnemyComponent;
             Assert.Equal(300, enemyComp2.Health);
             Assert.Equal(20, enemyComp2.Mana);
@@ -202,7 +202,8 @@ namespace com.csutil.tests.model.esc {
             // First the user creates a scene at runtime:
             var dir = EnvironmentV2.instance.GetNewInMemorySystem();
             {
-                var ecs = new EntityComponentSystem<Entity>(new TemplatesIO<Entity>(dir), isModelImmutable: false);
+                var templatesIo = new TemplatesIO<Entity>(dir);
+                var ecs = new EntityComponentSystem<Entity>(templatesIo, isModelImmutable: false);
 
                 // He defines a few of the entities as templates and other as variants
 
@@ -232,13 +233,21 @@ namespace com.csutil.tests.model.esc {
                 mageEnemy.Data.Name = "MageEnemy";
                 mageEnemy.GetComponent<EnemyComponent>().Mana = 100;
                 mageEnemy.SaveChanges();
-                
+
+                Assert.NotSame(mageEnemy, baseEnemy);
+                Assert.NotSame(mageEnemy.Data, baseEnemy.Data);
+
                 var sword = mageEnemy.GetChild("Sword");
+                Assert.NotEqual(sword, baseEnemy.GetChild("Sword"));
 
                 // Switching the parent of the sword from the mage to the boss enemy should fail
                 Assert.Throws<InvalidOperationException>(() => bossEnemy.AddChild(sword));
+
                 // Instead the sword first needs to be removed and then added to the new parent:
+                Assert.Equal(sword.Id, mageEnemy.ChildrenIds.Single());
                 sword.RemoveFromParent();
+                Assert.Empty(mageEnemy.ChildrenIds);
+
                 bossEnemy.AddChild(sword);
 
                 bossEnemy.SaveChanges();
@@ -247,7 +256,7 @@ namespace com.csutil.tests.model.esc {
                 // Updates to the prefabs also result in the variants being updated
                 baseEnemy.GetComponent<EnemyComponent>().Health = 150;
                 baseEnemy.SaveChanges();
-                
+
                 // The mage enemy health wasnt modified so with the template update it now has also 150 health:
                 Assert.Equal(150, mageEnemy.GetComponent<EnemyComponent>().Health);
                 // The boss enemy was modified so it still has 200 health:
@@ -278,6 +287,7 @@ namespace com.csutil.tests.model.esc {
 
                 // Simulate the user closing the application and starting it again
                 ecs.Dispose();
+                // TODO
             }
             {
                 var ecs = new EntityComponentSystem<Entity>(new TemplatesIO<Entity>(dir), isModelImmutable: false);

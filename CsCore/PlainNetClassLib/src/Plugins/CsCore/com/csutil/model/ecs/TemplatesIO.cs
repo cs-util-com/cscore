@@ -75,7 +75,7 @@ namespace com.csutil.model.ecs {
             var json = ToJToken(entity, GetJsonSerializer());
             var templateId = entity.TemplateId;
             if (templateId != null) {
-                var template = ComposeFullJsonFromDisk(templateId, allowLazyLoadFromDisk: true);
+                var template = ComposeFullJson(templateId, allowLazyLoadFromDisk: true);
                 json = JonDiffPatch.Diff(template, json);
             }
             UpdateEntitiesCache(entity.GetId(), json);
@@ -133,15 +133,15 @@ namespace com.csutil.model.ecs {
             return EntityDir.EnumerateFiles().Map(x => x.Name);
         }
 
-        /// <summary> Creates a template instance based on the involved templates </summary>
-        /// <param name="entityId"> The id of the entity to load </param>
-        /// <param name="allowLazyLoadFromDisk"> if false its is expected all entities were already loaded into memory via <see cref="LoadAllTemplateFilesIntoMemory"/> </param>
-        public T LoadTemplateInstance(string entityId, bool allowLazyLoadFromDisk = true) {
-            return ToObject(ComposeFullJsonFromDisk(entityId, allowLazyLoadFromDisk), GetJsonSerializer());
+        /// <summary> Composes an entity instance based on the involved templates </summary>
+        /// <param name="entityId"> The id of the entity to compose </param>
+        /// <param name="allowLazyLoadFromDisk"> if false its is expected all involved templates were already loaded into memory via <see cref="LoadAllTemplateFilesIntoMemory"/> </param>
+        public T ComposeEntityInstance(string entityId, bool allowLazyLoadFromDisk = true) {
+            return ToObject(ComposeFullJson(entityId, allowLazyLoadFromDisk), GetJsonSerializer());
         }
 
         /// <summary> Recursively composes the full json for the given entity id by applying the templates </summary>
-        private JToken ComposeFullJsonFromDisk(string entityId, bool allowLazyLoadFromDisk) {
+        private JToken ComposeFullJson(string entityId, bool allowLazyLoadFromDisk) {
             if (!EntityCache.ContainsKey(entityId)) {
                 if (allowLazyLoadFromDisk) {
                     var entityFile = GetEntityFileForId(entityId);
@@ -156,7 +156,7 @@ namespace com.csutil.model.ecs {
             var json = EntityCache[entityId];
             if (json["TemplateId"] is JArray templateIdArray) {
                 var templateId = templateIdArray[1].Value<string>();
-                var template = ComposeFullJsonFromDisk(templateId, allowLazyLoadFromDisk);
+                var template = ComposeFullJson(templateId, allowLazyLoadFromDisk);
                 json = JonDiffPatch.Patch(template, json);
             }
             return json;
@@ -174,11 +174,7 @@ namespace com.csutil.model.ecs {
             if (json["TemplateId"] is JArray templateIdArray) {
                 var templateId = templateIdArray[1].Value<string>();
                 var template = ComposeFullJsonOnlyFromMemory(templateId);
-                try {
-                    json = JonDiffPatch.Patch(template, json);
-                } catch (Exception e) {
-                    throw;
-                }
+                json = JonDiffPatch.Patch(template, json);
             }
             return json;
         }
