@@ -80,7 +80,7 @@ namespace com.csutil.tests.model.esc {
             Assert.Equal(20, enemyComp2.Mana);
 
         }
-        
+
         private Dictionary<string, string> NewIdDict(Entity original) {
             return new Dictionary<string, string>() { { original.Id, "" + GuidV2.NewGuid() } };
         }
@@ -211,6 +211,13 @@ namespace com.csutil.tests.model.esc {
                 var ecs = new EntityComponentSystem<Entity>(templatesIo, isModelImmutable: false);
 
                 // He defines a few of the entities as templates and other as variants
+
+                {
+                    var firstEntity = ecs.Add(new Entity() { Name = "Entity1" });
+                    firstEntity.SaveAsTemplate();
+                    var firstVariant = firstEntity.CreateVariant();
+                    Assert.NotEqual(firstVariant.Id, firstEntity.Id);
+                }
 
                 // Define a base enemy template with a sword:
                 var baseEnemy = ecs.Add(new Entity() {

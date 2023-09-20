@@ -149,9 +149,10 @@ namespace com.csutil.model.ecs {
         /// Recursively creates variants of all entities in the subtree of the entity and returns a new root entity that has the variant ids in its children lists
         /// </summary>
         public static IEntity<T> CreateVariant<T>(this IEntity<T> self) where T : IEntityData {
-            var fullSubtree = self.GetChildrenTreeBreadthFirst().ToList();
-            var newIdsLookup = fullSubtree.ToDictionary(x => x.Id, x => "" + GuidV2.NewGuid());
-            foreach (var e in fullSubtree) {
+            var all = self.GetChildrenTreeBreadthFirst().ToList();
+            var newIdsLookup = all.ToDictionary(x => x.Id, x => "" + GuidV2.NewGuid());
+            var fullSubtreeLeavesFirst = all.Skip(1).Reverse();
+            foreach (var e in fullSubtreeLeavesFirst) {
                 e.Ecs.CreateVariant(e.Data, newIdsLookup);
             }
             return self.Ecs.CreateVariant(self.Data, newIdsLookup);

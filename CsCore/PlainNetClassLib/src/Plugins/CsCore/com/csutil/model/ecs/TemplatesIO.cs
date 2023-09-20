@@ -134,7 +134,9 @@ namespace com.csutil.model.ecs {
         private void AssertAllFieldsWereDeserialized(JToken sourceJson, T resultingEntity) {
             var backAsJson = ToJToken(resultingEntity, GetJsonSerializer());
             var diff = JonDiffPatch.Diff(sourceJson, backAsJson);
-            if (diff != null) { throw new Exception($"Not all props of {typeof(T)} were deserialized, missing set/get for:" + diff); }
+            if (diff != null) {
+                throw new Exception($"Not all props of {typeof(T)} were deserialized, missing set/get for:" + diff);
+            }
         }
 
         public IEnumerable<string> GetAllEntityIds() {
