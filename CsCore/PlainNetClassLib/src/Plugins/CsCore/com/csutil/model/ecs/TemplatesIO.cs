@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using com.csutil.json;
 using JsonDiffPatchDotNet;
@@ -60,7 +59,7 @@ namespace com.csutil.model.ecs {
             var entityId = instance.GetId();
             var json = UpdateJsonState(instance);
             // If the entity is a template, save also its file:
-            if (IsTemplate(entityId)) {
+            if (IsSavedToFiles(entityId)) {
                 var templateFile = GetEntityFileForId(entityId);
                 templateFile.SaveAsJson(json);
             }
@@ -103,8 +102,8 @@ namespace com.csutil.model.ecs {
 
         public T CreateVariantInstanceOf(T template, Dictionary<string, string> newIdsLookup) {
             var templateId = template.GetId();
-            if (!IsTemplate(templateId)) {
-                throw new InvalidOperationException($"The passed entity {template} first needs to be saved as a template");
+            if (!IsSavedToFiles(templateId)) {
+                throw new InvalidOperationException($"The passed entity {template} first needs to be saved before it can be used as a template");
             }
             JsonSerializer serializer = GetJsonSerializer();
             var json = ToJToken(template, serializer);
@@ -115,13 +114,15 @@ namespace com.csutil.model.ecs {
             }
             if (!template.ChildrenIds.IsNullOrEmpty()) {
                 var newChildrenIds = template.ChildrenIds.Map(x => newIdsLookup[x]);
-                json["ChildrenIds"] = (JArray)JToken.FromObject(newChildrenIds, serializer);
+                var newChildrenIdsJArray = (JArray)JToken.FromObject(newChildrenIds, serializer);
+                var oldChildrenIds = (JObject)json["ChildrenIds"];
+                oldChildrenIds.Property("$values").Value = newChildrenIdsJArray;
             }
             return ToObject(json, serializer);
         }
 
-        private bool IsTemplate(string templateId) {
-            return GetEntityFileForId(templateId).Exists;
+        private bool IsSavedToFiles(string entityId) {
+            return GetEntityFileForId(entityId).Exists;
         }
 
         private T ToObject(JToken json, JsonSerializer serializer) {
@@ -135,7 +136,7 @@ namespace com.csutil.model.ecs {
             var backAsJson = ToJToken(resultingEntity, GetJsonSerializer());
             var diff = JonDiffPatch.Diff(sourceJson, backAsJson);
             if (diff != null) {
-                throw new Exception($"Not all props of {typeof(T)} were deserialized, missing set/get for:" + diff);
+                throw new Exception($"Not all props of {typeof(T)} were deserialized, diff:" + diff);
             }
         }
 
@@ -145,7 +146,8 @@ namespace com.csutil.model.ecs {
 
         /// <summary> Composes an entity instance based on the involved templates </summary>
         /// <param name="entityId"> The id of the entity to compose </param>
-        /// <param name="allowLazyLoadFromDisk"> if false its is expected all involved templates were already loaded into memory via <see cref="LoadAllTemplateFilesIntoMemory"/> </param>
+        /// <param name="allowLazyLoadFromDisk"> if false its is expected all involved templates were
+        /// already loaded into memory via <see cref="LoadAllTemplateFilesIntoMemory"/> </param>
         public T ComposeEntityInstance(string entityId, bool allowLazyLoadFromDisk = true) {
             return ToObject(ComposeFullJson(entityId, allowLazyLoadFromDisk), GetJsonSerializer());
         }
