@@ -11,6 +11,8 @@ using Zio;
 
 namespace com.csutil.model.ecs {
 
+    /// <summary> A system to put entities into and to load/save them to a specified DirectoryEntry which unlocks using them as
+    /// templates for other entities. An in-memory DirectoryEntry can be used if saving to disk is not desired </summary>
     public class TemplatesIO<T> : IDisposableV2 where T : IEntityData {
 
         public DisposeState IsDisposed { get; private set; } = DisposeState.Active;
@@ -55,17 +57,7 @@ namespace com.csutil.model.ecs {
             }
         }
 
-        public void Update(T instance) {
-            var entityId = instance.GetId();
-            var json = UpdateJsonState(instance);
-            // If the entity is a template, save also its file:
-            if (IsSavedToFiles(entityId)) {
-                var file = GetEntityFileForId(entityId);
-                file.SaveAsJson(json);
-            }
-        }
-
-        public void SaveAsTemplate(T instance) {
+        public void SaveChanges(T instance) {
             var entityId = instance.GetId();
             var json = UpdateJsonState(instance);
             var file = GetEntityFileForId(entityId);
@@ -94,9 +86,9 @@ namespace com.csutil.model.ecs {
 
         public void Delete(string entityId) {
             if (EntityCache.Remove(entityId)) {
-                var templateFile = GetEntityFileForId(entityId);
-                if (templateFile.Exists) {
-                    templateFile.DeleteV2();
+                var entityFile = GetEntityFileForId(entityId);
+                if (entityFile.Exists) {
+                    entityFile.DeleteV2();
                 }
             }
         }
@@ -105,26 +97,26 @@ namespace com.csutil.model.ecs {
             return JToken.FromObject(instance, serializer);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="entity"></param>
+        /// <summary> Creates a variant instance of the given entity, the parent of the new variant will be defined by the
+        /// passed in dictionary, for the top level entity of the variant subtree typically no new parent id is passed in
+        /// so that the parent will be null and with that the new variant overall will not automatically be attached to
+        /// the same parent as the template. </summary>
         /// <param name="newIdsLookup"> Requires to pass in a filled dictionary with the current entity ids
         /// mapping to new ones that will be used for the new instances </param>
-        /// <returns></returns>
-        /// <exception cref="InvalidOperationException"></exception>
         public T CreateVariantInstanceOf(T entity, Dictionary<string, string> newIdsLookup) {
             var templateId = entity.GetId();
             if (!IsSavedToFiles(templateId)) {
-                throw new InvalidOperationException($"The passed entity {entity} first needs to be saved before it can be used as a template");
+                throw new InvalidOperationException($"The passed entity {entity} first needs to be saved once before it can be used as a template");
             }
             JsonSerializer serializer = GetJsonSerializer();
             var variantJson = ToJToken(entity, serializer);
             { // Update the entity jtoken to become a variant jtoken:
                 variantJson["Id"] = newIdsLookup[entity.Id];
                 variantJson["TemplateId"] = templateId;
-                if (entity.ParentId != null) {
-                    variantJson["ParentId"] = newIdsLookup[entity.ParentId];
+                if (entity.ParentId != null && newIdsLookup.TryGetValue(entity.ParentId, out var newParentId)) {
+                    variantJson["ParentId"] = newParentId;
+                } else {
+                    variantJson["ParentId"] = null;
                 }
                 if (!entity.ChildrenIds.IsNullOrEmpty()) {
                     var newChildrenIds = entity.ChildrenIds.Map(x => newIdsLookup[x]);

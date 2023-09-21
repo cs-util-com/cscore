@@ -26,7 +26,7 @@ namespace com.csutil.model.ecs {
 
         }
 
-        public DisposeState IsDisposed { get; set; } = DisposeState.Active;
+        public DisposeState IsDisposed { get; private set; } = DisposeState.Active;
 
         private readonly TemplatesIO<T> TemplatesIo;
 
@@ -57,8 +57,12 @@ namespace com.csutil.model.ecs {
         }
 
         public void Dispose() {
+            IsDisposed = DisposeState.DisposingStarted;
             TemplatesIo.DisposeV2();
             Entities.Clear();
+            Variants.Clear();
+            OnIEntityUpdated = null;
+            IsDisposed = DisposeState.Disposed;
         }
 
         public IEntity<T> Add(T entityData) {
@@ -156,12 +160,7 @@ namespace com.csutil.model.ecs {
         }
 
         public void SaveChanges(T entityData) {
-            TemplatesIo.Update(entityData);
-            Update(entityData);
-        }
-
-        public void SaveAsTemplate(T entityData) {
-            TemplatesIo.SaveAsTemplate(entityData);
+            TemplatesIo.SaveChanges(entityData);
             Update(entityData);
         }
 

@@ -30,21 +30,21 @@ namespace com.csutil.tests.model.esc {
                     new EnemyComponent() { Id = "c1", Health = 100, Mana = 10 }
                 )
             };
-            templates.SaveAsTemplate(enemyTemplate);
+            templates.SaveChanges(enemyTemplate);
 
             // An instance that has a different health value than the template:
             Entity variant1 = templates.CreateVariantInstanceOf(enemyTemplate, NewIdDict(enemyTemplate));
             (variant1.Components.Single().Value as EnemyComponent).Health = 200;
-            templates.SaveAsTemplate(variant1); // Save it as a variant of the enemyTemplate
+            templates.SaveChanges(variant1); // Save it as a variant of the enemyTemplate
 
             // Create a variant2 of the variant1
             Entity variant2 = templates.CreateVariantInstanceOf(variant1, NewIdDict(variant1));
             (variant2.Components.Single().Value as EnemyComponent).Mana = 20;
-            templates.SaveAsTemplate(variant2);
+            templates.SaveChanges(variant2);
 
             // Updating variant 1 should also update variant2:
             (variant1.Components.Single().Value as EnemyComponent).Health = 300;
-            templates.SaveAsTemplate(variant1);
+            templates.SaveChanges(variant1);
             variant2 = templates.ComposeEntityInstance(variant2.Id);
             Assert.Equal(300, (variant2.Components.Single().Value as EnemyComponent).Health);
 
@@ -213,10 +213,26 @@ namespace com.csutil.tests.model.esc {
                 // He defines a few of the entities as templates and other as variants
 
                 {
-                    var firstEntity = ecs.Add(new Entity() { Name = "Entity1" });
-                    firstEntity.SaveAsTemplate();
-                    var firstVariant = firstEntity.CreateVariant();
-                    Assert.NotEqual(firstVariant.Id, firstEntity.Id);
+                    var entity1 = ecs.Add(new Entity() { Name = "Entity1" });
+                    var entity11 = entity1.AddChild(new Entity() { Name = "Entity2" });
+                    entity1.SaveChanges();
+
+                    var variant1 = entity1.CreateVariant();
+                    Assert.NotEqual(variant1.Id, entity1.Id);
+                    // The ids of the children are different:
+                    Assert.NotEqual(entity1.ChildrenIds.Single(), variant1.ChildrenIds.Single());
+                    Assert.NotSame(entity1.GetChildren().Single(), variant1.GetChildren().Single());
+
+                    var variant11 = entity11.CreateVariant();
+                    Assert.NotEqual(entity11.Id, variant11.Id);
+                    // The variant is not attached to the same parent
+                    Assert.NotEqual(entity11.ParentId, variant11.ParentId);
+                    Assert.Null(variant11.ParentId);
+                    // But the variant can be found in the root level of the ecs:
+                    Assert.Same(variant11, ecs.GetEntity(variant11.Id));
+                    // That means that the first entity also still does only have 1 child:
+                    Assert.Single(entity1.GetChildren());
+                    Assert.Single(entity1.ChildrenIds);
                 }
 
                 // Define a base enemy template with a sword:
@@ -228,7 +244,7 @@ namespace com.csutil.tests.model.esc {
                     Name = "Sword",
                     Components = CreateComponents(new SwordComponent() { Damage = 10 })
                 });
-                baseEnemy.SaveAsTemplate();
+                baseEnemy.SaveChanges();
 
                 // Define a variant of the base enemy which is stronger and has a shield:
                 var bossEnemy = baseEnemy.CreateVariant();
@@ -287,9 +303,9 @@ namespace com.csutil.tests.model.esc {
                 Assert.Equal(200, bossEnemy.GetComponent<EnemyComponent>().Health);
                 Assert.Equal(0, bossEnemy.GetComponent<EnemyComponent>().Mana);
 
-                bossEnemy.SaveAsTemplate();
-                mageEnemy.SaveAsTemplate();
-                
+                bossEnemy.SaveChanges();
+                mageEnemy.SaveChanges();
+
                 // All created entities are added to the scene graph and persisted to disk
                 var scene = ecs.Add(new Entity() { Name = "Scene" });
                 var enemy1 = scene.AddChild(baseEnemy.CreateVariant());
@@ -299,7 +315,7 @@ namespace com.csutil.tests.model.esc {
                 var enemy3 = scene.AddChild(mageEnemy.CreateVariant());
                 enemy3.Data.LocalPose = Pose.NewMatrix(new Vector3(-1, 0, 0));
 
-                scene.SaveAsTemplate();
+                scene.SaveChanges();
 
                 // Simulate the user closing the application and starting it again
                 ecs.Dispose();
@@ -309,8 +325,8 @@ namespace com.csutil.tests.model.esc {
                 var ecs = new EntityComponentSystem<Entity>(new TemplatesIO<Entity>(dir), isModelImmutable: false);
                 Assert.Empty(ecs.AllEntities);
                 await ecs.LoadSceneGraphFromDisk();
-                Assert.Equal(16, dir.EnumerateFiles().Count());
-                Assert.Equal(16, ecs.AllEntities.Count);
+                Assert.Equal(17, dir.EnumerateFiles().Count());
+                Assert.Equal(17, ecs.AllEntities.Count);
                 // The user loads the scene from disk and can continue editing it
 
                 var scene = ecs.FindEntitiesWithName("Scene").Single();
