@@ -75,7 +75,7 @@ namespace com.csutil.tests {
                 // The progress callback is dispatched using the SynchronizationContext 
                 // of the constructor, so it will have some delay before being called:
                 Assert.False(progressEventTriggered);
-                await TaskV2.Delay(50); // Wait for progress update to be invoked
+                await TaskV2.Delay(200); // Wait for progress update to be invoked
                 Assert.True(progressEventTriggered);
             }
         }

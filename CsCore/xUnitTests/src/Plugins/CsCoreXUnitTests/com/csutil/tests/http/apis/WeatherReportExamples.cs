@@ -43,7 +43,7 @@ namespace com.csutil.tests.http {
         }
 
         /// <summary> MetaWeather seems to be down for quite a while, will check from time to time if its back  </summary>
-        private DateTime MetaWeatherComNextCheckIfBackOnline = new DateTime(2023, 07, 01);
+        private DateTime MetaWeatherComNextCheckIfBackOnline = new DateTime(2024, 01, 01);
 
         [Obsolete]
         [Fact]

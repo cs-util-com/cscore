@@ -403,13 +403,12 @@ namespace com.csutil.tests.http {
             await TestPlaceholderImageService($"https://placekitten.com/{w}/{h}", h, w);
             await TestPlaceholderImageService($"https://loremflickr.com/{w}/{h}", h, w);
             await TestPlaceholderImageService($"https://baconmockup.com/{w}/{h}", h, w);
-            await TestPlaceholderImageService($"https://placeimg.com/{w}/{h}/any", h, w);
             await TestPlaceholderImageService($"https://placebear.com/{w}/{h}", h, w);
             await TestPlaceholderImageService($"https://placebeard.it/{w}x{h}", h, w);
+            await TestPlaceholderImageService($"https://picsum.photos/{w}/{h}", h, w);
             // await TestPlaceholderImageService($"https://www.placecage.com/{w}/{h}", h, w);
             // await TestPlaceholderImageService($"https://www.fillmurray.com/{w}/{h}", h, w);
             // await TestPlaceholderImageService($"https://www.stevensegallery.com/{w}/{h}", h, w);
-            // await TestPlaceholderImageService($"https://picsum.photos/{w}/{h}", h, w);
         }
 
         private static async Task TestPlaceholderImageService(string placeholderImageServiceUrl, int h, int w) {
