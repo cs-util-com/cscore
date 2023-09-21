@@ -1,7 +1,10 @@
 ﻿using System.Collections.Generic;
-using System.Threading.Channels;
 using System.Threading.Tasks;
 using Xunit;
+
+#if !UNITY_5_3_OR_NEWER
+
+using System.Threading.Channels;
 
 namespace com.csutil.tests.async {
 
@@ -68,3 +71,5 @@ namespace com.csutil.tests.async {
     }
 
 }
+
+#endif
