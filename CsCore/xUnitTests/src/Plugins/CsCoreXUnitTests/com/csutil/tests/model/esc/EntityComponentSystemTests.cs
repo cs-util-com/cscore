@@ -287,6 +287,9 @@ namespace com.csutil.tests.model.esc {
                 Assert.Equal(200, bossEnemy.GetComponent<EnemyComponent>().Health);
                 Assert.Equal(0, bossEnemy.GetComponent<EnemyComponent>().Mana);
 
+                bossEnemy.SaveAsTemplate();
+                mageEnemy.SaveAsTemplate();
+                
                 // All created entities are added to the scene graph and persisted to disk
                 var scene = ecs.Add(new Entity() { Name = "Scene" });
                 var enemy1 = scene.AddChild(baseEnemy.CreateVariant());
@@ -296,7 +299,7 @@ namespace com.csutil.tests.model.esc {
                 var enemy3 = scene.AddChild(mageEnemy.CreateVariant());
                 enemy3.Data.LocalPose = Pose.NewMatrix(new Vector3(-1, 0, 0));
 
-                scene.SaveChanges();
+                scene.SaveAsTemplate();
 
                 // Simulate the user closing the application and starting it again
                 ecs.Dispose();
@@ -306,8 +309,8 @@ namespace com.csutil.tests.model.esc {
                 var ecs = new EntityComponentSystem<Entity>(new TemplatesIO<Entity>(dir), isModelImmutable: false);
                 Assert.Empty(ecs.AllEntities);
                 await ecs.LoadSceneGraphFromDisk();
-                Assert.Equal(9, dir.EnumerateFiles().Count());
-                Assert.Equal(9, ecs.AllEntities.Count);
+                Assert.Equal(16, dir.EnumerateFiles().Count());
+                Assert.Equal(16, ecs.AllEntities.Count);
                 // The user loads the scene from disk and can continue editing it
 
                 var scene = ecs.FindEntitiesWithName("Scene").Single();

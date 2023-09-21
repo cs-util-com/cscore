@@ -18,24 +18,24 @@ namespace com.csutil.model.immutable {
         public SubState(IDataStore<T> store, Func<T, S> subStateFunc) {
             Store = store;
             GetState = () => {
-                ThrowIfDisposed();
+                this.ThrowErrorIfDisposed();
                 return subStateFunc(Store.GetState());
             };
         }
 
         public object Dispatch(object actionToDispatch, bool throwExceptionIfActionDoesNotChangeSubState = true) {
-            ThrowIfDisposed();
+            this.ThrowErrorIfDisposed();
             return Store.Dispatch(actionToDispatch);
         }
 
         public void TriggerOnSubstateChanged(S newSubState) {
-            ThrowIfDisposed();
+            this.ThrowErrorIfDisposed();
             onStateChanged?.Invoke();
         }
 
         public Action AddStateChangeListener<SubSub>(Func<S, SubSub> getSubSubState, Action<SubSub> onChanged, bool triggerInstantToInit = true) {
             Action newListener = ImmutableExtensions.NewSubstateChangeListener(() => {
-                ThrowIfDisposed();
+                this.ThrowErrorIfDisposed();
                 return getSubSubState(GetState());
             }, onChanged);
             onStateChanged += newListener;
