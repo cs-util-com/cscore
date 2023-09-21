@@ -51,23 +51,20 @@ namespace com.csutil.model.ecs {
             }
         }
 
-        private void UpdateEntitiesCache(string id, JToken entity) {
-            EntityCache[id] = entity;
-        }
-
         public void Update(T instance) {
             var entityId = instance.GetId();
             var json = UpdateJsonState(instance);
             // If the entity is a template, save also its file:
             if (IsSavedToFiles(entityId)) {
-                var templateFile = GetEntityFileForId(entityId);
-                templateFile.SaveAsJson(json);
+                var file = GetEntityFileForId(entityId);
+                file.SaveAsJson(json);
             }
         }
 
         public void SaveAsTemplate(T instance) {
-            var file = GetEntityFileForId(instance.GetId());
+            var entityId = instance.GetId();
             var json = UpdateJsonState(instance);
+            var file = GetEntityFileForId(entityId);
             file.SaveAsJson(json);
         }
 
@@ -82,6 +79,10 @@ namespace com.csutil.model.ecs {
             return json;
         }
 
+        private void UpdateEntitiesCache(string id, JToken entity) {
+            EntityCache[id] = entity;
+        }
+        
         private FileEntry GetEntityFileForId(string entityId) {
             entityId.ThrowErrorIfNullOrEmpty("entityId");
             return EntityDir.GetChild(entityId);
@@ -100,25 +101,35 @@ namespace com.csutil.model.ecs {
             return JToken.FromObject(instance, serializer);
         }
 
-        public T CreateVariantInstanceOf(T template, Dictionary<string, string> newIdsLookup) {
-            var templateId = template.GetId();
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="newIdsLookup"> Requires to pass in a filled dictionary with the current entity ids
+        /// mapping to new ones that will be used for the new instances </param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        public T CreateVariantInstanceOf(T entity, Dictionary<string, string> newIdsLookup) {
+            var templateId = entity.GetId();
             if (!IsSavedToFiles(templateId)) {
-                throw new InvalidOperationException($"The passed entity {template} first needs to be saved before it can be used as a template");
+                throw new InvalidOperationException($"The passed entity {entity} first needs to be saved before it can be used as a template");
             }
             JsonSerializer serializer = GetJsonSerializer();
-            var json = ToJToken(template, serializer);
-            json["Id"] = newIdsLookup[template.Id];
-            json["TemplateId"] = templateId;
-            if (template.ParentId != null) {
-                json["ParentId"] = newIdsLookup[template.ParentId];
+            var variantJson = ToJToken(entity, serializer);
+            { // Update the entity jtoken to become a variant jtoken:
+                variantJson["Id"] = newIdsLookup[entity.Id];
+                variantJson["TemplateId"] = templateId;
+                if (entity.ParentId != null) {
+                    variantJson["ParentId"] = newIdsLookup[entity.ParentId];
+                }
+                if (!entity.ChildrenIds.IsNullOrEmpty()) {
+                    var newChildrenIds = entity.ChildrenIds.Map(x => newIdsLookup[x]);
+                    var newChildrenIdsJArray = (JArray)JToken.FromObject(newChildrenIds, serializer);
+                    var oldChildrenIds = (JObject)variantJson["ChildrenIds"];
+                    oldChildrenIds.Property("$values").Value = newChildrenIdsJArray;
+                }
             }
-            if (!template.ChildrenIds.IsNullOrEmpty()) {
-                var newChildrenIds = template.ChildrenIds.Map(x => newIdsLookup[x]);
-                var newChildrenIdsJArray = (JArray)JToken.FromObject(newChildrenIds, serializer);
-                var oldChildrenIds = (JObject)json["ChildrenIds"];
-                oldChildrenIds.Property("$values").Value = newChildrenIdsJArray;
-            }
-            return ToObject(json, serializer);
+            return ToObject(variantJson, serializer);
         }
 
         private bool IsSavedToFiles(string entityId) {
