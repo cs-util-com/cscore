@@ -43,15 +43,11 @@ namespace com.csutil.model.immutable {
             return newListener;
         }
 
-        private void ThrowIfDisposed() {
-            if (IsDisposed != DisposeState.Active) { throw new ObjectDisposedException(GetType().Name); }
-        }
-
         /// <summary> If both the substate and the passed in mutable object change (eg because the mutable object is
         /// a child of the substate) then this listener will be triggered </summary>
         public Action AddStateChangeListener<M>(M mutableObj, Action<M> onChanged, bool triggerInstantToInit = true) where M : IsMutable {
             Action newListener = () => {
-                ThrowIfDisposed();
+                this.ThrowErrorIfDisposed();
                 if (StateCompare.WasModifiedInLastDispatch(mutableObj)) { onChanged(mutableObj); }
             };
             onStateChanged += newListener;

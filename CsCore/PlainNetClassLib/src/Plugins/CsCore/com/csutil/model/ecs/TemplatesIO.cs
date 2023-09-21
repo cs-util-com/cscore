@@ -13,7 +13,7 @@ namespace com.csutil.model.ecs {
 
     public class TemplatesIO<T> : IDisposableV2 where T : IEntityData {
 
-        public DisposeState IsDisposed { get; set; } = DisposeState.Active;
+        public DisposeState IsDisposed { get; private set; } = DisposeState.Active;
 
         private readonly DirectoryEntry EntityDir;
         private readonly JsonDiffPatch JonDiffPatch = new JsonDiffPatch();
@@ -29,11 +29,15 @@ namespace com.csutil.model.ecs {
         }
 
         public void Dispose() {
+            IsDisposed = DisposeState.DisposingStarted;
             EntityCache.Clear();
+            GetJsonSerializer = null;
+            IsDisposed = DisposeState.Disposed;
         }
 
         /// <summary> Loads all template files from disk into memory </summary>
         public async Task LoadAllTemplateFilesIntoMemory() {
+            this.ThrowErrorIfDisposed();
             var jsonSerializer = GetJsonSerializer();
             var tasks = new List<Task>();
             foreach (var templateFile in EntityDir.EnumerateFiles()) {
@@ -82,7 +86,7 @@ namespace com.csutil.model.ecs {
         private void UpdateEntitiesCache(string id, JToken entity) {
             EntityCache[id] = entity;
         }
-        
+
         private FileEntry GetEntityFileForId(string entityId) {
             entityId.ThrowErrorIfNullOrEmpty("entityId");
             return EntityDir.GetChild(entityId);

@@ -36,9 +36,7 @@ namespace com.csutil {
         }
 
         public void Dispose() {
-            if (IsDisposed != DisposeState.Active) {
-                throw new InvalidOperationException("IDisposableCollection state was already " + IsDisposed);
-            }
+            this.ThrowErrorIfDisposed();
             IsDisposed = DisposeState.DisposingStarted;
             foreach (var child in Children) {
                 try {
