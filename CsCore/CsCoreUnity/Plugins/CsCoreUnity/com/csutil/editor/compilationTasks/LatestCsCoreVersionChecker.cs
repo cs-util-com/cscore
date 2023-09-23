@@ -21,9 +21,13 @@ namespace com.csutil.editor {
                 await Task.Delay(3000); // Wait at least 3sec before starting
             } while (!(await InternetStateManager.Instance(null).HasInetAsync)); // Wait until internet awailable
 
-            var installedPackages = await GetInstalledPackagesFromPackageManager();
-            await CheckForUpdates(installedPackages, "https://raw.githubusercontent.com/cs-util-com/cscore/master/CsCore/PlainNetClassLib/src/Plugins/package.json");
-            await CheckForUpdates(installedPackages, "https://raw.githubusercontent.com/cs-util-com/cscore/master/CsCore/CsCoreUnity/Plugins/package.json");
+            try {
+                var installedPackages = await GetInstalledPackagesFromPackageManager();
+                await CheckForUpdates(installedPackages, "https://raw.githubusercontent.com/cs-util-com/cscore/master/CsCore/PlainNetClassLib/src/Plugins/package.json");
+                await CheckForUpdates(installedPackages, "https://raw.githubusercontent.com/cs-util-com/cscore/master/CsCore/CsCoreUnity/Plugins/package.json");
+            } catch (Exception e) {
+                Log.w("Could not check for latest version of CsCore: " + e);
+            }
         }
 
         private static async Task CheckForUpdates(List<UnityEditor.PackageManager.PackageInfo> installedPackages, string urlToLoadPackageJsonFrom) {
