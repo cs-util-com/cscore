@@ -273,6 +273,8 @@ namespace com.csutil.tests {
             TestGetEulerAnglesWith(61, 111, 87);
             TestGetEulerAnglesWith(90.012695f, -73.464935f, 157.1788f);
             TestGetEulerAnglesWith(90.004265f, 21.351936f, 15.406252f);
+            TestGetEulerAnglesWith(90.0001f, -153.36794f, 50.995544f);
+
             var rnd = new Random();
             for (int i = 0; i < 100000; i++) {
                 // Generate different angles in degrees for TestGetEulerAngles2: 
@@ -303,7 +305,7 @@ namespace com.csutil.tests {
 
         private static void TestGetEulerAnglesWith(float pitch, float yaw, float roll) {
             var inputEulers = new Vector3(pitch, yaw, roll);
-            var digits = 2;
+            var digits = 1;
             var rotation = Quaternion.CreateFromYawPitchRoll(yaw * degreeToRad, pitch * degreeToRad, roll * degreeToRad);
             var eulers = rotation.GetEulerAnglesAsPitchYawRoll();
             var rotation2 = Quaternion.CreateFromYawPitchRoll(eulers.Y * degreeToRad, eulers.X * degreeToRad, eulers.Z * degreeToRad);

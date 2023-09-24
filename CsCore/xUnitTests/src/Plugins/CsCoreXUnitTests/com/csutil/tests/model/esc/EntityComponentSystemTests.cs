@@ -322,7 +322,9 @@ namespace com.csutil.tests.model.esc {
                 // TODO
             }
             {
-                var ecs = new EntityComponentSystem<Entity>(new TemplatesIO<Entity>(dir), isModelImmutable: false);
+                Assert.NotEmpty(dir.EnumerateEntries());
+                var templatesIo = new TemplatesIO<Entity>(dir);
+                var ecs = new EntityComponentSystem<Entity>(templatesIo, isModelImmutable: false);
                 Assert.Empty(ecs.AllEntities);
                 await ecs.LoadSceneGraphFromDisk();
                 Assert.Equal(17, dir.EnumerateFiles().Count());
