@@ -8,7 +8,6 @@ using Xunit;
 
 namespace com.csutil.tests.async {
 
-    [Collection("Sequential")] // Will execute tests in here sequentially
     public class EventHandlerTests {
 
         public EventHandlerTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }

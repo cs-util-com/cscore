@@ -9,7 +9,6 @@ using Xunit;
 
 namespace com.csutil.tests.keyvaluestore {
 
-    [Collection("Sequential")] // Will execute tests in here sequentially
     public class KeyValueStoreTests {
 
         public KeyValueStoreTests(Xunit.Abstractions.ITestOutputHelper logger) {

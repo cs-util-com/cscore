@@ -5,7 +5,7 @@ using System.Linq;
 using com.csutil.model.immutable;
 using Xunit;
 
-namespace com.csutil.tests.model.immutable {
+namespace com.csutil.integrationTests.model.immutable {
 
     [Collection("Sequential")] // Will execute tests in here sequentially
     public class DataStoreStressTests {

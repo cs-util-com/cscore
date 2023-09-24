@@ -3,6 +3,7 @@ using Xunit;
 using System.Linq;
 
 namespace com.csutil.tests.reflection {
+    
     public class CodeQualityTests {
 
         public CodeQualityTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
@@ -22,4 +23,5 @@ namespace com.csutil.tests.reflection {
         }
 
     }
+    
 }

@@ -4,7 +4,6 @@ using Xunit;
 
 namespace com.csutil.tests {
 
-    [Collection("Sequential")] // Will execute tests in here sequentially
     public class MethodAnalyticsTests {
 
 

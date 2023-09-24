@@ -7,7 +7,7 @@ using com.csutil.logging.analytics;
 using com.csutil.model;
 using Xunit;
 
-namespace com.csutil.tests.model {
+namespace com.csutil.integrationTests.model {
 
     [Collection("Sequential")] // Will execute tests in here sequentially
     public class FeatureFlagTests {

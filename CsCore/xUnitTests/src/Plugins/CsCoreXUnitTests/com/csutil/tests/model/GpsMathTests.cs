@@ -5,7 +5,6 @@ using Xunit;
 
 namespace com.csutil.tests.gps {
 
-    [Collection("Sequential")] // Will execute tests in here sequentially
     public class GpsMathTests {
 
         public GpsMathTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }

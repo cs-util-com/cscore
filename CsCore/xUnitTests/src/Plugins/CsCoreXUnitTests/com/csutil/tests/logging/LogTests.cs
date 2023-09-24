@@ -10,7 +10,6 @@ using Xunit;
 
 namespace com.csutil.tests {
 
-    [Collection("Sequential")] // Will execute tests in here sequentially
     public class LogTests {
 
         public LogTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }

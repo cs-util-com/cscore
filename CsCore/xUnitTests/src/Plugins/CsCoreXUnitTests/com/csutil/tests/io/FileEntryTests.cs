@@ -14,7 +14,6 @@ namespace com.csutil.tests {
     /// These tests are analog to the FileTests (that work directly with FileInfo and DirectoryInfo) but 
     /// the FileEntry use the new FileSystem abstraction.
     /// </summary>
-    [Collection("Sequential")] // Will execute tests in here sequentially
     public class FileEntryTests {
 
         public FileEntryTests(Xunit.Abstractions.ITestOutputHelper logger) {
