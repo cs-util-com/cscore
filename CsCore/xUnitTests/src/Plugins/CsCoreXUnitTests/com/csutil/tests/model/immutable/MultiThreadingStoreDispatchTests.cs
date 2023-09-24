@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using com.csutil.model.immutable;
 using Xunit;
 
-namespace com.csutil.tests.model.immutable {
+namespace com.csutil.integrationTests.model.immutable {
     
     public class MultiThreadingStoreDispatchTests {
 
