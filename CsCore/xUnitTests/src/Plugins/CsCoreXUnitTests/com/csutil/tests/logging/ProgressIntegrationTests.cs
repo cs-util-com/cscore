@@ -7,6 +7,8 @@ namespace com.csutil.integrationTests {
     
     public class ProgressIntegrationTests {
 
+        public ProgressIntegrationTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
+
         [Fact]
         public async Task TestEventListeners() {
             using (ProgressV2 progress = new ProgressV2("p3", 200)) {

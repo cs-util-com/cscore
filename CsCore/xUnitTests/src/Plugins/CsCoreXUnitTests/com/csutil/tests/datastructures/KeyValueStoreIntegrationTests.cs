@@ -7,6 +7,8 @@ namespace com.csutil.integrationTests.keyvaluestore {
     
     public class KeyValueStoreIntegrationTests {
 
+        public KeyValueStoreIntegrationTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
+        
         [Fact]
         public async Task TestGoogleSheetsKeyValueStore() {
 

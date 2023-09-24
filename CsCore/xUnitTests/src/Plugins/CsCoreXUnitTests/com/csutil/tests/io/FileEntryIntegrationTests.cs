@@ -5,6 +5,8 @@ namespace com.csutil.integrationTests.io {
     
     public class FileEntryIntegrationTests {
 
+        public FileEntryIntegrationTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
+        
         [Fact]
         public void TestVeryLongFilePathes() {
             var dir = CreateDirectoryForTesting("TestVeryLongFilePathes");

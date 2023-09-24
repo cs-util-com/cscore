@@ -11,6 +11,8 @@ namespace com.csutil.integrationTests.http {
     [Collection("Sequential")] // Will execute tests in here sequentially
     public class RestCookieTests {
 
+        public RestCookieTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
+
         [Fact]
         public async Task ExampleUsage() {
 

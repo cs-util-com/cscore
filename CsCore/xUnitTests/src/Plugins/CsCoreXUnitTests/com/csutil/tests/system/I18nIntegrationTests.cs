@@ -6,6 +6,8 @@ namespace com.csutil.integrationTests {
     
     public class I18nIntegrationTests {
         
+        public I18nIntegrationTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
+
         [Fact]
         public async Task TestLoadRemoteLocale() {
 

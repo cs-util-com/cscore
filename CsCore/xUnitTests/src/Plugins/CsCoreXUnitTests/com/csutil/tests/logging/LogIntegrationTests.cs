@@ -5,6 +5,8 @@ namespace com.csutil.integrationTests {
     
     public class LogIntegrationTests {
         
+        public LogIntegrationTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
+
         [Fact]
         public void TestUsingAssertV2ForPrintDebugging() {
             AssertV3.SetupPrintDebuggingSuccessfulAssertions(); // Turn on print debugging
