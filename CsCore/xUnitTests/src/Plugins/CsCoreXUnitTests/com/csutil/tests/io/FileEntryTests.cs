@@ -277,7 +277,7 @@ namespace com.csutil.tests {
         }
 
         private static DirectoryEntry CreateDirectoryForTesting(string name) {
-            var rootDir = EnvironmentV2.instance.GetRootTempFolder().GetChildDir(name);
+            var rootDir = EnvironmentV2.instance.GetRootTempFolder().GetChildDir("FileEntryTests").GetChildDir(name);
             rootDir.DeleteV2(); // ensure that the test folder does not yet exist
             rootDir.CreateV2();
             Assert.True(rootDir.Exists);
