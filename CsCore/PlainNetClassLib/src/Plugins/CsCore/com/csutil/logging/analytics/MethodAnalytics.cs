@@ -53,6 +53,7 @@ namespace com.csutil.analytics {
         }
 
         private void OnMethodDone(string methodName, Stopwatch timing) {
+            if (Current == null) { return; }
             if (timing.ElapsedMilliseconds > 0) {
                 Current.DurationInMs = timing.ElapsedMilliseconds;
             }
