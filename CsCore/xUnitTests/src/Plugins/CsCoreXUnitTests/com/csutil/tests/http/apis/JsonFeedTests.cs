@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using com.csutil.http.apis;
 using Xunit;
 
-namespace com.csutil.tests.http {
+namespace com.csutil.integrationTests.http {
 
     public class JsonFeedTests {
 

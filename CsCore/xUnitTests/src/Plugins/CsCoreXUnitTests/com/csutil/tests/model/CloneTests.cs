@@ -69,7 +69,7 @@ namespace com.csutil.tests.model {
         }
 
         [Fact]
-        public void PerformanceTest1() {
+        public void LargeObjectCloningTest1() {
 
             var dataTree = NewTreeElem("root", () => NewTreeLayer("1", 20, () => NewTreeLayer("2", 200, () => NewTreeLayer("3", 2, () => NewTreeLayer("4", 10)))));
 

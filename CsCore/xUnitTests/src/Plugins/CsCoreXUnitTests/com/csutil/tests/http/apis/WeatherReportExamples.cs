@@ -6,7 +6,7 @@ using com.csutil.http.apis;
 using com.csutil.http.apis.iplookup;
 using Xunit;
 
-namespace com.csutil.tests.http {
+namespace com.csutil.integrationTests.http {
     
     public class WeatherReportExamples {
 

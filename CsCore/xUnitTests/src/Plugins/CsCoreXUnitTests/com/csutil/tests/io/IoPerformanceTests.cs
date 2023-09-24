@@ -6,7 +6,7 @@ using ICSharpCode.SharpZipLib.Zip;
 using Xunit;
 using Zio;
 
-namespace com.csutil.tests {
+namespace com.csutil.integrationTests.io {
 
     public class IoPerformanceTests {
 

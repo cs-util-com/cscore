@@ -12,7 +12,7 @@ using com.csutil.io;
 using Newtonsoft.Json.Linq;
 using Xunit;
 
-namespace com.csutil.tests.http {
+namespace com.csutil.integrationTests.http {
 
     [Collection("Sequential")] // Will execute tests in here sequentially
     public class RestTests {

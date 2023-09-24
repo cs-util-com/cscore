@@ -9,7 +9,7 @@ using Newtonsoft.Json;
 using Xunit;
 using Zio;
 
-namespace com.csutil.tests.http {
+namespace com.csutil.integrationTests.http {
 
     public class FileUploadTests {
 

@@ -6,7 +6,7 @@ using com.csutil.http;
 using com.csutil.http.cookies;
 using Xunit;
 
-namespace com.csutil.tests.http {
+namespace com.csutil.integrationTests.http {
 
     [Collection("Sequential")] // Will execute tests in here sequentially
     public class RestCookieTests {

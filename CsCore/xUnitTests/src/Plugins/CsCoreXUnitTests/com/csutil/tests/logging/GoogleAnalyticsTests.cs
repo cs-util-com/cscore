@@ -6,7 +6,7 @@ using com.csutil.keyvaluestore;
 using com.csutil.logging.analytics;
 using Xunit;
 
-namespace com.csutil.tests.logging {
+namespace com.csutil.integrationTests.logging {
 
     [Collection("Sequential")] // Will execute tests in here sequentially
     public class GoogleAnalyticsTests {

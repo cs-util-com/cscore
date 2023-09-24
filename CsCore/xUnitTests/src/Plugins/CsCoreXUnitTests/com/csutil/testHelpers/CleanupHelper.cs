@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace com.csutil.tests {
+namespace com.csutil {
 
     /// <summary> Triggers all its cleanup tasks when it is disposed, can be used in a unit test to cleanup eg singletons that were registered during the test execution </summary>
     public class CleanupHelper : IDisposable {

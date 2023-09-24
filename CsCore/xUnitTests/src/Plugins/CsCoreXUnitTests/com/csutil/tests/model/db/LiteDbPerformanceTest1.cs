@@ -10,7 +10,7 @@ using UltraLiteDB;
 using Xunit;
 using Zio;
 
-namespace com.csutil.tests.model {
+namespace com.csutil.integrationTests.model {
 
     [Collection("Sequential")] // Will execute tests in here sequentially
     public class LiteDbPerformanceTest1 {

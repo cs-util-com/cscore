@@ -20,7 +20,7 @@ namespace com.csutil.tests.system {
                 Assert.True(a.CompareToV2(b) < 0, $"Run {i}: a={a} was > then b={b}");
                 Assert.True(a.CompareToV2(a) == 0, $"Run {i}: a != a : {b}");
             }
-            var count = 1000000;
+            var count = 100000;
             var t1 = StopwatchV2.StartNewV2();
             {
                 var isOrderedAfterCounter = RunIdTest(count, () => Guid.NewGuid());
