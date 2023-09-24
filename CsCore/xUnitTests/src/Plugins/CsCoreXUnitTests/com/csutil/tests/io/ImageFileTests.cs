@@ -5,7 +5,7 @@ using com.csutil.io;
 using Xunit;
 using Zio;
 
-namespace com.csutil.tests {
+namespace com.csutil.integrationTests {
 
     public class ImageFileTests {
 

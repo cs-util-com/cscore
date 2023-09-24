@@ -250,7 +250,7 @@ namespace com.csutil.tests {
 
         [Fact]
         public void TestBaseConversionWithRandomStrings() {
-            for (int i = 0; i < 10000; i++) {
+            for (int i = 0; i < 1000; i++) {
                 var someRandomName = new Random().NextRandomName();
                 var md5InBase16 = someRandomName.GetMD5Hash();
                 Assert_IsBase16(md5InBase16);

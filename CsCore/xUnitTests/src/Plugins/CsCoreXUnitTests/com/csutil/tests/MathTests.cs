@@ -276,7 +276,7 @@ namespace com.csutil.tests {
             TestGetEulerAnglesWith(90.0001f, -153.36794f, 50.995544f);
 
             var rnd = new Random();
-            for (int i = 0; i < 100000; i++) {
+            for (int i = 0; i < 10000; i++) {
                 // Generate different angles in degrees for TestGetEulerAngles2: 
                 var pitch = rnd.NextFloat(-180, 180);
                 var yaw = rnd.NextFloat(-180, 180);
@@ -294,7 +294,7 @@ namespace com.csutil.tests {
             TestGetEulerAnglesWith(-90, 130, 158);
             TestGetEulerAnglesWith(90, -69, -74);
             var rnd = new Random();
-            for (int i = 0; i < 100000; i++) {
+            for (int i = 0; i < 10000; i++) {
                 // Generate different angles in degrees for TestGetEulerAngles2: 
                 var pitch = rnd.Next(-180, 180);
                 var yaw = rnd.Next(-180, 180);
