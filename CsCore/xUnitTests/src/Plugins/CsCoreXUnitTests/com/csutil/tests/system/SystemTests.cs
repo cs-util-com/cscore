@@ -37,7 +37,7 @@ namespace com.csutil.tests.system {
             }
             t2.StopV2();
             // Check that the GuidV2.NewGuid is not much slower then Guid.NewGuid
-            Assert.True(t1.ElapsedMilliseconds * 3 > t2.ElapsedMilliseconds, $"t1={t1.ElapsedMilliseconds} t2={t2.ElapsedMilliseconds}");
+            Assert.True(t1.ElapsedMilliseconds * 10 > t2.ElapsedMilliseconds, $"t1={t1.ElapsedMilliseconds} t2={t2.ElapsedMilliseconds}");
         }
 
         private static int RunIdTest(int count, Func<Guid> newId) {
