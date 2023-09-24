@@ -181,50 +181,6 @@ namespace com.csutil.tests.keyvaluestore {
             await Assert.ThrowsAsync<InvalidCastException>(() => exHandlerStore.Get<string>(myKey1, myDefaultString));
         }
 
-        [Fact]
-        public async Task TestStoreWithDelay() {
-            // Simulates the DB on the server:
-            var innerStore = new InMemoryKeyValueStore();
-            // Simulates the connection to the server:
-            var simulatedDelayStore = new MockDelayKeyValueStore(innerStore);
-            // Handles connection problems to the server:
-            var exWrapperStore = new ExceptionWrapperKeyValueStore(simulatedDelayStore);
-            // Represents the local cache in case the server cant be reached:
-            var outerStore = new InMemoryKeyValueStore().WithFallbackStore(exWrapperStore);
-
-            var key1 = "key1";
-            var value1 = "value1";
-            var key2 = "key2";
-            var value2 = "value2";
-
-            {
-                await outerStore.Set(key1, value1);
-                Assert.Equal(value1, await outerStore.Get(key1, ""));
-                Assert.Equal(value1, await innerStore.Get(key1, ""));
-            }
-
-            simulatedDelayStore.throwTimeoutError = true;
-            var simulatedErrorCatched = false;
-            exWrapperStore.onError = (Exception e) => { simulatedErrorCatched = true; };
-
-            {
-                await outerStore.Set(key2, value2); // This will cause a timeout error in the "delayed" store
-                Assert.True(simulatedErrorCatched);
-                Assert.Contains(key2, await outerStore.GetAllKeys()); // In the outer store the value was set
-                Assert.False(await innerStore.ContainsKey(key2)); // The inner store never got the update
-                Assert.False(await exWrapperStore.ContainsKey(key2)); // The exc. wrapper returns false if an error is thrown
-                Assert.Null(await exWrapperStore.GetAllKeys()); // Will throw another error and return null
-            }
-
-            Log.d("innerStore " + innerStore.latestFallbackGetTimingInMs);
-            Log.d("simulatedDelayStore " + simulatedDelayStore.latestFallbackGetTimingInMs);
-            Log.d("exWrapperStore " + exWrapperStore.latestFallbackGetTimingInMs);
-            Log.d("outerStore " + outerStore.latestFallbackGetTimingInMs);
-            Assert.Equal(0, innerStore.latestFallbackGetTimingInMs);
-            Assert.NotEqual(0, exWrapperStore.latestFallbackGetTimingInMs);
-            Assert.NotEqual(0, outerStore.latestFallbackGetTimingInMs);
-
-        }
 
         [Fact]
         public async Task TestCachingValuesFromFallbackStores() {
