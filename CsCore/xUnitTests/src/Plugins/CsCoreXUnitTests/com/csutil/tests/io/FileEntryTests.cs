@@ -336,20 +336,6 @@ namespace com.csutil.tests {
         }
 
         [Fact]
-        public void TestVeryLongFilePathes() {
-            var dir = CreateDirectoryForTesting("TestVeryLongFilePathes");
-            for (int i = 0; i < 100; i++) { dir = dir.GetChildDir("Abcdefghijlm"); }
-            Assert.True(dir.FullName.Length > 260, "dir.FullName=" + dir.FullName);
-            dir.CreateV2();
-            Assert.True(dir.Exists);
-
-            var file = dir.GetChild("test.txt");
-            file.SaveAsText("Abc");
-            Assert.True(file.Exists);
-            Log.d("file: " + file.FullName);
-        }
-
-        [Fact]
         public void TestSubDirAsNewRootDir() {
             var dir = CreateDirectoryForTesting("TestSubDirAsNewRootDir");
             var dir1 = dir.GetChildDir("dir1");

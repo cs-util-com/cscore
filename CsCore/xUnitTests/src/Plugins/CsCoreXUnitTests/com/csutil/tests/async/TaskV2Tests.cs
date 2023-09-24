@@ -228,6 +228,20 @@ namespace com.csutil.integrationTests.async {
             throw new Exception();
         }
 
+        [Fact]
+        public async Task TestTaskWithTimeout() {
+            var t = Log.MethodEntered("TestTaskWithTimeout Part 1");
+            var t1 = TaskV2.Delay(50);
+            await t1.WithTimeout(1000);
+            Log.MethodDone(t);
+            t = Log.MethodEntered("TestTaskWithTimeout Part 2");
+            await Assert.ThrowsAsync<TimeoutException>(async () => {
+                Task t2 = TaskV2.Delay(5000);
+                await t2.WithTimeout(50);
+                Log.MethodDone(t);
+            });
+        }
+        
     }
 
 }

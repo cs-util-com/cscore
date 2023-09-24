@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace com.csutil.tests.async {
+namespace com.csutil.integrationTests.async {
 
     public class EventHandlerTests {
 
