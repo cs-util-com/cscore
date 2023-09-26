@@ -9,7 +9,7 @@ using com.csutil.json;
 using com.csutil.model.immutable;
 using Xunit;
 
-namespace com.csutil.tests.datastructures {
+namespace com.csutil.integrationTests.datastructures {
 
     /// <summary>
     /// These tests make sure that libraries like the System.Collections.Immutable lib are included in the build correctly, 
