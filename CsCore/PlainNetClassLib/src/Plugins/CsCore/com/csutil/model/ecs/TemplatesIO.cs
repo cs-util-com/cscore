@@ -76,7 +76,9 @@ namespace com.csutil.model.ecs {
         }
 
         private void UpdateEntitiesCache(string id, JToken entity) {
-            EntityCache[id] = entity;
+            lock (EntityCache) {
+                EntityCache[id] = entity;
+            }
         }
 
         private FileEntry GetEntityFileForId(string entityId) {
