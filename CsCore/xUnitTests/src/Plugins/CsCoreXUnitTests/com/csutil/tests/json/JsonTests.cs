@@ -5,7 +5,7 @@ using System.IO;
 using Newtonsoft.Json.Linq;
 using Xunit;
 
-namespace com.csutil.tests.json {
+namespace com.csutil.integrationTests.json {
 
     public class JsonTests {
 

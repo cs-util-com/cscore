@@ -3,7 +3,7 @@ using com.csutil.json;
 using Newtonsoft.Json;
 using Xunit;
 
-namespace com.csutil.tests.json {
+namespace com.csutil.integrationTests.json {
 
     public class JsonTestHandleAdditionalJsonFields {
 
