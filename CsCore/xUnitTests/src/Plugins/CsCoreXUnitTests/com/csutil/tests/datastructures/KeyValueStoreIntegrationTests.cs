@@ -7,6 +7,7 @@ using Xunit;
 
 namespace com.csutil.integrationTests.keyvaluestore {
     
+    [Collection("Sequential")] // Will execute tests in here sequentially
     public class KeyValueStoreIntegrationTests {
 
         public KeyValueStoreIntegrationTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
