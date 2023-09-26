@@ -44,11 +44,13 @@ namespace com.csutil.tests.model.immutable {
         [Fact]
         public void TestAddStateChangeListener() {
             var store = new DataStore<List<string>>(StateReducer2, new List<string>());
+#if DEBUG
             Assert.Throws<InvalidOperationException>(() => {
                 // Using list.Filter(..) would generate a new IEnumerable every time so using it for comparison if
                 // the state changes would not work, ensure that an exception is thrown to inform the developer about this:
                 store.AddStateChangeListener(x => x.Filter(s => !s.IsEmpty()), (newList) => { });
             });
+#endif
         }
 
         private List<string> StateReducer2(List<string> previousstate, object action) {

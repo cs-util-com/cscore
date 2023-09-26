@@ -4,7 +4,7 @@ using Xunit;
 using com.csutil.random;
 using System.Linq;
 
-namespace com.csutil.tests.json {
+namespace com.csutil.integrationTests.json {
 
     public class PersistedRegressionTests {
 
