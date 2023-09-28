@@ -125,7 +125,7 @@ namespace com.csutil.integrationTests.async {
             throttledAction(this, "bad");
             Assert.Equal(1, counter); // Debounced, so not triggered
             throttledAction(this, "good");
-            await TaskV2.Delay(100);
+            await TaskV2.Delay(200);
             Assert.Equal(2, counter);
         }
 

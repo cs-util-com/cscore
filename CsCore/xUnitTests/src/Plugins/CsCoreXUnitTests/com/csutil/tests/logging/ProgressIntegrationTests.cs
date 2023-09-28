@@ -5,6 +5,7 @@ using Xunit;
 
 namespace com.csutil.integrationTests {
     
+    [Collection("Sequential")] // Will execute tests in here sequentially
     public class ProgressIntegrationTests {
 
         public ProgressIntegrationTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
