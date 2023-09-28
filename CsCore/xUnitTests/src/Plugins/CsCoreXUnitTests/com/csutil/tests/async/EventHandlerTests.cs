@@ -6,9 +6,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace com.csutil.tests.async {
+namespace com.csutil.integrationTests.async {
 
-    [Collection("Sequential")] // Will execute tests in here sequentially
     public class EventHandlerTests {
 
         public EventHandlerTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
@@ -126,7 +125,7 @@ namespace com.csutil.tests.async {
             throttledAction(this, "bad");
             Assert.Equal(1, counter); // Debounced, so not triggered
             throttledAction(this, "good");
-            await TaskV2.Delay(100);
+            await TaskV2.Delay(200);
             Assert.Equal(2, counter);
         }
 

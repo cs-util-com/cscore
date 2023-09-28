@@ -2,7 +2,7 @@
 using com.csutil.progress;
 using Xunit;
 
-namespace com.csutil.tests.async {
+namespace com.csutil.integrationTests.async {
 
     [Collection("Sequential")] // Will execute tests in here sequentially
     public class CountdownTimerTests {

@@ -5,7 +5,7 @@ using com.csutil.keyvaluestore;
 using com.csutil.logging.analytics;
 using Xunit;
 
-namespace com.csutil.tests {
+namespace com.csutil.integrationTests {
 
     [Collection("Sequential")] // Will execute tests in here sequentially
     public class AppFlowTests {

@@ -15,7 +15,8 @@ namespace com.csutil.model.ecs {
         string Id { get; }
         string TemplateId { get; }
         Matrix4x4? LocalPose { get; }
-        IReadOnlyList<IComponentData> Components { get; }
+        IReadOnlyDictionary<string, IComponentData> Components { get; }
+        string ParentId { get; }
         IReadOnlyList<string> ChildrenIds { get; }
         string Name { get; }
 
@@ -47,6 +48,10 @@ namespace com.csutil.model.ecs {
 
         public static Matrix4x4 NewMatrix(Vector3 position, Quaternion rotation, Vector3 scale) {
             return Matrix4x4Extensions.Compose(position, rotation, scale);
+        }
+
+        public static Pose NewPosition(Vector3 position) {
+            return new Pose(position, Quaternion.Identity, Vector3.One);
         }
 
     }

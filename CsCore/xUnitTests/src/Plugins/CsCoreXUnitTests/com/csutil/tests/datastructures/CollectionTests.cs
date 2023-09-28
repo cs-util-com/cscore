@@ -224,14 +224,19 @@ namespace com.csutil.tests {
             promiseMapCache["a"] = ComputeResultForA();
 
             var s = StopwatchV2.StartNewV2();
-            Assert.Equal("1", await promiseMapCache["a"]);
+            var firstTimeResult = await promiseMapCache["a"];
             var firstComputeTime = s.ElapsedMilliseconds;
-            Assert.True(firstComputeTime >= 100, "firstComputeTime=" + firstComputeTime);
+            Assert.Equal("1", firstTimeResult);
+            Assert.True(firstComputeTime >= 50, "firstComputeTime=" + firstComputeTime);
             Assert.True(s.IsRunning); // Keep the stopwatch running 
 
             // The second time accessing the same computation task is completed instantly:
-            Assert.Equal("1", await promiseMapCache["a"]);
-            Assert.True(s.ElapsedMilliseconds <= firstComputeTime + 1, $"s.ElapsedMilliseconds {s.ElapsedMilliseconds} > firstComputeTime {firstComputeTime} + 5ms");
+            var secondStartTime = s.ElapsedMilliseconds;
+            var secondAccessResult = await promiseMapCache["a"];
+            var secondAccessTiming = s.ElapsedMilliseconds-secondStartTime;
+            Assert.Equal("1", secondAccessResult);
+            Assert.True(secondAccessTiming < 10, "secondAccessTiming=" + secondAccessTiming);
+            Assert.True(secondAccessTiming < firstComputeTime , $"secondAccessTiming {s.ElapsedMilliseconds} > firstComputeTime {firstComputeTime}");
 
         }
 

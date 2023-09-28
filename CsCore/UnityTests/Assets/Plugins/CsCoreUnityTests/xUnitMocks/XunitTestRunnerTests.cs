@@ -1,11 +1,10 @@
 ﻿using com.csutil.testing;
-using com.csutil.tests.http;
-using com.csutil.tests.model;
 using com.csutil.tests.model.immutable;
 using System;
 using System.Collections;
 using System.Threading.Tasks;
-using UnityEngine;
+using com.csutil.integrationTests.http;
+using com.csutil.integrationTests.model;
 using UnityEngine.TestTools;
 
 namespace com.csutil.tests {

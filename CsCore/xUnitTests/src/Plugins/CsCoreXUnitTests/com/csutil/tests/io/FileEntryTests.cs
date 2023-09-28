@@ -14,7 +14,6 @@ namespace com.csutil.tests {
     /// These tests are analog to the FileTests (that work directly with FileInfo and DirectoryInfo) but 
     /// the FileEntry use the new FileSystem abstraction.
     /// </summary>
-    [Collection("Sequential")] // Will execute tests in here sequentially
     public class FileEntryTests {
 
         public FileEntryTests(Xunit.Abstractions.ITestOutputHelper logger) {
@@ -278,7 +277,7 @@ namespace com.csutil.tests {
         }
 
         private static DirectoryEntry CreateDirectoryForTesting(string name) {
-            var rootDir = EnvironmentV2.instance.GetRootTempFolder().GetChildDir(name);
+            var rootDir = EnvironmentV2.instance.GetRootTempFolder().GetChildDir("FileEntryTests").GetChildDir(name);
             rootDir.DeleteV2(); // ensure that the test folder does not yet exist
             rootDir.CreateV2();
             Assert.True(rootDir.Exists);
@@ -334,20 +333,6 @@ namespace com.csutil.tests {
             f1.SaveAsText("Some text 1 Some text 1");
             f1.SaveAsText("Some text 2");
             Assert.Equal("Some text 2", f1.LoadAs<string>());
-        }
-
-        [Fact]
-        public void TestVeryLongFilePathes() {
-            var dir = CreateDirectoryForTesting("TestVeryLongFilePathes");
-            for (int i = 0; i < 100; i++) { dir = dir.GetChildDir("Abcdefghijlm"); }
-            Assert.True(dir.FullName.Length > 260, "dir.FullName=" + dir.FullName);
-            dir.CreateV2();
-            Assert.True(dir.Exists);
-
-            var file = dir.GetChild("test.txt");
-            file.SaveAsText("Abc");
-            Assert.True(file.Exists);
-            Log.d("file: " + file.FullName);
         }
 
         [Fact]

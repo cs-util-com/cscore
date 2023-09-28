@@ -11,7 +11,7 @@ namespace com.csutil.tests.keyvaluestore {
         public IKeyValueStore fallbackStore { get; set; }
         public long latestFallbackGetTimingInMs { get; set; }
 
-        public int delay = 100;
+        public int delay = 50;
         public bool throwTimeoutError = false;
 
         public DisposeState IsDisposed { get; private set; } = DisposeState.Active;

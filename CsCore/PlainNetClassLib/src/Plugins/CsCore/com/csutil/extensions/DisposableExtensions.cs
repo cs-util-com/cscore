@@ -40,6 +40,12 @@ namespace com.csutil {
             return new IDisposableCollection(new List<IDisposable>() { self });
         }
 
+        public static void ThrowErrorIfDisposed(this IDisposableV2 self) {
+            if (self != null && self.IsDisposed != DisposeState.Active) {
+                throw new ObjectDisposedException($"{self.GetType()} {self} is already " + self.IsDisposed);
+            }
+        }
+
     }
 
 }

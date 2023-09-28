@@ -2,9 +2,8 @@
 using System.Linq;
 using Xunit;
 
-namespace com.csutil.tests {
+namespace com.csutil.integrationTests {
 
-    [Collection("Sequential")] // Will execute tests in here sequentially
     public class MethodAnalyticsTests {
 
 

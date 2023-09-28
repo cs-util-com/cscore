@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using com.csutil.http.apis.iplookup;
 using Xunit;
 
-namespace com.csutil.tests.http {
+namespace com.csutil.integrationTests.http {
 
     /// <summary> Some REST API examples and how they would be used in async methods </summary>
     public class IpLookupExamples {

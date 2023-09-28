@@ -1,7 +1,7 @@
 ﻿using com.csutil.injection;
 using com.csutil.io;
 
-namespace com.csutil.tests {
+namespace com.csutil {
 
     public static class TestHelperExtensionMethods {
 

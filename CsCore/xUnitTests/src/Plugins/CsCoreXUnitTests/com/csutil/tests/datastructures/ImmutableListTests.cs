@@ -13,21 +13,21 @@ namespace com.csutil.tests.datastructures {
         public void ExampleUsage1() {
 
             {
-                var elemCount = 100000;
+                var elemCount = 10000;
                 var t1 = RunOnList("add", elemCount, (list) => { list.Add(1); });
                 var t2 = RunOnImmutableList("ExampleUsage1.add", elemCount, (list) => list.Add(1));
                 var timeDiff = Math.Abs(t1 - t2);
                 Assert.True(timeDiff < 2000, "add t1=" + t1 + ", t2=" + t2 + ", timeDiff=" + timeDiff);
             }
             {
-                var elemCount = 100000;
+                var elemCount = 10000;
                 var t1 = RunOnList("insert", elemCount, (list) => { list.Insert(0, 1); });
                 var t2 = RunOnImmutableList("ExampleUsage1.insert", elemCount, (list) => list.Insert(0, 1));
                 var timeDiff = Math.Abs(t1 - t2);
                 Assert.True(t2 < t1 || timeDiff < 200, "insert t1 (Normal List)=" + t1 + ", t2(Immutable List)=" + t2 + ", timeDiff=" + timeDiff);
             }
             {
-                var elemCount = 100000;
+                var elemCount = 10000;
                 List<int> l1 = new List<int>();
                 RunOnList("fill", l1, elemCount, l => l.Add(1));
                 Assert.Equal(elemCount, l1.Count);

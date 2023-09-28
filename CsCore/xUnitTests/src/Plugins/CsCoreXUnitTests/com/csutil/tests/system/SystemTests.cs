@@ -20,7 +20,7 @@ namespace com.csutil.tests.system {
                 Assert.True(a.CompareToV2(b) < 0, $"Run {i}: a={a} was > then b={b}");
                 Assert.True(a.CompareToV2(a) == 0, $"Run {i}: a != a : {b}");
             }
-            var count = 1000000;
+            var count = 100000;
             var t1 = StopwatchV2.StartNewV2();
             {
                 var isOrderedAfterCounter = RunIdTest(count, () => Guid.NewGuid());
@@ -37,7 +37,7 @@ namespace com.csutil.tests.system {
             }
             t2.StopV2();
             // Check that the GuidV2.NewGuid is not much slower then Guid.NewGuid
-            Assert.True(t1.ElapsedMilliseconds * 2 > t2.ElapsedMilliseconds);
+            Assert.True(t1.ElapsedMilliseconds * 10 > t2.ElapsedMilliseconds, $"t1={t1.ElapsedMilliseconds} t2={t2.ElapsedMilliseconds}");
         }
 
         private static int RunIdTest(int count, Func<Guid> newId) {

@@ -26,36 +26,37 @@ namespace com.csutil.tests.model.esc {
 
             var enemyTemplate = new Entity() {
                 LocalPose = Matrix4x4.CreateTranslation(1, 2, 3),
-                Components = new List<IComponentData>() {
+                Components = CreateComponents(
                     new EnemyComponent() { Id = "c1", Health = 100, Mana = 10 }
-                }
+                )
             };
-            templates.SaveAsTemplate(enemyTemplate);
+            templates.SaveChanges(enemyTemplate);
 
             // An instance that has a different health value than the template:
-            Entity variant1 = templates.CreateVariantInstanceOf(enemyTemplate);
-            (variant1.Components.Single() as EnemyComponent).Health = 200;
-            templates.SaveAsTemplate(variant1); // Save it as a variant of the enemyTemplate
+            Entity variant1 = templates.CreateVariantInstanceOf(enemyTemplate, NewIdDict(enemyTemplate));
+            (variant1.Components.Single().Value as EnemyComponent).Health = 200;
+            templates.SaveChanges(variant1); // Save it as a variant of the enemyTemplate
 
             // Create a variant2 of the variant1
-            Entity variant2 = templates.CreateVariantInstanceOf(variant1);
-            (variant2.Components.Single() as EnemyComponent).Mana = 20;
-            templates.SaveAsTemplate(variant2);
+            Entity variant2 = templates.CreateVariantInstanceOf(variant1, NewIdDict(variant1));
+            (variant2.Components.Single().Value as EnemyComponent).Mana = 20;
+            templates.SaveChanges(variant2);
 
             // Updating variant 1 should also update variant2:
-            (variant1.Components.Single() as EnemyComponent).Health = 300;
-            templates.SaveAsTemplate(variant1);
-            variant2 = templates.LoadTemplateInstance(variant2.Id);
-            Assert.Equal(300, (variant2.Components.Single() as EnemyComponent).Health);
+            (variant1.Components.Single().Value as EnemyComponent).Health = 300;
+            templates.SaveChanges(variant1);
+            variant2 = templates.ComposeEntityInstance(variant2.Id);
+            Assert.Equal(300, (variant2.Components.Single().Value as EnemyComponent).Health);
 
             {
                 // Another instance that is identical to the template:
-                Entity instance3 = templates.CreateVariantInstanceOf(enemyTemplate);
+                Entity instance3 = templates.CreateVariantInstanceOf(enemyTemplate, NewIdDict(enemyTemplate));
                 // instance3 is not saved as a variant 
                 // Creating an instance of an instance is not allowed:
-                Assert.Throws<InvalidOperationException>(() => templates.CreateVariantInstanceOf(instance3));
+                Assert.Throws<InvalidOperationException>(() => templates.CreateVariantInstanceOf(instance3, NewIdDict(instance3)));
                 // Instead the parent template should be used to create another instance:
-                Entity instance4 = templates.CreateVariantInstanceOf(templates.LoadTemplateInstance(instance3.TemplateId));
+                var template = templates.ComposeEntityInstance(instance3.TemplateId);
+                Entity instance4 = templates.CreateVariantInstanceOf(template, NewIdDict(template));
                 Assert.Equal(instance3.TemplateId, instance4.TemplateId);
                 Assert.NotEqual(instance3.Id, instance4.Id);
             }
@@ -65,25 +66,29 @@ namespace com.csutil.tests.model.esc {
             var ids = ecs2.GetAllEntityIds().ToList();
             Assert.Equal(3, ids.Count());
 
-            Entity v1 = ecs2.LoadTemplateInstance(variant1.Id);
-            var enemyComp1 = v1.Components.Single() as EnemyComponent;
+            Entity v1 = ecs2.ComposeEntityInstance(variant1.Id);
+            var enemyComp1 = v1.Components.Single().Value as EnemyComponent;
             Assert.Equal(300, enemyComp1.Health);
             Assert.Equal(10, enemyComp1.Mana);
 
             // Alternatively to automatically lazy loading the templates can be loaded into memory all at once: 
             await ecs2.LoadAllTemplateFilesIntoMemory();
 
-            Entity v2 = ecs2.LoadTemplateInstance(variant2.Id);
-            var enemyComp2 = v2.Components.Single() as EnemyComponent;
+            Entity v2 = ecs2.ComposeEntityInstance(variant2.Id);
+            var enemyComp2 = v2.Components.Single().Value as EnemyComponent;
             Assert.Equal(300, enemyComp2.Health);
             Assert.Equal(20, enemyComp2.Mana);
 
         }
 
+        private Dictionary<string, string> NewIdDict(Entity original) {
+            return new Dictionary<string, string>() { { original.Id, "" + GuidV2.NewGuid() } };
+        }
+
         [Fact]
         public async Task ExampleUsageOfEcs() {
 
-            var ecs = new EntityComponentSystem<Entity>(null);
+            var ecs = new EntityComponentSystem<Entity>(null, isModelImmutable: false);
 
             var entityGroup = ecs.Add(new Entity() {
                 LocalPose = Matrix4x4.CreateRotationY(MathF.PI / 2) // 90 degree rotation around y axis
@@ -91,11 +96,11 @@ namespace com.csutil.tests.model.esc {
 
             var e1 = entityGroup.AddChild(new Entity() {
                 LocalPose = Matrix4x4.CreateRotationY(-MathF.PI / 2), // -90 degree rotation around y axis
-            }, AddToChildrenListOfParent);
+            });
 
             var e2 = entityGroup.AddChild(new Entity() {
                 LocalPose = Matrix4x4.CreateTranslation(1, 0, 0),
-            }, AddToChildrenListOfParent);
+            });
 
             var children = entityGroup.GetChildren();
             Assert.Equal(2, children.Count());
@@ -132,22 +137,22 @@ namespace com.csutil.tests.model.esc {
             }
 
             Assert.Equal(3, ecs.AllEntities.Count);
-            e1.RemoveFromParent(RemoveChildIdFromParent);
+            e1.RemoveFromParent();
             // e1 is removed from its parent but still in the scene graph:
             Assert.Equal(3, ecs.AllEntities.Count);
             Assert.Same(e2, entityGroup.GetChildren().Single());
             Assert.Null(e1.GetParent());
-            Assert.True(e1.Destroy(RemoveChildIdFromParent));
-            Assert.False(e1.Destroy(RemoveChildIdFromParent));
+            Assert.True(e1.Destroy());
+            Assert.False(e1.Destroy());
             // e1 is now fully removed from the scene graph and destroyed:
             Assert.Equal(2, ecs.AllEntities.Count);
 
             Assert.False(e2.IsDestroyed());
 
-            var e3 = e2.AddChild(new Entity(), AddToChildrenListOfParent);
-            var e4 = e3.AddChild(new Entity(), AddToChildrenListOfParent);
+            var e3 = e2.AddChild(new Entity());
+            var e4 = e3.AddChild(new Entity());
 
-            Assert.True(e2.Destroy(RemoveChildIdFromParent));
+            Assert.True(e2.Destroy());
             Assert.Empty(entityGroup.GetChildren());
 
             Assert.True(e2.IsDestroyed());
@@ -166,7 +171,7 @@ namespace com.csutil.tests.model.esc {
              * global pose of the most inner entity is back at the origin (validated that
              * same result is achieved with Unity) */
 
-            var ecs = new EntityComponentSystem<Entity>(null);
+            var ecs = new EntityComponentSystem<Entity>(null, isModelImmutable: false);
 
             var e1 = ecs.Add(new Entity() {
                 LocalPose = Pose.NewMatrix(new Vector3(0, 1, 0))
@@ -174,19 +179,19 @@ namespace com.csutil.tests.model.esc {
 
             var e2 = e1.AddChild(new Entity() {
                 LocalPose = Pose.NewMatrix(new Vector3(0, 1, 0), 90)
-            }, AddToChildrenListOfParent);
+            });
 
             var e3 = e2.AddChild(new Entity() {
                 LocalPose = Pose.NewMatrix(new Vector3(0, 0, 2), 0, 2)
-            }, AddToChildrenListOfParent);
+            });
 
             var e4 = e3.AddChild(new Entity() {
                 LocalPose = Pose.NewMatrix(new Vector3(0, 0, -1), -90)
-            }, AddToChildrenListOfParent);
+            });
 
             var e5 = e4.AddChild(new Entity() {
                 LocalPose = Pose.NewMatrix(new Vector3(0, -1, 0), 0, 0.5f)
-            }, AddToChildrenListOfParent);
+            });
 
             var pose = e5.GlobalPose();
             Assert.Equal(Quaternion.Identity, pose.rotation);
@@ -202,19 +207,43 @@ namespace com.csutil.tests.model.esc {
             // First the user creates a scene at runtime:
             var dir = EnvironmentV2.instance.GetNewInMemorySystem();
             {
-                var ecs = new EntityComponentSystem<Entity>(new TemplatesIO<Entity>(dir));
+                var templatesIo = new TemplatesIO<Entity>(dir);
+                var ecs = new EntityComponentSystem<Entity>(templatesIo, isModelImmutable: false);
 
                 // He defines a few of the entities as templates and other as variants
+
+                {
+                    var entity1 = ecs.Add(new Entity() { Name = "Entity1" });
+                    var entity11 = entity1.AddChild(new Entity() { Name = "Entity2" });
+                    entity1.SaveChanges();
+
+                    var variant1 = entity1.CreateVariant();
+                    Assert.NotEqual(variant1.Id, entity1.Id);
+                    // The ids of the children are different:
+                    Assert.NotEqual(entity1.ChildrenIds.Single(), variant1.ChildrenIds.Single());
+                    Assert.NotSame(entity1.GetChildren().Single(), variant1.GetChildren().Single());
+
+                    var variant11 = entity11.CreateVariant();
+                    Assert.NotEqual(entity11.Id, variant11.Id);
+                    // The variant is not attached to the same parent
+                    Assert.NotEqual(entity11.ParentId, variant11.ParentId);
+                    Assert.Null(variant11.ParentId);
+                    // But the variant can be found in the root level of the ecs:
+                    Assert.Same(variant11, ecs.GetEntity(variant11.Id));
+                    // That means that the first entity also still does only have 1 child:
+                    Assert.Single(entity1.GetChildren());
+                    Assert.Single(entity1.ChildrenIds);
+                }
 
                 // Define a base enemy template with a sword:
                 var baseEnemy = ecs.Add(new Entity() {
                     Name = "EnemyTemplate",
-                    Components = new[] { new EnemyComponent() { Health = 100, Mana = 0 } }
+                    Components = CreateComponents(new EnemyComponent() { Health = 100, Mana = 0 })
                 });
                 baseEnemy.AddChild(new Entity() {
                     Name = "Sword",
-                    Components = new[] { new SwordComponent() { Damage = 10 } }
-                }, AddToChildrenListOfParent);
+                    Components = CreateComponents(new SwordComponent() { Damage = 10 })
+                });
                 baseEnemy.SaveChanges();
 
                 // Define a variant of the base enemy which is stronger and has a shield:
@@ -223,51 +252,83 @@ namespace com.csutil.tests.model.esc {
                 bossEnemy.GetComponent<EnemyComponent>().Health = 200;
                 bossEnemy.AddChild(new Entity() {
                     Name = "Shield",
-                    Components = new[] { new ShieldComponent() { Defense = 10 } }
-                }, AddToChildrenListOfParent);
+                    Components = CreateComponents(new ShieldComponent() { Defense = 10 })
+                });
                 bossEnemy.SaveChanges();
 
                 // Define a mage variant that has mana but no sword
                 var mageEnemy = baseEnemy.CreateVariant();
                 mageEnemy.Data.Name = "MageEnemy";
                 mageEnemy.GetComponent<EnemyComponent>().Mana = 100;
+                mageEnemy.SaveChanges();
+
+                Assert.NotSame(mageEnemy, baseEnemy);
+                Assert.NotSame(mageEnemy.Data, baseEnemy.Data);
+
                 var sword = mageEnemy.GetChild("Sword");
-                
+                Assert.NotEqual(sword, baseEnemy.GetChild("Sword"));
+
                 // Switching the parent of the sword from the mage to the boss enemy should fail
-                Assert.Throws<InvalidOperationException>(() => bossEnemy.AddChild(sword, AddToChildrenListOfParent));
+                Assert.Throws<InvalidOperationException>(() => bossEnemy.AddChild(sword));
+
                 // Instead the sword first needs to be removed and then added to the new parent:
-                sword.RemoveFromParent(RemoveChildIdFromParent);
-                bossEnemy.AddChild(sword, AddToChildrenListOfParent);
-                
+                Assert.Equal(sword.Id, mageEnemy.ChildrenIds.Single());
+                sword.RemoveFromParent();
+                Assert.Empty(mageEnemy.ChildrenIds);
+
+                // Now that the sword is removed from the mage it can be added to the boss enemy: 
+                bossEnemy.AddChild(sword);
+
                 bossEnemy.SaveChanges();
                 mageEnemy.SaveChanges();
 
                 // Updates to the prefabs also result in the variants being updated
                 baseEnemy.GetComponent<EnemyComponent>().Health = 150;
                 baseEnemy.SaveChanges();
-                // The mage enemy health wasnt overwritten so with the template update it now has also 150 health:
+
+                // The mage enemy health wasnt modified so with the template update it now has also 150 health:
                 Assert.Equal(150, mageEnemy.GetComponent<EnemyComponent>().Health);
+                // The boss enemy was modified so it still has 200 health:
+                Assert.Equal(200, bossEnemy.GetComponent<EnemyComponent>().Health);
+
+                // If a change to a variant is done but not persisted via save changes and then a parent template of
+                // that variant is changed the variant is reconstructed from the latest stored state and with that the
+                // unsaved changes to the variant are lost:
+                bossEnemy.GetComponent<EnemyComponent>().Health = 300;
+                bossEnemy.GetComponent<EnemyComponent>().Mana = 50;
+                // These boss enemy changes are NOT persisted (no call to SaveChanges) so they are lost once
+                // baseEnemy saves its changes (and with that also updates all direct and indirect variants):
+                baseEnemy.SaveChanges();
+                // The health is back to the 200 value as it was before and the mana is back to 0:
+                Assert.Equal(200, bossEnemy.GetComponent<EnemyComponent>().Health);
+                Assert.Equal(0, bossEnemy.GetComponent<EnemyComponent>().Mana);
+
+                bossEnemy.SaveChanges();
+                mageEnemy.SaveChanges();
 
                 // All created entities are added to the scene graph and persisted to disk
                 var scene = ecs.Add(new Entity() { Name = "Scene" });
-                var enemy1 = scene.AddChild(baseEnemy.CreateVariant(), AddToChildrenListOfParent);
+                var enemy1 = scene.AddChild(baseEnemy.CreateVariant());
                 enemy1.Data.LocalPose = Pose.NewMatrix(new Vector3(1, 0, 0));
-                var enemy2 = scene.AddChild(bossEnemy.CreateVariant(), AddToChildrenListOfParent);
+                var enemy2 = scene.AddChild(bossEnemy.CreateVariant());
                 enemy2.Data.LocalPose = Pose.NewMatrix(new Vector3(0, 0, 1));
-                var enemy3 = scene.AddChild(mageEnemy.CreateVariant(), AddToChildrenListOfParent);
+                var enemy3 = scene.AddChild(mageEnemy.CreateVariant());
                 enemy3.Data.LocalPose = Pose.NewMatrix(new Vector3(-1, 0, 0));
 
                 scene.SaveChanges();
 
                 // Simulate the user closing the application and starting it again
                 ecs.Dispose();
+                // TODO
             }
             {
-                var ecs = new EntityComponentSystem<Entity>(new TemplatesIO<Entity>(dir));
+                Assert.NotEmpty(dir.EnumerateEntries());
+                var templatesIo = new TemplatesIO<Entity>(dir);
+                var ecs = new EntityComponentSystem<Entity>(templatesIo, isModelImmutable: false);
                 Assert.Empty(ecs.AllEntities);
                 await ecs.LoadSceneGraphFromDisk();
-                Assert.Equal(9, dir.EnumerateFiles().Count());
-                Assert.Equal(9, ecs.AllEntities.Count);
+                Assert.Equal(17, dir.EnumerateFiles().Count());
+                Assert.Equal(17, ecs.AllEntities.Count);
                 // The user loads the scene from disk and can continue editing it
 
                 var scene = ecs.FindEntitiesWithName("Scene").Single();
@@ -280,9 +341,80 @@ namespace com.csutil.tests.model.esc {
             }
         }
 
+        private IReadOnlyDictionary<string, IComponentData> CreateComponents(IComponentData component) {
+            component.GetId().ThrowErrorIfNullOrEmpty("component.GetId()");
+            var dict = new Dictionary<string, IComponentData>();
+            dict.Add(component.GetId(), component);
+            return dict;
+        }
+
         private void Assert_AlmostEqual(Vector3 a, Vector3 b, float allowedDelta = 0.000001f) {
             var length = (a - b).Length();
             Assert.True(length < allowedDelta, $"Expected {a} to be almost equal to {b} but the difference is {length}");
+        }
+
+        private class EnemyComponent : IComponentData {
+            public string Id { get; set; } = "" + GuidV2.NewGuid();
+            public int Mana { get; set; }
+            public int Health;
+            public string GetId() { return Id; }
+        }
+
+        private class SwordComponent : IComponentData {
+            public string Id { get; set; } = "" + GuidV2.NewGuid();
+            public int Damage { get; set; }
+            public string GetId() { return Id; }
+        }
+
+        private class ShieldComponent : IComponentData {
+            public string Id { get; set; } = "" + GuidV2.NewGuid();
+            public int Defense { get; set; }
+            public string GetId() { return Id; }
+        }
+
+    }
+
+    public class Entity : IEntityData {
+
+        public string Id { get; set; } = "" + GuidV2.NewGuid();
+        public string Name { get; set; }
+        public string TemplateId { get; set; }
+        public Matrix4x4? LocalPose { get; set; }
+        public IReadOnlyDictionary<string, IComponentData> Components { get; set; }
+
+        public string ParentId { get; set; }
+
+        public IReadOnlyList<string> ChildrenIds => MutablehildrenIds;
+        [JsonIgnore] // Dont include the children ids two times
+        public List<string> MutablehildrenIds { get; } = new List<string>();
+
+        public string GetId() { return Id; }
+
+        public override string ToString() { return $"{Name} ({Id})"; }
+
+    }
+
+    public static class EntityExtensions {
+
+        public static IEntity<Entity> AddChild(this IEntity<Entity> parent, Entity childData) {
+            return parent.AddChild(childData, SetParentIdInChild, AddToChildrenListOfParent);
+        }
+
+        public static IEntity<Entity> AddChild(this IEntity<Entity> parent, IEntity<Entity> childData) {
+            return parent.AddChild(childData, SetParentIdInChild, AddToChildrenListOfParent);
+        }
+
+        public static void RemoveFromParent(this IEntity<Entity> child) {
+            child.RemoveFromParent(RemoveParentIdFromChild, RemoveChildIdFromParent);
+        }
+
+        public static bool Destroy(this IEntity<Entity> self) {
+            return self.Destroy(RemoveChildIdFromParent);
+        }
+
+        private static Entity SetParentIdInChild(IEntity<Entity> child, string newParentId) {
+            child.Data.ParentId = newParentId;
+            return child.Data;
         }
 
         private static Entity AddToChildrenListOfParent(IEntity<Entity> parent, string addedChildId) {
@@ -290,44 +422,14 @@ namespace com.csutil.tests.model.esc {
             return parent.Data;
         }
 
-        private Entity RemoveChildIdFromParent(IEntity<Entity> parent, string childIdToRemove) {
+        private static Entity RemoveParentIdFromChild(IEntity<Entity> child) {
+            child.Data.ParentId = null;
+            return child.Data;
+        }
+
+        private static Entity RemoveChildIdFromParent(IEntity<Entity> parent, string childIdToRemove) {
             parent.Data.MutablehildrenIds.Remove(childIdToRemove);
             return parent.Data;
-        }
-
-        private class Entity : IEntityData {
-
-            public string Id { get; set; } = "" + GuidV2.NewGuid();
-            public string Name { get; set; }
-            public string TemplateId { get; set; }
-            public Matrix4x4? LocalPose { get; set; }
-            public IReadOnlyList<IComponentData> Components { get; set; }
-
-            public IReadOnlyList<string> ChildrenIds => MutablehildrenIds;
-            [JsonIgnore] // Dont include the children ids two times
-            public List<string> MutablehildrenIds { get; } = new List<string>();
-
-            public string GetId() { return Id; }
-
-        }
-
-        private class EnemyComponent : IComponentData {
-            public string Id { get; set; }
-            public int Mana { get; set; }
-            public int Health;
-            public string GetId() { return Id; }
-        }
-
-        private class SwordComponent : IComponentData {
-            public string Id { get; set; }
-            public int Damage { get; set; }
-            public string GetId() { return Id; }
-        }
-
-        private class ShieldComponent : IComponentData {
-            public string Id { get; set; }
-            public int Defense { get; set; }
-            public string GetId() { return Id; }
         }
 
     }

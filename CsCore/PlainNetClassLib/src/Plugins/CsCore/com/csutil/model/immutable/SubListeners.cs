@@ -2,6 +2,7 @@
 
 namespace com.csutil.model.immutable {
     
+    [Obsolete("Use SubState class instead")]
     public class SubListeners<SubState> {
 
         public Action innerListeners;

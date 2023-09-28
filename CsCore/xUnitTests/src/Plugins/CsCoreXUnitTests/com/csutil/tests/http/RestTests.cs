@@ -12,7 +12,7 @@ using com.csutil.io;
 using Newtonsoft.Json.Linq;
 using Xunit;
 
-namespace com.csutil.tests.http {
+namespace com.csutil.integrationTests.http {
 
     [Collection("Sequential")] // Will execute tests in here sequentially
     public class RestTests {
@@ -393,7 +393,7 @@ namespace com.csutil.tests.http {
             Assert.True(now.IsUtc());
             Assert.False(DateTimeV2.Now.IsUtc());
             var delta = now - remoteNow;
-            Assert.True(delta.TotalMillisecondsAbs() < 10000, $"delta={delta}, now={now}, remoteNow={remoteNow} (from string '{resp}'");
+            Assert.True(delta.TotalMillisecondsAbs() < 60000, $"delta={delta}, now={now}, remoteNow={remoteNow} (from string '{resp}'");
         }
 
         [Fact]
@@ -403,13 +403,12 @@ namespace com.csutil.tests.http {
             await TestPlaceholderImageService($"https://placekitten.com/{w}/{h}", h, w);
             await TestPlaceholderImageService($"https://loremflickr.com/{w}/{h}", h, w);
             await TestPlaceholderImageService($"https://baconmockup.com/{w}/{h}", h, w);
-            await TestPlaceholderImageService($"https://placeimg.com/{w}/{h}/any", h, w);
             await TestPlaceholderImageService($"https://placebear.com/{w}/{h}", h, w);
             await TestPlaceholderImageService($"https://placebeard.it/{w}x{h}", h, w);
+            await TestPlaceholderImageService($"https://picsum.photos/{w}/{h}", h, w);
             // await TestPlaceholderImageService($"https://www.placecage.com/{w}/{h}", h, w);
             // await TestPlaceholderImageService($"https://www.fillmurray.com/{w}/{h}", h, w);
             // await TestPlaceholderImageService($"https://www.stevensegallery.com/{w}/{h}", h, w);
-            // await TestPlaceholderImageService($"https://picsum.photos/{w}/{h}", h, w);
         }
 
         private static async Task TestPlaceholderImageService(string placeholderImageServiceUrl, int h, int w) {

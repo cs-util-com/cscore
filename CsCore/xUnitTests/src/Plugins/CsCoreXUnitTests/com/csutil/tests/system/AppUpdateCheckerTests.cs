@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace com.csutil.tests.system {
+namespace com.csutil.integrationTests.system {
 
     public class AppUpdateCheckerTests {
 

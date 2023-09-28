@@ -1,13 +1,8 @@
 {
+	"readme": "Run cmd command on XUnitTests to start stryker: 'dotnet stryker', see also https://stryker-mutator.io/docs/stryker-net/configuration/",
 	"stryker-config": {
-		"reporters": [
-			"All"
-		],
-		"log-file": true,
-		"max-concurrent-test-runners": 1,
-		"timeout-ms": 15000,
-		"excluded-mutations": [
-			"string"
-		]
+		"test-case-filter": "FullyQualifiedName!~com.csutil.integrationTests", 
+		"reporters": [ "All" ],
+		"project-info": { "name": "github.com/cs-util-com/cscore" }
 	}
 }

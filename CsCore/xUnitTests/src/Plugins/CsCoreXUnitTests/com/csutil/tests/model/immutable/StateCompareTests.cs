@@ -5,6 +5,7 @@ using com.csutil.model.immutable;
 using Xunit;
 
 namespace com.csutil.tests.model.immutable {
+    
     public class StateCompareTests {
 
         public StateCompareTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }

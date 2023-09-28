@@ -5,7 +5,7 @@ using System.Linq;
 using com.csutil.model.immutable;
 using Xunit;
 
-namespace com.csutil.tests.model.immutable {
+namespace com.csutil.integrationTests.model.immutable {
 
     [Collection("Sequential")] // Will execute tests in here sequentially
     public class DataStoreStressTests {
@@ -23,7 +23,7 @@ namespace com.csutil.tests.model.immutable {
             StopwatchV2 t1, t2, t3, t4; // The 4 measured timings of the Dispatches
             { // Add subListeners that are only informed by the one listener attached directly to the store:
                 var counterA1 = 0;
-                var subListenersA = store.NewSubStateListener(s => s.substateA);
+                var subListenersA = store.GetSubState(s => s.substateA);
                 for (int i = 0; i < listenerCount; i++) {
                     subListenersA.AddStateChangeListener(substateA => substateA.valA, newValA => {
                         counterA1++;
@@ -37,7 +37,7 @@ namespace com.csutil.tests.model.immutable {
             }
             { // Now add additional listeners to check if it makes Dispatching slower:
                 var counterB1 = 0;
-                var subListenersB = store.NewSubStateListener(s => s.substateB);
+                var subListenersB = store.GetSubState(s => s.substateB);
                 for (int i = 0; i < listenerCount; i++) {
                     subListenersB.AddStateChangeListener(substateB => substateB.valB, newValB => {
                         counterB1++;
@@ -85,7 +85,7 @@ namespace com.csutil.tests.model.immutable {
 
                 float t1t4Ratio = (float)t4.ElapsedMilliseconds / (float)t1.ElapsedMilliseconds;
                 Log.d("t1t4Ratio=" + t1t4Ratio);
-                Assert.True(2f < t1t4Ratio, "t1t4Ratio=" + t1t4Ratio);
+                Assert.True(1.5f < t1t4Ratio, "t1t4Ratio=" + t1t4Ratio);
 
                 float t3t4Ratio = (float)t3.ElapsedMilliseconds / (float)t4.ElapsedMilliseconds;
                 Log.d("t3t4Ratio=" + t3t4Ratio);

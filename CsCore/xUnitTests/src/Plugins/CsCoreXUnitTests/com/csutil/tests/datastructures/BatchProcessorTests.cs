@@ -7,7 +7,7 @@ using com.csutil.keyvaluestore;
 using com.csutil.model;
 using Xunit;
 
-namespace com.csutil.tests.keyvaluestore {
+namespace com.csutil.integrationTests.keyvaluestore {
 
     [Collection("Sequential")] // Will execute tests in here sequentially
     public class BatchProcessorTests {

@@ -4,9 +4,8 @@ using Xunit;
 using com.csutil.random;
 using System.Linq;
 
-namespace com.csutil.tests.json {
+namespace com.csutil.integrationTests.json {
 
-    [Collection("Sequential")] // Will execute tests in here sequentially
     public class PersistedRegressionTests {
 
         public PersistedRegressionTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }

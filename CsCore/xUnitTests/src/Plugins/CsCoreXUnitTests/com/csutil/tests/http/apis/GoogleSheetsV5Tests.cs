@@ -5,7 +5,7 @@ using com.csutil.http.apis;
 using com.csutil.system;
 using Xunit;
 
-namespace com.csutil.tests.http {
+namespace com.csutil.integrationTests.http {
 
     public class GoogleSheetsV5Tests {
 

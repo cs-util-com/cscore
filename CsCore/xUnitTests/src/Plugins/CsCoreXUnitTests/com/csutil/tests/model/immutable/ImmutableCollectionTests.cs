@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace com.csutil.tests.model.immutable {
+namespace com.csutil.integrationTests.model.immutable {
 
     public class ImmutableCollectionTests {
 

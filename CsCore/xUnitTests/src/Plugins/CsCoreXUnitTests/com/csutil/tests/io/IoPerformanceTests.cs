@@ -6,7 +6,7 @@ using ICSharpCode.SharpZipLib.Zip;
 using Xunit;
 using Zio;
 
-namespace com.csutil.tests {
+namespace com.csutil.integrationTests.io {
 
     public class IoPerformanceTests {
 
@@ -55,7 +55,7 @@ namespace com.csutil.tests {
             root.CreateV2();
             {
                 using var t = Log.MethodEnteredWith($"Write with count {FILE_COUNT}");
-                using var zipFileSystem = zipFile.OpenAsZip();
+                using var zipFileSystem = zipFile.OpenOrCreateAsZip();
                 var zip = zipFileSystem.GetRootDirectory();
                 for (int i = 0; i < FILE_COUNT; i++) {
                     var entryName = GuidV2.NewGuid() + ".txt";
@@ -65,7 +65,7 @@ namespace com.csutil.tests {
             }
             {
                 using var t = Log.MethodEnteredWith($"Read with count {FILE_COUNT}");
-                using var zipFileSystem = zipFile.OpenAsZip();
+                using var zipFileSystem = zipFile.OpenOrCreateAsZip();
                 var zip = zipFileSystem.GetRootDirectory();
                 var allFilesInZip = zip.EnumerateEntries().Cast<FileEntry>().ToList();
                 Assert.Equal(FILE_COUNT, allFilesInZip.Count());
@@ -82,11 +82,11 @@ namespace com.csutil.tests {
             var zipFile = root.GetChild("Test3.zip");
             root.CreateV2();
             {
-                using var zipFileSystem = zipFile.OpenAsZip();
+                using var zipFileSystem = zipFile.OpenOrCreateAsZip();
                 await WriteFilesTo(zipFileSystem.GetRootDirectory());
             }
             {
-                using var zipFileSystem = zipFile.OpenAsZip();
+                using var zipFileSystem = zipFile.OpenOrCreateAsZip();
                 ReadAllFilesFrom(zipFileSystem.GetRootDirectory());
             }
         }
