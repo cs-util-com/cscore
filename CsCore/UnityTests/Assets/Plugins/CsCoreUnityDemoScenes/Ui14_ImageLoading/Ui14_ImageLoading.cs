@@ -14,7 +14,7 @@ namespace com.csutil.tests {
 
     public class Ui14_ImageLoading : UnitTestMono {
 
-        public string testUrl = "https://github.com/cs-util-com/cscore/raw/master/CsCore/UnityTests/Assets/TestApplicationData/testImage.png";
+        public string testUrl = "https://github.com/cs-util-com/cscore/raw/master/CsCore/assets/logo-cscore1024x1024_2.png";
 
         private Dictionary<string, Link> links;
 
@@ -34,13 +34,13 @@ namespace com.csutil.tests {
             });
 
             links.Get<Button>("ButtonLoadImage_LoadAndPersistTo").SetOnClickAction(async delegate {
-                DirectoryEntry targetDir = EnvironmentV2.instance.GetOrAddTempFolder("Ui14_ImageLoading");
+                DirectoryEntry targetDir = EnvironmentV2.instance.GetOrAddTempFolder("Ui14_ImageLoading_LoadAndPersistTo");
 
                 var imgRefFile = targetDir.GetChild("imgRef.txt");
                 FileRef imgRef = imgRefFile.Exists ? imgRefFile.LoadAs<FileRef>() : null;
                 if (imgRef == null) { imgRef = new FileRef() { url = testUrl }; }
 
-                var t = Log.MethodEntered("LoadAndPersistTo");
+                var t = Log.MethodEntered("LoadAndPersistTo with imgRef=" + imgRef);
                 await links.Get<Image>("Image2").LoadAndPersistTo(imgRef, targetDir, 64);
                 Log.MethodDone(t);
 
@@ -103,6 +103,9 @@ namespace com.csutil.tests {
             public string url { get; set; }
             public Dictionary<string, object> checksums { get; set; }
             public string mimeType { get; set; }
+
+            public override string ToString() { return $"FileRef(url={url}, dir={dir}, fileName={fileName})"; }
+
         }
 
     }

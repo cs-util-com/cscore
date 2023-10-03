@@ -3,6 +3,7 @@ using com.csutil.model;
 using com.csutil.ui.Components;
 using StbImageSharp;
 using System;
+using System.IO;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
@@ -23,7 +24,7 @@ namespace com.csutil {
         }
 
         /// <summary> Loads a texture on the main thread using Unitys own LoadImage method.
-        /// This is faster then the ToTexture2D method but can not be performed in a background thread. </summary>
+        /// This is faster than the ToTexture2D method but can not be performed in a background thread. </summary>
         public static bool TryLoadTexture2DFast(byte[] downloadedBytes, out Texture2D texture2d, bool hasAlpha = false) {
             downloadedBytes.ThrowErrorIfNullOrEmpty("input image bytes");
             if (hasAlpha) {
@@ -86,10 +87,11 @@ namespace com.csutil {
 
         public static async Task<Texture2D> LoadAndPersistTo(IFileRef imgRef, DirectoryEntry targetDir, int thumbnailPixelWidth, Action<Texture2D> showTexture) {
             Texture2D tempThumbTexture = null;
+            var hasAlpha = imgRef.mimeType == "image/png";
             if (imgRef.fileName != null) { // Try load local thumbnail as quick as possible:
                 var i = targetDir.GetChild(imgRef.fileName);
                 var t = i.Parent.GetChild(i.NameWithoutExtension + ".thm");
-                tempThumbTexture = await LoadThumbnailIfFound(showTexture, t, tempThumbTexture);
+                tempThumbTexture = LoadThumbnailIfFound(showTexture, t, tempThumbTexture, hasAlpha);
             }
 
             var fileWasDownloaded = await imgRef.DownloadTo(targetDir, useAutoCachedFileRef: true);
@@ -98,12 +100,15 @@ namespace com.csutil {
             FileEntry thumbnailFile = GetThumbnailFile(imgRef, targetDir);
             if (!fileWasDownloaded && tempThumbTexture == null) {
                 // If there was no new file downloaded and the thumbnail is available and not loaded yet:
-                tempThumbTexture = await LoadThumbnailIfFound(showTexture, thumbnailFile, tempThumbTexture);
+                tempThumbTexture = LoadThumbnailIfFound(showTexture, thumbnailFile, tempThumbTexture, hasAlpha);
             }
             if (!imageFile.Exists) { return null; }
 
             // Load the full image as a texture and show it in the UI:
-            Texture2D texture2d = await imageFile.LoadTexture2D();
+            Texture2D texture2d = null;
+            if (!imageFile.TryLoadTexture2DFast(out texture2d, hasAlpha)) {
+                throw new InvalidDataException("Could not load image from " + imageFile);
+            }
             showTexture(texture2d);
             if (tempThumbTexture != null) { tempThumbTexture.Destroy(true); }
 
@@ -126,11 +131,13 @@ namespace com.csutil {
             return imageFile.Parent.GetChild(imageFile.NameWithoutExtension + ".thm");
         }
 
-        private static async Task<Texture2D> LoadThumbnailIfFound(Action<Texture2D> showTexture, FileEntry thumbnailFile, Texture2D tempThumbTexture) {
+        private static Texture2D LoadThumbnailIfFound(Action<Texture2D> showTexture, FileEntry thumbnailFile, Texture2D tempThumbTexture, bool hasAlpha) {
             if (thumbnailFile.Exists) {
                 if (tempThumbTexture != null) { tempThumbTexture.Destroy(true); }
-                tempThumbTexture = await thumbnailFile.LoadTexture2D();
-                showTexture(tempThumbTexture);
+                if (thumbnailFile.TryLoadTexture2DFast(out var result, hasAlpha)) {
+                    tempThumbTexture = result;
+                    showTexture(tempThumbTexture);
+                }
             }
             return tempThumbTexture;
         }

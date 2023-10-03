@@ -18,6 +18,12 @@ namespace com.csutil {
             return await ImageLoaderUnity.ToTexture2D(self.ReadAllBytes());
         }
 
+        /// <summary> Loads a texture on the main thread using Unitys own LoadImage method.
+        /// This is faster than the LoadTexture2D method but can not be performed in a background thread. </summary>
+        public static bool TryLoadTexture2DFast(this FileEntry self, out Texture2D texture2D, bool hasAlpha = false) {
+            return ImageLoaderUnity.TryLoadTexture2DFast(self.ReadAllBytes(), out texture2D, hasAlpha);
+        }
+
         public static void SaveToJpgFile(this Texture2D self, FileEntry targetFile, int quality = 90) {
             if (!targetFile.Parent.Exists) { targetFile.Parent.CreateV2(); }
             targetFile.SaveStream(new MemoryStream(self.EncodeToJPG(quality)));

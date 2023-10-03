@@ -75,7 +75,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   simulateUserInput: 0
-  testUrl: https://github.com/cs-util-com/cscore/raw/master/CsCore/UnityTests/Assets/TestApplicationData/testImage.png
+  testUrl: https://github.com/cs-util-com/cscore/raw/master/CsCore/assets/logo-cscore1024x1024_2.png
 --- !u!222 &3009606000734550557
 CanvasRenderer:
   m_ObjectHideFlags: 0
