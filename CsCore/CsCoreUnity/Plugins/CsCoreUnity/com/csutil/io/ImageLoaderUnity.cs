@@ -16,12 +16,27 @@ namespace com.csutil {
 
         public static void LoadTexture2D(this Image self, Texture2D tex) { self.sprite = tex.ToSprite(); }
 
-        /// <summary>
-        /// Uses the StbImageLib internally and seems to be a bit slower then loading the texture directly via UnityWebRequest but 
-        /// can be performed in a background thread.
-        /// </summary>
+        /// <summary> Uses the StbImageLib internally and seems to be a bit slower then loading the texture directly via UnityWebRequest but 
+        /// can be performed in a background thread. </summary>
         public static async Task<Texture2D> ToTexture2D(byte[] downloadedBytes) {
             return ToTexture2D(await ImageLoader.LoadImageInBackground(downloadedBytes));
+        }
+
+        /// <summary> Loads a texture on the main thread using Unitys own LoadImage method.
+        /// This is faster then the ToTexture2D method but can not be performed in a background thread. </summary>
+        public static bool TryLoadTexture2DFast(byte[] downloadedBytes, out Texture2D texture2d, bool hasAlpha = false) {
+            downloadedBytes.ThrowErrorIfNullOrEmpty("input image bytes");
+            if (hasAlpha) {
+                texture2d = new Texture2D(2, 2, TextureFormat.RGB565, false);
+            } else {
+                texture2d = new Texture2D(2, 2, TextureFormat.RGBA32, false);
+            }
+            var couldBeLoaded = texture2d.LoadImage(downloadedBytes, hasAlpha);
+            if (!couldBeLoaded) { return false; }
+            
+            // Unity has an error placeholder which is 8 x 8 pixels in size and has only 1 mipmap:
+            var isErrorPlaceholder = texture2d.width == 8 && texture2d.height == 8 && texture2d.mipmapCount == 1;
+            return !isErrorPlaceholder;
         }
 
         public static Texture2D ToTexture2D(this ImageResult self) {
