@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -97,6 +98,22 @@ namespace com.csutil {
 
         public virtual DirectoryEntry GetNewInMemorySystem() {
             return new DirectoryEntry(new Zio.FileSystems.MemoryFileSystem(), UPath.Root);
+        }
+
+        public virtual string GetEnvironmentVariable(string variable) {
+            return Environment.GetEnvironmentVariable(variable);
+        }
+        
+        public virtual void SetEnvironmentVariable(string variable, string value) {
+            Environment.SetEnvironmentVariable(variable, value);
+        }
+        
+        public virtual void SetEnvironmentVariable(string variable, string value, EnvironmentVariableTarget target) {
+            Environment.SetEnvironmentVariable(variable, value, target);
+        }
+        
+        public virtual IDictionary GetEnvironmentVariables() {
+            return Environment.GetEnvironmentVariables();
         }
 
         public interface ISystemInfo {
