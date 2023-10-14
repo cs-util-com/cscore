@@ -191,6 +191,7 @@ namespace com.csutil.model.ecs {
 
         [Conditional("DEBUG")]
         private static void AssertOnlySingleCompOfType<V>(IEntityData self) where V : class {
+            self.ThrowErrorIfNull("Entity self");
             var compTypeCount = self.Components.Values.Count(c => c is V);
             if (compTypeCount > 1) {
                 throw new ArgumentException($"The entity {self.Id} has {compTypeCount} components of type {typeof(V).Name} but only one is allowed");
