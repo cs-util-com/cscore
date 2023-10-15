@@ -132,11 +132,11 @@ namespace com.csutil.model.ecs {
 
         public void Destroy(string entityId) {
             var entity = Entities[entityId] as Entity;
-            OnIEntityUpdated?.Invoke(entity, UpdateType.Remove, entity.Data, default);
             Entities.Remove(entityId);
             if (entity.TemplateId != null) {
                 Variants.Remove(entity.TemplateId);
             }
+            OnIEntityUpdated?.Invoke(entity, UpdateType.Remove, entity.Data, default);
             entity.Ecs = null;
             if (entity.Data.Components != null) {
                 foreach (var comp in entity.Data.Components) {
