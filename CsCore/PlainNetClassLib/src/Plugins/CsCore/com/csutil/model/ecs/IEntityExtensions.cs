@@ -76,9 +76,10 @@ namespace com.csutil.model.ecs {
         }
 
         private static void DestroyAllChildrenRecursively<T>(this IEntity<T> self, Func<IEntity<T>, string, T> removeChildIdFromParent) where T : IEntityData {
-            var children = self.GetChildren().ToList();
+            var children = self.GetChildren();
             if (children != null) {
-                foreach (var child in children) {
+                var childrenToDelete= children.ToList();
+                foreach (var child in childrenToDelete) {
                     child.Destroy(removeChildIdFromParent);
                 }
             }
