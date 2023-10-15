@@ -189,6 +189,16 @@ namespace com.csutil.model.ecs {
             AssertOnlySingleCompOfType<V>(self);
             return self.Components.Values.Single(c => c is V) as V;
         }
+        
+        public static bool TryGetComponent<V>(this IEntityData self, out V comp) where V : class {
+            var compOrNull = self.Components.Values.SingleOrDefault(c => c is V);
+            if (compOrNull != null) {
+                comp = compOrNull as V;
+                return true;
+            }
+            comp = default;
+            return false;
+        }
 
         [Conditional("DEBUG")]
         private static void AssertOnlySingleCompOfType<V>(IEntityData self) where V : class {
