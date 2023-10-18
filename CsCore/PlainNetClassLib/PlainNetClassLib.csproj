@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
@@ -68,7 +68,7 @@
     <!-- https://www.nuget.org/packages/Magick.NET.Core/ --> 
     <PackageReference Include="Magick.NET.Core" Version="13.0.1" />
     <!-- https://www.nuget.org/packages/Magick.NET-Q8-AnyCPU/ --> 
-    <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="13.0.1" />
+    <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="13.3.0" />
   </ItemGroup>
 
 </Project>
