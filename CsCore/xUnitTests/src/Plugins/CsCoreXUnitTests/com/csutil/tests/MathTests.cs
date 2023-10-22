@@ -403,7 +403,7 @@ namespace com.csutil.tests {
 
                 // Check that for each point the formula returns the correct y value:
                 foreach (var p in points) {
-                    var y = CurveFitting.CalculateY(coefficients, p);
+                    var y = CurveFitting.CalcPolynomialFor(coefficients, p);
                     Assert.Equal(p.Y, y);
                 }
 

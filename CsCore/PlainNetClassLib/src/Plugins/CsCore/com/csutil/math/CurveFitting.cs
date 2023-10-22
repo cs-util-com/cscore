@@ -103,8 +103,8 @@ namespace com.csutil.math {
             return solution;
         }
 
-        /// <summary> Calculates y using a generic for loop that can handle any number of coefficients </summary>
-        public static double CalculateY(double[] coefficients, Vector2 point) {
+        /// <summary> Calculates the y value for the given x value using the given polynomial coefficients </summary>
+        public static double CalcPolynomialFor(double[] coefficients, Vector2 point) {
             var y = 0d;
             for (int i = 0; i < coefficients.Length; i++) {
                 y += coefficients[i] * Math.Pow(point.X, i);
