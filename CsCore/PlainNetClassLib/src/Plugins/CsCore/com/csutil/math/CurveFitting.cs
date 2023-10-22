@@ -60,7 +60,7 @@ namespace com.csutil.math {
 
             public double CalcPolynomialFor(double x) { return CurveFitting.CalcPolynomialFor(Coefficients, x); }
 
-            public double? totalModelError => ErrorSum;
+            public double? totalModelError => ErrorMedian;
             public ICollection<Vector2> inliers { get; set; }
             public ICollection<Vector2> outliers { get; set; }
 
