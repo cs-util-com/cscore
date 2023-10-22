@@ -384,7 +384,7 @@ namespace com.csutil.tests {
             }
 
             [Fact]
-            public void TestCurveFitting() {
+            public void TestCurveFitting1() {
 
                 // Points from a simple y=x^2 function:
                 var points = new List<Vector2>() {
@@ -400,13 +400,33 @@ namespace com.csutil.tests {
                 var coefficients = CurveFitting.CalcPolynomialCoefficients(points, coefficientCount: 5);
                 // The resulting formula should be: y = 0 + 0*x + 1*x^2 + 0*x^3 + 0*x^4 :
                 Assert.Equal(new double[] { 0, 0, 1, 0, 0 }, coefficients);
-                Assert.Equal("x^2", CurveFitting.GetPolynomialStringFor(coefficients));
+                Assert.Equal("var y = Math.Pow(x, 2);", CurveFitting.GetPolynomialStringFor(coefficients));
 
                 // Check that for each point the formula returns the correct y value:
                 foreach (var p in points) {
                     var y = CurveFitting.CalcPolynomialFor(coefficients, p.X);
                     Assert.Equal(p.Y, y);
                 }
+
+            }
+
+            [Fact]
+            public void TestCurveFitting2() {
+
+                // Points from a simple y=x^2 function:
+                var points = new List<Vector2>() {
+                    new Vector2(0, 0),
+                    new Vector2(1, 1),
+                    new Vector2(2, 4),
+                    new Vector2(3, 9),
+                    new Vector2(4, 16),
+                    new Vector2(5, 25),
+                    new Vector2(10, 999), // One outlier that should be ignored
+                };
+
+                var bestFunction = CurveFitting.CalcAllPolynomialFunctionsWithRansac(points, new Random(Seed: 1), inlierDistance: 5);
+                Assert.True(new double[] { 0, 0, 1 }.SequenceEqual(bestFunction.Coefficients), $"actual func={bestFunction}");
+                Assert.Equal("var y = Math.Pow(x, 2);", bestFunction.ToString());
 
             }
 
