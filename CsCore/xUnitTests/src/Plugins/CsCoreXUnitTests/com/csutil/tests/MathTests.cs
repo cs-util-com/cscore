@@ -163,7 +163,7 @@ namespace com.csutil.tests {
 
             var vec1 = new Vector3(1, 1, 3);
             var vec2 = new Vector3(1, 1, 3.01f);
-            
+
             Assert.True(vec1.IsAlmostEqual(vec2, 2));
             Assert.False(vec1.IsAlmostEqual(vec2, 3));
             Assert.True(vec1.IsAlmostEqual(vec2, 0.01f));
@@ -372,6 +372,43 @@ namespace com.csutil.tests {
                 }
 
             }
+
+            [Fact]
+            public void TestMatrix4x4GetAndSet() {
+                var m = Matrix4x4.Identity;
+                Assert.Equal(1, m.Get(0, 0));
+                m.Set(0, 0, 2);
+                Assert.Equal(2, m.Get(0, 0));
+                var row = m.GetRow(0);
+                Assert.Equal(new Vector4(2, 0, 0, 0), row);
+            }
+
+            [Fact]
+            public void TestCurveFitting() {
+
+                // Points from a simple y=x^2 function:
+                var points = new List<Vector2>() {
+                    new Vector2(0, 0),
+                    new Vector2(1, 1),
+                    new Vector2(2, 4),
+                    new Vector2(3, 9),
+                    new Vector2(4, 16),
+                    new Vector2(5, 25),
+                    new Vector2(10, 100),
+                };
+
+                var coefficients = CurveFitting.CalcPolynomialCoefficients(points, coefficientCount: 5);
+                // The resulting formula should be: y = 0 + 0*x + 1*x^2 + 0*x^3 + 0*x^4 :
+                Assert.Equal(new double[] { 0, 0, 1, 0, 0 }, coefficients);
+
+                // Check that for each point the formula returns the correct y value:
+                foreach (var p in points) {
+                    var y = CurveFitting.CalculateY(coefficients, p);
+                    Assert.Equal(p.Y, y);
+                }
+
+            }
+
 
         }
 
