@@ -104,12 +104,27 @@ namespace com.csutil.math {
         }
 
         /// <summary> Calculates the y value for the given x value using the given polynomial coefficients </summary>
-        public static double CalcPolynomialFor(double[] coefficients, Vector2 point) {
+        public static double CalcPolynomialFor(double[] coefficients, double x) {
             var y = 0d;
             for (int i = 0; i < coefficients.Length; i++) {
-                y += coefficients[i] * Math.Pow(point.X, i);
+                y += coefficients[i] * Math.Pow(x, i);
             }
             return y;
+        }
+
+        public static string GetPolynomialStringFor(double[] coefficients) {
+            var s = "";
+            for (int i = 0; i < coefficients.Length; i++) {
+                var c = coefficients[i];
+                if (c == 0) { continue; }
+                if (s.Length > 0) { s += " + "; }
+                if (c == 1) {
+                    s += "x^" + i;
+                } else {
+                    s += c + "*x^" + i;
+                }
+            }
+            return s;
         }
 
     }

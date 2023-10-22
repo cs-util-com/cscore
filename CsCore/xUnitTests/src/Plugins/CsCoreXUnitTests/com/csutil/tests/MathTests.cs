@@ -400,10 +400,11 @@ namespace com.csutil.tests {
                 var coefficients = CurveFitting.CalcPolynomialCoefficients(points, coefficientCount: 5);
                 // The resulting formula should be: y = 0 + 0*x + 1*x^2 + 0*x^3 + 0*x^4 :
                 Assert.Equal(new double[] { 0, 0, 1, 0, 0 }, coefficients);
+                Assert.Equal("x^2", CurveFitting.GetPolynomialStringFor(coefficients));
 
                 // Check that for each point the formula returns the correct y value:
                 foreach (var p in points) {
-                    var y = CurveFitting.CalcPolynomialFor(coefficients, p);
+                    var y = CurveFitting.CalcPolynomialFor(coefficients, p.X);
                     Assert.Equal(p.Y, y);
                 }
 
