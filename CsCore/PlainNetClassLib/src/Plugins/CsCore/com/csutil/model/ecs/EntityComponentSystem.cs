@@ -21,6 +21,7 @@ namespace com.csutil.model.ecs {
             public IReadOnlyDictionary<string, IComponentData> Components => Data.Components;
             public string ParentId => Data.ParentId;
             public IReadOnlyList<string> ChildrenIds => Data.ChildrenIds;
+            public bool IsActive => Data.IsActive;
 
             public override string ToString() { return Data.ToString(); }
 

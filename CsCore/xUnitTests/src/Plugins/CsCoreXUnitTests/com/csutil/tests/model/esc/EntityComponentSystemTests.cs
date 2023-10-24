@@ -353,23 +353,23 @@ namespace com.csutil.tests.model.esc {
             Assert.True(length < allowedDelta, $"Expected {a} to be almost equal to {b} but the difference is {length}");
         }
 
-        private class EnemyComponent : IComponentData {
+        private abstract class Component : IComponentData {
             public string Id { get; set; } = "" + GuidV2.NewGuid();
+            public string GetId() { return Id; }
+            public bool IsActive { get; set; } = true;
+        }
+
+        private class EnemyComponent : Component {
             public int Mana { get; set; }
             public int Health;
-            public string GetId() { return Id; }
         }
 
-        private class SwordComponent : IComponentData {
-            public string Id { get; set; } = "" + GuidV2.NewGuid();
+        private class SwordComponent : Component {
             public int Damage { get; set; }
-            public string GetId() { return Id; }
         }
 
-        private class ShieldComponent : IComponentData {
-            public string Id { get; set; } = "" + GuidV2.NewGuid();
+        private class ShieldComponent : Component {
             public int Defense { get; set; }
-            public string GetId() { return Id; }
         }
 
     }
@@ -381,6 +381,7 @@ namespace com.csutil.tests.model.esc {
         public string TemplateId { get; set; }
         public Matrix4x4? LocalPose { get; set; }
         public IReadOnlyDictionary<string, IComponentData> Components { get; set; }
+        public bool IsActive { get; set; } = true;
 
         public string ParentId { get; set; }
 
