@@ -138,7 +138,7 @@ namespace com.csutil.model.ecs {
 
         public static void SaveChanges<T>(this IEntity<T> self) where T : IEntityData {
             var fullSubtree = self.GetChildrenTreeBreadthFirst();
-            foreach (var e in fullSubtree) { e.Ecs.SaveChanges(e.Data); }
+            foreach (var e in fullSubtree) { e.Ecs.Update(e.Data); }
         }
 
         /// <summary>

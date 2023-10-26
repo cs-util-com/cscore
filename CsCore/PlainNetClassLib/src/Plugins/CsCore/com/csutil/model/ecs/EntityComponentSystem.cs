@@ -91,13 +91,13 @@ namespace com.csutil.model.ecs {
             }
         }
 
-        public void SaveChanges(T entityData) {
-            TemplatesIo.SaveChanges(entityData);
+        public void Update(T entityData) {
+            TemplatesIo?.SaveChanges(entityData);
             // In case the entity is a template, update also all entities that inherit from the template:
-            Update(entityData);
+            InternalUpdate(entityData);
         }
         
-        public void Update(T updatedEntityData) {
+        private void InternalUpdate(T updatedEntityData) {
             var entityId = updatedEntityData.Id;
             var entity = (Entity)_entities[entityId];
 
@@ -121,7 +121,7 @@ namespace com.csutil.model.ecs {
             if (Variants.TryGetValue(updatedEntityData.Id, out var variantIds)) {
                 foreach (var variantId in variantIds) {
                     var newVariantState = TemplatesIo.RecreateVariantInstance(variantId);
-                    Update(newVariantState);
+                    InternalUpdate(newVariantState);
                 }
             }
         }
