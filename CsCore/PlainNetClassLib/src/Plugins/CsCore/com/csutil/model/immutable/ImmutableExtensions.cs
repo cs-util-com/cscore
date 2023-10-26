@@ -95,13 +95,13 @@ namespace com.csutil.model.immutable {
 
         public static SubState<T, S> GetSubState<T, S>(this IDataStore<T> self, Func<T, S> getSubState) {
             var subState = new SubState<T, S>(self, getSubState);
-            self.AddSubStateAsListener(subState);
             return subState;
         }
 
-        public static void AddSubStateAsListener<T, S>(this IDataStore<T> self, SubState<T, S> subState, bool triggerInstantToInit = true) {
-            var listenerInStore = self.AddStateChangeListener((_) => subState.GetState(), subState.TriggerOnSubstateChanged, triggerInstantToInit);
-            subState.RemoveFromParent = () => { self.onStateChanged -= listenerInStore; };
+        public static void AddSubStateAsListener<T, S>(this IDataStore<T> store, SubState<T, S> subState, bool triggerInstantToInit = true) {
+            if (subState.RemoveFromParent != null) { return; } // Do nothing if the SubState is already a listener (of the store or a parent SubState)
+            var listenerInStore = store.AddStateChangeListener((_) => subState.GetState(), subState.TriggerOnSubstateChanged, triggerInstantToInit);
+            subState.RemoveFromParent = () => { store.onStateChanged -= listenerInStore; };
         }
 
         public static SubState<T, SubSub> GetSubState<T, Sub, SubSub>(this SubState<T, Sub> self, Func<Sub, SubSub> getSubSubState) {
