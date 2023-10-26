@@ -15,7 +15,7 @@ namespace com.csutil.model.ecs {
 
         public static IEntity<T> GetParent<T>(this IEntity<T> self) where T : IEntityData {
             if (self.ParentId == null) { return default; }
-            return self.Ecs.AllEntities[self.ParentId];
+            return self.Ecs.Entities[self.ParentId];
         }
 
         public static T GetParent<T>(this T self, IReadOnlyDictionary<string, T> allEntities) where T : IEntityData {
@@ -178,7 +178,7 @@ namespace com.csutil.model.ecs {
     public static class EcsExtensions {
 
         public static IEnumerable<IEntity<T>> FindEntitiesWithName<T>(this EntityComponentSystem<T> ecs, string name) where T : IEntityData {
-            return ecs.AllEntities.Values.Filter(x => x.Name == name);
+            return ecs.Entities.Values.Filter(x => x.Name == name);
         }
 
     }

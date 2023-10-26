@@ -136,16 +136,16 @@ namespace com.csutil.tests.model.esc {
                 Assert.Equal(Vector3.One, e1.LocalPose().scale);
             }
 
-            Assert.Equal(3, ecs.AllEntities.Count);
+            Assert.Equal(3, ecs.Entities.Count);
             e1.RemoveFromParent();
             // e1 is removed from its parent but still in the scene graph:
-            Assert.Equal(3, ecs.AllEntities.Count);
+            Assert.Equal(3, ecs.Entities.Count);
             Assert.Same(e2, entityGroup.GetChildren().Single());
             Assert.Null(e1.GetParent());
             Assert.True(e1.Destroy());
             Assert.False(e1.Destroy());
             // e1 is now fully removed from the scene graph and destroyed:
-            Assert.Equal(2, ecs.AllEntities.Count);
+            Assert.Equal(2, ecs.Entities.Count);
 
             Assert.False(e2.IsDestroyed());
 
@@ -156,7 +156,7 @@ namespace com.csutil.tests.model.esc {
             Assert.Empty(entityGroup.GetChildren());
 
             Assert.True(e2.IsDestroyed());
-            Assert.Equal(1, ecs.AllEntities.Count);
+            Assert.Equal(1, ecs.Entities.Count);
 
             // Since e3 and e4 are in the subtree of e2 they are also destroyed:
             Assert.True(e3.IsDestroyed());
@@ -325,10 +325,10 @@ namespace com.csutil.tests.model.esc {
                 Assert.NotEmpty(dir.EnumerateEntries());
                 var templatesIo = new TemplatesIO<Entity>(dir);
                 var ecs = new EntityComponentSystem<Entity>(templatesIo, isModelImmutable: false);
-                Assert.Empty(ecs.AllEntities);
+                Assert.Empty(ecs.Entities);
                 await ecs.LoadSceneGraphFromDisk();
                 Assert.Equal(17, dir.EnumerateFiles().Count());
-                Assert.Equal(17, ecs.AllEntities.Count);
+                Assert.Equal(17, ecs.Entities.Count);
                 // The user loads the scene from disk and can continue editing it
 
                 var scene = ecs.FindEntitiesWithName("Scene").Single();

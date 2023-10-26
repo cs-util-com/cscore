@@ -31,12 +31,12 @@ namespace com.csutil.model.ecs {
 
         private readonly TemplatesIO<T> TemplatesIo;
 
-        private readonly Dictionary<string, IEntity<T>> Entities = new Dictionary<string, IEntity<T>>();
+        private readonly Dictionary<string, IEntity<T>> _entities = new Dictionary<string, IEntity<T>>();
 
         /// <summary> A lookup from templateId to all entityIds that are variants of that template </summary>
         private readonly Dictionary<string, HashSet<string>> Variants = new Dictionary<string, HashSet<string>>();
 
-        public IReadOnlyDictionary<string, IEntity<T>> AllEntities => Entities;
+        public IReadOnlyDictionary<string, IEntity<T>> Entities => _entities;
 
         /// <summary> If set to true the T class used in IEntity<T> must be immutable in all fields </summary>
         public readonly bool IsModelImmutable;
@@ -60,7 +60,7 @@ namespace com.csutil.model.ecs {
         public void Dispose() {
             IsDisposed = DisposeState.DisposingStarted;
             TemplatesIo.DisposeV2();
-            Entities.Clear();
+            _entities.Clear();
             Variants.Clear();
             OnIEntityUpdated = null;
             IsDisposed = DisposeState.Disposed;
@@ -68,7 +68,7 @@ namespace com.csutil.model.ecs {
 
         public IEntity<T> Add(T entityData) {
             // First check if the entity already exists:
-            if (Entities.TryGetValue(entityData.Id, out var existingEntity)) {
+            if (_entities.TryGetValue(entityData.Id, out var existingEntity)) {
                 throw new InvalidOperationException("Entity already exists with id '" + entityData.Id + "' old=" + existingEntity.Data + " new=" + entityData);
             }
             return AddEntity(new Entity() { Data = entityData, Ecs = this });
@@ -77,9 +77,9 @@ namespace com.csutil.model.ecs {
         private IEntity<T> AddEntity(Entity entity) {
             var entityId = entity.Id;
             entityId.ThrowErrorIfNullOrEmpty("entityData.Id");
-            var hasOldEntity = Entities.TryGetValue(entityId, out var oldEntity);
+            var hasOldEntity = _entities.TryGetValue(entityId, out var oldEntity);
             T oldEntityData = hasOldEntity ? oldEntity.Data : default;
-            Entities[entityId] = entity;
+            _entities[entityId] = entity;
             UpdateVariantsLookup(entity.Data);
             OnIEntityUpdated?.Invoke(entity, UpdateType.Add, oldEntityData, entity.Data);
             return entity;
@@ -93,7 +93,7 @@ namespace com.csutil.model.ecs {
 
         public void Update(T updatedEntityData) {
             var entityId = updatedEntityData.Id;
-            var entity = (Entity)Entities[entityId];
+            var entity = (Entity)_entities[entityId];
 
             var oldEntryData = entity.Data;
 
@@ -128,12 +128,12 @@ namespace com.csutil.model.ecs {
         }
 
         public IEntity<T> GetEntity(string entityId) {
-            return Entities[entityId];
+            return _entities[entityId];
         }
 
         public void Destroy(string entityId) {
-            var entity = Entities[entityId] as Entity;
-            Entities.Remove(entityId);
+            var entity = _entities[entityId] as Entity;
+            _entities.Remove(entityId);
             if (entity.TemplateId != null) {
                 Variants.Remove(entity.TemplateId);
             }
