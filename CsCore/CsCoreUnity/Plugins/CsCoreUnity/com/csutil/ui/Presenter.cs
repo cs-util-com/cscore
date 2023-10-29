@@ -5,13 +5,20 @@ using UnityEngine;
 
 namespace com.csutil {
 
-    // https://en.wikipedia.org/wiki/Model–view–presenter
+    /// <summary> The presenter pattern connects a part of the data model with a
+    /// UI view that should show that part of the model.
+    /// For details see https://en.wikipedia.org/wiki/Model–view–presenter </summary>
     public interface Presenter<T> {
 
         /// <summary> The target view to load the model into </summary>
         GameObject targetView { get; set; }
 
-        /// <summary> Called to load the model into the targetView </summary>
+        /// <summary> Called to load the model into the targetView. <br/>
+        /// - This might happen every time the model changes so an already created view can
+        ///   update its state based on the latest model <br/>
+        /// - It can also be used to load the model into a new view and setting up subscriptions on
+        ///   the model changes that will handle any further updates to the model <br/>
+        /// </summary>
         Task OnLoad(T model);
 
     }
@@ -33,6 +40,7 @@ namespace com.csutil {
             await AssertVisually.AssertNoVisualChange(name);
 #endif
             EventBus.instance.Publish(EventConsts.catPresenter + EventConsts.START, name, self, model);
+
             await self.OnLoad(model);
             EventBus.instance.Publish(EventConsts.catPresenter + EventConsts.DONE, name, self, model);
             return model;
@@ -53,6 +61,26 @@ namespace com.csutil {
                 tcs.TrySetResult(await self.LoadModelIntoView(newValue));
             });
             return tcs.Task;
+        }
+
+    }
+
+    /// <summary>
+    /// To split the business logic further from the presenter, the presenter can be split into a presenter and a presenter actions part.
+    /// The actions are pure C# logic that is not related to Unity so that they can also be used in other contexts and tested without Unity.
+    /// </summary>
+    public interface PresenterWithActions<T, V> : Presenter<T>, IHasActions<T, V> where V : IModelActions<T> {
+    }
+
+    public static class PresenterWithActionsExtensions {
+
+        /// <summary> Connects a model with a view </summary>
+        /// <returns> A task that can be awaited on, that returns the fully setup presenter </returns>
+        public static Task<T> LoadModelIntoView<T, V>(this PresenterWithActions<T, V> self, T model) where V : IModelActions<T> {
+            self.actions.ThrowErrorIfNull("presenter.actions");
+            self.actions.Model = model;
+            Presenter<T> presenter = self;
+            return presenter.LoadModelIntoView(model);
         }
 
     }
