@@ -17,11 +17,14 @@ namespace Xunit {
 
     public static class Assert {
 
-        public static void True(bool b, string msg = null) {
-            if (!b) { throw (msg != null) ? new AssertException(msg) : new AssertException(); }
+        public static void True(bool? b, string msg = null) {
+            if (b is null) { throw new AssertException("Passed in boolean was null"); }
+            if (!b.Value) { throw (msg != null) ? new AssertException(msg) : new AssertException(); }
         }
 
-        public static void False(bool b, string msg = null) { True(!b, msg); }
+        public static void False(bool? b, string msg = null) {
+            True(!b, msg);
+        }
 
         public static void Null<T>(T obj) { True(null == obj, "Was NOT null: " + obj); }
         public static void NotNull<T>(T obj) { True(null != obj, "Was null: " + typeof(T)); }
