@@ -21,15 +21,24 @@ namespace com.csutil.keyvaluestore {
             return new FileBasedKeyValueStore(EnvironmentV2.instance.GetOrAddAppDataFolder(appId).GetChildDir(dirName));
         }
 
-        public DirectoryEntry folderForAllFiles { get; private set; }
+        public DirectoryEntry folderForAllFiles { get; protected set; }
         public IKeyValueStore fallbackStore { get; set; }
         public long latestFallbackGetTimingInMs { get; set; }
 
         private class PrimitiveWrapper { public object val; }
+        /// <summary> Lock will be set while accessing the folder </summary>
+        private object folderAccessLock = new object();
+        private int openChanges = 0;
+
 
         public FileBasedKeyValueStore(DirectoryEntry folderForAllFiles) { this.folderForAllFiles = folderForAllFiles; }
 
         public DisposeState IsDisposed { get; private set; } = DisposeState.Active;
+
+        protected virtual int FlushOpenChangesIfNeeded(int openChanges) {
+            // Changes to a normal directory are always instant persisted
+            return 0; // Reset openChangesCounter
+        }
 
         public virtual void Dispose() {
             IsDisposed = DisposeState.DisposingStarted;
@@ -41,9 +50,10 @@ namespace com.csutil.keyvaluestore {
             var s = this.StartFallbackStoreGetTimer();
             Task<T> fallbackGet = fallbackStore.Get(key, defaultValue, (newVal) => InternalSet(key, newVal));
             await this.WaitLatestFallbackGetTime(s, fallbackGet);
-
-            var fileForKey = GetFile(key);
-            if (TryInternalGet(fileForKey, typeof(T), out object result)) { return (T)result; }
+            lock (folderAccessLock) {
+                var fileForKey = GetFile(key);
+                if (TryInternalGet(fileForKey, typeof(T), out object result)) { return (T)result; }
+            }
             return await fallbackGet;
         }
 
@@ -73,24 +83,34 @@ namespace com.csutil.keyvaluestore {
         private object InternalSet(string key, object value) {
             var objType = value.GetType();
             if (objType.IsPrimitive) { value = new PrimitiveWrapper() { val = value }; }
-            var file = GetFile(key);
-            TryInternalGet(file, objType, out object oldVal);
-            if (objType == typeof(string)) {
-                file.SaveAsText((string)value);
-            } else {
-                file.SaveAsText(JsonWriter.GetWriter(value).Write(value));
+            lock (folderAccessLock) {
+                var file = GetFile(key);
+                TryInternalGet(file, objType, out object oldVal);
+                if (objType == typeof(string)) {
+                    file.SaveAsText((string)value);
+                } else {
+                    file.SaveAsText(JsonWriter.GetWriter(value).Write(value));
+                }
+                openChanges = FlushOpenChangesIfNeeded(openChanges);
+                return oldVal;
             }
-            return oldVal;
         }
 
         public async Task<bool> Remove(string key) {
-            var res = GetFile(key).DeleteV2();
+            bool res;
+            lock (folderAccessLock) {
+                res = GetFile(key).DeleteV2();
+                openChanges = FlushOpenChangesIfNeeded(openChanges);
+            }
             if (fallbackStore != null) { res &= await fallbackStore.Remove(key); }
             return res;
         }
 
         public async Task RemoveAll() {
-            folderForAllFiles.DeleteV2();
+            lock (folderAccessLock) {
+                folderForAllFiles.DeleteV2();
+                openChanges = FlushOpenChangesIfNeeded(openChanges);
+            }
             if (fallbackStore != null) { await fallbackStore.RemoveAll(); }
         }
 
@@ -101,8 +121,11 @@ namespace com.csutil.keyvaluestore {
         }
 
         public async Task<IEnumerable<string>> GetAllKeys() {
-            if (!folderForAllFiles.Exists) { return Enumerable.Empty<string>(); }
-            var fileNames = folderForAllFiles.GetFiles().Map(x => x.Name);
+            IEnumerable<string> fileNames;
+            lock (folderAccessLock) {
+                if (!folderForAllFiles.Exists) { return Enumerable.Empty<string>(); }
+                fileNames = folderForAllFiles.GetFiles().Map(x => x.Name);
+            }
             return await fallbackStore.ConcatWithKeys(fileNames.Cached());
         }
 
