@@ -5,6 +5,15 @@ namespace com.csutil.keyvaluestore {
 
     public class ZipFileBasedKeyValueStore : FileBasedKeyValueStore {
 
+        /// <summary> Will use a passed in zip file as the storage for the key value store.
+        /// Will automatically persist all changes to the zip file in intervals based on the
+        /// specified <see cref="maxAllowedOpenChanges"/> value. </summary>
+        /// <param name="zipFile"> The existing or new zip file to use </param>
+        /// <param name="maxAllowedOpenChanges"> 0 means any change will be persisted immediately,
+        /// the larger the number the faster the store will be able to take new data in with the
+        /// risk that the application crashes the last x changes to it would be lost, so 0 is the
+        /// only session that guarantees that all changes are persisted to the zip file. </param>
+        /// <returns></returns>
         public static ZipFileBasedKeyValueStore New(FileEntry zipFile, int maxAllowedOpenChanges = 0) {
             var zipFileSystem = zipFile.OpenOrCreateAsZip();
             var zipRootDir = zipFileSystem.GetRootDirectory();
