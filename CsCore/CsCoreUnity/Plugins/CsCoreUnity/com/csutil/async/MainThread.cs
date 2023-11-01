@@ -16,6 +16,10 @@ namespace com.csutil {
             }
         }
 
+        /// <summary> Will be false if the app is still in initialization phase and the
+        /// main thread is not yet ready to use </summary>
+        public static bool IsReadyToUse => mainThreadRef != null;
+        
         public static bool isMainThread { get { return mainThreadRef.Equals(Thread.CurrentThread); } }
 
         private static Thread mainThreadRef;
