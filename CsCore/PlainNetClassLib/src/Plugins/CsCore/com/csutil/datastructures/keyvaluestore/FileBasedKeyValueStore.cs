@@ -114,6 +114,16 @@ namespace com.csutil.keyvaluestore {
             if (fallbackStore != null) { await fallbackStore.RemoveAll(); }
         }
 
+        /// <summary> Can be called to manually persist all open changes to the underlying persistence system,
+        /// only needs to be called if changes are not persisted instantly already, for example for a
+        /// zip based file system this method allows to persist changes e.g. every second </summary>
+        public void FlushOpenChangesIfNeeded() {
+            if (openChanges == 0) { return; }
+            lock (folderAccessLock) {
+                openChanges = FlushOpenChangesIfNeeded(openChanges);
+            }
+        }
+
         public async Task<bool> ContainsKey(string key) {
             if (GetFile(key).IsNotNullAndExists()) { return true; }
             if (fallbackStore != null) { return await fallbackStore.ContainsKey(key); }
