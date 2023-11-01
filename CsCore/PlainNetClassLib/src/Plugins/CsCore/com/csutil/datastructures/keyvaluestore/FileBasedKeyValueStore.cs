@@ -91,7 +91,7 @@ namespace com.csutil.keyvaluestore {
                 } else {
                     file.SaveAsText(JsonWriter.GetWriter(value).Write(value));
                 }
-                openChanges = FlushOpenChangesIfNeeded(openChanges);
+                openChanges = FlushOpenChangesIfNeeded(openChanges + 1);
                 return oldVal;
             }
         }
@@ -100,7 +100,7 @@ namespace com.csutil.keyvaluestore {
             bool res;
             lock (folderAccessLock) {
                 res = GetFile(key).DeleteV2();
-                openChanges = FlushOpenChangesIfNeeded(openChanges);
+                openChanges = FlushOpenChangesIfNeeded(openChanges + 1);
             }
             if (fallbackStore != null) { res &= await fallbackStore.Remove(key); }
             return res;
@@ -109,7 +109,7 @@ namespace com.csutil.keyvaluestore {
         public async Task RemoveAll() {
             lock (folderAccessLock) {
                 folderForAllFiles.DeleteV2();
-                openChanges = FlushOpenChangesIfNeeded(openChanges);
+                openChanges = FlushOpenChangesIfNeeded(openChanges + 1);
             }
             if (fallbackStore != null) { await fallbackStore.RemoveAll(); }
         }

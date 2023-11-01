@@ -15,7 +15,7 @@ namespace com.csutil.keyvaluestore {
         }
 
         /// <summary> The parent zip file that is used by the store </summary>
-        public FileEntry SourceZipFile { get; private set; }
+        private FileEntry SourceZipFile { get; set; }
 
         private ZipArchiveFileSystem _zipFileSystem;
         private readonly int _maxAllowedOpenChanges;
