@@ -10,13 +10,13 @@ using Zio;
 
 namespace com.csutil.tests.AlgorithmTests {
 
-    public class ImageMattingTests {
+    public class ImageAlphaMattingTests {
 
-        public ImageMattingTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
+        public ImageAlphaMattingTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
         /// <summary> Ported example usage from https://github.com/atilimcetin/global-matting/tree/master#code  </summary>
         [Fact]
-        public async Task Test1() {
+        public async Task TestGlobalMatting() {
 
             var folder = EnvironmentV2.instance.GetOrAddAppDataFolder("ImageMattingTests");
 
