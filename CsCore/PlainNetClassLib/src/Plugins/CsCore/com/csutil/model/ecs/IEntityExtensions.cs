@@ -78,7 +78,7 @@ namespace com.csutil.model.ecs {
         private static void DestroyAllChildrenRecursively<T>(this IEntity<T> self, Func<IEntity<T>, string, T> removeChildIdFromParent) where T : IEntityData {
             var children = self.GetChildren();
             if (children != null) {
-                var childrenToDelete= children.ToList();
+                var childrenToDelete = children.ToList();
                 foreach (var child in childrenToDelete) {
                     child.Destroy(removeChildIdFromParent);
                 }
@@ -185,15 +185,25 @@ namespace com.csutil.model.ecs {
 
     public static class IEntityDataExtensions {
 
-        public static V GetComponent<V>(this IEntityData self) where V : class {
+        public static V GetComponent<V>(this IEntityData self) where V : IComponentData {
             AssertOnlySingleCompOfType<V>(self);
-            return self.Components.Values.Single(c => c is V) as V;
+            // Take a shortcut for the common case where the most requested component has the same id as the entity:
+            var comps = self.Components;
+            if (comps.TryGetValue(self.Id, out var c) && c is V v) { return v; }
+            // Else go through the list of all components:
+            return (V)comps.Values.Single(comp => comp is V);
         }
-        
-        public static bool TryGetComponent<V>(this IEntityData self, out V comp) where V : class {
-            var compOrNull = self.Components.Values.SingleOrDefault(c => c is V);
+
+        public static bool TryGetComponent<V>(this IEntityData self, out V comp) where V : IComponentData {
+            var comps = self.Components;
+            // Take a shortcut for the common case where the most requested component has the same id as the entity:
+            if (comps.TryGetValue(self.Id, out var comp2) && comp2 is V v) {
+                comp = v;
+                return true;
+            }
+            var compOrNull = comps.Values.SingleOrDefault(c => c is V);
             if (compOrNull != null) {
-                comp = compOrNull as V;
+                comp = (V)compOrNull;
                 return true;
             }
             comp = default;
@@ -201,7 +211,7 @@ namespace com.csutil.model.ecs {
         }
 
         [Conditional("DEBUG")]
-        private static void AssertOnlySingleCompOfType<V>(IEntityData self) where V : class {
+        private static void AssertOnlySingleCompOfType<V>(IEntityData self) where V : IComponentData {
             self.ThrowErrorIfNull("Entity self");
             var compTypeCount = self.Components.Values.Count(c => c is V);
             if (compTypeCount > 1) {
