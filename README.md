@@ -1212,7 +1212,6 @@ See current features in development here: https://github.com/cs-util-com/cscore/
 
 [![Twitter](https://img.shields.io/twitter/follow/csutil_com.svg?style=for-the-badge&logo=twitter)](https://twitter.com/intent/follow?screen_name=csutil_com)
 -- [![Discord](https://img.shields.io/discord/518684359667089409.svg?logo=discord&label=ask%20on%20discord&style=for-the-badge)](https://discord.gg/UCqJjEU)
--- [![Gitter](https://img.shields.io/gitter/room/csutil-com/community.svg?style=for-the-badge&logo=gitter-white)](https://gitter.im/csutil-com)
 
 To stay updated via Email see https://www.csutil.com/updates
 
