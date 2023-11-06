@@ -17,6 +17,8 @@
 [**Getting started**](#-getting-started)
 **•**
 [**Demo (in your browser)**](#test-cscore-in-the-browser)
+**•**
+[**Contributing**](#-contributing)
 
 `cscore` is a lightweight library providing commonly used helpers & patterns for both your pure `C#` and `Unity` projects.
 
@@ -1180,7 +1182,7 @@ _Player Settings_ -> _Other Settings_ -> _Scripting Define Symbols_ and add `CSC
 # 💚 Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
-[![Open Source Helpers](https://www.codetriage.com/cs-util-com/cscore/badges/users.svg)](https://www.codetriage.com/cs-util-com/cscore)
+If you are unsure where to start or need inspiration for your first PR, there is a collection of possible extensions and improvments collected here: [Help wanted](https://github.com/cs-util-com/cscore/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22)
 
 ## Repository structure and instructions
 The cscore project is separated into multiple folders:
