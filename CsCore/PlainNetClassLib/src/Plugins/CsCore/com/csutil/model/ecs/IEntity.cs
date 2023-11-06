@@ -3,7 +3,7 @@ using System.Numerics;
 
 namespace com.csutil.model.ecs {
 
-    public interface IEntity<T> : IEntityData where T : IEntityData {
+    public interface IEntity<T> : IEntityData, IDisposableV2 where T : IEntityData {
 
         T Data { get; }
         EntityComponentSystem<T> Ecs { get; }

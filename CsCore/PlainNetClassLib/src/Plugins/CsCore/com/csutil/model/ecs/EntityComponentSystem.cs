@@ -12,7 +12,12 @@ namespace com.csutil.model.ecs {
 
             public string GetId() { return Data.GetId(); }
             public T Data { get; set; }
-            public EntityComponentSystem<T> Ecs { get; set; }
+            public EntityComponentSystem<T> Ecs { get; private set; }
+
+            public Entity(T data, EntityComponentSystem<T> ecs) {
+                Data = data;
+                Ecs = ecs;
+            }
 
             public string Id => Data.Id;
             public string Name => Data.Name;
@@ -24,6 +29,15 @@ namespace com.csutil.model.ecs {
             public bool IsActive => Data.IsActive;
 
             public override string ToString() { return Data.ToString(); }
+
+            public void Dispose() {
+                IsDisposed = DisposeState.DisposingStarted;
+                if (Ecs != null) { Ecs.Destroy(this); }
+                Ecs = null;
+                IsDisposed = DisposeState.Disposed;
+            }
+
+            public DisposeState IsDisposed { get; private set; } = DisposeState.Active;
 
         }
 
@@ -71,7 +85,7 @@ namespace com.csutil.model.ecs {
             if (_entities.TryGetValue(entityData.Id, out var existingEntity)) {
                 throw new InvalidOperationException("Entity already exists with id '" + entityData.Id + "' old=" + existingEntity.Data + " new=" + entityData);
             }
-            return AddEntity(new Entity() { Data = entityData, Ecs = this });
+            return AddEntity(new Entity(entityData, this));
         }
 
         private IEntity<T> AddEntity(Entity entity) {
@@ -137,20 +151,30 @@ namespace com.csutil.model.ecs {
             return _entities[entityId];
         }
 
-        public void Destroy(string entityId) {
+        public void Destroy(IEntity<T> entityToDestroy) {
+            if (!entityToDestroy.IsAlive()) { return; }
+            Destroy(entityToDestroy.Id);
+        }
+        
+        private void Destroy(string entityId) {
             var entity = _entities[entityId] as Entity;
             _entities.Remove(entityId);
             if (entity.TemplateId != null) {
                 Variants.Remove(entity.TemplateId);
             }
-            OnIEntityUpdated?.Invoke(entity, UpdateType.Remove, entity.Data, default);
-            entity.Ecs = null;
-            if (entity.Data.Components != null) {
-                foreach (var comp in entity.Data.Components) {
+            var entityData = entity.Data;
+            OnIEntityUpdated?.Invoke(entity, UpdateType.Remove, entityData, default);
+            entity.DisposeV2();
+            DisposeEntityData(entityData);
+        }
+
+        private static void DisposeEntityData(T entityData) {
+            if (entityData.Components != null) {
+                foreach (var comp in entityData.Components) {
                     DisposeIfPossible(comp);
                 }
             }
-            DisposeIfPossible(entity.Data);
+            DisposeIfPossible(entityData);
         }
 
         private static void DisposeIfPossible(object x) {

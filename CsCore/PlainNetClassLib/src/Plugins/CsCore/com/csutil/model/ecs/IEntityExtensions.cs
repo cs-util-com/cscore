@@ -71,7 +71,7 @@ namespace com.csutil.model.ecs {
                 self.RemoveFromParent(c => c.Data, removeChildIdFromParent);
             }
             self.DestroyAllChildrenRecursively(removeChildIdFromParent);
-            self.Ecs.Destroy(self.Id);
+            self.Ecs.Destroy(self);
             return true;
         }
 
@@ -186,6 +186,9 @@ namespace com.csutil.model.ecs {
     public static class IEntityDataExtensions {
 
         public static V GetComponent<V>(this IEntityData self) where V : IComponentData {
+            if (self is IDisposableV2 d && !d.IsAlive()) {
+                throw new InvalidOperationException($"The entity {self.Id} is already disposed");
+            }
             AssertOnlySingleCompOfType<V>(self);
             // Take a shortcut for the common case where the most requested component has the same id as the entity:
             var comps = self.Components;
