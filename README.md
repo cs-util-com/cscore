@@ -1184,6 +1184,13 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 
 If you are unsure where to start or need inspiration for your first PR, there is a collection of possible extensions and improvments collected here: [Help wanted](https://github.com/cs-util-com/cscore/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22)
 
+<a href="https://github.com/cs-util-com/cscore/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22">
+  <img src="https://contrib.rocks/image?repo=cs-util-com/cscore" />
+</a>
+
+Thank you to everyone who already participated!
+
+
 ## Repository structure and instructions
 The cscore project is separated into multiple folders:
 
