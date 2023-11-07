@@ -15,10 +15,12 @@ namespace com.csutil.http.apis {
 
         /// <summary> See also https://platform.openai.com/docs/guides/chat/chat-vs-completions : "Because gpt-3.5-turbo performs at a
         /// similar capability to text-davinci-003 but at 10% the price per token, we recommend gpt-3.5-turbo for most use cases." </summary>
+        [Obsolete("This API is deprecated, use .ChatGpt(..) instead")]
         public Task<Text.CompletionsResponse> Complete(string prompt) {
             return Complete(new Text.CompletionsRequest() { prompt = prompt });
         }
 
+        [Obsolete("This API is deprecated, use .ChatGpt(..) instead")]
         public Task<Text.CompletionsResponse> Complete(Text.CompletionsRequest requestParams) {
             var request = new Uri("https://api.openai.com/v1/completions").SendPOST();
             return request.WithAuthorization(apiKey).WithJsonContent(requestParams).GetResult<Text.CompletionsResponse>();
@@ -38,7 +40,8 @@ namespace com.csutil.http.apis {
 
         public class Text {
 
-            /// <summary> See https://beta.openai.com/docs/api-reference/completions </summary>
+            /// <summary> See https://platform.openai.com/docs/api-reference/completions </summary>
+            [Obsolete("This API is deprecated, use .ChatGpt(..) instead")]
             public class CompletionsRequest {
 
                 /// <summary> The prompt(s) to generate completions for, encoded as a string, array of strings, array of tokens, or array of token arrays.
@@ -130,10 +133,27 @@ namespace com.csutil.http.apis {
 
         public class Image {
 
+            /// <summary> See https://platform.openai.com/docs/api-reference/images/create </summary>
             public class Request {
+                
+                /// <summary> See https://platform.openai.com/docs/api-reference/images/create#images-create-prompt </summary>
                 public string prompt { get; set; }
+
+                /// <summary> See https://platform.openai.com/docs/api-reference/images/create#images-create-model </summary>
+                public string model { get; set; } = "dall-e-3"; //"dall-e-2";
+                
+                /// <summary> See https://platform.openai.com/docs/api-reference/images/create#images-create-n </summary>
                 public int n { get; set; } = 1;
+               
+                /// <summary> See https://platform.openai.com/docs/api-reference/images/create#images-create-size </summary>
                 public string size { get; set; } = "1024x1024";
+                
+                /// <summary> See https://platform.openai.com/docs/api-reference/images/create#images-create-quality </summary>
+                public string quality { get; set; } = "standard";
+                
+                /// <summary> See https://platform.openai.com/docs/api-reference/images/create#images-create-style </summary>
+                public string style { get; set; } = "vivid"; 
+                
             }
 
             public class Response {
@@ -175,7 +195,7 @@ namespace com.csutil.http.apis {
         public class Request {
 
             /// <summary> See https://beta.openai.com/docs/models/overview </summary>
-            public string model = "gpt-3.5-turbo";
+            public string model = "gpt-3.5-turbo-1106";
 
             /// <summary> The maximum number of tokens to generate in the completion.
             /// The token count of your prompt plus max_tokens cannot exceed the model's context length.
