@@ -246,6 +246,11 @@ namespace com.csutil.tests.model.esc {
                 });
                 baseEnemy.SaveChanges();
 
+                // Accessing components and children entities: 
+                Assert.NotNull(baseEnemy.GetComponent<EnemyComponent>());
+                Assert.Null(baseEnemy.GetComponent<SwordComponent>());
+                Assert.NotNull(baseEnemy.GetChildren().Single().GetComponent<SwordComponent>());
+                
                 // Define a variant of the base enemy which is stronger and has a shield:
                 var bossEnemy = baseEnemy.CreateVariant();
                 bossEnemy.Data.Name = "BossEnemy";
