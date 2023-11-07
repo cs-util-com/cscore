@@ -194,7 +194,7 @@ namespace com.csutil.model.ecs {
             var comps = self.Components;
             if (comps.TryGetValue(self.Id, out var c) && c is V v) { return v; }
             // Else go through the list of all components:
-            return (V)comps.Values.Single(comp => comp is V);
+            return (V)comps.Values.SingleOrDefault(comp => comp is V);
         }
 
         public static bool TryGetComponent<V>(this IEntityData self, out V comp) where V : IComponentData {
