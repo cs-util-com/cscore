@@ -1,8 +1,15 @@
-﻿using com.csutil.model.immutable;
+﻿using System;
+using System.Linq;
+using com.csutil.model.immutable;
 using Xunit;
 
 namespace com.csutil.tests.model.immutable {
 
+    /// <summary>
+    /// This example shows how to use the SlicedModel to create a store that contains multiple model slices.
+    /// A slice is an independent model that can be added to a store and removed from it at any time.
+    /// This allows to create a store that contains multiple independent models that can be accessed via the store.
+    /// </summary>
     public class DataStoreExample7_StoreSlicing {
 
         public DataStoreExample7_StoreSlicing(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
@@ -10,12 +17,16 @@ namespace com.csutil.tests.model.immutable {
         [Fact]
         public void ExampleUsage1() {
 
+            // Create a store with 2 slices:
             var slices = new SlicedModel(new[] {
                 SlicedModel.Slice.New(new Model1(), Model1Reducer),
                 SlicedModel.Slice.New(new Model2(), Model2Reducer),
-                SlicedModel.Slice.New(new Model3(), Model3Reducer)
             });
-            DataStore<SlicedModel> store = new DataStore<SlicedModel>(SlicedModel.Reducer, slices, Middlewares.NewLoggingMiddleware<SlicedModel>());
+            IDataStore<SlicedModel> store = new DataStore<SlicedModel>(SlicedModel.Reducer, slices, Middlewares.NewLoggingMiddleware<SlicedModel>());
+
+            // Adding slices to an already created store is possible as well:
+            store.AddSlice(new Model3(), Model3Reducer);
+
             IDataStore<Model1> store1 = store.GetStore<Model1>();
             IDataStore<Model2> store2 = store.GetStore<Model2>();
             IDataStore<Model3> store3 = store.GetStore<Model3>();
@@ -53,9 +64,22 @@ namespace com.csutil.tests.model.immutable {
                 var model2 = store.GetState<Model2>();
                 Assert.Equal("b", model2.GetState().b);
                 // GetSubState can automatically access the correct slice of the store:
-                var model3 = store.GetSubState((Model3 x) => x.c);
-                Assert.Equal("c", model3.GetState());
+                var model3c = store.GetSubState((Model3 x) => x.c);
+                Assert.Equal("c", model3c.GetState());
+                var cChangedCounter = 0;
+                model3c.onStateChanged += () => { cChangedCounter++; };
+                Assert.Equal(0, cChangedCounter);
+                store.Dispatch(new ActionChangeC() { newC = "c2" });
+                Assert.Equal("c2", model3c.GetState());
+                Assert.Equal(1, cChangedCounter);
             }
+
+            // Removing slices from the store is possible as well:
+            store.RemoveSlice(store.GetState().Slices.Last());
+            Assert.Equal("a2", store1.GetState().a);
+            Assert.Equal("b", store2.GetState().b);
+            // The removed slice can not be accessed anymore:
+            Assert.Throws<SlicedModel.SliceNotFoundException>(() => store3.GetState());
 
         }
 
