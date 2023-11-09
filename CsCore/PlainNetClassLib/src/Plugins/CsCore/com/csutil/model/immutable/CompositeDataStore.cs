@@ -1,5 +1,8 @@
+using System;
+
 namespace com.csutil.model.immutable {
 
+    [Obsolete("Use a normal DataStore with a SlicedModel instead", true)]
     public class CompositeDataStore<M1, M2> : DataStore<M1>, IDataStore<M2> {
 
         private readonly IDataStore<M2> model2Store;
@@ -15,7 +18,7 @@ namespace com.csutil.model.immutable {
         }
 
         public new M2 GetState() { return model2Store.GetState(); }
-        
+
         public IDataStore<M2> GetInnerStore() { return model2Store; }
 
         public override object Dispatch(object action) {

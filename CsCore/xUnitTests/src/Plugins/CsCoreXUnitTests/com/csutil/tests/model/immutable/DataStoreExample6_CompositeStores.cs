@@ -1,8 +1,10 @@
-﻿using com.csutil.model.immutable;
+﻿using System;
+using com.csutil.model.immutable;
 using Xunit;
 
 namespace com.csutil.tests.model.immutable {
 
+    [Obsolete("Only kept for backwards compatibility, See DataStoreExample7_StoreSlicing how to use a normal DataStore with a SlicedModel instead")]
     public class DataStoreExample6_CompositeStores {
 
         public DataStoreExample6_CompositeStores(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
