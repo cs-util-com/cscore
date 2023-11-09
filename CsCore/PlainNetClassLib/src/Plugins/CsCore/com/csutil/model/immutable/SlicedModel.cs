@@ -7,11 +7,15 @@ namespace com.csutil.model.immutable {
 
     public static class SlicedStoreExtensions {
 
+        public static SubState<T, T> GetState<T>(this IDataStore<SlicedModel> store) {
+            return store.GetStore<T>().GetSubState(x => x);
+        }
+        
         public static SubState<T, S> GetSubState<T, S>(this IDataStore<SlicedModel> store, Func<T, S> getSubState) {
-            return store.GetState<T>().GetSubState(getSubState);
+            return store.GetStore<T>().GetSubState(getSubState);
         }
 
-        public static IDataStore<T> GetState<T>(this IDataStore<SlicedModel> store) {
+        public static IDataStore<T> GetStore<T>(this IDataStore<SlicedModel> store) {
             return new SlicedStore<T>(store);
         }
 

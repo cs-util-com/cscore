@@ -16,9 +16,9 @@ namespace com.csutil.tests.model.immutable {
                 SlicedModel.Slice.New(new Model3(), Model3Reducer)
             });
             DataStore<SlicedModel> store = new DataStore<SlicedModel>(SlicedModel.Reducer, slices, Middlewares.NewLoggingMiddleware<SlicedModel>());
-            IDataStore<Model1> store1 = store.GetState<Model1>();
-            IDataStore<Model2> store2 = store.GetState<Model2>();
-            IDataStore<Model3> store3 = store.GetState<Model3>();
+            IDataStore<Model1> store1 = store.GetStore<Model1>();
+            IDataStore<Model2> store2 = store.GetStore<Model2>();
+            IDataStore<Model3> store3 = store.GetStore<Model3>();
             Assert.Null(store1.GetState().a);
             Assert.Null(store2.GetState().b);
             Assert.Null(store3.GetState().c);
@@ -42,10 +42,11 @@ namespace com.csutil.tests.model.immutable {
             Assert.Equal("b", store2.GetState().b);
             Assert.Equal("c", store3.GetState().c);
 
+            // GetState can return the slice of the store:
+            var model2 = store.GetState<Model2>();
+            Assert.Equal("b", model2.GetState().b);
             // GetSubState can automatically access the correct slice of the store:
-            var model2 = store.GetSubState((Model2 x) => x.b);
             var model3 = store.GetSubState((Model3 x) => x.c);
-            Assert.Equal("b", model2.GetState());
             Assert.Equal("c", model3.GetState());
 
         }
