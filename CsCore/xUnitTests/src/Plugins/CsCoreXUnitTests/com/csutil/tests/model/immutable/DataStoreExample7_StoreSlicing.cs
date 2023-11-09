@@ -46,6 +46,8 @@ namespace com.csutil.tests.model.immutable {
                 Assert.Equal("a", store1.GetState().a);
                 Assert.Equal("b", store2.GetState().b);
                 Assert.Equal("c", store3.GetState().c);
+                store1.Dispatch(new ActionChangeA() { newA = "a2" });
+                Assert.Equal("a2", store1.GetState().a);
             }
             { // GetState can return the slice of the store:
                 var model2 = store.GetState<Model2>();
