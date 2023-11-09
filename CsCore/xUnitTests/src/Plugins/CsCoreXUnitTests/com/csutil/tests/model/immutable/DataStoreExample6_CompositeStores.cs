@@ -3,9 +3,9 @@ using Xunit;
 
 namespace com.csutil.tests.model.immutable {
 
-    public class DataStoreExample6 {
+    public class DataStoreExample6_CompositeStores {
 
-        public DataStoreExample6(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
+        public DataStoreExample6_CompositeStores(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
         [Fact]
         public void ExampleUsage1_MultipleStores() {
