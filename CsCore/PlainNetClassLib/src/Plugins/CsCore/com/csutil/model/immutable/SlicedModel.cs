@@ -26,8 +26,14 @@ namespace com.csutil.model.immutable {
                 this.Store = store;
             }
             public Action onStateChanged { get => Store.onStateChanged; set => Store.onStateChanged = value; }
-            public T GetState() { return Store.GetState().GetSlice<T>(); }
-            public object Dispatch(object action) { return Store.Dispatch(action); }
+            
+            public T GetState() {
+                return Store.GetState().GetSlice<T>();
+            }
+            
+            public object Dispatch(object action) {
+                return Store.Dispatch(action);
+            }
 
         }
 
@@ -37,8 +43,8 @@ namespace com.csutil.model.immutable {
 
         public class Slice {
 
-            public static Slice New<T>(T model, StateReducer<T> reducer) {
-                return new Slice(model, (object oldState, object action) => reducer((T)oldState, action));
+            public static Slice New<T>(T initialState, StateReducer<T> reducer) {
+                return new Slice(initialState, (object oldState, object action) => reducer((T)oldState, action));
             }
 
             public readonly object Model;

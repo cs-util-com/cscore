@@ -19,35 +19,41 @@ namespace com.csutil.tests.model.immutable {
             IDataStore<Model1> store1 = store.GetStore<Model1>();
             IDataStore<Model2> store2 = store.GetStore<Model2>();
             IDataStore<Model3> store3 = store.GetStore<Model3>();
-            Assert.Null(store1.GetState().a);
-            Assert.Null(store2.GetState().b);
-            Assert.Null(store3.GetState().c);
-            store1.Dispatch(new ActionChangeA() { newA = "a" });
-            Assert.Equal("a", store1.GetState().a);
-            Assert.Null(store2.GetState().b);
-            Assert.Null(store3.GetState().c);
 
-            var slice1 = store.GetState().GetSlice<Model1>();
-            var slice2 = store.GetState().GetSlice<Model2>();
-            Assert.Equal("a", slice1.a);
-            store2.Dispatch(new ActionChangeB() { newB = "b" });
-            Assert.Same(slice1, store.GetState().GetSlice<Model1>());
-            Assert.NotSame(slice2, store.GetState().GetSlice<Model2>());
-            Assert.Equal("a", store1.GetState().a);
-            Assert.Equal("b", store2.GetState().b);
-            Assert.Null(store3.GetState().c);
-
-            store3.Dispatch(new ActionChangeC() { newC = "c" });
-            Assert.Equal("a", store1.GetState().a);
-            Assert.Equal("b", store2.GetState().b);
-            Assert.Equal("c", store3.GetState().c);
-
-            // GetState can return the slice of the store:
-            var model2 = store.GetState<Model2>();
-            Assert.Equal("b", model2.GetState().b);
-            // GetSubState can automatically access the correct slice of the store:
-            var model3 = store.GetSubState((Model3 x) => x.c);
-            Assert.Equal("c", model3.GetState());
+            { // Initially all slices are empty:
+                Assert.Null(store1.GetState().a);
+                Assert.Null(store2.GetState().b);
+                Assert.Null(store3.GetState().c);
+                // dispatching to store or store1 has the same effect:
+                store1.Dispatch(new ActionChangeA() { newA = "a" });
+                Assert.Equal("a", store1.GetState().a);
+                Assert.Null(store2.GetState().b);
+                Assert.Null(store3.GetState().c);
+            }
+            {
+                var slice1 = store.GetState().GetSlice<Model1>();
+                var slice2 = store.GetState().GetSlice<Model2>();
+                Assert.Equal("a", slice1.a);
+                store1.Dispatch(new ActionChangeB() { newB = "b" });
+                Assert.Same(slice1, store.GetState().GetSlice<Model1>());
+                Assert.NotSame(slice2, store.GetState().GetSlice<Model2>());
+                Assert.Equal("a", store1.GetState().a);
+                Assert.Equal("b", store2.GetState().b);
+                Assert.Null(store3.GetState().c);
+            }
+            {
+                store3.Dispatch(new ActionChangeC() { newC = "c" });
+                Assert.Equal("a", store1.GetState().a);
+                Assert.Equal("b", store2.GetState().b);
+                Assert.Equal("c", store3.GetState().c);
+            }
+            { // GetState can return the slice of the store:
+                var model2 = store.GetState<Model2>();
+                Assert.Equal("b", model2.GetState().b);
+                // GetSubState can automatically access the correct slice of the store:
+                var model3 = store.GetSubState((Model3 x) => x.c);
+                Assert.Equal("c", model3.GetState());
+            }
 
         }
 
