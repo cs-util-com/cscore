@@ -121,6 +121,16 @@ namespace com.csutil.model.immutable {
             }
         }
 
+        public bool TryGetSlice<T>(out T slice) {
+            if (_getSliceLookUpTable.TryGetValue(typeof(T), out Slice s)) {
+                slice = (T)s.Model;
+                return true;
+            } else {
+                slice = default(T);
+                return false;
+            }
+        }
+
         public static SlicedModel Reducer(SlicedModel previousstate, object action) {
             var changed = false;
             if (action is ActionAddStoreSlice a) {

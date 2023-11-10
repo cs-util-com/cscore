@@ -22,10 +22,22 @@ namespace com.csutil.tests.model.immutable {
                 SlicedModel.Slice.New(new Model1(), Model1Reducer),
                 SlicedModel.Slice.New(new Model2(), Model2Reducer),
             });
-            IDataStore<SlicedModel> store = new DataStore<SlicedModel>(SlicedModel.Reducer, slices, Middlewares.NewLoggingMiddleware<SlicedModel>());
 
+            // Common middleware to receive callbacks when the state of the slice was changed by the action:
+            var slice3ChangedCounter = 0;
+            Middleware<SlicedModel> slice1ChangeHandler = Middlewares.NewSliceChangeHandler<Model3>((store, oldState, action, newState) => {
+                Log.d($"Slice Model3 was changed by action {action}");
+                slice3ChangedCounter++;
+            });
+
+            // Generic middlewares can be added to the store and operate on all slices:
+            Middleware<SlicedModel>[] middlewares = new[] { Middlewares.NewLoggingMiddleware<SlicedModel>(), slice1ChangeHandler };
+            IDataStore<SlicedModel> store = new DataStore<SlicedModel>(SlicedModel.Reducer, slices, middlewares);
+
+            Assert.Equal(0, slice3ChangedCounter);
             // Adding slices to an already created store is possible as well:
             store.AddSlice(new Model3(), Model3Reducer);
+            Assert.Equal(1, slice3ChangedCounter); // The slice was added to the store so the change handler was called
 
             IDataStore<Model1> store1 = store.GetStore<Model1>();
             IDataStore<Model2> store2 = store.GetStore<Model2>();
@@ -53,7 +65,10 @@ namespace com.csutil.tests.model.immutable {
                 Assert.Null(store3.GetState().c);
             }
             {
+                // Slice not affected by any actions so far:
+                Assert.Equal(1, slice3ChangedCounter);
                 store3.Dispatch(new ActionChangeC() { newC = "c" });
+                Assert.Equal(2, slice3ChangedCounter);
                 Assert.Equal("a", store1.GetState().a);
                 Assert.Equal("b", store2.GetState().b);
                 Assert.Equal("c", store3.GetState().c);
@@ -72,10 +87,12 @@ namespace com.csutil.tests.model.immutable {
                 store.Dispatch(new ActionChangeC() { newC = "c2" });
                 Assert.Equal("c2", model3c.GetState());
                 Assert.Equal(1, cChangedCounter);
+                Assert.Equal(3, slice3ChangedCounter);
             }
 
             // Removing slices from the store is possible as well:
-            store.RemoveSlice(store.GetState().Slices.Last());
+            store.RemoveSlice(store.GetState().Slices.Single(x => x.Model is Model3));
+            Assert.Equal(4, slice3ChangedCounter); // Callback when slice is removed
             Assert.Equal("a2", store1.GetState().a);
             Assert.Equal("b", store2.GetState().b);
             // The removed slice can not be accessed anymore:

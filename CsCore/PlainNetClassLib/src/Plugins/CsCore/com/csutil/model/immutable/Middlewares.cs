@@ -139,9 +139,26 @@ namespace com.csutil.model.immutable {
 
         private static string asJson(string varName, object result) { return varName + "=" + JsonWriter.AsPrettyString(result); }
 
-    /// <summary> Can be implemented by an action to prevent any default logging by the default logger middleware for this action </summary>
-    public class IDontLogDispatch { }
-    
+        /// <summary> Can be implemented by an action to prevent any default logging by the default logger middleware for this action </summary>
+        public class IDontLogDispatch {
+        }
+
+        public static Middleware<SlicedModel> NewSliceChangeHandler<T>(Action<IDataStore<SlicedModel>, T, object, T> onSliceChanged) {
+            return (IDataStore<SlicedModel> store) => {
+                return (Dispatcher innerDispatcher) => {
+                    return (object action) => {
+                        store.GetState().TryGetSlice<T>(out var oldSlice);
+                        var a = innerDispatcher(action);
+                        store.GetState().TryGetSlice<T>(out var newSlice);
+                        if (StateCompare.WasModified(oldSlice, newSlice)) {
+                            onSliceChanged(store, oldSlice, action, newSlice);
+                        }
+                        return a;
+                    };
+                };
+            };
+        }
+
     }
 
 }
