@@ -17,6 +17,8 @@ namespace com.csutil.model.immutable {
             this.model2Store = model2Store;
         }
 
+        public StateReducer<M2> reducer => model2Store.reducer;
+        
         public new M2 GetState() { return model2Store.GetState(); }
 
         public IDataStore<M2> GetInnerStore() { return model2Store; }

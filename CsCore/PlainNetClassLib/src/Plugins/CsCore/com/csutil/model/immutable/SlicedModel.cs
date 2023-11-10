@@ -1,11 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using Newtonsoft.Json;
 
 namespace com.csutil.model.immutable {
 
     public static class SlicedStoreExtensions {
+
+        public static IDataStore<SlicedModel> NewSlicedDataStore(this IEnumerable<SlicedModel.Slice> slices, IList<Middleware<SlicedModel>> middlewares, bool addLoggingMiddleware) {
+            if (addLoggingMiddleware) {
+                middlewares.Add(Middlewares.NewLoggingMiddleware<SlicedModel>());
+            }
+            return new DataStore<SlicedModel>(SlicedModel.Reducer, new SlicedModel(slices), middlewares.ToArray());
+        }
 
         public static void AddSlice<T>(this IDataStore<SlicedModel> store, T initialState, StateReducer<T> reducer) {
             SlicedModel.Slice.New(initialState, reducer).AddToStore(store);
@@ -33,6 +41,12 @@ namespace com.csutil.model.immutable {
 
             private readonly IDataStore<SlicedModel> _slicedStore;
             public SlicedStore(IDataStore<SlicedModel> slicedStore) { _slicedStore = slicedStore; }
+
+            public StateReducer<T> reducer => (T oldState, object action) => {
+                var newState = _slicedStore.reducer(_slicedStore.GetState(), action);
+                newState.TryGetSlice<T>(out var newSlice);
+                return newSlice;
+            };
 
             public Action onStateChanged { get => _slicedStore.onStateChanged; set => _slicedStore.onStateChanged = WrapWithRemoveHandler(value); }
             private Action WrapWithRemoveHandler(Action listener) {

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using com.csutil.model.immutable;
 using Xunit;
@@ -18,21 +19,21 @@ namespace com.csutil.tests.model.immutable {
         public void ExampleUsage1() {
 
             // Create a store with 2 slices:
-            var slices = new SlicedModel(new[] {
+            var slices = new[] {
                 SlicedModel.Slice.New(new Model1(), Model1Reducer),
                 SlicedModel.Slice.New(new Model2(), Model2Reducer),
-            });
+            };
+
+            List<Middleware<SlicedModel>> middlewares = new List<Middleware<SlicedModel>>();
 
             // Common middleware to receive callbacks when the state of the slice was changed by the action:
             var slice3ChangedCounter = 0;
-            Middleware<SlicedModel> slice1ChangeHandler = Middlewares.NewSliceChangeHandler<Model3>((store, oldState, action, newState) => {
+            middlewares.Add(Middlewares.NewSliceChangeHandler<Model3>((store, oldState, action, newState) => {
                 Log.d($"Slice Model3 was changed by action {action}");
                 slice3ChangedCounter++;
-            });
+            }));
 
-            // Generic middlewares can be added to the store and operate on all slices:
-            Middleware<SlicedModel>[] middlewares = new[] { Middlewares.NewLoggingMiddleware<SlicedModel>(), slice1ChangeHandler };
-            IDataStore<SlicedModel> store = new DataStore<SlicedModel>(SlicedModel.Reducer, slices, middlewares);
+            IDataStore<SlicedModel> store = slices.NewSlicedDataStore(middlewares, addLoggingMiddleware: true);
 
             Assert.Equal(0, slice3ChangedCounter);
             // Adding slices to an already created store is possible as well:

@@ -14,7 +14,7 @@ namespace com.csutil.model.immutable {
         private T state;
 
         public string storeName;
-        public readonly StateReducer<T> reducer;
+        public  StateReducer<T> reducer { get; }
         public Action onStateChanged { get; set; }
 
         public DataStore(StateReducer<T> reducer, T initialState = default(T), params Middleware<T>[] middlewares) {
