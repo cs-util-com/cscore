@@ -17,6 +17,8 @@
 [**Getting started**](#-getting-started)
 **•**
 [**Demo (in your browser)**](#test-cscore-in-the-browser)
+**•**
+[**Contributing**](#-contributing)
 
 `cscore` is a lightweight library providing commonly used helpers & patterns for both your pure `C#` and `Unity` projects.
 
@@ -1187,7 +1189,14 @@ _Player Settings_ -> _Other Settings_ -> _Scripting Define Symbols_ and add `CSC
 # 💚 Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
-[![Open Source Helpers](https://www.codetriage.com/cs-util-com/cscore/badges/users.svg)](https://www.codetriage.com/cs-util-com/cscore)
+If you are unsure where to start or need inspiration for your first PR, there is a collection of possible extensions and improvments collected here: [Help wanted](https://github.com/cs-util-com/cscore/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22)
+
+<a href="https://github.com/cs-util-com/cscore/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22">
+  <img src="https://contrib.rocks/image?repo=cs-util-com/cscore" />
+</a>
+
+Thank you to everyone who already participated!
+
 
 ## Repository structure and instructions
 The cscore project is separated into multiple folders:
@@ -1210,7 +1219,6 @@ See current features in development here: https://github.com/cs-util-com/cscore/
 
 [![Twitter](https://img.shields.io/twitter/follow/csutil_com.svg?style=for-the-badge&logo=twitter)](https://twitter.com/intent/follow?screen_name=csutil_com)
 -- [![Discord](https://img.shields.io/discord/518684359667089409.svg?logo=discord&label=ask%20on%20discord&style=for-the-badge)](https://discord.gg/UCqJjEU)
--- [![Gitter](https://img.shields.io/gitter/room/csutil-com/community.svg?style=for-the-badge&logo=gitter-white)](https://gitter.im/csutil-com)
 
 To stay updated via Email see https://www.csutil.com/updates
 
