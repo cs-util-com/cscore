@@ -43,9 +43,8 @@ namespace com.csutil.model.immutable {
             public SlicedStore(IDataStore<SlicedModel> slicedStore) { _slicedStore = slicedStore; }
 
             public StateReducer<T> reducer => (T oldState, object action) => {
-                var newState = _slicedStore.reducer(_slicedStore.GetState(), action);
-                newState.TryGetSlice<T>(out var newSlice);
-                return newSlice;
+                SlicedModel.Slice slice = _slicedStore.GetState().Slices.Single(x => x.Model is T);
+                return (T)slice.MyReducer(oldState, action);
             };
 
             public Action onStateChanged { get => _slicedStore.onStateChanged; set => _slicedStore.onStateChanged = WrapWithRemoveHandler(value); }
@@ -99,7 +98,7 @@ namespace com.csutil.model.immutable {
             }
 
             public readonly object Model;
-            private readonly StateReducer<object> MyReducer;
+            internal readonly StateReducer<object> MyReducer;
 
             [JsonConstructor]
             private Slice(object model, StateReducer<object> reducer) {
