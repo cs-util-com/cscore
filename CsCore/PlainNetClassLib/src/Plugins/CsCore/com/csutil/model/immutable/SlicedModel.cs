@@ -110,7 +110,7 @@ namespace com.csutil.model.immutable {
             public static Slice Reduce(Slice slice, object action) {
                 var newModel = slice.MyReducer(slice.Model, action);
                 if (StateCompare.WasModified(slice.Model, newModel)) {
-                    return New(newModel, slice.MyReducer);
+                    return new Slice(newModel, slice.MyReducer);
                 }
                 return slice;
             }
