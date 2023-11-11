@@ -2,7 +2,7 @@ using System;
 
 namespace com.csutil.model.immutable {
 
-    public interface IDataStore<T> {
+    public interface IHasReducer<T> {
 
         /// <summary>
         /// The reducer can be called manually if an immutable model is used to simulate the
@@ -11,6 +11,10 @@ namespace com.csutil.model.immutable {
         /// immutable) by using the Dispatch method.
         /// </summary>
         StateReducer<T> reducer { get; }
+
+    }
+
+    public interface IDataStore<T> : IHasReducer<T> {
 
         /// <summary> The onStateChanged callback is called after the state of the
         /// store was changed </summary>
@@ -25,7 +29,7 @@ namespace com.csutil.model.immutable {
         /// <returns> the dispatcher decides what object is returned, typically its the
         /// action itself </returns>
         object Dispatch(object action);
-
+        
     }
 
 }
