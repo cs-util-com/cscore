@@ -27,6 +27,12 @@ namespace com.csutil.model.jsonschema {
             jsonSerializer = JsonSerializer.Create(jsonSettings);
         }
 
+        public ModelToJsonSchema(NullValueHandling nullValueHandling) {
+            var jsonSettings = JsonNetSettings.defaultSettings;
+            jsonSettings.NullValueHandling = nullValueHandling;
+            jsonSerializer = JsonSerializer.Create(jsonSettings);
+        }
+
         public JsonSchema ToJsonSchema(string modelName, object model) {
             var modelType = model.GetType();
             if (GetExistingSchemaFor(modelType, out JsonSchema vm)) { return vm; }

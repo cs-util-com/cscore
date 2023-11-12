@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using com.csutil.model.jsonschema;
 using Newtonsoft.Json;
 
 namespace com.csutil.http.apis {
@@ -135,25 +136,25 @@ namespace com.csutil.http.apis {
 
             /// <summary> See https://platform.openai.com/docs/api-reference/images/create </summary>
             public class Request {
-                
+
                 /// <summary> See https://platform.openai.com/docs/api-reference/images/create#images-create-prompt </summary>
                 public string prompt { get; set; }
 
                 /// <summary> See https://platform.openai.com/docs/api-reference/images/create#images-create-model </summary>
                 public string model { get; set; } = "dall-e-3"; //"dall-e-2";
-                
+
                 /// <summary> See https://platform.openai.com/docs/api-reference/images/create#images-create-n </summary>
                 public int n { get; set; } = 1;
-               
+
                 /// <summary> See https://platform.openai.com/docs/api-reference/images/create#images-create-size </summary>
                 public string size { get; set; } = "1024x1024";
-                
+
                 /// <summary> See https://platform.openai.com/docs/api-reference/images/create#images-create-quality </summary>
                 public string quality { get; set; } = "standard";
-                
+
                 /// <summary> See https://platform.openai.com/docs/api-reference/images/create#images-create-style </summary>
-                public string style { get; set; } = "vivid"; 
-                
+                public string style { get; set; } = "vivid";
+
             }
 
             public class Response {
@@ -203,6 +204,9 @@ namespace com.csutil.http.apis {
             public int max_tokens { get; set; }
             public List<Line> messages { get; set; }
 
+            /// <summary> typically null, but if the AI e.g. should respond only with json it should be ChatGpt.Request.ResponseFormat.json </summary>
+            public ResponseFormat response_format { get; set; }
+
             public Request(List<Line> messages, int max_tokens = 4096) {
                 var tokenCountForMessages = JsonWriter.GetWriter(this).Write(messages).Length;
                 if (max_tokens + tokenCountForMessages > 4096) {
@@ -210,6 +214,12 @@ namespace com.csutil.http.apis {
                 }
                 this.messages = messages;
                 this.max_tokens = max_tokens;
+            }
+
+            public class ResponseFormat {
+                /// <summary> See https://platform.openai.com/docs/guides/text-generation/json-mode </summary>
+                public static ResponseFormat json = new ResponseFormat() { type = "json_object" };
+                public string type { get; set; }
             }
 
         }
@@ -235,6 +245,37 @@ namespace com.csutil.http.apis {
                 public int total_tokens { get; set; }
             }
 
+        }
+
+    }
+
+    public static class ChatGptExtensions {
+
+        public static void AddUserLineWithJsonResultStructure<T>(this ICollection<ChatGpt.Line> self, string userMessage, T exampleResponse) {
+            self.Add(new ChatGpt.Line(ChatGpt.Role.user, content: userMessage));
+            self.Add(new ChatGpt.Line(ChatGpt.Role.system, content: CreateJsonInstructions(exampleResponse)));
+        }
+
+        public static string CreateJsonInstructions<T>(T exampleResponse) {
+            var schemaGenerator = new ModelToJsonSchema(nullValueHandling: Newtonsoft.Json.NullValueHandling.Ignore);
+            var className = typeof(T).Name;
+            JsonSchema schema = schemaGenerator.ToJsonSchema(className, exampleResponse);
+            var schemaJson = JsonWriter.GetWriter(exampleResponse).Write(schema);
+            var exampleJson = JsonWriter.GetWriter(exampleResponse).Write(exampleResponse);
+            var jsonSchemaInfos = " This is the json schema that describes the format you have to use for your json response: " + schemaJson;
+            var exampleJsonInfos = " And for that schema, this would an example of a valid response: " + exampleJson;
+            return jsonSchemaInfos + exampleJsonInfos;
+        }
+
+        public static T ParseNewLineContentAsJson<T>(this ChatGpt.Line newLine) {
+            var responseText = newLine.content;
+            if (responseText.StartsWith("```json\n")) {
+                responseText = responseText.Replace("```json\n", "");
+            }
+            if (responseText.EndsWith("\n```")) {
+                responseText = responseText.Replace("\n```", "");
+            }
+            return JsonReader.GetReader().Read<T>(responseText);
         }
 
     }
