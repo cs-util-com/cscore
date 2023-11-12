@@ -27,13 +27,6 @@ namespace com.csutil.integrationTests.io {
 
         }
 
-        [Fact]
-        public void TestEnvironmentVariablesBasedKeyValueStore() {
-            throw new NotImplementedException();
-            // TODO implement:
-            //IKeyValueStore store = new EnvironmentVariablesKeyValueStore();
-        }
-
     }
 
 }
