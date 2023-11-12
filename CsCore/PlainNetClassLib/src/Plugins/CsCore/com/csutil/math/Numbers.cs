@@ -32,7 +32,7 @@ namespace com.csutil {
             }
             catch (Exception e) {
                 Log.e($"Failed to calculate formula '{formula}': {e.Message}", e);
-                throw e;
+                throw;
             }
         }
 

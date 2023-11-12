@@ -14,7 +14,7 @@ namespace com.csutil.model.immutable {
         private T state;
 
         public string storeName;
-        public readonly StateReducer<T> reducer;
+        public  StateReducer<T> reducer { get; }
         public Action onStateChanged { get; set; }
 
         public DataStore(StateReducer<T> reducer, T initialState = default(T), params Middleware<T>[] middlewares) {
@@ -28,18 +28,21 @@ namespace com.csutil.model.immutable {
                 state = reducer(state, action);
                 return action;
             };
-            if (middlewares != null) {
-                foreach (var middleware in middlewares) {
-                    createdDispatcher = ApplyMiddleware(createdDispatcher, middleware);
-                }
-            }
-            return createdDispatcher;
+            return ApplyMiddlewaresToDispatcher(this, middlewares, createdDispatcher);
         }
 
-        private Dispatcher ApplyMiddleware(Dispatcher wrappedDispatcher, Middleware<T> middleware) {
-            return middleware(this)((object action) => {
-                return wrappedDispatcher(action);
-            });
+        private static Dispatcher ApplyMiddlewaresToDispatcher(IDataStore<T> store, Middleware<T>[] middlewares, Dispatcher dispatcher) {
+            if (middlewares != null) {
+                foreach (var middleware in middlewares) {
+                    dispatcher = ApplyMiddleware(store, dispatcher, middleware);
+                }
+            }
+            return dispatcher;
+        }
+
+        private static Dispatcher ApplyMiddleware(IDataStore<T> store, Dispatcher dispatcher, Middleware<T> middleware) {
+            Func<Dispatcher, Dispatcher> wrapDispatcher = middleware(store);
+            return wrapDispatcher(dispatcher);
         }
 
         /// <summary> Dispatches an action to the store. </summary>

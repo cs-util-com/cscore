@@ -17,6 +17,7 @@ namespace com.csutil.io {
             return TaskV2.Run(() => LoadAndDispose(new MemoryStream(bytes)));
         }
 
+        /// <summary> This method loads an image from a stream and disposes the stream afterwards </summary>
         public static async Task<ImageResult> LoadAndDispose(Stream stream) {
             stream = await stream.CopyToSeekableStreamIfNeeded(disposeOriginalStream: true);
             AssertV3.AreNotEqual(0, stream.Length, "LoadAndDispose: stream.Length");

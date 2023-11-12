@@ -136,16 +136,16 @@ namespace com.csutil.tests.model.esc {
                 Assert.Equal(Vector3.One, e1.LocalPose().scale);
             }
 
-            Assert.Equal(3, ecs.AllEntities.Count);
+            Assert.Equal(3, ecs.Entities.Count);
             e1.RemoveFromParent();
             // e1 is removed from its parent but still in the scene graph:
-            Assert.Equal(3, ecs.AllEntities.Count);
+            Assert.Equal(3, ecs.Entities.Count);
             Assert.Same(e2, entityGroup.GetChildren().Single());
             Assert.Null(e1.GetParent());
             Assert.True(e1.Destroy());
             Assert.False(e1.Destroy());
             // e1 is now fully removed from the scene graph and destroyed:
-            Assert.Equal(2, ecs.AllEntities.Count);
+            Assert.Equal(2, ecs.Entities.Count);
 
             Assert.False(e2.IsDestroyed());
 
@@ -156,7 +156,7 @@ namespace com.csutil.tests.model.esc {
             Assert.Empty(entityGroup.GetChildren());
 
             Assert.True(e2.IsDestroyed());
-            Assert.Equal(1, ecs.AllEntities.Count);
+            Assert.Equal(1, ecs.Entities.Count);
 
             // Since e3 and e4 are in the subtree of e2 they are also destroyed:
             Assert.True(e3.IsDestroyed());
@@ -246,6 +246,11 @@ namespace com.csutil.tests.model.esc {
                 });
                 baseEnemy.SaveChanges();
 
+                // Accessing components and children entities: 
+                Assert.NotNull(baseEnemy.GetComponent<EnemyComponent>());
+                Assert.Null(baseEnemy.GetComponent<SwordComponent>());
+                Assert.NotNull(baseEnemy.GetChildren().Single().GetComponent<SwordComponent>());
+                
                 // Define a variant of the base enemy which is stronger and has a shield:
                 var bossEnemy = baseEnemy.CreateVariant();
                 bossEnemy.Data.Name = "BossEnemy";
@@ -325,10 +330,10 @@ namespace com.csutil.tests.model.esc {
                 Assert.NotEmpty(dir.EnumerateEntries());
                 var templatesIo = new TemplatesIO<Entity>(dir);
                 var ecs = new EntityComponentSystem<Entity>(templatesIo, isModelImmutable: false);
-                Assert.Empty(ecs.AllEntities);
+                Assert.Empty(ecs.Entities);
                 await ecs.LoadSceneGraphFromDisk();
                 Assert.Equal(17, dir.EnumerateFiles().Count());
-                Assert.Equal(17, ecs.AllEntities.Count);
+                Assert.Equal(17, ecs.Entities.Count);
                 // The user loads the scene from disk and can continue editing it
 
                 var scene = ecs.FindEntitiesWithName("Scene").Single();
@@ -353,23 +358,23 @@ namespace com.csutil.tests.model.esc {
             Assert.True(length < allowedDelta, $"Expected {a} to be almost equal to {b} but the difference is {length}");
         }
 
-        private class EnemyComponent : IComponentData {
+        private abstract class Component : IComponentData {
             public string Id { get; set; } = "" + GuidV2.NewGuid();
+            public string GetId() { return Id; }
+            public bool IsActive { get; set; } = true;
+        }
+
+        private class EnemyComponent : Component {
             public int Mana { get; set; }
             public int Health;
-            public string GetId() { return Id; }
         }
 
-        private class SwordComponent : IComponentData {
-            public string Id { get; set; } = "" + GuidV2.NewGuid();
+        private class SwordComponent : Component {
             public int Damage { get; set; }
-            public string GetId() { return Id; }
         }
 
-        private class ShieldComponent : IComponentData {
-            public string Id { get; set; } = "" + GuidV2.NewGuid();
+        private class ShieldComponent : Component {
             public int Defense { get; set; }
-            public string GetId() { return Id; }
         }
 
     }
@@ -381,6 +386,7 @@ namespace com.csutil.tests.model.esc {
         public string TemplateId { get; set; }
         public Matrix4x4? LocalPose { get; set; }
         public IReadOnlyDictionary<string, IComponentData> Components { get; set; }
+        public bool IsActive { get; set; } = true;
 
         public string ParentId { get; set; }
 

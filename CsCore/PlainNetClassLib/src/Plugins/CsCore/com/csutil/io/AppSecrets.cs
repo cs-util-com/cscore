@@ -32,16 +32,17 @@ namespace com.csutil.io {
 
         private static FileEntry FindFile(string fileName) {
             var startDir = EnvironmentV2.instance.GetCurrentDirectory().GetFullFileSystemPath();
-            return FindFile(fileName, new DirectoryInfo(startDir));
+            return FindFileInParentDirs(fileName, new DirectoryInfo(startDir));
         }
 
-        private static FileEntry FindFile(string fileName, DirectoryInfo dirToSearch) {
+        /// <summary> Moves up the directory tree and checks if the file exists in any of the traversed directories </summary>
+        private static FileEntry FindFileInParentDirs(string fileName, DirectoryInfo dirToSearch) {
             if (!dirToSearch.IsNotNullAndExists()) {
                 throw new FileNotFoundException($"Could not find secrets file '{fileName}'");
             }
             var file = dirToSearch.GetChild(fileName);
             if (file.IsNotNullAndExists()) { return file.ToFileEntryInNewRoot(); }
-            return FindFile(fileName, dirToSearch.Parent);
+            return FindFileInParentDirs(fileName, dirToSearch.Parent);
         }
 
     }

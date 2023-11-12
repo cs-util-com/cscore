@@ -372,6 +372,45 @@ namespace com.csutil.tests.keyvaluestore {
             }
             
         }
+
+        [Fact]
+        public async Task ZipFileInstantPersisted() {
+
+            var dbFolder = EnvironmentV2.instance.GetOrAddTempFolder("ZipKeyValueStoreTests").GetChildDir("ZipFileInstantPersisted");
+            dbFolder.DeleteV2();
+            var zipFile = dbFolder.CreateV2().GetChild("MyZipFile.zip");
+
+            {
+                using var kvStore = ZipFileBasedKeyValueStore.New(zipFile, 1);
+                Assert.Equal(0, zipFile.GetFileSize());
+
+                // 1 open change is allowed so setting the first value will not write to the zip file:
+                await kvStore.Set("1 key", "1 value");
+                Assert.Equal(0, zipFile.GetFileSize());
+
+                // 2 open changes are above the limit so the zip file will be written to disk:
+                await kvStore.Set("2 key", "2 value");
+                Assert.True(zipFile.GetFileSize() > 0, $"zipFile.GetFileSize()={zipFile.GetFileSize()}");
+            }
+
+            { // Do a lot of parallel operations on the store to test the flushing does not cause other operations happening at the same time to fail:
+                using var kvStore = ZipFileBasedKeyValueStore.New(zipFile, 100);
+                var tasks = new List<Task>();
+                for (int i = 0; i < 10000; i++) {
+                    string s = "" + i;
+                    tasks.Add(TaskV2.Run(async () => {
+                        await kvStore.Set(s, s);
+                        var res = await kvStore.Get(s, "<value not found>");
+                        if (res != s) {
+                            throw new InvalidDataException("res=" + res + " != " + s);
+                        }
+                        await kvStore.Remove(s);
+                    }));
+                }
+                await Task.WhenAll(tasks);
+            }
+
+        }
         
         private static async Task TestTypesNotLostWith(IKeyValueStore s1, IKeyValueStore s2) {
             var x = new MySheetEntry() { myInt1 = 123 };

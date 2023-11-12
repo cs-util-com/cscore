@@ -115,6 +115,40 @@ namespace com.csutil.tests.model.immutable {
 
         }
 
+        [Fact]
+        public void TestSubStateSubscription() {
+
+            // Create some example app state and put it into a store:
+            var state = new MyAppState1(user: new MyUser(userName: "Bob", dog: null), someNumber: 123);
+            DataStore<MyAppState1> store = new DataStore<MyAppState1>(MyReducers1.ReduceMyAppState1, state);
+
+            // Accessing sub states of the entire state is done via the GetSubState method:
+            SubState<MyAppState1, MyUser> userState = store.GetSubState(data => data.User);
+
+            // Creating the substate does not instantly subscribe it to the store:
+            Assert.Null(userState.RemoveFromParent);
+            Assert.Null(store.onStateChanged);
+
+            // Only when either the substate or a new child subsubstate is created, subscribing the substate to the store is needed:
+            SubState<MyAppState1, Dog> dogState = userState.GetSubState(u => u.Dog);
+            Assert.NotNull(userState.RemoveFromParent);
+            var actionAsMultpleEntities = store.onStateChanged.GetInvocationList();
+            Assert.Single(actionAsMultpleEntities);
+
+            // Adding another subsubsubstate will not add another listener to the store:
+            SubState<MyAppState1, string> dogNameState = dogState.GetSubState(d => d?.Name);
+            Assert.Single(store.onStateChanged.GetInvocationList());
+
+            SubState<MyAppState1, int> someNumberState = store.GetSubState(data => data.SomeNumber);
+            // Just using the SubState object as a way to access always the latest state in the store does not register it yet as a listener:
+            Assert.Equal(123, someNumberState.GetState());
+            Assert.Single(store.onStateChanged.GetInvocationList());
+            // Registering a callback on the SubState will register the SubState on the store
+            someNumberState.onStateChanged += () => { };
+            Assert.Equal(2, store.onStateChanged.GetInvocationList().Length);
+
+        }
+
         private class MyAppState1 {
             public readonly MyUser User;
             public readonly int SomeNumber;

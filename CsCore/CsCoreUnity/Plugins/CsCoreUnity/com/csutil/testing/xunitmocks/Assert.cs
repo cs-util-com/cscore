@@ -17,11 +17,14 @@ namespace Xunit {
 
     public static class Assert {
 
-        public static void True(bool b, string msg = null) {
-            if (!b) { throw (msg != null) ? new AssertException(msg) : new AssertException(); }
+        public static void True(bool? b, string msg = null) {
+            if (b is null) { throw new AssertException("Passed in boolean was null"); }
+            if (!b.Value) { throw (msg != null) ? new AssertException(msg) : new AssertException(); }
         }
 
-        public static void False(bool b, string msg = null) { True(!b, msg); }
+        public static void False(bool? b, string msg = null) {
+            True(!b, msg);
+        }
 
         public static void Null<T>(T obj) { True(null == obj, "Was NOT null: " + obj); }
         public static void NotNull<T>(T obj) { True(null != obj, "Was null: " + typeof(T)); }
@@ -56,11 +59,17 @@ namespace Xunit {
             True(!Eq(objA, objB), "EQUAL: \n " + objA + " \n and \n " + objB);
         }
 
-        public static void IsType<T>(object obj) where T : class {
+        public static T IsType<T>(object obj) where T : class {
             True(obj is T, "Not Type " + typeof(T) + ": " + obj);
+            return (T)obj;
         }
 
         public static T Throws<T>(Action a) where T : Exception {
+            try { a(); } catch (T t) { return t; }
+            throw new AssertException("Did not throw " + typeof(T));
+        }
+
+        public static T Throws<T>(Func<object> a) where T : Exception {
             try { a(); } catch (T t) { return t; }
             throw new AssertException("Did not throw " + typeof(T));
         }
@@ -82,18 +91,25 @@ namespace Xunit {
             True(min.CompareTo(actual) <= 0 && actual.CompareTo(max) <= 0, "actual=" + actual + " not in range [" + min + " .. " + max + "]");
         }
 
-        public static void Single<T>(IEnumerable<T> e) { Equal(1, e.Count()); }
+        public static T Single<T>(IEnumerable<T> e) {
+            Equal(1, e.Count());
+            return e.Single();
+        }
 
         public static void Empty<T>(IEnumerable<T> e) { Equal(0, e.Count()); }
         public static void NotEmpty<T>(IEnumerable<T> e) { NotEqual(0, e.Count()); }
 
         public static void Contains(object obj, IEnumerable e) {
-            foreach (var i in e) { if (Eq(obj, i)) { return; } }
+            foreach (var i in e) {
+                if (Eq(obj, i)) { return; }
+            }
             throw new AssertException("Not found in " + e + ":" + obj);
         }
 
         public static void Contains<T>(IEnumerable<T> e, Func<T, bool> f) {
-            foreach (var i in e) { if (f(i)) { return; } }
+            foreach (var i in e) {
+                if (f(i)) { return; }
+            }
             throw new AssertException("Not found in " + e);
         }
 
@@ -112,6 +128,12 @@ namespace Xunit {
         public static void DoesNotContain<T>(T element, IEnumerable<T> elements) {
             if (elements.Contains(element)) {
                 throw new AssertException("'" + element + "' is substring of '" + elements + "'");
+            }
+        }
+
+        public static void DoesNotContain<T>(IEnumerable<T> collection, Predicate<T> filter) {
+            foreach (T obj in collection) {
+                if (filter(obj)) { throw new AssertException($"'{obj}' is part of '{collection}'"); }
             }
         }
 

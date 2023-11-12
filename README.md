@@ -1024,18 +1024,25 @@ Assert.AreEqual(myObjectToSave.myInt, objLoadedAgain.myInt);
 ## `WebGL Helpers` 
 
 Unity does not offer a way to expose some native browser functionality to the user. Therefore we created a concise JavaScript library and a C# wrapper that exposes commonly used browser functionality:
+
   - Emitting Browser alerts
   - Creating a popup when the user wants to quit a page
   - Writing and retrieving data from the browser history
-  ```cs
-//Add the AlertManager Script to any GameObject. Then you can call
-gameObj.GetComponent<AlertManager>().activateOnQuitPrompt()
+  - Initiating file downloads
+  - Share texts, links and files through the device-native sharing UI
 
-//Or to deactivate it 
-gameObj.GetComponent<AlertManager>().deactivateOnQuitPrompt()
-  ```
+```cs
+//To use alerts add the AlertManager Script to any GameObject. Then you can call
+gameObj.GetComponent<AlertManager>().ShowUnsavedChangesWarningOnPageClose(bool);
+gameObj.GetComponent<AlertManager>().ShowBrowserAlertMessage(string);
 
-To use the functionality you need to [install the WebGL module into your Unity project](#Install-cscore-into-your-Unity-project). There are Demo scenes to get familiar with the functionality.
+//For downloads or sharing add the ShareManager Script, then call:
+gameObj.GetComponent<ShareManager>().downloadFile(byte[], string);
+gameObj.GetComponent<ShareManager>().share(...)
+```
+
+To use the functionality you need to [install the WebGL module into your Unity project](#Install-cscore-into-your-Unity-project). 
+Take a look at the WebGL Demo scenes to get familiar with the functionality and features listed above.
 
 
 ## Running xUnit tests in Unity

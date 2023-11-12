@@ -95,13 +95,13 @@ namespace com.csutil.model.immutable {
 
         public static SubState<T, S> GetSubState<T, S>(this IDataStore<T> self, Func<T, S> getSubState) {
             var subState = new SubState<T, S>(self, getSubState);
-            self.AddSubStateAsListener(subState);
             return subState;
         }
 
-        public static void AddSubStateAsListener<T, S>(this IDataStore<T> self, SubState<T, S> subState, bool triggerInstantToInit = true) {
-            var listenerInStore = self.AddStateChangeListener((_) => subState.GetState(), subState.TriggerOnSubstateChanged, triggerInstantToInit);
-            subState.RemoveFromParent = () => { self.onStateChanged -= listenerInStore; };
+        public static void AddSubStateAsListener<T, S>(this IDataStore<T> store, SubState<T, S> subState, bool triggerInstantToInit = true) {
+            if (subState.RemoveFromParent != null) { return; } // Do nothing if the SubState is already a listener (of the store or a parent SubState)
+            var listenerInStore = store.AddStateChangeListener((_) => subState.GetState(), subState.TriggerOnSubstateChanged, triggerInstantToInit);
+            subState.RemoveFromParent = () => { store.onStateChanged -= listenerInStore; };
         }
 
         public static SubState<T, SubSub> GetSubState<T, Sub, SubSub>(this SubState<T, Sub> self, Func<Sub, SubSub> getSubSubState) {
@@ -161,7 +161,7 @@ namespace com.csutil.model.immutable {
             return list;
         }
 
-        [Obsolete("Typically not needed, since the key should be used to modify the specific entries of the Dict instead of iterating over all")]
+        [Obsolete("Use version where ref bool changed has to be passed in as well")]
         public static ImmutableDictionary<T, V> MutateEntries<T, V>(this ImmutableDictionary<T, V> dict, object action, StateReducer<V> reducer) {
             if (dict != null) {
                 foreach (var elem in dict) {
@@ -174,6 +174,20 @@ namespace com.csutil.model.immutable {
             return dict;
         }
 
+        [Obsolete("Typically not needed, since the key should be used to modify the specific entries of the Dict instead of iterating over all")]
+        public static ImmutableDictionary<T, V> MutateEntries<T, V>(this ImmutableDictionary<T, V> dict, object action, StateReducer<V> reducer, ref bool changed) {
+            if (dict != null) {
+                foreach (var elem in dict) {
+                    var newValue = reducer(elem.Value, action);
+                    if (StateCompare.WasModified(elem.Value, newValue)) {
+                        dict = dict.SetItem(elem.Key, newValue);
+                        changed = true;
+                    }
+                }
+            }
+            return dict;
+        }
+        
         public static ImmutableDictionary<T, V> MutateEntry<T, V>(this ImmutableDictionary<T, V> dict, T key, object action, StateReducer<V> reducer) {
             var elem = dict[key];
             var newValue = reducer(elem, action);
