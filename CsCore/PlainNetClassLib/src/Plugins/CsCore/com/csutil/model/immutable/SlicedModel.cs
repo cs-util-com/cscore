@@ -37,7 +37,16 @@ namespace com.csutil.model.immutable {
             return new SlicedStore<T>(store);
         }
 
-        private class SlicedStore<T> : IDataStore<T> {
+        public interface IsSlicedStore {
+
+            /// <summary> Allows to access the parent store of a sliced store, to also get access to the other slices </summary>
+            IDataStore<SlicedModel> ParentStore { get; }
+
+        }
+
+        private class SlicedStore<T> : IDataStore<T>, IsSlicedStore {
+
+            public IDataStore<SlicedModel> ParentStore => _slicedStore;
 
             private readonly IDataStore<SlicedModel> _slicedStore;
             public SlicedStore(IDataStore<SlicedModel> slicedStore) { _slicedStore = slicedStore; }
