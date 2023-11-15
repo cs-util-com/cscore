@@ -17,7 +17,7 @@ namespace com.csutil {
         public static GameObject LoadPrefab(string pathInResourcesFolder, bool keepReferenceToEditorPrefab = false) {
             // Log.d($"LoadPrefab '{pathInResourcesFolder}'");
             GameObject prefab = LoadV2<GameObject>(pathInResourcesFolder);
-            if (prefab == null) { throw new Exception("Could not find prefab at path='" + pathInResourcesFolder + "'"); }
+            if (prefab == null) { throw new FileNotFoundException("Could not find prefab in any /Resources/.. folder under path='../" + pathInResourcesFolder + "'"); }
             var prefabInstance = InstantiatePrefab(prefab, keepReferenceToEditorPrefab);
             prefabInstance.name = pathInResourcesFolder;
             EventBus.instance.Publish(EventConsts.catTemplate, prefabInstance);
