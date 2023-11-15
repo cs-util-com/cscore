@@ -11,6 +11,11 @@ namespace com.csutil {
             SubscribeToStateChanges(self, subState, getSubState, newText => self.text = newText);
         }
 
+        public static void SetSubState<T,S>(this InputField self, SubState<T, S> subState, Func<S, string> getSubState, Action<string> onValueChanged) {
+            self.SubscribeToStateChanges(subState, getSubState);
+            self.AddOnValueChangedActionThrottled(onValueChanged);
+        }
+        
         public static void SubscribeToStateChanges<T, S>(this InputField self, SubState<T, S> subState, Func<S, string> getSubState) {
             SubscribeToStateChanges(self, subState, getSubState, newText => self.text = newText);
         }

@@ -63,8 +63,8 @@ namespace com.csutil {
             return tcs.Task;
         }
 
-        public static void SwitchBackToLastView<T>(this Presenter<T> self) {
-            self.targetView.GetViewStack().SwitchBackToLastView(self.targetView);
+        public static void SwitchBackToLastView<T>(this Presenter<T> self, bool destroyFinalView = false, bool hideNotDestroyCurrentView = false) {
+            self.targetView.GetViewStack().SwitchBackToLastView(self.targetView, destroyFinalView, hideNotDestroyCurrentView);
         }
 
     }
