@@ -66,7 +66,7 @@ namespace com.csutil {
         public static void SwitchBackToLastView<T>(this Presenter<T> self) {
             self.targetView.GetViewStack().SwitchBackToLastView(self.targetView);
         }
-        
+
     }
 
     /// <summary>
@@ -81,6 +81,7 @@ namespace com.csutil {
         /// <summary> Connects a model with a view </summary>
         /// <returns> A task that can be awaited on, that returns the fully setup presenter </returns>
         public static Task<T> LoadModelIntoView<T, V>(this PresenterWithActions<T, V> self, T model) where V : IModelActions<T> {
+            if (self.targetView.IsNullOrDestroyed()) { throw new ArgumentNullException("presenter.targetView"); }
             self.actions.ThrowErrorIfNull("presenter.actions");
             self.actions.Model = model;
             Presenter<T> presenter = self;

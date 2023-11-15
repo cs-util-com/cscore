@@ -7,50 +7,29 @@ namespace com.csutil {
 
     public static class UiExtensionsForReduxSubState {
 
-        public static void SubscribeToStateChanges<T>(this Text self, SubState<T, string> subState) {
-            subState.AddUnityStateChangeListener(self, newText => self.text = newText);
+        public static void SubscribeToStateChanges<T, S>(this Text self, SubState<T, S> subState, Func<S, string> getSubState) {
+            SubscribeToStateChanges(self, subState, getSubState, newText => self.text = newText);
         }
 
-        public static void SubscribeToStateChanges<T>(this InputField self, SubState<T, string> subState) {
-            subState.AddUnityStateChangeListener(self, newText => self.text = newText);
+        public static void SubscribeToStateChanges<T, S>(this InputField self, SubState<T, S> subState, Func<S, string> getSubState) {
+            SubscribeToStateChanges(self, subState, getSubState, newText => self.text = newText);
         }
 
-        public static void SubscribeToStateChanges<T>(this Toggle self, SubState<T, bool> subState) {
-            subState.AddUnityStateChangeListener(self, newCheckedState => self.isOn = newCheckedState);
+        public static void SubscribeToStateChanges<T, S>(this Toggle self, SubState<T, S> subState, Func<S, bool> getSubState) {
+            SubscribeToStateChanges(self, subState, getSubState, newCheckedState => self.isOn = newCheckedState);
         }
 
-        public static void SubscribeToStateChanges<T>(this Slider self, SubState<T, float> subState) {
-            subState.AddUnityStateChangeListener(self, newText => self.value = newText);
+        public static void SubscribeToStateChanges<T, S>(this Slider self, SubState<T, S> subState, Func<S, float> getSubState) {
+            SubscribeToStateChanges(self, subState, getSubState, newText => self.value = newText);
         }
 
-        public static void AddUnityStateChangeListener<T, S>(this SubState<T, S> subState, UnityEngine.Object unityObject, Action<S> updateUi, bool triggerOnSubscribe = true, bool eventsAlwaysInMainThread = true) {
-            updateUi(subState.GetState());
-            Wrapper w = new Wrapper();
-            w.stateChangeListener = () => {
-                var newVal = subState.GetState();
-                if (eventsAlwaysInMainThread) {
-                    MainThread.Invoke(() => { SubscribeToStateChanges_OnChanged(unityObject, subState, updateUi, w, newVal); });
-                } else {
-                    SubscribeToStateChanges_OnChanged(unityObject, subState, updateUi, w, newVal);
-                }
-            };
-            subState.onStateChanged += w.stateChangeListener;
+        private static void SubscribeToStateChanges<T, S, Sub>(UnityEngine.Object ui, SubState<T, S> sub, Func<S, Sub> getSubState, Action<Sub> updateUi) {
+            var subSub = sub.GetSubStateForUnity(ui, getSubState);
+            subSub.onStateChanged += () => { updateUi(subSub.GetState()); };
         }
 
-        private class Wrapper {
-            public Action stateChangeListener;
-        }
-
-        private static void SubscribeToStateChanges_OnChanged<T, S>(UnityEngine.Object unityObject, SubState<T, S> subState, Action<S> updateUi, Wrapper w, S newVal) {
-            if (unityObject.IsDestroyed()) {
-                subState.onStateChanged -= w.stateChangeListener;
-                return;
-            }
-            UiExtensionsForReduxStore.OnStateChangedForUnity(updateUi, newVal, unityObject);
-        }
-
-        public static SubState<T, S> GetSubStateForUnity<T, S>(this IDataStore<T> store, UnityEngine.Object context, Func<T, S> getSubState, bool eventsAlwaysInMainThread = true) {
-            SubState<T, S> subState = store.GetSubState(getSubState);
+        public static SubState<T, Sub> GetSubStateForUnity<T, Sub>(this IDataStore<T> store, UnityEngine.Object context, Func<T, Sub> getSubState, bool eventsAlwaysInMainThread = true) {
+            SubState<T, Sub> subState = store.GetSubState(getSubState);
             var listenerInStore = store.AddStateChangeListener((_) => subState.GetState(), newSubState => {
                 if (eventsAlwaysInMainThread) {
                     MainThread.Invoke(() => { OnSubstateChangedForUnity(subState, newSubState, context); });
@@ -62,7 +41,7 @@ namespace com.csutil {
             return subState;
         }
 
-        public static SubState<T, SubSub> GetSubStateForUnity<T, S, SubSub>(this SubState<T, S> parentSubState, UnityEngine.Object context, Func<S, SubSub> getSubState, bool eventsAlwaysInMainThread = true) {
+        public static SubState<T, SubSub> GetSubStateForUnity<T, Sub, SubSub>(this SubState<T, Sub> parentSubState, UnityEngine.Object context, Func<Sub, SubSub> getSubState, bool eventsAlwaysInMainThread = true) {
             var subState = parentSubState.GetSubState(getSubState);
             var ownListenerInParent = parentSubState.AddStateChangeListener(getSubState, newSubState => {
                 if (eventsAlwaysInMainThread) {
