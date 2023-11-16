@@ -1,5 +1,6 @@
 ﻿using System;
 using com.csutil.model.immutable;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,15 +8,33 @@ namespace com.csutil {
 
     public static class UiExtensionsForReduxSubState {
 
+        public static void SubscribeToStateChanges<T, S>(this TMP_Text self, SubState<T, S> subState, Func<S, string> getSubState) {
+            SubscribeToStateChanges(self, subState, getSubState, newText => self.text = newText);
+        }
+        
+        [Obsolete("Use TMP_Text instead of Text")]
         public static void SubscribeToStateChanges<T, S>(this Text self, SubState<T, S> subState, Func<S, string> getSubState) {
             SubscribeToStateChanges(self, subState, getSubState, newText => self.text = newText);
         }
 
-        public static void SetSubState<T,S>(this InputField self, SubState<T, S> subState, Func<S, string> getSubState, Action<string> onValueChanged) {
+        public static void SetSubState<T, S>(this TMP_InputField self, SubState<T, S> subState, Func<S, string> getSubState, Action<string> onValueChanged) {
+            if (self.IsNullOrDestroyed()) { throw new ArgumentNullException("self(InputField) must not be null!"); }
             self.SubscribeToStateChanges(subState, getSubState);
             self.AddOnValueChangedActionThrottled(onValueChanged);
         }
         
+        [Obsolete("Use TMP_InputField instead of InputField")]
+        public static void SetSubState<T, S>(this InputField self, SubState<T, S> subState, Func<S, string> getSubState, Action<string> onValueChanged) {
+            if (self.IsNullOrDestroyed()) { throw new ArgumentNullException("self(InputField) must not be null!"); }
+            self.SubscribeToStateChanges(subState, getSubState);
+            self.AddOnValueChangedActionThrottled(onValueChanged);
+        }
+
+        public static void SubscribeToStateChanges<T, S>(this TMP_InputField self, SubState<T, S> subState, Func<S, string> getSubState) {
+            SubscribeToStateChanges(self, subState, getSubState, newText => self.text = newText);
+        }
+        
+        [Obsolete("Use TMP_InputField instead of InputField")]
         public static void SubscribeToStateChanges<T, S>(this InputField self, SubState<T, S> subState, Func<S, string> getSubState) {
             SubscribeToStateChanges(self, subState, getSubState, newText => self.text = newText);
         }
@@ -29,6 +48,9 @@ namespace com.csutil {
         }
 
         private static void SubscribeToStateChanges<T, S, Sub>(UnityEngine.Object ui, SubState<T, S> sub, Func<S, Sub> getSubState, Action<Sub> updateUi) {
+            if (ui.IsNullOrDestroyed()) {
+                throw new ArgumentNullException("The Unity UI object must not be null!");
+            }
             var subSub = sub.GetSubStateForUnity(ui, getSubState);
             subSub.onStateChanged += () => { updateUi(subSub.GetState()); };
         }
@@ -47,6 +69,9 @@ namespace com.csutil {
         }
 
         public static SubState<T, SubSub> GetSubStateForUnity<T, Sub, SubSub>(this SubState<T, Sub> parentSubState, UnityEngine.Object context, Func<Sub, SubSub> getSubState, bool eventsAlwaysInMainThread = true) {
+            if (context.IsNullOrDestroyed()) {
+                throw new ArgumentNullException("The Unity context object must not be null!");
+            }
             var subState = parentSubState.GetSubState(getSubState);
             var ownListenerInParent = parentSubState.AddStateChangeListener(getSubState, newSubState => {
                 if (eventsAlwaysInMainThread) {
