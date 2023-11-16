@@ -13,6 +13,7 @@ namespace com.csutil.editor {
         /// <summary> The priority value of the default Unity GameObject/UI menu </summary>
         private const int priorityOfUiMenu = 6;
         private const string UIv2menu = "GameObject/UI v2/";
+        private const string UIv2menuOld = UIv2menu + "Old/";
 
         [MenuItem(UIv2menu + "Root Canvas", false, priorityOfUiMenu + 1)]
         static void AddRootCanvas() {
@@ -76,9 +77,12 @@ namespace com.csutil.editor {
 
         [MenuItem(UIv2menu + "DefaultRadioButton", false, priorityOfUiMenu + 6)]
         static void DefaultRadioButton() { AddPrefabToActiveView("DefaultRadioButton"); }
-        
-        [MenuItem(UIv2menu + "DefaultInput", false, priorityOfUiMenu + 6)]
+
+        [MenuItem(UIv2menuOld + "DefaultInput", false, priorityOfUiMenu + 6)]
         static void DefaultInput() { AddPrefabToActiveView("DefaultInput"); }
+
+        [MenuItem(UIv2menu + "DefaultInputV2", false, priorityOfUiMenu + 6)]
+        static void DefaultInputV2() { AddPrefabToActiveView("DefaultInputV2"); }
 
         [MenuItem(UIv2menu + "DefaultDropDown", false, priorityOfUiMenu + 6)]
         static void DefaultDropDown() { AddPrefabToActiveView("DefaultDropDown"); }
