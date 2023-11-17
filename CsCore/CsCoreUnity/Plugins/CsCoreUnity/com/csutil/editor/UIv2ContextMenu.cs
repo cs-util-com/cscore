@@ -83,6 +83,9 @@ namespace com.csutil.editor {
 
         [MenuItem(UIv2menu + "DefaultInputV2", false, priorityOfUiMenu + 6)]
         static void DefaultInputV2() { AddPrefabToActiveView("DefaultInputV2"); }
+        
+        [MenuItem(UIv2menu + "DefaultText", false, priorityOfUiMenu + 6)]
+        static void DefaultText() { AddPrefabToActiveView("DefaultText"); }
 
         [MenuItem(UIv2menu + "DefaultDropDown", false, priorityOfUiMenu + 6)]
         static void DefaultDropDown() { AddPrefabToActiveView("DefaultDropDown"); }
