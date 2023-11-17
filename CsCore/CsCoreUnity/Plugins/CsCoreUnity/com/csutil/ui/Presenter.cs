@@ -63,8 +63,17 @@ namespace com.csutil {
             return tcs.Task;
         }
 
-        public static void SwitchBackToLastView<T>(this Presenter<T> self, bool destroyFinalView = false, bool hideNotDestroyCurrentView = false) {
-            self.targetView.GetViewStack().SwitchBackToLastView(self.targetView, destroyFinalView, hideNotDestroyCurrentView);
+        /// <summary> Switches back to the previous view in the ViewStack </summary>
+        /// <param name="viewDoneTcs"> A task completion source that is set to finished, the task of the tcs is typically used by the presenter to return its Task in
+        /// the <see cref="Presenter{T}.OnLoad"/> method so that multiple componets like this SwitchBackToLastView method here can set it to complete independently </param>
+        public static void SwitchBackToLastView<T>(this Presenter<T> self, TaskCompletionSource<bool> viewDoneTcs, bool destroyFinalView = false, bool hideNotDestroyCurrentView = false) {
+            try {
+                self.targetView.GetViewStack().SwitchBackToLastView(self.targetView, destroyFinalView, hideNotDestroyCurrentView);
+                viewDoneTcs.TrySetResult(true);
+            } catch (Exception e) {
+                viewDoneTcs.TrySetException(e);
+                throw;
+            }
         }
 
     }

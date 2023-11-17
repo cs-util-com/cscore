@@ -6,8 +6,8 @@ namespace com.csutil.ui {
 
     public static class ListUiExtensions {
 
-        public static void SetListData<T>(this BaseController<T> list, IEnumerable<T> content) {
-            list.SetListData(content.ToList());
+        public static void SetListData<T>(this BaseController<T> list, IEnumerable<T> content, bool isReset) {
+            list.SetListData(content.ToList(), isReset);
         }
 
         public static V GetParentListUiController<T, V>(this BaseCell<T> cell) where V : BaseController<T> {
