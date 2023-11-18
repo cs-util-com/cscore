@@ -6,7 +6,7 @@ namespace com.csutil.ui {
 
     public static class ListUiExtensions {
 
-        public static void SetListData<T>(this BaseController<T> list, IEnumerable<T> content, bool isReset) {
+        public static void SetListData<T>(this BaseController<T> list, IEnumerable<T> content, bool isReset = true) {
             list.SetListData(content.ToList(), isReset);
         }
 
