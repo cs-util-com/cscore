@@ -11,7 +11,7 @@ namespace com.csutil.model.ecs {
         public GameObject targetView { get; set; }
 
         private Dictionary<string, GameObject> _entityViews = new Dictionary<string, GameObject>();
-        private Dictionary<string, IComponentPresenter> _componentViews = new Dictionary<string, IComponentPresenter>();
+        private Dictionary<string, IComponentPresenter<T>> _componentViews = new Dictionary<string, IComponentPresenter<T>>();
 
         public Task OnLoad(EntityComponentSystem<T> model) {
 
@@ -93,10 +93,10 @@ namespace com.csutil.model.ecs {
         private void onCompAdded(IEntity<T> iEntity, KeyValuePair<string, IComponentData> added, GameObject targetParentGo) {
             var createdComponent = AddComponentTo(targetParentGo, added.Value);
             _componentViews.Add(added.Key, createdComponent);
-            createdComponent.OnUpdateUnityComponent(default, added.Value);
+            createdComponent.OnUpdateUnityComponent(iEntity, default, added.Value);
         }
 
-        protected abstract IComponentPresenter AddComponentTo(GameObject targetGo, IComponentData componentModel);
+        protected abstract IComponentPresenter<T> AddComponentTo(GameObject targetGo, IComponentData componentModel);
 
         private void onCompRemoved(IEntity<T> iEntity, string deleted, GameObject targetParentGo) {
             _componentViews[deleted].DisposeV2();
@@ -105,13 +105,13 @@ namespace com.csutil.model.ecs {
 
         private void onCompUpdated(IEntity<T> iEntity, IComponentData oldState, KeyValuePair<string, IComponentData> updatedState, GameObject targetParentGo) {
             var compView = _componentViews[updatedState.Key];
-            compView.OnUpdateUnityComponent(oldState, updatedState.Value);
+            compView.OnUpdateUnityComponent(iEntity, oldState, updatedState.Value);
         }
 
     }
 
-    public interface IComponentPresenter : IDisposableV2 {
-        void OnUpdateUnityComponent(IComponentData? oldState, IComponentData updatedState);
+    public interface IComponentPresenter<T> : IDisposableV2 where T : IEntityData {
+        void OnUpdateUnityComponent(IEntity<T> iEntity, IComponentData oldState, IComponentData updatedState);
     }
 
     public static class PoseExtensionsForUnity {
