@@ -7,6 +7,10 @@ namespace com.csutil {
 
     public static class IEnumerableDiffHelpers {
 
+        public static void CalcEntryChangesV2<K, V>(this IReadOnlyDictionary<K, V> oldState, IReadOnlyDictionary<K, V> newState, Action<KeyValuePair<K, V>> onEntryAdded, Action<KeyValuePair<K, V>> onEntryUpdated, Action<K> onEntryRemoved) {
+            CalcEntryChanges(oldState, newState, getKey: x => x.Key, onEntryAdded, onEntryUpdated, onEntryRemoved);
+        }
+        
         public static void CalcEntryChanges<K, V>(this IDictionary<K, V> oldState, IDictionary<K, V> newState, Action<KeyValuePair<K, V>> onEntryAdded, Action<KeyValuePair<K, V>> onEntryUpdated, Action<K> onEntryRemoved) {
             CalcEntryChanges(oldState, newState, getKey: x => x.Key, onEntryAdded, onEntryUpdated, onEntryRemoved);
         }
