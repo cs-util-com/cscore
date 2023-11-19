@@ -33,7 +33,7 @@ namespace com.csutil.model.ecs {
         private void OnEntityUpdated(IEntity<T> iEntity, EntityComponentSystem<T>.UpdateType type, T oldstate, T newstate) {
             switch (type) {
                 case EntityComponentSystem<T>.UpdateType.Add:
-                    CreateGoFor(iEntity, newstate);
+                    CreateGoFor(iEntity);
                     break;
                 case EntityComponentSystem<T>.UpdateType.Remove:
                     RemoveGoFor(iEntity, oldstate);
@@ -45,8 +45,9 @@ namespace com.csutil.model.ecs {
             }
         }
 
-        private void CreateGoFor(IEntity<T> iEntity, T addedEntity) {
-            var go = new GameObject(iEntity.Name);
+        private void CreateGoFor(IEntity<T> iEntity) {
+            var go = NewGameObjectFor(iEntity);
+            go.name = iEntity.Name;
             _entityViews.Add(iEntity.Id, go);
             if (iEntity.ParentId != null) {
                 _entityViews[iEntity.ParentId].AddChild(go);
@@ -54,11 +55,13 @@ namespace com.csutil.model.ecs {
                 targetView.AddChild(go);
             }
             iEntity.LocalPose().ApplyTo(go.transform);
-            go.SetActive(addedEntity.IsActive);
-            foreach (var x in addedEntity.Components) {
+            go.SetActive(iEntity.IsActive);
+            foreach (var x in iEntity.Components) {
                 onCompAdded(iEntity, x, targetParentGo: go);
             }
         }
+
+        protected abstract GameObject NewGameObjectFor(IEntity<T> iEntity);
 
         private void RemoveGoFor(IEntity<T> iEntity, T removedEntity) {
             _entityViews[iEntity.Id].Destroy();
