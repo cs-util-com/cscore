@@ -9,11 +9,23 @@ namespace com.csutil {
         public const double radToDegree = 180d / Math.PI;
         private const double halfPi = Math.PI / 2d;
 
-        public static bool IsSimilarTo(this Quaternion q1, Quaternion q2, int digits) {
+        public static bool Equals(this Quaternion q1, Quaternion q2, int digits) {
             return Math.Round(q1.X, digits) == Math.Round(q2.X, digits)
                 && Math.Round(q1.Y, digits) == Math.Round(q2.Y, digits)
                 && Math.Round(q1.Z, digits) == Math.Round(q2.Z, digits)
                 && Math.Round(q1.W, digits) == Math.Round(q2.W, digits);
+        }
+
+        public static bool IsSimilarTo(this Quaternion q1, Quaternion q2, double degreeDifferenceThreshold = 0.1) {
+            return q1.GetRotationDeltaInDegreeTo(q2) < degreeDifferenceThreshold;
+        }
+
+        public static double GetRotationDeltaInDegreeTo(this Quaternion q1, Quaternion q2) {
+            return GetRotationDeltaInRadTo(q1, q2) * radToDegree;
+        }
+
+        public static double GetRotationDeltaInRadTo(this Quaternion q1, Quaternion q2) {
+            return Math.Acos(Math.Min(Math.Abs(Quaternion.Dot(q1, q2)), 1.0)) * 2.0;
         }
 
         /// <summary> diff * q1 = q2  --->  diff = q2 * inverse(q1) </summary>
