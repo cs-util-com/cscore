@@ -28,6 +28,8 @@ namespace com.csutil {
             return Math.Acos(Math.Min(Math.Abs(Quaternion.Dot(q1, q2)), 1.0)) * 2.0;
         }
 
+        public static Matrix4x4 ToMatrix4X4(this Quaternion self) { return Matrix4x4.CreateFromQuaternion(self); }
+        
         /// <summary> diff * q1 = q2  --->  diff = q2 * inverse(q1) </summary>
         public static Quaternion GetRotationDeltaTo(this Quaternion q1, Quaternion q2) { return Quaternion.Inverse(q1) * q2; }
 

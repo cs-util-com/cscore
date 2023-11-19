@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 
@@ -48,10 +49,13 @@ namespace com.csutil.model.ecs {
         /// An inactive component typically is frozen.
         /// Both an entity and individual components can be inactive. </summary>
         bool IsActive { get; }
-        
+
     }
 
     public struct Pose {
+
+        public const double radToDegree = 180f / Math.PI;
+        public const double degreeToRad = Math.PI / 180f;
 
         public readonly Vector3 position;
         public readonly Quaternion rotation;
@@ -63,8 +67,9 @@ namespace com.csutil.model.ecs {
             this.scale = scale;
         }
 
-        public static Matrix4x4 NewMatrix(Vector3 position = new Vector3(), float rotation = 0, float scale = 1f) {
-            return NewMatrix(position, Quaternion.CreateFromYawPitchRoll(rotation, 0, 0), scale);
+        public static Matrix4x4 NewMatrix(Vector3 position = new Vector3(), double rotOnYAxisInDegree = 0, float scale = 1f) {
+            var rot = rotOnYAxisInDegree == 0 ? Quaternion.Identity : Quaternion.CreateFromAxisAngle(Vector3.UnitY, (float)(rotOnYAxisInDegree * degreeToRad));
+            return NewMatrix(position, rot, scale);
         }
 
         public static Matrix4x4 NewMatrix(Vector3 position, Quaternion rotation, float scale) {
@@ -78,6 +83,24 @@ namespace com.csutil.model.ecs {
         public static Pose NewPosition(Vector3 position) {
             return new Pose(position, Quaternion.Identity, Vector3.One);
         }
+
+        public static Pose operator +(Pose pose, Vector3 positionToAdd) {
+            return new Pose(pose.position + positionToAdd, pose.rotation, pose.scale);
+        }
+
+        public static Pose operator *(Pose pose, Vector3 scaleToMultiply) {
+            return new Pose(pose.position, pose.rotation, pose.scale * scaleToMultiply);
+        }
+
+        public static Pose operator *(Pose pose, float scaleToMultiply) {
+            return new Pose(pose.position, pose.rotation, pose.scale * scaleToMultiply);
+        }
+
+        public static Pose operator *(Quaternion rotationToAdd, Pose pose) {
+            return new Pose(pose.position, rotationToAdd * pose.rotation, pose.scale);
+        }
+
+        public Matrix4x4 ToMatrix4x4() { return NewMatrix(position, rotation, scale); }
 
     }
 

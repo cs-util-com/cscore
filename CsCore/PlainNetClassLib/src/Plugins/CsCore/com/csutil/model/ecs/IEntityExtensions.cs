@@ -120,20 +120,25 @@ namespace com.csutil.model.ecs {
         }
 
         public static Pose GlobalPose<T>(this IEntity<T> self) where T : IEntityData {
-            self.GlobalPoseMatrix().Decompose(out Vector3 scale, out Quaternion rotation, out Vector3 position);
-            return new Pose(position, rotation, scale);
+            return self.GlobalPoseMatrix().ToPose();
         }
 
-        public static Pose GlobalPose<T>(this T self, IReadOnlyDictionary<string, T> allEntities) where T : IEntityData {
-            self.GlobalPoseMatrix(allEntities).Decompose(out Vector3 scale, out Quaternion rotation, out Vector3 position);
+        public static Pose ToPose(this Matrix4x4 matrix) {
+            if (matrix == Matrix4x4.Identity) {
+                return new Pose(Vector3.Zero, Quaternion.Identity, Vector3.One);
+            }
+            matrix.Decompose(out Vector3 scale, out Quaternion rotation, out Vector3 position);
             return new Pose(position, rotation, scale);
+        }
+        
+        public static Pose GlobalPose<T>(this T self, IReadOnlyDictionary<string, T> allEntities) where T : IEntityData {
+            return self.GlobalPoseMatrix(allEntities).ToPose();
         }
 
         public static Pose LocalPose<T>(this IEntity<T> self) where T : IEntityData {
             var localPose = self.LocalPose;
-            if (!localPose.HasValue) { return new Pose(Vector3.Zero, Quaternion.Identity, Vector3.One); }
-            localPose.Value.Decompose(out Vector3 scale, out Quaternion rotation, out Vector3 position);
-            return new Pose(position, rotation, scale);
+            if (!localPose.HasValue) { return Matrix4x4.Identity.ToPose(); }
+            return localPose.Value.ToPose();
         }
 
         public static void SaveChanges<T>(this IEntity<T> self) where T : IEntityData {

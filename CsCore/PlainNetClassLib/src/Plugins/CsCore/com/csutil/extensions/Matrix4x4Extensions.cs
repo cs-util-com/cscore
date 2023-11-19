@@ -20,7 +20,9 @@ namespace com.csutil {
             return Matrix4x4.Decompose(matrix, out scale, out rotation, out translation);
         }
 
-        public static Vector3 Transform(this Matrix4x4 transformationMatrix, Vector3 vecToTransform) { return Vector3.Transform(vecToTransform, transformationMatrix); }
+        public static Vector3 Transform(this Matrix4x4 transformationMatrix, Vector3 vecToTransform) {
+            return Vector3.Transform(vecToTransform, transformationMatrix);
+        }
 
         public static void Set(this ref Matrix4x4 self, int rowIndex, int columnIndex, float value) {
             if (rowIndex < 0 || rowIndex > 3 || columnIndex < 0 || columnIndex > 3) {

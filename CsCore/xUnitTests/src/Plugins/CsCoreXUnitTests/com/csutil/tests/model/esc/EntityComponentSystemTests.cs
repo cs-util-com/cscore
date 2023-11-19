@@ -12,6 +12,9 @@ namespace com.csutil.tests.model.esc {
 
     public class EntityComponentSystemTests {
 
+        private const float radToDegree = 180f / MathF.PI;
+        private const float degreeToRad = MathF.PI / 180f;
+
         public EntityComponentSystemTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
         [Fact]
@@ -110,7 +113,7 @@ namespace com.csutil.tests.model.esc {
             Assert.Same(e2.GetParent(), entityGroup);
 
             { // Local and global poses can be accessed like this:
-                var rot90Degree = Quaternion.CreateFromYawPitchRoll(MathF.PI / 2, 0, 0);
+                var rot90Degree = Quaternion.CreateFromYawPitchRoll(90 * degreeToRad, 0, 0);
                 Assert.Equal(rot90Degree, entityGroup.GlobalPose().rotation);
                 Assert.Equal(rot90Degree, entityGroup.LocalPose().rotation);
 
@@ -120,7 +123,7 @@ namespace com.csutil.tests.model.esc {
 
                 // e1 has a local rotation that is opposite of the parent 90 degree, the 2 cancel each other out:
                 Assert.Equal(Quaternion.Identity, e1.GlobalPose().rotation);
-                var rotMinus90Degree = Quaternion.CreateFromYawPitchRoll(-MathF.PI / 2, 0, 0);
+                var rotMinus90Degree = Quaternion.CreateFromYawPitchRoll(-90 * degreeToRad, 0, 0);
                 Assert.Equal(rotMinus90Degree, e1.LocalPose().rotation);
 
                 // e1 is in the center of the parent, its global pos isnt affected by the rotation of the parent:
@@ -200,6 +203,43 @@ namespace com.csutil.tests.model.esc {
 
         }
 
+        [Fact]
+        public void TestPoseOperators() {
+
+            var poseTranslation = new Vector3(5, 10, 15);
+            Matrix4x4 matrix = Pose.NewMatrix(poseTranslation, 180);
+            var pose = matrix.ToPose();
+            Assert_AlmostEqual(matrix, pose.ToMatrix4x4());
+            Assert.Equal(poseTranslation, pose.position);
+            Assert_AlmostEqual(Quaternion.CreateFromYawPitchRoll(180 * degreeToRad, 0, 0), pose.rotation);
+            Assert_AlmostEqual(Vector3.One, pose.scale);
+
+            var vecX_1_0_0 = Vector3.UnitX;
+
+            // Counterclockwise rotation around the y/up axis:
+            var rot90Degree = Quaternion.CreateFromYawPitchRoll(90 * degreeToRad, 0, 0);
+            // The x axis is now pointing to the negative z axis:
+            Assert_AlmostEqual(-Vector3.UnitZ, rot90Degree.ToMatrix4X4().Transform(vecX_1_0_0));
+
+            // The pose has a position and rotation set which means (1,0,0) will end up rotated by 180 degree: 
+            Assert.Equal(-Vector3.UnitX + poseTranslation, pose.ToMatrix4x4().Transform(vecX_1_0_0));
+
+            { // To make it easier to work with poses they can be modified with operators:
+                // Change the position of the pose:
+                pose += vecX_1_0_0;
+                Assert.Equal(vecX_1_0_0 + poseTranslation, pose.position);
+                // Change the scale of the pose:
+                pose *= 2;
+                Assert.Equal(new Vector3(2, 2, 2), pose.scale);
+                // Add a 90 degree rotation to the pose:
+                pose = rot90Degree * pose;
+                Assert_AlmostEqual(Quaternion.CreateFromYawPitchRoll((90 + 180) * degreeToRad, 0, 0), pose.rotation);
+                Assert.Equal(new Vector3(2, 2, 2), pose.scale);
+                Assert.Equal(vecX_1_0_0 + poseTranslation, pose.position);
+            }
+
+        }
+
         /// <summary> Shows how to create a scene at runtime, persist it to disk and reload it </summary>
         [Fact]
         public async Task ExampleRuntimeSceneCreationPersistenceAndReloading() {
@@ -250,7 +290,7 @@ namespace com.csutil.tests.model.esc {
                 Assert.NotNull(baseEnemy.GetComponent<EnemyComponent>());
                 Assert.Null(baseEnemy.GetComponent<SwordComponent>());
                 Assert.NotNull(baseEnemy.GetChildren().Single().GetComponent<SwordComponent>());
-                
+
                 // Define a variant of the base enemy which is stronger and has a shield:
                 var bossEnemy = baseEnemy.CreateVariant();
                 bossEnemy.Data.Name = "BossEnemy";
@@ -353,9 +393,23 @@ namespace com.csutil.tests.model.esc {
             return dict;
         }
 
-        private void Assert_AlmostEqual(Vector3 a, Vector3 b, float allowedDelta = 0.000001f) {
-            var length = (a - b).Length();
-            Assert.True(length < allowedDelta, $"Expected {a} to be almost equal to {b} but the difference is {length}");
+        private void Assert_AlmostEqual(Vector3 expected, Vector3 actual, float allowedDelta = 0.000001f) {
+            var distance = (expected - actual).Length();
+            Assert.True(distance < allowedDelta, $"Expected {expected} but was {actual} (distance={distance}>{allowedDelta})");
+        }
+
+        private void Assert_AlmostEqual(Quaternion expected, Quaternion actual, double allowedDelta = 0.1) {
+            var angle = expected.GetRotationDeltaInDegreeTo(actual);
+            Assert.True(angle < allowedDelta, $"Expected {expected} but was {actual} (angle={angle}>{allowedDelta})");
+        }
+
+        private void Assert_AlmostEqual(Matrix4x4 expected, Matrix4x4 actual, float allowedDelta = 0.000001f) {
+            // Decompose the matrices into their components and compare them:
+            expected.Decompose(out var scaleExp, out var rotExp, out var posExp);
+            actual.Decompose(out var scaleActual, out var rotActual, out var posActual);
+            Assert_AlmostEqual(scaleExp, scaleActual, allowedDelta);
+            Assert_AlmostEqual(rotExp, rotActual, allowedDelta);
+            Assert_AlmostEqual(posExp, posActual, allowedDelta);
         }
 
         private abstract class Component : IComponentData {
@@ -380,24 +434,18 @@ namespace com.csutil.tests.model.esc {
     }
 
     public class Entity : IEntityData {
-
         public string Id { get; set; } = "" + GuidV2.NewGuid();
         public string Name { get; set; }
         public string TemplateId { get; set; }
         public Matrix4x4? LocalPose { get; set; }
         public IReadOnlyDictionary<string, IComponentData> Components { get; set; }
         public bool IsActive { get; set; } = true;
-
         public string ParentId { get; set; }
-
         public IReadOnlyList<string> ChildrenIds => MutablehildrenIds;
         [JsonIgnore] // Dont include the children ids two times
         public List<string> MutablehildrenIds { get; } = new List<string>();
-
         public string GetId() { return Id; }
-
         public override string ToString() { return $"{Name} ({Id})"; }
-
     }
 
     public static class EntityExtensions {
