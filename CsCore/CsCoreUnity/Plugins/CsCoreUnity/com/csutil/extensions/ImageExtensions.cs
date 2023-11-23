@@ -121,6 +121,14 @@ namespace com.csutil {
             }
             finally { RenderTexture.ReleaseTemporary(tempRenderTex); }
         }
+        
+        public static void SetSpriteRendererWidthToFitTextureAspectRatio(this SpriteRenderer self) {
+            var sprite = self.sprite;
+            var aspectRatio = sprite.textureRect.width / sprite.textureRect.height;
+            var correctedSizeX = aspectRatio * self.size.y;
+            self.size = new Vector2(correctedSizeX, self.size.y); 
+        }
+        
     }
 
 }
