@@ -95,6 +95,9 @@ namespace com.csutil.model.ecs {
 
         private void onCompAdded(IEntity<T> iEntity, KeyValuePair<string, IComponentData> added, GameObject targetParentGo) {
             var createdComponent = AddComponentTo(targetParentGo, added.Value);
+            if (createdComponent == null) {
+                throw new NullReferenceException($"AddComponentTo returned null for component={added.Value} and targetParentGo={targetParentGo}");
+            }
             _componentViews.Add(added.Key, createdComponent);
             createdComponent.OnUpdateUnityComponent(iEntity, default, added.Value);
         }
