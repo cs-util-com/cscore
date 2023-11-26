@@ -127,6 +127,8 @@ namespace com.csutil {
             var aspectRatio = sprite.textureRect.width / sprite.textureRect.height;
             var correctedSizeX = aspectRatio * self.size.y;
             self.size = new Vector2(correctedSizeX, self.size.y); 
+            var boxCollider = self.GetComponent<BoxCollider>();
+            if (boxCollider != null) { boxCollider.size = self.size; }
         }
         
     }
