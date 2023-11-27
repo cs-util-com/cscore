@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -12,9 +13,10 @@ namespace com.csutil.model.ecs {
 
         private Dictionary<string, GameObject> _entityViews = new Dictionary<string, GameObject>();
         private Dictionary<string, IComponentPresenter<T>> _componentViews = new Dictionary<string, IComponentPresenter<T>>();
+        public IReadOnlyDictionary<string, GameObject> EntityViews => _entityViews;
+        public IReadOnlyDictionary<string, IComponentPresenter<T>> ComponentViews => _componentViews;
 
-        public Task OnLoad(EntityComponentSystem<T> model) {
-
+        public virtual Task OnLoad(EntityComponentSystem<T> model) {
             var entitiesInRoot = model.Entities.Values.Filter(x => x.ParentId == null);
             AddViewsForEntityModelsRecursively(entitiesInRoot);
             model.OnIEntityUpdated += OnEntityUpdated;
