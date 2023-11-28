@@ -52,7 +52,7 @@ namespace com.csutil.model.ecs {
 
     }
 
-    public struct Pose {
+    public struct Pose3d {
 
         public const double radToDegree = 180f / Math.PI;
         public const double degreeToRad = Math.PI / 180f;
@@ -61,7 +61,7 @@ namespace com.csutil.model.ecs {
         public readonly Quaternion rotation;
         public readonly Vector3 scale;
 
-        public Pose(Vector3 position, Quaternion rotation, Vector3 scale) {
+        public Pose3d(Vector3 position, Quaternion rotation, Vector3 scale) {
             this.position = position;
             this.rotation = rotation;
             this.scale = scale;
@@ -80,24 +80,24 @@ namespace com.csutil.model.ecs {
             return Matrix4x4Extensions.Compose(position, rotation, scale);
         }
 
-        public static Pose NewPosition(Vector3 position) {
-            return new Pose(position, Quaternion.Identity, Vector3.One);
+        public static Pose3d NewPosition(Vector3 position) {
+            return new Pose3d(position, Quaternion.Identity, Vector3.One);
         }
 
-        public static Pose operator +(Pose pose, Vector3 positionToAdd) {
-            return new Pose(pose.position + positionToAdd, pose.rotation, pose.scale);
+        public static Pose3d operator +(Pose3d pose, Vector3 positionToAdd) {
+            return new Pose3d(pose.position + positionToAdd, pose.rotation, pose.scale);
         }
 
-        public static Pose operator *(Pose pose, Vector3 scaleToMultiply) {
-            return new Pose(pose.position, pose.rotation, pose.scale * scaleToMultiply);
+        public static Pose3d operator *(Pose3d pose, Vector3 scaleToMultiply) {
+            return new Pose3d(pose.position, pose.rotation, pose.scale * scaleToMultiply);
         }
 
-        public static Pose operator *(Pose pose, float scaleToMultiply) {
-            return new Pose(pose.position, pose.rotation, pose.scale * scaleToMultiply);
+        public static Pose3d operator *(Pose3d pose, float scaleToMultiply) {
+            return new Pose3d(pose.position, pose.rotation, pose.scale * scaleToMultiply);
         }
 
-        public static Pose operator *(Quaternion rotationToAdd, Pose pose) {
-            return new Pose(pose.position, rotationToAdd * pose.rotation, pose.scale);
+        public static Pose3d operator *(Quaternion rotationToAdd, Pose3d pose) {
+            return new Pose3d(pose.position, rotationToAdd * pose.rotation, pose.scale);
         }
 
         public Matrix4x4 ToMatrix4x4() { return NewMatrix(position, rotation, scale); }

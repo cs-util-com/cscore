@@ -177,23 +177,23 @@ namespace com.csutil.tests.model.esc {
             var ecs = new EntityComponentSystem<Entity>(null, isModelImmutable: false);
 
             var e1 = ecs.Add(new Entity() {
-                LocalPose = Pose.NewMatrix(new Vector3(0, 1, 0))
+                LocalPose = Pose3d.NewMatrix(new Vector3(0, 1, 0))
             });
 
             var e2 = e1.AddChild(new Entity() {
-                LocalPose = Pose.NewMatrix(new Vector3(0, 1, 0), 90)
+                LocalPose = Pose3d.NewMatrix(new Vector3(0, 1, 0), 90)
             });
 
             var e3 = e2.AddChild(new Entity() {
-                LocalPose = Pose.NewMatrix(new Vector3(0, 0, 2), 0, 2)
+                LocalPose = Pose3d.NewMatrix(new Vector3(0, 0, 2), 0, 2)
             });
 
             var e4 = e3.AddChild(new Entity() {
-                LocalPose = Pose.NewMatrix(new Vector3(0, 0, -1), -90)
+                LocalPose = Pose3d.NewMatrix(new Vector3(0, 0, -1), -90)
             });
 
             var e5 = e4.AddChild(new Entity() {
-                LocalPose = Pose.NewMatrix(new Vector3(0, -1, 0), 0, 0.5f)
+                LocalPose = Pose3d.NewMatrix(new Vector3(0, -1, 0), 0, 0.5f)
             });
 
             var pose = e5.GlobalPose();
@@ -207,7 +207,7 @@ namespace com.csutil.tests.model.esc {
         public void TestPoseOperators() {
 
             var poseTranslation = new Vector3(5, 10, 15);
-            Matrix4x4 matrix = Pose.NewMatrix(poseTranslation, 180);
+            Matrix4x4 matrix = Pose3d.NewMatrix(poseTranslation, 180);
             var pose = matrix.ToPose();
             Assert_AlmostEqual(matrix, pose.ToMatrix4x4());
             Assert.Equal(poseTranslation, pose.position);
@@ -354,11 +354,11 @@ namespace com.csutil.tests.model.esc {
                 // All created entities are added to the scene graph and persisted to disk
                 var scene = ecs.Add(new Entity() { Name = "Scene" });
                 var enemy1 = scene.AddChild(baseEnemy.CreateVariant());
-                enemy1.Data.LocalPose = Pose.NewMatrix(new Vector3(1, 0, 0));
+                enemy1.Data.LocalPose = Pose3d.NewMatrix(new Vector3(1, 0, 0));
                 var enemy2 = scene.AddChild(bossEnemy.CreateVariant());
-                enemy2.Data.LocalPose = Pose.NewMatrix(new Vector3(0, 0, 1));
+                enemy2.Data.LocalPose = Pose3d.NewMatrix(new Vector3(0, 0, 1));
                 var enemy3 = scene.AddChild(mageEnemy.CreateVariant());
-                enemy3.Data.LocalPose = Pose.NewMatrix(new Vector3(-1, 0, 0));
+                enemy3.Data.LocalPose = Pose3d.NewMatrix(new Vector3(-1, 0, 0));
 
                 scene.SaveChanges();
 

@@ -119,23 +119,23 @@ namespace com.csutil.model.ecs {
             return localPose * parent.GlobalPoseMatrix(allEntities);
         }
 
-        public static Pose GlobalPose<T>(this IEntity<T> self) where T : IEntityData {
+        public static Pose3d GlobalPose<T>(this IEntity<T> self) where T : IEntityData {
             return self.GlobalPoseMatrix().ToPose();
         }
 
-        public static Pose ToPose(this Matrix4x4 matrix) {
+        public static Pose3d ToPose(this Matrix4x4 matrix) {
             if (matrix == Matrix4x4.Identity) {
-                return new Pose(Vector3.Zero, Quaternion.Identity, Vector3.One);
+                return new Pose3d(Vector3.Zero, Quaternion.Identity, Vector3.One);
             }
             matrix.Decompose(out Vector3 scale, out Quaternion rotation, out Vector3 position);
-            return new Pose(position, rotation, scale);
+            return new Pose3d(position, rotation, scale);
         }
         
-        public static Pose GlobalPose<T>(this T self, IReadOnlyDictionary<string, T> allEntities) where T : IEntityData {
+        public static Pose3d GlobalPose<T>(this T self, IReadOnlyDictionary<string, T> allEntities) where T : IEntityData {
             return self.GlobalPoseMatrix(allEntities).ToPose();
         }
 
-        public static Pose LocalPose<T>(this IEntity<T> self) where T : IEntityData {
+        public static Pose3d LocalPose<T>(this IEntity<T> self) where T : IEntityData {
             var localPose = self.LocalPose;
             if (!localPose.HasValue) { return Matrix4x4.Identity.ToPose(); }
             return localPose.Value.ToPose();

@@ -124,7 +124,7 @@ namespace com.csutil.model.ecs {
 
     public static class PoseExtensionsForUnity {
 
-        public static void ApplyTo(this Pose self, Transform goTransform) {
+        public static void ApplyTo(this Pose3d self, Transform goTransform) {
             goTransform.SetLocalPositionAndRotation(self.position.ToUnityVec(), self.rotation.ToUnityRot());
             goTransform.localScale = self.scale.ToUnityVec();
         }
