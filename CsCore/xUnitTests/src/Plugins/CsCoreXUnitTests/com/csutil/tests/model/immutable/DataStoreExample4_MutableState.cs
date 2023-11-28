@@ -15,9 +15,9 @@ namespace com.csutil.tests.model.immutable {
     /// all parent objects as changed as well. This example shows how this can be done following the 
     /// typical Reducer patterns also used very similarly with immutable data models. 
     /// </summary>
-    public class DataStoreExample4 {
+    public class DataStoreExample4_MutableState {
 
-        public DataStoreExample4(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
+        public DataStoreExample4_MutableState(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
         [Fact]
         public void ExampleUsage1() {

@@ -117,7 +117,8 @@ namespace com.csutil {
             try {
                 if (EnvironmentV2.isWebGL) { return "" + self; }
                 var method = self.GetMethod(); // analyse stack trace for class name:
-                var methodString = method.ReflectedType.Name + "." + method.Name;
+                if (method == null) { return "" + self; }
+                var methodString = (method.ReflectedType?.Name ?? "GLOBAL ") + "." + method.Name;
                 var paramsString = includeParams ? method.GetParameters().ToStringV2(x => "" + x, "", "") : "..";
                 return methodString + "(" + paramsString + ")";
             } catch (Exception e) { Console.WriteLine("" + e); return ""; }

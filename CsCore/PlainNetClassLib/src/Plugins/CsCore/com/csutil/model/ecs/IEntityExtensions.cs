@@ -15,7 +15,7 @@ namespace com.csutil.model.ecs {
 
         public static IEntity<T> GetParent<T>(this IEntity<T> self) where T : IEntityData {
             if (self.ParentId == null) { return default; }
-            return self.Ecs.AllEntities[self.ParentId];
+            return self.Ecs.Entities[self.ParentId];
         }
 
         public static T GetParent<T>(this T self, IReadOnlyDictionary<string, T> allEntities) where T : IEntityData {
@@ -71,14 +71,15 @@ namespace com.csutil.model.ecs {
                 self.RemoveFromParent(c => c.Data, removeChildIdFromParent);
             }
             self.DestroyAllChildrenRecursively(removeChildIdFromParent);
-            self.Ecs.Destroy(self.Id);
+            self.Ecs.Destroy(self);
             return true;
         }
 
         private static void DestroyAllChildrenRecursively<T>(this IEntity<T> self, Func<IEntity<T>, string, T> removeChildIdFromParent) where T : IEntityData {
-            var children = self.GetChildren().ToList();
+            var children = self.GetChildren();
             if (children != null) {
-                foreach (var child in children) {
+                var childrenToDelete = children.ToList();
+                foreach (var child in childrenToDelete) {
                     child.Destroy(removeChildIdFromParent);
                 }
             }
@@ -137,7 +138,7 @@ namespace com.csutil.model.ecs {
 
         public static void SaveChanges<T>(this IEntity<T> self) where T : IEntityData {
             var fullSubtree = self.GetChildrenTreeBreadthFirst();
-            foreach (var e in fullSubtree) { e.Ecs.SaveChanges(e.Data); }
+            foreach (var e in fullSubtree) { e.Ecs.Update(e.Data); }
         }
 
         /// <summary>
@@ -177,20 +178,44 @@ namespace com.csutil.model.ecs {
     public static class EcsExtensions {
 
         public static IEnumerable<IEntity<T>> FindEntitiesWithName<T>(this EntityComponentSystem<T> ecs, string name) where T : IEntityData {
-            return ecs.AllEntities.Values.Filter(x => x.Name == name);
+            return ecs.Entities.Values.Filter(x => x.Name == name);
         }
 
     }
 
     public static class IEntityDataExtensions {
 
-        public static V GetComponent<V>(this IEntityData self) where V : class {
+        public static V GetComponent<V>(this IEntityData self) where V : IComponentData {
+            if (self is IDisposableV2 d && !d.IsAlive()) {
+                throw new InvalidOperationException($"The entity {self.Id} is already disposed");
+            }
             AssertOnlySingleCompOfType<V>(self);
-            return self.Components.Values.Single(c => c is V) as V;
+            // Take a shortcut for the common case where the most requested component has the same id as the entity:
+            var comps = self.Components;
+            if (comps.TryGetValue(self.Id, out var c) && c is V v) { return v; }
+            // Else go through the list of all components:
+            return (V)comps.Values.SingleOrDefault(comp => comp is V);
+        }
+
+        public static bool TryGetComponent<V>(this IEntityData self, out V comp) where V : IComponentData {
+            var comps = self.Components;
+            // Take a shortcut for the common case where the most requested component has the same id as the entity:
+            if (comps.TryGetValue(self.Id, out var comp2) && comp2 is V v) {
+                comp = v;
+                return true;
+            }
+            var compOrNull = comps.Values.SingleOrDefault(c => c is V);
+            if (compOrNull != null) {
+                comp = (V)compOrNull;
+                return true;
+            }
+            comp = default;
+            return false;
         }
 
         [Conditional("DEBUG")]
-        private static void AssertOnlySingleCompOfType<V>(IEntityData self) where V : class {
+        private static void AssertOnlySingleCompOfType<V>(IEntityData self) where V : IComponentData {
+            self.ThrowErrorIfNull("Entity self");
             var compTypeCount = self.Components.Values.Count(c => c is V);
             if (compTypeCount > 1) {
                 throw new ArgumentException($"The entity {self.Id} has {compTypeCount} components of type {typeof(V).Name} but only one is allowed");

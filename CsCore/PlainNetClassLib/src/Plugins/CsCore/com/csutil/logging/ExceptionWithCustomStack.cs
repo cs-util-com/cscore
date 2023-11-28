@@ -16,7 +16,12 @@ namespace com.csutil {
         public Error(string message) : base(message) { }
         public Error(string message, Exception innerException) : base(message, innerException) { }
 
-        public override string StackTrace => stack.ToString();
+        public override string StackTrace {
+            get {
+                if (stack != null) { return stack.ToString(); }
+                return base.StackTrace;
+            }
+        }
 
     }
 

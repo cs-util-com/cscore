@@ -1,14 +1,16 @@
-﻿using com.csutil.model.immutable;
+﻿using System;
+using com.csutil.model.immutable;
 using Xunit;
 
 namespace com.csutil.tests.model.immutable {
 
-    public class DataStoreExample6 {
+    [Obsolete("Only kept for backwards compatibility, See DataStoreExample7_StoreSlicing how to use a normal DataStore with a SlicedModel instead")]
+    public class DataStoreExample6_CompositeStores {
 
-        public DataStoreExample6(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
+        public DataStoreExample6_CompositeStores(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
         [Fact]
-        public void ExampleUsage1() {
+        public void ExampleUsage1_MultipleStores() {
 
             var m1 = new Model1() { a = "a" };
             var m2 = new Model2() { b = "b" };
@@ -53,7 +55,7 @@ namespace com.csutil.tests.model.immutable {
         }
 
         [Fact]
-        public void ExampleUsage2() {
+        public void ExampleUsage2_MultipleStores() {
 
             // Normally using the composite store pattern only requires to
             // combine 2 stores but more is possible as this example here shows:

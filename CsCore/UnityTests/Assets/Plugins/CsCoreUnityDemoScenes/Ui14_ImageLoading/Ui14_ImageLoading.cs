@@ -4,6 +4,7 @@ using com.csutil.model;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using com.csutil.ui;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
@@ -13,7 +14,7 @@ namespace com.csutil.tests {
 
     public class Ui14_ImageLoading : UnitTestMono {
 
-        public string testUrl = "https://github.com/cs-util-com/cscore/raw/master/CsCore/UnityTests/Assets/TestApplicationData/testImage.png";
+        public string testUrl = "https://github.com/cs-util-com/cscore/raw/master/CsCore/assets/logo-cscore1024x1024_2.png";
 
         private Dictionary<string, Link> links;
 
@@ -25,21 +26,21 @@ namespace com.csutil.tests {
 
             TestTexture2dVsRawByteLoadingSpeeds();
 
-            links.Get<Button>("ButtonLoadImage3").SetOnClickAction(async delegate {
-                var t = Log.MethodEntered("ButtonLoadImage3");
+            links.Get<Button>("ButtonLoadImage_LoadFromUrl").SetOnClickAction(async delegate {
+                var t = Log.MethodEntered("ButtonLoadImage_LoadFromUrl");
                 Texture2D texture2d = await links.Get<Image>("Image2").LoadFromUrl(GetUrl());
                 Log.MethodDone(t);
                 Toast.Show($"The loaded texture has the size: {texture2d.width}x{texture2d.height} pixels");
             });
 
-            links.Get<Button>("ButtonLoadImage4").SetOnClickAction(async delegate {
-                DirectoryEntry targetDir = EnvironmentV2.instance.GetOrAddTempFolder("Ui14_ImageLoading");
+            links.Get<Button>("ButtonLoadImage_LoadAndPersistTo").SetOnClickAction(async delegate {
+                DirectoryEntry targetDir = EnvironmentV2.instance.GetOrAddTempFolder("Ui14_ImageLoading_LoadAndPersistTo");
 
                 var imgRefFile = targetDir.GetChild("imgRef.txt");
                 FileRef imgRef = imgRefFile.Exists ? imgRefFile.LoadAs<FileRef>() : null;
                 if (imgRef == null) { imgRef = new FileRef() { url = testUrl }; }
 
-                var t = Log.MethodEntered("LoadAndPersistTo");
+                var t = Log.MethodEntered("LoadAndPersistTo with imgRef=" + imgRef);
                 await links.Get<Image>("Image2").LoadAndPersistTo(imgRef, targetDir, 64);
                 Log.MethodDone(t);
 
@@ -63,13 +64,26 @@ namespace com.csutil.tests {
             });
 
             links.Get<Button>("ButtonLoadImage2").SetOnClickAction(delegate {
-                var t = Log.MethodEntered("ButtonLoadImage2");
                 StartCoroutine(DownloadBytes(new Uri(GetUrl()), new Response<byte[]>().WithResultCallback(async downloadedBytes => {
+                    var t = Log.MethodEntered("ButtonLoadImage2");
                     Texture2D texture2d = await ImageLoaderUnity.ToTexture2D(downloadedBytes);
                     img.sprite = texture2d.ToSprite();
                     Log.MethodDone(t);
                 })));
             });
+
+            links.Get<Button>("ButtonLoadImage3").SetOnClickAction(delegate {
+                StartCoroutine(DownloadBytes(new Uri(GetUrl()), new Response<byte[]>().WithResultCallback(downloadedBytes => {
+                    var t = Log.MethodEntered("ButtonLoadImage3");
+                    if (ImageLoaderUnity.TryLoadTexture2DFast(downloadedBytes, out var texture2d)) {
+                        img.sprite = texture2d.ToSprite();
+                        Log.MethodDone(t);
+                    } else {
+                        Dialog.ShowErrorDialog("Could not load image", "TryLoadTexture2D returned false", "Ok");
+                    }
+                })));
+            });
+
         }
 
         /// <summary> Get URL string from the user input field in the UI </summary>
@@ -89,6 +103,9 @@ namespace com.csutil.tests {
             public string url { get; set; }
             public Dictionary<string, object> checksums { get; set; }
             public string mimeType { get; set; }
+
+            public override string ToString() { return $"FileRef(url={url}, dir={dir}, fileName={fileName})"; }
+
         }
 
     }

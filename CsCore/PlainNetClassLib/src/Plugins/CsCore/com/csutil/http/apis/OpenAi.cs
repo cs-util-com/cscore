@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using com.csutil.model.jsonschema;
 using Newtonsoft.Json;
 
 namespace com.csutil.http.apis {
@@ -15,10 +16,12 @@ namespace com.csutil.http.apis {
 
         /// <summary> See also https://platform.openai.com/docs/guides/chat/chat-vs-completions : "Because gpt-3.5-turbo performs at a
         /// similar capability to text-davinci-003 but at 10% the price per token, we recommend gpt-3.5-turbo for most use cases." </summary>
+        [Obsolete("This API is deprecated, use .ChatGpt(..) instead")]
         public Task<Text.CompletionsResponse> Complete(string prompt) {
             return Complete(new Text.CompletionsRequest() { prompt = prompt });
         }
 
+        [Obsolete("This API is deprecated, use .ChatGpt(..) instead")]
         public Task<Text.CompletionsResponse> Complete(Text.CompletionsRequest requestParams) {
             var request = new Uri("https://api.openai.com/v1/completions").SendPOST();
             return request.WithAuthorization(apiKey).WithJsonContent(requestParams).GetResult<Text.CompletionsResponse>();
@@ -38,7 +41,8 @@ namespace com.csutil.http.apis {
 
         public class Text {
 
-            /// <summary> See https://beta.openai.com/docs/api-reference/completions </summary>
+            /// <summary> See https://platform.openai.com/docs/api-reference/completions </summary>
+            [Obsolete("This API is deprecated, use .ChatGpt(..) instead")]
             public class CompletionsRequest {
 
                 /// <summary> The prompt(s) to generate completions for, encoded as a string, array of strings, array of tokens, or array of token arrays.
@@ -130,10 +134,27 @@ namespace com.csutil.http.apis {
 
         public class Image {
 
+            /// <summary> See https://platform.openai.com/docs/api-reference/images/create </summary>
             public class Request {
+
+                /// <summary> See https://platform.openai.com/docs/api-reference/images/create#images-create-prompt </summary>
                 public string prompt { get; set; }
+
+                /// <summary> See https://platform.openai.com/docs/api-reference/images/create#images-create-model </summary>
+                public string model { get; set; } = "dall-e-3"; //"dall-e-2";
+
+                /// <summary> See https://platform.openai.com/docs/api-reference/images/create#images-create-n </summary>
                 public int n { get; set; } = 1;
+
+                /// <summary> See https://platform.openai.com/docs/api-reference/images/create#images-create-size </summary>
                 public string size { get; set; } = "1024x1024";
+
+                /// <summary> See https://platform.openai.com/docs/api-reference/images/create#images-create-quality </summary>
+                public string quality { get; set; } = "standard";
+
+                /// <summary> See https://platform.openai.com/docs/api-reference/images/create#images-create-style </summary>
+                public string style { get; set; } = "vivid";
+
             }
 
             public class Response {
@@ -175,13 +196,16 @@ namespace com.csutil.http.apis {
         public class Request {
 
             /// <summary> See https://beta.openai.com/docs/models/overview </summary>
-            public string model = "gpt-3.5-turbo";
+            public string model = "gpt-3.5-turbo-1106";
 
             /// <summary> The maximum number of tokens to generate in the completion.
             /// The token count of your prompt plus max_tokens cannot exceed the model's context length.
             /// Most models have a context length of 2048 tokens (except for the newest models, which support 4096). </summary>
             public int max_tokens { get; set; }
             public List<Line> messages { get; set; }
+
+            /// <summary> typically null, but if the AI e.g. should respond only with json it should be ChatGpt.Request.ResponseFormat.json </summary>
+            public ResponseFormat response_format { get; set; }
 
             public Request(List<Line> messages, int max_tokens = 4096) {
                 var tokenCountForMessages = JsonWriter.GetWriter(this).Write(messages).Length;
@@ -190,6 +214,12 @@ namespace com.csutil.http.apis {
                 }
                 this.messages = messages;
                 this.max_tokens = max_tokens;
+            }
+
+            public class ResponseFormat {
+                /// <summary> See https://platform.openai.com/docs/guides/text-generation/json-mode </summary>
+                public static ResponseFormat json = new ResponseFormat() { type = "json_object" };
+                public string type { get; set; }
             }
 
         }
@@ -215,6 +245,37 @@ namespace com.csutil.http.apis {
                 public int total_tokens { get; set; }
             }
 
+        }
+
+    }
+
+    public static class ChatGptExtensions {
+
+        public static void AddUserLineWithJsonResultStructure<T>(this ICollection<ChatGpt.Line> self, string userMessage, T exampleResponse) {
+            self.Add(new ChatGpt.Line(ChatGpt.Role.user, content: userMessage));
+            self.Add(new ChatGpt.Line(ChatGpt.Role.system, content: CreateJsonInstructions(exampleResponse)));
+        }
+
+        public static string CreateJsonInstructions<T>(T exampleResponse) {
+            var schemaGenerator = new ModelToJsonSchema(nullValueHandling: Newtonsoft.Json.NullValueHandling.Ignore);
+            var className = typeof(T).Name;
+            JsonSchema schema = schemaGenerator.ToJsonSchema(className, exampleResponse);
+            var schemaJson = JsonWriter.GetWriter(exampleResponse).Write(schema);
+            var exampleJson = JsonWriter.GetWriter(exampleResponse).Write(exampleResponse);
+            var jsonSchemaInfos = " This is the json schema that describes the format you have to use for your json response: " + schemaJson;
+            var exampleJsonInfos = " And for that schema, this would an example of a valid response: " + exampleJson;
+            return jsonSchemaInfos + exampleJsonInfos;
+        }
+
+        public static T ParseNewLineContentAsJson<T>(this ChatGpt.Line newLine) {
+            var responseText = newLine.content;
+            if (responseText.StartsWith("```json\n")) {
+                responseText = responseText.Replace("```json\n", "");
+            }
+            if (responseText.EndsWith("\n```")) {
+                responseText = responseText.Replace("\n```", "");
+            }
+            return JsonReader.GetReader().Read<T>(responseText);
         }
 
     }

@@ -9,7 +9,7 @@ namespace com.csutil.algorithms {
 
         /// <summary> Returns a list of (randomly) sampled elements (outliers filtered out from this list). See https://en.wikipedia.org/wiki/Random_sample_consensus#Algorithm </summary>
         /// <param name="elems"> All elements </param>
-        /// <param name="d"> Number of close data points required to assert that a model fits well to data </param>
+        /// <param name="d"> Number of close data points required to assert that a model fits well to data, e.g. 10% of the total number of elements </param>
         /// <param name="createModel"> Has to create a model based on the set of provided elements and calculate its total error </param>
         /// <param name="isInlier"> Will be called with an element and has to return true if the element is in the error margin of the current model </param>
         public static M RunRansac<E, M>(this Random rnd, IEnumerable<E> e, int d, int minSampleSize, int iterations, Func<IEnumerable<E>, M> createModel, Func<M, E, bool> isInlier) where M : IModel<E> {

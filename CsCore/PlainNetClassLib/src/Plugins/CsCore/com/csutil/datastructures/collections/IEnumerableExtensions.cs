@@ -72,6 +72,10 @@ namespace com.csutil {
             return keys.Zip(values, (key, value) => new KeyValuePair<K, V>(key, value)).ToDictionary(p => p.Key, p => p.Value);
         }
 
+        public static Dictionary<K, W> MapValues<K, V, W>(this IDictionary<K, V> self, Func<V, W> mapFunc) {
+            return self.ToDictionary(x => x.Key, x => mapFunc(x.Value));
+        }
+
         public static int IndexOf<T>(this IEnumerable<T> self, T elem) { return self.IndexOf(x => Equals(x, elem)); }
 
         public static int IndexOf<T>(this IEnumerable<T> self, Func<T, bool> predicate) {

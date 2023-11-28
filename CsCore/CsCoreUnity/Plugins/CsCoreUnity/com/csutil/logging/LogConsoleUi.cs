@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -72,22 +73,26 @@ namespace com.csutil.logging {
         private const string LINE_BREAK = "\n";
 
         public void HandleLogMessageReceivedThreaded(string condition, string stacktrace, LogType type) {
-            if (!ApplicationV2.isPlaying) { return; }
-            MainThread.Invoke(() => {
-                switch (type) {
-                    case LogType.Log:
-                        PrintDebugMessage(condition + LINE_BREAK + stacktrace);
-                        break;
-                    case LogType.Warning:
-                        PrintWarningMessage(condition + LINE_BREAK + stacktrace);
-                        break;
-                    case LogType.Assert:
-                    case LogType.Error:
-                    case LogType.Exception:
-                        PrintErrorMessage(condition + LINE_BREAK + stacktrace);
-                        break;
-                }
-            });
+            TaskV2.TryWithExponentialBackoff(async () => {
+                if (!ApplicationV2.isPlaying) { return; }
+                // Wait for the main thread to be ready to use:
+                while (!MainThread.IsReadyToUse) { await TaskV2.Delay(5); }
+                MainThread.Invoke(() => {
+                    switch (type) {
+                        case LogType.Log:
+                            PrintDebugMessage(condition + LINE_BREAK + stacktrace);
+                            break;
+                        case LogType.Warning:
+                            PrintWarningMessage(condition + LINE_BREAK + stacktrace);
+                            break;
+                        case LogType.Assert:
+                        case LogType.Error:
+                        case LogType.Exception:
+                            PrintErrorMessage(condition + LINE_BREAK + stacktrace);
+                            break;
+                    }
+                });
+            }, maxNrOfRetries: 1, initialExponent: 9).LogOnError();
         }
 
     }
