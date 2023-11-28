@@ -5,11 +5,13 @@ using com.csutil.http.apis;
 using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
+using System.Net;
+using System.Text;
 namespace SPPTest;
 
 public class UnitTest1
 {
-    string openAiKey = File.ReadAllText("/Users/devicedev/Documents/RWTH/5 Semester/Holobuilder Lab/cscore/TestProject1/env.txt");
+    string openAiKey = File.ReadAllText(@"C:\Users\nicol\Desktop\VSCSem3\cscore\TestProject1\env.txt");
 
     // [Fact]
     // public async Task ExampleUsage3_ChatGpt()
@@ -35,17 +37,57 @@ public class UnitTest1
     [Fact]
     public async Task ExampleTTS()
     {
+
+        string apiUrl = "https://api.openai.com/v1/audio/speech";
+        string token = openAiKey;
+
+        // Create HttpClient
+        using (HttpClient client = new HttpClient())
+        {
+            // Set the authorization header with the Bearer token
+            client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
+
+            // Define the JSON payload
+            string jsonPayload = "{\"model\": \"tts-1\", \"voice\": \"alloy\",\"input\": \"please work\"}";
+
+            // Create the content for the request
+            StringContent content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+
+            // Send the POST request
+            HttpResponseMessage response = await client.PostAsync(apiUrl, content);
+
+            // Check the response status
+            if (response.IsSuccessStatusCode)
+            {
+                // Read and display the response content
+                byte[] responseContent = await response.Content.ReadAsByteArrayAsync();
+                string outputPath = @"C:\Users\nicol\Desktop\VSCSem3\cscore\TestProject1\response.mp3";
+                File.WriteAllBytes(outputPath, responseContent);
+                Console.WriteLine($"Success! Response: {responseContent}");
+
+            }
+            else
+            {
+                Console.WriteLine($"Error! Status Code: {response.StatusCode}");
+            }
+        }
+
+
+
+
+
         // call speech with await
-        var response = await Speech("Hello World");
+        //var response = await Speech("Hello World");
     }
-    public Task<OpenAi.Text.CompletionsResponse> Speech(string input)
+    public Task<HttpWebResponse> Speech(string input)
     {
         return CreateSpeechRequest(new MyTTSRequest(input));
     }
-    public Task<OpenAi.Text.CompletionsResponse> CreateSpeechRequest(MyTTSRequest requestObject)
+    public Task<HttpWebResponse> CreateSpeechRequest(MyTTSRequest requestObject)
     {
         var request = new Uri("https://api.openai.com/v1/audio/speech").SendPOST();
-        return request.WithAuthorization(openAiKey).WithJsonContent(requestObject).GetResult<OpenAi.Text.CompletionsResponse>();
+        var aa = request.WithAuthorization(openAiKey).WithJsonContent(requestObject);
+        return aa.GetResult<HttpWebResponse>();
     }
     // create a class with fields model, input and voice
     public class MyTTSRequest
