@@ -42,3 +42,4 @@ msbuild.log
 msbuild.err
 msbuild.wrn
 env.txt
+*/*.mp3
