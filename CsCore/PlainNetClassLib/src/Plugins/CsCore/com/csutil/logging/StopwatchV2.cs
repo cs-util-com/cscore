@@ -13,6 +13,8 @@ namespace com.csutil {
         public string methodName;
         public Action onDispose;
         private long lastLogStep = 0;
+        
+        public bool doMemoryLogging = false;
         public bool forceFullMemoryCollection = ShouldCaptureFullMemory();
 
         private static bool ShouldCaptureFullMemory() {
@@ -43,6 +45,7 @@ namespace com.csutil {
 
         [Conditional("DEBUG"), Conditional("ENFORCE_FULL_LOGGING")]
         private void CaptureMemoryAtStart() {
+            if (!doMemoryLogging) { return; }
             if (forceFullMemoryCollection) {
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
@@ -63,6 +66,7 @@ namespace com.csutil {
 
         [Conditional("DEBUG"), Conditional("ENFORCE_FULL_LOGGING")]
         private void CaptureMemoryAtStop() {
+            if (!doMemoryLogging) { return; }
             managedMemoryAtStop = GC.GetTotalMemory(forceFullMemoryCollection);
             memoryAtStop = GetCurrentProcessPrivateMemorySize64();
         }
