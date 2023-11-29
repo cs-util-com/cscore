@@ -1,5 +1,4 @@
-using System.Text;
-using Newtonsoft.Json;
+using com.csutil;
 namespace SPPTest;
 
 public class UnitTest1
@@ -11,51 +10,52 @@ public class UnitTest1
     static string audioFolderPath = Path.GetFullPath(Path.Combine(currentDirectory, @"../../../audio/"));
     static string openAiKey = File.ReadAllText(Path.GetFullPath(Path.Combine(currentDirectory, @"../../../env.txt")));
 
+
     [Fact]
     public async Task ExampleTTS()
     {
-        string input = "Hello World";
+        HttpResponseMessage response = await TTS(new Audio.TTSRequest() { input = "hello world" });
 
-        using (HttpClient client = new HttpClient())
+        string outputPath = audioFolderPath + "speech.mp3";
+        File.WriteAllBytes(outputPath, await response.Content.ReadAsByteArrayAsync());
+        //TODO asserts
+    }
+
+    public async Task ExampleSTT()
+    {
+        //TODO
+    }
+
+
+    public Task<HttpResponseMessage> TTS(Audio.TTSRequest requestParam)
+    {
+        return new Uri(openAISpeechURL).SendPOST().WithAuthorization(openAiKey).WithJsonContent(requestParam).GetResult<HttpResponseMessage>();
+    }
+
+    public Task<HttpResponseMessage> STT(Audio.STTRequest requestparam)
+    {
+        //TODO
+        return null;
+    }
+    public class Audio
+    {
+        public class TTSRequest
         {
-            SetBearerToken(client, openAiKey);
-
-            HttpResponseMessage response = await MakeTTSRequest(client, input);
-            Assert.True(response.IsSuccessStatusCode);
-
-            byte[] responseContent = await response.Content.ReadAsByteArrayAsync();
-            Assert.True(responseContent.Length > 0);
-
-            string outputPath = audioFolderPath + "speech.mp3";
-
-            File.WriteAllBytes(outputPath, responseContent);
-            Assert.True(File.Exists(outputPath));
-
-            Console.WriteLine("Saved audio to " + outputPath);
-
+            public string input { get; set; }
+            public string model { get; set; } = "tts-1";
+            public string voice { get; set; } = "alloy";
+            public string response_format { get; set; } = "mp3";
+            public double speed { get; set; } = 1.0;
         }
-    }
-    void SetBearerToken(HttpClient client, string token)
-    {
-        client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
-    }
-    async Task<HttpResponseMessage> MakeTTSRequest(HttpClient client, string input)
-    {
-        MyTTSRequest ttsRequest = new MyTTSRequest(input);
-        string jsonPayload = JsonConvert.SerializeObject(ttsRequest);
-        StringContent content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
-        HttpResponseMessage response = await client.PostAsync(openAISpeechURL, content);
-        return response;
-    }
 
-    public class MyTTSRequest
-    {
-        public string model { get; set; } = "tts-1";
-        public string input { get; set; }
-        public string voice { get; set; } = "alloy";
-        public MyTTSRequest(string input)
+        public class STTRequest
         {
-            this.input = input;
+            //TODO
+        }
+
+        public class STTResponse
+        {
+            public string text { get; set; }
         }
     }
 
