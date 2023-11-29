@@ -15,10 +15,11 @@ public class UnitTest1
     public async Task ExampleTTS()
     {
         HttpResponseMessage response = await TTS(new Audio.TTSRequest() { input = "hello world" });
+        Assert.NotNull(response);
 
         string outputPath = audioFolderPath + "speech.mp3";
         File.WriteAllBytes(outputPath, await response.Content.ReadAsByteArrayAsync());
-        //TODO asserts
+        Assert.NotNull(Path.GetFileName(outputPath));
     }
 
     public async Task ExampleSTT()
