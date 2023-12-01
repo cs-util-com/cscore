@@ -8,6 +8,11 @@ namespace com.csutil.model.ecs {
 
         T Data { get; }
         EntityComponentSystem<T> Ecs { get; }
+        
+        /// <summary> Optional callback listener that informs the IEntity if its
+        /// content (the entity data) was updated. Will not fire for the initial creation of
+        /// the entity or the removal/destruction of the entity in the ecs </summary>
+        public Action<T,T>? OnUpdate { get; set; }
 
     }
 

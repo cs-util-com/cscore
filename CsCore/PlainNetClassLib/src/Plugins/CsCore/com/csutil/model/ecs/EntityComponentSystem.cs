@@ -19,6 +19,8 @@ namespace com.csutil.model.ecs {
                 Ecs = ecs;
             }
 
+            public Action<T,T>? OnUpdate { get; set; }
+            
             public string Id => Data.Id;
             public string Name => Data.Name;
             public string TemplateId => Data.TemplateId;
@@ -128,8 +130,9 @@ namespace com.csutil.model.ecs {
                 if (!TemplatesIo.HasChanges(oldEntryData, updatedEntityData)) { return; }
             }
             entity.Data = updatedEntityData;
-            // At this point in the update method it is known that the entity really changed and 
+            // At this point in the update method it is known that the entity really changed  
             OnIEntityUpdated?.Invoke(entity, UpdateType.Update, oldEntryData, updatedEntityData);
+            entity.OnUpdate?.Invoke(oldEntryData, updatedEntityData);
 
             // If the entry is a template for other entries, then all variants need to be updated:
             if (Variants.TryGetValue(updatedEntityData.Id, out var variantIds)) {
