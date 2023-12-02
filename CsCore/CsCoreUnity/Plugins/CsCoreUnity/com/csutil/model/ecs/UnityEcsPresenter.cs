@@ -88,7 +88,8 @@ namespace com.csutil.model.ecs {
             if (oldState.IsActive != newState.IsActive) {
                 go.SetActive(newState.IsActive);
             }
-            oldState.Components.CalcEntryChangesV2(newState.Components,
+            var oldComps = oldState.Components;
+            newState.Components.CalcEntryChangesToOldStateV2<IReadOnlyDictionary<string, IComponentData>, string, IComponentData>(ref oldComps,
                 added => onCompAdded(iEntity, added, targetParentGo: go),
                 updated => onCompUpdated(iEntity, oldState.Components[updated.Key], updated, targetParentGo: go),
                 deleted => onCompRemoved(iEntity, deleted, targetParentGo: go)
