@@ -123,9 +123,9 @@ namespace com.csutil.model.immutable {
                 bool stateChanged = StateCompare.WasModified(oldState, newState);
                 var newMonitor = GetMonitorFor(newState);
                 if (stateChanged || StateCompare.WasModified(oldMonitor, newMonitor)) {
-                    onChanged(newState);
                     oldState = newState;
                     oldMonitor = newMonitor;
+                    onChanged(newState);
                 }
             };
             return newListener;
