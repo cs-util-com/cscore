@@ -19,7 +19,7 @@ namespace com.csutil.model.ecs {
                 Ecs = ecs;
             }
 
-            public Action<T,T>? OnUpdate { get; set; }
+            public Action<T,T> OnUpdate { get; set; }
             
             public string Id => Data.Id;
             public string Name => Data.Name;

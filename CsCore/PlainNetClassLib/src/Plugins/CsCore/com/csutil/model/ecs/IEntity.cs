@@ -12,7 +12,7 @@ namespace com.csutil.model.ecs {
         /// <summary> Optional callback listener that informs the IEntity if its
         /// content (the entity data) was updated. Will not fire for the initial creation of
         /// the entity or the removal/destruction of the entity in the ecs </summary>
-        public Action<T,T>? OnUpdate { get; set; }
+        Action<T,T> OnUpdate { get; set; }
 
     }
 
