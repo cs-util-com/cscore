@@ -32,13 +32,20 @@ namespace com.csutil.tests.model.immutable {
             }, triggerInstantToInit: false);
 
             var carlUpdatedCounter = 0;
+            var carlsFriendUpdatedCounter = 0;
             store.AddStateChangeListenerForDictionary(state => state.users,
                 (addedUser) => {
                     // The only user added to the store (after the initial store creation) will be carlsFriend
                     Assert.Equal(carlsFriend.name, addedUser.Value.name);
                 }, (updatedUser) => {
-                    Assert.Equal(carl.id, updatedUser.Value.id); // Carl will be updated multiple times
-                    carlUpdatedCounter++;
+                    if (updatedUser.Value.id == carl.id) {
+                        carlUpdatedCounter++; // Carl will be updated multiple times
+                    } else if (updatedUser.Value.id == carlsFriend.id) {
+                        Assert.Equal(carlsFriend.name, updatedUser.Value.name);
+                        carlsFriendUpdatedCounter++;
+                    } else {
+                        throw Log.e("Unexpected user updated: " + updatedUser.Value);
+                    }
                 }, (removedUser) => {
                     throw Log.e("A user was removed from the store even though there are no remove actions");
                 });
@@ -47,23 +54,27 @@ namespace com.csutil.tests.model.immutable {
             store.Dispatch(a1);
             Assert.Equal(0, usersChangedCounter); // no change happened in the users
             Assert.Equal(0, carlUpdatedCounter);
+            Assert.Equal(0,carlsFriendUpdatedCounter);
             Assert.Equal(a1.someId, store.GetState().someUuids.Value.Single());
 
             store.Dispatch(new ActionOnUser.AddContact() { targetUser = carl.id, newContact = carlsFriend });
             Assert.Equal(1, usersChangedCounter);
             Assert.Equal(1, carlUpdatedCounter);
+            Assert.Equal(0,carlsFriendUpdatedCounter);
             Assert.Equal(carlsFriend, store.GetState().users[carlsFriend.id]);
             Assert.Contains(carlsFriend.id, store.GetState().users[carl.id].contacts);
 
             store.Dispatch(new ActionOnUser.ChangeName() { targetUser = carl.id, newName = "Karl" });
-            Assert.Equal(2, usersChangedCounter);            
+            Assert.Equal(2, usersChangedCounter);
             Assert.Equal(2, carlUpdatedCounter);
+            Assert.Equal(0,carlsFriendUpdatedCounter);
             Assert.Equal("Karl", store.GetState().users[carl.id].name);
 
 
             store.Dispatch(new ActionOnUser.ChangeAge() { targetUser = carlsFriend.id, newAge = null });
             Assert.Equal(3, usersChangedCounter);
-            Assert.Equal(3, carlUpdatedCounter);
+            Assert.Equal(2, carlUpdatedCounter);
+            Assert.Equal(1,carlsFriendUpdatedCounter);
             Assert.Null(store.GetState().users[carlsFriend.id].age);
 
             Assert.NotEqual(MyUser1.MyEnum.State2, store.GetState().users[carl.id].myEnum);
@@ -73,19 +84,22 @@ namespace com.csutil.tests.model.immutable {
             // Remove the listener from the store the next time an action is dispatched:
             keepListenerAlive = false;
             Assert.Equal(4, usersChangedCounter);
-            Assert.Equal(4, carlUpdatedCounter);
+            Assert.Equal(3, carlUpdatedCounter);
+            Assert.Equal(1,carlsFriendUpdatedCounter);
 
             store.Dispatch(new ActionOnUser.ChangeAge() { targetUser = carlsFriend.id, newAge = 22 });
             Assert.Equal(5, usersChangedCounter);
-            Assert.Equal(5, carlUpdatedCounter);
-            
+            Assert.Equal(3, carlUpdatedCounter);
+            Assert.Equal(2,carlsFriendUpdatedCounter);
+
             // Test that now the listener is removed and will not receive any updates anymore:
             store.Dispatch(new ActionOnUser.ChangeAge() { targetUser = carlsFriend.id, newAge = 33 });
             Assert.Equal(5, usersChangedCounter);
-            
+
             // The other listener will still be active:
-            Assert.Equal(6, carlUpdatedCounter);
-            
+            Assert.Equal(3, carlUpdatedCounter);
+            Assert.Equal(3,carlsFriendUpdatedCounter);
+
             Log.MethodDone(t);
         }
 

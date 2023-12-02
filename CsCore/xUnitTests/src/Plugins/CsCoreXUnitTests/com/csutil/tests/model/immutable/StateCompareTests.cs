@@ -163,6 +163,27 @@ namespace com.csutil.tests.model.immutable {
 
         }
 
+        [Fact]
+        public void TestRefUpdatedCorrectly() {
+
+            var d1 = new Dictionary<string, int>() { { "a", 1 }, { "b", 1 } };
+            var d1_2 = new Dictionary<string, int>() { { "a", 1 }, { "b", 2 } };
+
+            var count = 0;
+            d1_2.CalcEntryChangesToOldState<Dictionary<string, int>, string, int>(ref d1,
+                _ => throw Log.e("Added"),
+                _ => {
+                    count++;
+                    // The d1 reference here must already be updated:
+                    Assert.Same(d1_2, d1);
+                },
+                _ => throw Log.e("Removed"));
+
+            Assert.Equal(1, count);
+            Assert.Same(d1_2, d1);
+            
+        }
+
         private class MyClass {
 
             public string s;
