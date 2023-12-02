@@ -5,7 +5,7 @@ using com.csutil.model.immutable;
 using Xunit;
 
 namespace com.csutil.tests.model.immutable {
-    
+
     public class StateCompareTests {
 
         public StateCompareTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
@@ -77,42 +77,48 @@ namespace com.csutil.tests.model.immutable {
 
         [Fact]
         public void TestStateCompareEnumerable2_CalcEntryChanges() {
-            
+
             var a = new MyClass() { s = "a" };
             var b1 = new MyClass() { s = "b" };
             var b2 = new MyClass() { s = "b" };
             var c = new MyClass() { s = "c" };
 
-            List<MyClass> l1 = new List<MyClass>() { a, b1, c };
-            List<MyClass> l2_1 = new List<MyClass>() { a, b1, c };
-            List<MyClass> l2_2 = new List<MyClass>() { a, b2, c };
+            {
+                // l1 and l2_1 are the same so there must not be any diff: 
+                List<MyClass> l1 = new List<MyClass>() { a, b1, c };
+                List<MyClass> l2_1 = new List<MyClass>() { a, b1, c };
+                l2_1.CalcEntryChangesToOldState<List<MyClass>, MyClass, MyClass>(ref l1, x => x,
+                    _ => throw Log.e("Added"),
+                    _ => throw Log.e("Updated"),
+                    _ => throw Log.e("Removed"));
+            }
+            {
+                // l1 and l2_2 only differ in the reference change of entry 2, and as a key the
+                // MyClass itself is used. Since b1 equals b2 the diffing-logic will think b1 was updated to b2: 
+                List<MyClass> l1 = new List<MyClass>() { a, b1, c };
+                List<MyClass> l2_2 = new List<MyClass>() { a, b2, c };
+                l2_2.CalcEntryChangesToOldState<List<MyClass>, MyClass, MyClass>(ref l1, x => x,
+                    added => throw Log.e("Added"),
+                    updated => { Assert.Same(b2, updated); },
+                    removed => throw Log.e("Removed"));
+            }
+            { // Detecting removals
+                List<MyClass> l1 = new List<MyClass>() { a, b1, c };
+                var l1WithCRemoved = new List<MyClass>() { a, b1 };
+                l1WithCRemoved.CalcEntryChangesToOldState<List<MyClass>, MyClass, MyClass>(ref l1, x => x,
+                    _ => throw Log.e("Added"),
+                    _ => throw Log.e("Updated"),
+                    removed => Assert.Same(c, removed));
+            }
+            { // Detecting additions:
+                List<MyClass> l1 = new List<MyClass>() { a, b1, c };
+                var l1WithCRemoved = new List<MyClass>() { a, b1 };
+                l1.CalcEntryChangesToOldState<List<MyClass>, MyClass, MyClass>(ref l1WithCRemoved, x => x,
+                    added => { Assert.Same(c, added); },
+                    _ => throw Log.e("Updated"),
+                    removed => throw Log.e("Removed"));
+            }
 
-            // l1 and l2_1 are the same so there must not be any diff: 
-            l1.CalcEntryChanges(newState: l2_1, x => x,
-                _ => throw Log.e("Added"),
-                _ => throw Log.e("Updated"),
-                _ => throw Log.e("Removed"));
-
-            // l1 and l2_2 only differ in the reference change of entry 2, and as a key the
-            // MyClass itself is used. Since b1 equals b2 the diffing-logic will think b1 was updated to b2: 
-            l1.CalcEntryChanges(newState: l2_2, x => x,
-                added => throw Log.e("Added"),
-                updated => { Assert.Same(b2, updated); },
-                removed => throw Log.e("Removed"));
-
-            // Detecting removals
-            var l1WithCRemoved = new List<MyClass>() { a, b1 };
-            l1.CalcEntryChanges(newState: l1WithCRemoved, x => x,
-                _ => throw Log.e("Added"),
-                _ => throw Log.e("Updated"),
-                removed => Assert.Same(c, removed));
-
-            // Detecting additions:
-            l1WithCRemoved.CalcEntryChanges(newState: l1, x => x,
-                added => { Assert.Same(c, added); },
-                _ => throw Log.e("Updated"),
-                removed => throw Log.e("Removed"));
-            
         }
 
         [Fact]
@@ -124,7 +130,7 @@ namespace com.csutil.tests.model.immutable {
             var d3 = new Dictionary<string, int>() { { "a", 1 }, { "b", 99 }, { "c", 3 } };
 
             // No changes if the same:
-            d1.CalcEntryChanges(newState: d1_2,
+            d1_2.CalcEntryChangesToOldState<Dictionary<string, int>, string, int>(ref d1,
                 _ => throw Log.e("Added"),
                 _ => throw Log.e("Updated"),
                 _ => throw Log.e("Removed"));
@@ -132,7 +138,7 @@ namespace com.csutil.tests.model.immutable {
             Assert.Equal(2, d1.Count);
 
             // Detecting additions:
-            d1.CalcEntryChanges(newState: d2,
+            d2.CalcEntryChangesToOldState<Dictionary<string, int>, string, int>(ref d1,
                 added => {
                     Assert.Equal("c", added.Key);
                     Assert.Equal(3, added.Value);
@@ -141,13 +147,13 @@ namespace com.csutil.tests.model.immutable {
                 removed => throw Log.e("Removed"));
 
             // Detecting removals
-            d2.CalcEntryChanges(newState: d1,
+            d1.CalcEntryChangesToOldState<Dictionary<string, int>, string, int>(ref d2,
                 _ => throw Log.e("Added"),
                 _ => throw Log.e("Updated"),
                 removed => Assert.Equal("c", removed));
 
             // Detecting updates
-            d2.CalcEntryChanges(newState: d3,
+            d3.CalcEntryChangesToOldState<Dictionary<string, int>, string, int>(ref d2,
                 _ => throw Log.e("Added"),
                 updated => {
                     Assert.Equal("b", updated.Key);
