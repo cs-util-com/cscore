@@ -70,7 +70,7 @@ namespace com.csutil {
         /// <param name="onEntryAdded"></param>
         /// <param name="onEntryUpdated"></param>
         /// <param name="onEntryRemoved"></param>
-        public static void CalcEntryChangesToOldState<E, T, K>(this E newState, ref E oldState, Func<T, K> getKey, Action<T> onEntryAdded, Action<T> onEntryUpdated, Action<K> onEntryRemoved) where E : IEnumerable<T> {
+        public static void CalcEntryChangesToOldState<E, K, V>(this E newState, ref E oldState, Func<V, K> getKey, Action<V> onEntryAdded, Action<V> onEntryUpdated, Action<K> onEntryRemoved) where E : IEnumerable<V> {
             // TODO does not include order changes
 
             var oldStateCopy = oldState;
