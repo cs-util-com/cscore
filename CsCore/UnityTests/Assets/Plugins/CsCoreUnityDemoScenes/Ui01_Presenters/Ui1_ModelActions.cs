@@ -72,6 +72,14 @@ namespace com.csutil.tests.ui {
                 Log.d("User saved: " + Model);
             }
 
+            public void Dispose() {
+                IsDisposed = DisposeState.DisposingStarted;
+                Model = null;
+                IsDisposed = DisposeState.Disposed;
+            }
+
+            public DisposeState IsDisposed { get; private set; } = DisposeState.Active;
+
         }
 
     }
