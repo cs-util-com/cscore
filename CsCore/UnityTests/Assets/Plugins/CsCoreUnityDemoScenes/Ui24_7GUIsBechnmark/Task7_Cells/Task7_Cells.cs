@@ -75,7 +75,8 @@ namespace com.csutil.tests.Task7 {
 
             private void SyncUiColumnCountWithModelColumnCount(ImmutableDictionary<CellPos, Cell> Cells) {
                 // Get the biggest column count in the cells model:
-                int maxColumn = Cells.Keys.Map(k => k.columnNr).Max() + 1;
+                int maxColumn = Cells.Keys.Map(k => k.columnNr).DefaultIfEmpty(-1).Max() + 1;
+
                 // For each UI row check that they all have the same nr of UI cells:
                 var rowNr = 0;
                 foreach (var row in uiRows.GetChildren()) {
@@ -99,7 +100,7 @@ namespace com.csutil.tests.Task7 {
 
             private void SyncUiRowCountWithModelRowCount(ImmutableDictionary<CellPos, Cell> Cells) {
                 // The biggest row count in the model:
-                int maxRow = Cells.Keys.Map(k => k.rowNr).Max() + 1;
+                int maxRow = Cells.Keys.Map(k => k.rowNr).DefaultIfEmpty(-1).Max() + 1;
 
                 // Add UI rows based on model row count (until UI has same row count):
                 while (uiRows.GetChildCount() <= maxRow) {

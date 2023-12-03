@@ -74,7 +74,11 @@ namespace com.csutil.tests.Task7 {
                 double valToInsert = Calculate(cell.formula, allCells, depth + 1);
                 formula = formula.Replace(m.Value, "" + valToInsert);
             }
-            return Numbers.Calculate(formula);
+            try {
+                return Numbers.Calculate(formula, logErrors: false);
+            } catch (Exception e) {
+                return Double.NaN;
+            }
         }
 
         public static IEnumerable<CellPos> CalcDependentCells(string formula) {
@@ -189,12 +193,14 @@ namespace com.csutil.tests.Task7 {
         private static Cell NewCell(MyActions.SetCell s, ImmutableDictionary<CellPos, Cell> allCells, bool isSelected) {
             var formula = s.newFormula;
             var deps = ImmutableHashSet.CreateRange(Cell.CalcDependentCells(formula));
-            return new Cell(s.pos, formula, deps, Cell.Calculate(formula, allCells), isSelected);
+            double formulaResult = double.NaN;
+            try { formulaResult = Cell.Calculate(formula, allCells); } catch (Exception e) { }
+            return new Cell(s.pos, formula, deps, formulaResult, isSelected);
         }
 
         private static Cell UpdateDependentCell(Cell cell, ImmutableDictionary<CellPos, Cell> oldCells, ImmutableDictionary<CellPos, Cell> newCells) {
             foreach (CellPos d in cell.dependentCells) {
-                /* If a cell changed that the current cell depends on, then also the current cell must 
+                /* If a cell changed that the current cell depends on, then also the current cell must
                  * be recalculated so that all cells that are influenced by the change update correctly */
                 if (oldCells[d] != newCells[d]) {
                     return new Cell(cell.pos, cell.formula, cell.dependentCells, Cell.Calculate(cell.formula, newCells), cell.isSelected);
