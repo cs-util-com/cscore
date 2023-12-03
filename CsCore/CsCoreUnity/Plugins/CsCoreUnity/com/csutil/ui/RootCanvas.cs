@@ -2,6 +2,7 @@
 using com.csutil.netstandard2_1polyfill;
 #endif
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using UnityEngine;
@@ -32,7 +33,12 @@ namespace com.csutil.ui {
             return FilterForBestRootCanvas(roots);
         }
 
-        private static Canvas FilterForBestRootCanvas(IOrderedEnumerable<Canvas> roots) {
+        private static Canvas FilterForBestRootCanvas(IEnumerable<Canvas> roots) {
+
+            // If some of the canvases are in screen space overlay mode, prefer those:
+            var screenSpaceCanvases = roots.Filter(x => x.renderMode == RenderMode.ScreenSpaceOverlay);
+            if (!screenSpaceCanvases.IsEmpty()) { roots = screenSpaceCanvases; }
+
             // Prefer canvas objects that are on the root level of the open scene:
             var canvasesOnRootOfScene = roots.Filter(x => x.gameObject.GetParent() == null);
             if (!canvasesOnRootOfScene.IsNullOrEmpty()) {
