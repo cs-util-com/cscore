@@ -12,7 +12,7 @@ namespace com.csutil.model.ecs {
         /// <summary> Optional callback listener that informs the IEntity if its
         /// content (the entity data) was updated. Will not fire for the initial creation of
         /// the entity or the removal/destruction of the entity in the ecs </summary>
-        Action<T,T> OnUpdate { get; set; }
+        Action<T, T> OnUpdate { get; set; }
 
     }
 
@@ -57,7 +57,7 @@ namespace com.csutil.model.ecs {
 
     }
 
-    public struct Pose3d {
+    public class Pose3d {
 
         public const double radToDegree = 180f / Math.PI;
         public const double degreeToRad = Math.PI / 180f;
@@ -65,6 +65,9 @@ namespace com.csutil.model.ecs {
         public readonly Vector3 position;
         public readonly Quaternion rotation;
         public readonly Vector3 scale;
+
+        public Pose3d() : this(Vector3.Zero, Quaternion.Identity, Vector3.One) {
+        }
 
         public Pose3d(Vector3 position, Quaternion rotation, Vector3 scale) {
             this.position = position;
