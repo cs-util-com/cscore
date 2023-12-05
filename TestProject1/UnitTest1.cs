@@ -59,14 +59,8 @@ public class UnitTest1
         fs.WriteAllBytes(filePath1, File.ReadAllBytes(outputPath));
         FileEntry fe = fs.GetFileEntry(filePath1);
 
-
-        // FileEntry fe = new FileEntry(new PhysicalFileSystem(), UPath.Combine(Directory.GetCurrentDirectory(), "speech.mp3"));
-
-
-        // return null;
         RestRequest uri = new Uri(openAIAudioURL + "transcriptions").SendPOST().WithAuthorization(openAiKey).AddFileViaForm(fe).WithFormContent(formContent);
         return uri.GetResult<Audio.STTResponse>();
-
     }
     public class Audio
     {
