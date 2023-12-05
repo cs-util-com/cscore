@@ -7,38 +7,35 @@ namespace SPPTest;
 
 public class UnitTest1
 {
-    private readonly ITestOutputHelper output;
 
-
-    static string openAIAudioURL = "https://api.openai.com/v1/audio/";
+    string openAIAudioURL = "https://api.openai.com/v1/audio/";
     static string currentDirectory = Directory.GetCurrentDirectory();
     static string audioFolderPath = Path.GetFullPath(Path.Combine(currentDirectory, @"../../../audio/"));
     static string openAiKey = File.ReadAllText(Path.GetFullPath(Path.Combine(currentDirectory, @"../../../env.txt")));
+    private readonly ITestOutputHelper output;
     public UnitTest1(ITestOutputHelper output)
     {
         this.output = output;
     }
 
     [Fact]
-    public async Task ExampleTTS()
+    public async Task ExampleTTSandSTT()
     {
-        HttpResponseMessage response = await TTS(new Audio.TTSRequest() { input = "hello world" });
-        Assert.NotNull(response);
-
         string outputPath = audioFolderPath + "speech.mp3";
-        File.WriteAllBytes(outputPath, await response.Content.ReadAsByteArrayAsync());
+
+        HttpResponseMessage TTSResponse = await TTS(new Audio.TTSRequest() { input = "hello world" });
+        Assert.NotNull(TTSResponse);
+
+        File.WriteAllBytes(outputPath, await TTSResponse.Content.ReadAsByteArrayAsync());
         Assert.NotNull(Path.GetFileName(outputPath));
-        output.WriteLine(outputPath);
+
+        Audio.STTResponse STTResponse = await STT(new Audio.STTRequest() { file = outputPath });
+        Assert.NotEmpty(STTResponse.text);
+        output.WriteLine(STTResponse.text);
+
     }
 
-    [Fact]
-    public async Task ExampleSTT()
-    {
-        string outputPath = audioFolderPath + "speech.mp3";
 
-        Audio.STTResponse response = await STT(new Audio.STTRequest() { file = outputPath });
-        Assert.NotEmpty(response.text);
-    }
 
 
     public Task<HttpResponseMessage> TTS(Audio.TTSRequest requestParam)
