@@ -4,8 +4,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using com.csutil.http.apis;
 using com.csutil.model.jsonschema;
-using Newtonsoft.Json.Linq;
 using Xunit;
+using com.csutil.http;
+using Xunit.Abstractions;
+using Zio;
+using Zio.FileSystems;
+using System.IO;
+using System.Net.Http;
 
 namespace com.csutil.integrationTests.http {
 
@@ -188,7 +193,7 @@ namespace com.csutil.integrationTests.http {
 
 
         public class EmotionalChatResponse {
-            
+
             public enum Emotion { happy, sad, angry }
 
             [Description("How the AI feels about the users question")]
@@ -199,6 +204,66 @@ namespace com.csutil.integrationTests.http {
 
         }
 
+
+        string openAIAudioURL = "https://api.openai.com/v1/audio/";
+
+        [Fact]
+        public async Task ExampleTTSandSTT() {
+            HttpResponseMessage TTSResponse = await TTS(new Audio.TTSRequest() { input = "one two three" });
+            Assert.NotNull(TTSResponse);
+
+            string outputPath = "/speech.mp3";
+            IFileSystem fs = new MemoryFileSystem();
+            fs.WriteAllBytes(outputPath, await TTSResponse.Content.ReadAsByteArrayAsync());
+            FileEntry fileEntry = fs.GetFileEntry(outputPath);
+
+            Assert.NotNull(Path.GetFileName(outputPath));
+
+            Audio.STTResponse STTResponse = await STT(new Audio.STTRequest() { file = outputPath }, fileEntry);
+            Assert.NotEmpty(STTResponse.text);
+            Log.d(STTResponse.text);
+        }
+
+        public async Task<HttpResponseMessage> TTS(Audio.TTSRequest requestParam) {
+            var openAiKey = await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey");
+            return await new Uri(openAIAudioURL + "speech").SendPOST().WithAuthorization(openAiKey).WithJsonContent(requestParam).GetResult<HttpResponseMessage>();
+        }
+
+        public async Task<Audio.STTResponse> STT(Audio.STTRequest requestParam, FileEntry fileEntry) {
+            var openAiKey = await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey");
+
+            Dictionary<string, object> formContent = new Dictionary<string, object>
+            {
+            { "model", requestParam.model },
+            };
+
+            RestRequest uri = new Uri(openAIAudioURL + "transcriptions").SendPOST().WithAuthorization(openAiKey).AddFileViaForm(fileEntry).WithFormContent(formContent);
+            return await uri.GetResult<Audio.STTResponse>();
+        }
+
+        public class Audio {
+            public class TTSRequest {
+                public string input { get; set; }
+                public string model { get; set; } = "tts-1";
+                public string voice { get; set; } = "alloy";
+                public string response_format { get; set; } = "mp3";
+                public double speed { get; set; } = 1.0;
+            }
+
+            public class STTRequest {
+                public string file { get; set; }
+                public string model { get; set; } = "whisper-1";
+                public string language { get; set; } = "en";
+                public string prompt { get; set; }
+                public string response_format { get; set; } = "text";
+                public int temperature { get; set; } = 0;
+
+            }
+
+            public class STTResponse {
+                public string text { get; set; }
+            }
+        }
     }
 
 }
