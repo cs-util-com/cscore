@@ -8,7 +8,7 @@ namespace com.csutil.model.ecs {
 
         T Data { get; }
         EntityComponentSystem<T> Ecs { get; }
-        
+
         /// <summary> Optional callback listener that informs the IEntity if its
         /// content (the entity data) was updated. Will not fire for the initial creation of
         /// the entity or the removal/destruction of the entity in the ecs </summary>
@@ -58,6 +58,8 @@ namespace com.csutil.model.ecs {
     }
 
     public class Pose3d {
+
+        public static readonly Pose3d Identity = new Pose3d();
 
         public const double radToDegree = 180f / Math.PI;
         public const double degreeToRad = Math.PI / 180f;
