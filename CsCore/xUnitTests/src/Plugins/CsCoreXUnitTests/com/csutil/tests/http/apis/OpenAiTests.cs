@@ -6,11 +6,8 @@ using com.csutil.http.apis;
 using com.csutil.model.jsonschema;
 using Xunit;
 using com.csutil.http;
-using Xunit.Abstractions;
 using Zio;
-using Zio.FileSystems;
 using System.IO;
-using System.Net.Http;
 
 namespace com.csutil.integrationTests.http {
 
@@ -204,60 +201,50 @@ namespace com.csutil.integrationTests.http {
 
         }
 
-        [Fact]
-        public async Task FileEntryTest() {
-            var openAiKey = await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey");
-            var bstream = await new Uri(openAIAudioURL + "speech").SendPOST().WithAuthorization(openAiKey)
-            .WithJsonContent(new Audio.TTSRequest() { input = "oh my god it is working" }).GetResult<Stream>();
-            DirectoryEntry dir = EnvironmentV2.instance.GetNewInMemorySystem();
-            FileEntry fileToUpload = dir.GetChild("speech.mp3");
-            await fileToUpload.SaveStreamAsync(bstream, resetStreamToStart: false);
-
-            Dictionary<string, object> formContent = new Dictionary<string, object>
-            {
-            { "model", "whisper-1" },
-            };
-
-            RestRequest uri = new Uri(openAIAudioURL + "transcriptions").SendPOST().WithAuthorization(openAiKey).
-            AddFileViaForm(fileToUpload).WithFormContent(formContent);
-            var result = await uri.GetResult<Audio.STTResponse>();
-            Log.d(result.text);
-        }
-
-
-        string openAIAudioURL = "https://api.openai.com/v1/audio/";
 
         [Fact]
         public async Task ExampleTTSandSTT() {
-            HttpResponseMessage TTSResponse = await TTS(new Audio.TTSRequest() { input = "one two three" });
-            Assert.NotNull(TTSResponse);
+            string textToTest = "hello world";
+            Stream TTSResponseStream = await TTS(new Audio.TTSRequest() { input = textToTest });
+            Assert.NotNull(TTSResponseStream);
 
-            string outputPath = "/speech.mp3";
-            IFileSystem fs = new MemoryFileSystem();
-            fs.WriteAllBytes(outputPath, await TTSResponse.Content.ReadAsByteArrayAsync());
-            FileEntry fileEntry = fs.GetFileEntry(outputPath);
-
-            Assert.NotNull(Path.GetFileName(outputPath));
-
-            Audio.STTResponse STTResponse = await STT(new Audio.STTRequest() { file = outputPath }, fileEntry);
+            Audio.STTResponse STTResponse = await STT(new Audio.STTRequest() { file = TTSResponseStream });
             Assert.NotEmpty(STTResponse.text);
             Log.d(STTResponse.text);
+            //fails when textToTest contains numbers
+            Assert.Equal(formatString(STTResponse.text), formatString(textToTest));
         }
 
-        public async Task<HttpResponseMessage> TTS(Audio.TTSRequest requestParam) {
-            var openAiKey = await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey");
-            return await new Uri(openAIAudioURL + "speech").SendPOST().WithAuthorization(openAiKey).WithJsonContent(requestParam).GetResult<HttpResponseMessage>();
+        private string formatString(string str) {
+            //helper function to format TTS and STT converted texts to test weather input text and output text is equal
+            return new String(str.ToCharArray().Where(c => !Char.IsWhiteSpace(c) && Char.IsLetterOrDigit(c))
+            .ToArray()).ToLower();
         }
 
-        public async Task<Audio.STTResponse> STT(Audio.STTRequest requestParam, FileEntry fileEntry) {
+        public async Task<Stream> TTS(Audio.TTSRequest requestParam) {
+            var openAiKey = await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey");
+            return await new Uri("https://api.openai.com/v1/audio/speech").SendPOST().WithAuthorization(openAiKey)
+            .WithJsonContent(requestParam).GetResult<Stream>();
+        }
+
+        public async Task<Audio.STTResponse> STT(Audio.STTRequest requestParam) {
             var openAiKey = await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey");
 
-            Dictionary<string, object> formContent = new Dictionary<string, object>
-            {
-            { "model", requestParam.model },
-            };
+            Dictionary<string, object> formContent = new Dictionary<string, object>();
+            formContent.Add("model", requestParam.model);
+            formContent.Add("language", requestParam.language);
+            formContent.Add("responseFormat", requestParam.responseFormat);
+            formContent.Add("temperature", requestParam.temperature);
+            if (requestParam.prompt != null) {
+                formContent.Add("prompt", requestParam.prompt);
+            }
 
-            RestRequest uri = new Uri(openAIAudioURL + "transcriptions").SendPOST().WithAuthorization(openAiKey).AddFileViaForm(fileEntry).WithFormContent(formContent);
+            DirectoryEntry dir = EnvironmentV2.instance.GetNewInMemorySystem();
+            FileEntry fileToUpload = dir.GetChild("speech.mp3");
+            await fileToUpload.SaveStreamAsync(requestParam.file, resetStreamToStart: false);
+
+            RestRequest uri = new Uri("https://api.openai.com/v1/audio/transcriptions").SendPOST().WithAuthorization(openAiKey)
+            .AddFileViaForm(fileToUpload).WithFormContent(formContent);
             return await uri.GetResult<Audio.STTResponse>();
         }
 
@@ -271,11 +258,11 @@ namespace com.csutil.integrationTests.http {
             }
 
             public class STTRequest {
-                public string file { get; set; }
+                public Stream file { get; set; }
                 public string model { get; set; } = "whisper-1";
                 public string language { get; set; } = "en";
                 public string prompt { get; set; }
-                public string response_format { get; set; } = "text";
+                public string responseFormat { get; set; } = "text";
                 public int temperature { get; set; } = 0;
 
             }
