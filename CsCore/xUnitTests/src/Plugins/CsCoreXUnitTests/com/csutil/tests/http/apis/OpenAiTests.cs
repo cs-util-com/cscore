@@ -204,6 +204,26 @@ namespace com.csutil.integrationTests.http {
 
         }
 
+        [Fact]
+        public async Task FileEntryTest() {
+            var openAiKey = await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey");
+            var bstream = await new Uri(openAIAudioURL + "speech").SendPOST().WithAuthorization(openAiKey)
+            .WithJsonContent(new Audio.TTSRequest() { input = "oh my god it is working" }).GetResult<Stream>();
+            DirectoryEntry dir = EnvironmentV2.instance.GetNewInMemorySystem();
+            FileEntry fileToUpload = dir.GetChild("speech.mp3");
+            await fileToUpload.SaveStreamAsync(bstream, resetStreamToStart: false);
+
+            Dictionary<string, object> formContent = new Dictionary<string, object>
+            {
+            { "model", "whisper-1" },
+            };
+
+            RestRequest uri = new Uri(openAIAudioURL + "transcriptions").SendPOST().WithAuthorization(openAiKey).
+            AddFileViaForm(fileToUpload).WithFormContent(formContent);
+            var result = await uri.GetResult<Audio.STTResponse>();
+            Log.d(result.text);
+        }
+
 
         string openAIAudioURL = "https://api.openai.com/v1/audio/";
 
