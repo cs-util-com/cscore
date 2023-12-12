@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 using com.csutil.model.jsonschema;
 using Newtonsoft.Json;
@@ -36,6 +37,101 @@ namespace com.csutil.http.apis
         {
             var request = new Uri("https://api.openai.com/v1/images/generations").SendPOST();
             return request.WithAuthorization(apiKey).WithJsonContent(requestParams).GetResult<Image.Response>();
+        }
+
+        /// <summary> https://beta.openai.com/docs/api-reference/images/create </summary>
+        public Task<Vision.Response> ImageToText(Vision.Request requestParams, string imageURL)
+        {
+            var request = new Uri("https://api.openai.com/v1/chat/completions").SendPOST();
+
+            var content = new List<Dictionary<string, object>>();
+            content.Add(new Dictionary<string, object>()
+            {
+                {"type","text"},
+                {"text","What's in this image?"},
+            });
+
+            content.Add(new Dictionary<string, object>()
+            {
+                {"type","image_url"},
+                {"image_url",new Dictionary<string,string>{
+                    {"url",imageURL},
+                    {"detail","high"}
+                }},
+            });
+
+            var message = new Vision.Request.Message()
+            {
+                role = "user",
+                content = content
+            };
+            var messages = new List<Vision.Request.Message>()
+            {
+                message
+
+            };
+
+            var finalRequestParams = new Vision.Request()
+            {
+                messages = messages
+            };
+
+
+            return request.WithAuthorization(apiKey).WithJsonContent(finalRequestParams).GetResult<Vision.Response>();
+        }
+
+
+        public class Vision
+        {
+            public class Request
+            {
+                public string model { get; set; } = "gpt-4-vision-preview";
+                public int max_tokens { get; set; } = 300;
+                public List<Message> messages { get; set; }
+
+                public class Message
+                {
+                    public string role { get; set; } = "user";
+
+                    public List<Dictionary<string, object>> content { get; set; }
+                }
+            }
+            public class Response
+            {
+                public string id { get; set; }
+
+                public string @object { get; set; }
+                public int created { get; set; }
+                public string model { get; set; }
+                public Usage usage { get; set; }
+                public List<Choice> choices { get; set; }
+                public class Choice
+                {
+                    public Message message { get; set; }
+                    public FinishDetails finish_details { get; set; }
+                    public int index { get; set; }
+                }
+
+                public class FinishDetails
+                {
+                    public string type { get; set; }
+                    public string stop { get; set; }
+                }
+
+                public class Message
+                {
+                    public string role { get; set; }
+                    public string content { get; set; }
+                }
+
+                public class Usage
+                {
+                    public int prompt_tokens { get; set; }
+                    public int completion_tokens { get; set; }
+                    public int total_tokens { get; set; }
+                }
+
+            }
         }
 
         /// <summary> See https://platform.openai.com/docs/guides/chat </summary>
