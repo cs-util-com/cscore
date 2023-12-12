@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using com.csutil.model.jsonschema;
 using Newtonsoft.Json;
+using System.IO;
+using Zio;
 
 namespace com.csutil.http.apis
 {
@@ -182,6 +184,64 @@ namespace com.csutil.http.apis
 
             }
 
+        }
+
+        //TODO Summary
+        public async Task<Stream> TextToSpeech(Audio.TTSRequest requestParam)
+        {
+            return await new Uri("https://api.openai.com/v1/audio/speech").SendPOST().WithAuthorization(apiKey)
+            .WithJsonContent(requestParam).GetResult<Stream>();
+        }
+
+        //TODO Summary
+        public async Task<Audio.STTResponse> SpeechToText(Audio.STTRequest requestParam)
+        {
+
+            Dictionary<string, object> formContent = new Dictionary<string, object>();
+            formContent.Add("model", requestParam.model);
+            formContent.Add("language", requestParam.language);
+            formContent.Add("responseFormat", requestParam.responseFormat);
+            formContent.Add("temperature", requestParam.temperature);
+            if (requestParam.prompt != null)
+            {
+                formContent.Add("prompt", requestParam.prompt);
+            }
+
+            DirectoryEntry dir = EnvironmentV2.instance.GetNewInMemorySystem();
+            FileEntry fileToUpload = dir.GetChild("speech.mp3");
+            await fileToUpload.SaveStreamAsync(requestParam.fileStream, resetStreamToStart: false);
+
+            RestRequest uri = new Uri("https://api.openai.com/v1/audio/transcriptions").SendPOST().WithAuthorization(apiKey)
+            .AddFileViaForm(fileToUpload).WithFormContent(formContent);
+            return await uri.GetResult<Audio.STTResponse>();
+        }
+
+        public class Audio
+        {
+            public class TTSRequest
+            {
+                public string input { get; set; }
+                public string model { get; set; } = "tts-1";
+                public string voice { get; set; } = "alloy";
+                public string response_format { get; set; } = "mp3";
+                public double speed { get; set; } = 1.0;
+            }
+
+            public class STTRequest
+            {
+                public Stream fileStream { get; set; }
+                public string model { get; set; } = "whisper-1";
+                public string language { get; set; } = "en";
+                public string prompt { get; set; }
+                public string responseFormat { get; set; } = "text";
+                public int temperature { get; set; } = 0;
+
+            }
+
+            public class STTResponse
+            {
+                public string text { get; set; }
+            }
         }
 
     }
@@ -429,5 +489,9 @@ namespace com.csutil.http.apis
         }
 
     }
+
+
+
+
 
 }
