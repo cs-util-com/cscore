@@ -186,17 +186,18 @@ namespace com.csutil.http.apis
 
         }
 
-        //TODO Summary
+        /// <summary> https://platform.openai.com/docs/guides/text-to-speech/text-to-speech
+        /// </summary>
         public async Task<Stream> TextToSpeech(Audio.TTSRequest requestParam)
         {
             return await new Uri("https://api.openai.com/v1/audio/speech").SendPOST().WithAuthorization(apiKey)
             .WithJsonContent(requestParam).GetResult<Stream>();
         }
 
-        //TODO Summary
+        /// <summary> https://platform.openai.com/docs/guides/speech-to-text
+        /// </summary>
         public async Task<Audio.STTResponse> SpeechToText(Audio.STTRequest requestParam)
         {
-
             Dictionary<string, object> formContent = new Dictionary<string, object>();
             formContent.Add("model", requestParam.model);
             formContent.Add("language", requestParam.language);
