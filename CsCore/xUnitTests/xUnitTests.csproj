@@ -34,4 +34,9 @@
     <ProjectReference Include="..\PlainNetClassLib\PlainNetClassLib.csproj" />
   </ItemGroup>
 
+  <!-- Hide all .meta files from the pure C# project -->
+  <ItemGroup>
+    <None Remove="**\*.meta" />
+  </ItemGroup>
+
 </Project>

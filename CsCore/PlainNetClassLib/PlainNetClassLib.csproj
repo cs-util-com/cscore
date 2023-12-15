@@ -71,4 +71,9 @@
     <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="13.4.0" />
   </ItemGroup>
 
+  <!-- Hide all .meta files from the pure C# project -->
+  <ItemGroup>
+    <None Remove="**\*.meta" />
+  </ItemGroup>
+  
 </Project>
