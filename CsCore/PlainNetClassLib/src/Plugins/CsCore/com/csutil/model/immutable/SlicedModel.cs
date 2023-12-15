@@ -8,9 +8,9 @@ namespace com.csutil.model.immutable {
 
     public static class SlicedStoreExtensions {
 
-        public static IDataStore<SlicedModel> NewSlicedDataStore(this IEnumerable<SlicedModel.Slice> slices, IList<Middleware<SlicedModel>> middlewares, bool addLoggingMiddleware) {
+        public static IDataStore<SlicedModel> NewSlicedDataStore(this IEnumerable<SlicedModel.Slice> slices, IList<Middleware<SlicedModel>> middlewares, bool addLoggingMiddleware, bool showStateDiff = true, int maxMsBudgetForLoggingChanges = 1000) {
             if (addLoggingMiddleware) {
-                middlewares.Add(Middlewares.NewLoggingMiddleware<SlicedModel>());
+                middlewares.Add(Middlewares.NewLoggingMiddleware<SlicedModel>(showStateDiff, maxMsBudgetForLoggingChanges));
             }
             return new DataStore<SlicedModel>(SlicedModel.Reducer, new SlicedModel(slices), middlewares.ToArray());
         }
