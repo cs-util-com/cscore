@@ -33,6 +33,10 @@ namespace com.csutil.model.ecs {
         }
 
         private void OnEntityUpdated(IEntity<T> iEntity, EntityComponentSystem<T>.UpdateType type, T oldstate, T newstate) {
+            MainThread.Invoke(() => { HandleEntityUpdate(iEntity, type, oldstate, newstate); });
+        }
+
+        private void HandleEntityUpdate(IEntity<T> iEntity, EntityComponentSystem<T>.UpdateType type, T oldstate, T newstate) {
             switch (type) {
                 case EntityComponentSystem<T>.UpdateType.Add:
                     CreateGoFor(iEntity);
