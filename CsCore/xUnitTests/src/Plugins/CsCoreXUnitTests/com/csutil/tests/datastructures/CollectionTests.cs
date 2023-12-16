@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -170,6 +171,18 @@ namespace com.csutil.tests {
         public void TestMove() {
             TestMoveWith(new List<string>() { "A", "B", "C", "D" });
             TestMoveWith(new string[] { "A", "B", "C", "D" });
+        }
+
+        [Fact]
+        public void TestMove2() {
+            var list = ImmutableList<string>.Empty.AddRange(new string[] { "A", "B", "C", "D" });
+            Assert.Equal("[A, B, C, D]", list.ToStringV2());
+            var newList = list.Move("A", 3); // Move A to the end
+            Assert.Equal("[B, C, D, A]", newList.ToStringV2());
+            newList = list.Move("A", 0); // Move A back to the start
+            Assert.Equal("[A, B, C, D]", newList.ToStringV2());
+            // Moving A to index 4 is not possible:
+            Assert.Throws<ArgumentOutOfRangeException>(() => { list.Move("A", 4); });
         }
 
         private static void TestMoveWith(IList<string> l) {

@@ -87,6 +87,28 @@ namespace com.csutil {
             return -1;
         }
 
+        public static IEnumerable<T> Move<T>(this IReadOnlyList<T> list, T entryToMove, int newIndex) {
+            if (list == null || !list.Any())
+                throw new ArgumentNullException(nameof(list));
+
+            if (newIndex < 0 || newIndex > list.Count - 1)
+                throw new ArgumentOutOfRangeException(nameof(newIndex), $"New index is out of range (0 - {list.Count - 1}), but was {newIndex}");
+
+            var currentIndex = list.IndexOf(entryToMove);
+
+            // If the entry is not found or the new index is the same as the current index, return the list as is:
+            if (currentIndex == -1) {
+                throw new ArgumentException("The entry to move doesn't exist in the list");
+            }
+            // If the new index is the same as the current index, return the list as is:
+            if (currentIndex == newIndex) { return list; }
+
+            var resultList = list.ToList();
+            resultList.RemoveAt(currentIndex);
+            resultList.Insert(newIndex, entryToMove);
+            return resultList;
+        }
+
         public static void Move<T>(this IList<T> self, int oldIndex, int newIndex) {
             if (oldIndex == newIndex) { return; }
             T itemToMove = self[oldIndex];
