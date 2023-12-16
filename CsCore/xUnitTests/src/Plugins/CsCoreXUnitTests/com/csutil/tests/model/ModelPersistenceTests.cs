@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using com.csutil.integrationTests.http;
 using com.csutil.io;
 using com.csutil.model;
 using Xunit;
@@ -66,7 +67,7 @@ namespace com.csutil.integrationTests.model {
                 Assert.False(await TestDownloadTo(f, dir)); // Second time its already cached
             }
             {
-                IFileRef f = new FileRef() { url = "https://placekitten.com/50/50" };
+                IFileRef f = new FileRef() { url = RestTests.IMG_PLACEHOLD_SERVICE_URL + "/50/50" };
                 Assert.True(await TestDownloadTo(f, dir));
                 Log.d("FileRef: " + JsonWriter.AsPrettyString(f));
                 Assert.True(await TestDownloadTo(f, dir)); // Every time a different image so has to be redownloaded
@@ -115,7 +116,7 @@ namespace com.csutil.integrationTests.model {
 
             var dir = EnvironmentV2.instance.GetOrAddTempFolder("TestImageFileWithThumbnail");
 
-            var imgRef = new FileRef() { url = "https://placekitten.com/1024/512" };
+            var imgRef = new FileRef() { url = RestTests.IMG_PLACEHOLD_SERVICE_URL + "/1024/512" };
             await imgRef.DownloadTo(dir);
             Log.d("FileRef: " + JsonWriter.AsPrettyString(imgRef));
             Assert.NotNull(imgRef.url);
