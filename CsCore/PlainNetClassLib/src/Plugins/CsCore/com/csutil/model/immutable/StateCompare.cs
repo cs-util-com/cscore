@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 namespace com.csutil.model.immutable {
 
@@ -37,6 +38,10 @@ namespace com.csutil.model.immutable {
                     Log.w("Accessing KeyValuePair failed: " + e);
                     Debugger.Break();
                 }
+            }
+            // If both are enumerables then use SequenceEqual to compare them:
+            if (oldState is IEnumerable oldEnum && newState is IEnumerable newEnum) {
+                return !oldEnum.Cast<object>().SequenceEqual(newEnum.Cast<object>());
             }
             if (Nullable.GetUnderlyingType(typeof(S)) != null) { return !Equals(oldState, newState); }
             if (!ReferenceEquals(oldState, newState)) { return true; }

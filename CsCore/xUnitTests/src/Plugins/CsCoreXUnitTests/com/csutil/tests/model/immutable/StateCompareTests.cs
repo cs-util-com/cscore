@@ -58,9 +58,9 @@ namespace com.csutil.tests.model.immutable {
             var l2_1 = new List<MyClass>() { a, b1 };
             var l2_2 = new List<MyClass>() { a, b2 };
             Assert.False(StateCompare.WasModified(l1, l1));
-            Assert.True(StateCompare.WasModified(l1, l2_1));
-            // 2 different arrays are created from the same source list:
-            Assert.True(StateCompare.WasModified(l1.ToArray(), l1.ToArray()));
+            Assert.False(StateCompare.WasModified(l1, l2_1));
+            // 2 different arrays are created from the same source list so their sequences are equal: 
+            Assert.False(StateCompare.WasModified(l1.ToArray(), l1.ToArray()));
 
             // Same object references in both arrays (but arrays dont have same ref):
             Assert.True(l1.ToArray().SequenceEqual(l1.ToArray()));
@@ -73,6 +73,52 @@ namespace com.csutil.tests.model.immutable {
             Assert.False(l1.ToArray().SequenceReferencesEqual(l2_2.ToArray()));
             Assert.False(l1.ToArray().SequenceReferencesEqual(new MyClass[0]));
             Assert.False(new MyClass[0].SequenceReferencesEqual(l2_2.ToArray()));
+        }
+        
+        /// <summary> Same test as above just with a class that does not impelement the Equals method </summary>
+        [Fact]
+        public void TestStateCompareEnumerable2() {
+            var a = new MyClass2() { s = "a" };
+            var b1 = new MyClass2() { s = "b" };
+            var b2 = new MyClass2() { s = "b" };
+
+            var l1 = new List<MyClass2>() { a, b1 };
+            var l2_1 = new List<MyClass2>() { a, b2 };
+            Assert.False(StateCompare.WasModified(l1, l1));
+            Assert.True(StateCompare.WasModified(l1, l2_1));
+            // 2 different arrays are created from the same source list so their sequences are equal: 
+            Assert.False(StateCompare.WasModified(l1.ToArray(), l1.ToArray()));
+            Assert.True(StateCompare.WasModified(l1.ToArray(), l2_1.ToArray()));
+
+            // Same object references in both arrays (but arrays dont have same ref):
+            Assert.True(l1.ToArray().SequenceEqual(l1.ToArray()));
+            Assert.False(l1.ToArray().SequenceEqual(l2_1.ToArray()));
+            // Because MyClass2 does NOT implements equal these are also NOT equal:
+            Assert.False(l1.ToArray().SequenceReferencesEqual(l2_1.ToArray()));
+            Assert.False(l1.ToArray().SequenceReferencesEqual(new MyClass2[0]));
+        }
+
+        [Fact]
+        public void TestStateCompareEnumerable3() {
+            var a = new MyClass() { s = "a" };
+            var b1 = new MyClass() { s = "b" };
+            var b2 = new MyClass() { s = "b" };
+            var c = new MyClass() { s = "c" };
+
+            var l1 = new List<MyClass>() { a, b1 };
+            var l2_1 = new List<MyClass>() { a, b1 };
+            var l2_2 = new List<MyClass>() { a, b2 };
+            var l3 = new List<MyClass>() { a, c };
+
+            Assert.False(StateCompare.WasModified(l1, l1));
+            Assert.False(StateCompare.WasModified(l1, l2_1));
+            Assert.False(StateCompare.WasModified(l1, l2_2));
+            Assert.True(StateCompare.WasModified(l1, l3));
+            // 2 different arrays are created from the same source list:
+            Assert.False(StateCompare.WasModified(l1.ToArray(), l1.ToArray()));
+            Assert.False(StateCompare.WasModified(l1.ToArray(), l2_1.ToArray()));
+            Assert.False(StateCompare.WasModified(l1.ToArray(), l2_2.ToArray()));
+            Assert.True(StateCompare.WasModified(l1.ToArray(), l3.ToArray()));
         }
 
         [Fact]
@@ -199,6 +245,10 @@ namespace com.csutil.tests.model.immutable {
 
             public override int GetHashCode() { return (s != null ? s.GetHashCode() : 0); }
 
+        }
+
+        private class MyClass2 {
+            public string s;
         }
 
     }
