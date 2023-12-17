@@ -128,7 +128,10 @@ namespace com.csutil {
             var correctedSizeX = aspectRatio * self.size.y;
             self.size = new Vector2(correctedSizeX, self.size.y); 
             var boxCollider = self.GetComponent<BoxCollider>();
-            if (boxCollider != null) { boxCollider.size = self.size * boxColliderShrinkFactor; }
+            if (boxCollider != null) {
+                var spriteHeightInMeters = self.localBounds.extents.y * 2;
+                boxCollider.size = self.size * (boxColliderShrinkFactor * spriteHeightInMeters);
+            }
         }
         
     }
