@@ -64,6 +64,11 @@ namespace com.csutil.model.ecs {
                 return child;
             }
         }
+        
+        public static void SetActive<T>(this IEntity<T> self, bool newIsActive, Func<IEntity<T>, bool, T> setActive) where T : IEntityData {
+            if (self.IsActive == newIsActive) { return; }
+            self.Ecs.Update(setActive(self, newIsActive));
+        }
 
         public static bool Destroy<T>(this IEntity<T> self, Func<IEntity<T>, string, T> removeChildIdFromParent) where T : IEntityData {
             if (self.IsDestroyed()) { return false; }
