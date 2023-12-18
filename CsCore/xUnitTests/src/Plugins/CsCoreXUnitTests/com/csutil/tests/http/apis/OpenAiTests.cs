@@ -63,7 +63,7 @@ namespace com.csutil.integrationTests.http {
             var response = await openAi.ChatGpt(new ChatGpt.Request(messages));
             ChatGpt.Line newLine = response.choices.Single().message;
             Assert.Equal("" + ChatGpt.Role.assistant, newLine.role);
-            Assert.NotEmpty(newLine.content);
+            Assert.NotEmpty(newLine.content.ToString());
 
             messages.Add(newLine);
             Log.d("response.content=" + JsonWriter.AsPrettyString(messages));
@@ -83,7 +83,7 @@ namespace com.csutil.integrationTests.http {
             var response = await openAi.ChatGpt(request);
             ChatGpt.Line newLine = response.choices.Single().message;
             Assert.Equal("" + ChatGpt.Role.assistant, newLine.role);
-            Assert.NotEmpty(newLine.content);
+            Assert.NotEmpty(newLine.content.ToString());
 
             messages.Add(newLine);
             Log.d("response.content=" + JsonWriter.AsPrettyString(messages));
@@ -172,19 +172,43 @@ namespace com.csutil.integrationTests.http {
             var url = result.data.First().url;
             Assert.NotEmpty(url);
 
-            var resultImageToText = await openAi.ImageToText(new OpenAi.Vision.Request() {
-            }, url);
-            var completion = resultImageToText.choices[0].message.content;
+            var messages = new List<ChatGpt.Line>() {
+                new ChatGpt.Line(ChatGpt.Role.user, content: getFormattedContent(url))
+            };
+            var request = new ChatGpt.Request(messages);
+            request.model = "gpt-4-vision-preview";
 
-            Assert.NotEmpty(completion);
-            Log.d("result id is: " + completion);
-            Assert.Contains("dog", completion);
+            var resultImageToText = await openAi.ImageToText(request);
+            var guessedContent = resultImageToText.choices[0].message.content.ToString();
+
+            Assert.NotEmpty(guessedContent);
+            Log.d("result id is: " + guessedContent);
+            Assert.Contains("dog", guessedContent);
+        }
+        private List<Dictionary<string, object>> getFormattedContent(string url) {
+            var content = new List<Dictionary<string, object>>();
+            content.Add(new Dictionary<string, object>()
+            {
+                {"type","text"},
+                {"text","What's in this image?"},
+            });
+
+            content.Add(new Dictionary<string, object>()
+            {
+                {"type","image_url"},
+                {"image_url",new Dictionary<string,string>{
+                    {"url",url},
+                    {"detail","high"}
+                }},
+            });
+            return content;
         }
 
         private static ChatGpt.Request NewGpt4JsonRequestWithFullConversation(List<ChatGpt.Line> conversationSoFar) {
             var request = new ChatGpt.Request(conversationSoFar);
             // Use json as the response format:
-            request.response_format = ChatGpt.Request.ResponseFormat.json;
+            // !! this had to be commented, otherwise the vision api cannot work with chatgpt.request as parameter
+            // request.response_format = ChatGpt.Request.ResponseFormat.json;
             request.model = "gpt-4-1106-preview"; // See https://platform.openai.com/docs/models/gpt-4
             return request;
         }
