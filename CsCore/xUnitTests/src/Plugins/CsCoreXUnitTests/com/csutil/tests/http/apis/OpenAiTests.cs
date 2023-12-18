@@ -166,23 +166,20 @@ namespace com.csutil.integrationTests.http {
         [Fact]
         public async Task ExampleUsage5_ImageToText() {
             var openAi = new OpenAi(await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey"));
-            // var prompt = "A picture of a dog";
-            var result = await openAi.ImageToText(new OpenAi.Vision.Request() {
 
-            }, "https://preview.redd.it/i-got-bored-so-i-decided-to-draw-a-random-image-on-the-v0-4ig97vv85vjb1.png?width=1280&format=png&auto=webp&s=7177756d1f393b6e093596d06e1ba539f723264b");
-            var completion = result.choices[0].message.content;
+            var prompt = "A picture of a dog";
+            var result = await openAi.TextToImage(new OpenAi.Image.Request() { prompt = prompt });
+            var url = result.data.First().url;
+            Assert.NotEmpty(url);
 
+            var resultImageToText = await openAi.ImageToText(new OpenAi.Vision.Request() {
+            }, url);
+            var completion = resultImageToText.choices[0].message.content;
+
+            Assert.NotEmpty(completion);
             Log.d("result id is: " + completion);
+            Assert.Contains("dog", completion);
         }
-        // Assert.NotEmpty(result);
-
-        // await openAi.ImageTo
-
-        // upload image to openai
-        // get response and assert that dog is in response
-
-
-
 
         private static ChatGpt.Request NewGpt4JsonRequestWithFullConversation(List<ChatGpt.Line> conversationSoFar) {
             var request = new ChatGpt.Request(conversationSoFar);
