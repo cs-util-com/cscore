@@ -40,7 +40,7 @@ namespace com.csutil.http.apis
         }
 
         /// <summary> https://beta.openai.com/docs/api-reference/images/create </summary>
-        public Task<Vision.Response> ImageToText(Vision.Request requestParams, string imageURL)
+        public Task<ChatGpt.Response> ImageToText(Vision.Request requestParams, string imageURL)
         {
             var request = new Uri("https://api.openai.com/v1/chat/completions").SendPOST();
 
@@ -77,7 +77,7 @@ namespace com.csutil.http.apis
             };
 
 
-            return request.WithAuthorization(apiKey).WithJsonContent(finalRequestParams).GetResult<Vision.Response>();
+            return request.WithAuthorization(apiKey).WithJsonContent(finalRequestParams).GetResult<ChatGpt.Response>();
         }
 
 
@@ -95,42 +95,6 @@ namespace com.csutil.http.apis
 
                     public List<Dictionary<string, object>> content { get; set; }
                 }
-            }
-            public class Response
-            {
-                public string id { get; set; }
-
-                public string @object { get; set; }
-                public int created { get; set; }
-                public string model { get; set; }
-                public Usage usage { get; set; }
-                public List<Choice> choices { get; set; }
-                public class Choice
-                {
-                    public Message message { get; set; }
-                    public FinishDetails finish_details { get; set; }
-                    public int index { get; set; }
-                }
-
-                public class FinishDetails
-                {
-                    public string type { get; set; }
-                    public string stop { get; set; }
-                }
-
-                public class Message
-                {
-                    public string role { get; set; }
-                    public string content { get; set; }
-                }
-
-                public class Usage
-                {
-                    public int prompt_tokens { get; set; }
-                    public int completion_tokens { get; set; }
-                    public int total_tokens { get; set; }
-                }
-
             }
         }
 
@@ -357,6 +321,7 @@ namespace com.csutil.http.apis
             {
                 public Line message { get; set; }
                 public string finish_reason { get; set; }
+                public string finish_details { get; set; }
                 public int index { get; set; }
             }
 
