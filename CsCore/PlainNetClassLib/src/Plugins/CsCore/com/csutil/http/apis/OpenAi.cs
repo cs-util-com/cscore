@@ -264,13 +264,20 @@ namespace com.csutil.http.apis {
             public readonly object content;
 
 
-            [JsonConstructor]
             public Line(string role, List<Dictionary<string, object>> content) {
                 this.role = role;
                 this.content = content;
             }
-
             public Line(Role role, List<Dictionary<string, object>> content) {
+                this.role = role.ToString();
+                this.content = content;
+            }
+            [JsonConstructor]
+            public Line(string role, string content) {
+                this.role = role;
+                this.content = content;
+            }
+            public Line(Role role, string content) {
                 this.role = role.ToString();
                 this.content = content;
             }
@@ -312,7 +319,6 @@ namespace com.csutil.http.apis {
             public class Choice {
                 public Line message { get; set; }
                 public string finish_reason { get; set; }
-                public string finish_details { get; set; }
                 public int index { get; set; }
             }
 
@@ -344,6 +350,37 @@ namespace com.csutil.http.apis {
         }
 
         public static T ParseNewLineContentAsJson<T>(this ChatGpt.Line newLine) {
+            var responseText = (string)newLine.content;
+            if (responseText.StartsWith("```json\n")) {
+                responseText = responseText.Replace("```json\n", "");
+            }
+            if (responseText.EndsWith("\n```")) {
+                responseText = responseText.Replace("\n```", "");
+            }
+            return JsonReader.GetReader().Read<T>(responseText);
+        }
+
+    }
+
+    public static class VisionGptExtention {
+
+        public static void AddUserLineWithJsonResultStructure<T>(this ICollection<VisionGpt.Line> self, string userMessage, T exampleResponse) {
+            self.Add(new VisionGpt.Line(VisionGpt.Role.user, content: userMessage));
+            self.Add(new VisionGpt.Line(VisionGpt.Role.system, content: CreateJsonInstructions(exampleResponse)));
+        }
+
+        public static string CreateJsonInstructions<T>(T exampleResponse) {
+            var schemaGenerator = new ModelToJsonSchema(nullValueHandling: Newtonsoft.Json.NullValueHandling.Ignore);
+            var className = typeof(T).Name;
+            JsonSchema schema = schemaGenerator.ToJsonSchema(className, exampleResponse);
+            var schemaJson = JsonWriter.GetWriter(exampleResponse).Write(schema);
+            var exampleJson = JsonWriter.GetWriter(exampleResponse).Write(exampleResponse);
+            var jsonSchemaInfos = " This is the json schema that describes the format you have to use for your json response: " + schemaJson;
+            var exampleJsonInfos = " And for that schema, this would an example of a valid response: " + exampleJson;
+            return jsonSchemaInfos + exampleJsonInfos;
+        }
+
+        public static T ParseNewLineContentAsJson<T>(this VisionGpt.Line newLine) {
             var responseText = (string)newLine.content;
             if (responseText.StartsWith("```json\n")) {
                 responseText = responseText.Replace("```json\n", "");
