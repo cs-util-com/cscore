@@ -216,10 +216,6 @@ namespace com.csutil.http.apis {
             public int max_tokens { get; set; }
             public List<Line> messages { get; set; }
 
-            /// <summary> typically null, but if the AI e.g. should respond only with json it should be ChatGpt.Request.ResponseFormat.json </summary>
-            // this parameter is not allowed for vision api endpoint
-            // public ResponseFormat response_format { get; set; }
-
             public Request(List<Line> messages, int max_tokens = 4096) {
                 var tokenCountForMessages = JsonWriter.GetWriter(this).Write(messages).Length;
                 if (max_tokens + tokenCountForMessages > 4096) {
@@ -229,11 +225,27 @@ namespace com.csutil.http.apis {
                 this.max_tokens = max_tokens;
             }
 
+
+        }
+        public class JsonRequest : Request {
+            public JsonRequest(List<Line> messages, int max_tokens = 4096) : base(messages, max_tokens) {
+                var tokenCountForMessages = JsonWriter.GetWriter(this).Write(messages).Length;
+                if (max_tokens + tokenCountForMessages > 4096) {
+                    max_tokens = 4096 - tokenCountForMessages;
+                }
+                this.messages = messages;
+                this.max_tokens = max_tokens;
+            }
+
+            /// <summary> typically null, but if the AI e.g. should respond only with json it should be ChatGpt.Request.ResponseFormat.json </summary>
+            // this parameter is not allowed for vision api endpoint
+            public ResponseFormat response_format { get; set; }
             public class ResponseFormat {
                 /// <summary> See https://platform.openai.com/docs/guides/text-generation/json-mode </summary>
                 public static ResponseFormat json = new ResponseFormat() { type = "json_object" };
                 public string type { get; set; }
             }
+
 
         }
 

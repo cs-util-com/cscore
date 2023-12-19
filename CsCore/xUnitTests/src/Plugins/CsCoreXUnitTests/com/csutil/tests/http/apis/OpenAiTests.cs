@@ -205,10 +205,10 @@ namespace com.csutil.integrationTests.http {
         }
 
         private static ChatGpt.Request NewGpt4JsonRequestWithFullConversation(List<ChatGpt.Line> conversationSoFar) {
-            var request = new ChatGpt.Request(conversationSoFar);
+            var request = new ChatGpt.JsonRequest(conversationSoFar);
             // Use json as the response format:
             // !! this had to be commented, otherwise the vision api cannot work with chatgpt.request as parameter
-            // request.response_format = ChatGpt.Request.ResponseFormat.json;
+            request.response_format = ChatGpt.JsonRequest.ResponseFormat.json;
             request.model = "gpt-4-1106-preview"; // See https://platform.openai.com/docs/models/gpt-4
             return request;
         }
