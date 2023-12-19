@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -63,7 +63,7 @@ namespace com.csutil.integrationTests.http {
             var response = await openAi.ChatGpt(new ChatGpt.Request(messages));
             ChatGpt.Line newLine = response.choices.Single().message;
             Assert.Equal("" + ChatGpt.Role.assistant, newLine.role);
-            Assert.NotEmpty(newLine.content.ToString());
+            Assert.NotEmpty(newLine.content);
 
             messages.Add(newLine);
             Log.d("response.content=" + JsonWriter.AsPrettyString(messages));
@@ -83,7 +83,7 @@ namespace com.csutil.integrationTests.http {
             var response = await openAi.ChatGpt(request);
             ChatGpt.Line newLine = response.choices.Single().message;
             Assert.Equal("" + ChatGpt.Role.assistant, newLine.role);
-            Assert.NotEmpty(newLine.content.ToString());
+            Assert.NotEmpty(newLine.content);
 
             messages.Add(newLine);
             Log.d("response.content=" + JsonWriter.AsPrettyString(messages));
@@ -172,11 +172,10 @@ namespace com.csutil.integrationTests.http {
             var url = result.data.First().url;
             Assert.NotEmpty(url);
 
-            var messages = new List<ChatGpt.Line>() {
-                new ChatGpt.Line(ChatGpt.Role.user, content: getFormattedContent(url))
+            var messages = new List<VisionGpt.Line>() {
+                new VisionGpt.Line(VisionGpt.Role.user, content: getFormattedContent(url))
             };
-            var request = new ChatGpt.Request(messages);
-            request.model = "gpt-4-vision-preview";
+            var request = new VisionGpt.Request(messages);
 
             var resultImageToText = await openAi.ImageToText(request);
             var guessedContent = resultImageToText.choices[0].message.content.ToString();
@@ -205,10 +204,9 @@ namespace com.csutil.integrationTests.http {
         }
 
         private static ChatGpt.Request NewGpt4JsonRequestWithFullConversation(List<ChatGpt.Line> conversationSoFar) {
-            var request = new ChatGpt.JsonRequest(conversationSoFar);
+            var request = new ChatGpt.Request(conversationSoFar);
             // Use json as the response format:
-            // !! this had to be commented, otherwise the vision api cannot work with chatgpt.request as parameter
-            request.response_format = ChatGpt.JsonRequest.ResponseFormat.json;
+            request.response_format = ChatGpt.Request.ResponseFormat.json;
             request.model = "gpt-4-1106-preview"; // See https://platform.openai.com/docs/models/gpt-4
             return request;
         }

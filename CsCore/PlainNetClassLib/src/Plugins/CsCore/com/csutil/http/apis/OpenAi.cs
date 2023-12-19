@@ -35,9 +35,9 @@ namespace com.csutil.http.apis {
         }
 
         /// <summary> https://beta.openai.com/docs/api-reference/images/create </summary>
-        public Task<ChatGpt.Response> ImageToText(ChatGpt.Request requestParams) {
+        public Task<VisionGpt.Response> ImageToText(VisionGpt.Request requestParams) {
             var request = new Uri("https://api.openai.com/v1/chat/completions").SendPOST();
-            return request.WithAuthorization(apiKey).WithJsonContent(requestParams).GetResult<ChatGpt.Response>();
+            return request.WithAuthorization(apiKey).WithJsonContent(requestParams).GetResult<VisionGpt.Response>();
         }
 
         /// <summary> See https://platform.openai.com/docs/guides/chat </summary>
@@ -183,16 +183,12 @@ namespace com.csutil.http.apis {
         public class Line {
 
             public readonly string role;
-            public readonly object content;
+            public readonly string content;
 
 
             [JsonConstructor]
             public Line(string role, string content) {
                 this.role = role;
-                this.content = content;
-            }
-            public Line(Role role, List<Dictionary<string, object>> content) {
-                this.role = role.ToString();
                 this.content = content;
             }
 
@@ -216,6 +212,9 @@ namespace com.csutil.http.apis {
             public int max_tokens { get; set; }
             public List<Line> messages { get; set; }
 
+            /// <summary> typically null, but if the AI e.g. should respond only with json it should be ChatGpt.Request.ResponseFormat.json </summary>
+            public ResponseFormat response_format { get; set; }
+
             public Request(List<Line> messages, int max_tokens = 4096) {
                 var tokenCountForMessages = JsonWriter.GetWriter(this).Write(messages).Length;
                 if (max_tokens + tokenCountForMessages > 4096) {
@@ -225,10 +224,73 @@ namespace com.csutil.http.apis {
                 this.max_tokens = max_tokens;
             }
 
+            public class ResponseFormat {
+                /// <summary> See https://platform.openai.com/docs/guides/text-generation/json-mode </summary>
+                public static ResponseFormat json = new ResponseFormat() { type = "json_object" };
+                public string type { get; set; }
+            }
 
         }
-        public class JsonRequest : Request {
-            public JsonRequest(List<Line> messages, int max_tokens = 4096) : base(messages, max_tokens) {
+
+        public class Response {
+
+            public string id { get; set; }
+            public string @object { get; set; }
+            public int created { get; set; }
+            public string model { get; set; }
+            public Usage usage { get; set; }
+            public List<Choice> choices { get; set; }
+
+            public class Choice {
+                public Line message { get; set; }
+                public string finish_reason { get; set; }
+                public int index { get; set; }
+            }
+
+            public class Usage {
+                public int prompt_tokens { get; set; }
+                public int completion_tokens { get; set; }
+                public int total_tokens { get; set; }
+            }
+
+        }
+
+    }
+    public class VisionGpt {
+
+        public class Line {
+
+            public readonly string role;
+            public readonly object content;
+
+
+            [JsonConstructor]
+            public Line(string role, List<Dictionary<string, object>> content) {
+                this.role = role;
+                this.content = content;
+            }
+
+            public Line(Role role, List<Dictionary<string, object>> content) {
+                this.role = role.ToString();
+                this.content = content;
+            }
+
+        }
+
+        public enum Role { system, user, assistant }
+
+        public class Request {
+
+            /// <summary> See https://beta.openai.com/docs/models/overview </summary>
+            public string model = "gpt-4-vision-preview";
+
+            /// <summary> The maximum number of tokens to generate in the completion.
+            /// The token count of your prompt plus max_tokens cannot exceed the model's context length.
+            /// Most models have a context length of 2048 tokens (except for the newest models, which support 4096). </summary>
+            public int max_tokens { get; set; }
+            public List<Line> messages { get; set; }
+
+            public Request(List<Line> messages, int max_tokens = 4096) {
                 var tokenCountForMessages = JsonWriter.GetWriter(this).Write(messages).Length;
                 if (max_tokens + tokenCountForMessages > 4096) {
                     max_tokens = 4096 - tokenCountForMessages;
@@ -236,17 +298,6 @@ namespace com.csutil.http.apis {
                 this.messages = messages;
                 this.max_tokens = max_tokens;
             }
-
-            /// <summary> typically null, but if the AI e.g. should respond only with json it should be ChatGpt.Request.ResponseFormat.json </summary>
-            // this parameter is not allowed for vision api endpoint
-            public ResponseFormat response_format { get; set; }
-            public class ResponseFormat {
-                /// <summary> See https://platform.openai.com/docs/guides/text-generation/json-mode </summary>
-                public static ResponseFormat json = new ResponseFormat() { type = "json_object" };
-                public string type { get; set; }
-            }
-
-
         }
 
         public class Response {
@@ -274,7 +325,6 @@ namespace com.csutil.http.apis {
         }
 
     }
-
     public static class ChatGptExtensions {
 
         public static void AddUserLineWithJsonResultStructure<T>(this ICollection<ChatGpt.Line> self, string userMessage, T exampleResponse) {
