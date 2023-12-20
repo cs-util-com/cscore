@@ -149,6 +149,23 @@ namespace com.csutil {
             }
             throw new InvalidOperationException("Invalid row index.");
         }
+        
+        public static Matrix4x4 WithPosition(this Matrix4x4 self, Vector3 newPosition) {
+            self.M41 = newPosition.X;
+            self.M42 = newPosition.Y;
+            self.M43 = newPosition.Z;
+            return self;
+        }
+        
+        public static Matrix4x4 WithRotation(this Matrix4x4 self, Quaternion newRotation) {
+            self.Decompose(out var scale, out var _, out var translation);
+            return Compose(translation, newRotation, scale);
+        }
+        
+        public static Matrix4x4 WithScale(this Matrix4x4 self, Vector3 newScale) {
+            self.Decompose(out var _, out var rotation, out var translation);
+            return Compose(translation, rotation, newScale);
+        }
 
     }
 

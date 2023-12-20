@@ -404,6 +404,24 @@ namespace com.csutil.tests {
             }
 
             [Fact]
+            public void TestMatrix4x4SetPositionRotationScale() {
+                var matrix = Matrix4x4.Identity;
+                var testPostion = new Vector3(1, 2, 3);
+                var testRotation = Quaternion.CreateFromYawPitchRoll(45 * degreeToRad, 95 * degreeToRad, 110 * degreeToRad);
+                var testScale = new Vector3(4, 4, 4);
+                
+                var newMatrix = matrix.WithPosition(testPostion).WithRotation(testRotation).WithScale(testScale);
+                Assert.Equal(Matrix4x4.Identity, matrix); // The old matrix m is not changed
+                
+                // The new matrix has the expected values:
+                newMatrix.Decompose(out var scale, out var rotation, out var translation);
+                Assert.Equal(testPostion, translation);
+                var rotDelta = testRotation.GetRotationDeltaInDegreeTo(rotation);
+                Assert.True(rotDelta < 0.1, $"rotDelta={rotDelta}");
+                Assert.Equal(testScale, scale);
+            }
+
+            [Fact]
             public void TestCurveFitting1() {
 
                 // Points from a simple y=x^2 function:
