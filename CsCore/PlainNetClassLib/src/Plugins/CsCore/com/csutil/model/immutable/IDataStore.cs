@@ -14,7 +14,18 @@ namespace com.csutil.model.immutable {
 
     }
 
-    public interface IDataStore<T> : IHasReducer<T> {
+    public interface IDataStoreDispatcher {
+        
+        /// <summary> Dispatches an action to the store so that afterwards GetState()
+        /// can be called to get the new state. </summary>
+        /// <param name="action"> The action to dispatch to the store </param>
+        /// <returns> the dispatcher decides what object is returned, typically its the
+        /// action itself </returns>
+        object Dispatch(object action);
+        
+    }
+    
+    public interface IDataStore<T> : IDataStoreDispatcher, IHasReducer<T> {
 
         /// <summary> The onStateChanged callback is called after the state of the
         /// store was changed </summary>
@@ -23,13 +34,6 @@ namespace com.csutil.model.immutable {
         /// <summary> Returns the current state of the store </summary>
         T GetState();
 
-        /// <summary> Dispatches an action to the store so that afterwards GetState()
-        /// can be called to get the new state. </summary>
-        /// <param name="action"> The action to dispatch to the store </param>
-        /// <returns> the dispatcher decides what object is returned, typically its the
-        /// action itself </returns>
-        object Dispatch(object action);
-        
     }
 
 }
