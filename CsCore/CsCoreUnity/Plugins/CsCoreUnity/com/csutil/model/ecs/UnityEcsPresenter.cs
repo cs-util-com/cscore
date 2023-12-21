@@ -81,65 +81,53 @@ namespace com.csutil.model.ecs {
             }
             if (oldState.ParentId != newState.ParentId) {
                 if (newState.ParentId != null) {
-                    go.transform.SetParent(_entityViews[newState.ParentId].transform);
+                    OnChangeParent(newState, go);
                 } else {
-                    go.transform.SetParent(targetView.transform);
+                    OnDetachFromParent(go);
                 }
             }
             if (oldState.LocalPose != newState.LocalPose) {
-                iEntity.LocalPose().ApplyTo(go.transform);
+                OnPoseUpdate(iEntity, go, iEntity.LocalPose());
             }
-            if (oldState.IsActive != newState.IsActive) {
-                go.SetActive(newState.IsActive);
+            var newIsActiveState = newState.IsActive;
+            if (oldState.IsActive != newIsActiveState) {
+                OnToggleActiveState(go, newIsActiveState);
             }
             var oldComps = oldState.Components;
             newState.Components.CalcEntryChangesToOldStateV2<IReadOnlyDictionary<string, IComponentData>, string, IComponentData>(ref oldComps,
                 added => onCompAdded(iEntity, added, targetParentGo: go),
-                updated => onCompUpdated(iEntity, oldState.Components[updated.Key], updated, targetParentGo: go),
-                deleted => onCompRemoved(iEntity, deleted, targetParentGo: go)
+                updated => OnComponentUpdated(iEntity, oldState.Components[updated.Key], updated, targetParentGo: go),
+                deleted => OnCompentRemoved(iEntity, deleted, targetParentGo: go)
             );
         }
+        
+        protected virtual void OnToggleActiveState(GameObject go, bool newIsActiveState) { go.SetActive(newIsActiveState); }
+
+        protected virtual void OnChangeParent(T newState, GameObject go) { go.transform.SetParent(_entityViews[newState.ParentId].transform); }
+        
+        protected virtual void OnDetachFromParent(GameObject go) { go.transform.SetParent(targetView.transform); }
+
+        protected virtual void OnPoseUpdate(IEntity<T> iEntity, GameObject go, Pose3d newLocalPose) { newLocalPose.ApplyTo(go.transform); }
 
         private void onCompAdded(IEntity<T> iEntity, KeyValuePair<string, IComponentData> added, GameObject targetParentGo) {
-            var createdComponent = AddComponentTo(targetParentGo, added.Value);
+            var createdComponent = AddComponentTo(targetParentGo, added.Value, iEntity);
             if (createdComponent == null) {
-                throw new NullReferenceException($"AddComponentTo returned null for component={added.Value} and targetParentGo={targetParentGo}");
+                throw Log.e($"AddComponentTo returned NULL for component={added.Value} and targetParentGo={targetParentGo}", targetParentGo);
             }
             _componentViews.Add(added.Key, createdComponent);
             createdComponent.OnUpdateUnityComponent(iEntity, default, added.Value);
         }
 
-        protected abstract IComponentPresenter<T> AddComponentTo(GameObject targetGo, IComponentData componentModel);
+        protected abstract IComponentPresenter<T> AddComponentTo(GameObject targetGo, IComponentData componentModel, IEntity<T> iEntity);
 
-        private void onCompRemoved(IEntity<T> iEntity, string deleted, GameObject targetParentGo) {
+        protected virtual void OnCompentRemoved(IEntity<T> iEntity, string deleted, GameObject targetParentGo) {
             _componentViews[deleted].DisposeV2();
             _componentViews.Remove(deleted);
         }
 
-        private void onCompUpdated(IEntity<T> iEntity, IComponentData oldState, KeyValuePair<string, IComponentData> updatedState, GameObject targetParentGo) {
+        protected virtual void OnComponentUpdated(IEntity<T> iEntity, IComponentData oldState, KeyValuePair<string, IComponentData> updatedState, GameObject targetParentGo) {
             var compView = _componentViews[updatedState.Key];
             compView.OnUpdateUnityComponent(iEntity, oldState, updatedState.Value);
-        }
-
-    }
-
-    public interface IComponentPresenter<T> : IDisposableV2 where T : IEntityData {
-        void OnUpdateUnityComponent(IEntity<T> iEntity, IComponentData oldState, IComponentData updatedState);
-    }
-
-    public static class PoseExtensionsForUnity {
-
-        public static void ApplyTo(this Pose3d self, Transform goTransform) {
-            goTransform.SetLocalPositionAndRotation(self.position.ToUnityVec(), self.rotation.ToUnityRot());
-            goTransform.localScale = self.scale.ToUnityVec();
-        }
-
-        public static Quaternion ToUnityRot(this System.Numerics.Quaternion self) {
-            return new Quaternion(self.X, self.Y, self.Z, self.W);
-        }
-
-        public static Vector3 ToUnityVec(this System.Numerics.Vector3 self) {
-            return new Vector3(self.X, self.Y, self.Z);
         }
 
     }
