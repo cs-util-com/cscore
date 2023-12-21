@@ -80,6 +80,18 @@ namespace com.csutil {
             return rotated;
         }
 
+        public static Quaternion LookRotation(Vector3 directionVector, Vector3 upVector) {
+            var dir = Vector3.Normalize(directionVector);
+            var right = Vector3.Normalize(Vector3.Cross(upVector, dir));
+            var up = Vector3.Cross(dir, right);
+            var rotMat = new Matrix4x4(
+                right.X, right.Y, right.Z, 0,
+                up.X, up.Y, up.Z, 0,
+                dir.X, dir.Y, dir.Z,
+                0, 0, 0, 0, 1);
+            return Quaternion.CreateFromRotationMatrix(rotMat);
+        }
+
     }
 
 }
