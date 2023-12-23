@@ -32,6 +32,7 @@ namespace com.csutil {
                     // Lerp the rotation of the object to face the target rotation
                     var vector = transform.position - targetToLookAt.position;
                     if (onlyRotateAroundY) { vector.y = 0; }
+                    if (vector.magnitude < 0.001f) { return; }
                     var targetRotation = Quaternion.LookRotation(vector);
                     transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * lerpSpeed);
                 } else {
