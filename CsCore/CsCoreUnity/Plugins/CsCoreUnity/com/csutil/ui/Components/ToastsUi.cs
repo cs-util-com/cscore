@@ -18,6 +18,7 @@ namespace com.csutil {
         }
 
         private static ToastsUi InitToastsUi() {
+            if (!Application.isPlaying) { throw Log.e("Showing toasts not supported in edit mode"); }
             var targetCanvas = RootCanvas.GetOrAddRootCanvasV2().gameObject;
             var toastContainer = targetCanvas.AddChild(ResourcesV2.LoadPrefab("Messages/ToastContainer1"));
             return toastContainer.GetOrAddComponent<ToastsUi>();
