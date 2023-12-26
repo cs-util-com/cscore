@@ -19,6 +19,7 @@ namespace com.csutil.model.immutable {
         }
 
         /// <summary> This middleware will automatically log all dispatched actions to the store to the AppFlow logic to track them there </summary>
+        [Obsolete("Use store.AddStoreMutationEventBroadcaster() instead")]
         public static Middleware<T> NewMutationBroadcasterMiddleware<T>(object extraArgument = null) {
             return (IDataStore<T> store) => {
                 return (Dispatcher innerDispatcher) => {
@@ -29,6 +30,14 @@ namespace com.csutil.model.immutable {
                     return outerDispatcher;
                 };
             };
+        }
+
+        /// <summary> Broadcasts all actions on the EventBus that are dispatched to the store </summary>
+        public static Action AddStoreMutationEventBroadcaster<T>(this IDataStore<T> store) {
+            return store.AddStateChangeListener(x => x, delegate {
+                object action = store.LastDispatchedAction;
+                EventBus.instance.Publish(EventConsts.catMutation, "" + action, action);
+            }, triggerInstantToInit: false);
         }
 
         public static Middleware<T> NewLoggingMiddleware<T>(bool showStateDiff = true, int maxMsBudgetForLoggingChanges = 1000) {
