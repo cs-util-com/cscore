@@ -8,7 +8,8 @@ namespace com.csutil.model {
         Task<bool> IsFeatureUnlocked(T featureFlag);
         Task<IEnumerable<T>> GetLockedFeatures();
         Task<IEnumerable<T>> GetUnlockedFeatures();
-
+        Task<int> GetLatestXp();
+        
     }
 
 }

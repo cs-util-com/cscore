@@ -179,7 +179,7 @@ namespace com.csutil.integrationTests.model {
             // Get the analtics store for category "Mutations":
             var mutationStore = await analytics.GetStoreForCategory(EventConsts.catMutation).GetAll();
             Assert.Equal(eventCount, mutationStore.Count()); // All events so far were mutations
-            Assert.True(eventCount <= xpSystem.currentXp); // The user received xp for each mutation
+            Assert.True(eventCount <= await xpSystem.GetLatestXp()); // The user received xp for each mutation
 
             Assert.Equal(1000, flag4.requiredXp); // The user needs >= 1000 xp for the feature
 
@@ -199,6 +199,8 @@ namespace com.csutil.integrationTests.model {
             public Task<IEnumerable<FeatureFlag>> GetLockedFeatures() { throw new NotImplementedException(); }
 
             public Task<IEnumerable<FeatureFlag>> GetUnlockedFeatures() { throw new NotImplementedException(); }
+            
+            public Task<int> GetLatestXp() { return Task.FromResult(currentXp); }
 
         }
 
