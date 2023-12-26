@@ -71,6 +71,7 @@ namespace com.csutil.model.immutable {
             }
 
             public T GetState() { return _slicedStore.GetState().GetSlice<T>(); }
+            public object LastDispatchedAction => _slicedStore.LastDispatchedAction;
 
             public object Dispatch(object action) { return _slicedStore.Dispatch(action); }
 

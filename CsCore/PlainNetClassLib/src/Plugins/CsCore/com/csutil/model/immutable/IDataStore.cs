@@ -34,6 +34,8 @@ namespace com.csutil.model.immutable {
         /// <summary> Returns the current state of the store </summary>
         T GetState();
 
+        /// <summary> The last successfully dispatched action to the store (or null) </summary>
+        object LastDispatchedAction { get; }
     }
 
 }
