@@ -150,8 +150,20 @@ namespace com.csutil {
 
         /// <summary> When the <see cref="GameObject"/> is destroyed call Dispose on a target <see cref="IDisposable"/> </summary>
         public static T SetUpDisposeOnDestroy<T>(this GameObject self, T objectToDispose) where T : IDisposable {
-            self.AddComponent<DisposerMono>().disposable = objectToDispose;
+            self.AddComponent<OnDestroyMono>().onDestroy.AddListener(() => {
+                objectToDispose?.Dispose();
+            });
             return objectToDispose;
+        }
+
+        public static void UnregisterOnDestroy<T>(this GameObject self, object injector) {
+            UnregisterOnDestroy(self, injector, typeof(T));
+        }
+        
+        public static void UnregisterOnDestroy(this GameObject self, object injector, Type type) {
+            self.AddComponent<OnDestroyMono>().onDestroy.AddListener(() => {
+                IoC.inject.UnregisterInjector(injector, type);
+            });
         }
 
         /// <summary> When the target <see cref="GameObject"/> is destroyed call Dispose on a <see cref="IDisposable"/> </summary>
