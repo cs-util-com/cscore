@@ -202,17 +202,28 @@ namespace com.csutil.integrationTests.model {
 
         }
 
+        [Obsolete("See TestDefaultProgressionSystem2 instead")]
         [Fact]
         public async Task TestDefaultProgressionSystem() {
-
-            using var cleanup = new CleanupHelper();
-
             // Get your key from https://console.developers.google.com/apis/credentials
             var apiKey = await IoC.inject.GetAppSecrets().GetSecret("GoogleSheetsV4Key");
             // https://docs.google.com/spreadsheets/d/1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM contains the sheetId:
             var sheetId = "1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM";
             var sheetName = "MySheet1"; // Has to match the sheet name
             var googleSheetsStore = new GoogleSheetsKeyValueStore(new InMemoryKeyValueStore(), apiKey, sheetId, sheetName);
+            await RunTestDefaultProgressionSystem(googleSheetsStore);
+        }
+
+        [Fact]
+        public async Task TestDefaultProgressionSystem2() {
+            // https://docs.google.com/spreadsheets/d/1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM contains the sheetId:
+            var uri = new Uri("https://docs.google.com/spreadsheets/d/e/2PACX-1vRoktXHWp9P014GbReS-ueS980qt3uU5taGKhsJifG6jTtvws7Rcg06tsMa2evVDUp3OPRZQuOKR2MM/pub?output=csv");
+            var googleSheetsStore = new GoogleSheetsKeyValueStoreV2(new InMemoryKeyValueStore(), uri);
+            await RunTestDefaultProgressionSystem(googleSheetsStore);
+        }
+
+        private async Task RunTestDefaultProgressionSystem(IKeyValueStore googleSheetsStore) {
+            using var cleanup = new CleanupHelper();
             var ffm = new FeatureFlagManager<FeatureFlag>(new FeatureFlagStore(new InMemoryKeyValueStore(), googleSheetsStore));
             var injector1 = IoC.inject.SetSingleton<FeatureFlagManager<FeatureFlag>>(ffm);
             cleanup.AddInjectorCleanup<FeatureFlagManager<FeatureFlag>>(injector1);

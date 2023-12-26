@@ -39,10 +39,16 @@ namespace com.csutil.model {
 
     public static class DefaultProgressionSystem {
 
+        [Obsolete("Consider using SetupWithGSheetsV2 instead")]
         public static async Task<ProgressionSystem<FeatureFlag>> SetupWithGSheets(string apiKey, string sheetId, string sheetName, HashSet<Tuple<object, Type>> collectedInjectors = null) {
             var cachedFlags = FileBasedKeyValueStore.New("FeatureFlags");
             var cachedFlagsLocalData = FileBasedKeyValueStore.New("FeatureFlags_LocalData");
             var googleSheetsStore = new GoogleSheetsKeyValueStore(cachedFlags, apiKey, sheetId, sheetName);
+            return await Setup(new FeatureFlagStore(cachedFlagsLocalData, googleSheetsStore), collectedInjectors);
+        }
+        
+        public static async Task<ProgressionSystem<FeatureFlag>> SetupWithGSheetsV2(Uri gSheetsUri, IKeyValueStore cachedFlagsLocalData, IKeyValueStore gSheetsChache, HashSet<Tuple<object, Type>> collectedInjectors = null) {
+            var googleSheetsStore = new GoogleSheetsKeyValueStoreV2(gSheetsChache, gSheetsUri);
             return await Setup(new FeatureFlagStore(cachedFlagsLocalData, googleSheetsStore), collectedInjectors);
         }
 
