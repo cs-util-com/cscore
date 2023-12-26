@@ -48,9 +48,9 @@ namespace com.csutil.model {
             return await Setup(new FeatureFlagStore(cachedFlagsLocalData, googleSheetsStore), collectedInjectors);
         }
 
-        public static async Task<ProgressionSystem<FeatureFlag>> SetupWithGSheetsV2(Uri gSheetsUri, DirectoryEntry dir, IKeyValueStore cachedFlagsLocalData, IKeyValueStore gSheetsChache, HashSet<Tuple<object, Type>> collectedInjectors = null) {
+        public static async Task<ProgressionSystem<FeatureFlag>> SetupWithGSheetsV2(Uri gSheetsUri, DirectoryEntry localAnalyticsFolder, IKeyValueStore cachedFlagsLocalData, IKeyValueStore gSheetsChache, HashSet<Tuple<object, Type>> collectedInjectors = null) {
             var googleSheetsStore = new GoogleSheetsKeyValueStoreV2(gSheetsChache, gSheetsUri);
-            return await SetupV2(new FeatureFlagStore(cachedFlagsLocalData, googleSheetsStore), dir, collectedInjectors);
+            return await SetupV2(new FeatureFlagStore(cachedFlagsLocalData, googleSheetsStore), localAnalyticsFolder, collectedInjectors);
         }
 
         [Obsolete("Use SetupV2 instead")]
@@ -58,8 +58,8 @@ namespace com.csutil.model {
             return await Setup(featureFlagStore, new LocalAnalytics(), collectedInjectors);
         }
 
-        public static async Task<ProgressionSystem<FeatureFlag>> SetupV2(KeyValueStoreTypeAdapter<FeatureFlag> featureFlagStore, DirectoryEntry folder, HashSet<Tuple<object, Type>> collectedInjectors = null) {
-            return await SetupV2(featureFlagStore, new LocalAnalyticsV2(folder), collectedInjectors);
+        public static async Task<ProgressionSystem<FeatureFlag>> SetupV2(KeyValueStoreTypeAdapter<FeatureFlag> featureFlagStore, DirectoryEntry localAnalyticsFolder, HashSet<Tuple<object, Type>> collectedInjectors = null) {
+            return await SetupV2(featureFlagStore, new LocalAnalyticsV2(localAnalyticsFolder), collectedInjectors);
         }
 
         [Obsolete("Use SetupV2 instead")]

@@ -15,9 +15,9 @@ namespace com.csutil.logging.analytics {
         
         private readonly DirectoryEntry _dir;
 
-        public LocalAnalyticsV2(DirectoryEntry dir)
-            : base(new ObservableKeyValueStore(new FileBasedKeyValueStore(dir))) {
-            this._dir = dir;
+        public LocalAnalyticsV2(DirectoryEntry dirForEvents)
+            : base(new ObservableKeyValueStore(new FileBasedKeyValueStore(dirForEvents))) {
+            this._dir = dirForEvents;
         }
 
         public override async Task<AppFlowEvent> Set(string key, AppFlowEvent value) {
