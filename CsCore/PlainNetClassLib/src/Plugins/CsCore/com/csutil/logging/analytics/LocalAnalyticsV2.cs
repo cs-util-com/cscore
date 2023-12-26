@@ -1,27 +1,22 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using com.csutil.keyvaluestore;
+using Zio;
 
 namespace com.csutil.logging.analytics {
-
-    [Obsolete("Use LocalAnalyticsV2 instead", true)]
-    public class LocalAnalytics : KeyValueStoreTypeAdapter<AppFlowEvent>, IDisposable {
-
-        private const string DEFAULT_DIR = "AppFlowAnalytics";
+    
+    public class LocalAnalyticsV2 : KeyValueStoreTypeAdapter<AppFlowEvent>, IDisposable {
 
         public readonly Dictionary<string, KeyValueStoreTypeAdapter<AppFlowEvent>> categoryStores
-                = new Dictionary<string, KeyValueStoreTypeAdapter<AppFlowEvent>>();
+            = new Dictionary<string, KeyValueStoreTypeAdapter<AppFlowEvent>>();
+        
+        private readonly DirectoryEntry _dir;
 
-        public Func<string, KeyValueStoreTypeAdapter<AppFlowEvent>> createStoreFor = (dirName) => {
-            return FileBasedKeyValueStore.New(DEFAULT_DIR + "_" + dirName).GetTypeAdapter<AppFlowEvent>();
-        };
-
-        public LocalAnalytics(string dirName = DEFAULT_DIR)
-            : this(new ObservableKeyValueStore(FileBasedKeyValueStore.New(dirName))) {
+        public LocalAnalyticsV2(DirectoryEntry dir)
+            : base(new ObservableKeyValueStore(new FileBasedKeyValueStore(dir))) {
+            this._dir = dir;
         }
-
-        public LocalAnalytics(IKeyValueStore mainStore) : base(mainStore) { }
 
         public override async Task<AppFlowEvent> Set(string key, AppFlowEvent value) {
             var replacedEvent = await base.Set(key, value);
@@ -42,7 +37,7 @@ namespace com.csutil.logging.analytics {
 
         public KeyValueStoreTypeAdapter<AppFlowEvent> GetStoreForCategory(string catMethod) {
             if (categoryStores.TryGetValue(catMethod, out var store)) { return store; }
-            var createdStore = createStoreFor(catMethod);
+            var createdStore = new FileBasedKeyValueStore(_dir.GetChildDir(catMethod)).GetTypeAdapter<AppFlowEvent>();
             categoryStores.Add(catMethod, createdStore);
             return createdStore;
         }
@@ -54,5 +49,5 @@ namespace com.csutil.logging.analytics {
         }
 
     }
-
+    
 }
