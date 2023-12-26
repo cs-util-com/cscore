@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using com.csutil.keyvaluestore;
 using com.csutil.logging.analytics;
+using Zio;
 
 namespace com.csutil.model {
 
@@ -46,17 +47,35 @@ namespace com.csutil.model {
             var googleSheetsStore = new GoogleSheetsKeyValueStore(cachedFlags, apiKey, sheetId, sheetName);
             return await Setup(new FeatureFlagStore(cachedFlagsLocalData, googleSheetsStore), collectedInjectors);
         }
-        
-        public static async Task<ProgressionSystem<FeatureFlag>> SetupWithGSheetsV2(Uri gSheetsUri, IKeyValueStore cachedFlagsLocalData, IKeyValueStore gSheetsChache, HashSet<Tuple<object, Type>> collectedInjectors = null) {
+
+        public static async Task<ProgressionSystem<FeatureFlag>> SetupWithGSheetsV2(Uri gSheetsUri, DirectoryEntry dir, IKeyValueStore cachedFlagsLocalData, IKeyValueStore gSheetsChache, HashSet<Tuple<object, Type>> collectedInjectors = null) {
             var googleSheetsStore = new GoogleSheetsKeyValueStoreV2(gSheetsChache, gSheetsUri);
-            return await Setup(new FeatureFlagStore(cachedFlagsLocalData, googleSheetsStore), collectedInjectors);
+            return await SetupV2(new FeatureFlagStore(cachedFlagsLocalData, googleSheetsStore), dir, collectedInjectors);
         }
 
+        [Obsolete("Use SetupV2 instead")]
         public static async Task<ProgressionSystem<FeatureFlag>> Setup(KeyValueStoreTypeAdapter<FeatureFlag> featureFlagStore, HashSet<Tuple<object, Type>> collectedInjectors = null) {
             return await Setup(featureFlagStore, new LocalAnalytics(), collectedInjectors);
         }
 
+        public static async Task<ProgressionSystem<FeatureFlag>> SetupV2(KeyValueStoreTypeAdapter<FeatureFlag> featureFlagStore, DirectoryEntry folder, HashSet<Tuple<object, Type>> collectedInjectors = null) {
+            return await SetupV2(featureFlagStore, new LocalAnalyticsV2(folder), collectedInjectors);
+        }
+
+        [Obsolete("Use SetupV2 instead")]
         public static async Task<ProgressionSystem<FeatureFlag>> Setup(KeyValueStoreTypeAdapter<FeatureFlag> featureFlagStore, LocalAnalytics analytics, HashSet<Tuple<object, Type>> collectedInjectors = null) {
+            var ffm = new FeatureFlagManager<FeatureFlag>(featureFlagStore);
+            var injector1 = IoC.inject.SetSingleton(ffm);
+            collectedInjectors?.Add(new Tuple<object, Type>(injector1, typeof(FeatureFlagManager<FeatureFlag>)));
+            AppFlow.AddAppFlowTracker(new AppFlowToStore(analytics).WithBasicTrackingActive());
+            var xpSystem = new ProgressionSystem<FeatureFlag>(analytics, ffm);
+            var injector2 = IoC.inject.SetSingleton<IProgressionSystem<FeatureFlag>>(xpSystem);
+            collectedInjectors?.Add(new Tuple<object, Type>(injector2, typeof(IProgressionSystem<FeatureFlag>)));
+            await xpSystem.UpdateCurrentCategoryCounts();
+            return xpSystem;
+        }
+
+        public static async Task<ProgressionSystem<FeatureFlag>> SetupV2(KeyValueStoreTypeAdapter<FeatureFlag> featureFlagStore, LocalAnalyticsV2 analytics, HashSet<Tuple<object, Type>> collectedInjectors = null) {
             var ffm = new FeatureFlagManager<FeatureFlag>(featureFlagStore);
             var injector1 = IoC.inject.SetSingleton(ffm);
             collectedInjectors?.Add(new Tuple<object, Type>(injector1, typeof(FeatureFlagManager<FeatureFlag>)));

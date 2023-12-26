@@ -12,10 +12,10 @@ namespace com.csutil.model {
 
         public readonly Dictionary<string, float> xpFactors = InitDefaultXpFactors();
         public readonly Dictionary<string, int> cachedCategoryCounts = new Dictionary<string, int>();
-        public readonly LocalAnalytics analytics;
+        public readonly ILocalAnalytics analytics;
         public readonly FeatureFlagManager<T> featureFlagManager;
 
-        public ProgressionSystem(LocalAnalytics analytics, FeatureFlagManager<T> featureFlagManager) {
+        public ProgressionSystem(ILocalAnalytics analytics, FeatureFlagManager<T> featureFlagManager) {
             // Make sure the FeatureFlag system was set up too:
             AssertV3.IsNotNull(FeatureFlagManager<T>.instance, "FeatureFlagManager.instance");
             this.analytics = analytics;

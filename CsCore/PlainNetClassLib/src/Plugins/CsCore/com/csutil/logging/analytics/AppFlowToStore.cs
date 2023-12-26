@@ -6,9 +6,9 @@ namespace com.csutil.logging.analytics {
     public class AppFlowToStore : IAppFlow {
 
         protected const string DEFAULT_FOLDER = "AppFlowEvents";
-        public KeyValueStoreTypeAdapter<AppFlowEvent> store;
+        public IKeyValueStoreTypeAdapter<AppFlowEvent> store;
 
-        public AppFlowToStore(KeyValueStoreTypeAdapter<AppFlowEvent> store = null) {
+        public AppFlowToStore(IKeyValueStoreTypeAdapter<AppFlowEvent> store = null) {
             if (store == null) {
                 store = FileBasedKeyValueStore.New(DEFAULT_FOLDER).GetTypeAdapter<AppFlowEvent>();
             }

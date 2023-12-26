@@ -90,8 +90,8 @@ namespace com.csutil.integrationTests {
             int eventCount = 10000;
 
             // Create a LocalAnalytics instance that uses only memory stores for testing:
-            LocalAnalytics localAnalytics = new LocalAnalytics(new InMemoryKeyValueStore());
-            localAnalytics.createStoreFor = (_) => new InMemoryKeyValueStore().GetTypeAdapter<AppFlowEvent>();
+            var dir = EnvironmentV2.instance.GetNewInMemorySystem();
+            ILocalAnalytics localAnalytics = new LocalAnalyticsV2(dir);
 
             // Pass this local analytics system to the app flow impl. as the target store:
             AppFlowToStore appFlow = new AppFlowToStore(localAnalytics);
