@@ -38,6 +38,9 @@ namespace com.csutil.tests {
             var url = "https://github.com/cs-util-com/cscore";
             var urlText = "Show details..";
 
+            var x = News.NewLocalNewsEvent("Entry added via code", "This entry was added via code and not received from the remote Google Sheet", url, urlText);
+            await onDeviceEventsStore.Set(x.key, x);
+            
             if (await appUsed1DayRule.isTrue()) {
                 var n = News.NewLocalNewsEvent("Achievement Unlocked", "You used the app 1 day", url, urlText);
                 await onDeviceEventsStore.Set(n.key, n);
