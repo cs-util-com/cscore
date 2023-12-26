@@ -14,6 +14,7 @@ namespace com.csutil.logging.analytics {
             = new Dictionary<string, KeyValueStoreTypeAdapter<AppFlowEvent>>();
         
         private readonly DirectoryEntry _dir;
+        private readonly object _threadLock = new object();
 
         public LocalAnalyticsV2(DirectoryEntry dirForEvents)
             : base(new ObservableKeyValueStore(new FileBasedKeyValueStore(dirForEvents))) {
@@ -38,10 +39,12 @@ namespace com.csutil.logging.analytics {
         }
 
         public KeyValueStoreTypeAdapter<AppFlowEvent> GetStoreForCategory(string catMethod) {
-            if (_categoryStores.TryGetValue(catMethod, out var store)) { return store; }
-            var createdStore = new FileBasedKeyValueStore(_dir.GetChildDir(catMethod)).GetTypeAdapter<AppFlowEvent>();
-            _categoryStores.Add(catMethod, createdStore);
-            return createdStore;
+            lock (_threadLock) {
+                if (_categoryStores.TryGetValue(catMethod, out var store)) { return store; }
+                var createdStore = new FileBasedKeyValueStore(_dir.GetChildDir(catMethod)).GetTypeAdapter<AppFlowEvent>();
+                _categoryStores.Add(catMethod, createdStore);
+                return createdStore;
+            }
         }
 
         public void Dispose() {
