@@ -1,6 +1,7 @@
 ﻿using com.csutil.model.immutable;
 using System;
 using System.Threading.Tasks;
+using com.csutil.ui;
 using UnityEngine;
 
 namespace com.csutil {
@@ -24,6 +25,13 @@ namespace com.csutil {
     }
 
     public static class PresenterExtensions {
+
+        /// <summary> Connects a model with a view </summary>
+        /// <returns> A task that can be awaited on, that returns the fully setup presenter </returns>
+        public static Task<T> ShowModelInView<T>(this Presenter<T> presenter, T model, string viewPrefabName) {
+            presenter.targetView = ViewStackHelper.MainViewStack().SwitchToView(viewPrefabName);
+            return presenter.LoadModelIntoView(model);
+        }
 
         /// <summary> Connects a model with a view </summary>
         /// <returns> A task that can be awaited on, that returns the fully setup presenter </returns>
@@ -87,10 +95,15 @@ namespace com.csutil {
 
     public static class PresenterWithActionsExtensions {
 
+        public static async Task ShowModelInView<T, V>(this PresenterWithActions<T, V> presenter, T model, string prefabName) where V : IModelActions<T> {
+            presenter.targetView = ViewStackHelper.MainViewStack().SwitchToView(prefabName);
+            await presenter.LoadModelIntoView(model);
+        }
+
         /// <summary> Connects a model with a view </summary>
         /// <returns> A task that can be awaited on, that returns the fully setup presenter </returns>
         public static Task<T> LoadModelIntoView<T, V>(this PresenterWithActions<T, V> self, T model) where V : IModelActions<T> {
-            if (self.targetView.IsNullOrDestroyed()) { throw new ArgumentNullException("presenter.targetView"); }
+            if (self.targetView.IsNullOrDestroyed()) { throw new InvalidOperationException("presenter.targetView not yet set"); }
             self.actions.ThrowErrorIfNull("presenter.actions");
             self.actions.Model = model;
             Presenter<T> presenter = self;
