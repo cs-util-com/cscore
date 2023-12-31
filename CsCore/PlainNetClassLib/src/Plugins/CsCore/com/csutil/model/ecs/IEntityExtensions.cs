@@ -125,7 +125,9 @@ namespace com.csutil.model.ecs {
         }
 
         public static Matrix4x4 ToLocalPose<T>(this IEntity<T> self, Matrix4x4 globalPose) where T : IEntityData {
-            return self.GetParent().GlobalPoseMatrix().Inverse() * globalPose;
+            var parent = self.GetParent();
+            if (parent == null) { return globalPose; }
+            return parent.GlobalPoseMatrix().Inverse() * globalPose;
         }
         
         public static Pose3d GlobalPose<T>(this IEntity<T> self) where T : IEntityData {
