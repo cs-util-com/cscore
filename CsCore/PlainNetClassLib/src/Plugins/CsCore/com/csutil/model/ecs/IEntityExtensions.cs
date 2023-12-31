@@ -228,6 +228,10 @@ namespace com.csutil.model.ecs {
             comp = default;
             return false;
         }
+        
+        public static bool HasComponent<V>(this IEntityData self) where V : IComponentData {
+            return self.Components.Values.Any(c => c is V);
+        }
 
         [Conditional("DEBUG")]
         private static void AssertOnlySingleCompOfType<V>(IEntityData self) where V : IComponentData {
