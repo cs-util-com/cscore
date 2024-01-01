@@ -74,7 +74,11 @@ namespace com.csutil.logging {
 
         public void HandleLogMessageReceivedThreaded(string condition, string stacktrace, LogType type) {
             TaskV2.TryWithExponentialBackoff(async () => {
-                if (!ApplicationV2.isPlaying) { return; }
+                if (!ApplicationV2.isPlaying || logUi.IsDestroyed()) {
+                    Application.logMessageReceivedThreaded -= this.HandleLogMessageReceivedThreaded;
+                    Log.e("LogToLogConsoleConnector is not active anymore, stopping to listen to log events");
+                    return;
+                }
                 // Wait for the main thread to be ready to use:
                 while (!MainThread.IsReadyToUse) { await TaskV2.Delay(5); }
                 MainThread.Invoke(() => {
