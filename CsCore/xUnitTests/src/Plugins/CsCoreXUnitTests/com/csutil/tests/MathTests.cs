@@ -32,6 +32,19 @@ namespace com.csutil.tests {
             Assert.Equal(6f, average);
             Assert.Equal(6f, someNumbers.CalcMedian());
 
+            // Mean and Median are also usable with Vector3:
+            var someVectors = new List<Vector3>();
+            someVectors.Add(new Vector3(0, 0, 0));
+            someVectors.Add(new Vector3(2, 2, 2));
+            someVectors.Add(new Vector3(4, 4, 4));
+            Assert.Equal(new Vector3(2, 2, 2), someVectors.CalcMean());
+            Assert.Equal(new Vector3(2, 2, 2), someVectors.CalcMedian());
+            someVectors.Add(new Vector3(999, 999, 999));
+            Assert.Equal(new Vector3(2, 2, 2), someVectors.CalcMedian());
+            Assert.NotEqual(new Vector3(2, 2, 2), someVectors.CalcMean());
+            someVectors.Add(new Vector3(999, 999, 999));
+            Assert.Equal(new Vector3(4, 4, 4), someVectors.CalcMedian());
+
         }
 
         private static float AddValue(List<float> self, float newValue, float oldAverage) {
