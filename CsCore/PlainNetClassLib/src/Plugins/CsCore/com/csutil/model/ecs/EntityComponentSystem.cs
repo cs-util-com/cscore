@@ -19,8 +19,8 @@ namespace com.csutil.model.ecs {
                 Ecs = ecs;
             }
 
-            public Action<T,T> OnUpdate { get; set; }
-            
+            public Action<T, T> OnUpdate { get; set; }
+
             public string Id => Data.Id;
             public string Name => Data.Name;
             public string TemplateId => Data.TemplateId;
@@ -32,7 +32,7 @@ namespace com.csutil.model.ecs {
 
             public override string ToString() { return Data.ToString(); }
 
-            public void Dispose() {
+            public virtual void Dispose() {
                 IsDisposed = DisposeState.DisposingStarted;
                 if (Ecs != null) { Ecs.Destroy(this); }
                 Ecs = null;
@@ -75,12 +75,15 @@ namespace com.csutil.model.ecs {
 
         public void Dispose() {
             IsDisposed = DisposeState.DisposingStarted;
+            OnDispose();
             TemplatesIo.DisposeV2();
             _entities.Clear();
             Variants.Clear();
             OnIEntityUpdated = null;
             IsDisposed = DisposeState.Disposed;
         }
+
+        protected virtual void OnDispose() { }
 
         public IEntity<T> Add(T entityData) {
             // First check if the entity already exists:
@@ -112,7 +115,7 @@ namespace com.csutil.model.ecs {
             // In case the entity is a template, update also all entities that inherit from the template:
             InternalUpdate(entityData);
         }
-        
+
         private void InternalUpdate(T updatedEntityData) {
             var entityId = updatedEntityData.Id;
             var entity = (Entity)_entities[entityId];
@@ -158,7 +161,7 @@ namespace com.csutil.model.ecs {
             if (!entityToDestroy.IsAlive()) { return; }
             Destroy(entityToDestroy.Id);
         }
-        
+
         private void Destroy(string entityId) {
             var entity = _entities[entityId] as Entity;
             _entities.Remove(entityId);

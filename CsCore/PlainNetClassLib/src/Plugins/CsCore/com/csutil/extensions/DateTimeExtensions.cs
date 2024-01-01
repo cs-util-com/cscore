@@ -18,6 +18,11 @@ namespace com.csutil {
         public static string ToLocalUiString(this DateTime self) {
             return self.ToLocalTime().ToString("MMMM dd, yyyy " + DateTimeFormatInfo.CurrentInfo.ShortTimePattern);
         }
+        
+        /// <summary> sortable, short, hard to read wrong, can be used in pathes. read also https://stackoverflow.com/a/15952652/165106 </summary>
+        public static string ToLocalUiStringV2(this DateTime self) {
+            return self.ToLocalTime().ToString("MMMM dd, yyyy " + DateTimeFormatInfo.CurrentInfo.LongTimePattern);
+        }
 
         /// <summary> e.g. 2019-10-27T13:35:47Z (see https://en.wikipedia.org/wiki/ISO_8601 for details) </summary>
         public static string ToReadableString_ISO8601(this DateTime dateTime) {

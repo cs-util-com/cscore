@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace com.csutil.model.ecs {
 
-    public abstract class UnityEcsPresenter<T> : Presenter<EntityComponentSystem<T>> where T : IEntityData {
+    public abstract class UnityEcsPresenter<T> : Presenter<EntityComponentSystem<T>>, IDisposableV2 where T : IEntityData {
 
         /// <summary> The root of the Unity view (the Scene graph composed of Unity GameObjects that visualize the ECS model </summary>
         public GameObject targetView { get; set; }
@@ -16,12 +16,32 @@ namespace com.csutil.model.ecs {
         public IReadOnlyDictionary<string, GameObject> EntityViews => _entityViews;
         public IReadOnlyDictionary<string, IComponentPresenter<T>> ComponentViews => _componentViews;
 
+        public DisposeState IsDisposed { get; private set; }
+
         public virtual Task OnLoad(EntityComponentSystem<T> model) {
             var entitiesInRoot = model.Entities.Values.Filter(x => x.ParentId == null);
             AddViewsForEntityModelsRecursively(entitiesInRoot);
             model.OnIEntityUpdated += OnEntityUpdated;
             return Task.FromResult(true);
         }
+
+        public void Dispose() {
+            IsDisposed = DisposeState.DisposingStarted;
+            OnDispose();
+            foreach (var component in _componentViews.Values) {
+                component.DisposeV2();
+            }
+            foreach (var child in _entityViews.Values) {
+                child.Destroy();
+            }
+            _componentViews.Clear();
+            _componentViews = null;
+            _entityViews.Clear();
+            _entityViews = null;
+            IsDisposed = DisposeState.Disposed;
+        }
+
+        protected virtual void OnDispose() { }
 
         /// <summary> Traverses the entity tree recursively and creates the Unity GameObjects for each entity </summary>
         private void AddViewsForEntityModelsRecursively(IEnumerable<IEntity<T>> entities) {
@@ -100,11 +120,11 @@ namespace com.csutil.model.ecs {
                 deleted => OnCompentRemoved(iEntity, deleted, targetParentGo: go)
             );
         }
-        
+
         protected virtual void OnToggleActiveState(GameObject go, bool newIsActiveState) { go.SetActive(newIsActiveState); }
 
         protected virtual void OnChangeParent(T newState, GameObject go) { go.transform.SetParent(_entityViews[newState.ParentId].transform); }
-        
+
         protected virtual void OnDetachFromParent(GameObject go) { go.transform.SetParent(targetView.transform); }
 
         protected virtual void OnPoseUpdate(IEntity<T> iEntity, GameObject go, Pose3d newLocalPose) { newLocalPose.ApplyTo(go.transform); }
