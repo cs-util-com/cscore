@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace com.csutil.model.ecs {
 
@@ -14,6 +15,7 @@ namespace com.csutil.model.ecs {
             public T Data { get; set; }
             public EntityComponentSystem<T> Ecs { get; private set; }
 
+            [JsonConstructor]
             public Entity(T data, EntityComponentSystem<T> ecs) {
                 Data = data;
                 Ecs = ecs;

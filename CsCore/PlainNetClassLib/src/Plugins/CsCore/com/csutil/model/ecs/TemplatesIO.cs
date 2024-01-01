@@ -145,7 +145,8 @@ namespace com.csutil.model.ecs {
             var backAsJson = ToJToken(resultingEntity, GetJsonSerializer());
             var diff = JonDiffPatch.Diff(sourceJson, backAsJson);
             if (diff != null) {
-                throw new Exception($"Not all props of {typeof(T)} were deserialized, diff:" + diff);
+                Log.e($"Not all props of {typeof(T)} were deserialized, diff: {diff}");
+                Log.e($"Full json of both version: sourceJson: {sourceJson} and backAsJson: {backAsJson}");
             }
         }
 
