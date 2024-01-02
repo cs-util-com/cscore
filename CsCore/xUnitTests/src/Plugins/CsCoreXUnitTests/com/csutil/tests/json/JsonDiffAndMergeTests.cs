@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json.Linq;
 using Xunit;
 
 namespace com.csutil.tests.json {
@@ -65,6 +66,42 @@ namespace com.csutil.tests.json {
             //Log.d("merge2.conflicts=" + JsonWriter.AsPrettyString(merge2.conflicts));
             //Log.d("parsedConflicts=" + JsonWriter.AsPrettyString(parsedConflicts));
 
+        }
+
+        [Fact]
+        public void TestDiffV2CleanUp() {
+            JToken jToken = JToken.Parse(@"{
+                ""LocalPose"": {
+                  ""M11"": [
+                    -0.680480063,
+                    -0.680480063
+                  ],    
+                  ""M43"": [
+                    -5.162368,
+                    -5.162368
+                  ],
+                  ""Translation"": {
+                    ""Y"": [
+                      1.819809,
+                      1.819809
+                    ],
+                    ""Z"": [
+                      -5.162368,
+                      -5.162368
+                    ]
+                  }
+                },
+                ""Components"": {
+                  ""39f7ac11-0bc1-4ac1-f8e9-08dc0b4858e8"": {
+                    ""HeightInMeters"": [
+                      1.9,
+                      1.9
+                    ]
+                  }
+                }
+              }");
+            JsonDiffPatchExtensions.CleanUp(jToken);
+            Assert.True(jToken.IsNullOrEmpty(), "jToken=" + jToken);
         }
 
     }
