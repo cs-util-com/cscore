@@ -87,7 +87,9 @@ namespace com.csutil.model.immutable {
                 if (copyOfActionSupported) { AssertActionDidNotChangeDuringDispatch(actionBeforeDispatch, action); }
 
                 if (!StateCompare.WasModified(previousState, newState)) {
-                    Log.w($"The action was not handled by any of the reducers of Store<{store.GetState().GetType().Name}>:"
+                    var state = store.GetState();
+                    var modelTypeName = state == null ? $"Store({store}" : $"Store<{state.GetType().Name}>";
+                    Log.w($"The action was not handled by any of the reducers of {modelTypeName}:"
                         + "\n" + asJson("" + action.GetType().Name, action));
                 } else {
                     var t = StopwatchV2.StartNewV2("NewLoggingMiddleware->NewLoggingDispatcher");
