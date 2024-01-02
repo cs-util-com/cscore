@@ -17,8 +17,8 @@ namespace com.csutil.model.ecs {
 
         public DisposeState IsDisposed { get; private set; } = DisposeState.Active;
 
-        private readonly DirectoryEntry EntityDir;
-        private readonly JsonDiffPatch JonDiffPatch = new JsonDiffPatch();
+        private readonly DirectoryEntry _entityDir;
+        private readonly JsonDiffPatch _jsonDiffPatch = new JsonDiffPatch();
 
         /// <summary> A cache of all loaded templates and variants,
         /// these need to be combined with all parent entities to get the full entity data </summary>
@@ -27,7 +27,7 @@ namespace com.csutil.model.ecs {
         private Func<JsonSerializer> GetJsonSerializer = () => JsonSerializer.Create(JsonNetSettings.typedJsonSettings);
 
         public TemplatesIO(DirectoryEntry entityDir) {
-            EntityDir = entityDir;
+            _entityDir = entityDir;
         }
 
         public void Dispose() {
@@ -42,7 +42,7 @@ namespace com.csutil.model.ecs {
             this.ThrowErrorIfDisposed();
             var jsonSerializer = GetJsonSerializer();
             var tasks = new List<Task>();
-            foreach (var templateFile in EntityDir.EnumerateFiles()) {
+            foreach (var templateFile in _entityDir.EnumerateFiles()) {
                 tasks.Add(TaskV2.Run((() => LoadJTokenFromFile(templateFile, jsonSerializer))));
             }
             await Task.WhenAll(tasks);
@@ -69,7 +69,7 @@ namespace com.csutil.model.ecs {
             var templateId = entity.TemplateId;
             if (templateId != null) {
                 var template = ComposeFullJson(templateId, allowLazyLoadFromDisk: true);
-                json = JonDiffPatch.Diff(template, json);
+                json = _jsonDiffPatch.DiffV2(template, json);
             }
             UpdateEntitiesCache(entity.GetId(), json);
             return json;
@@ -83,7 +83,7 @@ namespace com.csutil.model.ecs {
 
         private FileEntry GetEntityFileForId(string entityId) {
             entityId.ThrowErrorIfNullOrEmpty("entityId");
-            return EntityDir.GetChild(entityId);
+            return _entityDir.GetChild(entityId);
         }
 
         public void Delete(string entityId) {
@@ -143,7 +143,7 @@ namespace com.csutil.model.ecs {
         [Conditional("DEBUG")]
         private void AssertAllFieldsWereDeserialized(JToken sourceJson, T resultingEntity) {
             var backAsJson = ToJToken(resultingEntity, GetJsonSerializer());
-            var diff = JonDiffPatch.Diff(sourceJson, backAsJson);
+            var diff = _jsonDiffPatch.DiffV2(sourceJson, backAsJson);
             if (diff != null) {
                 Log.e($"Not all props of {typeof(T)} were deserialized, diff: {diff}");
                 Log.e($"Full json of both version: sourceJson: {sourceJson} and backAsJson: {backAsJson}");
@@ -151,7 +151,7 @@ namespace com.csutil.model.ecs {
         }
 
         public IEnumerable<string> GetAllEntityIds() {
-            return EntityDir.EnumerateFiles().Map(x => x.Name);
+            return _entityDir.EnumerateFiles().Map(x => x.Name);
         }
 
         /// <summary> Composes an entity instance based on the involved templates </summary>
@@ -179,7 +179,7 @@ namespace com.csutil.model.ecs {
             if (json["TemplateId"] is JArray templateIdArray) {
                 var templateId = templateIdArray[1].Value<string>();
                 var template = ComposeFullJson(templateId, allowLazyLoadFromDisk);
-                json = JonDiffPatch.Patch(template, json);
+                json = _jsonDiffPatch.Patch(template, json);
             }
             return json;
         }
@@ -196,14 +196,14 @@ namespace com.csutil.model.ecs {
             if (json["TemplateId"] is JArray templateIdArray) {
                 var templateId = templateIdArray[1].Value<string>();
                 var template = ComposeFullJsonOnlyFromMemory(templateId);
-                json = JonDiffPatch.Patch(template, json);
+                json = _jsonDiffPatch.Patch(template, json);
             }
             return json;
         }
 
         public bool HasChanges(T oldState, T newState) {
             var s = GetJsonSerializer();
-            var diff = JonDiffPatch.Diff(ToJToken(oldState, s), ToJToken(newState, s));
+            var diff = _jsonDiffPatch.DiffV2(ToJToken(oldState, s), ToJToken(newState, s));
             return diff != null;
         }
 

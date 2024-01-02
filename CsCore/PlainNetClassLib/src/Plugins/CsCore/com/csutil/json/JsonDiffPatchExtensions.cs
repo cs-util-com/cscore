@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using JsonDiffPatchDotNet;
 using Newtonsoft.Json.Linq;
 
@@ -9,7 +10,10 @@ namespace com.csutil {
         public static JToken DiffV2(this JsonDiffPatch self, JToken left, JToken right) {
             var diff = self.Diff(left, right);
             // If the diff is not empty do a cleanup to remove all empty arrays and objects:
-            if (diff != null && diff.HasValues) { CleanUp(diff); }
+            if (!diff.IsNullOrEmpty()) {
+                CleanUp(diff);
+                if (diff.IsNullOrEmpty()) { return null; }
+            }
             return diff;
         }
 
@@ -42,9 +46,21 @@ namespace com.csutil {
         }
 
         private static bool ShouldRemoveProperty(JProperty p) {
-            return p.Value is JArray arr && arr.Count == 2 && JToken.DeepEquals(arr[0], arr[1]);
+            if (p.Value is JArray arr && arr.Count == 2) {
+                if (arr[0].Type == JTokenType.Float && arr[1].Type == JTokenType.Float) {
+                    // Custom comparison for floating point numbers
+                    return AreFloatsEqual(arr[0].ToObject<float>(), arr[1].ToObject<float>());
+                }
+                return JToken.DeepEquals(arr[0], arr[1]);
+            }
+            return false;
         }
 
+        private static bool AreFloatsEqual(float a, float b, float tolerance = 1e-6f) {
+            // Check if the absolute difference between a and b is less than or equal to the tolerance
+            return Math.Abs(a - b) <= tolerance;
+        }
+        
         private static bool IsEmptyJObject(JToken token) {
             return token is JObject o && !o.HasValues;
         }
