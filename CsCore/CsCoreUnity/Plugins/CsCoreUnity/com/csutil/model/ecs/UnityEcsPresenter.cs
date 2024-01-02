@@ -29,6 +29,7 @@ namespace com.csutil.model.ecs {
             IsDisposed = DisposeState.DisposingStarted;
             OnDispose();
             foreach (var component in _componentViews.Values) {
+                if (component is UnityEngine.Object b) { b.Destroy(); }
                 component.DisposeV2();
             }
             foreach (var child in _entityViews.Values) {
