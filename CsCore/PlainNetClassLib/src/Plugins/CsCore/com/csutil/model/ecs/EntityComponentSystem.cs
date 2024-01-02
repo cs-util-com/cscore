@@ -79,6 +79,9 @@ namespace com.csutil.model.ecs {
             IsDisposed = DisposeState.DisposingStarted;
             OnDispose();
             TemplatesIo.DisposeV2();
+            foreach (var entity in _entities.Values) {
+                entity.DisposeV2();
+            }
             _entities.Clear();
             Variants.Clear();
             OnIEntityUpdated = null;
