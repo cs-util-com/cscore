@@ -216,6 +216,32 @@ namespace com.csutil.algorithms.images {
             // ... (Conversion logic) ...
             // Loop through pixels and perform calculations based on the C++ logic
             // ... 
+            for (var x = 0; x < w; ++x) {
+                for (var y = 0; y < h; ++y) {
+                    if (trimap[y * width + x] != 128)
+                        continue;
+                    var im = GetColorAt(image, x, y);
+
+                    for (var j = y - r; j <= y + r; ++j) {
+                        for (var i = x-r; i <= x + r; ++i) {
+                            if (i < 0 || i >= w || j < 0 || j >= h)
+                                continue;
+                            if (trimap[j * width + i] != 0 && trimap[j * width + i] != 255)
+                                continue;
+                            var imCur = GetColorAt(image, j, i);
+                            var pd = Sqr(Sqr(x - i) + Sqr(y - j));
+                            var cd = ColorDist(im, imCur);
+
+                            if (!(pd <= r) || !(cd <= c))
+                                continue;
+                            if (trimap[j * width + i] == 0)
+                                trimap[y * width + x] = 1;
+                            else if (trimap[j * width + i] == 255)
+                                trimap[y * width + x] = 254;
+                        }
+                    }
+                }
+            }
         }
 
         // Method to expand known regions in the trimap
