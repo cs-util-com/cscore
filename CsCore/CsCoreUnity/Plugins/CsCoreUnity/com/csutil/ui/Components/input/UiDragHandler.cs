@@ -12,7 +12,7 @@ namespace com.csutil.ui {
         public OnDragEvent onDrag = new OnDragEvent();
 
         private void Start() {
-            if (onDrag.IsNullOrEmpty()) {
+            if (onDrag.IsNullOrEmptyV2()) {
                 onDrag.AddListener((targetPos) => transform.position = targetPos);
             }
         }
@@ -27,7 +27,7 @@ namespace com.csutil.ui {
         }
 
         [System.Serializable]
-        public class OnDragEvent : UnityEvent<Vector2> { }
+        public class OnDragEvent : UnityEventV2<Vector2> { }
 
     }
 

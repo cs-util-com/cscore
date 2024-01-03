@@ -145,12 +145,12 @@ namespace com.csutil {
         }
 
         public static void AddOnDestroyListener(this GameObject self, Action onDestroyCallback) {
-            self.GetOrAddComponent<OnDestroyListener>().onDestroy.AddListener(() => { onDestroyCallback(); });
+            self.GetOrAddComponent<OnDestroyListener>().onDestroy.AddListenerV2(() => { onDestroyCallback(); });
         }
 
         /// <summary> When the <see cref="GameObject"/> is destroyed call Dispose on a target <see cref="IDisposable"/> </summary>
         public static T SetUpDisposeOnDestroy<T>(this GameObject self, T objectToDispose) where T : IDisposable {
-            self.AddComponent<OnDestroyMono>().onDestroy.AddListener(() => {
+            self.AddComponent<OnDestroyMono>().onDestroy.AddListenerV2(() => {
                 objectToDispose?.Dispose();
             });
             return objectToDispose;
@@ -161,7 +161,7 @@ namespace com.csutil {
         }
         
         public static void UnregisterOnDestroy(this GameObject self, object injector, Type type) {
-            self.AddComponent<OnDestroyMono>().onDestroy.AddListener(() => {
+            self.AddComponent<OnDestroyMono>().onDestroy.AddListenerV2(() => {
                 IoC.inject.UnregisterInjector(injector, type);
             });
         }

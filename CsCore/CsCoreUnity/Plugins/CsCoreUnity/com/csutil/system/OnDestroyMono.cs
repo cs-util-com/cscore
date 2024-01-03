@@ -6,7 +6,7 @@ namespace com.csutil {
     
     public class OnDestroyMono : MonoBehaviour {
 
-        public UnityEvent onDestroy = new UnityEvent();
+        public UnityEventV2 onDestroy = new UnityEventV2();
 
         private void OnDestroy() {
             try { onDestroy.Invoke(); } 
