@@ -228,7 +228,7 @@ namespace com.csutil.algorithms.images {
                                 continue;
                             if (trimap[j * width + i] != 0 && trimap[j * width + i] != 255)
                                 continue;
-                            var imCur = GetColorAt(image, j, i);
+                            var imCur = GetColorAt(image, i, j);
                             var pd = Sqr(Sqr(x - i) + Sqr(y - j));
                             var cd = ColorDist(im, imCur);
 
