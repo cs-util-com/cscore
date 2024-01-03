@@ -102,9 +102,9 @@ namespace com.csutil.model.ecs {
             }
             if (oldState.ParentId != newState.ParentId) {
                 if (newState.ParentId != null) {
-                    OnChangeParent(newState, go);
+                    OnChangeParent(newState, go, iEntity.LocalPose());
                 } else {
-                    OnDetachFromParent(go);
+                    OnDetachFromParent(go, iEntity.LocalPose());
                 }
             }
             if (oldState.LocalPose != newState.LocalPose) {
@@ -122,13 +122,23 @@ namespace com.csutil.model.ecs {
             );
         }
 
-        protected virtual void OnToggleActiveState(GameObject go, bool newIsActiveState) { go.SetActive(newIsActiveState); }
+        protected virtual void OnToggleActiveState(GameObject go, bool newIsActiveState) {
+            go.SetActive(newIsActiveState);
+        }
 
-        protected virtual void OnChangeParent(T newState, GameObject go) { go.transform.SetParent(_entityViews[newState.ParentId].transform); }
+        protected virtual void OnChangeParent(T newState, GameObject go, Pose3d newLocalPose) {
+            go.transform.SetParent(_entityViews[newState.ParentId].transform);
+            newLocalPose.ApplyTo(go.transform);
+        }
 
-        protected virtual void OnDetachFromParent(GameObject go) { go.transform.SetParent(targetView.transform); }
+        protected virtual void OnDetachFromParent(GameObject go, Pose3d newLocalPose) {
+            go.transform.SetParent(targetView.transform);
+            newLocalPose.ApplyTo(go.transform);
+        }
 
-        protected virtual void OnPoseUpdate(IEntity<T> iEntity, GameObject go, Pose3d newLocalPose) { newLocalPose.ApplyTo(go.transform); }
+        protected virtual void OnPoseUpdate(IEntity<T> iEntity, GameObject go, Pose3d newLocalPose) {
+            newLocalPose.ApplyTo(go.transform);
+        }
 
         private void onCompAdded(IEntity<T> iEntity, KeyValuePair<string, IComponentData> added, GameObject targetParentGo) {
             var createdComponent = AddComponentTo(targetParentGo, added.Value, iEntity);
