@@ -41,7 +41,7 @@ namespace com.csutil.model.ecs {
                 IsDisposed = DisposeState.Disposed;
             }
 
-            public DisposeState IsDisposed { get; private set; } = DisposeState.Active;
+            public DisposeState IsDisposed { get; set; } = DisposeState.Active;
 
         }
 
@@ -78,12 +78,12 @@ namespace com.csutil.model.ecs {
         public void Dispose() {
             IsDisposed = DisposeState.DisposingStarted;
             OnDispose();
+            Variants.Clear();
             TemplatesIo.DisposeV2();
-            foreach (var entity in _entities.Values) {
-                entity.DisposeV2();
+            foreach (IEntity<T> entity in _entities.Values) {
+                ((Entity)entity).IsDisposed = DisposeState.Disposed;
             }
             _entities.Clear();
-            Variants.Clear();
             OnIEntityUpdated = null;
             IsDisposed = DisposeState.Disposed;
         }
@@ -91,6 +91,7 @@ namespace com.csutil.model.ecs {
         protected virtual void OnDispose() { }
 
         public IEntity<T> Add(T entityData) {
+            this.ThrowErrorIfDisposed();
             // First check if the entity already exists:
             if (_entities.TryGetValue(entityData.Id, out var existingEntity)) {
                 throw new InvalidOperationException("Entity already exists with id '" + entityData.Id + "' old=" + existingEntity.Data + " new=" + entityData);
@@ -125,6 +126,7 @@ namespace com.csutil.model.ecs {
         private void InternalUpdate(T updatedEntityData) {
             var entityId = updatedEntityData.Id;
             var entity = (Entity)_entities[entityId];
+            entity.ThrowErrorIfDisposed();
 
             var oldEntryData = entity.Data;
 
@@ -153,6 +155,7 @@ namespace com.csutil.model.ecs {
         }
 
         public async Task LoadSceneGraphFromDisk() {
+            this.ThrowErrorIfDisposed();
             await TemplatesIo.LoadAllTemplateFilesIntoMemory();
             foreach (var entityId in TemplatesIo.GetAllEntityIds()) {
                 Add(TemplatesIo.ComposeEntityInstance(entityId));
@@ -160,10 +163,12 @@ namespace com.csutil.model.ecs {
         }
 
         public IEntity<T> GetEntity(string entityId) {
+            this.ThrowErrorIfDisposed();
             return _entities[entityId];
         }
 
         public void Destroy(IEntity<T> entityToDestroy) {
+            this.ThrowErrorIfDisposed();
             if (!entityToDestroy.IsAlive()) { return; }
             Destroy(entityToDestroy.Id);
         }
@@ -198,6 +203,7 @@ namespace com.csutil.model.ecs {
         }
 
         public IEntity<T> CreateVariant(T entityData, Dictionary<string, string> newIdsLookup) {
+            this.ThrowErrorIfDisposed();
             var variant = TemplatesIo.CreateVariantInstanceOf(entityData, newIdsLookup);
             return Add(variant);
         }
