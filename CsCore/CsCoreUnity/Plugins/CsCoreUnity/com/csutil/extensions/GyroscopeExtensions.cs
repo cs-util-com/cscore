@@ -27,6 +27,7 @@ namespace com.csutil {
         public static async Task RequestFineLocationPermissionIfNeeded(this LocationService locationService,
             string message, string caption = "GPS positioning needs to be enabled") {
             {
+                if (EnvironmentV2.isEditor) { return; }
                 while (!locationService.isEnabledByUser) {
                     await Dialog.ShowInfoDialog(
                         caption,
