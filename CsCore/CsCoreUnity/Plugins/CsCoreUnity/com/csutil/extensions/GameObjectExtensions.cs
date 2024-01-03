@@ -110,7 +110,7 @@ namespace com.csutil {
         public static bool IsNullOrDestroyed(this UnityEngine.Object self) { return self == null; }
 
         public static bool Destroy(this UnityEngine.Object self, bool destroyNextFrame = false) {
-            if (self == null) { return false; }
+            if (self.IsNullOrDestroyed()) { return false; }
             try {
                 if (destroyNextFrame) {
                     UnityEngine.Object.Destroy(self);
