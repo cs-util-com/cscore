@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -12,9 +12,7 @@ namespace com.csutil.model.ecs {
         public GameObject targetView { get; set; }
 
         private Dictionary<string, GameObject> _entityViews = new Dictionary<string, GameObject>();
-        private Dictionary<string, IComponentPresenter<T>> _componentViews = new Dictionary<string, IComponentPresenter<T>>();
         public IReadOnlyDictionary<string, GameObject> EntityViews => _entityViews;
-        public IReadOnlyDictionary<string, IComponentPresenter<T>> ComponentViews => _componentViews;
 
         public DisposeState IsDisposed { get; private set; }
 
@@ -28,15 +26,9 @@ namespace com.csutil.model.ecs {
         public void Dispose() {
             IsDisposed = DisposeState.DisposingStarted;
             OnDispose();
-            foreach (var component in _componentViews.Values) {
-                if (component is UnityEngine.Object b) { b.Destroy(); }
-                component.DisposeV2();
-            }
             foreach (var child in _entityViews.Values) {
                 child.Destroy();
             }
-            _componentViews.Clear();
-            _componentViews = null;
             _entityViews.Clear();
             _entityViews = null;
             IsDisposed = DisposeState.Disposed;
@@ -145,19 +137,23 @@ namespace com.csutil.model.ecs {
             if (createdComponent == null) {
                 throw Log.e($"AddComponentTo returned NULL for component={added.Value} and targetParentGo={targetParentGo}", targetParentGo);
             }
-            _componentViews.Add(added.Key, createdComponent);
+            createdComponent.ComponentId = added.Value.GetId();
             createdComponent.OnUpdateUnityComponent(iEntity, default, added.Value);
         }
 
         protected abstract IComponentPresenter<T> AddComponentTo(GameObject targetGo, IComponentData componentModel, IEntity<T> iEntity);
 
         protected virtual void OnCompentRemoved(IEntity<T> iEntity, string deleted, GameObject targetParentGo) {
-            _componentViews[deleted].DisposeV2();
-            _componentViews.Remove(deleted);
+            GetComponentPresenter(iEntity, deleted).DisposeV2();
+        }
+
+        private IComponentPresenter<T> GetComponentPresenter(IEntity<T> iEntity, string componentId) {
+            var components = _entityViews[iEntity.Id].GetComponentsInChildren<IComponentPresenter<T>>();
+            return components.Single(x => x.ComponentId == componentId);
         }
 
         protected virtual void OnComponentUpdated(IEntity<T> iEntity, IComponentData oldState, KeyValuePair<string, IComponentData> updatedState, GameObject targetParentGo) {
-            var compView = _componentViews[updatedState.Key];
+            var compView = GetComponentPresenter(iEntity, updatedState.Key);
             compView.OnUpdateUnityComponent(iEntity, oldState, updatedState.Value);
         }
 
