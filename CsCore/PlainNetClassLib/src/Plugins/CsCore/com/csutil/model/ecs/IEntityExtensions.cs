@@ -180,7 +180,7 @@ namespace com.csutil.model.ecs {
         }
 
         /// <summary> Recursively searches for all components of the specified type in the entity and all its children </summary>
-        public static IEnumerable<V> GetComponentsInChildren<T, V>(this IEntity<T> self) where T : IEntityData where V : IComponentData {
+        public static IEnumerable<V> GetComponentsInChildren<T, V>(this IEntity<T> self) where T : IEntityData {
             return self.GetChildrenTreeBreadthFirst().SelectMany(x => x.Components.Values).Where(c => c is V).Cast<V>();
         }
 
