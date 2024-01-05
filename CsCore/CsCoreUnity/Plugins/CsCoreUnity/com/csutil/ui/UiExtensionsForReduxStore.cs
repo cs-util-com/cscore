@@ -47,14 +47,6 @@ namespace com.csutil {
             SubscribeToStateChanges(self, subState, getSubState, newText => self.value = newText);
         }
 
-        private static void SubscribeToStateChanges<T, S, Sub>(UnityEngine.Object ui, SubState<T, S> sub, Func<S, Sub> getSubState, Action<Sub> updateUi) {
-            if (ui.IsNullOrDestroyed()) {
-                throw new ArgumentNullException("The Unity UI object must not be null!");
-            }
-            var subSub = sub.GetSubStateForUnity(ui, getSubState);
-            subSub.onStateChanged += () => { updateUi(subSub.GetState()); };
-        }
-
         public static SubState<T, Sub> GetSubStateForUnity<T, Sub>(this IDataStore<T> store, UnityEngine.Object context, Func<T, Sub> getSubState, bool eventsAlwaysInMainThread = true) {
             SubState<T, Sub> subState = store.GetSubState(getSubState);
             var listenerInStore = store.AddStateChangeListener((_) => subState.GetState(), newSubState => {
@@ -68,7 +60,11 @@ namespace com.csutil {
             return subState;
         }
 
-        public static SubState<T, SubSub> GetSubStateForUnity<T, Sub, SubSub>(this SubState<T, Sub> parentSubState, UnityEngine.Object context, Func<Sub, SubSub> getSubState, bool eventsAlwaysInMainThread = true) {
+        private static void SubscribeToStateChanges<T, S, Sub>(UnityEngine.Object ui, SubState<T, S> sub, Func<S, Sub> getSubState, Action<Sub> updateUi) {
+            sub.GetSubStateForUnity(ui, getSubState, updateUi);
+        }
+        
+        public static SubState<T, SubSub> GetSubStateForUnity<T, Sub, SubSub>(this SubState<T, Sub> parentSubState, UnityEngine.Object context, Func<Sub, SubSub> getSubState, Action<SubSub> onChanged, bool eventsAlwaysInMainThread = true) {
             if (context.IsNullOrDestroyed()) {
                 throw new ArgumentNullException("The Unity context object must not be null!");
             }
@@ -81,6 +77,7 @@ namespace com.csutil {
                 }
             });
             subState.RemoveFromParent = () => { parentSubState.onStateChanged -= ownListenerInParent; };
+            subState.AddStateChangeListener(onChanged);
             return subState;
         }
 
