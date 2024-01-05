@@ -8,8 +8,10 @@ using com.csutil.algorithms.images;
 using com.csutil.io;
 using com.csutil.model;
 using StbImageSharp;
+using StbImageWriteSharp;
 using Xunit;
 using Zio;
+using ColorComponents = StbImageSharp.ColorComponents;
 
 
 namespace com.csutil.tests.AlgorithmTests {
@@ -25,10 +27,13 @@ namespace com.csutil.tests.AlgorithmTests {
             await DownloadFileIfNeeded(imageFile, "http://atilimcetin.com/global-matting/GT04-image.png");
 
             var image = await ImageLoader.LoadImageInBackground(imageFile);
-            var imageResult = ImageBlur.RunBoxBlur(image.Data, image.Width, image.Height, 3, (int)image.ColorComponents);
-            
-            var result = ImageResult.FromMemory(image.Data, image.ColorComponents);
-
+            var imageResult = ImageBlur.RunBoxBlur(image.Data, image.Width, image.Height, 21, (int)image.ColorComponents);
+            var test = folder.GetChild("Blurred.png");
+            {
+                using var stream = test.OpenOrCreateForWrite();
+                ImageWriter writer = new ImageWriter();
+                writer.WritePng(imageResult, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
+            }
         }
         private static async Task DownloadFileIfNeeded(FileEntry self, string url) {
             var imgFileRef = new MyFileRef() { url = url, fileName = self.Name };
@@ -41,6 +46,6 @@ namespace com.csutil.tests.AlgorithmTests {
             public Dictionary<string, object> checksums { get; set; }
             public string mimeType { get; set; }
         }
-    }        
+    }
 
 }

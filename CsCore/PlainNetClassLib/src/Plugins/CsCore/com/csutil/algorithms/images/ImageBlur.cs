@@ -18,45 +18,8 @@ public class ImageBlur {
 
     //Potentially optimizable by skipping pixels already in for loop instead of checking throgh if statement 
 
+    //Todo fix for alpha value to always be the same alpha as the pixel originally had
     public static byte[] RunBoxBlur(byte[] image, int width, int height, int boxSize, int bytePerPixel) {
-        // byte[] outputImage = new byte[inputImage.Length];
-        // int stride = width * bytePerPixel;
-        //
-        // for (int y = radius; y < height - radius; ++y) {
-        //     for (int x = radius; x < width - radius; ++x) {
-        //         // int[] sumColor = new int[bytePerPixel];
-        //         var sumColor = GetColorAt(inputImage, x, y, bytePerPixel, width);
-        //         var count = 0;
-        //
-        //         for (int dy = -radius; dy <= radius; ++dy) {
-        //             for (int dx = -radius; dx <= radius; ++dx) {
-        //                 int positionx = x + dx;
-        //                 int positiony = y + dy;
-        //
-        //                 // if (positionx >= 0 && positionx < width && positiony >= 0 && positiony < height) {
-        //                 //     byte[] color = new byte[bytePerPixel];
-        //                 //     Array.Copy(inputImage, x, color, 0, bytePerPixel);
-        //                 //     for (int i = 0; i < bytePerPixel; i++) {
-        //                 //         sumColor[i] += color[i];
-        //                 //     }
-        //                 //     count++;
-        //                 // }
-        //                 var currColor = GetColorAt(inputImage, positionx, positiony, bytePerPixel, width);
-        //                 for (var c = 0; c < sumColor.Length; c++) {
-        //                     sumColor[c] = (byte)(sumColor[c] + currColor[c]);
-        //                 }
-        //                 count++;
-        //             }
-        //         }
-        //         byte[] avgColor = new byte[bytePerPixel];
-        //         for (int i = 0; i < sumColor.Length - 1; i++) {
-        //             avgColor[i] = (byte)(sumColor[i] / count);
-        //         }
-        //         SetColorAt(outputImage, x, y, width, avgColor, bytePerPixel);
-        //
-        //     }
-        // }
-        // return outputImage;
         var result = new byte[image.Length];
 
         var halfKernel = (int)Math.Floor((double)boxSize / 2);
