@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net.Mime;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using com.csutil.algorithms.images;
@@ -23,9 +24,10 @@ namespace com.csutil.tests.AlgorithmTests {
             var imageFile = folder.GetChild("GT04-image.png");
             await DownloadFileIfNeeded(imageFile, "http://atilimcetin.com/global-matting/GT04-image.png");
 
-            ImageResult image = await ImageLoader.LoadImageInBackground(imageFile);
-            byte[] imageResult = ImageBlur.RunBoxBlur(image.Data, image.Width, image.Height, 1, (int)image.ColorComponents);
-            ImageResult result = ImageResult.FromMemory(imageResult);
+            var image = await ImageLoader.LoadImageInBackground(imageFile);
+            var imageResult = ImageBlur.RunBoxBlur(image.Data, image.Width, image.Height, 3, (int)image.ColorComponents);
+            
+            var result = ImageResult.FromMemory(image.Data, image.ColorComponents);
 
         }
         private static async Task DownloadFileIfNeeded(FileEntry self, string url) {
