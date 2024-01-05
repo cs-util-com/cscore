@@ -185,7 +185,7 @@ namespace com.csutil.model.ecs {
         }
 
         /// <summary> Recursively searches the entity and all its children until a component of the specified type is found </summary>
-        public static V GetComponentInChildren<T, V>(this IEntity<T> self) where T : IEntityData where V : IComponentData {
+        public static V GetComponentInChildren<T, V>(this IEntity<T> self) where T : IEntityData {
             return self.GetComponentsInChildren<T, V>().FirstOrDefault();
         }
 

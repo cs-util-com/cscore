@@ -76,7 +76,7 @@ namespace com.csutil.model.ecs {
             iEntity.LocalPose().ApplyTo(go.transform);
             go.SetActive(iEntity.IsActive);
             foreach (var x in iEntity.Components) {
-                onCompAdded(iEntity, x, targetParentGo: go);
+                OnComponentAdded(iEntity, x, targetParentGo: go);
             }
         }
 
@@ -108,7 +108,7 @@ namespace com.csutil.model.ecs {
             }
             var oldComps = oldState.Components;
             newState.Components.CalcEntryChangesToOldStateV2<IReadOnlyDictionary<string, IComponentData>, string, IComponentData>(ref oldComps,
-                added => onCompAdded(iEntity, added, targetParentGo: go),
+                added => OnComponentAdded(iEntity, added, targetParentGo: go),
                 updated => OnComponentUpdated(iEntity, oldState.Components[updated.Key], updated, targetParentGo: go),
                 deleted => OnCompentRemoved(iEntity, deleted, targetParentGo: go)
             );
@@ -132,12 +132,15 @@ namespace com.csutil.model.ecs {
             newLocalPose.ApplyTo(go.transform);
         }
 
-        private void onCompAdded(IEntity<T> iEntity, KeyValuePair<string, IComponentData> added, GameObject targetParentGo) {
+        protected virtual void OnComponentAdded(IEntity<T> iEntity, KeyValuePair<string, IComponentData> added, GameObject targetParentGo) {
             var createdComponent = AddComponentTo(targetParentGo, added.Value, iEntity);
             if (createdComponent == null) {
                 throw Log.e($"AddComponentTo returned NULL for component={added.Value} and targetParentGo={targetParentGo}", targetParentGo);
             }
             createdComponent.ComponentId = added.Value.GetId();
+            if (createdComponent is Behaviour mono) {
+                mono.enabled = added.Value.IsActive;
+            }
             createdComponent.OnUpdateUnityComponent(iEntity, default, added.Value);
         }
 
@@ -154,6 +157,9 @@ namespace com.csutil.model.ecs {
 
         protected virtual void OnComponentUpdated(IEntity<T> iEntity, IComponentData oldState, KeyValuePair<string, IComponentData> updatedState, GameObject targetParentGo) {
             var compView = GetComponentPresenter(iEntity, updatedState.Key);
+            if (compView is Behaviour mono) {
+                mono.enabled = updatedState.Value.IsActive;
+            }
             compView.OnUpdateUnityComponent(iEntity, oldState, updatedState.Value);
         }
 
