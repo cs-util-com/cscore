@@ -80,7 +80,7 @@ namespace com.csutil.tests.model.immutable {
                 var model2 = store.GetState<Model2>();
                 Assert.Equal("b", model2.GetState().b);
                 // GetSubState can automatically access the correct slice of the store:
-                var model3c = store.GetSubState((Model3 x) => x.c);
+                var model3c = store.GetSubState((Model3 x) => x?.c);
                 Assert.Equal("c", model3c.GetState());
                 var cChangedCounter = 0;
                 model3c.onStateChanged += () => { cChangedCounter++; };
@@ -96,8 +96,15 @@ namespace com.csutil.tests.model.immutable {
             Assert.Equal(4, slice3ChangedCounter); // Callback when slice is removed
             Assert.Equal("a2", store1.GetState().a);
             Assert.Equal("b", store2.GetState().b);
+
             // The removed slice can not be accessed anymore:
-            Assert.Throws<SlicedModel.SliceNotFoundException>(() => store3.GetState());
+            Assert.Throws<SlicedModel.SliceNotFoundException>(() => {
+                store3.Dispatch(new ActionChangeC() { newC = "c3" });
+            });
+            
+            // The state will always return null (its needed not to throw an exception here to
+            // not break existing listeners to the store that were not yet removed):
+            Assert.Null(store3.GetState());
 
         }
 

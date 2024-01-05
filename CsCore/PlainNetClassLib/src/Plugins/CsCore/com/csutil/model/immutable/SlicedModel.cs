@@ -44,36 +44,48 @@ namespace com.csutil.model.immutable {
 
         }
 
-        private class SlicedStore<T> : IDataStore<T>, IsSlicedStore {
+        private class SlicedStore<T> : IDataStore<T>, IsSlicedStore, IDisposableV2 {
 
             public IDataStore<SlicedModel> ParentStore => _slicedStore;
+            public DisposeState IsDisposed { get; private set; } = DisposeState.Active;
 
             private readonly IDataStore<SlicedModel> _slicedStore;
+
             public SlicedStore(IDataStore<SlicedModel> slicedStore) { _slicedStore = slicedStore; }
+
+            public void Dispose() {
+                IsDisposed = DisposeState.DisposingStarted;
+                IsDisposed = DisposeState.Disposed;
+            }
 
             public StateReducer<T> reducer => (T oldState, object action) => {
                 SlicedModel.Slice slice = _slicedStore.GetState().Slices.Single(x => x.Model is T);
                 return (T)slice.MyReducer(oldState, action);
             };
 
-            public Action onStateChanged { get => _slicedStore.onStateChanged; set => _slicedStore.onStateChanged = WrapWithRemoveHandler(value); }
-            private Action WrapWithRemoveHandler(Action listener) {
-                return () => {
-                    try {
-                        listener();
-                    } catch (SlicedModel.SliceNotFoundException e) {
-                        // If the slice was removed from the store then remove the listener:
-                        if (e.SliceType != typeof(T)) {
-                            throw;
-                        }
-                    }
-                };
+            public Action onStateChanged { get => _slicedStore.onStateChanged; set => _slicedStore.onStateChanged = value; }
+
+            public T GetState() {
+                DisposeOfSliceModelNoLongerExists();
+                return _slicedStore.GetState().GetSlice<T>();
             }
 
-            public T GetState() { return _slicedStore.GetState().GetSlice<T>(); }
+            private void DisposeOfSliceModelNoLongerExists() {
+                if (!_slicedStore.GetState().HasSlice<T>()) { this.DisposeV2(); }
+            }
             public object LastDispatchedAction => _slicedStore.LastDispatchedAction;
 
-            public object Dispatch(object action) { return _slicedStore.Dispatch(action); }
+            public object Dispatch(object action) {
+                ThrowIfSliceRemoved();
+                return _slicedStore.Dispatch(action);
+            }
+
+            private void ThrowIfSliceRemoved() {
+                DisposeOfSliceModelNoLongerExists();
+                if (!this.IsAlive()) {
+                    throw new SlicedModel.SliceNotFoundException(typeof(T));
+                }
+            }
 
         }
 
@@ -136,11 +148,13 @@ namespace com.csutil.model.immutable {
             _getSliceLookUpTable = slices.ToImmutableDictionary(x => x.Model.GetType(), x => x);
         }
 
+        public bool HasSlice<T>() { return _getSliceLookUpTable.ContainsKey(typeof(T)); }
+
         public T GetSlice<T>() {
             if (_getSliceLookUpTable.TryGetValue(typeof(T), out Slice slice)) {
                 return (T)slice.Model;
             } else {
-                throw new SliceNotFoundException(typeof(T));
+                return default;
             }
         }
 
