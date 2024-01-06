@@ -77,6 +77,21 @@ namespace com.csutil.model.ecs {
             this.scale = scale;
         }
 
+        protected bool Equals(Pose3d other) {
+            return position.Equals(other.position) && rotation.Equals(other.rotation) && scale.Equals(other.scale);
+        }
+        
+        public override bool Equals(object obj) {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((Pose3d)obj);
+        }
+        
+        public override int GetHashCode() {
+            return HashCode.Combine(position, rotation, scale);
+        }
+
         public static Matrix4x4 NewMatrix(Vector3 position = new Vector3(), double rotOnYAxisInDegree = 0, float scale = 1f) {
             var rot = rotOnYAxisInDegree == 0 ? Quaternion.Identity : Quaternion.CreateFromAxisAngle(Vector3.UnitY, (float)(rotOnYAxisInDegree * degreeToRad));
             return NewMatrix(position, rot, scale);
