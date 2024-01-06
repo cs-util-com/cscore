@@ -31,6 +31,7 @@ namespace com.csutil.logging {
 #if UNITY_EDITOR
             if (!ApplicationV2.isPlaying) { return "[ EDIT MODE ]  "; }
 #endif
+            if (MainThread.isMainThread) { return "[ MAIN THREAD ] "; }
             return "";
         }
 
