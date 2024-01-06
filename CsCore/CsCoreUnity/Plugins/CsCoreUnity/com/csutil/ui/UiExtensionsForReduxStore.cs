@@ -47,6 +47,7 @@ namespace com.csutil {
             SubscribeToStateChanges(self, subState, getSubState, newText => self.value = newText);
         }
 
+        [Obsolete("Consider using the variant instead that directly passes in the callback")]
         public static SubState<T, Sub> GetSubStateForUnity<T, Sub>(this IDataStore<T> store, UnityEngine.Object context, Func<T, Sub> getSubState, bool eventsAlwaysInMainThread = true) {
             SubState<T, Sub> subState = store.GetSubState(getSubState);
             var listenerInStore = store.AddStateChangeListener((_) => subState.GetState(), newSubState => {
@@ -64,21 +65,50 @@ namespace com.csutil {
             sub.GetSubStateForUnity(ui, getSubState, updateUi);
         }
         
-        public static SubState<T, SubSub> GetSubStateForUnity<T, Sub, SubSub>(this SubState<T, Sub> parentSubState, UnityEngine.Object context, Func<Sub, SubSub> getSubState, Action<SubSub> onChanged, bool eventsAlwaysInMainThread = true) {
-            if (context.IsNullOrDestroyed()) {
-                throw new ArgumentNullException("The Unity context object must not be null!");
-            }
-            var subState = parentSubState.GetSubState(getSubState);
-            var ownListenerInParent = parentSubState.AddStateChangeListener(getSubState, newSubState => {
+        public static SubState<T, Sub> GetSubStateForUnity<T, Sub>(this IDataStore<T> store, UnityEngine.Object context, Func<T, Sub> getSubState, Action<Sub> onChanged, bool eventsAlwaysInMainThread = true, bool triggerInstantToInit = true) {
+            SubState<T, Sub> subState = store.GetSubState(getSubState);
+            var listenerInStore = store.AddStateChangeListener((_) => subState.GetState(), newSubState => {
                 if (eventsAlwaysInMainThread) {
                     MainThread.Invoke(() => { OnSubstateChangedForUnity(subState, newSubState, context); });
                 } else {
                     OnSubstateChangedForUnity(subState, newSubState, context);
                 }
-            });
-            subState.RemoveFromParent = () => { parentSubState.onStateChanged -= ownListenerInParent; };
-            subState.AddStateChangeListener(onChanged);
+            }, triggerInstantToInit: true);
+            subState.RemoveFromParent = () => { store.onStateChanged -= listenerInStore; };
+            subState.AddStateChangeListener((newSubSub) => {
+                if (eventsAlwaysInMainThread) {
+                    MainThread.Invoke(() => { onChanged(newSubSub); });
+                } else {
+                    onChanged(newSubSub);
+                }
+            }, triggerInstantToInit);
             return subState;
+        }
+
+        public static SubState<T, SubSub> GetSubStateForUnity<T, Sub, SubSub>(this SubState<T, Sub> parentSubState, UnityEngine.Object context, Func<Sub, SubSub> getSubState,
+            Action<SubSub> onChanged, bool eventsAlwaysInMainThread = true, bool triggerInstantToInit = true) {
+            {
+                if (context.IsNullOrDestroyed()) {
+                    throw new ArgumentNullException("The Unity context object must not be null!");
+                }
+                var subState = parentSubState.GetSubState(getSubState);
+                var ownListenerInParent = parentSubState.AddStateChangeListener(getSubState, (SubSub newSubState) => {
+                    if (eventsAlwaysInMainThread) {
+                        MainThread.Invoke(() => { OnSubstateChangedForUnity(subState, newSubState, context); });
+                    } else {
+                        OnSubstateChangedForUnity(subState, newSubState, context);
+                    }
+                });
+                subState.RemoveFromParent = () => { parentSubState.onStateChanged -= ownListenerInParent; };
+                subState.AddStateChangeListener((newSubSub) => {
+                    if (eventsAlwaysInMainThread) {
+                        MainThread.Invoke(() => { onChanged(newSubSub); });
+                    } else {
+                        onChanged(newSubSub);
+                    }
+                }, triggerInstantToInit);
+                return subState;
+            }
         }
 
         private static void OnSubstateChangedForUnity<T, S>(SubState<T, S> subState, S newVal, UnityEngine.Object context) {
