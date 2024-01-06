@@ -28,11 +28,12 @@ namespace com.csutil.tests.AlgorithmTests {
 
             var image = await ImageLoader.LoadImageInBackground(imageFile);
             var imageResult = ImageBlur.RunBoxBlur(image.Data, image.Width, image.Height, 21, (int)image.ColorComponents);
+            var flippedResult = ImageFlip.FlipImageVertically(imageResult, image.Width, image.Height, (int)image.ColorComponents);
             var test = folder.GetChild("Blurred.png");
             {
                 using var stream = test.OpenOrCreateForWrite();
                 ImageWriter writer = new ImageWriter();
-                writer.WritePng(imageResult, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
+                writer.WritePng(flippedResult, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
             }
         }
         private static async Task DownloadFileIfNeeded(FileEntry self, string url) {
