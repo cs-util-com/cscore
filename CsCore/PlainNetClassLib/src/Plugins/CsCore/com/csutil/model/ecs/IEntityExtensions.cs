@@ -241,6 +241,14 @@ namespace com.csutil.model.ecs {
                 throw new ArgumentException($"The entity {self.Id} has {compTypeCount} components of type {typeof(V).Name} but only one is allowed");
             }
         }
+        
+        public static bool IsNullOrInactive(this IEntityData self) {
+            return self == null || !self.IsActive;
+        }
+        
+        public static bool IsNullOrInactive(this IComponentData self) {
+            return self == null || !self.IsActive;
+        }
 
     }
 
