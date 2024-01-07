@@ -57,11 +57,15 @@ namespace com.csutil.model.ecs {
             }
         }
 
-        public void SaveChanges(T instance) {
+        public Task SaveChanges(T instance) {
             var entityId = instance.GetId();
             var json = UpdateJsonState(instance);
             var file = GetEntityFileForId(entityId);
-            file.SaveAsJson(json);
+            // Try saving with exponential backoff a few times:
+            return TaskV2.TryWithExponentialBackoff(() => {
+                file.SaveAsJson(json);
+                return Task.FromResult(true);
+            }, maxNrOfRetries: 3, initialExponent: 4);
         }
 
         private JToken UpdateJsonState(T entity) {

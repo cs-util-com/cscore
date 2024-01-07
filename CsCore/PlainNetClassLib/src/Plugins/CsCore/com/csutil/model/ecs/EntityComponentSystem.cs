@@ -118,7 +118,7 @@ namespace com.csutil.model.ecs {
 
         public void Update(T entityData) {
             this.ThrowErrorIfDisposed();
-            TemplatesIo?.SaveChanges(entityData);
+            TemplatesIo?.SaveChanges(entityData).LogOnError();
             // In case the entity is a template, update also all entities that inherit from the template:
             InternalUpdate(entityData);
         }
