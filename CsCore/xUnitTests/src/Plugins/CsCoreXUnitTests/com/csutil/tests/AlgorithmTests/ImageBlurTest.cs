@@ -36,6 +36,25 @@ namespace com.csutil.tests.AlgorithmTests {
                 writer.WritePng(flippedResult, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
             }
         }
+
+
+        [Fact]
+        public async Task BitWiseByteArrayMultTst() {
+
+            var test1 = new byte[] {1,2,3};
+            var test2 = new byte[] {5, 6, 7};
+
+            var test3 = GuidedFilter.ElementwiseMultiply(test1, test2);
+            var test = 2;
+        }
+        
+        
+        
+        
+        
+        
+        
+        
         private static async Task DownloadFileIfNeeded(FileEntry self, string url) {
             var imgFileRef = new MyFileRef() { url = url, fileName = self.Name };
             await imgFileRef.DownloadTo(self.Parent, useAutoCachedFileRef: true);
