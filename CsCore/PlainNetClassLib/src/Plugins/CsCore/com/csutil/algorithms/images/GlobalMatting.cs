@@ -242,6 +242,16 @@ namespace com.csutil.algorithms.images {
                     }
                 }
             }
+            
+            for (int x = 0; x < width; ++x)
+                for (int y = 0; y < height; ++y)
+                {
+                    if (trimap[y * width + x] == 1)
+                        trimap[y * width + x] = 0;
+                    else if (trimap[y * width + x] == 254)
+                        trimap[y * width + x] = 255;
+
+                }
         }
 
         // Method to expand known regions in the trimap

@@ -34,10 +34,11 @@ namespace com.csutil.tests.AlgorithmTests {
             var trimatByes = trimap.Data;
             var imageMatting = new GlobalMatting(image.Data, image.Width, image.Height, (int)image.ColorComponents);
             imageMatting.ExpansionOfKnownRegions(ref trimatByes, niter: 9);
-
+            
             imageMatting.RunGlobalMatting(trimatByes, out var foreground, out var alphaData, out var conf);
 
             // filter the result with fast guided filter
+            var imageGuidedFilter = new GuidedFilter(image.Width, image.Height, (int)image.ColorComponents);
             alphaData = imageMatting.RunGuidedFilter(alphaData, r: 10, eps: 1e-5);
 
             var alpha = new ImageResult {
