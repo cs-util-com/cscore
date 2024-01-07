@@ -38,7 +38,7 @@ namespace com.csutil.tests.AlgorithmTests {
             imageMatting.RunGlobalMatting(trimatByes, out var foreground, out var alphaData, out var conf);
 
             // filter the result with fast guided filter
-            var imageGuidedFilter = new GuidedFilter(image.Width, image.Height, (int)image.ColorComponents);
+            var imageGuidedFilter = new GuidedFilter(image.Data, image.Width, image.Height, (int)image.ColorComponents, r:10, eps:1e-5);
             alphaData = imageMatting.RunGuidedFilter(alphaData, r: 10, eps: 1e-5);
 
             var alpha = new ImageResult {

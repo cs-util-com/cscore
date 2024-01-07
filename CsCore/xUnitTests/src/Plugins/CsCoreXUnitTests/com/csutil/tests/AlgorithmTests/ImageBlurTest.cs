@@ -41,7 +41,7 @@ namespace com.csutil.tests.AlgorithmTests {
         [Fact]
         public async Task BitWiseByteArrayMultTst() {
 
-            var test1 = new byte[] {1,2,3};
+            var test1 = new byte[] {64,2,3};
             var test2 = new byte[] {5, 6, 7};
 
             var test3 = GuidedFilter.ElementwiseMultiply(test1, test2);
@@ -49,7 +49,15 @@ namespace com.csutil.tests.AlgorithmTests {
         }
         
         
-        
+        [Fact]
+        public async Task BitWiseByteArraySubTst() {
+
+            var test1 = new byte[] {64,2,3};
+            var test2 = new byte[] {5, 6, 7};
+
+            var test3 = GuidedFilter.ElementwiseSub(test1, test2);
+            var test = 2;
+        }
         
         
         
