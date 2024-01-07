@@ -25,9 +25,11 @@ namespace com.csutil.model.ecs {
         private readonly Dictionary<string, JToken> EntityCache = new Dictionary<string, JToken>();
 
         private Func<JsonSerializer> GetJsonSerializer = () => JsonSerializer.Create(JsonNetSettings.typedJsonSettings);
+        private readonly BackgroundTaskQueue _taskQueue;
 
         public TemplatesIO(DirectoryEntry entityDir) {
             _entityDir = entityDir;
+            _taskQueue = BackgroundTaskQueue.NewBackgroundTaskQueue(1);
         }
 
         public void Dispose() {
@@ -61,11 +63,16 @@ namespace com.csutil.model.ecs {
             var entityId = instance.GetId();
             var json = UpdateJsonState(instance);
             var file = GetEntityFileForId(entityId);
-            // Try saving with exponential backoff a few times:
-            return TaskV2.TryWithExponentialBackoff(() => {
-                file.SaveAsJson(json);
-                return Task.FromResult(true);
-            }, maxNrOfRetries: 3, initialExponent: 4);
+            return _taskQueue.Run(delegate {
+                // Try saving with exponential backoff a few times:
+                return TaskV2.TryWithExponentialBackoff(() => {
+                    if (_taskQueue.GetRemainingScheduledTaskCount() > 1) {
+                        Log.d($"Saving entity to disk: {instance} with {_taskQueue.GetRemainingScheduledTaskCount()} other tasks in queue");
+                    }
+                    file.SaveAsJson(json);
+                    return Task.FromResult(true);
+                }, maxNrOfRetries: 3, initialExponent: 4);
+            });
         }
 
         private JToken UpdateJsonState(T entity) {
