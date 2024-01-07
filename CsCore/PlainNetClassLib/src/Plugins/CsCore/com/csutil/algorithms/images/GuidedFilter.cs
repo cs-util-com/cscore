@@ -24,17 +24,32 @@ namespace com.csutil.algorithms.images {
 
         public class GuidedFilterMono : GuidedFilter {
 
+            private byte[] channel;
             public byte[] mean1;
-            public byte[] mean2;
             public byte[] variance;
             public GuidedFilterMono(byte[] image, int width, int height, int colorComponents, int r, double eps) :
                 base(image, width, height, colorComponents, r, eps) {
 
                 mean1 = BoxFilter(image, r);
-                mean2 = BoxFilter((ElementwiseMultiply(image, image)), r);
+                var mean2 = BoxFilter((ElementwiseMultiply(image, image)), r);
                 variance = ElementwiseSub(mean2, ElementwiseMultiply(mean1, mean1));
             }
-            
+
+
+            public byte[] GuidedFilterSingleChannel(byte[] imageSingleChannel) {
+                var mean_p = BoxFilter(imageSingleChannel, r);
+                var mean_Ip = BoxFilter(ElementwiseMultiply(imageSingleChannel, mean_p), r);
+                var cov_Ip = ElementwiseSub(mean_Ip, ElementwiseMultiply(mean1, mean_p));
+
+                var varianceEps = new double[variance.Length];
+                for (int i = 0; i < variance.Length; i++) {
+                    varianceEps[i] = variance[i] + eps;
+                }
+                //var a = cov_Ip / (variance + eps)
+
+
+                return imageSingleChannel;
+            }
         }
 
         public static byte[] RunGuidedFilter(byte[] bytes, byte[] alpha, int i, double eps) {
@@ -92,6 +107,44 @@ namespace com.csutil.algorithms.images {
             }
 
             return result;
+        }
+
+        private byte[] CreateSingleChannel(byte[] image, int channel) {
+            var newIm = new byte[image.Length];
+            switch (channel) {
+                case 0:
+                    for (var i = 0; i < image.Length; i++) {
+                        if (i%width == 0) {
+                            newIm[i] = image[i];
+                        } else {
+                            newIm[i] = 0;
+                        }
+                    }
+                    break;
+                case 1:
+                    for (var i = 0; i < image.Length; i++) {
+                        if (i%width == 1) {
+                            newIm[i] = image[i];
+                        } else {
+                            newIm[i] = 0;
+                        }
+                    }
+                    break;
+                case 2:
+                    for (var i = 0; i < image.Length; i++) {
+                        if (i%width == 2) {
+                            newIm[i] = image[i];
+                        } else {
+                            newIm[i] = 0;
+                        }
+                    }
+                    break;
+                default:
+                    newIm = image;
+                    break;
+            }
+
+            return newIm;
         }
     }
 }
