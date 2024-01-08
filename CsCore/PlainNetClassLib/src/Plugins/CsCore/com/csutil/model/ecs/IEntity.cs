@@ -89,7 +89,12 @@ namespace com.csutil.model.ecs {
         }
         
         public override int GetHashCode() {
-            return HashCode.Combine(position, rotation, scale);
+            unchecked {
+                var hashCode = position.GetHashCode();
+                hashCode = (hashCode * 397) ^ rotation.GetHashCode();
+                hashCode = (hashCode * 397) ^ scale.GetHashCode();
+                return hashCode;
+            }
         }
 
         public static Matrix4x4 NewMatrix(Vector3 position = new Vector3(), double rotOnYAxisInDegree = 0, float scale = 1f) {
