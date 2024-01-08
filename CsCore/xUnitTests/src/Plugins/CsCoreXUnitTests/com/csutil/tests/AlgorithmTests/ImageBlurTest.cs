@@ -28,7 +28,7 @@ namespace com.csutil.tests.AlgorithmTests {
 
             var image = await ImageLoader.LoadImageInBackground(imageFile);
             var imageResult = ImageBlur.RunBoxBlur(image.Data, image.Width, image.Height, 21, (int)image.ColorComponents);
-            var flippedResult = ImageFlip.FlipImageVertically(imageResult, image.Width, image.Height, (int)image.ColorComponents);
+            var flippedResult = ImageUtility.FlipImageVertically(imageResult, image.Width, image.Height, (int)image.ColorComponents);
             var test = folder.GetChild("Blurred.png");
             {
                 using var stream = test.OpenOrCreateForWrite();
@@ -58,8 +58,7 @@ namespace com.csutil.tests.AlgorithmTests {
             var test3 = GuidedFilter.ElementwiseSub(test1, test2);
             var test = 2;
         }
-        
-        
+
         
         
         
