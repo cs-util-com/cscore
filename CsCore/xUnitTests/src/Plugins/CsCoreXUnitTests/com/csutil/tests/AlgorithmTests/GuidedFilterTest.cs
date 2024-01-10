@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Mime;
@@ -15,32 +16,48 @@ using ColorComponents = StbImageSharp.ColorComponents;
 
 
 namespace com.csutil.tests.AlgorithmTests {
-    public class ImageBlurTest {
-        public ImageBlurTest(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
+    public class GuidedFilterTest {
 
         [Fact]
-        public async Task RunBoxBlur_ShouldApplyBlurCorrectly() {
+        public async Task SingleChannelGuidedFilterTest() {
 
-            var folder = EnvironmentV2.instance.GetOrAddAppDataFolder("BlurTesting");
+            var folder = EnvironmentV2.instance.GetOrAddAppDataFolder("GuidedTesting");
 
             var imageFile = folder.GetChild("GT04-image.png");
             await DownloadFileIfNeeded(imageFile, "http://atilimcetin.com/global-matting/GT04-image.png");
 
             var image = await ImageLoader.LoadImageInBackground(imageFile);
-            var imageResult = ImageBlur.RunBoxBlur(image.Data, image.Width, image.Height, 21, (int)image.ColorComponents);
+
+            var guidedFilter = new GuidedFilter(image.Data, image.Width, image.Height, (int)image.ColorComponents, 11, 0.6);
+            var imageSingleChannel = guidedFilter.CreateSingleChannel(image.Data, 1);
+            var guidedMono = new GuidedFilter.GuidedFilterMono(imageSingleChannel, image.Width, image.Height, (int)image.ColorComponents, 11, 0.6);
+            
+            var imageResult = guidedMono.GuidedFilterSingleChannel(imageSingleChannel, 1);
             var flippedResult = ImageUtility.FlipImageVertically(imageResult, image.Width, image.Height, (int)image.ColorComponents);
-            var test = folder.GetChild("Blurred.png");
+            var test = folder.GetChild("GuidedMono.png");
             {
-                using var stream = test.OpenOrCreateForWrite();
-                ImageWriter writer = new ImageWriter();
+                await using var stream = test.OpenOrCreateForWrite();
+                var writer = new ImageWriter();
                 writer.WritePng(flippedResult, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
             }
+            
+            var single = folder.GetChild("SingleChannel.png");
+            {
+                await using var stream = single.OpenOrCreateForWrite();
+                var writer = new ImageWriter();
+                var flippedSingleChannel = ImageUtility.FlipImageVertically(imageSingleChannel, image.Width, image.Height, (int)image.ColorComponents);
+                writer.WritePng(imageSingleChannel, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
+            }
         }
-
-
-
-
-
+        
+        
+        
+        
+        
+        
+        
+        
+        
         private static async Task DownloadFileIfNeeded(FileEntry self, string url) {
             var imgFileRef = new MyFileRef() { url = url, fileName = self.Name };
             await imgFileRef.DownloadTo(self.Parent, useAutoCachedFileRef: true);
@@ -53,5 +70,4 @@ namespace com.csutil.tests.AlgorithmTests {
             public string mimeType { get; set; }
         }
     }
-
 }

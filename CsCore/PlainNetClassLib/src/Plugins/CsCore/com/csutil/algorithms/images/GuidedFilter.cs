@@ -1,4 +1,7 @@
 using System;
+using System.IO;
+using System.Numerics;
+using System.Runtime.Serialization.Formatters.Binary;
 using com.csutil.http.apis;
 
 namespace com.csutil.algorithms.images {
@@ -31,24 +34,34 @@ namespace com.csutil.algorithms.images {
                 base(image, width, height, colorComponents, r, eps) {
 
                 mean1 = BoxFilter(image, r);
-                var mean2 = BoxFilter((ElementwiseMultiply(image, image)), r);
-                variance = ElementwiseSub(mean2, ElementwiseMultiply(mean1, mean1));
+                var mean2 = BoxFilter((ByteArrayMult(image, image)), r);
+                variance = ByteArraySub(mean2, ByteArrayMult(mean1, mean1));
             }
 
 
-            public byte[] GuidedFilterSingleChannel(byte[] imageSingleChannel) {
+            public byte[] GuidedFilterSingleChannel(byte[] imageSingleChannel, int currentChannel) {
+                var numberImage = ConvertToDouble(imageSingleChannel);
                 var mean_p = BoxFilter(imageSingleChannel, r);
-                var mean_Ip = BoxFilter(ElementwiseMultiply(imageSingleChannel, mean_p), r);
-                var cov_Ip = ElementwiseSub(mean_Ip, ElementwiseMultiply(mean1, mean_p));
+                var mean_Ip = BoxFilter(ByteArrayMult(imageSingleChannel, mean_p), r);
+                var cov_Ip = ByteArraySub(mean_Ip, ByteArrayMult(mean1, mean_p));
 
+                var meanNumber = ConvertToDouble(mean_p);
+                var covariance = ConvertToDouble(cov_Ip);
+                var varianceNumber = ConvertToDouble(variance);
+                var meanI = ConvertToDouble(mean1);
+                
                 var varianceEps = new double[variance.Length];
-                for (int i = 0; i < variance.Length; i++) {
-                    varianceEps[i] = variance[i] + eps;
+                for (var i = 0; i < variance.Length; i++) {
+                    if(i%colorComponents == currentChannel)
+                        varianceEps[i] = varianceNumber[i] + eps;
                 }
-                //var a = cov_Ip / (variance + eps)
+                var a = DivideArrays(covariance, varianceEps);
+                var b = SubArrays(meanNumber, MultArrays(a, meanI));
 
+                var meanA = BoxFilter(ConvertToByte(a), r);
+                var meanB = BoxFilter(ConvertToByte(b), r);
 
-                return imageSingleChannel;
+                return ByteArrayAdd(ByteArrayMult(meanA, image), meanB);
             }
         }
 
@@ -62,59 +75,132 @@ namespace com.csutil.algorithms.images {
         }
 
 
-        public static byte[] ElementwiseMultiply(byte[] image1, byte[] image2) {
-            if (image1.Length != image2.Length)
-                throw new ArgumentException("Input arrays must have the same length.");
-
-            byte[] result = new byte[image1.Length];
-
-            for (int i = 0; i < image1.Length; i++) {
-                // Convert bytes to integers for intermediate calculations
-                int intResult = (int)image1[i] * image2[i];
-
-                // Check for overflow and clip the result to byte range
+        
+        
+        public static byte[] ByteArrayMult(byte[] image1, byte[] image2) {
+            if (image1.Length != image2.Length) throw new ArgumentException("Input arrays must have the same length.");
+            var result = new byte[image1.Length];
+            for (var i = 0; i < image1.Length; i++) {
+                var intResult = (int)image1[i] * image2[i];
                 result[i] = (byte)Math.Min(byte.MaxValue, Math.Max(0, intResult));
             }
-
             return result;
         }
         
-        
-        public static byte[] ElementwiseSub(byte[] image1, byte[] image2)
-        {
-            if (image1.Length != image2.Length)
-            {
-                throw new ArgumentException("Arrays must have the same length");
-            }
+        public static byte[] ByteArraySub(byte[] image1, byte[] image2) {
+            if (image1.Length != image2.Length) { throw new ArgumentException("Arrays must have the same length"); }
 
-            int length = image1.Length;
-            byte[] result = new byte[length];
+            var length = image1.Length;
+            var result = new byte[length];
 
-            for (int i = 0; i < length; i++)
-            {
+            for (int i = 0; i < length; i++) {
                 // Perform element-wise subtraction with underflow check
-                int subtractionResult = image1[i] - image2[i];
+                var subtractionResult = image1[i] - image2[i];
 
-                if (subtractionResult < 0)
-                {
+                if (subtractionResult < 0) {
                     // Underflow occurred, set result to 0
                     result[i] = 0;
-                }
-                else
-                {
+                } else {
                     result[i] = (byte)subtractionResult;
                 }
             }
 
             return result;
         }
+        
+        public static byte[] ByteArrayAdd(byte[] image1, byte[] image2) {
+            if (image1.Length != image2.Length) { throw new ArgumentException("Arrays must have the same length"); }
 
-        private byte[] CreateSingleChannel(byte[] image, int channel) {
+            var length = image1.Length;
+            var result = new byte[length];
+
+            for (int i = 0; i < length; i++) {
+                // Perform element-wise subtraction with underflow check
+                var subtractionResult = image1[i] + image2[i];
+
+                if (subtractionResult < 0) {
+                    // Underflow occurred, set result to 0
+                    result[i] = 0;
+                } else {
+                    result[i] = (byte)subtractionResult;
+                }
+            }
+
+            return result;
+        }
+        
+        public static double[] MultArrays(double[] array1, double[] array2)
+        {
+            if (array1 == null || array2 == null) { throw new ArgumentNullException("Input arrays cannot be null."); }
+            if (array1.Length != array2.Length) { throw new ArgumentException("Input arrays must have the same length."); }
+
+            var result = new double[array1.Length];
+            for (var i = 0; i < array1.Length; i++){
+                result[i] = array1[i] * array2[i];
+            }
+
+            return result;
+        }
+        
+        private static double[] DivideArrays(double[] array1, double[] array2) {
+            if (array1.Length != array2.Length) throw new ArgumentException("Input arrays must have the same length.");
+            var res = new double[array1.Length];
+            for (var i = 0; i < array1.Length; i++) {
+                res[i] = array1[i] / array2[i];
+            }
+            return res;
+        }
+        
+        private static double[] SubArrays(double[] array1, double[] array2)
+        {
+            if (array1 == null || array2 == null) { throw new ArgumentNullException("Input arrays cannot be null."); }
+            if (array1.Length != array2.Length) { throw new ArgumentException("Input arrays must have the same length."); }
+
+            var result = new double[array1.Length];
+            for (var i = 0; i < array1.Length; i++){
+                result[i] = array1[i] - array2[i];
+            }
+            return result;
+        }
+        
+        
+        
+        private static double[] AddArrays(double[] array1, double[] array2)
+        {
+            if (array1 == null || array2 == null) { throw new ArgumentNullException("Input arrays cannot be null."); }
+            if (array1.Length != array2.Length) { throw new ArgumentException("Input arrays must have the same length."); }
+
+            var result = new double[array1.Length];
+            for (var i = 0; i < array1.Length; i++){
+                result[i] = array1[i] - array2[i];
+            }
+            return result;
+        }
+        
+
+        public static double[] ConvertToDouble(byte[] data) {
+            var res = new double[data.Length];
+            for (var i = 0; i < data.Length; i++) {
+                res[i] = data[i];
+            }
+            return res;
+        }
+
+        public static byte[] ConvertToByte(double[] data) {
+            var res = new byte[data.Length];
+            for (var i = 0; i < data.Length; i++) {
+                res[i] = (byte)data[i];
+            }
+            return res;
+        }
+
+
+        public  byte[] CreateSingleChannel(byte[] image, int channel) {
             var newIm = new byte[image.Length];
             switch (channel) {
                 case 0:
                     for (var i = 0; i < image.Length; i++) {
-                        if (i%width == 0) {
+                        if (i % colorComponents == 0) {
                             newIm[i] = image[i];
                         } else {
                             newIm[i] = 0;
@@ -123,7 +209,7 @@ namespace com.csutil.algorithms.images {
                     break;
                 case 1:
                     for (var i = 0; i < image.Length; i++) {
-                        if (i%width == 1) {
+                        if (i % colorComponents == 1) {
                             newIm[i] = image[i];
                         } else {
                             newIm[i] = 0;
@@ -132,7 +218,7 @@ namespace com.csutil.algorithms.images {
                     break;
                 case 2:
                     for (var i = 0; i < image.Length; i++) {
-                        if (i%width == 2) {
+                        if (i % colorComponents == 2) {
                             newIm[i] = image[i];
                         } else {
                             newIm[i] = 0;
