@@ -71,6 +71,80 @@ namespace com.csutil.algorithms.images {
             }
         }
 
+
+        public class GuidedFilterColor : GuidedFilter {
+            private int iChannels;
+            private int r;
+            private double eps;
+            private byte[] meanI_R, meanI_G, meanI_B;
+            private double[] invRR, invRG, invRB, invGG, invGB, invBB;
+
+            public GuidedFilterColor(byte[] image, int width, int height, int colorComponents, int r, double eps) :
+                base(image, width, height, colorComponents, r, eps) {
+
+                var redImage = CreateSingleChannel(image, 0);
+                var greenImage = CreateSingleChannel(image, 1);
+                var blueImage = CreateSingleChannel(image, 2);    
+                    
+                meanI_R = BoxFilter(redImage, r);
+                meanI_G = BoxFilter(greenImage, r);
+                meanI_B = BoxFilter(blueImage, r);
+                
+                // variance of I in each local patch: the matrix Sigma in Eqn (14).
+                // Note the variance in each local patch is a 3x3 symmetric matrix:
+                //           rr, rg, rb
+                //   Sigma = rg, gg, gb
+                //           rb, gb, bb
+                
+                //TODO Question - won't any combination such as rg or similar just be an empty image, as a 0 from one color channel 
+                //TODO makes the product of two different channels full of 0s?
+                var varRR_Eps = AddValueToSingleChannel(ConvertToDouble(ByteArrayMult(meanI_R, meanI_R)), eps, 0);
+                var varianceI_RR = SubArrays(ConvertToDouble(BoxFilter(ByteArrayMult(redImage, redImage), r)), varRR_Eps);
+                
+                var varRG_Eps = AddValueToSingleChannel(ConvertToDouble(ByteArrayMult(meanI_R, meanI_G)), eps, 0);
+                var varianceI_RG = SubArrays(ConvertToDouble(BoxFilter(ByteArrayMult(redImage, greenImage), r)), varRG_Eps);
+                
+                var varRB_Eps = AddValueToSingleChannel(ConvertToDouble(ByteArrayMult(meanI_R, meanI_B)), eps, 0);
+                var varianceI_RB = SubArrays(ConvertToDouble(BoxFilter(ByteArrayMult(redImage, blueImage), r)), varRB_Eps);
+                
+                var varGG_Eps = AddValueToSingleChannel(ConvertToDouble(ByteArrayMult(meanI_G, meanI_G)), eps, 1);
+                var varianceI_GG = SubArrays(ConvertToDouble(BoxFilter(ByteArrayMult(greenImage, greenImage), r)), varGG_Eps);
+                
+                var varGB_Eps = AddValueToSingleChannel(ConvertToDouble(ByteArrayMult(meanI_G, meanI_B)), eps, 1);
+                var varianceI_GB = SubArrays(ConvertToDouble(BoxFilter(ByteArrayMult(greenImage, blueImage), r)), varGB_Eps);
+                
+                var varBB_Eps = AddValueToSingleChannel(ConvertToDouble(ByteArrayMult(meanI_G, meanI_G)), eps, 2);
+                var varianceI_BB = SubArrays(ConvertToDouble(BoxFilter(ByteArrayMult(blueImage, blueImage), r)), varBB_Eps);
+                
+                // Inverse of Sigmae + Eps + I
+                invRR = SubArrays(MultArrays(varianceI_GG, varianceI_BB), MultArrays(varianceI_GB, varianceI_GB));
+                invRG = SubArrays(MultArrays(varianceI_GB, varianceI_RB), MultArrays(varianceI_RG, varianceI_BB));
+                invRB = SubArrays(MultArrays(varianceI_RG, varianceI_GB), MultArrays(varianceI_GG, varianceI_RB));
+                invGG = SubArrays(MultArrays(varianceI_RR, varianceI_BB), MultArrays(varianceI_RB, varianceI_RB));
+                invGB = SubArrays(MultArrays(varianceI_RB, varianceI_RG), MultArrays(varianceI_RR, varianceI_GB));
+                invBB = SubArrays(MultArrays(varianceI_RR, varianceI_GG), MultArrays(varianceI_RG, varianceI_RG));
+
+                var covDet = AddArrays(AddArrays(MultArrays(invRR, varianceI_RR), MultArrays(invRG, varianceI_RG)),MultArrays(invRB, varianceI_RB));
+
+                invRR = DivideArrays(invRR, covDet);
+                invRG = DivideArrays(invRG, covDet);
+                invRB = DivideArrays(invRB, covDet);
+                invGG = DivideArrays(invGG, covDet);
+                invGB = DivideArrays(invGB, covDet);
+                invBB = DivideArrays(invBB, covDet);
+            }
+        }
+
+
+        private double[] AddValueToSingleChannel(double[] array, double eps, int channel) {
+            var varianceEps = new double[array.Length];
+            for (var i = 0; i < array.Length; i++) {
+                if(i % colorComponents == channel)
+                    varianceEps[i] = array[i] + eps;
+            }
+            return varianceEps;
+        }
+        
         public static byte[] RunGuidedFilter(byte[] bytes, byte[] alpha, int i, double eps) {
             throw new NotImplementedException("TODO");
         }
