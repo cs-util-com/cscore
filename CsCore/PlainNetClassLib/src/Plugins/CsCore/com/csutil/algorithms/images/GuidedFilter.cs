@@ -116,13 +116,13 @@ namespace com.csutil.algorithms.images {
 
             for (int i = 0; i < length; i++) {
                 // Perform element-wise subtraction with underflow check
-                var subtractionResult = image1[i] + image2[i];
+                var additionResult = image1[i] + image2[i];
 
-                if (subtractionResult < 0) {
+                if (additionResult > 255) {
                     // Underflow occurred, set result to 0
-                    result[i] = 0;
+                    result[i] = 255;
                 } else {
-                    result[i] = (byte)subtractionResult;
+                    result[i] = (byte)additionResult;
                 }
             }
 
@@ -197,39 +197,15 @@ namespace com.csutil.algorithms.images {
 
         public  byte[] CreateSingleChannel(byte[] image, int channel) {
             var newIm = new byte[image.Length];
-            switch (channel) {
-                case 0:
-                    for (var i = 0; i < image.Length; i++) {
-                        if (i % colorComponents == 0) {
-                            newIm[i] = image[i];
-                        } else {
-                            newIm[i] = 0;
-                        }
-                    }
-                    break;
-                case 1:
-                    for (var i = 0; i < image.Length; i++) {
-                        if (i % colorComponents == 1) {
-                            newIm[i] = image[i];
-                        } else {
-                            newIm[i] = 0;
-                        }
-                    }
-                    break;
-                case 2:
-                    for (var i = 0; i < image.Length; i++) {
-                        if (i % colorComponents == 2) {
-                            newIm[i] = image[i];
-                        } else {
-                            newIm[i] = 0;
-                        }
-                    }
-                    break;
-                default:
-                    newIm = image;
-                    break;
+            for (var i = 0; i < image.Length; i++) {
+                if (i % colorComponents == channel) {
+                    newIm[i] = image[i];
+                } else if(i % colorComponents == 4 && colorComponents == 4){
+                    newIm[i] = 255;
+                } else {
+                    newIm[i] = 0;
+                }
             }
-
             return newIm;
         }
     }
