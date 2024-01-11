@@ -29,7 +29,14 @@ namespace com.csutil.tests.AlgorithmTests {
             var image = await ImageLoader.LoadImageInBackground(imageFile);
 
             var guidedFilter = new GuidedFilter(image.Data, image.Width, image.Height, (int)image.ColorComponents, 11, 0.6);
-            var imageSingleChannel = guidedFilter.CreateSingleChannel(image.Data, 1);
+            var imageSingleChannel = guidedFilter.CreateSingleChannel(image.Data, 2);
+            var single = folder.GetChild("SingleChannel.png");
+            {
+                await using var stream = single.OpenOrCreateForWrite();
+                var writer = new ImageWriter();
+                var flippedSingleChannel = ImageUtility.FlipImageVertically(imageSingleChannel, image.Width, image.Height, (int)image.ColorComponents);
+                writer.WritePng(flippedSingleChannel, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
+            }
             var guidedMono = new GuidedFilter.GuidedFilterMono(imageSingleChannel, image.Width, image.Height, (int)image.ColorComponents, 11, 0.6);
             
             var imageResult = guidedMono.GuidedFilterSingleChannel(imageSingleChannel, 1);
@@ -41,13 +48,7 @@ namespace com.csutil.tests.AlgorithmTests {
                 writer.WritePng(flippedResult, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
             }
             
-            var single = folder.GetChild("SingleChannel.png");
-            {
-                await using var stream = single.OpenOrCreateForWrite();
-                var writer = new ImageWriter();
-                var flippedSingleChannel = ImageUtility.FlipImageVertically(imageSingleChannel, image.Width, image.Height, (int)image.ColorComponents);
-                writer.WritePng(imageSingleChannel, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
-            }
+            
         }
         
         

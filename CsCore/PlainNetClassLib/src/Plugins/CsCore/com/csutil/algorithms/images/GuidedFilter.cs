@@ -30,11 +30,17 @@ namespace com.csutil.algorithms.images {
             private byte[] channel;
             public byte[] mean1;
             public byte[] variance;
+            
+            
+            
+            
+            
+            
             public GuidedFilterMono(byte[] image, int width, int height, int colorComponents, int r, double eps) :
                 base(image, width, height, colorComponents, r, eps) {
 
                 mean1 = BoxFilter(image, r);
-                var mean2 = BoxFilter((ByteArrayMult(image, image)), r);
+                var mean2 = BoxFilter(ByteArrayMult(image, image), r);
                 variance = ByteArraySub(mean2, ByteArrayMult(mean1, mean1));
             }
 
@@ -52,7 +58,7 @@ namespace com.csutil.algorithms.images {
                 
                 var varianceEps = new double[variance.Length];
                 for (var i = 0; i < variance.Length; i++) {
-                    if(i%colorComponents == currentChannel)
+                    if(i % colorComponents == currentChannel)
                         varianceEps[i] = varianceNumber[i] + eps;
                 }
                 var a = DivideArrays(covariance, varianceEps);
@@ -131,7 +137,7 @@ namespace com.csutil.algorithms.images {
         
         public static double[] MultArrays(double[] array1, double[] array2)
         {
-            if (array1 == null || array2 == null) { throw new ArgumentNullException("Input arrays cannot be null."); }
+            if (array1 == null || array2 == null) { throw new ArgumentException("Input arrays cannot be null."); }
             if (array1.Length != array2.Length) { throw new ArgumentException("Input arrays must have the same length."); }
 
             var result = new double[array1.Length];
@@ -153,7 +159,7 @@ namespace com.csutil.algorithms.images {
         
         private static double[] SubArrays(double[] array1, double[] array2)
         {
-            if (array1 == null || array2 == null) { throw new ArgumentNullException("Input arrays cannot be null."); }
+            if (array1 == null || array2 == null) { throw new ArgumentException("Input arrays cannot be null."); }
             if (array1.Length != array2.Length) { throw new ArgumentException("Input arrays must have the same length."); }
 
             var result = new double[array1.Length];
@@ -167,7 +173,7 @@ namespace com.csutil.algorithms.images {
         
         private static double[] AddArrays(double[] array1, double[] array2)
         {
-            if (array1 == null || array2 == null) { throw new ArgumentNullException("Input arrays cannot be null."); }
+            if (array1 == null || array2 == null) { throw new ArgumentException("Input arrays cannot be null."); }
             if (array1.Length != array2.Length) { throw new ArgumentException("Input arrays must have the same length."); }
 
             var result = new double[array1.Length];
@@ -200,7 +206,7 @@ namespace com.csutil.algorithms.images {
             for (var i = 0; i < image.Length; i++) {
                 if (i % colorComponents == channel) {
                     newIm[i] = image[i];
-                } else if(i % colorComponents == 4 && colorComponents == 4){
+                } else if(i % colorComponents == 3 && colorComponents == 4){
                     newIm[i] = 255;
                 } else {
                     newIm[i] = 0;
