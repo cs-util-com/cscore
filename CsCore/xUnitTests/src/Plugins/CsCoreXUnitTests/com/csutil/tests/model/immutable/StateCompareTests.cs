@@ -74,7 +74,7 @@ namespace com.csutil.tests.model.immutable {
             Assert.False(l1.ToArray().SequenceReferencesEqual(new MyClass[0]));
             Assert.False(new MyClass[0].SequenceReferencesEqual(l2_2.ToArray()));
         }
-        
+
         /// <summary> Same test as above just with a class that does not impelement the Equals method </summary>
         [Fact]
         public void TestStateCompareEnumerable2() {
@@ -135,7 +135,7 @@ namespace com.csutil.tests.model.immutable {
                 List<MyClass> l2_1 = new List<MyClass>() { a, b1, c };
                 l2_1.CalcEntryChangesToOldState<List<MyClass>, MyClass, MyClass>(ref l1, x => x,
                     _ => throw Log.e("Added"),
-                    _ => throw Log.e("Updated"),
+                    (_, __) => throw Log.e("Updated"),
                     _ => throw Log.e("Removed"));
             }
             {
@@ -145,7 +145,7 @@ namespace com.csutil.tests.model.immutable {
                 List<MyClass> l2_2 = new List<MyClass>() { a, b2, c };
                 l2_2.CalcEntryChangesToOldState<List<MyClass>, MyClass, MyClass>(ref l1, x => x,
                     added => throw Log.e("Added"),
-                    updated => { Assert.Same(b2, updated); },
+                    (_, updated) => { Assert.Same(b2, updated); },
                     removed => throw Log.e("Removed"));
             }
             { // Detecting removals
@@ -153,7 +153,7 @@ namespace com.csutil.tests.model.immutable {
                 var l1WithCRemoved = new List<MyClass>() { a, b1 };
                 l1WithCRemoved.CalcEntryChangesToOldState<List<MyClass>, MyClass, MyClass>(ref l1, x => x,
                     _ => throw Log.e("Added"),
-                    _ => throw Log.e("Updated"),
+                    (_, __) => throw Log.e("Updated"),
                     removed => Assert.Same(c, removed));
             }
             { // Detecting additions:
@@ -161,7 +161,7 @@ namespace com.csutil.tests.model.immutable {
                 var l1WithCRemoved = new List<MyClass>() { a, b1 };
                 l1.CalcEntryChangesToOldState<List<MyClass>, MyClass, MyClass>(ref l1WithCRemoved, x => x,
                     added => { Assert.Same(c, added); },
-                    _ => throw Log.e("Updated"),
+                    (_, __) => throw Log.e("Updated"),
                     removed => throw Log.e("Removed"));
             }
 
@@ -178,7 +178,7 @@ namespace com.csutil.tests.model.immutable {
             // No changes if the same:
             d1_2.CalcEntryChangesToOldState<Dictionary<string, int>, string, int>(ref d1,
                 _ => throw Log.e("Added"),
-                _ => throw Log.e("Updated"),
+                (_, __) => throw Log.e("Updated"),
                 _ => throw Log.e("Removed"));
             Assert.Equal(2, d1_2.Count);
             Assert.Equal(2, d1.Count);
@@ -189,19 +189,19 @@ namespace com.csutil.tests.model.immutable {
                     Assert.Equal("c", added.Key);
                     Assert.Equal(3, added.Value);
                 },
-                _ => throw Log.e("Updated"),
+                (_, __) => throw Log.e("Updated"),
                 removed => throw Log.e("Removed"));
 
             // Detecting removals
             d1.CalcEntryChangesToOldState<Dictionary<string, int>, string, int>(ref d2,
                 _ => throw Log.e("Added"),
-                _ => throw Log.e("Updated"),
+                (_, __) => throw Log.e("Updated"),
                 removed => Assert.Equal("c", removed));
 
             // Detecting updates
             d3.CalcEntryChangesToOldState<Dictionary<string, int>, string, int>(ref d2,
                 _ => throw Log.e("Added"),
-                updated => {
+                (_, updated) => {
                     Assert.Equal("b", updated.Key);
                     Assert.Equal(99, updated.Value);
                 },
@@ -218,7 +218,7 @@ namespace com.csutil.tests.model.immutable {
             var count = 0;
             d1_2.CalcEntryChangesToOldState<Dictionary<string, int>, string, int>(ref d1,
                 _ => throw Log.e("Added"),
-                _ => {
+                (_, __) => {
                     count++;
                     // The d1 reference here must already be updated:
                     Assert.Same(d1_2, d1);
@@ -227,7 +227,7 @@ namespace com.csutil.tests.model.immutable {
 
             Assert.Equal(1, count);
             Assert.Same(d1_2, d1);
-            
+
         }
 
         private class MyClass {

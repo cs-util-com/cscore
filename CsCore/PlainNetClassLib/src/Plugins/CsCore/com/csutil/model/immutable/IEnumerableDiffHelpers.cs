@@ -12,7 +12,7 @@ namespace com.csutil {
             CalcEntryChanges(oldState, newState, getKey: x => x.Key, onEntryAdded, onEntryUpdated, onEntryRemoved);
         }
 
-        public static void CalcEntryChangesToOldStateV2<E, K, V>(this E newState, ref E oldState, Action<KeyValuePair<K, V>> onEntryAdded, Action<KeyValuePair<K, V>> onEntryUpdated, Action<K> onEntryRemoved) where E : IReadOnlyDictionary<K, V> {
+        public static void CalcEntryChangesToOldStateV2<E, K, V>(this E newState, ref E oldState, Action<KeyValuePair<K, V>> onEntryAdded, Action<KeyValuePair<K, V>, KeyValuePair<K, V>> onEntryUpdated, Action<K> onEntryRemoved) where E : IReadOnlyDictionary<K, V> {
             CalcEntryChangesToOldState(newState, ref oldState, getKey: x => x.Key, onEntryAdded, onEntryUpdated, onEntryRemoved);
         }
 
@@ -21,7 +21,7 @@ namespace com.csutil {
             CalcEntryChanges(oldState, newState, getKey: x => x.Key, onEntryAdded, onEntryUpdated, onEntryRemoved);
         }
 
-        public static void CalcEntryChangesToOldState<E, K, V>(this E newState, ref E oldState, Action<KeyValuePair<K, V>> onEntryAdded, Action<KeyValuePair<K, V>> onEntryUpdated, Action<K> onEntryRemoved) where E : IDictionary<K, V> {
+        public static void CalcEntryChangesToOldState<E, K, V>(this E newState, ref E oldState, Action<KeyValuePair<K, V>> onEntryAdded, Action<KeyValuePair<K, V>, KeyValuePair<K, V>> onEntryUpdated, Action<K> onEntryRemoved) where E : IDictionary<K, V> {
             CalcEntryChangesToOldState(newState, ref oldState, getKey: x => x.Key, onEntryAdded, onEntryUpdated, onEntryRemoved);
         }
 
@@ -70,7 +70,7 @@ namespace com.csutil {
         /// <param name="onEntryAdded"></param>
         /// <param name="onEntryUpdated"></param>
         /// <param name="onEntryRemoved"></param>
-        public static void CalcEntryChangesToOldState<E, K, V>(this E newState, ref E oldState, Func<V, K> getKey, Action<V> onEntryAdded, Action<V> onEntryUpdated, Action<K> onEntryRemoved) where E : IEnumerable<V> {
+        public static void CalcEntryChangesToOldState<E, K, V>(this E newState, ref E oldState, Func<V, K> getKey, Action<V> onEntryAdded, Action<V, V> onEntryUpdated, Action<K> onEntryRemoved) where E : IEnumerable<V> {
             // TODO does not include order changes
 
             var oldStateCopy = oldState;
@@ -93,7 +93,7 @@ namespace com.csutil {
                     onEntryRemoved(keyOld);
                 } else {
                     var foundMatch = newDict[keyOld];
-                    if (StateCompare.WasModified(old, foundMatch)) { onEntryUpdated(foundMatch); }
+                    if (StateCompare.WasModified(old, foundMatch)) { onEntryUpdated(old, foundMatch); }
                     newDict.Remove(keyOld);
                 }
             }

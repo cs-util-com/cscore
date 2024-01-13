@@ -37,7 +37,7 @@ namespace com.csutil.tests.model.immutable {
                 (addedUser) => {
                     // The only user added to the store (after the initial store creation) will be carlsFriend
                     Assert.Equal(carlsFriend.name, addedUser.Value.name);
-                }, (updatedUser) => {
+                }, (_, updatedUser) => {
                     if (updatedUser.Value.id == carl.id) {
                         carlUpdatedCounter++; // Carl will be updated multiple times
                     } else if (updatedUser.Value.id == carlsFriend.id) {
@@ -54,27 +54,27 @@ namespace com.csutil.tests.model.immutable {
             store.Dispatch(a1);
             Assert.Equal(0, usersChangedCounter); // no change happened in the users
             Assert.Equal(0, carlUpdatedCounter);
-            Assert.Equal(0,carlsFriendUpdatedCounter);
+            Assert.Equal(0, carlsFriendUpdatedCounter);
             Assert.Equal(a1.someId, store.GetState().someUuids.Value.Single());
 
             store.Dispatch(new ActionOnUser.AddContact() { targetUser = carl.id, newContact = carlsFriend });
             Assert.Equal(1, usersChangedCounter);
             Assert.Equal(1, carlUpdatedCounter);
-            Assert.Equal(0,carlsFriendUpdatedCounter);
+            Assert.Equal(0, carlsFriendUpdatedCounter);
             Assert.Equal(carlsFriend, store.GetState().users[carlsFriend.id]);
             Assert.Contains(carlsFriend.id, store.GetState().users[carl.id].contacts);
 
             store.Dispatch(new ActionOnUser.ChangeName() { targetUser = carl.id, newName = "Karl" });
             Assert.Equal(2, usersChangedCounter);
             Assert.Equal(2, carlUpdatedCounter);
-            Assert.Equal(0,carlsFriendUpdatedCounter);
+            Assert.Equal(0, carlsFriendUpdatedCounter);
             Assert.Equal("Karl", store.GetState().users[carl.id].name);
 
 
             store.Dispatch(new ActionOnUser.ChangeAge() { targetUser = carlsFriend.id, newAge = null });
             Assert.Equal(3, usersChangedCounter);
             Assert.Equal(2, carlUpdatedCounter);
-            Assert.Equal(1,carlsFriendUpdatedCounter);
+            Assert.Equal(1, carlsFriendUpdatedCounter);
             Assert.Null(store.GetState().users[carlsFriend.id].age);
 
             Assert.NotEqual(MyUser1.MyEnum.State2, store.GetState().users[carl.id].myEnum);
@@ -85,12 +85,12 @@ namespace com.csutil.tests.model.immutable {
             keepListenerAlive = false;
             Assert.Equal(4, usersChangedCounter);
             Assert.Equal(3, carlUpdatedCounter);
-            Assert.Equal(1,carlsFriendUpdatedCounter);
+            Assert.Equal(1, carlsFriendUpdatedCounter);
 
             store.Dispatch(new ActionOnUser.ChangeAge() { targetUser = carlsFriend.id, newAge = 22 });
             Assert.Equal(5, usersChangedCounter);
             Assert.Equal(3, carlUpdatedCounter);
-            Assert.Equal(2,carlsFriendUpdatedCounter);
+            Assert.Equal(2, carlsFriendUpdatedCounter);
 
             // Test that now the listener is removed and will not receive any updates anymore:
             store.Dispatch(new ActionOnUser.ChangeAge() { targetUser = carlsFriend.id, newAge = 33 });
@@ -98,7 +98,7 @@ namespace com.csutil.tests.model.immutable {
 
             // The other listener will still be active:
             Assert.Equal(3, carlUpdatedCounter);
-            Assert.Equal(3,carlsFriendUpdatedCounter);
+            Assert.Equal(3, carlsFriendUpdatedCounter);
 
             Log.MethodDone(t);
         }
@@ -137,15 +137,25 @@ namespace com.csutil.tests.model.immutable {
 
         #region example actions
 
-        private class ActionAddSomeId { public Guid? someId; }
+        private class ActionAddSomeId {
+            public Guid? someId;
+        }
 
         private class ActionOnUser {
             public Guid targetUser;
 
-            public class ChangeName : ActionOnUser { public string newName; }
-            public class ChangeAge : ActionOnUser { public int? newAge; }
-            public class AddContact : ActionOnUser { public MyUser1 newContact; }
-            public class ChangeEnumState : ActionOnUser { public MyUser1.MyEnum newEnumValue; }
+            public class ChangeName : ActionOnUser {
+                public string newName;
+            }
+            public class ChangeAge : ActionOnUser {
+                public int? newAge;
+            }
+            public class AddContact : ActionOnUser {
+                public MyUser1 newContact;
+            }
+            public class ChangeEnumState : ActionOnUser {
+                public MyUser1.MyEnum newEnumValue;
+            }
         }
 
         #endregion // of example actions
