@@ -78,13 +78,14 @@ namespace com.csutil.algorithms.images {
             private double eps;
             private byte[] meanI_R, meanI_G, meanI_B;
             private double[] invRR, invRG, invRB, invGG, invGB, invBB;
+            private byte[] redImage, greenImage, blueImage;
 
             public GuidedFilterColor(byte[] image, int width, int height, int colorComponents, int r, double eps) :
                 base(image, width, height, colorComponents, r, eps) {
 
-                var redImage = CreateSingleChannel(image, 0);
-                var greenImage = CreateSingleChannel(image, 1);
-                var blueImage = CreateSingleChannel(image, 2);    
+                redImage = CreateSingleChannel(image, 0);
+                greenImage = CreateSingleChannel(image, 1);
+                blueImage = CreateSingleChannel(image, 2);    
                     
                 meanI_R = BoxFilter(redImage, r);
                 meanI_G = BoxFilter(greenImage, r);
@@ -132,6 +133,37 @@ namespace com.csutil.algorithms.images {
                 invGG = DivideArrays(invGG, covDet);
                 invGB = DivideArrays(invGB, covDet);
                 invBB = DivideArrays(invBB, covDet);
+            }
+
+
+            public byte[] FilterSingleChannel(byte[] p) {
+                var meanI = BoxFilter(p, r);
+                var meanIp_R = BoxFilter(ByteArrayMult(redImage, p), r);
+                var meanIp_G = BoxFilter(ByteArrayMult(greenImage, p), r);
+                var meanIp_B = BoxFilter(ByteArrayMult(blueImage, p), r);
+                
+                var cov_Ip_R = SubArrays(ConvertToDouble(meanIp_R), MultArrays(ConvertToDouble(meanIp_R), ConvertToDouble(meanI)));
+                var cov_Ip_G = SubArrays(ConvertToDouble(meanIp_G), MultArrays(ConvertToDouble(meanIp_G), ConvertToDouble(meanI)));
+                var cov_Ip_B = SubArrays(ConvertToDouble(meanIp_B), MultArrays(ConvertToDouble(meanIp_B), ConvertToDouble(meanI)));
+
+                var a_r = AddArrays(AddArrays(MultArrays(invRR, cov_Ip_R), MultArrays(invRG, cov_Ip_G)), MultArrays(invRB, cov_Ip_B));
+                var a_g = AddArrays(AddArrays(MultArrays(invRG, cov_Ip_R), MultArrays(invGG, cov_Ip_G)), MultArrays(invGB, cov_Ip_B));
+                var a_b = AddArrays(AddArrays(MultArrays(invRB, cov_Ip_R), MultArrays(invGB, cov_Ip_G)), MultArrays(invBB, cov_Ip_B));
+
+                var b1 = SubArrays(ConvertToDouble(meanI), MultArrays(a_r, ConvertToDouble(meanI_R)));
+                var b2 = MultArrays(a_g, ConvertToDouble(meanI_G));
+                var b3 = MultArrays(a_b, ConvertToDouble(meanI_B));
+                var b = SubArrays(SubArrays(b1, b2), b3);
+
+                var a_R_byte = ConvertToByte(a_r);
+                var a_G_byte = ConvertToByte(a_g);
+                var a_B_byte = ConvertToByte(a_b);
+
+                var res1 = ByteArrayMult(BoxFilter(a_R_byte, r), redImage);
+                var res2 = ByteArrayMult(BoxFilter(a_G_byte, r), greenImage);
+                var res3 = ByteArrayMult(BoxFilter(a_B_byte, r), blueImage);
+                var res4 = BoxFilter(ConvertToByte(b), r);
+                return ByteArrayAdd(ByteArrayAdd(ByteArrayAdd(res1, res2), res3), res4);
             }
         }
 
