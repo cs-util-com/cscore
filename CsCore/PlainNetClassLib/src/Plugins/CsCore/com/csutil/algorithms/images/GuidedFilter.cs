@@ -25,6 +25,18 @@ namespace com.csutil.algorithms.images {
             this.r = r;
             this.eps = eps;
         }
+        public GuidedFilter init(byte[] image, int radius, double eps) {
+            if(colorComponents == 1 || colorComponents == 4) {
+                if(colorComponents == 1) {
+                    return new GuidedFilterMono(image, width, height, colorComponents, 2 * radius + 1, eps);
+                }
+                else
+                {
+                    return new GuidedFilterColor(image, width, height, colorComponents, 2 * radius + 1, eps);
+                }
+            }
+            throw new Exception("not correct channel image");
+        }
         public abstract class GuidedFilterImpl {
             public static byte[] Filter(in byte[] image, int colorComponents, GuidedFilterMono mono) {
                 var p2 = image;
