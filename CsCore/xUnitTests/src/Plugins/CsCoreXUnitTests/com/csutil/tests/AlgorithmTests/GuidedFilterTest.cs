@@ -39,7 +39,7 @@ namespace com.csutil.tests.AlgorithmTests {
             }
             var guidedMono = new GuidedFilter.GuidedFilterMono(imageSingleChannel, image.Width, image.Height, (int)image.ColorComponents, 11, 0.6);
             
-            var imageResult = guidedMono.GuidedFilterSingleChannel(imageSingleChannel, 1);
+            var imageResult = guidedMono.FilterSingleChannel(imageSingleChannel, 1);
             var flippedResult = ImageUtility.FlipImageVertically(imageResult, image.Width, image.Height, (int)image.ColorComponents);
             var test = folder.GetChild("GuidedMono.png");
             {

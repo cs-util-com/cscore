@@ -28,13 +28,8 @@ namespace com.csutil.algorithms.images {
         public class GuidedFilterMono : GuidedFilter {
 
             private byte[] channel;
-            public byte[] mean1;
-            public byte[] variance;
-            
-            
-            
-            
-            
+            private byte[] mean1;
+            private byte[] variance;
             
             public GuidedFilterMono(byte[] image, int width, int height, int colorComponents, int r, double eps) :
                 base(image, width, height, colorComponents, r, eps) {
@@ -45,7 +40,7 @@ namespace com.csutil.algorithms.images {
             }
 
 
-            public byte[] GuidedFilterSingleChannel(byte[] imageSingleChannel, int currentChannel) {
+            public byte[] FilterSingleChannel(byte[] imageSingleChannel, int currentChannel) {
                 var numberImage = ConvertToDouble(imageSingleChannel);
                 var mean_p = BoxFilter(imageSingleChannel, r);
                 var mean_Ip = BoxFilter(ByteArrayMult(imageSingleChannel, mean_p), r);
@@ -56,11 +51,13 @@ namespace com.csutil.algorithms.images {
                 var varianceNumber = ConvertToDouble(variance);
                 var meanI = ConvertToDouble(mean1);
                 
-                var varianceEps = new double[variance.Length];
-                for (var i = 0; i < variance.Length; i++) {
-                    if(i % colorComponents == currentChannel)
-                        varianceEps[i] = varianceNumber[i] + eps;
-                }
+                // var varianceEps = new double[variance.Length];
+                // for (var i = 0; i < variance.Length; i++) {
+                //     if(i % colorComponents == currentChannel)
+                //         varianceEps[i] = varianceNumber[i] + eps;
+                // }
+                var varianceEps = AddValueToSingleChannel(varianceNumber, eps, currentChannel);
+                
                 var a = DivideArrays(covariance, varianceEps);
                 var b = SubArrays(meanNumber, MultArrays(a, meanI));
 
@@ -74,8 +71,6 @@ namespace com.csutil.algorithms.images {
 
         public class GuidedFilterColor : GuidedFilter {
             private int iChannels;
-            private int r;
-            private double eps;
             private byte[] meanI_R, meanI_G, meanI_B;
             private double[] invRR, invRG, invRB, invGG, invGB, invBB;
             private byte[] redImage, greenImage, blueImage;
@@ -117,7 +112,7 @@ namespace com.csutil.algorithms.images {
                 var varBB_Eps = AddValueToSingleChannel(ConvertToDouble(ByteArrayMult(meanI_G, meanI_G)), eps, 2);
                 var varianceI_BB = SubArrays(ConvertToDouble(BoxFilter(ByteArrayMult(blueImage, blueImage), r)), varBB_Eps);
                 
-                // Inverse of Sigmae + Eps + I
+                // Inverse of Sigma + Eps + I
                 invRR = SubArrays(MultArrays(varianceI_GG, varianceI_BB), MultArrays(varianceI_GB, varianceI_GB));
                 invRG = SubArrays(MultArrays(varianceI_GB, varianceI_RB), MultArrays(varianceI_RG, varianceI_BB));
                 invRB = SubArrays(MultArrays(varianceI_RG, varianceI_GB), MultArrays(varianceI_GG, varianceI_RB));
@@ -168,14 +163,7 @@ namespace com.csutil.algorithms.images {
         }
 
 
-        private double[] AddValueToSingleChannel(double[] array, double eps, int channel) {
-            var varianceEps = new double[array.Length];
-            for (var i = 0; i < array.Length; i++) {
-                if(i % colorComponents == channel)
-                    varianceEps[i] = array[i] + eps;
-            }
-            return varianceEps;
-        }
+        
         
         public static byte[] RunGuidedFilter(byte[] bytes, byte[] alpha, int i, double eps) {
             throw new NotImplementedException("TODO");
@@ -219,8 +207,8 @@ namespace com.csutil.algorithms.images {
 
             return result;
         }
-        
-        public static byte[] ByteArrayAdd(byte[] image1, byte[] image2) {
+
+        private static byte[] ByteArrayAdd(byte[] image1, byte[] image2) {
             if (image1.Length != image2.Length) { throw new ArgumentException("Arrays must have the same length"); }
 
             var length = image1.Length;
@@ -241,7 +229,16 @@ namespace com.csutil.algorithms.images {
             return result;
         }
         
-        public static double[] MultArrays(double[] array1, double[] array2)
+        private double[] AddValueToSingleChannel(double[] array, double eps, int channel) {
+            var varianceEps = new double[array.Length];
+            for (var i = 0; i < array.Length; i++) {
+                if(i % colorComponents == channel)
+                    varianceEps[i] = array[i] + eps;
+            }
+            return varianceEps;
+        }
+
+        private static double[] MultArrays(double[] array1, double[] array2)
         {
             if (array1 == null || array2 == null) { throw new ArgumentException("Input arrays cannot be null."); }
             if (array1.Length != array2.Length) { throw new ArgumentException("Input arrays must have the same length."); }
@@ -275,8 +272,6 @@ namespace com.csutil.algorithms.images {
             return result;
         }
         
-        
-        
         private static double[] AddArrays(double[] array1, double[] array2)
         {
             if (array1 == null || array2 == null) { throw new ArgumentException("Input arrays cannot be null."); }
@@ -288,7 +283,6 @@ namespace com.csutil.algorithms.images {
             }
             return result;
         }
-        
 
         public static double[] ConvertToDouble(byte[] data) {
             var res = new double[data.Length];
@@ -305,7 +299,6 @@ namespace com.csutil.algorithms.images {
             }
             return res;
         }
-
 
         public  byte[] CreateSingleChannel(byte[] image, int channel) {
             var newIm = new byte[image.Length];
