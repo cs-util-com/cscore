@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -24,7 +25,26 @@ namespace com.csutil.algorithms.images {
             this.r = r;
             this.eps = eps;
         }
+        public abstract class GuidedFilterImpl {
+            public static byte[] Filter(in byte[] image, int colorComponents, GuidedFilterMono mono) {
+                var p2 = image;
+                var channel = FindFirstByte(image);
+                var result = new byte[image.Length];
+                if (colorComponents == 1) {
+                    result = mono.FilterSingleChannel(p2, channel);
+                }
+                else {
+                    var pc = SplitChannels(image, colorComponents, mono);
 
+                    for(int i = 0; i < pc.Count; ++i) {
+                        pc[i] = mono.FilterSingleChannel(pc[i], i);
+                    }
+
+                    result = ByteArrayAdd(ByteArrayAdd(pc[2], pc[3]), ByteArrayAdd(pc[0], pc[1])); //Only for 4 Channel Image!!!!
+                }
+                return result; 
+            }
+        }
         public class GuidedFilterMono : GuidedFilter {
 
             private byte[] channel;
@@ -313,5 +333,21 @@ namespace com.csutil.algorithms.images {
             }
             return newIm;
         }
+        private static int FindFirstByte(byte[] image) {
+            for (int i = 0; i <= 3; i++) {
+                if (image[i] != 0) { return i; } //channel range from 0 to 3 in rgba order 
+            }
+            return -1;
+        }
+
+        public static List<byte[]> SplitChannels(byte[] inputImage, int numberOfChannels, GuidedFilterMono mono) {
+            var result = new List<byte[]>();
+            for(int i = 0; i < numberOfChannels;i++) {
+                result.Add(mono.CreateSingleChannel(inputImage, i));
+            }
+            return result;
+        }
+
+
     }
 }
