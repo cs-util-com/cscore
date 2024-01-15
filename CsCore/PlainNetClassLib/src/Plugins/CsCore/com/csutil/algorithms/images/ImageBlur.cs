@@ -22,8 +22,8 @@ namespace com.csutil.algorithms.images {
         public static byte[] RunBoxBlur(byte[] image, int width, int height, int boxSize, int bytePerPixel) {
             var result = new byte[image.Length];
             var halfKernel = (int)Math.Floor((double)boxSize / 2);
-            for (var y = halfKernel; y < height - halfKernel; y++) {
-                for (var x = halfKernel; x < width - halfKernel; x++) {
+            for (var y = 0; y < height; y++) {
+                for (var x = 0; x < width; x++) {
                     var sum = new int[bytePerPixel];
                     var count = 0;
                     for (var ky = -halfKernel; ky <= halfKernel; ky++) {
@@ -31,7 +31,7 @@ namespace com.csutil.algorithms.images {
                             var offsetX = x + kx;
                             var offsetY = y + ky;
 
-                            //if (offsetX < 0 || offsetX >= width || offsetY < 0 || offsetY >= height) continue;
+                            if (offsetX < 0 || offsetX >= width || offsetY < 0 || offsetY >= height) continue;
 
                             var color = GetColorAt(image, offsetX, offsetY, bytePerPixel, width);
                             for (var channel = 0; channel < bytePerPixel; channel++) {
