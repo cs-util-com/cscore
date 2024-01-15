@@ -37,7 +37,27 @@ namespace com.csutil.tests.AlgorithmTests {
             }
         }
 
+        
+        [Fact]
+        public async Task DoubleMeanFilterTest() {
 
+            var folder = EnvironmentV2.instance.GetOrAddAppDataFolder("BlurTesting");
+
+            var imageFile = folder.GetChild("GT04-image.png");
+            await DownloadFileIfNeeded(imageFile, "http://atilimcetin.com/global-matting/GT04-image.png");
+
+            var image = await ImageLoader.LoadImageInBackground(imageFile);
+            var doubleIm = GuidedFilter.ConvertToDouble(image.Data);
+            var imageResult = ImageBlur.RunBoxBlurDouble(doubleIm, image.Width, image.Height, 21, (int)image.ColorComponents);
+            var byteIm = GuidedFilter.ConvertToByte(imageResult);
+            var flippedResult = ImageUtility.FlipImageVertically(byteIm, image.Width, image.Height, (int)image.ColorComponents);
+            var test = folder.GetChild("BlurredDouble.png");
+            {
+                using var stream = test.OpenOrCreateForWrite();
+                ImageWriter writer = new ImageWriter();
+                writer.WritePng(flippedResult, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
+            }
+        }
 
 
 

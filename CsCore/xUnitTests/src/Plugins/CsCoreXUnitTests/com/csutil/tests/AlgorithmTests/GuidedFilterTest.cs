@@ -87,7 +87,6 @@ namespace com.csutil.tests.AlgorithmTests {
         
         
         
-        
         private static async Task DownloadFileIfNeeded(FileEntry self, string url) {
             var imgFileRef = new MyFileRef() { url = url, fileName = self.Name };
             await imgFileRef.DownloadTo(self.Parent, useAutoCachedFileRef: true);

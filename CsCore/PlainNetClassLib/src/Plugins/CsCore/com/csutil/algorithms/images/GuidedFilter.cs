@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using com.csutil.http.apis;
 
 namespace com.csutil.algorithms.images {
@@ -200,10 +201,14 @@ namespace com.csutil.algorithms.images {
         }
 
 
-        private byte[] BoxFilter(byte[] image, int boxSize) {
+        public byte[] BoxFilter(byte[] image, int boxSize) {
             return ImageBlur.RunBoxBlur(image, width, height, boxSize, colorComponents);
         }
 
+
+        private double[] BoxFilterDouble(double[] image, int boxsize) {
+            return ImageBlur.RunBoxBlurDouble(image, width, height, boxsize, colorComponents);
+        }
 
         
         
@@ -275,45 +280,26 @@ namespace com.csutil.algorithms.images {
             if (array1 == null || array2 == null) { throw new ArgumentException("Input arrays cannot be null."); }
             if (array1.Length != array2.Length) { throw new ArgumentException("Input arrays must have the same length."); }
 
-            var result = new double[array1.Length];
-            for (var i = 0; i < array1.Length; i++){
-                result[i] = array1[i] * array2[i];
-            }
-
-            return result;
+            return array1.Zip(array2, (x, y) => x * y).ToArray();
         }
         
         private static double[] DivideArrays(double[] array1, double[] array2) {
             if (array1.Length != array2.Length) throw new ArgumentException("Input arrays must have the same length.");
-            var res = new double[array1.Length];
-            for (var i = 0; i < array1.Length; i++) {
-                res[i] = array1[i] / array2[i];
-            }
-            return res;
+            return array1.Zip(array2, (x, y) => x / y).ToArray();
         }
         
         private static double[] SubArrays(double[] array1, double[] array2)
         {
             if (array1 == null || array2 == null) { throw new ArgumentException("Input arrays cannot be null."); }
             if (array1.Length != array2.Length) { throw new ArgumentException("Input arrays must have the same length."); }
-
-            var result = new double[array1.Length];
-            for (var i = 0; i < array1.Length; i++){
-                result[i] = array1[i] - array2[i];
-            }
-            return result;
+            return array1.Zip(array2, (x, y) => x - y).ToArray();
         }
         
         private static double[] AddArrays(double[] array1, double[] array2)
         {
             if (array1 == null || array2 == null) { throw new ArgumentException("Input arrays cannot be null."); }
             if (array1.Length != array2.Length) { throw new ArgumentException("Input arrays must have the same length."); }
-
-            var result = new double[array1.Length];
-            for (var i = 0; i < array1.Length; i++){
-                result[i] = array1[i] - array2[i];
-            }
-            return result;
+            return array1.Zip(array2, (x, y) => x + y).ToArray();
         }
 
         public static double[] ConvertToDouble(byte[] data) {
