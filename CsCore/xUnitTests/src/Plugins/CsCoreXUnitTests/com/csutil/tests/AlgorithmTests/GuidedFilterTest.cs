@@ -18,7 +18,7 @@ using ColorComponents = StbImageSharp.ColorComponents;
 namespace com.csutil.tests.AlgorithmTests {
     public class GuidedFilterTest {
 
-        private int radius = 5;
+        private int radius = 11;
         private double eps = (255 * 255) * (0.2 * 0.2);
         
         
@@ -70,7 +70,7 @@ namespace com.csutil.tests.AlgorithmTests {
             var flippedCf = ImageUtility.FlipImageVertically(colorFiltered, image.Width, image.Height, (int)image.ColorComponents);
             var colorFilteredFile = folder.GetChild("ColorFiltered.png");
             {
-                await using var stream = colorFilteredFile.OpenOrCreateForWrite();
+                await using var stream = colorFilteredFile.OpenOrCreateForReadWrite();
                 var writer = new ImageWriter();
                 writer.WritePng(flippedCf, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
             }

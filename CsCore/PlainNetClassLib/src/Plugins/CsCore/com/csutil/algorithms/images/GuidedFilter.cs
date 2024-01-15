@@ -98,9 +98,11 @@ namespace com.csutil.algorithms.images {
         public class GuidedFilterColor : GuidedFilter {
             private int iChannels;
             private double[] meanI_R, meanI_G, meanI_B;
-            private double[] invRR, invRG, invRB, invGG, invGB, invBB;
+            // private double[] invRR, invRG, invRB, invGG, invGB, invBB;
             private double[] redImageDouble, greenImageDouble, blueImageDouble;
             private byte[] redImage, greenImage, blueImage;
+
+            private double[] invrr, invrg, invrb, invgg, invgb, invbb;
 
             public GuidedFilterColor(byte[] image, int width, int height, int colorComponents, int r, double eps) :
                 base(image, width, height, colorComponents, r, eps) {
@@ -112,9 +114,9 @@ namespace com.csutil.algorithms.images {
                 greenImageDouble = ConvertToDouble(greenImage);
                 blueImageDouble = ConvertToDouble(blueImage);    
                     
-                meanI_R = ConvertToDouble(BoxFilter(redImage, r));
-                meanI_G = ConvertToDouble(BoxFilter(greenImage, r));
-                meanI_B = ConvertToDouble(BoxFilter(blueImage, r));
+                meanI_R = BoxFilterDouble(redImageDouble, r);
+                meanI_G = BoxFilterDouble(greenImageDouble, r);
+                meanI_B = BoxFilterDouble(blueImageDouble, r);
                 
                 
                 // variance of I in each local patch: the matrix Sigma in Eqn (14).
@@ -125,71 +127,104 @@ namespace com.csutil.algorithms.images {
                 
                 //TODO Question - won't any combination such as rg or similar just be an empty image, as a 0 from one color channel 
                 //TODO makes the product of two different channels full of 0s?
-                var varRR_Eps = AddValueToSingleChannel(MultArrays(meanI_R, meanI_R), eps, 0);
-                var varianceI_RR = SubArrays(ConvertToDouble(BoxFilter(ByteArrayMult(redImage, redImage), r)), varRR_Eps);
+                // var varRR_Eps = AddValueToSingleChannel(MultArrays(meanI_R, meanI_R), eps, 0);
+                // var varianceI_RR = SubArrays(ConvertToDouble(BoxFilter(ByteArrayMult(redImage, redImage), r)), varRR_Eps);
+                //
+                // var varRG_Eps = AddValueToSingleChannel(MultArrays(meanI_R, meanI_G), eps, 0);
+                // var varianceI_RG = SubArrays(ConvertToDouble(BoxFilter(ByteArrayMult(redImage, greenImage), r)), varRG_Eps);
+                //
+                // var varRB_Eps = AddValueToSingleChannel(MultArrays(meanI_R, meanI_B), eps, 0);
+                // var varianceI_RB = SubArrays(ConvertToDouble(BoxFilter(ByteArrayMult(redImage, blueImage), r)), varRB_Eps);
+                //
+                // var varGG_Eps = AddValueToSingleChannel(MultArrays(meanI_G, meanI_G), eps, 1);
+                // var varianceI_GG = SubArrays(ConvertToDouble(BoxFilter(ByteArrayMult(greenImage, greenImage), r)), varGG_Eps);
+                //
+                // var varGB_Eps = AddValueToSingleChannel(MultArrays(meanI_G, meanI_B), eps, 1);
+                // var varianceI_GB = SubArrays(ConvertToDouble(BoxFilter(ByteArrayMult(greenImage, blueImage), r)), varGB_Eps);
+                //
+                // var varBB_Eps = AddValueToSingleChannel(MultArrays(meanI_G, meanI_G), eps, 2);
+                // var varianceI_BB = SubArrays(ConvertToDouble(BoxFilter(ByteArrayMult(blueImage, blueImage), r)), varBB_Eps);
                 
-                var varRG_Eps = AddValueToSingleChannel(MultArrays(meanI_R, meanI_G), eps, 0);
-                var varianceI_RG = SubArrays(ConvertToDouble(BoxFilter(ByteArrayMult(redImage, greenImage), r)), varRG_Eps);
+                var var_I_rr = BoxFilterDouble(MultArrays(redImageDouble, redImageDouble), r)
+                    .Zip(MultArrays(meanI_R, meanI_R), (x, y) => x - y + eps).ToArray();
+                var var_I_rg = BoxFilterDouble(MultArrays(redImageDouble, greenImageDouble), r)
+                    .Zip(MultArrays(meanI_R, meanI_G), (x, y) => x - y + eps).ToArray();
+                var var_I_rb = BoxFilterDouble(MultArrays(redImageDouble, blueImageDouble), r)
+                    .Zip(MultArrays(meanI_R, meanI_B), (x, y) => x - y + eps).ToArray();
+                var var_I_gg = BoxFilterDouble(MultArrays(greenImageDouble, greenImageDouble), r)
+                    .Zip(MultArrays(meanI_G, meanI_G), (x, y) => x - y + eps).ToArray();
+                var var_I_gb = BoxFilterDouble(MultArrays(greenImageDouble, blueImageDouble), r)
+                    .Zip(MultArrays(meanI_G, meanI_B), (x, y) => x - y + eps).ToArray();
+                var var_I_bb = BoxFilterDouble(MultArrays(blueImageDouble, blueImageDouble), r)
+                    .Zip(MultArrays(meanI_B, meanI_B), (x, y) => x - y + eps).ToArray();
                 
-                var varRB_Eps = AddValueToSingleChannel(MultArrays(meanI_R, meanI_B), eps, 0);
-                var varianceI_RB = SubArrays(ConvertToDouble(BoxFilter(ByteArrayMult(redImage, blueImage), r)), varRB_Eps);
-                
-                var varGG_Eps = AddValueToSingleChannel(MultArrays(meanI_G, meanI_G), eps, 1);
-                var varianceI_GG = SubArrays(ConvertToDouble(BoxFilter(ByteArrayMult(greenImage, greenImage), r)), varGG_Eps);
-                
-                var varGB_Eps = AddValueToSingleChannel(MultArrays(meanI_G, meanI_B), eps, 1);
-                var varianceI_GB = SubArrays(ConvertToDouble(BoxFilter(ByteArrayMult(greenImage, blueImage), r)), varGB_Eps);
-                
-                var varBB_Eps = AddValueToSingleChannel(MultArrays(meanI_G, meanI_G), eps, 2);
-                var varianceI_BB = SubArrays(ConvertToDouble(BoxFilter(ByteArrayMult(blueImage, blueImage), r)), varBB_Eps);
-                
-                // Inverse of Sigma + Eps + I
-                invRR = SubArrays(MultArrays(varianceI_GG, varianceI_BB), MultArrays(varianceI_GB, varianceI_GB));
-                invRG = SubArrays(MultArrays(varianceI_GB, varianceI_RB), MultArrays(varianceI_RG, varianceI_BB));
-                invRB = SubArrays(MultArrays(varianceI_RG, varianceI_GB), MultArrays(varianceI_GG, varianceI_RB));
-                invGG = SubArrays(MultArrays(varianceI_RR, varianceI_BB), MultArrays(varianceI_RB, varianceI_RB));
-                invGB = SubArrays(MultArrays(varianceI_RB, varianceI_RG), MultArrays(varianceI_RR, varianceI_GB));
-                invBB = SubArrays(MultArrays(varianceI_RR, varianceI_GG), MultArrays(varianceI_RG, varianceI_RG));
+                invrr = SubArrays(MultArrays(var_I_gg, var_I_bb), MultArrays(var_I_gb, var_I_gb));
+                invrg = SubArrays(MultArrays(var_I_gb, var_I_rb), MultArrays(var_I_rg, var_I_bb));
+                invrb = SubArrays(MultArrays(var_I_rg, var_I_gb), MultArrays(var_I_gg, var_I_rb));
+                invgg = SubArrays(MultArrays(var_I_rr, var_I_bb), MultArrays(var_I_rb, var_I_rb));
+                invgb = SubArrays(MultArrays(var_I_rb, var_I_rg), MultArrays(var_I_rr, var_I_gb));
+                invbb = SubArrays(MultArrays(var_I_rr, var_I_gg), MultArrays(var_I_rg, var_I_rg));
 
-                var covDet = AddArrays(AddArrays(MultArrays(invRR, varianceI_RR), MultArrays(invRG, varianceI_RG)),MultArrays(invRB, varianceI_RB));
+                var covDet = AddArrays(AddArrays(MultArrays(invrr, var_I_rr),
+                                                        MultArrays(invrg, var_I_rg)), 
+                                             MultArrays(invrb, var_I_rb));
 
-                invRR = DivideArrays(invRR, covDet);
-                invRG = DivideArrays(invRG, covDet);
-                invRB = DivideArrays(invRB, covDet);
-                invGG = DivideArrays(invGG, covDet);
-                invGB = DivideArrays(invGB, covDet);
-                invBB = DivideArrays(invBB, covDet);
+                invrr = DivideArrays(invrr, covDet);
+                invrg = DivideArrays(invrg, covDet);
+                invrb = DivideArrays(invrb, covDet);
+                invgg = DivideArrays(invgg, covDet);
+                invgb = DivideArrays(invgb, covDet);
+                invbb = DivideArrays(invbb, covDet);
+                
+                // // Inverse of Sigma + Eps + I
+                // invRR = SubArrays(MultArrays(varianceI_GG, varianceI_BB), MultArrays(varianceI_GB, varianceI_GB));
+                // invRG = SubArrays(MultArrays(varianceI_GB, varianceI_RB), MultArrays(varianceI_RG, varianceI_BB));
+                // invRB = SubArrays(MultArrays(varianceI_RG, varianceI_GB), MultArrays(varianceI_GG, varianceI_RB));
+                // invGG = SubArrays(MultArrays(varianceI_RR, varianceI_BB), MultArrays(varianceI_RB, varianceI_RB));
+                // invGB = SubArrays(MultArrays(varianceI_RB, varianceI_RG), MultArrays(varianceI_RR, varianceI_GB));
+                // invBB = SubArrays(MultArrays(varianceI_RR, varianceI_GG), MultArrays(varianceI_RG, varianceI_RG));
+                //
+                // var covDet = AddArrays(AddArrays(MultArrays(invRR, varianceI_RR), MultArrays(invRG, varianceI_RG)),MultArrays(invRB, varianceI_RB));
+                //
+                // invRR = DivideArrays(invRR, covDet);
+                // invRG = DivideArrays(invRG, covDet);
+                // invRB = DivideArrays(invRB, covDet);
+                // invGG = DivideArrays(invGG, covDet);
+                // invGB = DivideArrays(invGB, covDet);
+                // invBB = DivideArrays(invBB, covDet);
             }
 
 
-            public byte[] FilterSingleChannel(byte[] p) {
-                var meanI = BoxFilter(p, r);
-                var meanIp_R = BoxFilter(ByteArrayMult(redImage, p), r);
-                var meanIp_G = BoxFilter(ByteArrayMult(greenImage, p), r);
-                var meanIp_B = BoxFilter(ByteArrayMult(blueImage, p), r);
+            public byte[] FilterSingleChannel(byte[] alpha) {
+                var alphaDouble = ConvertToDouble(alpha);
+                var meanAlpha = BoxFilterDouble(alphaDouble, r);
+                var meanIp_R = BoxFilterDouble(MultArrays(redImageDouble, alphaDouble), r);
+                var meanIp_G = BoxFilterDouble(MultArrays(greenImageDouble, alphaDouble), r);
+                var meanIp_B = BoxFilterDouble(MultArrays(blueImageDouble, alphaDouble), r);
                 
-                var cov_Ip_R = SubArrays(ConvertToDouble(meanIp_R), MultArrays(ConvertToDouble(meanIp_R), ConvertToDouble(meanI)));
-                var cov_Ip_G = SubArrays(ConvertToDouble(meanIp_G), MultArrays(ConvertToDouble(meanIp_G), ConvertToDouble(meanI)));
-                var cov_Ip_B = SubArrays(ConvertToDouble(meanIp_B), MultArrays(ConvertToDouble(meanIp_B), ConvertToDouble(meanI)));
+                var cov_Ip_R = SubArrays(meanIp_R, MultArrays(meanI_R, meanAlpha));
+                var cov_Ip_G = SubArrays(meanIp_G, MultArrays(meanI_G, meanAlpha));
+                var cov_Ip_B = SubArrays(meanIp_B, MultArrays(meanI_B, meanAlpha));
 
-                var a_r = AddArrays(AddArrays(MultArrays(invRR, cov_Ip_R), MultArrays(invRG, cov_Ip_G)), MultArrays(invRB, cov_Ip_B));
-                var a_g = AddArrays(AddArrays(MultArrays(invRG, cov_Ip_R), MultArrays(invGG, cov_Ip_G)), MultArrays(invGB, cov_Ip_B));
-                var a_b = AddArrays(AddArrays(MultArrays(invRB, cov_Ip_R), MultArrays(invGB, cov_Ip_G)), MultArrays(invBB, cov_Ip_B));
+                var a_r = AddArrays(AddArrays(MultArrays(invrr, cov_Ip_R), MultArrays(invrg, cov_Ip_G)), MultArrays(invrb, cov_Ip_B));
+                var a_g = AddArrays(AddArrays(MultArrays(invrg, cov_Ip_R), MultArrays(invgg, cov_Ip_G)), MultArrays(invgb, cov_Ip_B));
+                var a_b = AddArrays(AddArrays(MultArrays(invrb, cov_Ip_R), MultArrays(invgb, cov_Ip_G)), MultArrays(invbb, cov_Ip_B));
 
-                var b1 = SubArrays(ConvertToDouble(meanI), MultArrays(a_r, meanI_R));
+                var b1 = SubArrays(meanAlpha, MultArrays(a_r, meanI_R));
                 var b2 = MultArrays(a_g, meanI_G);
                 var b3 = MultArrays(a_b, meanI_B);
                 var b = SubArrays(SubArrays(b1, b2), b3);
 
-                var a_R_byte = ConvertToByte(a_r);
-                var a_G_byte = ConvertToByte(a_g);
-                var a_B_byte = ConvertToByte(a_b);
-
-                var res1 = ByteArrayMult(BoxFilter(a_R_byte, r), redImage);
-                var res2 = ByteArrayMult(BoxFilter(a_G_byte, r), greenImage);
-                var res3 = ByteArrayMult(BoxFilter(a_B_byte, r), blueImage);
-                var res4 = BoxFilter(ConvertToByte(b), r);
-                return ByteArrayAdd(ByteArrayAdd(ByteArrayAdd(res1, res2), res3), res4);
+                var res1 = MultArrays(BoxFilterDouble(a_r, r), redImageDouble);
+                var res2 = MultArrays(BoxFilterDouble(a_g,  r), greenImageDouble);
+                var res3 = MultArrays(BoxFilterDouble(a_b, r), blueImageDouble);
+                var res4 = BoxFilterDouble(b, r);
+                var result = ConvertToByte(AddArrays(AddArrays(AddArrays(res1, res2), res3), res4));
+                for (var i = colorComponents - 1; i < result.Length; i += colorComponents) {
+                    result[i] = image[i];
+                }
+                
+                return result;
             }
         }
 
@@ -285,7 +320,7 @@ namespace com.csutil.algorithms.images {
         
         private static double[] DivideArrays(double[] array1, double[] array2) {
             if (array1.Length != array2.Length) throw new ArgumentException("Input arrays must have the same length.");
-            return array1.Zip(array2, (x, y) => x / y).ToArray();
+            return array1.Zip(array2, (x, y) => (y != 0) ? x / y : x).ToArray();
         }
         
         private static double[] SubArrays(double[] array1, double[] array2)
