@@ -48,7 +48,7 @@ namespace com.csutil.tests.AlgorithmTests {
 
             var image = await ImageLoader.LoadImageInBackground(imageFile);
             var doubleIm = GuidedFilter.ConvertToDouble(image.Data);
-            var imageResult = ImageBlur.RunBoxBlurDouble(doubleIm, image.Width, image.Height, 21, (int)image.ColorComponents);
+            var imageResult = ImageBlur.RunBoxBlurDouble(doubleIm, image.Width, image.Height, 11, (int)image.ColorComponents);
             var byteIm = GuidedFilter.ConvertToByte(imageResult);
             var flippedResult = ImageUtility.FlipImageVertically(byteIm, image.Width, image.Height, (int)image.ColorComponents);
             var test = folder.GetChild("BlurredDouble.png");

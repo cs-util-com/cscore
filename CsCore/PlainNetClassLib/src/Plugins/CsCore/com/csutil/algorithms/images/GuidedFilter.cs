@@ -14,7 +14,12 @@ namespace com.csutil.algorithms.images {
         private int colorComponents;
         private int r;
         private double eps;
-
+        public static byte[] RunGuidedFilter(byte[] bytes, byte[] alpha, GuidedFilter instance, int i, double eps) {
+            using(var t = Log.MethodEntered()){
+                return GuidedFilterImpl.Filter(alpha, instance.colorComponents, instance); 
+            }
+        }
+        
         public GuidedFilter(byte[] image, int width, int height, int colorComponents, int r, double eps) {
             this.image = image;
             this.width = width;
@@ -180,13 +185,6 @@ namespace com.csutil.algorithms.images {
                 
                 return result;
             }
-        }
-
-
-        
-        
-        public static byte[] RunGuidedFilter(byte[] bytes, byte[] alpha, int i, double eps) {
-            throw new NotImplementedException("TODO");
         }
 
 

@@ -5,6 +5,7 @@ using com.csutil.algorithms.images;
 using com.csutil.io;
 using com.csutil.model;
 using StbImageSharp;
+using StbImageWriteSharp;
 using Xunit;
 using Zio;
 
@@ -34,12 +35,13 @@ namespace com.csutil.tests.AlgorithmTests {
             var trimatByes = trimap.Data;
             var imageMatting = new GlobalMatting(image.Data, image.Width, image.Height, (int)image.ColorComponents);
             imageMatting.ExpansionOfKnownRegions(ref trimatByes, niter: 9);
-            
+
             imageMatting.RunGlobalMatting(trimatByes, out var foreground, out var alphaData, out var conf);
 
             // filter the result with fast guided filter
-            var imageGuidedFilter = new GuidedFilter(image.Data, image.Width, image.Height, (int)image.ColorComponents, r:10, eps:1e-5);
-            alphaData = imageMatting.RunGuidedFilter(alphaData, r: 10, eps: 1e-5);
+            var imageGuidedFilter = new GuidedFilter(image.Data, image.Width, image.Height, (int)image.ColorComponents, r: 10, eps: 1e-5);
+            var guidedFilterInstance = imageGuidedFilter.init((int)image.ColorComponents);
+            alphaData = imageMatting.RunGuidedFilter(alphaData, guidedFilterInstance, r: 10, eps: 1e-5);
 
             var alpha = new ImageResult {
                 Width = image.Width,
@@ -63,6 +65,14 @@ namespace com.csutil.tests.AlgorithmTests {
             // Save the result:
             var alphaBytes = alpha.Data;
             var resultPngFile = folder.GetChild("GT04-alpha.png");
+
+            {
+                await using var stream = resultPngFile.OpenOrCreateForWrite();
+                ImageWriter writer = new ImageWriter();
+                var flippedResult = ImageUtility.FlipImageVertically(alphaBytes, image.Width, image.Height, (int)image.ColorComponents);
+                writer.WritePng(flippedResult, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
+            }
+
             // Use a encoder that supports transparency:
             // TODO 
 

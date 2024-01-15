@@ -19,7 +19,7 @@ namespace com.csutil.tests.AlgorithmTests {
     public class GuidedFilterTest {
 
         private int radius = 11;
-        private double eps = (255 * 255) * (0.2 * 0.2);
+        private double eps = (255*255) * (0.9*0.9);
         
         
         [Fact]
@@ -74,14 +74,6 @@ namespace com.csutil.tests.AlgorithmTests {
                 var writer = new ImageWriter();
                 writer.WritePng(flippedCf, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
             }
-            //var filterTest = GuidedFilter.GuidedFilterImpl.Filter(image.Data, 4, guidedMono);
-            //var flippedFilterResult = ImageUtility.FlipImageVertically(filterTest, image.Width, image.Height, (int)image.ColorComponents);
-            //var filter = folder.GetChild("Filter.png");
-            //{
-            //    await using var stream = filter.OpenOrCreateForWrite();
-            //    var writer = new ImageWriter();
-            //    writer.WritePng(flippedFilterResult, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
-            //}
         }
         
         

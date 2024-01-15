@@ -195,9 +195,10 @@ namespace com.csutil.algorithms.images {
                 throw new ArgumentException("image must have CV_8UC3 type (3 channels) but was bytesPerPixel=" + bytesPerPixel);
 
             // Assuming trimap is a single channel image
+            /* this does not work for byte[] type images as we just have all but one channel at 0
             if (trimap.Length != width * height)
                 throw new ArgumentException("trimap must have CV_8UC1 type (1 channel)");
-
+            */
             // Loop through iterations and call helper functions
             for (int i = 0; i < niter; ++i) {
                 // Calculate the scaling factor for the radius and color difference threshold
@@ -588,19 +589,20 @@ namespace com.csutil.algorithms.images {
                 throw new ArgumentException("image must have CV_8UC3 type (3 channels) but was bytesPerPixel=" + bytesPerPixel);
 
             // Assuming trimap is a single channel image
+            /* does not work for byte[] type single channel images
             if (trimap.Length != width * height)
                 throw new ArgumentException("trimap must have CV_8UC1 type (1 channel)");
-
+            
             // Check if image and trimap have the same size
             if (image.Length / bytesPerPixel != trimap.Length)
                 throw new ArgumentException("image and trimap must have the same size");
-
+            */
             // Call the helper function to perform the global matting
             GlobalMattingHelper(trimap, out foreground, out alpha, out conf);
         }
 
-        public byte[] RunGuidedFilter(byte[] alpha, int r, double eps) {
-            return GuidedFilter.RunGuidedFilter(image, alpha, r, eps);
+        public byte[] RunGuidedFilter(byte[] alpha, GuidedFilter guidedFilter, int r, double eps) {
+            return GuidedFilter.RunGuidedFilter(image, alpha, guidedFilter, r, eps);
         }
 
 
