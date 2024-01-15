@@ -32,16 +32,14 @@ namespace com.csutil.tests.AlgorithmTests {
 
             ImageResult image = await ImageLoader.LoadImageInBackground(imageFile);
             var trimap = await ImageLoader.LoadImageInBackground(trimapFile);
-            var trimatByes = trimap.Data;
+            var trimapBytes = trimap.Data;
             var imageMatting = new GlobalMatting(image.Data, image.Width, image.Height, (int)image.ColorComponents);
-            imageMatting.ExpansionOfKnownRegions(ref trimatByes, niter: 9);
+            imageMatting.ExpansionOfKnownRegions(ref trimapBytes, niter: 9);
 
-            imageMatting.RunGlobalMatting(trimatByes, out var foreground, out var alphaData, out var conf);
+            imageMatting.RunGlobalMatting(trimapBytes, out var foreground, out var alphaData, out var conf);
 
             // filter the result with fast guided filter
-            var imageGuidedFilter = new GuidedFilter(image.Data, image.Width, image.Height, (int)image.ColorComponents, r: 10, eps: 1e-5);
-            var guidedFilterInstance = imageGuidedFilter.init((int)image.ColorComponents);
-            alphaData = imageMatting.RunGuidedFilter(alphaData, guidedFilterInstance, r: 10, eps: 1e-5);
+            alphaData = imageMatting.RunGuidedFilter(alphaData, r: 10, eps: 1e-5);
 
             var alpha = new ImageResult {
                 Width = image.Width,
@@ -65,14 +63,26 @@ namespace com.csutil.tests.AlgorithmTests {
             // Save the result:
             var alphaBytes = alpha.Data;
             var resultPngFile = folder.GetChild("GT04-alpha.png");
-
             {
                 await using var stream = resultPngFile.OpenOrCreateForWrite();
                 ImageWriter writer = new ImageWriter();
                 var flippedResult = ImageUtility.FlipImageVertically(alphaBytes, image.Width, image.Height, (int)image.ColorComponents);
                 writer.WritePng(flippedResult, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
             }
-
+            var guidedAlpha = folder.GetChild("GuidedImageWithTrimap.png");
+            {
+                await using var stream = guidedAlpha.OpenOrCreateForWrite();
+                ImageWriter writer = new ImageWriter();
+                var flippedResult = ImageUtility.FlipImageVertically(alphaData, image.Width, image.Height, (int)image.ColorComponents);
+                writer.WritePng(flippedResult, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
+            }
+            var foregroundIm = folder.GetChild("ForeGroundResult.png");
+            {
+                await using var stream = foregroundIm.OpenOrCreateForWrite();
+                ImageWriter writer = new ImageWriter();
+                var flippedResult = ImageUtility.FlipImageVertically(foreground, image.Width, image.Height, (int)image.ColorComponents);
+                writer.WritePng(flippedResult, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
+            }
             // Use a encoder that supports transparency:
             // TODO 
 
@@ -112,11 +122,12 @@ namespace com.csutil.tests.AlgorithmTests {
             int index = (y * self.Width + x) * (int)self.ColorComponents;
             if ((int)self.ColorComponents == 3) {
                 return new Pixel(self.Data[index], self.Data[index + 1], self.Data[index + 2], 255);
-            } else if ((int)self.ColorComponents == 4) {
-                return new Pixel(self.Data[index], self.Data[index + 1], self.Data[index + 2], self.Data[index + 3]);
-            } else {
-                throw new Exception("ColorComponents=" + self.ColorComponents);
             }
+            if ((int)self.ColorComponents == 4) {
+                return new Pixel(self.Data[index], self.Data[index + 1], self.Data[index + 2], self.Data[index + 3]);
+            }
+            throw new Exception("ColorComponents=" + self.ColorComponents);
+            
         }
 
         public static void SetPixel(this ImageResult self, int x, int y, Pixel p) {

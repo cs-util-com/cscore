@@ -601,8 +601,10 @@ namespace com.csutil.algorithms.images {
             GlobalMattingHelper(trimap, out foreground, out alpha, out conf);
         }
 
-        public byte[] RunGuidedFilter(byte[] alpha, GuidedFilter guidedFilter, int r, double eps) {
-            return GuidedFilter.RunGuidedFilter(image, alpha, guidedFilter, r, eps);
+        public byte[] RunGuidedFilter(byte[] alpha, int r, double eps) {
+            var imageGuidedFilter = new GuidedFilter(image, width, height, bytesPerPixel, r, eps);
+            var guidedFilterInstance = imageGuidedFilter.init(bytesPerPixel);
+            return GuidedFilter.RunGuidedFilter(image, alpha, guidedFilterInstance, r, eps);
         }
 
 

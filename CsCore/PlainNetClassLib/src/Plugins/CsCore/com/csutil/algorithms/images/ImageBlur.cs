@@ -96,7 +96,7 @@ namespace com.csutil.algorithms.images {
         // Helper method to get color at a given position
         private static double[] GetColorAtDouble(double[] img, int x, int y, int bytesPerPixel, int width) {
             int startIdx = (y * width + x) * bytesPerPixel;
-            return new double[] { img[startIdx], img[startIdx + 1], img[startIdx + 2], 255 };
+            return new double[] { img[startIdx], img[startIdx + 1], img[startIdx + 2], img[startIdx + 3] };
         }
     }
 }
