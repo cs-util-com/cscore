@@ -22,12 +22,12 @@ namespace com.csutil.algorithms.images {
             this.r = r;
             this.eps = eps;
         }
-        public GuidedFilter init(byte[] image, int radius, double eps) {
-            if(colorComponents == 1) {
-                return new GuidedFilterMono(image, width, height, colorComponents, 2 * radius + 1, eps);
+        public GuidedFilter init(int channels) {
+            if(channels == 1) {
+                return new GuidedFilterMono(image, width, height, colorComponents, r, eps);
             }
-            else if(colorComponents == 4) {
-                return new GuidedFilterColor(image, width, height, colorComponents, 2 * radius + 1, eps);
+            else if(channels == 4) {
+                return new GuidedFilterColor(image, width, height, colorComponents, r, eps);
             }
             throw new Exception("not correct channel image");
         }
