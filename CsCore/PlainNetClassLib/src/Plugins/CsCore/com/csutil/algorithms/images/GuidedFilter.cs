@@ -97,8 +97,9 @@ namespace com.csutil.algorithms.images {
 
         public class GuidedFilterColor : GuidedFilter {
             private int iChannels;
-            private byte[] meanI_R, meanI_G, meanI_B;
+            private double[] meanI_R, meanI_G, meanI_B;
             private double[] invRR, invRG, invRB, invGG, invGB, invBB;
+            private double[] redImageDouble, greenImageDouble, blueImageDouble;
             private byte[] redImage, greenImage, blueImage;
 
             public GuidedFilterColor(byte[] image, int width, int height, int colorComponents, int r, double eps) :
@@ -106,11 +107,15 @@ namespace com.csutil.algorithms.images {
 
                 redImage = CreateSingleChannel(image, 0);
                 greenImage = CreateSingleChannel(image, 1);
-                blueImage = CreateSingleChannel(image, 2);    
+                blueImage = CreateSingleChannel(image, 2);
+                redImageDouble = ConvertToDouble(redImage);
+                greenImageDouble = ConvertToDouble(greenImage);
+                blueImageDouble = ConvertToDouble(blueImage);    
                     
-                meanI_R = BoxFilter(redImage, r);
-                meanI_G = BoxFilter(greenImage, r);
-                meanI_B = BoxFilter(blueImage, r);
+                meanI_R = ConvertToDouble(BoxFilter(redImage, r));
+                meanI_G = ConvertToDouble(BoxFilter(greenImage, r));
+                meanI_B = ConvertToDouble(BoxFilter(blueImage, r));
+                
                 
                 // variance of I in each local patch: the matrix Sigma in Eqn (14).
                 // Note the variance in each local patch is a 3x3 symmetric matrix:
@@ -120,22 +125,22 @@ namespace com.csutil.algorithms.images {
                 
                 //TODO Question - won't any combination such as rg or similar just be an empty image, as a 0 from one color channel 
                 //TODO makes the product of two different channels full of 0s?
-                var varRR_Eps = AddValueToSingleChannel(ConvertToDouble(ByteArrayMult(meanI_R, meanI_R)), eps, 0);
+                var varRR_Eps = AddValueToSingleChannel(MultArrays(meanI_R, meanI_R), eps, 0);
                 var varianceI_RR = SubArrays(ConvertToDouble(BoxFilter(ByteArrayMult(redImage, redImage), r)), varRR_Eps);
                 
-                var varRG_Eps = AddValueToSingleChannel(ConvertToDouble(ByteArrayMult(meanI_R, meanI_G)), eps, 0);
+                var varRG_Eps = AddValueToSingleChannel(MultArrays(meanI_R, meanI_G), eps, 0);
                 var varianceI_RG = SubArrays(ConvertToDouble(BoxFilter(ByteArrayMult(redImage, greenImage), r)), varRG_Eps);
                 
-                var varRB_Eps = AddValueToSingleChannel(ConvertToDouble(ByteArrayMult(meanI_R, meanI_B)), eps, 0);
+                var varRB_Eps = AddValueToSingleChannel(MultArrays(meanI_R, meanI_B), eps, 0);
                 var varianceI_RB = SubArrays(ConvertToDouble(BoxFilter(ByteArrayMult(redImage, blueImage), r)), varRB_Eps);
                 
-                var varGG_Eps = AddValueToSingleChannel(ConvertToDouble(ByteArrayMult(meanI_G, meanI_G)), eps, 1);
+                var varGG_Eps = AddValueToSingleChannel(MultArrays(meanI_G, meanI_G), eps, 1);
                 var varianceI_GG = SubArrays(ConvertToDouble(BoxFilter(ByteArrayMult(greenImage, greenImage), r)), varGG_Eps);
                 
-                var varGB_Eps = AddValueToSingleChannel(ConvertToDouble(ByteArrayMult(meanI_G, meanI_B)), eps, 1);
+                var varGB_Eps = AddValueToSingleChannel(MultArrays(meanI_G, meanI_B), eps, 1);
                 var varianceI_GB = SubArrays(ConvertToDouble(BoxFilter(ByteArrayMult(greenImage, blueImage), r)), varGB_Eps);
                 
-                var varBB_Eps = AddValueToSingleChannel(ConvertToDouble(ByteArrayMult(meanI_G, meanI_G)), eps, 2);
+                var varBB_Eps = AddValueToSingleChannel(MultArrays(meanI_G, meanI_G), eps, 2);
                 var varianceI_BB = SubArrays(ConvertToDouble(BoxFilter(ByteArrayMult(blueImage, blueImage), r)), varBB_Eps);
                 
                 // Inverse of Sigma + Eps + I
@@ -171,9 +176,9 @@ namespace com.csutil.algorithms.images {
                 var a_g = AddArrays(AddArrays(MultArrays(invRG, cov_Ip_R), MultArrays(invGG, cov_Ip_G)), MultArrays(invGB, cov_Ip_B));
                 var a_b = AddArrays(AddArrays(MultArrays(invRB, cov_Ip_R), MultArrays(invGB, cov_Ip_G)), MultArrays(invBB, cov_Ip_B));
 
-                var b1 = SubArrays(ConvertToDouble(meanI), MultArrays(a_r, ConvertToDouble(meanI_R)));
-                var b2 = MultArrays(a_g, ConvertToDouble(meanI_G));
-                var b3 = MultArrays(a_b, ConvertToDouble(meanI_B));
+                var b1 = SubArrays(ConvertToDouble(meanI), MultArrays(a_r, meanI_R));
+                var b2 = MultArrays(a_g, meanI_G);
+                var b3 = MultArrays(a_b, meanI_B);
                 var b = SubArrays(SubArrays(b1, b2), b3);
 
                 var a_R_byte = ConvertToByte(a_r);
@@ -258,7 +263,9 @@ namespace com.csutil.algorithms.images {
         private double[] AddValueToSingleChannel(double[] array, double eps, int channel) {
             var varianceEps = new double[array.Length];
             for (var i = 0; i < array.Length; i++) {
-                if(i % colorComponents == channel)
+                if (channel == 3)
+                    varianceEps[i] = array[i];
+                else if (i % colorComponents == channel)
                     varianceEps[i] = array[i] + eps;
             }
             return varianceEps;
