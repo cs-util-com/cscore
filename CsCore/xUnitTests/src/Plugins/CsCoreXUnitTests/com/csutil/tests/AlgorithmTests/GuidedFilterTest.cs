@@ -29,7 +29,7 @@ namespace com.csutil.tests.AlgorithmTests {
             var image = await ImageLoader.LoadImageInBackground(imageFile);
 
             var guidedFilter = new GuidedFilter(image.Data, image.Width, image.Height, (int)image.ColorComponents, 11, 0.6);
-            var imageSingleChannel = guidedFilter.CreateSingleChannel(image.Data, 2);
+            var imageSingleChannel = guidedFilter.CreateSingleChannel(image.Data, 0);
             var single = folder.GetChild("SingleChannel.png");
             {
                 await using var stream = single.OpenOrCreateForWrite();
@@ -39,7 +39,7 @@ namespace com.csutil.tests.AlgorithmTests {
             }
             var guidedMono = new GuidedFilter.GuidedFilterMono(imageSingleChannel, image.Width, image.Height, (int)image.ColorComponents, 11, 0.6);
             
-            var imageResult = guidedMono.FilterSingleChannel(imageSingleChannel, 1);
+            var imageResult = guidedMono.FilterSingleChannel(imageSingleChannel, 0);
             var flippedResult = ImageUtility.FlipImageVertically(imageResult, image.Width, image.Height, (int)image.ColorComponents);
             var test = folder.GetChild("GuidedMono.png");
             {
@@ -47,16 +47,24 @@ namespace com.csutil.tests.AlgorithmTests {
                 var writer = new ImageWriter();
                 writer.WritePng(flippedResult, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
             }
-            var filterTest = GuidedFilter.GuidedFilterImpl.Filter(image.Data, 4, guidedMono);
-            var flippedFilterResult = ImageUtility.FlipImageVertically(filterTest, image.Width, image.Height, (int)image.ColorComponents);
-            var filter = folder.GetChild("Filter.png");
+            // var filterTest = GuidedFilter.GuidedFilterImpl.Filter(image.Data, 4, guidedMono);
+            // var flippedFilterResult = ImageUtility.FlipImageVertically(filterTest, image.Width, image.Height, (int)image.ColorComponents);
+            // var filter = folder.GetChild("Filter.png");
+            // {
+            //     await using var stream = filter.OpenOrCreateForWrite();
+            //     var writer = new ImageWriter();
+            //     writer.WritePng(flippedFilterResult, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
+            // }
+
+            var guidedFilterFinal = guidedFilter.init(image.Data, 11, 0.6);
+            var colorFiltered = GuidedFilter.GuidedFilterImpl.Filter(image.Data, 4, guidedFilterFinal);
+            var flippedCF = ImageUtility.FlipImageVertically(colorFiltered, image.Width, image.Height, (int)image.ColorComponents);
+            var colorFilteredFile = folder.GetChild("ColorFiltered.png");
             {
-                await using var stream = filter.OpenOrCreateForWrite();
+                await using var stream = colorFilteredFile.OpenOrCreateForWrite();
                 var writer = new ImageWriter();
-                writer.WritePng(flippedFilterResult, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
+                writer.WritePng(flippedCF, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
             }
-            
-            
         }
         
         
