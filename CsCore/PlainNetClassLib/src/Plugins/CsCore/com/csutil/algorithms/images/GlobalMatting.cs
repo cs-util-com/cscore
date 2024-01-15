@@ -40,14 +40,14 @@ namespace com.csutil.algorithms.images {
 
             for (int x = 1; x < width - 1; ++x) {
                 for (int y = 1; y < height - 1; ++y) {
-                    int idx = y * width + x; // Calculate the index for the current pixel
+                    int idx = (y * width + x) * bytesPerPixel; // Calculate the index for the current pixel
 
                     // Check the current pixel's value and its neighbors to find boundary pixels
                     if (trimap[idx] == a) {
                         if (trimap[idx - width] == b || // pixel above
                             trimap[idx + width] == b || // pixel below
-                            trimap[idx - 1] == b || // pixel to the left
-                            trimap[idx + 1] == b) // pixel to the right
+                            trimap[idx - bytesPerPixel] == b || // pixel to the left
+                            trimap[idx + bytesPerPixel] == b) // pixel to the right
                         {
                             result.Add(new Point(x, y));
                         }
@@ -129,14 +129,14 @@ namespace com.csutil.algorithms.images {
         // Helper method to get color at a given position
         private byte[] GetColorAt(byte[] img, int x, int y) {
             int startIdx = (y * width + x) * bytesPerPixel;
-            return new byte[] { img[startIdx], img[startIdx + 1], img[startIdx + 2] };
+            return new byte[] { img[startIdx], img[startIdx + 1], img[startIdx + 2], img[startIdx + 3] };
         }
 
         // Method for expansion of known regions
         public void ExpansionOfKnownRegions(ref byte[] trimap, int r, float c) {
             for (int x = 0; x < width; ++x) {
                 for (int y = 0; y < height; ++y) {
-                    int idx = y * width + x;
+                    int idx = (y * width + x) * bytesPerPixel;
 
                     if (trimap[idx] != 128) // Assuming 128 represents the unknown region
                         continue;
@@ -148,7 +148,7 @@ namespace com.csutil.algorithms.images {
                             if (i < 0 || i >= width || j < 0 || j >= height)
                                 continue;
 
-                            int neighborIdx = j * width + i;
+                            int neighborIdx = (j * width + i) * bytesPerPixel;
 
                             if (trimap[neighborIdx] != 0 && trimap[neighborIdx] != 255)
                                 continue;
@@ -172,7 +172,7 @@ namespace com.csutil.algorithms.images {
             // Update the trimap values
             for (int x = 0; x < width; ++x) {
                 for (int y = 0; y < height; ++y) {
-                    int idx = y * width + x;
+                    int idx = (y * width + x) * bytesPerPixel;
 
                     if (trimap[idx] == 1)
                         trimap[idx] = 0;
@@ -219,7 +219,7 @@ namespace com.csutil.algorithms.images {
             // ... 
             for (var x = 0; x < w; ++x) {
                 for (var y = 0; y < h; ++y) {
-                    if (trimap[y * width + x] != 128)
+                    if (trimap[(y * width + x) * bytesPerPixel] != 128)
                         continue;
                     var im = GetColorAt(image, x, y);
 
@@ -227,7 +227,7 @@ namespace com.csutil.algorithms.images {
                         for (var i = x-r; i <= x + r; ++i) {
                             if (i < 0 || i >= w || j < 0 || j >= h)
                                 continue;
-                            if (trimap[j * width + i] != 0 && trimap[j * width + i] != 255)
+                            if (trimap[(j * width + i)*bytesPerPixel] != 0 && trimap[(j * width + i)*bytesPerPixel] != 255)
                                 continue;
                             var imCur = GetColorAt(image, i, j);
                             var pd = Sqr(Sqr(x - i) + Sqr(y - j));
@@ -235,10 +235,10 @@ namespace com.csutil.algorithms.images {
 
                             if (!(pd <= r) || !(cd <= c))
                                 continue;
-                            if (trimap[j * width + i] == 0)
-                                trimap[y * width + x] = 1;
-                            else if (trimap[j * width + i] == 255)
-                                trimap[y * width + x] = 254;
+                            if (trimap[(j * width + i)*bytesPerPixel] == 0)
+                                trimap[(y * width + x)*bytesPerPixel] = 1;
+                            else if (trimap[(j * width + i)*bytesPerPixel] == 255)
+                                trimap[(y * width + x)*bytesPerPixel] = 254;
                         }
                     }
                 }
@@ -247,10 +247,10 @@ namespace com.csutil.algorithms.images {
             for (int x = 0; x < width; ++x)
                 for (int y = 0; y < height; ++y)
                 {
-                    if (trimap[y * width + x] == 1)
-                        trimap[y * width + x] = 0;
-                    else if (trimap[y * width + x] == 254)
-                        trimap[y * width + x] = 255;
+                    if (trimap[(y * width + x)*bytesPerPixel] == 1)
+                        trimap[(y * width + x)*bytesPerPixel] = 0;
+                    else if (trimap[(y * width + x)*bytesPerPixel] == 254)
+                        trimap[(y * width + x)*bytesPerPixel] = 255;
 
                 }
         }
@@ -266,7 +266,7 @@ namespace com.csutil.algorithms.images {
 
             for (int x = 0; x < w; ++x) {
                 for (int y = 0; y < h; ++y) {
-                    if (trimap[y * w + x] != 128)
+                    if (trimap[(y * w + x)*bytesPerPixel] != 128)
                         continue;
 
                     byte[] I = GetColorAt(image, x, y);
@@ -276,7 +276,7 @@ namespace com.csutil.algorithms.images {
                             if (i < 0 || i >= w || j < 0 || j >= h)
                                 continue;
 
-                            if (trimap[j * w + i] != 0 && trimap[j * w + i] != 255)
+                            if (trimap[(j * w + i)*bytesPerPixel] != 0 && trimap[(j * w + i)*bytesPerPixel] != 255)
                                 continue;
 
                             byte[] I2 = GetColorAt(image, i, j);
@@ -285,10 +285,10 @@ namespace com.csutil.algorithms.images {
                             float cd = ColorDist(I, I2);
 
                             if (pd <= r && cd <= c) {
-                                if (trimap[j * w + i] == 0)
-                                    updatedTrimap[y * w + x] = 1;
-                                else if (trimap[j * w + i] == 255)
-                                    updatedTrimap[y * w + x] = 254;
+                                if (trimap[(j * w + i)*bytesPerPixel] == 0)
+                                    updatedTrimap[(y * w + x)*bytesPerPixel] = 1;
+                                else if (trimap[(j * w + i)*bytesPerPixel] == 255)
+                                    updatedTrimap[(y * w + x)*bytesPerPixel] = 254;
                             }
                         }
                     }
@@ -298,10 +298,10 @@ namespace com.csutil.algorithms.images {
             // Apply the changes to the original trimap
             for (int x = 0; x < w; ++x) {
                 for (int y = 0; y < h; ++y) {
-                    if (updatedTrimap[y * w + x] == 1)
-                        trimap[y * w + x] = 0;
-                    else if (updatedTrimap[y * w + x] == 254)
-                        trimap[y * w + x] = 255;
+                    if (updatedTrimap[(y * w + x)*bytesPerPixel] == 1)
+                        trimap[(y * w + x)*bytesPerPixel] = 0;
+                    else if (updatedTrimap[(y * w + x)*bytesPerPixel] == 254)
+                        trimap[(y * w + x)*bytesPerPixel] = 255;
                 }
             }
         }
@@ -311,13 +311,13 @@ namespace com.csutil.algorithms.images {
             int w = width;
             int h = height;
 
-            byte[] foreground = new byte[w * h];
-            byte[] background = new byte[w * h];
+            byte[] foreground = new byte[w * h * bytesPerPixel];
+            byte[] background = new byte[w * h * bytesPerPixel];
 
             // Initialize foreground and background maps
             for (int y = 0; y < h; ++y) {
                 for (int x = 0; x < w; ++x) {
-                    int idx = y * w + x;
+                    int idx = (y * w + x)*bytesPerPixel;
                     if (trimap[idx] == 0)
                         background[idx] = 1;
                     else if (trimap[idx] == 255)
@@ -332,7 +332,7 @@ namespace com.csutil.algorithms.images {
             // Increase unknown region
             for (int y = 0; y < h; ++y) {
                 for (int x = 0; x < w; ++x) {
-                    int idx = y * w + x;
+                    int idx = (y * w + x)*bytesPerPixel;
                     if (erodedBackground[idx] == 0 && erodedForeground[idx] == 0)
                         trimap[idx] = 128; // Set to unknown
                 }
@@ -353,7 +353,7 @@ namespace com.csutil.algorithms.images {
                                 int nx = x + dx;
                                 int ny = y + dy;
                                 if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
-                                    int idx = ny * w + nx;
+                                    int idx = (ny * w + nx)*bytesPerPixel;
                                     // If any pixel in the neighborhood is 0, erode the current pixel
                                     if (image[idx] == 0) {
                                         erodePixel = true;
@@ -364,7 +364,7 @@ namespace com.csutil.algorithms.images {
                     }
 
                     if (erodePixel) {
-                        int idx = y * w + x;
+                        int idx = (y * w + x) * bytesPerPixel;
                         erodedImage[idx] = 0;
                     }
                 }
@@ -399,7 +399,7 @@ namespace com.csutil.algorithms.images {
 
             for (int y = 0; y < h; ++y) {
                 for (int x = 0; x < w; ++x) {
-                    if (trimap[y * w + x] == 128) {
+                    if (trimap[(y * w + x) * bytesPerPixel] == 128) {
                         Point p = new Point(x, y);
 
                         samples[y][x].fi = rand.Next(foregroundBoundary.Count);
@@ -424,7 +424,7 @@ namespace com.csutil.algorithms.images {
                     int x = p.X;
                     int y = p.Y;
 
-                    if (trimap[y * w + x] != 128)
+                    if (trimap[(y * w + x) * bytesPerPixel] != 128)
                         continue;
 
                     byte[] I = GetColorAt(image, x, y);
@@ -435,11 +435,11 @@ namespace com.csutil.algorithms.images {
 
                     // Propagation: Check the neighbors' samples
                     for (int y2 = y - 1; y2 <= y + 1; ++y2) {
-                        for (int x2 = x - 1; x2 <= x + 1; ++x2) {
+                        for (int x2 = x - bytesPerPixel; x2 <= x + bytesPerPixel; x2 += bytesPerPixel) {
                             if (x2 < 0 || x2 >= w || y2 < 0 || y2 >= h)
                                 continue;
 
-                            if (trimap[y2 * w + x2] != 128)
+                            if (trimap[(y2 * w + x2)*bytesPerPixel] != 128)
                                 continue;
 
                             Sample s2 = samples[y2][x2];
@@ -516,9 +516,9 @@ namespace com.csutil.algorithms.images {
                 int x = rand.Next(width);
                 int y = rand.Next(height);
 
-                if (trimap[y * width + x] == 0)
+                if (trimap[(y * width + x) * bytesPerPixel] == 0)
                     backgroundBoundary.Add(new Point(x, y));
-                else if (trimap[y * width + x] == 255)
+                else if (trimap[(y * width + x) * bytesPerPixel] == 255)
                     foregroundBoundary.Add(new Point(x, y));
             }
 
@@ -529,17 +529,17 @@ namespace com.csutil.algorithms.images {
 
             // Initialize output arrays
             foreground = new byte[width * height * bytesPerPixel];
-            alpha = new byte[width * height];
-            conf = new byte[width * height];
+            alpha = new byte[width * height * bytesPerPixel];
+            conf = new byte[width * height * bytesPerPixel];
 
             for (int y = 0; y < height; ++y) {
                 for (int x = 0; x < width; ++x) {
-                    int idx = y * width + x;
+                    int idx = (y * width + x) * bytesPerPixel;
                     switch (trimap[idx]) {
                         case 0:
                             alpha[idx] = 0;
                             conf[idx] = 255;
-                            SetColorAt(foreground, x, y, new byte[] { 0, 0, 0 });
+                            SetColorAt(foreground, x, y, new byte[] { 0, 0, 0 , 0});
                             break;
                         case 128:
                             Sample s = samples[y][x];
