@@ -47,14 +47,14 @@ namespace com.csutil.tests.AlgorithmTests {
                 var writer = new ImageWriter();
                 writer.WritePng(flippedResult, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
             }
-            // var filterTest = GuidedFilter.GuidedFilterImpl.Filter(image.Data, 4, guidedMono);
-            // var flippedFilterResult = ImageUtility.FlipImageVertically(filterTest, image.Width, image.Height, (int)image.ColorComponents);
-            // var filter = folder.GetChild("Filter.png");
-            // {
-            //     await using var stream = filter.OpenOrCreateForWrite();
-            //     var writer = new ImageWriter();
-            //     writer.WritePng(flippedFilterResult, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
-            // }
+            //var filterTest = GuidedFilter.GuidedFilterImpl.Filter(image.Data, 4, guidedMono);
+            //var flippedFilterResult = ImageUtility.FlipImageVertically(filterTest, image.Width, image.Height, (int)image.ColorComponents);
+            //var filter = folder.GetChild("Filter.png");
+            //{
+            //    await using var stream = filter.OpenOrCreateForWrite();
+            //    var writer = new ImageWriter();
+            //    writer.WritePng(flippedFilterResult, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
+            //}
 
             var guidedFilterFinal = guidedFilter.init(image.Data, 11, 0.6);
             var colorFiltered = GuidedFilter.GuidedFilterImpl.Filter(image.Data, 4, guidedFilterFinal);

@@ -36,16 +36,15 @@ namespace com.csutil.algorithms.images {
                 var p2 = image;
                 var channel = FindFirstByte(image);
                 var result = new byte[image.Length];
-                if (colorComponents == 1) {
-                    result = ((GuidedFilterMono)gF).FilterSingleChannel(p2, channel);
+                if (gF is GuidedFilterMono a) {
+                    result = a.FilterSingleChannel(p2, channel);
                 }
                 else {
                     var pc = SplitChannels(image, colorComponents, gF);
-
+                    var b = (GuidedFilterColor)gF;
                     for(int i = 0; i < pc.Count; ++i) {
-                        pc[i] = ((GuidedFilterColor)gF).FilterSingleChannel(pc[i]);
+                        pc[i] = b.FilterSingleChannel(pc[i]);
                     }
-
                     result = ByteArrayAdd(ByteArrayAdd(pc[2], pc[3]), ByteArrayAdd(pc[0], pc[1])); //Only for 4 Channel Image!!!!
                 }
                 return result; 
@@ -360,7 +359,10 @@ namespace com.csutil.algorithms.images {
             }
             return result;
         }
-
+        //Calculates the amount of channels, implement in certain areas where i use fixed channel size
+        public static int CalculateChannels(byte[] image, int width, int height) {
+            return image.Length/width*height;
+        }
 
     }
 }
