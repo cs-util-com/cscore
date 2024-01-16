@@ -110,7 +110,7 @@ namespace com.csutil.model.ecs {
             var oldComps = oldState.Components;
             newState.Components.CalcEntryChangesToOldStateV2<IReadOnlyDictionary<string, IComponentData>, string, IComponentData>(ref oldComps,
                 added => OnComponentAdded(iEntity, added, targetParentGo: go),
-                updated => OnComponentUpdated(iEntity, oldState.Components[updated.Key], updated, targetParentGo: go),
+                (_, updated) => OnComponentUpdated(iEntity, oldState.Components[updated.Key], updated, targetParentGo: go),
                 deleted => OnCompentRemoved(iEntity, deleted, targetParentGo: go)
             );
         }

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ReuseScroller;
 
-namespace com.csutil.ui {
+namespace com.csutil {
 
     public static class ListUiExtensions {
 
