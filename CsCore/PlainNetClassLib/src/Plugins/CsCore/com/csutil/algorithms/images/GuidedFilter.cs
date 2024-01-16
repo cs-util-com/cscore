@@ -175,22 +175,18 @@ namespace com.csutil.algorithms.images {
                 var res3 = MultArrays(BoxFilterDouble(a_b, r), blueImageDouble);
                 var res4 = BoxFilterDouble(b, r);
                 var result = ConvertToByte(AddArrays(AddArrays(AddArrays(res1, res2), res3), res4));
-                /*for (var i = colorComponents - 1; i < result.Length; i += colorComponents) {
-                    result[i] = image[i];
-                }
-                */
                 return result;
             }
         }
 
 
         private byte[] BoxFilter(byte[] image, int boxSize) {
-            return ImageBlur.RunBoxBlur(image, width, height, boxSize, colorComponents);
+            return ImageBlur.RunBoxBlur(image, width, height, boxSize / 2, colorComponents);
         }
 
 
         private double[] BoxFilterDouble(double[] image, int boxSize) {
-            return ImageBlur.RunBoxBlurDouble(image, width, height, boxSize, colorComponents);
+            return ImageBlur.RunBoxBlurDouble(image, width, height, boxSize / 2, colorComponents);
         }
 
         
@@ -327,10 +323,6 @@ namespace com.csutil.algorithms.images {
                 result.Add(gf.CreateSingleChannel(inputImage, i));
             }
             return result;
-        }
-        //Calculates the amount of channels, implement in certain areas where i use fixed channel size
-        public static int CalculateChannels(byte[] image, int width, int height) {
-            return image.Length/width*height;
         }
 
     }

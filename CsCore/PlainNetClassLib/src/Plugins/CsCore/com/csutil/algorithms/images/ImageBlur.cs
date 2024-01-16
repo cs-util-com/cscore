@@ -2,26 +2,26 @@
 using System.Collections.Generic;
 using System.Text;
 namespace com.csutil.algorithms.images {
-    public class ImageBlur {
+    public static class ImageBlur {
 
         // Helper method to set the color at a specific location in the image array
         private static void SetColorAt(byte[] imageData, int x, int y, int width, byte[] color, int bytesPerPixel) {
             int startIdx = (y * width + x) * bytesPerPixel;
-            Array.Copy(color, 0, imageData, startIdx, color.Length);
+            var colorWithOriginalAlpha = new byte[] { color[0], color[1], color[2], imageData[startIdx + 3] };
+            Array.Copy(colorWithOriginalAlpha, 0, imageData, startIdx, color.Length);
         }
 
         // Helper method to get color at a given position
         private static byte[] GetColorAt(byte[] img, int x, int y, int bytesPerPixel, int width) {
             int startIdx = (y * width + x) * bytesPerPixel;
-            return new byte[] { img[startIdx], img[startIdx + 1], img[startIdx + 2], 255 };
+            return new byte[] { img[startIdx], img[startIdx + 1], img[startIdx + 2], img[startIdx + 3] };
         }
 
         //Potentially optimizable by skipping pixels already in for loop instead of checking throgh if statement 
 
         //Todo fix for alpha value to always be the same alpha as the pixel originally had
-        public static byte[] RunBoxBlur(byte[] image, int width, int height, int boxSize, int bytePerPixel) {
+        public static byte[] RunBoxBlur(byte[] image, int width, int height, int halfKernel, int bytePerPixel) {
             var result = new byte[image.Length];
-            var halfKernel = (int)Math.Floor((double)boxSize / 2);
             for (var y = 0; y < height; y++) {
                 for (var x = 0; x < width; x++) {
                     var sum = new int[bytePerPixel];
@@ -54,9 +54,8 @@ namespace com.csutil.algorithms.images {
             return result;
         }
         
-        public static double[] RunBoxBlurDouble(double[] image, int width, int height, int boxSize, int bytePerPixel) {
+        public static double[] RunBoxBlurDouble(double[] image, int width, int height, int halfKernel, int bytePerPixel) {
             var result = new double[image.Length];
-            var halfKernel = (int)Math.Floor((double)boxSize / 2);
             for (var y = 0; y < height; y++) {
                 for (var x = 0; x < width; x++) {
                     var sum = new double[bytePerPixel];
@@ -75,7 +74,6 @@ namespace com.csutil.algorithms.images {
                             count++;
                         }
                     }
-                    var byteSum = new byte[bytePerPixel];
                     for (var channel = 0; channel < bytePerPixel; channel++) {
                         sum[channel] /= count;
                     }
@@ -90,7 +88,8 @@ namespace com.csutil.algorithms.images {
         
         private static void SetColorAtDouble(double[] imageData, int x, int y, int width, double[] color, int bytesPerPixel) {
             int startIdx = (y * width + x) * bytesPerPixel;
-            Array.Copy(color, 0, imageData, startIdx, color.Length);
+            var colorWithOriginalAlpha = new [] { color[0], color[1], color[2], imageData[startIdx + 3] };
+            Array.Copy(colorWithOriginalAlpha, 0, imageData, startIdx, color.Length);
         }
 
         // Helper method to get color at a given position

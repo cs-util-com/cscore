@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using com.csutil.algorithms.images;
 using com.csutil.io;
@@ -20,26 +22,20 @@ namespace com.csutil.tests.AlgorithmTests {
         public async Task TestGlobalMatting() {
 
             var folder = EnvironmentV2.instance.GetOrAddAppDataFolder("ImageMattingTests");
-
             var imageFile = folder.GetChild("GT04-image.png");
             await DownloadFileIfNeeded(imageFile, "http://atilimcetin.com/global-matting/GT04-image.png");
-
             var trimapFile = folder.GetChild("GT04-trimap.png");
             await DownloadFileIfNeeded(trimapFile, "http://atilimcetin.com/global-matting/GT04-trimap.png");
-
             var resultOfOriginalCppImplementation = folder.GetChild("GT04-alpha.png");
             await DownloadFileIfNeeded(resultOfOriginalCppImplementation, "http://atilimcetin.com/global-matting/GT04-alpha.png");
-            var origAlphaImage = await ImageLoader.LoadImageInBackground(resultOfOriginalCppImplementation);
-            
-            
-            ImageResult image = await ImageLoader.LoadImageInBackground(imageFile);
+
+            var image = await ImageLoader.LoadImageInBackground(imageFile);
             var trimap = await ImageLoader.LoadImageInBackground(trimapFile);
             var trimapBytes = trimap.Data;
             var imageMatting = new GlobalMatting(image.Data, image.Width, image.Height, (int)image.ColorComponents);
             imageMatting.ExpansionOfKnownRegions(ref trimapBytes, niter: 9);
-
             imageMatting.RunGlobalMatting(trimapBytes, out var foreground, out var alphaData, out var conf);
-            
+
             var alphaFol = folder.GetChild("GT04-implementedAlpha.png");
             {
                 await using var stream = alphaFol.OpenOrCreateForReadWrite();
@@ -47,10 +43,9 @@ namespace com.csutil.tests.AlgorithmTests {
                 var flippedResult = ImageUtility.FlipImageVertically(alphaData, image.Width, image.Height, (int)image.ColorComponents);
                 writer.WritePng(flippedResult, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
             }
-            
+
             // filter the result with fast guided filter
-            alphaData = imageMatting.RunGuidedFilter(alphaData, r: 10, eps: 1e-5);
-            var origAlphaAfterGuided = imageMatting.RunGuidedFilter(origAlphaImage.Data, 10, 1e-5);
+            var alphaDataGuided = imageMatting.RunGuidedFilter(alphaData, r: 10, eps: 1e-5);
 
             var alpha = new ImageResult {
                 Width = image.Width,
@@ -58,70 +53,62 @@ namespace com.csutil.tests.AlgorithmTests {
                 SourceComponents = image.ColorComponents,
                 ColorComponents = image.ColorComponents,
                 BitsPerChannel = image.BitsPerChannel,
-                Data = alphaData
-            };
-            var alphaOrig = new ImageResult {
-                Width = image.Width,
-                Height = image.Height,
-                SourceComponents = image.ColorComponents,
-                ColorComponents = image.ColorComponents,
-                BitsPerChannel = image.BitsPerChannel,
-                Data = origAlphaAfterGuided
+                Data = alphaDataGuided
             };
 
             for (int x = 0; x < trimap.Width; ++x) {
                 for (int y = 0; y < trimap.Height; ++y) {
-                    if (trimap.GetPixel(x, y).B == 0) {
+                    if (trimap.GetPixel(x, y).R == 0) {
                         alpha.SetPixel(x, y, new Pixel(0, 0, 0, 0));
-                        alphaOrig.SetPixel(x, y, new Pixel(0, 0, 0, 0));
-                    } else if (trimap.GetPixel(x, y).B == 255) {
+                    } else if (trimap.GetPixel(x, y).R == 255) {
                         alpha.SetPixel(x, y, new Pixel(255, 255, 255, 255));
-                        alphaOrig.SetPixel(x, y, new Pixel(255, 255, 255, 255));
                     }
                 }
             }
+            // Safe cut out according to alpha region that is 255
+            var cutout255 = image.Data;
+            var cutout128 = image.Data;
+            var cutoutGreater0 = image.Data;
 
-            // Save the result:
-            var alphaBytes = alpha.Data;
-            var resultPngFile = folder.GetChild("GT04-alphaByte.png");
-            {
-                await using var stream = resultPngFile.OpenOrCreateForReadWrite();
-                ImageWriter writer = new ImageWriter();
-                var flippedResult = ImageUtility.FlipImageVertically(alphaBytes, image.Width, image.Height, (int)image.ColorComponents);
-                writer.WritePng(flippedResult, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
+            for (var x = 0; x < image.Width; ++x) {
+                for (var y = 0; y < image.Height; ++y) {
+                    cutout255[((y * image.Width + x) * (int)image.ColorComponents) + 3] = alpha.GetPixel(x, y).R == 255 ? (byte)255 : (byte)0;
+                    cutout128[((y * image.Width + x) * (int)image.ColorComponents) + 3] = alpha.GetPixel(x, y).R >= 128 ? (byte)255 : (byte)0;
+                    cutoutGreater0[((y * image.Width + x) * (int)image.ColorComponents) + 3] = alpha.GetPixel(x, y).R > 0 ? (byte)255 : (byte)0;
+                }
             }
-            var guidedAlpha = folder.GetChild("GuidedImageWithTrimap.png");
+            var cutout255File = folder.GetChild("Cutout255.png");
+            var cutout128File = folder.GetChild("Cutout128.png");
+            var cutoutGreater0File = folder.GetChild("cutoutGreater0.png");
             {
-                await using var stream = guidedAlpha.OpenOrCreateForReadWrite();
+                await using var stream = cutout255File.OpenOrCreateForReadWrite();
                 ImageWriter writer = new ImageWriter();
-                var flippedResult = ImageUtility.FlipImageVertically(alphaData, image.Width, image.Height, (int)image.ColorComponents);
+                var flippedResult = ImageUtility.FlipImageVertically(cutout255, image.Width, image.Height, (int)image.ColorComponents);
                 writer.WritePng(flippedResult, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
+                await using var stream2 = cutout128File.OpenOrCreateForReadWrite();
+                flippedResult = ImageUtility.FlipImageVertically(cutout128, image.Width, image.Height, (int)image.ColorComponents);
+                writer.WritePng(flippedResult, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream2);
+                await using var stream3 = cutoutGreater0File.OpenOrCreateForReadWrite();
+                flippedResult = ImageUtility.FlipImageVertically(cutoutGreater0, image.Width, image.Height, (int)image.ColorComponents);
+                writer.WritePng(flippedResult, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream3);
             }
-            var foregroundIm = folder.GetChild("ForeGroundResult.png");
-            {
-                await using var stream = foregroundIm.OpenOrCreateForReadWrite();
-                ImageWriter writer = new ImageWriter();
-                var flippedResult = ImageUtility.FlipImageVertically(foreground, image.Width, image.Height, (int)image.ColorComponents);
-                writer.WritePng(flippedResult, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
-            }
-            var origAlphaAfterAfterChanges = folder.GetChild("origAlphaAfterChanges.png");
-            {
-                await using var stream = origAlphaAfterAfterChanges.OpenOrCreateForReadWrite();
-                ImageWriter writer = new ImageWriter();
-                var flippedResult = ImageUtility.FlipImageVertically(alphaOrig.Data, image.Width, image.Height, (int)image.ColorComponents);
-                writer.WritePng(flippedResult, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
-            }
-            var origAlphaAfterGuidedFolder = folder.GetChild("origAlphaAfterGuided.png");
-            {
-                await using var stream = origAlphaAfterGuidedFolder.OpenOrCreateForReadWrite();
-                ImageWriter writer = new ImageWriter();
-                var flippedResult = ImageUtility.FlipImageVertically(origAlphaAfterGuided, image.Width, image.Height, (int)image.ColorComponents);
-                writer.WritePng(flippedResult, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
-            }
-            // Use a encoder that supports transparency:
-            // TODO 
-
         }
+
+        //
+        // [Fact]
+        // public async Task AlphaImageValueRange() {
+        //
+        //     DirectoryEntry folder = EnvironmentV2.instance.GetOrAddAppDataFolder("ImageMattingTests");
+        //     string[] files = Directory.GetFiles("C:/Users/walhe/AppData/Roaming/ImageMattingTests");
+        //     var test = Path.GetFileName(files);
+        //     // Use LINQ to find the image file with the specified name
+        //     string imagePath = files.FirstOrDefault(file => Path.GetFileName(file).Contains("GT04-alphaBytes.png"));
+        //
+        //
+        //     var bytes = File.ReadAllBytes(imagePath);
+        //     var t = 1;
+        // }
+
 
         private static async Task DownloadFileIfNeeded(FileEntry self, string url) {
             var imgFileRef = new MyFileRef() { url = url, fileName = self.Name };
@@ -162,7 +149,7 @@ namespace com.csutil.tests.AlgorithmTests {
                 return new Pixel(self.Data[index], self.Data[index + 1], self.Data[index + 2], self.Data[index + 3]);
             }
             throw new Exception("ColorComponents=" + self.ColorComponents);
-            
+
         }
 
         public static void SetPixel(this ImageResult self, int x, int y, Pixel p) {
