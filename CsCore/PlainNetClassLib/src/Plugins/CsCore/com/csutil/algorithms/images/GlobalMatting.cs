@@ -230,7 +230,7 @@ namespace com.csutil.algorithms.images {
                             if (trimap[(j * width + i)*bytesPerPixel] != 0 && trimap[(j * width + i)*bytesPerPixel] != 255)
                                 continue;
                             var imCur = GetColorAt(image, i, j);
-                            var pd = Sqr(Sqr(x - i) + Sqr(y - j));
+                            var pd = (float)Math.Sqrt(Sqr(x - i) + Sqr(y - j));
                             var cd = ColorDist(im, imCur);
 
                             if (!(pd <= r) || !(cd <= c))
