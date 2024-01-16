@@ -537,20 +537,24 @@ namespace com.csutil.algorithms.images {
                     int idx = (y * width + x) * bytesPerPixel;
                     switch (trimap[idx]) {
                         case 0:
-                            alpha[idx] = 0;
+                            SetColorAt(alpha, x, y, new byte[]{0,0,0,0});
+                            //alpha[idx] = 0;
                             conf[idx] = 255;
                             SetColorAt(foreground, x, y, new byte[] { 0, 0, 0 , 0});
                             break;
                         case 128:
                             Sample s = samples[y][x];
-                            alpha[idx] = (byte)(255 * s.alpha);
+                            var alphaValue = (byte)(255 * s.alpha);
+                            SetColorAt(alpha, x, y, new byte[]{alphaValue, alphaValue, alphaValue, alphaValue});
+                            //alpha[idx] = (byte)(255 * s.alpha);
                             conf[idx] = (byte)(255 * Math.Exp(-s.cost / 6));
                             Point p = foregroundBoundary[s.fi];
                             byte[] color = GetColorAt(image, p.X, p.Y);
                             SetColorAt(foreground, x, y, color);
                             break;
                         case 255:
-                            alpha[idx] = 255;
+                            SetColorAt(alpha, x, y, new byte[]{255,255,255,255});
+                            //alpha[idx] = 255;
                             conf[idx] = 255;
                             byte[] fgColor = GetColorAt(image, x, y);
                             SetColorAt(foreground, x, y, fgColor);
@@ -604,7 +608,7 @@ namespace com.csutil.algorithms.images {
         public byte[] RunGuidedFilter(byte[] alpha, int r, double eps) {
             var imageGuidedFilter = new GuidedFilter(image, width, height, bytesPerPixel, r, eps);
             var guidedFilterInstance = imageGuidedFilter.init(bytesPerPixel);
-            return GuidedFilter.RunGuidedFilter(image, alpha, guidedFilterInstance, r, eps);
+            return GuidedFilter.RunGuidedFilter(alpha, guidedFilterInstance);
         }
 
 

@@ -8,13 +8,14 @@ namespace com.csutil.algorithms.images {
     // TODO create a port of https://raw.githubusercontent.com/atilimcetin/guided-filter/master/guidedfilter.cpp 
     public class GuidedFilter {
 
-        private byte[] image;
-        private int width;
-        private int height;
-        private int colorComponents;
-        private int r;
-        private double eps;
-        public static byte[] RunGuidedFilter(byte[] bytes, byte[] alpha, GuidedFilter instance, int i, double eps) {
+        private readonly byte[] image;
+        private readonly double[] imageDouble;
+        private readonly int width;
+        private readonly int height;
+        private readonly int colorComponents;
+        private readonly int r;
+        private readonly double eps;
+        public static byte[] RunGuidedFilter(byte[] alpha, GuidedFilter instance) {
             using(var t = Log.MethodEntered()){
                 return GuidedFilterImpl.Filter(alpha, instance.colorComponents, instance); 
             }
@@ -22,6 +23,7 @@ namespace com.csutil.algorithms.images {
         
         public GuidedFilter(byte[] image, int width, int height, int colorComponents, int r, double eps) {
             this.image = image;
+            this.imageDouble = ConvertToDouble(image);
             this.width = width;
             this.height = height;
             this.colorComponents = colorComponents;
@@ -30,26 +32,24 @@ namespace com.csutil.algorithms.images {
         }
         public GuidedFilter init(int channels) {
             if(channels == 1) {
-                return new GuidedFilterMono(image, width, height, colorComponents, r, eps);
+                return new GuidedFilterMono(image, width, height, colorComponents, 2 * r + 1, eps);
             }
-            else if(channels == 4) {
-                return new GuidedFilterColor(image, width, height, colorComponents, r, eps);
+            if(channels == 4) {
+                return new GuidedFilterColor(image, width, height, colorComponents, 2 * r + 1, eps);
             }
             throw new Exception("not correct channel image");
         }
         public abstract class GuidedFilterImpl {
-            public static byte[] Filter(in byte[] image, int colorComponents, GuidedFilter gF) {
-                var p2 = image;
-                var channel = FindFirstByte(image);
-                var result = new byte[image.Length];
-                if (gF is GuidedFilterMono a) {
-                    result = a.FilterSingleChannel(p2, channel);
+            public static byte[] Filter(in byte[] p, int colorComponents, GuidedFilter gF) {
+                var channel = FindFirstByte(p);
+                var result = new byte[p.Length];
+                if (gF is GuidedFilterMono mono) {
+                    result = mono.FilterSingleChannel(p, channel);
                 }
                 else {
-                    var pc = SplitChannels(image, colorComponents, gF);
-                    var b = (GuidedFilterColor)gF;
+                    var pc = SplitChannels(p, colorComponents, gF);
                     for(int i = 0; i < pc.Count; ++i) {
-                        pc[i] = b.FilterSingleChannel(pc[i]);
+                        pc[i] = ((GuidedFilterColor)gF).FilterSingleChannel(pc[i]);
                     }
                     result = ByteArrayAdd(ByteArrayAdd(pc[2], pc[3]), ByteArrayAdd(pc[0], pc[1])); //Only for 4 Channel Image!!!!
                 }
@@ -58,37 +58,33 @@ namespace com.csutil.algorithms.images {
         }
         private class GuidedFilterMono : GuidedFilter {
 
-            private byte[] mean1;
-            private byte[] variance;
+            private readonly double[] meanI;
+            private readonly double[] variance;
             
             public GuidedFilterMono(byte[] image, int width, int height, int colorComponents, int r, double eps) :
                 base(image, width, height, colorComponents, r, eps) {
-
-                mean1 = BoxFilter(image, r);
-                var mean2 = BoxFilter(ByteArrayMult(image, image), r);
-                variance = ByteArraySub(mean2, ByteArrayMult(mean1, mean1));
+                
+                meanI = BoxFilterDouble(imageDouble, r);
+                var mean2 = BoxFilterDouble(MultArrays(imageDouble, imageDouble), r);
+                variance = SubArrays(mean2, MultArrays(meanI, meanI));
             }
 
 
-            public byte[] FilterSingleChannel(byte[] imageSingleChannel, int currentChannel) {
-                var numberImage = ConvertToDouble(imageSingleChannel);
-                var mean_p = BoxFilter(imageSingleChannel, r);
-                var mean_Ip = BoxFilter(ByteArrayMult(imageSingleChannel, mean_p), r);
-                var cov_Ip = ByteArraySub(mean_Ip, ByteArrayMult(mean1, mean_p));
+            public byte[] FilterSingleChannel(byte[] p, int currentChannel) {
+                var pDouble = ConvertToDouble(p);
+                var mean_p = BoxFilterDouble(pDouble, r);
+                var mean_Ip = BoxFilterDouble(MultArrays(imageDouble, pDouble), r);
+                var cov_Ip = SubArrays(mean_Ip, MultArrays(meanI, mean_p));
 
-                var meanNumber = ConvertToDouble(mean_p);
-                var covariance = ConvertToDouble(cov_Ip);
-                var varianceNumber = ConvertToDouble(variance);
-                var meanI = ConvertToDouble(mean1);
-                var varianceEps = AddValueToSingleChannel(varianceNumber, eps, currentChannel);
+                var varianceEps = AddValueToSingleChannel(variance, eps, currentChannel);
                 
-                var a = DivideArrays(covariance, varianceEps);
-                var b = SubArrays(meanNumber, MultArrays(a, meanI));
+                var a = DivideArrays(cov_Ip, varianceEps);
+                var b = SubArrays(mean_p, MultArrays(a, meanI));
 
-                var meanA = BoxFilter(ConvertToByte(a), r);
-                var meanB = BoxFilter(ConvertToByte(b), r);
+                var meanA = BoxFilterDouble(a, r);
+                var meanB = BoxFilterDouble(b, r);
 
-                return ByteArrayAdd(ByteArrayMult(meanA, image), meanB);
+                return ConvertToByte(AddArrays(MultArrays(meanA, imageDouble), meanB));
             }
         }
 
@@ -154,22 +150,22 @@ namespace com.csutil.algorithms.images {
             }
 
 
-            public byte[] FilterSingleChannel(byte[] alpha) {
-                var alphaDouble = ConvertToDouble(alpha);
-                var meanAlpha = BoxFilterDouble(alphaDouble, r);
-                var meanIp_R = BoxFilterDouble(MultArrays(redImageDouble, alphaDouble), r);
-                var meanIp_G = BoxFilterDouble(MultArrays(greenImageDouble, alphaDouble), r);
-                var meanIp_B = BoxFilterDouble(MultArrays(blueImageDouble, alphaDouble), r);
+            public byte[] FilterSingleChannel(byte[] p) {
+                var pDouble = ConvertToDouble(p);
+                var meanP = BoxFilterDouble(pDouble, r);
+                var meanIp_R = BoxFilterDouble(MultArrays(redImageDouble, pDouble), r);
+                var meanIp_G = BoxFilterDouble(MultArrays(greenImageDouble, pDouble), r);
+                var meanIp_B = BoxFilterDouble(MultArrays(blueImageDouble, pDouble), r);
                 
-                var cov_Ip_R = SubArrays(meanIp_R, MultArrays(meanI_R, meanAlpha));
-                var cov_Ip_G = SubArrays(meanIp_G, MultArrays(meanI_G, meanAlpha));
-                var cov_Ip_B = SubArrays(meanIp_B, MultArrays(meanI_B, meanAlpha));
+                var cov_Ip_R = SubArrays(meanIp_R, MultArrays(meanI_R, meanP));
+                var cov_Ip_G = SubArrays(meanIp_G, MultArrays(meanI_G, meanP));
+                var cov_Ip_B = SubArrays(meanIp_B, MultArrays(meanI_B, meanP));
 
                 var a_r = AddArrays(AddArrays(MultArrays(invariantRedRed, cov_Ip_R), MultArrays(invariantRedGreen, cov_Ip_G)), MultArrays(invariantRedBlue, cov_Ip_B));
                 var a_g = AddArrays(AddArrays(MultArrays(invariantRedGreen, cov_Ip_R), MultArrays(invariantGreenGreen, cov_Ip_G)), MultArrays(invariantGreenBlue, cov_Ip_B));
                 var a_b = AddArrays(AddArrays(MultArrays(invariantRedBlue, cov_Ip_R), MultArrays(invariantGreenBlue, cov_Ip_G)), MultArrays(invariantBlueBlue, cov_Ip_B));
 
-                var b1 = SubArrays(meanAlpha, MultArrays(a_r, meanI_R));
+                var b1 = SubArrays(meanP, MultArrays(a_r, meanI_R));
                 var b2 = MultArrays(a_g, meanI_G);
                 var b3 = MultArrays(a_b, meanI_B);
                 var b = SubArrays(SubArrays(b1, b2), b3);
@@ -179,10 +175,10 @@ namespace com.csutil.algorithms.images {
                 var res3 = MultArrays(BoxFilterDouble(a_b, r), blueImageDouble);
                 var res4 = BoxFilterDouble(b, r);
                 var result = ConvertToByte(AddArrays(AddArrays(AddArrays(res1, res2), res3), res4));
-                for (var i = colorComponents - 1; i < result.Length; i += colorComponents) {
+                /*for (var i = colorComponents - 1; i < result.Length; i += colorComponents) {
                     result[i] = image[i];
                 }
-                
+                */
                 return result;
             }
         }
