@@ -25,7 +25,7 @@ namespace com.csutil.algorithms.images
 
         public static byte[] FastBoxBlur(byte[] img, int width, int height, int radius, int channels)
         {
-            var kSize = radius;
+            var kSize = 2 * radius;
             
             if (kSize % 2 == 0) kSize++;
             var hBlur = new byte[img.Length];
