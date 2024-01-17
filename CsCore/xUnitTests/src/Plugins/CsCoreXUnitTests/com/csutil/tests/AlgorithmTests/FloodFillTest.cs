@@ -1,0 +1,66 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
+using com.csutil.algorithms.images;
+using com.csutil.io;
+using com.csutil.model;
+using Microsoft.VisualBasic.FileIO;
+using StbImageWriteSharp;
+using Xunit;
+using Zio;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.Net.Mime;
+using com.csutil.http.apis;
+
+namespace com.csutil.tests.AlgorithmTests {
+    public class FloodFillTest {
+        [Fact]
+        public async Task FloodFillDallETest() {
+
+            var downloadFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\Downloads";
+            var imagePath = Path.Combine(downloadFolderPath, "unnamed.png");
+            var image = Image.FromFile(imagePath);
+            var folder = EnvironmentV2.instance.GetOrAddAppDataFolder("FloodFillTesting");
+            using (var bitmap = new Bitmap(imagePath))
+            {
+                // Get image dimensions
+                var width = bitmap.Width;
+                var height = bitmap.Height;
+
+                // Create byte array to store RGBA data
+                var imageData = new byte[width * height * 4];
+                // Lock the bits of the image
+                BitmapData bmpData = bitmap.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+                // Copy the RGBA data to the byte array
+                System.Runtime.InteropServices.Marshal.Copy(bmpData.Scan0, imageData, 0, imageData.Length);
+                // Unlock the bits
+                bitmap.UnlockBits(bmpData);
+                var ff = new FloodFill(width, height);
+                ff.FloodFillAlgorithm(imageData, width, height);
+                var test = folder.GetChild("FloodFilled.png");
+                {
+                    using var stream = test.OpenOrCreateForReadWrite();
+                    ImageWriter writer = new ImageWriter();
+                    var flippedResult = ImageUtility.FlipImageVertically(imageData, width, height, 4);
+                    writer.WritePng(flippedResult, width, height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
+                }
+            }
+            
+        }
+        private static async Task DownloadFileIfNeeded(FileEntry self, string url)
+        {
+            var imgFileRef = new MyFileRef() { url = url, fileName = self.Name };
+            await imgFileRef.DownloadTo(self.Parent, useAutoCachedFileRef: true);
+        }
+        private class MyFileRef : IFileRef
+        {
+            public string dir { get; set; }
+            public string fileName { get; set; }
+            public string url { get; set; }
+            public Dictionary<string, object> checksums { get; set; }
+            public string mimeType { get; set; }
+        }
+    }
+}
