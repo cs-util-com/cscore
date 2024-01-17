@@ -173,8 +173,7 @@ namespace com.csutil.integrationTests.http {
             Assert.NotEmpty(url);
 
             var messages = new List<VisionGpt.Line>() {
-                new VisionGpt.Line(VisionGpt.Role.system, content: "You are a helpful assistant designed to output JSON."),
-                new VisionGpt.Line(VisionGpt.Role.user, content: getFormattedContent(url))
+                new VisionGpt.Line(VisionGpt.Role.system, content: "You are a helpful assistant designed to output JSON.")
             };
 
             var yesNoResponseFormat = new YesNoResponse() {
@@ -183,6 +182,7 @@ namespace com.csutil.integrationTests.http {
                 yesNoAnswer = true,
                 explanation = "The cat is in the picture because I see a small feline with whiskers."
             };
+            messages.AddImageURL(url);
             messages.AddUserLineWithJsonResultStructure("Is there a dog in the picture?", yesNoResponseFormat);
 
             // Send the messages to the AI and get the response:
@@ -203,24 +203,6 @@ namespace com.csutil.integrationTests.http {
             Assert.NotEmpty(yesNoResponse.explanation);
             // Show the entire conversation to make it clear how the responses look as strings:
             Log.d("messages=" + JsonWriter.AsPrettyString(messages));
-        }
-        private List<Dictionary<string, object>> getFormattedContent(string url) {
-            var content = new List<Dictionary<string, object>>();
-            content.Add(new Dictionary<string, object>()
-            {
-                {"type","text"},
-                {"text","What's in this image?"},
-            });
-
-            content.Add(new Dictionary<string, object>()
-            {
-                {"type","image_url"},
-                {"image_url",new Dictionary<string,string>{
-                    {"url",url},
-                    {"detail","high"}
-                }},
-            });
-            return content;
         }
 
         private static ChatGpt.Request NewGpt4JsonRequestWithFullConversation(List<ChatGpt.Line> conversationSoFar) {

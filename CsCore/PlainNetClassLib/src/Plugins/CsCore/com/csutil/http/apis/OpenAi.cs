@@ -364,6 +364,24 @@ namespace com.csutil.http.apis {
 
     public static class VisionGptExtention {
 
+        public static void AddImageURL(this ICollection<VisionGpt.Line> self, string url) {
+            var content = new List<Dictionary<string, object>>();
+            content.Add(new Dictionary<string, object>()
+            {
+                {"type","text"},
+                {"text","What's in this image?"},
+            });
+
+            content.Add(new Dictionary<string, object>()
+            {
+                {"type","image_url"},
+                {"image_url",new Dictionary<string,string>{
+                    {"url",url},
+                    {"detail","high"}
+                }},
+            });
+            self.Add(new VisionGpt.Line(VisionGpt.Role.user, content: content));
+        }
         public static void AddUserLineWithJsonResultStructure<T>(this ICollection<VisionGpt.Line> self, string userMessage, T exampleResponse) {
             self.Add(new VisionGpt.Line(VisionGpt.Role.user, content: userMessage));
             self.Add(new VisionGpt.Line(VisionGpt.Role.system, content: CreateJsonInstructions(exampleResponse)));
