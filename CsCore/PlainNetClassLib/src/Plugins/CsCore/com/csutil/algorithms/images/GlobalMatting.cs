@@ -582,33 +582,37 @@ namespace com.csutil.algorithms.images {
         }
 
         public void RunGlobalMatting(byte[] trimap, out byte[] foreground, out byte[] alpha, out byte[] conf) {
-            // Check if the image or trimap is empty
-            if (image == null || image.Length == 0)
-                throw new ArgumentException("image is empty");
-            if (trimap == null || trimap.Length == 0)
-                throw new ArgumentException("trimap is empty");
+            using (var t = Log.MethodEntered()) {
+                // Check if the image or trimap is empty
+                if (image == null || image.Length == 0)
+                    throw new ArgumentException("image is empty");
+                if (trimap == null || trimap.Length == 0)
+                    throw new ArgumentException("trimap is empty");
 
-            // Assuming bytesPerPixel is the number of channels (e.g., 3 for an RGB image)
-            if (image.Length != width * height * bytesPerPixel)
-                throw new ArgumentException("image must have CV_8UC3 type (3 channels) but was bytesPerPixel=" + bytesPerPixel);
+                // Assuming bytesPerPixel is the number of channels (e.g., 3 for an RGB image)
+                if (image.Length != width * height * bytesPerPixel)
+                    throw new ArgumentException("image must have CV_8UC3 type (3 channels) but was bytesPerPixel=" + bytesPerPixel);
 
-            // Assuming trimap is a single channel image
-            /* does not work for byte[] type single channel images
-            if (trimap.Length != width * height)
-                throw new ArgumentException("trimap must have CV_8UC1 type (1 channel)");
-            
-            // Check if image and trimap have the same size
-            if (image.Length / bytesPerPixel != trimap.Length)
-                throw new ArgumentException("image and trimap must have the same size");
-            */
-            // Call the helper function to perform the global matting
-            GlobalMattingHelper(trimap, out foreground, out alpha, out conf);
+                // Assuming trimap is a single channel image
+                /* does not work for byte[] type single channel images
+                if (trimap.Length != width * height)
+                    throw new ArgumentException("trimap must have CV_8UC1 type (1 channel)");
+                
+                // Check if image and trimap have the same size
+                if (image.Length / bytesPerPixel != trimap.Length)
+                    throw new ArgumentException("image and trimap must have the same size");
+                */
+                // Call the helper function to perform the global matting
+                GlobalMattingHelper(trimap, out foreground, out alpha, out conf);
+            }
         }
 
         public byte[] RunGuidedFilter(byte[] alpha, int r, double eps) {
-            var imageGuidedFilter = new GuidedFilter(image, width, height, bytesPerPixel, r, eps);
-            var guidedFilterInstance = imageGuidedFilter.init(bytesPerPixel);
-            return GuidedFilter.RunGuidedFilter(alpha, guidedFilterInstance);
+            using (var t = Log.MethodEntered()) {
+                var imageGuidedFilter = new GuidedFilter(image, width, height, bytesPerPixel, r, eps);
+                var guidedFilterInstance = imageGuidedFilter.init(bytesPerPixel);
+                return GuidedFilter.RunGuidedFilter(alpha, guidedFilterInstance);
+            }
         }
 
 

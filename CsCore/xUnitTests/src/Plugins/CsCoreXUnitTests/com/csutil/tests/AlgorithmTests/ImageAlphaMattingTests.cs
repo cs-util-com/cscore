@@ -65,21 +65,22 @@ namespace com.csutil.tests.AlgorithmTests {
                 }
             }
             // Safe cut out according to alpha region that is >= 128
-            var cutout128 = image.Data;
+            var cutoffValue = 129;
+            var cutout = image.Data;
 
             alpha.Data = alphaData;
             for (var x = 0; x < image.Width; ++x) {
                 for (var y = 0; y < image.Height; ++y) {
                     var value = (int)alpha.GetPixel(x, y).A;
                     var idx = (y * image.Width + x) * (int)image.ColorComponents;
-                    cutout128[idx + 3] = value >= 128 ? (byte)255 : (byte)0;
+                    cutout[idx + 3] = value >= cutoffValue ? (byte)255 : (byte)0;
                 }
             }
-            var cutout128File = folder.GetChild("Cutout128.png");
+            var cutoutFile = folder.GetChild("Cutout" + cutoffValue + ".png");
             {
                 ImageWriter writer = new ImageWriter();
-                await using var stream2 = cutout128File.OpenOrCreateForReadWrite();
-                var im128 = ImageUtility.FlipImageVertically(cutout128, image.Width, image.Height, (int)image.ColorComponents);
+                await using var stream2 = cutoutFile.OpenOrCreateForReadWrite();
+                var im128 = ImageUtility.FlipImageVertically(cutout, image.Width, image.Height, (int)image.ColorComponents);
                 writer.WritePng(im128, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream2);
             }
         }
