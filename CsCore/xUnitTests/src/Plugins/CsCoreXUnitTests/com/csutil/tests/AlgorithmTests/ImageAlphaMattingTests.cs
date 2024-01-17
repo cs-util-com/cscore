@@ -72,9 +72,9 @@ namespace com.csutil.tests.AlgorithmTests {
 
             for (var x = 0; x < image.Width; ++x) {
                 for (var y = 0; y < image.Height; ++y) {
-                    cutout255[((y * image.Width + x) * (int)image.ColorComponents) + 3] = alpha.GetPixel(x, y).R == 255 ? (byte)255 : (byte)0;
-                    cutout128[((y * image.Width + x) * (int)image.ColorComponents) + 3] = alpha.GetPixel(x, y).R >= 128 ? (byte)255 : (byte)0;
-                    cutoutGreater0[((y * image.Width + x) * (int)image.ColorComponents) + 3] = alpha.GetPixel(x, y).R > 0 ? (byte)255 : (byte)0;
+                    cutout255[((y * image.Width + x) * (int)image.ColorComponents) + 3] = alpha.GetPixel(x, y).A == 255 ? (byte)255 : (byte)0;
+                    cutout128[((y * image.Width + x) * (int)image.ColorComponents) + 3] = alpha.GetPixel(x, y).A >= 128 ? (byte)255 : (byte)0;
+                    cutoutGreater0[((y * image.Width + x) * (int)image.ColorComponents) + 3] = alpha.GetPixel(x, y).A > 0 ? (byte)255 : (byte)0;
                 }
             }
             var cutout255File = folder.GetChild("Cutout255.png");

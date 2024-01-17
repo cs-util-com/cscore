@@ -186,7 +186,8 @@ namespace com.csutil.algorithms.images {
 
 
         private double[] BoxFilterDouble(double[] image, int boxSize) {
-            return ImageBlur.RunBoxBlurDouble(image, width, height, boxSize / 2, colorComponents);
+            return FastBlur.FastBoxBlurDouble(image, width, height, boxSize, colorComponents);
+            //return ImageBlur.RunBoxBlurDouble(image, width, height, boxSize / 2, colorComponents);
         }
 
         
