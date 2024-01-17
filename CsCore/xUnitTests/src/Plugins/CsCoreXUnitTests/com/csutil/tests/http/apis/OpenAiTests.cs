@@ -4,8 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using com.csutil.http.apis;
 using com.csutil.model.jsonschema;
-using Newtonsoft.Json.Linq;
 using Xunit;
+using com.csutil.http;
+using Zio;
+using System.IO;
 
 namespace com.csutil.integrationTests.http {
 
@@ -241,6 +243,31 @@ namespace com.csutil.integrationTests.http {
             public string aiAnswer { get; set; }
 
         }
+
+
+        [Fact]
+        public async Task ExampleTTSandSTT() {
+            var openAi = new OpenAi(await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey"));
+
+            string textToTest = "hello world";
+            var responseTTS = await openAi.TextToSpeech(new OpenAi.Audio.TTSRequest() { input = textToTest });
+            Assert.NotNull(responseTTS);
+
+            var responseSTT = await openAi.SpeechToText(new OpenAi.Audio.STTRequest() { fileStream = responseTTS });
+            Assert.NotEmpty(responseSTT.text);
+            Log.d(responseSTT.text);
+            //fails when textToTest contains numbers
+            Assert.Equal(formatString(responseSTT.text), formatString(textToTest));
+        }
+
+        private string formatString(string str) {
+            //helper function to format TTS and STT converted texts to test whether input text and output text is equal
+            //remove all characters except alphabets, i.e. white spaces, numbers, special characters
+            return new String(str.ToCharArray().Where(c => !Char.IsWhiteSpace(c) && Char.IsLetterOrDigit(c))
+            .ToArray()).ToLower();
+
+        }
+
 
     }
 
