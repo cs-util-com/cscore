@@ -8,7 +8,7 @@ namespace com.csutil.algorithms.images {
         private static void SetColorAt(byte[] imageData, int x, int y, int width, byte[] color, int bytesPerPixel) {
             int startIdx = (y * width + x) * bytesPerPixel;
             var colorWithOriginalAlpha = new byte[] { color[0], color[1], color[2], imageData[startIdx + 3] };
-            Array.Copy(colorWithOriginalAlpha, 0, imageData, startIdx, color.Length);
+            Array.Copy(color, 0, imageData, startIdx, color.Length);
         }
 
         // Helper method to get color at a given position
@@ -89,7 +89,7 @@ namespace com.csutil.algorithms.images {
         private static void SetColorAtDouble(double[] imageData, int x, int y, int width, double[] color, int bytesPerPixel) {
             int startIdx = (y * width + x) * bytesPerPixel;
             var colorWithOriginalAlpha = new [] { color[0], color[1], color[2], imageData[startIdx + 3] };
-            Array.Copy(colorWithOriginalAlpha, 0, imageData, startIdx, color.Length);
+            Array.Copy(color, 0, imageData, startIdx, color.Length);
         }
 
         // Helper method to get color at a given position
