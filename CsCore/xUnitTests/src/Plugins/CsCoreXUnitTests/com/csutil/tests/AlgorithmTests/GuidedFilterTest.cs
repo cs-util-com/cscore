@@ -58,7 +58,7 @@ namespace com.csutil.tests.AlgorithmTests {
         [Fact]
         public async Task ColorGuidedFilterTest() {
 
-            var folder = EnvironmentV2.instance.GetOrAddAppDataFolder("ColorGuidedTesting");
+            var folder = EnvironmentV2.instance.GetOrAddAppDataFolder("GuidedTesting");
 
             var imageFile = folder.GetChild("GT04-image.png");
             await DownloadFileIfNeeded(imageFile, "http://atilimcetin.com/global-matting/GT04-image.png");

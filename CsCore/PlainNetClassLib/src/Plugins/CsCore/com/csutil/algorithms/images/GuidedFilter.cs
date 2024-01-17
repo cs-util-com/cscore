@@ -179,15 +179,8 @@ namespace com.csutil.algorithms.images {
             }
         }
 
-
-        private byte[] BoxFilter(byte[] image, int boxSize) {
-            return ImageBlur.RunBoxBlur(image, width, height, boxSize / 2, colorComponents);
-        }
-
-
         private double[] BoxFilterDouble(double[] image, int boxSize) {
-            return FastBlur.FastBoxBlurDouble(image, width, height, boxSize, colorComponents);
-            //return ImageBlur.RunBoxBlurDouble(image, width, height, boxSize / 2, colorComponents);
+            return Filter.BoxFilter(image, width, height, boxSize / 2 , colorComponents);
         }
 
         

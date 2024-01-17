@@ -2,6 +2,14 @@
 using System.Collections.Generic;
 using System.Text;
 namespace com.csutil.algorithms.images {
+    
+    
+    /* Deprecated Version by the newer Version in Filter.cs
+     this was the naive approach which was horribly slow.
+     */
+
+
+
     public static class ImageBlur {
 
         // Helper method to set the color at a specific location in the image array

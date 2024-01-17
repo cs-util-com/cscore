@@ -6,24 +6,9 @@ using System.Xml.Schema;
 
 namespace com.csutil.algorithms.images
 {
-    public class FastBlur
+    public class Filter
     {
-        private static void SetColorAt(byte[] imageData, int x, int y, int width, byte[] color, int bytesPerPixel)
-        {
-            int startIdx = (y * width + x) * bytesPerPixel;
-            Array.Copy(color, 0, imageData, startIdx, color.Length);
-        }
-
-
-
-        // Helper method to get color at a given position
-        private static byte[] GetColorAt(byte[] img, int x, int y, int bytesPerPixel, int width)
-        {
-            int startIdx = (y * width + x) * bytesPerPixel;
-            return new byte[] { img[startIdx], img[startIdx + 1], img[startIdx + 2], img[startIdx + 3] };
-        }
-
-        public static byte[] FastBoxBlur(byte[] img, int width, int height, int radius, int channels)
+        public static byte[] BoxFilter(byte[] img, int width, int height, int radius, int channels)
         {
             var kSize = 2 * radius;
             
@@ -129,22 +114,9 @@ namespace com.csutil.algorithms.images
 
         }
         
-        private static void SetColorAt(double[] imageData, int x, int y, int width, double[] color, int bytesPerPixel)
-        {
-            int startIdx = (y * width + x) * bytesPerPixel;
-            Array.Copy(color, 0, imageData, startIdx, color.Length);
-        }
+        
 
-
-
-        // Helper method to get color at a given position
-        private static double[] GetColorAt(double[] img, int x, int y, int bytesPerPixel, int width)
-        {
-            int startIdx = (y * width + x) * bytesPerPixel;
-            return new double[] { img[startIdx], img[startIdx + 1], img[startIdx + 2], img[startIdx + 3] };
-        }
-
-        public static double[] FastBoxBlurDouble(double[] img, int width, int height, int radius, int channels)
+        public static double[] BoxFilter(double[] img, int width, int height, int radius, int channels)
         {
             var kSize = 2 * radius;
             
@@ -247,7 +219,34 @@ namespace com.csutil.algorithms.images
                 }
             }
             return total;
+        }
+        private static void SetColorAt(byte[] imageData, int x, int y, int width, byte[] color, int bytesPerPixel)
+        {
+            int startIdx = (y * width + x) * bytesPerPixel;
+            Array.Copy(color, 0, imageData, startIdx, color.Length);
+        }
 
+
+
+        // Helper method to get color at a given position
+        private static byte[] GetColorAt(byte[] img, int x, int y, int bytesPerPixel, int width)
+        {
+            int startIdx = (y * width + x) * bytesPerPixel;
+            return new byte[] { img[startIdx], img[startIdx + 1], img[startIdx + 2], img[startIdx + 3] };
+        }
+        private static void SetColorAt(double[] imageData, int x, int y, int width, double[] color, int bytesPerPixel)
+        {
+            int startIdx = (y * width + x) * bytesPerPixel;
+            Array.Copy(color, 0, imageData, startIdx, color.Length);
+        }
+
+
+
+        // Helper method to get color at a given position
+        private static double[] GetColorAt(double[] img, int x, int y, int bytesPerPixel, int width)
+        {
+            int startIdx = (y * width + x) * bytesPerPixel;
+            return new double[] { img[startIdx], img[startIdx + 1], img[startIdx + 2], img[startIdx + 3] };
         }
     }
 }

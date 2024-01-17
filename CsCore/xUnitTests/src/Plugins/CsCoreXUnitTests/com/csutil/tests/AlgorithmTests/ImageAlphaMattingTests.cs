@@ -28,7 +28,6 @@ namespace com.csutil.tests.AlgorithmTests {
             await DownloadFileIfNeeded(trimapFile, "http://atilimcetin.com/global-matting/GT04-trimap.png");
             var resultOfOriginalCppImplementation = folder.GetChild("GT04-alpha.png");
             await DownloadFileIfNeeded(resultOfOriginalCppImplementation, "http://atilimcetin.com/global-matting/GT04-alpha.png");
-            var origAlpha = await ImageLoader.LoadImageInBackground(resultOfOriginalCppImplementation);
             var image = await ImageLoader.LoadImageInBackground(imageFile);
             var trimap = await ImageLoader.LoadImageInBackground(trimapFile);
             var trimapBytes = trimap.Data;
@@ -65,10 +64,8 @@ namespace com.csutil.tests.AlgorithmTests {
                     }
                 }
             }
-            // Safe cut out according to alpha region that is 255
-            var cutout255 = image.Data;
+            // Safe cut out according to alpha region that is >= 128
             var cutout128 = image.Data;
-            var cutoutGreater0 = image.Data;
 
             alpha.Data = alphaData;
             for (var x = 0; x < image.Width; ++x) {
@@ -76,98 +73,16 @@ namespace com.csutil.tests.AlgorithmTests {
                     var value = (int)alpha.GetPixel(x, y).A;
                     var idx = (y * image.Width + x) * (int)image.ColorComponents;
                     cutout128[idx + 3] = value >= 128 ? (byte)255 : (byte)0;
-                    // cutout255[idx + 3] = value == 255 ? (byte)255 : (byte)0;
-                    // cutoutGreater0[idx + 3] = value > 0 ? (byte)255 : (byte)0;
                 }
             }
-            AssertV3.AreEqual(cutout255, cutoutGreater0);
-            var cutout255File = folder.GetChild("Cutout255.png");
             var cutout128File = folder.GetChild("Cutout128.png");
-            var cutoutGreater0File = folder.GetChild("cutoutGreater0.png");
-            // {
-            //     await using var stream = cutout255File.OpenOrCreateForReadWrite();
-            //     ImageWriter writer = new ImageWriter();
-            //     var im255 = ImageUtility.FlipImageVertically(cutout255, image.Width, image.Height, (int)image.ColorComponents);
-            //     writer.WritePng(im255, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
-            //     
-            //     
-            // }
             {
                 ImageWriter writer = new ImageWriter();
                 await using var stream2 = cutout128File.OpenOrCreateForReadWrite();
                 var im128 = ImageUtility.FlipImageVertically(cutout128, image.Width, image.Height, (int)image.ColorComponents);
                 writer.WritePng(im128, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream2);
             }
-            // {
-            //     ImageWriter writer = new ImageWriter();
-            //     await using var stream3 = cutoutGreater0File.OpenOrCreateForReadWrite();
-            //     var im0 = ImageUtility.FlipImageVertically(cutoutGreater0, image.Width, image.Height, (int)image.ColorComponents);
-            //     writer.WritePng(im0, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream3);
-            // }
         }
-        private static void SetColorAt(byte[] imageData, int x, int y, int width, byte[] color, int bytesPerPixel)
-        {
-            int startIdx = (y * width + x) * bytesPerPixel;
-            Array.Copy(color, 0, imageData, startIdx, color.Length);
-        }
-        [Fact]
-        public async Task Testing() {
-            var folder = EnvironmentV2.instance.GetOrAddAppDataFolder("ImageMattingTests");
-            var imageFile = folder.GetChild("GT04-image.png");
-            await DownloadFileIfNeeded(imageFile, "http://atilimcetin.com/global-matting/GT04-image.png");
-            var trimapFile = folder.GetChild("GT04-trimap.png");
-            await DownloadFileIfNeeded(trimapFile, "http://atilimcetin.com/global-matting/GT04-trimap.png");
-            var resultOfOriginalCppImplementation = folder.GetChild("GT04-alpha.png");
-            await DownloadFileIfNeeded(resultOfOriginalCppImplementation, "http://atilimcetin.com/global-matting/GT04-alpha.png");
-            var origAlpha = await ImageLoader.LoadImageInBackground(resultOfOriginalCppImplementation);
-            var image = await ImageLoader.LoadImageInBackground(imageFile);
-            
-            // Safe cut out according to alpha region that is 255
-            var cutout255 = image.Data;
-            var cutout128 = image.Data;
-            var cutoutGreater0 = image.Data;
-
-            for (var x = 0; x < image.Width; ++x) {
-                for (var y = 0; y < image.Height; ++y) {
-                    var value = (int)origAlpha.GetPixel(x, y).R;
-                    var idx = (y * image.Width + x) * (int)image.ColorComponents;
-                    if(value == 255)
-                        SetColorAt(cutout255, x, y, image.Width, new byte[]{255,0,0,255}, 4);
-                    // if(value >= 128)
-                    //     SetColorAt(cutout128, x, y, image.Width, new byte[]{0,255,0,255}, 4);
-                    //
-                    //if(value > 0)
-                    //    SetColorAt(cutoutGreater0, x, y, image.Width, new byte[]{0,0,0,255}, 4);
-                    // cutout255[idx + 3] = value == 255 ? (byte)255 : (byte)0;
-                    // cutout128[idx + 3] = value >= 128 ? (byte)255 : (byte)0;
-                    // cutoutGreater0[idx + 3] = value > 0 ? (byte)255 : (byte)0;
-                }
-            }
-            var cutout255File = folder.GetChild("Cutout255.png");
-            var cutout128File = folder.GetChild("Cutout128.png");
-            var cutoutGreater0File = folder.GetChild("cutoutGreater0.png");
-            {
-                await using var stream = cutout255File.OpenOrCreateForReadWrite();
-                ImageWriter writer = new ImageWriter();
-                var im255 = ImageUtility.FlipImageVertically(cutout255, image.Width, image.Height, (int)image.ColorComponents);
-                writer.WritePng(im255, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
-                
-                
-            }
-            // {
-            //     ImageWriter writer = new ImageWriter();
-            //     await using var stream2 = cutout128File.OpenOrCreateForReadWrite();
-            //     var im128 = ImageUtility.FlipImageVertically(cutout128, image.Width, image.Height, (int)image.ColorComponents);
-            //     writer.WritePng(im128, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream2);
-            // }
-            // {
-            //     ImageWriter writer = new ImageWriter();
-            //     await using var stream3 = cutoutGreater0File.OpenOrCreateForReadWrite();
-            //     var im0 = ImageUtility.FlipImageVertically(cutoutGreater0, image.Width, image.Height, (int)image.ColorComponents);
-            //     writer.WritePng(im0, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream3);
-            // }
-        }
-
         private static async Task DownloadFileIfNeeded(FileEntry self, string url) {
             var imgFileRef = new MyFileRef() { url = url, fileName = self.Name };
             await imgFileRef.DownloadTo(self.Parent, useAutoCachedFileRef: true);
