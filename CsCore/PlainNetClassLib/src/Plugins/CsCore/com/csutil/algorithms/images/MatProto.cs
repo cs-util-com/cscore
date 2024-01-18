@@ -72,5 +72,26 @@ namespace com.csutil.algorithms.images {
             }
             return sb.ToString();
         }
+        //Only for 4 channel images
+        public static Mat ImageToMatrix(int width, int height, byte[] imageData) {
+            if (imageData.Length != width * height * 4) {
+                throw new ArgumentException("Invalid image data length for the specified width and height.");
+            }
+
+            var mat = new Mat(height, width);
+
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    int index = (y * width + x) * 4;
+                    int rgba = (imageData[index + 3] << 24) | // Alpha
+                               (imageData[index + 2] << 16) | // Blue
+                               (imageData[index + 1] << 8) | // Green
+                               imageData[index];             // Red
+                    mat[y, x] = rgba;
+                }
+            }
+
+            return mat;
+        }
     }
 }
