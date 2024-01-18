@@ -14,8 +14,8 @@ namespace ReuseScroller {
         public Direction scrollDirection;
         public bool scrollReverse;
         public GameObject cellObject;
-        public float defaultCellSize = 200.0f;
-        public float spacing = 20.0f;
+        public float defaultCellSize = 80.0f;
+        public float spacing = 8.0f;
         public RectOffset contentPadding;
         public float activePadding;
 
