@@ -434,6 +434,32 @@ namespace com.csutil.http.apis {
             });
             self.Add(new VisionGpt.Line(VisionGpt.Role.user, content: content));
         }
+        public static void AddQuestionsToImage(this ICollection<VisionGpt.Line> self, string url, List<string> questions) {
+            var content = new List<Dictionary<string, object>>();
+            content.Add(new Dictionary<string, object>()
+            {
+                {"type","text"},
+                {"text","Rate the following questions with a confidence from 0 to 100 based on how well the question fits the image"},
+            });
+
+            content.Add(new Dictionary<string, object>()
+            {
+                {"type","image_url"},
+                {"image_url",new Dictionary<string,string>{
+                    {"url",url},
+                    {"detail","high"}
+                }},
+            });
+            questions.ForEach(question => {
+                content.Add(new Dictionary<string, object>()
+                {
+                    {"type","text"},
+                    {"text",question},
+                });
+            });
+
+            self.Add(new VisionGpt.Line(VisionGpt.Role.user, content: content));
+        }
         public static void AddUserLineWithJsonResultStructure<T>(this ICollection<VisionGpt.Line> self, string userMessage, T exampleResponse) {
             self.Add(new VisionGpt.Line(VisionGpt.Role.user, content: userMessage));
             self.Add(new VisionGpt.Line(VisionGpt.Role.system, content: CreateJsonInstructions(exampleResponse)));
