@@ -151,7 +151,11 @@ namespace com.csutil {
         /// <summary> When the <see cref="GameObject"/> is destroyed call Dispose on a target <see cref="IDisposable"/> </summary>
         public static T SetUpDisposeOnDestroy<T>(this GameObject self, T objectToDispose) where T : IDisposable {
             self.AddComponent<OnDestroyMono>().onDestroy.AddListenerV2(() => {
-                objectToDispose?.Dispose();
+                if (objectToDispose is IDisposableV2 dV2) {
+                    dV2.DisposeV2();
+                } else {
+                    objectToDispose?.Dispose();
+                }
             });
             return objectToDispose;
         }
