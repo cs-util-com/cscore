@@ -59,7 +59,7 @@ namespace com.csutil.ui {
         /// <param name="destroyFinalView"> If true and the last view on the stack is reached this last view will be destroyed too </param>
         /// <param name="hideNotDestroyCurrentView"> If set to true the current active view will not be destroyed but instead set to hidden </param>
         /// <returns></returns>
-        public bool SwitchBackToLastView(GameObject gameObjectToClose, bool destroyFinalView = false, bool hideNotDestroyCurrentView = false) {
+        public bool SwitchBackToLastView(GameObject gameObjectToClose, bool destroyFinalView = false, bool hideNotDestroyCurrentView = false, bool destroyViewStackOnFinalView = false) {
             var currentView = GetRootViewOf(gameObjectToClose);
             if (!currentView.IsGrandChildOf(gameObject)) {
                 Log.w("A view was passed to a viewstack that did not belong to this view stack! Will not close that view", currentView);
@@ -77,12 +77,17 @@ namespace com.csutil.ui {
                         return true;
                     } catch (System.Exception e) { Log.w("Could not show screenToShowAsCloseView=" + screenToShowAsCloseView, e); }
                 }
-                if (!destroyFinalView) { return false; }
+                if (!destroyFinalView && !destroyViewStackOnFinalView) { return false; }
             }
             if (hideNotDestroyCurrentView) {
                 return currentView.SetActiveV2(false);
             } else {
-                return currentView.Destroy();
+                if (destroyViewStackOnFinalView) {
+                    this.DestroyViewStack();
+                    return true;
+                } else {
+                    return currentView.Destroy();
+                }
             }
         }
 

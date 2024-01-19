@@ -70,7 +70,7 @@ namespace com.csutil.ui.viewstack {
         private bool GoForwards() { return gameObject.GetViewStack().SwitchToNextView(gameObject, hideCurrentView); }
 
         private bool GoBackwards() {
-            return gameObject.GetViewStack().SwitchBackToLastView(gameObject, destroyViewStackWhenLastScreenReached, hideNotDestroyCurrentViewWhenGoingBackwards);
+            return gameObject.GetViewStack().SwitchBackToLastView(gameObject, destroyViewStackWhenLastScreenReached, hideNotDestroyCurrentViewWhenGoingBackwards, destroyViewStackWhenLastScreenReached);
         }
 
     }
