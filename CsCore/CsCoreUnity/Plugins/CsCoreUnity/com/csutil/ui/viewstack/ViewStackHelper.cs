@@ -24,6 +24,10 @@ namespace com.csutil.ui {
         public static GameObject SwitchToView(this ViewStack target, string prefabName, int siblingIndex = -1) {
             return target.ShowView(prefabName, target.GetLatestView(), siblingIndex);
         }
+        
+        public static GameObject ShowView(this ViewStack target, string prefabName, int siblingIndex = -1) {
+            return target.ShowView(prefabName, null, siblingIndex);
+        }
 
         public static GameObject SwitchToView(this ViewStack target, GameObject newView, int siblingIndex = -1) {
             return target.ShowView(newView, target.GetLatestView(), siblingIndex);
