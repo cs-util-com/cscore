@@ -244,5 +244,65 @@ namespace com.csutil.algorithms.images
             int startIdx = (y * width + x) * bytesPerPixel;
             return new double[] { img[startIdx], img[startIdx + 1], img[startIdx + 2], img[startIdx + 3] };
         }
+
+        private byte[] Erode(byte[] image, int w, int h, int r) {
+            byte[] erodedImage = new byte[image.Length];
+            Array.Copy(image, erodedImage, image.Length);
+
+            for (int y = 0; y < h; ++y) {
+                for (int x = 0; x < w; ++x) {
+                    bool erodePixel = false;
+                    for (int dy = -r; dy <= r; ++dy) {
+                        for (int dx = -r; dx <= r; ++dx) {
+                            if (dx * dx + dy * dy <= r * r) {
+                                int nx = x + dx;
+                                int ny = y + dy;
+                                if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
+                                    int idx = (ny * w + nx) * 4;
+                                    // If any pixel in the neighborhood is 0, erode the current pixel
+                                    if (image[idx] == 0) {
+                                        erodePixel = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (erodePixel) {
+                        int idx = (y * w + x) * 4;
+                        erodedImage[idx] = 0;
+                    }
+                }
+            }
+            return erodedImage;
+
+
+        }
+
+        public static byte[] Dilate(byte[] input, int width, int height) {
+            byte[] output = new byte[input.Length];
+            int stride = width;
+
+            for (int y = 1; y < height - 1; y++) {
+                for (int x = 1; x < width - 1; x++) {
+                    byte maxPixel = 0;
+
+                    // Iterate through the structuring element
+                    for (int ky = -1; ky <= 1; ky++) {
+                        for (int kx = -1; kx <= 1; kx++) {
+                            int pixelIndex = (y + ky) * stride + (x + kx);
+                            maxPixel = Math.Max(maxPixel, input[pixelIndex]);
+                        }
+                    }
+
+                    output[y * stride + x] = maxPixel;
+                }
+            }
+
+            return output;
+        }
+
+
+
     }
 }
