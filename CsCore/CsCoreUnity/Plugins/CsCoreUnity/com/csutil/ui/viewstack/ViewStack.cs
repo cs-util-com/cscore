@@ -52,7 +52,10 @@ namespace com.csutil.ui {
         }
 
         /// <summary> Destroys the complete ViewStack including all views </summary>
-        public void DestroyViewStack() { gameObject.Destroy(); }
+        public void DestroyViewStack() {
+            Log.MethodEntered();
+            gameObject.Destroy();
+        }
 
         /// <summary> Will "close" the current view and jump back to the last view and set it back to active </summary>
         /// <param name="gameObjectToClose"> The current view or any part of it </param>
@@ -78,16 +81,15 @@ namespace com.csutil.ui {
                     } catch (System.Exception e) { Log.w("Could not show screenToShowAsCloseView=" + screenToShowAsCloseView, e); }
                 }
                 if (!destroyFinalView && !destroyViewStackOnFinalView) { return false; }
+                if (destroyViewStackOnFinalView) {
+                    this.DestroyViewStack();
+                    return true;
+                }
             }
             if (hideNotDestroyCurrentView) {
                 return currentView.SetActiveV2(false);
             } else {
-                if (destroyViewStackOnFinalView) {
-                    this.DestroyViewStack();
-                    return true;
-                } else {
-                    return currentView.Destroy();
-                }
+                return currentView.Destroy();
             }
         }
 
