@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using com.csutil.algorithms.images;
 using com.csutil.io;
@@ -31,18 +29,9 @@ namespace com.csutil.tests.AlgorithmTests {
             var image = await ImageLoader.LoadImageInBackground(imageFile);
             var trimap = await ImageLoader.LoadImageInBackground(trimapFile);
             var trimapBytes = trimap.Data;
-            var imageMatting = new GlobalMatting(image.Data, image.Width, image.Height, (int)image.ColorComponents);
+            var imageMatting = new GlobalMatting(image.Data.DeepCopy(), image.Width, image.Height, (int)image.ColorComponents);
             imageMatting.ExpansionOfKnownRegions(ref trimapBytes, niter: 9);
             imageMatting.RunGlobalMatting(trimapBytes, out var foreground, out var alphaData, out var conf);
-
-            var alphaFol = folder.GetChild("GT04-implementedAlpha.png");
-            {
-                await using var stream = alphaFol.OpenOrCreateForReadWrite();
-                ImageWriter writer = new ImageWriter();
-                var flippedResult = ImageUtility.FlipImageVertically(alphaData, image.Width, image.Height, (int)image.ColorComponents);
-                writer.WritePng(flippedResult, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
-            }
-
             // filter the result with fast guided filter
             var alphaDataGuided = imageMatting.RunGuidedFilter(alphaData, r: 10, eps: 1e-5);
 
@@ -68,20 +57,28 @@ namespace com.csutil.tests.AlgorithmTests {
             var cutoffValue = 129;
             var cutout = image.Data;
 
-            alpha.Data = alphaData;
             for (var x = 0; x < image.Width; ++x) {
                 for (var y = 0; y < image.Height; ++y) {
-                    var value = (int)alpha.GetPixel(x, y).A;
+                    var value = (int)alpha.GetPixel(x, y).R;
                     var idx = (y * image.Width + x) * (int)image.ColorComponents;
-                    cutout[idx + 3] = value >= cutoffValue ? (byte)255 : (byte)0;
+                    cutout[idx + 3] = value >= cutoffValue ? (byte)value : (byte)0;
+                    // cutout[idx + 3] = (byte)value;
                 }
             }
-            var cutoutFile = folder.GetChild("Cutout" + cutoffValue + ".png");
+            
             {
+                var cutoutFile = folder.GetChild("Cutout" + cutoffValue + ".png");
                 ImageWriter writer = new ImageWriter();
-                await using var stream2 = cutoutFile.OpenOrCreateForReadWrite();
-                var im128 = ImageUtility.FlipImageVertically(cutout, image.Width, image.Height, (int)image.ColorComponents);
-                writer.WritePng(im128, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream2);
+                await using var stream = cutoutFile.OpenOrCreateForReadWrite();
+                var flipped = ImageUtility.FlipImageVertically(cutout, image.Width, image.Height, (int)image.ColorComponents);
+                writer.WritePng(flipped, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
+            }
+            {
+                var finalAlphaFile = folder.GetChild("OurAlpha.png");
+                ImageWriter writer = new ImageWriter();
+                await using var stream = finalAlphaFile.OpenOrCreateForReadWrite();
+                var flipped = ImageUtility.FlipImageVertically(alpha.Data, image.Width, image.Height, (int)image.ColorComponents);
+                writer.WritePng(flipped, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
             }
         }
         private static async Task DownloadFileIfNeeded(FileEntry self, string url) {

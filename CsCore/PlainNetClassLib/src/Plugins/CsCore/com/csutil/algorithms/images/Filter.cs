@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Text;
-using System.Xml.Schema;
 
 namespace com.csutil.algorithms.images
 {

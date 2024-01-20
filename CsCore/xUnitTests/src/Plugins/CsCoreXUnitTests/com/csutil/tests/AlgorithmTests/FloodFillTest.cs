@@ -3,15 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using com.csutil.algorithms.images;
-using com.csutil.io;
 using com.csutil.model;
-using Microsoft.VisualBasic.FileIO;
 using StbImageWriteSharp;
 using Xunit;
 using Zio;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.Net.Mime;
 using com.csutil.http.apis;
 
 namespace com.csutil.tests.AlgorithmTests {
