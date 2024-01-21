@@ -33,21 +33,21 @@ namespace com.csutil.tests.model.esc {
                     new EnemyComponent() { Id = "c1", Health = 100, Mana = 10 }
                 )
             };
-            templates.SaveChanges(enemyTemplate);
+            await templates.SaveChanges(enemyTemplate);
 
             // An instance that has a different health value than the template:
             Entity variant1 = templates.CreateVariantInstanceOf(enemyTemplate, NewIdDict(enemyTemplate));
             (variant1.Components.Single().Value as EnemyComponent).Health = 200;
-            templates.SaveChanges(variant1); // Save it as a variant of the enemyTemplate
+            await templates.SaveChanges(variant1); // Save it as a variant of the enemyTemplate
 
             // Create a variant2 of the variant1
             Entity variant2 = templates.CreateVariantInstanceOf(variant1, NewIdDict(variant1));
             (variant2.Components.Single().Value as EnemyComponent).Mana = 20;
-            templates.SaveChanges(variant2);
+            await templates.SaveChanges(variant2);
 
             // Updating variant 1 should also update variant2:
             (variant1.Components.Single().Value as EnemyComponent).Health = 300;
-            templates.SaveChanges(variant1);
+            await templates.SaveChanges(variant1);
             variant2 = templates.ComposeEntityInstance(variant2.Id);
             Assert.Equal(300, (variant2.Components.Single().Value as EnemyComponent).Health);
 
@@ -255,7 +255,7 @@ namespace com.csutil.tests.model.esc {
                 {
                     var entity1 = ecs.Add(new Entity() { Name = "Entity1" });
                     var entity11 = entity1.AddChild(new Entity() { Name = "Entity2" });
-                    entity1.SaveChanges();
+                    await entity1.SaveChanges();
 
                     var variant1 = entity1.CreateVariant();
                     Assert.NotEqual(variant1.Id, entity1.Id);
@@ -284,7 +284,7 @@ namespace com.csutil.tests.model.esc {
                     Name = "Sword",
                     Components = CreateComponents(new SwordComponent() { Damage = 10 })
                 });
-                baseEnemy.SaveChanges();
+                await baseEnemy.SaveChanges();
 
                 // Accessing components and children entities: 
                 Assert.NotNull(baseEnemy.GetComponent<EnemyComponent>());
@@ -299,13 +299,13 @@ namespace com.csutil.tests.model.esc {
                     Name = "Shield",
                     Components = CreateComponents(new ShieldComponent() { Defense = 10 })
                 });
-                bossEnemy.SaveChanges();
+                await bossEnemy.SaveChanges();
 
                 // Define a mage variant that has mana but no sword
                 var mageEnemy = baseEnemy.CreateVariant();
                 mageEnemy.Data.Name = "MageEnemy";
                 mageEnemy.GetComponent<EnemyComponent>().Mana = 100;
-                mageEnemy.SaveChanges();
+                await mageEnemy.SaveChanges();
 
                 Assert.NotSame(mageEnemy, baseEnemy);
                 Assert.NotSame(mageEnemy.Data, baseEnemy.Data);
@@ -324,12 +324,12 @@ namespace com.csutil.tests.model.esc {
                 // Now that the sword is removed from the mage it can be added to the boss enemy: 
                 bossEnemy.AddChild(sword);
 
-                bossEnemy.SaveChanges();
-                mageEnemy.SaveChanges();
+                await bossEnemy.SaveChanges();
+                await mageEnemy.SaveChanges();
 
                 // Updates to the prefabs also result in the variants being updated
                 baseEnemy.GetComponent<EnemyComponent>().Health = 150;
-                baseEnemy.SaveChanges();
+                await baseEnemy.SaveChanges();
 
                 // The mage enemy health wasnt modified so with the template update it now has also 150 health:
                 Assert.Equal(150, mageEnemy.GetComponent<EnemyComponent>().Health);
@@ -343,13 +343,13 @@ namespace com.csutil.tests.model.esc {
                 bossEnemy.GetComponent<EnemyComponent>().Mana = 50;
                 // These boss enemy changes are NOT persisted (no call to SaveChanges) so they are lost once
                 // baseEnemy saves its changes (and with that also updates all direct and indirect variants):
-                baseEnemy.SaveChanges();
+                await baseEnemy.SaveChanges();
                 // The health is back to the 200 value as it was before and the mana is back to 0:
                 Assert.Equal(200, bossEnemy.GetComponent<EnemyComponent>().Health);
                 Assert.Equal(0, bossEnemy.GetComponent<EnemyComponent>().Mana);
 
-                bossEnemy.SaveChanges();
-                mageEnemy.SaveChanges();
+                await bossEnemy.SaveChanges();
+                await mageEnemy.SaveChanges();
 
                 // All created entities are added to the scene graph and persisted to disk
                 var scene = ecs.Add(new Entity() { Name = "Scene" });
@@ -360,7 +360,7 @@ namespace com.csutil.tests.model.esc {
                 var enemy3 = scene.AddChild(mageEnemy.CreateVariant());
                 enemy3.Data.LocalPose = Pose3d.NewMatrix(new Vector3(-1, 0, 0));
 
-                scene.SaveChanges();
+                await scene.SaveChanges();
 
                 // Simulate the user closing the application and starting it again
                 ecs.Dispose();

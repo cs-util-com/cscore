@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
+using System.Threading.Tasks;
 
 namespace com.csutil.model.ecs {
 
@@ -152,9 +153,11 @@ namespace com.csutil.model.ecs {
             return localPose.Value.ToPose();
         }
 
-        public static void SaveChanges<T>(this IEntity<T> self) where T : IEntityData {
+        public static Task SaveChanges<T>(this IEntity<T> self) where T : IEntityData {
             var fullSubtree = self.GetChildrenTreeBreadthFirst();
-            foreach (var e in fullSubtree) { e.Ecs.Update(e.Data); }
+            var tasks = new List<Task>();
+            foreach (var e in fullSubtree) { tasks.Add(e.Ecs.Update(e.Data)); }
+            return Task.WhenAll(tasks);
         }
 
         /// <summary>

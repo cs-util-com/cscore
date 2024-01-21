@@ -116,11 +116,11 @@ namespace com.csutil.model.ecs {
             }
         }
 
-        public void Update(T entityData) {
+        public Task Update(T entityData) {
             this.ThrowErrorIfDisposed();
-            TemplatesIo?.SaveChanges(entityData).LogOnError();
-            // In case the entity is a template, update also all entities that inherit from the template:
+            var t = TemplatesIo?.SaveChanges(entityData);
             InternalUpdate(entityData);
+            return t;
         }
 
         private void InternalUpdate(T updatedEntityData) {
