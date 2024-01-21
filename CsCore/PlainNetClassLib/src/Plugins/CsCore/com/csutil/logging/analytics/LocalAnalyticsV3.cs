@@ -19,7 +19,7 @@ namespace com.csutil.logging.analytics {
         private readonly object _threadLock = new object();
 
         public LocalAnalyticsV3(DirectoryEntry dirForEvents)
-            : base(new ObservableKeyValueStore(ZipFileBasedKeyValueStore.New(dirForEvents.GetChild("AllEvents.zip"), maxAllowedOpenChanges))) {
+            : base(new ObservableKeyValueStore(ZipFileBasedKeyValueStore.New(dirForEvents.CreateV2().GetChild("AllEvents.zip"), maxAllowedOpenChanges))) {
             this._dir = dirForEvents;
         }
 
