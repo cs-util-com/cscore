@@ -36,7 +36,7 @@ namespace com.csutil {
             }
         }
 
-        public static bool isEditor {
+        public static bool isUnityEditor {
             get {
 #if UNITY_EDITOR
                 return true;
@@ -49,6 +49,46 @@ namespace com.csutil {
         public static bool isDebugMode {
             get {
 #if DEBUG
+                return true;
+#else
+                return false;
+#endif
+            }
+        }
+
+        public static bool isWindows {
+            get {
+#if UNITY_STANDALONE_WIN 
+                return true;
+#else
+                return false;
+#endif
+            }
+        }
+
+        public static bool isMacOs {
+            get {
+#if UNITY_STANDALONE_OSX 
+                return true;
+#else
+                return false;
+#endif
+            }
+        }
+
+        public static bool isLinux {
+            get {
+#if UNITY_STANDALONE_LINUX || UNITY_EDITOR_LINUX
+                return true;
+#else
+                return false;
+#endif
+            }
+        }
+
+        public static bool isIos {
+            get {
+#if UNITY_IOS
                 return true;
 #else
                 return false;

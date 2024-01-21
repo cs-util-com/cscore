@@ -77,7 +77,7 @@ namespace com.csutil {
             if (EnvironmentV2.isWebGL) { return 0; }
             
             // In latest Unity versions PrivateMemorySize64 seems to not work anymore for Android, so disabled:
-            if (EnvironmentV2.isAndroid && !EnvironmentV2.isEditor) { return 0; }
+            if (EnvironmentV2.isAndroid && !EnvironmentV2.isUnityEditor) { return 0; }
             
             try {
                 using (var p = Process.GetCurrentProcess()) { return p.PrivateMemorySize64; }
