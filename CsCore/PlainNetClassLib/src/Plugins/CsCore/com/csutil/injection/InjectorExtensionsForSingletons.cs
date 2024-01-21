@@ -79,8 +79,12 @@ namespace com.csutil {
             if (ReferenceEquals(null, singleton)) {
                 throw new ArgumentNullException("The singleton instance was null for type " + typeof(T));
             }
-            if ("null".Equals(singleton.ToString())) {
-                throw new ArgumentNullException("The singleton instance returns 'null' in .ToString() for type " + typeof(T));
+            try {
+                if ("null".Equals(singleton.ToString())) {
+                    throw new ArgumentNullException("The singleton instance returns 'null' in .ToString() for type " + typeof(T));
+                }
+            } catch (Exception e) {
+                Log.w("Could not check if the singleton instance returns 'null' in .ToString() for type " + typeof(T) + " because of " + e);
             }
         }
 
