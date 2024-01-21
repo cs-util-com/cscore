@@ -51,13 +51,16 @@ namespace com.csutil.http {
         }
 
 #if !UNITY_WEBGL
-        private static  Task<long> GetCurrentPingViaUnityPing(string ip, int timeoutInMs = DEFAULT_PING_TIMEOUT) {
-            return MainThread.Invoke<long>(async () => {
-                var ping = new UnityEngine.Ping(ip);
-                var timer = Stopwatch.StartNew();
-                while (!ping.isDone && timer.ElapsedMilliseconds < timeoutInMs) { await TaskV2.Delay(10); }
-                return ping.isDone ? ping.time : -1;
-            });
+        private static Task<long> GetCurrentPingViaUnityPing(string ip, int timeoutInMs = DEFAULT_PING_TIMEOUT) {
+            if (!ApplicationV2.isPlaying) { return GetCurrentPingViaUnityPingInMainThread(ip, timeoutInMs); }
+            return MainThread.Invoke<long>(() => GetCurrentPingViaUnityPingInMainThread(ip, timeoutInMs));
+        }
+
+        private static async Task<long> GetCurrentPingViaUnityPingInMainThread(string ip, int timeoutInMs) {
+            var ping = new UnityEngine.Ping(ip);
+            var timer = Stopwatch.StartNew();
+            while (!ping.isDone && timer.ElapsedMilliseconds < timeoutInMs) { await TaskV2.Delay(10); }
+            return ping.isDone ? ping.time : -1;
         }
 #endif
 
