@@ -53,8 +53,8 @@ namespace com.csutil.ui.jsonschema {
         public static bool LogAnyDiffToNewFieldViews(this Dictionary<string, FieldView> self, Dictionary<string, FieldView> newFieldViews) {
             // First compare all field views that are found both in the list of old and new views and print out the changes:
             self.CheckIntersectingFieldViewsForChanges(newFieldViews, (oldFieldView, newFieldView, _) => {
-                AssertV2.IsNotNull(oldFieldView.field, "oldFieldView.field");
-                AssertV2.IsNotNull(newFieldView.field, "newFieldView.field");
+                AssertV3.IsNotNull(oldFieldView.field, "oldFieldView.field");
+                AssertV3.IsNotNull(newFieldView.field, "newFieldView.field");
                 var diff = MergeJson.GetDiff(oldFieldView.field, newFieldView.field);
                 if (!diff.IsNullOrEmpty()) {
                     Log.e($"Detected changed field view '{oldFieldView.fullPath}' that needs UI update! " +
@@ -92,7 +92,7 @@ namespace com.csutil.ui.jsonschema {
                 var newFieldView = newFieldViews[item.Key];
                 var newFieldValue = JsonWriter.GetWriter(newFieldView.field).Write(newFieldView.field);
                 if (oldFieldView.fieldAsJson != newFieldValue) { onUpdateNeeded(oldFieldView, newFieldView, newFieldValue); }
-                AssertV2.AreEqual(item.Value.fieldName, newFieldView.fieldName);
+                AssertV3.AreEqual(item.Value.fieldName, newFieldView.fieldName);
             }
 
         }

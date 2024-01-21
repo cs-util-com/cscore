@@ -46,6 +46,7 @@ namespace com.csutil.tests {
 
         public static IEnumerator RunTest<T>(GameObject parent) where T : UnitTestMono {
             AssertV2.throwExeptionIfAssertionFails = true;
+            AssertV3.throwExeptionIfAssertionFails = true;
             var testMono = parent.GetOrAddComponent<T>();
             testMono.simulateUserInput = true;
             yield return testMono.Start();
@@ -66,7 +67,7 @@ namespace com.csutil.tests {
         }
 
         public Task SimulateButtonClickOn(string buttonName, Task buttonClickWaitTask) {
-            AssertV2.IsFalse(buttonClickWaitTask.IsCompleted, "buttonClickWaitTask was already completed");
+            AssertV3.IsFalse(buttonClickWaitTask.IsCompleted, () => "buttonClickWaitTask was already completed");
             SimulateButtonClickOn(buttonName);
             return buttonClickWaitTask;
         }

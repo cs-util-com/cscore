@@ -15,17 +15,17 @@ namespace com.csutil.ui.jsonschema {
         }
 
         public async Task<GameObject> NewViewFromSchema(JsonSchema schema, JsonSchemaToView generator) {
-            AssertV2.IsNotNull(schema, "schema");
-            AssertV2.IsNotNull(generator, "generator");
+            AssertV3.IsNotNull(schema, "schema");
+            AssertV3.IsNotNull(generator, "generator");
             if (schema.properties == null) {
-                AssertV2.IsFalse(generator.schemaGenerator.schemas.IsNullOrEmpty(), "generator.schema dict is emtpy!");
+                AssertV3.IsFalse(generator.schemaGenerator.schemas.IsNullOrEmpty(), () => "generator.schema dict is emtpy!");
                 if (generator.schemaGenerator.schemas.TryGetValue(schema.modelType, out JsonSchema vm)) {
                     schema = vm;
                 } else {
                     Log.e($"No Schema found for schema.modelType={schema.modelType}");
                 }
             }
-            AssertV2.IsNotNull(schema.properties, "schema.properties");
+            AssertV3.IsNotNull(schema.properties, "schema.properties");
             GameObject rootContainerView = await generator.NewRootContainerView(rootPrefabName);
             rootContainerView.GetComponentInChildren<FieldView>().field = schema;
             var innerContainer = await generator.SelectInnerViewContainerFromObjectFieldView(rootContainerView);

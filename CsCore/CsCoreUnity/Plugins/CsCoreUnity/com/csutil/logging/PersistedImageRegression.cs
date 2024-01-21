@@ -91,7 +91,7 @@ namespace com.csutil {
                     }
                 }
                 backup.DeleteV2(); // If a backup file was created during the process delete it
-                AssertV2.IsTrue(newImg.Exists, "newImg did not exist after AssertNoVisualChange done");
+                AssertV3.IsTrue(newImg.Exists, () => "newImg did not exist after AssertNoVisualChange done");
             }
             catch (ArgumentException e) {
                 HandleException(config, oldImg, new Error(e.Message, stacktrace));

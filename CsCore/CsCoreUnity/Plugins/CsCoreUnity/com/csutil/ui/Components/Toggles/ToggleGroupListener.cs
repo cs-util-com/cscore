@@ -27,8 +27,8 @@ namespace com.csutil.ui {
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         private void AssertChildrenHaveCorrectMonosAttached() {
             foreach (var t in gameObject.GetComponentV2<ToggleGroup>().ActiveToggles()) {
-                AssertV2.IsTrue(t.GetComponentV2<ToggleListener>() != null, "Missing ToggleListener MonoBehaviour for child of ToggleGroup", t.gameObject);
-                AssertV2.IsTrue(t.GetComponentV2<RadioButton>() != null, "Missing RadioButton MonoBehaviour for child of ToggleGroup", t.gameObject);
+                AssertV3.IsTrue(t.GetComponentV2<ToggleListener>() != null, () => "Missing ToggleListener MonoBehaviour for child of ToggleGroup", t.gameObject);
+                AssertV3.IsTrue(t.GetComponentV2<RadioButton>() != null, () => "Missing RadioButton MonoBehaviour for child of ToggleGroup", t.gameObject);
             }
         }
 

@@ -46,7 +46,7 @@ namespace com.csutil.http {
             if (!ipOrUrl.StartsWith("http")) { ipOrUrl = "https://" + ipOrUrl; }
             Stopwatch timer = Stopwatch.StartNew();
             var result = await new Uri(ipOrUrl).SendHEAD().GetResult<HttpStatusCode>().WithTimeout(timeoutInMs);
-            AssertV2.AreEqual(HttpStatusCode.OK, result);
+            AssertV3.AreEqual(HttpStatusCode.OK, result);
             return timer.ElapsedMilliseconds;
         }
 

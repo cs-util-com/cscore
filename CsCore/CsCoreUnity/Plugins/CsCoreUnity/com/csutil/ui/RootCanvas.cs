@@ -27,7 +27,7 @@ namespace com.csutil.ui {
             // Check if there is a root canvas that has a ViewStack attached:
             var rootCanvasesWithViewStack = roots.Filter(x => x.GetComponentV2<ViewStack>() != null);
             if (!rootCanvasesWithViewStack.IsNullOrEmpty()) {
-                AssertV2.AreEqual(1, rootCanvasesWithViewStack.Count(), "rootCanvasesWithViewStack");
+                AssertV3.AreEqual(1, rootCanvasesWithViewStack.Count(), "rootCanvasesWithViewStack");
                 return rootCanvasesWithViewStack.First();
             }
             return FilterForBestRootCanvas(roots);

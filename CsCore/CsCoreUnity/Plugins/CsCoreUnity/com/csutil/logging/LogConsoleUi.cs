@@ -142,7 +142,7 @@ namespace com.csutil.logging {
 
         private void InitMap() {
             var c = gameObject.GetComponentInParents<Canvas>();
-            AssertV2.IsNotNull(c, "Canvas in LogConsoleUi parent");
+            AssertV3.IsNotNull(c, "Canvas in LogConsoleUi parent");
             if (c == null) { c = gameObject.GetParent().GetComponentV2<Canvas>(); }
             map = c.gameObject.GetLinkMap();
         }

@@ -36,7 +36,7 @@ namespace com.csutil {
         /// <summary> Connects a model with a view </summary>
         /// <returns> A task that can be awaited on, that returns the fully setup presenter </returns>
         public static async Task<T> LoadModelIntoView<T>(this Presenter<T> self, T model) {
-            AssertV2.IsNotNull(self.targetView, "presenter.targetView");
+            AssertV3.IsNotNull(self.targetView, "presenter.targetView");
             if (model == null) { Log.w($"Passed model (of type={typeof(T).Name}]) was NULL"); }
 
             var presenterName = self.GetType().Name;

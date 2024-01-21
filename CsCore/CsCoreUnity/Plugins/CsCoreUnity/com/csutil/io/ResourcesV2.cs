@@ -90,7 +90,7 @@ namespace com.csutil {
         /// </summary>
         public static T LoadScriptableObjectInstance<T>(string pathInResourcesFolder) where T : ScriptableObject {
             var so = LoadV2<T>(pathInResourcesFolder);
-            AssertV2.IsNotNull(so, "ScriptableObject (" + typeof(T) + ") instance " + pathInResourcesFolder);
+            AssertV3.IsNotNull(so, "ScriptableObject (" + typeof(T) + ") instance " + pathInResourcesFolder);
             return so;
         }
 

@@ -12,7 +12,7 @@ namespace com.csutil.ui {
         }
 
         public static ViewStack GetOrAddViewStack(this Canvas self, string viewStackPrefabName) {
-            AssertV2.IsTrue(self.isRootCanvasV2(), "Passed canvas was not a root canvas", self.gameObject);
+            AssertV3.IsTrue(self.isRootCanvasV2(), () => "Passed canvas was not a root canvas", self.gameObject);
             var canvasGO = self.gameObject;
             var viewStackGOs = canvasGO.GetChildren();
             var go = viewStackGOs.SingleOrDefault(x => x.name == viewStackPrefabName);

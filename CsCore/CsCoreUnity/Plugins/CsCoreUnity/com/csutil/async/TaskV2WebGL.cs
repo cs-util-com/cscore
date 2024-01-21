@@ -28,7 +28,7 @@ namespace com.csutil.async {
         }
 
         private static Task StartCoroutineAsTask(IEnumerator iEnum) {
-            AssertV2.IsTrue(ApplicationV2.isPlaying, "In EDIT mode!");
+            AssertV3.IsTrue(ApplicationV2.isPlaying, () => "In EDIT mode!");
             var tcs = new TaskCompletionSource<bool>();
             MainThread.Invoke(() => { MainThread.instance.StartCoroutineAsTask(tcs, iEnum, () => true); });
             return tcs.Task;

@@ -23,7 +23,7 @@ namespace com.csutil {
             Stopwatch timer = timeoutInMs > 0 ? Stopwatch.StartNew() : null;
             while (!self.IsCompleted) {
                 yield return waitIntervalBeforeNextCheck;
-                AssertV2.IsTrue(self.Status != TaskStatus.WaitingToRun, "Task is WaitingToRun");
+                AssertV3.IsTrue(self.Status != TaskStatus.WaitingToRun, () => "Task is WaitingToRun");
                 if (timer != null && timeoutInMs < timer.ElapsedMilliseconds) {
                     onError(new TimeoutException("Task timeout after " + timer.ElapsedMilliseconds + "ms"));
                     break;
@@ -123,8 +123,10 @@ namespace com.csutil {
                 try {
                     if (!coroutineToWrap.MoveNext()) { break; }
                     current = coroutineToWrap.Current;
+                } catch (Exception e) {
+                    onRoutineDone(e);
+                    yield break;
                 }
-                catch (Exception e) { onRoutineDone(e); yield break; }
                 yield return current;
             }
             onRoutineDone(null);

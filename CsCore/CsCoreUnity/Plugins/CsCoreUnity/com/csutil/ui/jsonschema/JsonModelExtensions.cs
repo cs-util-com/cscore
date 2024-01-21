@@ -99,7 +99,7 @@ namespace com.csutil.ui.jsonschema {
         /// FieldViews in the children GameObjects.So first fill the properties of the rootFieldView again with the fields of the 
         /// direct children GameObjects.And do this recursively for all found ObjectFieldViews </summary>
         private static void RestorePropertiesFromChildrenGOs(ObjectFieldView targetFieldView) {
-            AssertV2.IsNotNull(targetFieldView, "targetFieldView");
+            AssertV3.IsNotNull(targetFieldView, "targetFieldView");
             if (targetFieldView.field.properties.IsNullOrEmpty()) {
                 var children = targetFieldView.mainLink.gameObject.GetChildren().Map(c => c.GetComponentV2<FieldView>()).Filter(x => x != null);
                 if (children.IsNullOrEmpty()) {
@@ -197,7 +197,7 @@ namespace com.csutil.ui.jsonschema {
 
         public static async Task LoadModelList(this ListFieldView self, JObject root, JsonSchemaToView viewGenerator) {
             JArray modelArray = self.GetFieldJModel(root) as JArray;
-            AssertV2.IsNotNull(modelArray, "modelArray");
+            AssertV3.IsNotNull(modelArray, "modelArray");
             var map = new Dictionary<FieldView, JToken>();
             for (int i = 0; i < modelArray.Count; i++) {
                 var fieldName = "" + i;
@@ -300,7 +300,7 @@ namespace com.csutil.ui.jsonschema {
                         }
                     }
                     currentLevel = child;
-                    AssertV2.IsNotNull(currentLevel, $"rootModel (p='{fieldName}', child={child}");
+                    AssertV3.IsNotNull(currentLevel, $"rootModel (p='{fieldName}', child={child}");
                 }
             }
             return currentLevel;
