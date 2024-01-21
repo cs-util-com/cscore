@@ -112,7 +112,9 @@ namespace com.csutil.ui {
         /// <summary> Moves up the tree until it reaches the direct child (the view) of the viewstack </summary>
         public GameObject GetRootViewOf(GameObject viewElement) {
             viewElement.ThrowErrorIfNull("viewElement");
-            if (viewElement == gameObject) { throw Log.e("Cant get root for ViewStack gameobject"); }
+            if (viewElement == gameObject) {
+                throw Log.e("Input view element not allowed to be viewStack!", viewElement);
+            }
             var parent = viewElement.GetParent();
             if (parent == gameObject) { return viewElement; } // stop when the GO of the viewstack is reached
             return GetRootViewOf(parent);
