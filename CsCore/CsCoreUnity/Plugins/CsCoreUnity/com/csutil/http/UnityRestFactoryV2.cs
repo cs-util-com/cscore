@@ -29,9 +29,17 @@ namespace com.csutil.http {
 #if !UNITY_WEBGL
             var ping = await GetCurrentPingViaUnityPing(ipOrUrl, timeoutInMs);
             if (ping > 0) { return ping; }
+            // Try fallback to head request if Unity.Ping did not work:
+            ping = await GetCurrentPingViaHeadRequest(ipOrUrl, timeoutInMs);
+            if (ping > 0) { return ping; }
 #endif
             // If Unity.Ping did not work, eg because a URL was used instead of an IP fallback to default ping approach:
-            return await base.GetCurrentPing(ipOrUrl, timeoutInMs);
+            try {
+                return await base.GetCurrentPing(ipOrUrl, timeoutInMs);
+            } catch (Exception e) {
+                Log.e("Failed to ping: " + ipOrUrl, e);
+                throw;
+            }
         }
 
         public static async Task<long> GetCurrentPingViaHeadRequest(string ipOrUrl, int timeoutInMs = DEFAULT_PING_TIMEOUT) {
@@ -43,11 +51,13 @@ namespace com.csutil.http {
         }
 
 #if !UNITY_WEBGL
-        private static async Task<long> GetCurrentPingViaUnityPing(string ip, int timeoutInMs = DEFAULT_PING_TIMEOUT) {
-            var ping = new UnityEngine.Ping(ip);
-            var timer = Stopwatch.StartNew();
-            while (!ping.isDone && timer.ElapsedMilliseconds < timeoutInMs) { await TaskV2.Delay(10); }
-            return ping.isDone ? ping.time : -1;
+        private static  Task<long> GetCurrentPingViaUnityPing(string ip, int timeoutInMs = DEFAULT_PING_TIMEOUT) {
+            return MainThread.Invoke<long>(async () => {
+                var ping = new UnityEngine.Ping(ip);
+                var timer = Stopwatch.StartNew();
+                while (!ping.isDone && timer.ElapsedMilliseconds < timeoutInMs) { await TaskV2.Delay(10); }
+                return ping.isDone ? ping.time : -1;
+            });
         }
 #endif
 
