@@ -59,7 +59,7 @@ namespace com.csutil.model {
         }
 
         public static async Task<ProgressionSystem<FeatureFlag>> SetupV2(KeyValueStoreTypeAdapter<FeatureFlag> featureFlagStore, DirectoryEntry localAnalyticsFolder, HashSet<Tuple<object, Type>> collectedInjectors = null) {
-            return await SetupV2(featureFlagStore, new LocalAnalyticsV2(localAnalyticsFolder), collectedInjectors);
+            return await SetupV2(featureFlagStore, new LocalAnalyticsV3(localAnalyticsFolder), collectedInjectors);
         }
 
         [Obsolete("Use SetupV2 instead")]
@@ -75,7 +75,7 @@ namespace com.csutil.model {
             return xpSystem;
         }
 
-        public static async Task<ProgressionSystem<FeatureFlag>> SetupV2(KeyValueStoreTypeAdapter<FeatureFlag> featureFlagStore, LocalAnalyticsV2 analytics, HashSet<Tuple<object, Type>> collectedInjectors = null) {
+        public static async Task<ProgressionSystem<FeatureFlag>> SetupV2(KeyValueStoreTypeAdapter<FeatureFlag> featureFlagStore, LocalAnalyticsV3 analytics, HashSet<Tuple<object, Type>> collectedInjectors = null) {
             var ffm = new FeatureFlagManager<FeatureFlag>(featureFlagStore);
             var injector1 = IoC.inject.SetSingleton(ffm);
             collectedInjectors?.Add(new Tuple<object, Type>(injector1, typeof(FeatureFlagManager<FeatureFlag>)));

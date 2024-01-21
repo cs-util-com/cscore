@@ -1,29 +1,27 @@
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using com.csutil.keyvaluestore;
+using Zio;
 
 namespace com.csutil.logging.analytics {
+    
+    public class LocalAnalyticsV3 : KeyValueStoreTypeAdapter<AppFlowEvent>, ILocalAnalytics {
 
-    [Obsolete("Use LocalAnalyticsV3 instead", true)]
-    public class LocalAnalytics : KeyValueStoreTypeAdapter<AppFlowEvent>, ILocalAnalytics {
-
-        private const string DEFAULT_DIR = "AppFlowAnalytics";
+        /// <summary> If the last 10 logs are missing if the app crashes this is probably ok, and not storing after every event increases performance </summary>
+        private const int maxAllowedOpenChanges = 10;
 
         public IReadOnlyDictionary<string, KeyValueStoreTypeAdapter<AppFlowEvent>> categoryStores => _categoryStores;
-        
+
         private readonly Dictionary<string, KeyValueStoreTypeAdapter<AppFlowEvent>> _categoryStores
             = new Dictionary<string, KeyValueStoreTypeAdapter<AppFlowEvent>>();
+        
+        private readonly DirectoryEntry _dir;
+        private readonly object _threadLock = new object();
 
-        public Func<string, KeyValueStoreTypeAdapter<AppFlowEvent>> createStoreFor = (dirName) => {
-            return FileBasedKeyValueStore.New(DEFAULT_DIR + "_" + dirName).GetTypeAdapter<AppFlowEvent>();
-        };
-
-        public LocalAnalytics(string dirName = DEFAULT_DIR)
-            : this(new ObservableKeyValueStore(FileBasedKeyValueStore.New(dirName))) {
+        public LocalAnalyticsV3(DirectoryEntry dirForEvents)
+            : base(new ObservableKeyValueStore(ZipFileBasedKeyValueStore.New(dirForEvents.GetChild("AllEvents.zip"), maxAllowedOpenChanges))) {
+            this._dir = dirForEvents;
         }
-
-        public LocalAnalytics(IKeyValueStore mainStore) : base(mainStore) { }
 
         public override async Task<AppFlowEvent> Set(string key, AppFlowEvent value) {
             var replacedEvent = await base.Set(key, value);
@@ -43,18 +41,20 @@ namespace com.csutil.logging.analytics {
         }
 
         public KeyValueStoreTypeAdapter<AppFlowEvent> GetStoreForCategory(string catMethod) {
-            if (_categoryStores.TryGetValue(catMethod, out var store)) { return store; }
-            var createdStore = createStoreFor(catMethod);
-            _categoryStores.Add(catMethod, createdStore);
-            return createdStore;
+            lock (_threadLock) {
+                if (_categoryStores.TryGetValue(catMethod, out var store)) { return store; }
+                var createdStore = ZipFileBasedKeyValueStore.New(_dir.GetChild(catMethod + ".zip"), maxAllowedOpenChanges).GetTypeAdapter<AppFlowEvent>();
+                _categoryStores.Add(catMethod, createdStore);
+                return createdStore;
+            }
         }
 
         public void Dispose() {
             store.Dispose();
-            foreach (var s in _categoryStores.Values) { s.store.Dispose(); }
+            foreach (var s in categoryStores.Values) { s.store.Dispose(); }
             _categoryStores.Clear();
         }
 
     }
-
+    
 }

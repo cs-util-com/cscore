@@ -91,7 +91,7 @@ namespace com.csutil.integrationTests {
 
             // Create a LocalAnalytics instance that uses only memory stores for testing:
             var dir = EnvironmentV2.instance.GetNewInMemorySystem();
-            ILocalAnalytics localAnalytics = new LocalAnalyticsV2(dir);
+            ILocalAnalytics localAnalytics = new LocalAnalyticsV3(dir);
 
             // Pass this local analytics system to the app flow impl. as the target store:
             AppFlowToStore appFlow = new AppFlowToStore(localAnalytics);

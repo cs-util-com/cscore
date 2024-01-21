@@ -6,6 +6,7 @@ using Zio;
 
 namespace com.csutil.logging.analytics {
 
+    [Obsolete("Use LocalAnalyticsV3 instead")]
     public class LocalAnalyticsV2 : KeyValueStoreTypeAdapter<AppFlowEvent>, ILocalAnalytics {
 
         public IReadOnlyDictionary<string, KeyValueStoreTypeAdapter<AppFlowEvent>> categoryStores => _categoryStores;

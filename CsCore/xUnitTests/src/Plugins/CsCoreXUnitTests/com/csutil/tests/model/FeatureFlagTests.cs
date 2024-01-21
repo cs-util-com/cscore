@@ -160,7 +160,7 @@ namespace com.csutil.integrationTests.model {
 
             // Set the store to be the target of the local analytics so that whenever any 
             var dir = EnvironmentV2.instance.GetNewInMemorySystem();
-            ILocalAnalytics analytics = new LocalAnalyticsV2(dir);
+            ILocalAnalytics analytics = new LocalAnalyticsV3(dir);
             var store = analytics.store as ObservableKeyValueStore;
             // Lets assume the users xp correlates with the number of triggered local analytics events:
             store.CollectionChanged += delegate {
@@ -232,7 +232,7 @@ namespace com.csutil.integrationTests.model {
             cleanup.AddInjectorCleanup<FeatureFlagManager<FeatureFlag>>(injector1);
 
             var dir = EnvironmentV2.instance.GetNewInMemorySystem();
-            ILocalAnalytics analytics = new LocalAnalyticsV2(dir);
+            ILocalAnalytics analytics = new LocalAnalyticsV3(dir);
             AppFlow.AddAppFlowTracker(new AppFlowToStore(analytics));
             var xpSystem = new ProgressionSystem<FeatureFlag>(analytics, ffm);
             var injector2 = IoC.inject.SetSingleton<IProgressionSystem<FeatureFlag>>(xpSystem);
@@ -345,7 +345,7 @@ namespace com.csutil.integrationTests.model {
             var googleSheetsStore = new GoogleSheetsKeyValueStore(cachedFlags, apiKey, sheetId, sheetName);
             var cachedFlagsLocalData = new InMemoryKeyValueStore();
             var dir = EnvironmentV2.instance.GetNewInMemorySystem();
-            var analytics = new LocalAnalyticsV2(dir);
+            var analytics = new LocalAnalyticsV3(dir);
             var featureFlagStore = new FeatureFlagStore(cachedFlagsLocalData, googleSheetsStore);
             return await DefaultProgressionSystem.SetupV2(featureFlagStore, analytics, collectedInjectors);
         }

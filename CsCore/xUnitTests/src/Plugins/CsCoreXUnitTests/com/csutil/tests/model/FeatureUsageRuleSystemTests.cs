@@ -281,7 +281,7 @@ namespace com.csutil.integrationTests.model {
         
         private static ILocalAnalytics CreateLocalAnalyticsSystemV2() {
             var dir = EnvironmentV2.instance.GetNewInMemorySystem();
-            LocalAnalyticsV2 analytics = new LocalAnalyticsV2(dir);
+            LocalAnalyticsV3 analytics = new LocalAnalyticsV3(dir);
             // Setup the AppFlow logic to use the LocalAnalytics system:
             AppFlow.AddAppFlowTracker(new AppFlowToStore(analytics));
             return analytics;
