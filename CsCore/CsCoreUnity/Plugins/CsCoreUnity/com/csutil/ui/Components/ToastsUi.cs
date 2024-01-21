@@ -9,12 +9,16 @@ namespace com.csutil {
 
         public const int DEFAULT_DURATION_IN_MS = 3000;
 
-        public static GameObject Show(string toastMsg, int displayDurationInMs = DEFAULT_DURATION_IN_MS) {
-            return IoC.inject.GetOrAddSingleton<ToastsUi>(null, InitToastsUi).Show(null, toastMsg, displayDurationInMs);
+        public static void Show(string toastMsg, int displayDurationInMs = DEFAULT_DURATION_IN_MS) {
+            MainThread.Invoke(() => {
+                IoC.inject.GetOrAddSingleton<ToastsUi>(null, InitToastsUi).Show(null, toastMsg, displayDurationInMs);
+            });
         }
 
-        public static GameObject Show(string toastCaption, string toastMsg, int displayDurationInMs = DEFAULT_DURATION_IN_MS) {
-            return IoC.inject.GetOrAddSingleton<ToastsUi>(null, InitToastsUi).Show(toastCaption, toastMsg, displayDurationInMs);
+        public static void Show(string toastCaption, string toastMsg, int displayDurationInMs = DEFAULT_DURATION_IN_MS) {
+            MainThread.Invoke(() => {
+                IoC.inject.GetOrAddSingleton<ToastsUi>(null, InitToastsUi).Show(toastCaption, toastMsg, displayDurationInMs);
+            });
         }
 
         private static ToastsUi InitToastsUi() {
