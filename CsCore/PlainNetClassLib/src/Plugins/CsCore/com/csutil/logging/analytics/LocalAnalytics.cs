@@ -15,6 +15,8 @@ namespace com.csutil.logging.analytics {
         private readonly Dictionary<string, KeyValueStoreTypeAdapter<AppFlowEvent>> _categoryStores
             = new Dictionary<string, KeyValueStoreTypeAdapter<AppFlowEvent>>();
 
+        public DisposeState IsDisposed { get; private set; } = DisposeState.Active;
+        
         public Func<string, KeyValueStoreTypeAdapter<AppFlowEvent>> createStoreFor = (dirName) => {
             return FileBasedKeyValueStore.New(DEFAULT_DIR + "_" + dirName).GetTypeAdapter<AppFlowEvent>();
         };
@@ -25,6 +27,17 @@ namespace com.csutil.logging.analytics {
 
         public LocalAnalytics(IKeyValueStore mainStore) : base(mainStore) { }
 
+        public override void Dispose() {
+            base.Dispose();
+            IsDisposed = DisposeState.DisposingStarted;
+            store.DisposeV2();
+            foreach (var s in _categoryStores.Values) {
+                s.store.DisposeV2();
+            }
+            _categoryStores.Clear();
+            IsDisposed = DisposeState.Disposed;
+        }
+        
         public override async Task<AppFlowEvent> Set(string key, AppFlowEvent value) {
             var replacedEvent = await base.Set(key, value);
             await GetStoreForCategory(value.cat).Set(key, value);
@@ -47,12 +60,6 @@ namespace com.csutil.logging.analytics {
             var createdStore = createStoreFor(catMethod);
             _categoryStores.Add(catMethod, createdStore);
             return createdStore;
-        }
-
-        public void Dispose() {
-            store.Dispose();
-            foreach (var s in _categoryStores.Values) { s.store.Dispose(); }
-            _categoryStores.Clear();
         }
 
     }

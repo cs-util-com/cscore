@@ -13,13 +13,26 @@ namespace com.csutil.logging.analytics {
 
         private readonly Dictionary<string, KeyValueStoreTypeAdapter<AppFlowEvent>> _categoryStores
             = new Dictionary<string, KeyValueStoreTypeAdapter<AppFlowEvent>>();
-        
+
         private readonly DirectoryEntry _dir;
         private readonly object _threadLock = new object();
+
+        public DisposeState IsDisposed { get; private set; } = DisposeState.Active;
 
         public LocalAnalyticsV2(DirectoryEntry dirForEvents)
             : base(new ObservableKeyValueStore(new FileBasedKeyValueStore(dirForEvents))) {
             this._dir = dirForEvents;
+        }
+
+        public override void Dispose() {
+            base.Dispose();
+            IsDisposed = DisposeState.DisposingStarted;
+            store.DisposeV2();
+            foreach (var s in categoryStores.Values) {
+                s.store.DisposeV2();
+            }
+            _categoryStores.Clear();
+            IsDisposed = DisposeState.Disposed;
         }
 
         public override async Task<AppFlowEvent> Set(string key, AppFlowEvent value) {
@@ -48,12 +61,6 @@ namespace com.csutil.logging.analytics {
             }
         }
 
-        public void Dispose() {
-            store.Dispose();
-            foreach (var s in categoryStores.Values) { s.store.Dispose(); }
-            _categoryStores.Clear();
-        }
-
     }
-    
+
 }

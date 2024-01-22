@@ -18,9 +18,22 @@ namespace com.csutil.logging.analytics {
         private readonly DirectoryEntry _dir;
         private readonly object _threadLock = new object();
 
+        public DisposeState IsDisposed { get; private set; } = DisposeState.Active;
+        
         public LocalAnalyticsV3(DirectoryEntry dirForEvents)
             : base(new ObservableKeyValueStore(ZipFileBasedKeyValueStore.New(dirForEvents.CreateV2().GetChild("AllEvents.zip"), maxAllowedOpenChanges))) {
             this._dir = dirForEvents;
+        }
+        
+        public override void Dispose() {
+            base.Dispose();
+            IsDisposed = DisposeState.DisposingStarted;
+            store.DisposeV2();
+            foreach (var s in categoryStores.Values) {
+                s.store.DisposeV2();
+            }
+            _categoryStores.Clear();
+            IsDisposed = DisposeState.Disposed;
         }
 
         public override async Task<AppFlowEvent> Set(string key, AppFlowEvent value) {
@@ -47,12 +60,6 @@ namespace com.csutil.logging.analytics {
                 _categoryStores.Add(catMethod, createdStore);
                 return createdStore;
             }
-        }
-
-        public void Dispose() {
-            store.Dispose();
-            foreach (var s in categoryStores.Values) { s.store.Dispose(); }
-            _categoryStores.Clear();
         }
 
     }

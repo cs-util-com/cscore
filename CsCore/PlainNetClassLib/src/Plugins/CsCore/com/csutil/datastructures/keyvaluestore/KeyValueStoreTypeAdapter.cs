@@ -3,12 +3,20 @@ using System.Threading.Tasks;
 
 namespace com.csutil.keyvaluestore {
 
-    public class KeyValueStoreTypeAdapter<T> : IKeyValueStoreTypeAdapter<T> {
+    public class KeyValueStoreTypeAdapter<T> : IKeyValueStoreTypeAdapter<T>, IDisposableV2 {
 
         public IKeyValueStore store { get; set; }
 
         public KeyValueStoreTypeAdapter(IKeyValueStore store) { this.store = store; }
 
+        public DisposeState IsDisposed { get; private set; } = DisposeState.Active;
+        
+        public virtual void Dispose() {
+            IsDisposed = DisposeState.DisposingStarted;
+            store.DisposeV2();
+            IsDisposed = DisposeState.Disposed;
+        }
+        
         public virtual Task<T> Get(string key, T defVal) { return store.Get(key, defVal); }
 
         public virtual async Task<T> Set(string key, T val) {

@@ -8,17 +8,27 @@ using com.csutil.model;
 
 namespace com.csutil {
 
-    public abstract class BatchProcessor<E> : KeyValueStoreTypeAdapter<E>, IDisposable where E : HasId {
+    public abstract class BatchProcessor<E> : KeyValueStoreTypeAdapter<E>, IDisposableV2 where E : HasId {
 
         public int batchSize { get; set; }
         private int batchingInProgress = 0;
         private readonly CancellationTokenSource cancel;
 
+        public DisposeState IsDisposed { get; private set; } = DisposeState.Active;
+        
         public BatchProcessor(IKeyValueStore localCache, int batchSize, CancellationTokenSource cancel) : base(localCache) {
             this.batchSize = batchSize;
             this.cancel = cancel;
         }
 
+        public override void Dispose() {
+            base.Dispose();
+            IsDisposed = DisposeState.DisposingStarted;
+            store.DisposeV2();
+            if (!cancel.IsCancellationRequested) { cancel.Cancel(); }
+            IsDisposed = DisposeState.Disposed;
+        }
+        
         public Task<E> Add(E val) {
             return Set(val.GetId(), val);
         }
@@ -81,11 +91,6 @@ namespace com.csutil {
         /// <param name="cancellationToken"> The cancel token that has to be checked if the batch process is canceled </param>
         /// <returns> The keys that where batch processed and can be removed from the local cache as the next automatic step </returns>
         protected abstract Task<IEnumerable<E>> Process(IEnumerable<E> entriesToProcess, CancellationToken cancellationToken);
-
-        public void Dispose() {
-            store.Dispose();
-            if (!cancel.IsCancellationRequested) { cancel.Cancel(); }
-        }
 
     }
 

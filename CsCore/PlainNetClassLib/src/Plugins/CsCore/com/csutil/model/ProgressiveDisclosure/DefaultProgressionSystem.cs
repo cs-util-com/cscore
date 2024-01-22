@@ -59,7 +59,9 @@ namespace com.csutil.model {
         }
 
         public static async Task<ProgressionSystem<FeatureFlag>> SetupV2(KeyValueStoreTypeAdapter<FeatureFlag> featureFlagStore, DirectoryEntry localAnalyticsFolder, HashSet<Tuple<object, Type>> collectedInjectors = null) {
-            return await SetupV2(featureFlagStore, new LocalAnalyticsV3(localAnalyticsFolder), collectedInjectors);
+            var localAnalyticsV3 = new LocalAnalyticsV3(localAnalyticsFolder);  
+            collectedInjectors.Add()
+            return await SetupV2(featureFlagStore, localAnalyticsV3, collectedInjectors);
         }
 
         [Obsolete("Use SetupV2 instead")]
