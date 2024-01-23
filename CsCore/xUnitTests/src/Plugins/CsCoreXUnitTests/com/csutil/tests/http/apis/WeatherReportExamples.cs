@@ -34,10 +34,11 @@ namespace com.csutil.integrationTests.http {
 
         [Fact]
         public async Task WttrInApiExample1() {
-            GeoPluginNet.Response response = await GeoPluginNet.GetResponse();
-            var report = await WttrInApi.GetWeather(response.geoplugin_city);
-            Log.d($"Full weather report for ({response.geoplugin_city}): " + JsonWriter.AsPrettyString(report));
+            GeoPluginNet.Response userPosition = await GeoPluginNet.GetResponse();
+            var report = await WttrInApi.GetWeather(userPosition.geoplugin_city);
+            Log.d($"Full weather report for ({userPosition.geoplugin_city}): " + JsonWriter.AsPrettyString(report));
             Assert.NotEmpty(report.weather.First().hourly.First().weatherDesc);
+            Assert.Equal(userPosition.geoplugin_countryName, report.nearest_area.First().country.First().value);
         }
 
         /// <summary> MetaWeather seems to be down for quite a while, will check from time to time if its back  </summary>
