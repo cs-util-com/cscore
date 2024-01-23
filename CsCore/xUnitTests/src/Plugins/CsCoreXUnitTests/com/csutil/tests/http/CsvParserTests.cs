@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using com.csutil.io;
+using Newtonsoft.Json.Linq;
 using Xunit;
 
 namespace com.csutil.tests.http {
@@ -55,7 +57,34 @@ namespace com.csutil.tests.http {
             public int Age { get; set; }
             public string Location { get; set; }
         }
+        
+        [Fact]
+        public async Task ExampleUsage3() {
+            // Made ConvertToJson Test based on ´ExampleUsage1´
+
+            string sampleCsvData = "Name,Age,Location\nAlice,25,New York\nBob,30,San Francisco\n";
+            using var stream = new MemoryStream(Encoding.Default.GetBytes(sampleCsvData));
+            List<List<string>> parsedData = CsvParser.ReadCsvStream(stream);
+    
+            JArray dataAsJson = new JArray();
+
+            foreach (var row in parsedData)
+            {
+                JArray rowArray = new JArray(row.Select(JToken.FromObject));
+                dataAsJson.Add(rowArray);
+            }
+
+            Assert.Equal(3, dataAsJson.Count); // 2 rows
+            Assert.Equal(3, ((JArray)dataAsJson[0]).Count); // 3 columns
+
+            Assert.Equal("Name", dataAsJson[0][0].ToString());
+            Assert.Equal("Age", dataAsJson[0][1].ToString());
+            Assert.Equal("Location", dataAsJson[0][2].ToString());
+
+            Assert.Equal("Alice", dataAsJson[1][0].ToString());
+            Assert.Equal("25", dataAsJson[1][1].ToString());
+            Assert.Equal("New York", dataAsJson[1][2].ToString());
+        }
 
     }
-
 }
