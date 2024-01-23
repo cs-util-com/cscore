@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Xml.XPath;
+using com.csutil.io;
 
 namespace com.csutil.algorithms.images {
 
@@ -51,8 +54,7 @@ namespace com.csutil.algorithms.images {
                     for(int i = 0; i < pc.Count -1; ++i) {
                         guidedChannels.Add(((GuidedFilterColor)gF).FilterSingleChannel(pc[i]));
                     }
-                    guidedChannels.Add(ConvertToDouble(pc[3]));
-                    result = ConvertToByte(AddArrays(AddArrays(guidedChannels[2], guidedChannels[3]), AddArrays(guidedChannels[0], guidedChannels[1]))); //Only for 4 Channel Image!!!!
+                    result = CombineRGBA(guidedChannels[0], guidedChannels[1], guidedChannels[2],ConvertToDouble(pc[3]), gF.width * gF.height); //Only for 4 Channel Image!!!!
                 }
                 return result; 
             }
@@ -115,9 +117,6 @@ namespace com.csutil.algorithms.images {
                 //           rr, rg, rb
                 //   Sigma = rg, gg, gb
                 //           rb, gb, bb
-                
-                //TODO Question - won't any combination such as rg or similar just be an empty image, as a 0 from one color channel 
-                //TODO makes the product of two different channels full of 0s?
                 var var_I_rr = BoxFilter(MultArrays(redImageDouble, redImageDouble), r)
                     .Zip(MultArrays(meanI_R, meanI_R), (x, y) => x - y + eps).ToArray();
                 var var_I_rg = BoxFilter(MultArrays(redImageDouble, greenImageDouble), r)
@@ -181,7 +180,7 @@ namespace com.csutil.algorithms.images {
         }
 
         private double[] BoxFilter(double[] image, int radius) {
-            return Filter.BoxFilter(image, width, height, radius / 2 , colorComponents);
+            return Filter.BoxFilterSingleChannel(image, width, height, radius / 2 , 1);
         }
         
 
@@ -250,17 +249,35 @@ namespace com.csutil.algorithms.images {
             }
             return res;
         }
-
-        public  byte[] CreateSingleChannel(byte[] image, int channel) {
-            var newIm = new byte[image.Length];
-            for (var i = 0; i < image.Length; i++) {
-                if (i % colorComponents == channel) {
-                    newIm[i] = image[i];
-                // } else if(i % colorComponents == 3 && colorComponents == 4){
-                //     newIm[i] = 255;
-                } else {
-                    newIm[i] = 0;
+        private static byte[] CombineRGBA(double[] red, double[] green, double[] blue, double[] alpha, int length) {
+            var result = new byte[length * 4];
+            for (int i = 0; i < length * 4; i++) {
+                switch (i % 4) {
+                    case 0:
+                        result[i] = (byte)Math.Min(Math.Max(red[i /4], 0), 255);
+                        break;
+                    case 1:
+                        result[i] = (byte)Math.Min(Math.Max(green[i /4], 0), 255);
+                        break;
+                    case 2:
+                        result[i] = (byte)Math.Min(Math.Max(blue[i /4], 0), 255);
+                        break;
+                    case 3:
+                        result[i] = (byte)Math.Min(Math.Max(alpha[i /4], 0), 255);
+                        break;
                 }
+            }
+            return result;
+        }
+        public  byte[] CreateSingleChannel(byte[] image, int channel) {
+            var newIm = new byte[image.Length / colorComponents];
+            var count = 0;
+            for (var i = 0; i < image.Length / colorComponents; i++) {
+                // if (i % colorComponents == channel) {
+                //     newIm[count] = image[i];
+                //     count++;
+                // }
+                newIm[i] = image[i * 4 + channel];
             }
             return newIm;
         }

@@ -617,10 +617,9 @@ namespace com.csutil.algorithms.images {
                     for (int y = 0; y < height; y++) {
                         var col = GetColorAt(guidedIm, x, y);
                         var temp = new double[] { col[0], col[1], col[2], col[3] };
-                        var val = temp[2];
+                        var val = temp.Max();
                         //SetColorAt(guidedIm, x, y, new []{(byte)val, (byte)val, (byte)val, (byte)val});
-                        // SetColorAt(guidedIm, x, y, new []{val, val, val, val});
-                        SetColorAt(guidedIm, x, y, new []{col[0], col[1], col[2], col[0]});
+                        SetColorAt(guidedIm, x, y, new []{col[0], col[1], col[2], (byte)val});
                     }
                 }
                 return guidedIm;

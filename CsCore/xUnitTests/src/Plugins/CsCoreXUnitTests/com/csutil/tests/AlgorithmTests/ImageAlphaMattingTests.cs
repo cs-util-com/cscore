@@ -121,7 +121,7 @@ namespace com.csutil.tests.AlgorithmTests {
                 }
             }
             // Safe cut out according to alpha region that is >= 128
-            var cutoffValue = 129;
+            var cutoffValue = 100;
             var cutout = image.Data;
 
             for (var x = 0; x < image.Width; ++x) {

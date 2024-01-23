@@ -126,7 +126,7 @@ namespace com.csutil.algorithms.images
                 var iAvg = new double[] { 0f, 0f, 0f, 0f, };
                 for(int x = 0; x < kSize; x++)
                 {
-                    var tmpColor = GetColorAt(img, x, j, 4, width);
+                    var tmpColor = GetColorAt(img, x, j, channels, width);
                     hSum[0] += (double)tmpColor[0];
                     hSum[1] += (double)tmpColor[1];
                     hSum[2] += (double)tmpColor[2];
@@ -140,12 +140,12 @@ namespace com.csutil.algorithms.images
                 {
                     if(i - kSize/2 >= 0 && i + 1 + kSize/2 < width)
                     {
-                        var tmp_pColor = GetColorAt(img, i - kSize / 2, j, 4, width);
+                        var tmp_pColor = GetColorAt(img, i - kSize / 2, j, channels, width);
                         hSum[0] -= (double)tmp_pColor[0];
                         hSum[1] -= (double)tmp_pColor[1];
                         hSum[2] -= (double)tmp_pColor[2];
                         hSum[3] -= (double)tmp_pColor[3];
-                        var tmp_nColor = GetColorAt(img, i + 1 + kSize / 2, j, 4, width);
+                        var tmp_nColor = GetColorAt(img, i + 1 + kSize / 2, j, channels, width);
                         hSum[0] += (double)tmp_nColor[0];
                         hSum[1] += (double)tmp_nColor[1];
                         hSum[2] += (double)tmp_nColor[2];
@@ -161,7 +161,7 @@ namespace com.csutil.algorithms.images
                     bAvg[1] = (double)iAvg[1];
                     bAvg[2] = (double)iAvg[2];
                     bAvg[3] = (double)iAvg[3];
-                    SetColorAt(hBlur, i, j, width, bAvg, 4); 
+                    SetColorAt(hBlur, i, j, width, bAvg, channels); 
 
                 }
                 
@@ -174,7 +174,7 @@ namespace com.csutil.algorithms.images
                 var iAvg = new double[] { 0f, 0f, 0f, 0f };
                 for (int y = 0; y < kSize; y++)
                 {
-                    var tmpColor = GetColorAt(hBlur, i, y, 4, width);
+                    var tmpColor = GetColorAt(hBlur, i, y, channels, width);
                     tSum[0] += (double)tmpColor[0];
                     tSum[1] += (double)tmpColor[1];
                     tSum[2] += (double)tmpColor[2];
@@ -189,12 +189,12 @@ namespace com.csutil.algorithms.images
                 {
                     if(j - kSize/2 >= 0 && j + 1 + kSize/2 < height)
                     {
-                        var tmp_pColor = GetColorAt(hBlur, i, j - kSize / 2, 4, width);
+                        var tmp_pColor = GetColorAt(hBlur, i, j - kSize / 2, channels, width);
                         tSum[0] -= (double)tmp_pColor[0];
                         tSum[1] -= (double)tmp_pColor[1]; 
                         tSum[2] -= (double)tmp_pColor[2];
                         tSum[3] -= (double)tmp_pColor[3];
-                        var tmp_nColor = GetColorAt(hBlur, i, j + 1 + kSize / 2, 4 , width);
+                        var tmp_nColor = GetColorAt(hBlur, i, j + 1 + kSize / 2, channels , width);
                         tSum[0] += (double)tmp_nColor[0];
                         tSum[1] += (double)tmp_nColor[1];
                         tSum[2] += (double)tmp_nColor[2];
@@ -211,7 +211,7 @@ namespace com.csutil.algorithms.images
                     bAvg[1] = (double)iAvg[1];
                     bAvg[2] = (double)iAvg[2];
                     bAvg[3] = (double)iAvg[3];
-                    SetColorAt(total, i, j, width, bAvg, 4);
+                    SetColorAt(total, i, j, width, bAvg, channels);
                 }
             }
             return total;
@@ -222,7 +222,74 @@ namespace com.csutil.algorithms.images
             Array.Copy(color, 0, imageData, startIdx, color.Length);
         }
 
+        public static double[] BoxFilterSingleChannel(double[] img, int width, int height, int radius, int channels)
+        {
+            var kSize = 2 * radius;
+            
+            if (kSize % 2 == 0) kSize++;
+            var hBlur = new double[img.Length];
+            var avg = (double)1 / kSize;
+            Array.Copy(img, hBlur, img.Length);
+            for(int j = 0; j < height; j++)
+            {
+                var hSum = new double[] { 0f};
+                var iAvg = new double[] { 0f};
+                for(int x = 0; x < kSize; x++)
+                {
+                    var tmpColor = GetColorAt(img, x, j, channels, width);
+                    hSum[0] += (double)tmpColor[0];
+                }
+                iAvg[0] = hSum[0] * avg;
+                for(int i = 0; i < width; i++)
+                {
+                    if(i - kSize/2 >= 0 && i + 1 + kSize/2 < width)
+                    {
+                        var tmp_pColor = GetColorAt(img, i - kSize / 2, j, channels, width);
+                        hSum[0] -= (double)tmp_pColor[0];
+                        var tmp_nColor = GetColorAt(img, i + 1 + kSize / 2, j, channels, width);
+                        hSum[0] += (double)tmp_nColor[0];
+                        //
+                        iAvg[0] = hSum[0] * avg;
+                    }
+                    var bAvg = new double[iAvg.Length];
+                    bAvg[0] = (double)iAvg[0];
+                    SetColorAt(hBlur, i, j, width, bAvg, channels); 
 
+                }
+                
+            }
+            var total = new double[hBlur.Length];
+            Array.Copy(hBlur, total, hBlur.Length);
+            for (int i = 0; i < width; i++)
+            {
+                var tSum = new double[] { 0f};
+                var iAvg = new double[] { 0f};
+                for (int y = 0; y < kSize; y++)
+                {
+                    var tmpColor = GetColorAt(hBlur, i, y, channels, width);
+                    tSum[0] += (double)tmpColor[0];
+                }
+                iAvg[0] = tSum[0] * avg;
+
+                for (int j = 0; j < height; j++)
+                {
+                    if(j - kSize/2 >= 0 && j + 1 + kSize/2 < height)
+                    {
+                        var tmp_pColor = GetColorAt(hBlur, i, j - kSize / 2, channels, width);
+                        tSum[0] -= (double)tmp_pColor[0];
+                        var tmp_nColor = GetColorAt(hBlur, i, j + 1 + kSize / 2, channels , width);
+                        tSum[0] += (double)tmp_nColor[0];
+
+                        iAvg[0] = tSum[0] * avg;
+
+                    }
+                    var bAvg = new double[iAvg.Length];
+                    bAvg[0] = (double)iAvg[0];
+                    SetColorAt(total, i, j, width, bAvg, channels);
+                }
+            }
+            return total;
+        }
 
         // Helper method to get color at a given position
         private static byte[] GetColorAt(byte[] img, int x, int y, int bytesPerPixel, int width)
@@ -242,7 +309,11 @@ namespace com.csutil.algorithms.images
         private static double[] GetColorAt(double[] img, int x, int y, int bytesPerPixel, int width)
         {
             int startIdx = (y * width + x) * bytesPerPixel;
-            return new double[] { img[startIdx], img[startIdx + 1], img[startIdx + 2], img[startIdx + 3] };
+            var color = new double[bytesPerPixel];
+            for (int i = 0; i < bytesPerPixel; i++) {
+                color[i] = img[startIdx + i];
+            }
+            return color;
         }
 
         private byte[] Erode(byte[] image, int w, int h, int r) {
