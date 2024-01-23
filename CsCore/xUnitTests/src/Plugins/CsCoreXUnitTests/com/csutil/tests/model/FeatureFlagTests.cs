@@ -56,9 +56,9 @@ namespace com.csutil.integrationTests.model {
             // https://docs.google.com/spreadsheets/d/1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM contains the sheetId:
             var sheetId = "1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM";
             var sheetName = "MySheet1"; // Has to match the sheet name
-            HashSet<Tuple<object, Type>> collectedInjectors = new HashSet<Tuple<object, Type>>();
-            var xpSys = await DefaultProgressionSystem.SetupWithGSheets(apiKey, sheetId, sheetName, collectedInjectors);
-            cleanup.AddInjectorsCleanup(collectedInjectors);
+            IDisposableCollection disposables = new IDisposableCollection();
+            var xpSys = await DefaultProgressionSystem.SetupWithGSheets(apiKey, sheetId, sheetName, disposables);
+            cleanup.AddDisposable(disposables);
 
             // The DefaultProgressionSystem will give 1 xp for each mutation:
             AppFlow.TrackEvent(EventConsts.catMutation, "Some mutation"); // Would also be triggered by DataStore
@@ -203,6 +203,10 @@ namespace com.csutil.integrationTests.model {
             
             public Task<int> GetLatestXp() { return Task.FromResult(currentXp); }
 
+            public void Dispose() { throw new NotImplementedException(); }
+            
+            public DisposeState IsDisposed { get; }
+            
         }
 
         [Obsolete("See TestDefaultProgressionSystem2 instead")]
@@ -273,19 +277,19 @@ namespace com.csutil.integrationTests.model {
         public async Task ExtensiveDefaultProgressionSystemTests() {
 
             using var cleanup = new CleanupHelper();
-            HashSet<Tuple<object, Type>> collectedInjectors = new HashSet<Tuple<object, Type>>();
+            IDisposableCollection disposables = new IDisposableCollection();
 
             // Get your key from https://console.developers.google.com/apis/credentials
             var apiKey = await IoC.inject.GetAppSecrets().GetSecret("GoogleSheetsV4Key");
             // https://docs.google.com/spreadsheets/d/1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM contains the sheetId:
             var sheetId = "1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM";
             var sheetName = "MySheet1"; // Has to match the sheet name
-            ProgressionSystem<FeatureFlag> xpSys = await NewInMemoryTestXpSystemV2(apiKey, sheetId, sheetName, collectedInjectors);
-            await ExtensiveDefaultProgressionSystemTests2(cleanup, collectedInjectors, xpSys);
+            ProgressionSystem<FeatureFlag> xpSys = await NewInMemoryTestXpSystemV2(apiKey, sheetId, sheetName, disposables);
+            await ExtensiveDefaultProgressionSystemTests2(cleanup, disposables, xpSys);
         }
         
-        private static async Task ExtensiveDefaultProgressionSystemTests2(CleanupHelper cleanup, HashSet<Tuple<object, Type>> collectedInjectors, ProgressionSystem<FeatureFlag> xpSys) {
-            cleanup.AddInjectorsCleanup(collectedInjectors);
+        private static async Task ExtensiveDefaultProgressionSystemTests2(CleanupHelper cleanup, IDisposableCollection disposables, ProgressionSystem<FeatureFlag> xpSys) {
+            cleanup.AddDisposable(disposables);
 
             Assert.Empty(await xpSys.analytics.GetStoreForCategory(EventConsts.catMutation).GetAllKeys());
             Assert.Equal(0, await xpSys.GetLatestXp());
@@ -330,24 +334,24 @@ namespace com.csutil.integrationTests.model {
         }
 
         [Obsolete("Use v2", true)]
-        private static async Task<ProgressionSystem<FeatureFlag>> NewInMemoryTestXpSystem(string apiKey, string sheetId, string sheetName, HashSet<Tuple<object, Type>> collectedInjectors = null) {
+        private static async Task<ProgressionSystem<FeatureFlag>> NewInMemoryTestXpSystem(string apiKey, string sheetId, string sheetName, IDisposableCollection disposables = null) {
             var cachedFlags = new InMemoryKeyValueStore();
             var googleSheetsStore = new GoogleSheetsKeyValueStore(cachedFlags, apiKey, sheetId, sheetName);
             var cachedFlagsLocalData = new InMemoryKeyValueStore();
             var analytics = new LocalAnalytics(new InMemoryKeyValueStore());
             analytics.createStoreFor = (_ => new InMemoryKeyValueStore().GetTypeAdapter<AppFlowEvent>());
             var featureFlagStore = new FeatureFlagStore(cachedFlagsLocalData, googleSheetsStore);
-            return await DefaultProgressionSystem.Setup(featureFlagStore, analytics, collectedInjectors);
+            return await DefaultProgressionSystem.Setup(featureFlagStore, analytics, disposables);
         }
         
-        private static async Task<ProgressionSystem<FeatureFlag>> NewInMemoryTestXpSystemV2(string apiKey, string sheetId, string sheetName, HashSet<Tuple<object, Type>> collectedInjectors = null) {
+        private static async Task<ProgressionSystem<FeatureFlag>> NewInMemoryTestXpSystemV2(string apiKey, string sheetId, string sheetName, IDisposableCollection disposables = null) {
             var cachedFlags = new InMemoryKeyValueStore();
             var googleSheetsStore = new GoogleSheetsKeyValueStore(cachedFlags, apiKey, sheetId, sheetName);
             var cachedFlagsLocalData = new InMemoryKeyValueStore();
             var dir = EnvironmentV2.instance.GetNewInMemorySystem();
             var analytics = new LocalAnalyticsV3(dir);
             var featureFlagStore = new FeatureFlagStore(cachedFlagsLocalData, googleSheetsStore);
-            return await DefaultProgressionSystem.SetupV2(featureFlagStore, analytics, collectedInjectors);
+            return await DefaultProgressionSystem.SetupV2(featureFlagStore, analytics, disposables);
         }
 
     }

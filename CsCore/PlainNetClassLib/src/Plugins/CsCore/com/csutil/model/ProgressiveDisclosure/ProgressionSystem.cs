@@ -15,11 +15,22 @@ namespace com.csutil.model {
         public readonly ILocalAnalytics analytics;
         public readonly FeatureFlagManager<T> featureFlagManager;
 
+        public DisposeState IsDisposed { get; private set; } = DisposeState.Active;
+        
         public ProgressionSystem(ILocalAnalytics analytics, FeatureFlagManager<T> featureFlagManager) {
             // Make sure the FeatureFlag system was set up too:
             AssertV3.IsNotNull(FeatureFlagManager<T>.instance, "FeatureFlagManager.instance");
             this.analytics = analytics;
             this.featureFlagManager = featureFlagManager;
+        }
+        
+        public void Dispose() {
+            IsDisposed = DisposeState.DisposingStarted;
+            analytics.DisposeV2();
+            featureFlagManager.DisposeV2();
+            xpFactors.Clear();
+            cachedCategoryCounts.Clear();
+            IsDisposed = DisposeState.Disposed;
         }
 
         private static Dictionary<string, float> InitDefaultXpFactors() {

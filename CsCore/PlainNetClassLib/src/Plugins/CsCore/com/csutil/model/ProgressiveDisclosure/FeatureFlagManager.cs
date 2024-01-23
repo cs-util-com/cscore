@@ -5,14 +5,22 @@ using System.Threading.Tasks;
 
 namespace com.csutil.model {
 
-    public class FeatureFlagManager<T> where T : IFeatureFlag {
+    public class FeatureFlagManager<T> : IDisposableV2 where T : IFeatureFlag {
 
         public static FeatureFlagManager<T> instance => IoC.inject.Get<FeatureFlagManager<T>>(null, false);
 
         private KeyValueStoreTypeAdapter<T> featureFlagStore;
 
+        public DisposeState IsDisposed { get; private set; } = DisposeState.Active;
+
         public FeatureFlagManager(KeyValueStoreTypeAdapter<T> featureFlagStore) {
             this.featureFlagStore = featureFlagStore;
+        }
+
+        public void Dispose() {
+            IsDisposed = DisposeState.DisposingStarted;
+            featureFlagStore.DisposeV2();
+            IsDisposed = DisposeState.Disposed;
         }
 
         public async Task<bool> IsFeatureEnabled(string featureId) {
