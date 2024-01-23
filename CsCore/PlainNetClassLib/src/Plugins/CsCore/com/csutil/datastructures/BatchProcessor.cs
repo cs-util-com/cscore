@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using com.csutil.keyvaluestore;
@@ -8,7 +6,7 @@ using com.csutil.model;
 
 namespace com.csutil {
 
-    public abstract class BatchProcessor<E> : KeyValueStoreTypeAdapter<E>, IDisposableV2 where E : HasId {
+    public abstract class BatchProcessor<E> : KeyValueStoreTypeAdapter<E> where E : HasId {
 
         public int batchSize { get; set; }
         private int batchingInProgress = 0;

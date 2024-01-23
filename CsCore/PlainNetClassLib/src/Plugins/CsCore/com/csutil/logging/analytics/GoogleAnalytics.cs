@@ -26,6 +26,7 @@ namespace com.csutil.logging.analytics {
         }
 
         protected override async Task<bool> SendEventToExternalSystem(AppFlowEvent e) {
+            this.ThrowErrorIfDisposed();
             ExtractScreenName(e);
             if (e.args?.FirstOrDefault(x => x is Stopwatch) is Stopwatch timing) {
                 await SendToGA(NewTiming(e.cat, e.action, timingInMs: timing.ElapsedMilliseconds)).GetResult<string>();
@@ -37,15 +38,18 @@ namespace com.csutil.logging.analytics {
 
         // https://cloud.google.com/appengine/docs/flexible/nodejs/integrating-with-analytics#server-side_analytics_collection
         public RestRequest SendToGA(BaseMsg parameters) {
+            this.ThrowErrorIfDisposed();
             return new Uri(url + "?" + RestRequestHelper.ToUriEncodedString(parameters)).SendGET();
         }
 
         public Timing NewTiming(string category, string varName, long timingInMs) {
+            this.ThrowErrorIfDisposed();
             return new Timing() { tid = appId, an = appName, cd = latestScreen, utc = category, utv = varName, utt = timingInMs };
         }
 
         // Example: https://developers.google.com/analytics/devguides/collection/protocol/v1/devguide#event
         public Event NewEvent(string category, string action, string label = null, int value = -1) {
+            this.ThrowErrorIfDisposed();
             var r = new Event() { tid = appId, an = appName, ec = category, ea = action, el = label, cd = latestScreen };
             if (value > 0) { r.ev = value; }
             return r;

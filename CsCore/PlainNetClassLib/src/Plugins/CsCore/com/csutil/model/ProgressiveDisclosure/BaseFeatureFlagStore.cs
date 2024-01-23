@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace com.csutil.model {
 
-    public abstract class BaseFeatureFlagStore<T, V> : KeyValueStoreTypeAdapter<T>, IDisposableV2
+    public abstract class BaseFeatureFlagStore<T, V> : KeyValueStoreTypeAdapter<T>
                                             where T : IFeatureFlag where V : IFeatureFlagLocalState {
 
         private readonly IKeyValueStore localStore;

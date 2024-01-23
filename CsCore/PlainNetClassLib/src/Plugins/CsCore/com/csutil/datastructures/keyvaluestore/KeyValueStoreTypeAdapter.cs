@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace com.csutil.keyvaluestore {
 
-    public class KeyValueStoreTypeAdapter<T> : IKeyValueStoreTypeAdapter<T>, IDisposableV2 {
+    public class KeyValueStoreTypeAdapter<T> : IKeyValueStoreTypeAdapter<T> {
 
         public IKeyValueStore store { get; set; }
 
