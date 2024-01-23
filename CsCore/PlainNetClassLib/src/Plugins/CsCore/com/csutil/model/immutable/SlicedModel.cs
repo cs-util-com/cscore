@@ -23,10 +23,6 @@ namespace com.csutil.model.immutable {
             sliceToRemove.RemoveFromStore(store);
         }
 
-        public static SubState<T, T> GetState<T>(this IDataStore<SlicedModel> store) {
-            return store.GetStore<T>().GetSubState(x => x);
-        }
-
         public static SubState<T, S> GetSubState<T, S>(this IDataStore<SlicedModel> store, Func<T, S> getSubState) {
             return store.GetStore<T>().GetSubState(getSubState);
         }
