@@ -35,10 +35,8 @@ namespace com.csutil.integrationTests.http {
         [Fact]
         public async Task WttrInApiExample1() {
             GeoPluginNet.Response response = await GeoPluginNet.GetResponse();
-            var latitude = double.Parse(response.geoplugin_latitude, CultureInfo.InvariantCulture);
-            var longitude = double.Parse(response.geoplugin_longitude, CultureInfo.InvariantCulture);
-            var report = await WttrInApi.GetWeather(latitude, longitude);
-            Log.d($"Full weather report for ({latitude},{longitude}): " + JsonWriter.AsPrettyString(report));
+            var report = await WttrInApi.GetWeather(response.geoplugin_city);
+            Log.d($"Full weather report for ({response.geoplugin_city}): " + JsonWriter.AsPrettyString(report));
             Assert.NotEmpty(report.weather.First().hourly.First().weatherDesc);
         }
 

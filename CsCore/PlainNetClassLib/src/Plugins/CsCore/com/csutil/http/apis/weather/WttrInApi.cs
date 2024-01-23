@@ -7,8 +7,8 @@ namespace com.csutil.http.apis {
 
     public static class WttrInApi {
 
-        public static async Task<Response> GetWeather(double latitude, double longitude) {
-            var url = new Uri($"https://wttr.in/{latitude.ToString(CultureInfo.InvariantCulture)},{longitude.ToString(CultureInfo.InvariantCulture)}?M&format=j1");
+        public static async Task<Response> GetWeather(string cityName) {
+            var url = new Uri($"https://wttr.in/{cityName}?M&format=j1");
             return await url.SendGET().GetResult<Response>();
         }
 
