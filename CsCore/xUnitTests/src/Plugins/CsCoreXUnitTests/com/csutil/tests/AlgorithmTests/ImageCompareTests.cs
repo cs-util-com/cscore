@@ -1,10 +1,8 @@
 ﻿using com.csutil.src.Plugins.CsCore.com.csutil.algorithms;
 using Xunit;
 
-namespace xUnitTests.src.Plugins.CsCoreXUnitTests.com.csutil.tests.AlgorithmTests
-{
-    public class ImageCompareTests
-    {
+namespace com.csutil.tests.AlgorithmTests {
+    public class ImageCompareTests {
 
         public ImageCompareTests(Xunit.Abstractions.ITestOutputHelper logger) { 
         
