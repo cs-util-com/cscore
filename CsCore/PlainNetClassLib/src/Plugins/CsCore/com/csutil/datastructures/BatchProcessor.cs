@@ -28,10 +28,12 @@ namespace com.csutil {
         }
         
         public Task<E> Add(E val) {
+            this.ThrowErrorIfDisposed();
             return Set(val.GetId(), val);
         }
 
         public override async Task<E> Set(string key, E val) {
+            this.ThrowErrorIfDisposed();
             cancel.Token.ThrowIfCancellationRequested();
             var e = await base.Set(key, val);
             BatchProcessIfNeeded().LogOnError();

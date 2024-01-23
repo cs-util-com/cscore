@@ -36,23 +36,27 @@ namespace com.csutil.logging.analytics {
         }
 
         public override async Task<AppFlowEvent> Set(string key, AppFlowEvent value) {
+            this.ThrowErrorIfDisposed();
             var replacedEvent = await base.Set(key, value);
             await GetStoreForCategory(value.cat).Set(key, value);
             return replacedEvent;
         }
 
         public override async Task<bool> Remove(string key) {
+            this.ThrowErrorIfDisposed();
             var res = await base.Remove(key);
             foreach (var s in _categoryStores.Values) { res &= await s.Remove(key); }
             return res;
         }
 
         public override async Task RemoveAll() {
+            this.ThrowErrorIfDisposed();
             await base.RemoveAll();
             foreach (var s in _categoryStores.Values) { await s.RemoveAll(); }
         }
 
         public KeyValueStoreTypeAdapter<AppFlowEvent> GetStoreForCategory(string catMethod) {
+            this.ThrowErrorIfDisposed();
             lock (_threadLock) {
                 if (_categoryStores.TryGetValue(catMethod, out var store)) { return store; }
                 var createdStore = new FileBasedKeyValueStore(_dir.GetChildDir(catMethod)).GetTypeAdapter<AppFlowEvent>();
