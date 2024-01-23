@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using com.csutil.algorithms.images;
 using com.csutil.io;
@@ -59,6 +60,72 @@ namespace com.csutil.tests.AlgorithmTests {
 
             for (var x = 0; x < image.Width; ++x) {
                 for (var y = 0; y < image.Height; ++y) {
+                    var value = (int)alpha.GetPixel(x, y).A;
+                    var idx = (y * image.Width + x) * (int)image.ColorComponents;
+                    cutout[idx + 3] = value >= cutoffValue ? (byte)value : (byte)0;
+                    // cutout[idx + 3] = (byte)value;
+                }
+            }
+            
+            {
+                var cutoutFile = folder.GetChild("Cutout" + cutoffValue + ".png");
+                ImageWriter writer = new ImageWriter();
+                await using var stream = cutoutFile.OpenOrCreateForReadWrite();
+                var flipped = ImageUtility.FlipImageVertically(cutout, image.Width, image.Height, (int)image.ColorComponents);
+                writer.WritePng(flipped, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
+            }
+            {
+                var finalAlphaFile = folder.GetChild("OurAlpha.png");
+                ImageWriter writer = new ImageWriter();
+                await using var stream = finalAlphaFile.OpenOrCreateForReadWrite();
+                var flipped = ImageUtility.FlipImageVertically(alpha.Data, image.Width, image.Height, (int)image.ColorComponents);
+                writer.WritePng(flipped, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
+            }
+        }
+        
+        
+        
+        [Fact]
+        public async Task OnlyGuidedFilterWithMap() {
+            var folder = EnvironmentV2.instance.GetOrAddAppDataFolder("ImageMattingTests");
+            var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            var imagePath = Path.Combine(appDataPath, "ImageMattingTests", "GT04-implementedAlpha");
+            var alphaMattedFe = folder.GetChild("GT04-implementedAlpha.png");
+            var alphaMatted = await ImageLoader.LoadImageInBackground(alphaMattedFe);
+            var imageFe = folder.GetChild("GT04-image.png");
+            var image = await ImageLoader.LoadImageInBackground(imageFe);
+            var trimapFe = folder.GetChild("GT04-trimap.png");
+            var trimap = await ImageLoader.LoadImageInBackground(trimapFe);
+            var imageMatting = new GlobalMatting(image.Data.DeepCopy(), image.Width, image.Height, (int)image.ColorComponents);
+
+            
+            
+            var alphaDataGuided = imageMatting.RunGuidedFilter(alphaMatted.Data, r: 10, eps: 1e-5);
+
+            var alpha = new ImageResult {
+                Width = image.Width,
+                Height = image.Height,
+                SourceComponents = image.ColorComponents,
+                ColorComponents = image.ColorComponents,
+                BitsPerChannel = image.BitsPerChannel,
+                Data = alphaDataGuided
+            };
+
+            for (int x = 0; x < trimap.Width; ++x) {
+                for (int y = 0; y < trimap.Height; ++y) {
+                    if (trimap.GetPixel(x, y).R == 0) {
+                        alpha.SetPixel(x, y, new Pixel(0, 0, 0, 0));
+                    } else if (trimap.GetPixel(x, y).R == 255) {
+                        alpha.SetPixel(x, y, new Pixel(255, 255, 255, 255));
+                    }
+                }
+            }
+            // Safe cut out according to alpha region that is >= 128
+            var cutoffValue = 129;
+            var cutout = image.Data;
+
+            for (var x = 0; x < image.Width; ++x) {
+                for (var y = 0; y < image.Height; ++y) {
                     var value = (int)alpha.GetPixel(x, y).R;
                     var idx = (y * image.Width + x) * (int)image.ColorComponents;
                     cutout[idx + 3] = value >= cutoffValue ? (byte)value : (byte)0;
@@ -81,6 +148,8 @@ namespace com.csutil.tests.AlgorithmTests {
                 writer.WritePng(flipped, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
             }
         }
+        
+        
         private static async Task DownloadFileIfNeeded(FileEntry self, string url) {
             var imgFileRef = new MyFileRef() { url = url, fileName = self.Name };
             await imgFileRef.DownloadTo(self.Parent, useAutoCachedFileRef: true);

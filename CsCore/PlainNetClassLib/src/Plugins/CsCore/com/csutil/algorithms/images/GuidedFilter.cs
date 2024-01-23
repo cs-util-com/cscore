@@ -47,10 +47,12 @@ namespace com.csutil.algorithms.images {
                 }
                 else {
                     var pc = SplitChannels(p, colorComponents, gF);
-                    for(int i = 0; i < pc.Count; ++i) {
-                        pc[i] = ((GuidedFilterColor)gF).FilterSingleChannel(pc[i]);
+                    var guidedChannels = new List<double[]>();
+                    for(int i = 0; i < pc.Count -1; ++i) {
+                        guidedChannels.Add(((GuidedFilterColor)gF).FilterSingleChannel(pc[i]));
                     }
-                    result = ByteArrayAdd(ByteArrayAdd(pc[2], pc[3]), ByteArrayAdd(pc[0], pc[1])); //Only for 4 Channel Image!!!!
+                    guidedChannels.Add(ConvertToDouble(pc[3]));
+                    result = ConvertToByte(AddArrays(AddArrays(guidedChannels[2], guidedChannels[3]), AddArrays(guidedChannels[0], guidedChannels[1]))); //Only for 4 Channel Image!!!!
                 }
                 return result; 
             }
@@ -149,7 +151,7 @@ namespace com.csutil.algorithms.images {
             }
 
 
-            public byte[] FilterSingleChannel(byte[] p) {
+            public double[] FilterSingleChannel(byte[] p) {
                 var pDouble = ConvertToDouble(p);
                 var meanP = BoxFilter(pDouble, r);
                 var meanIp_R = BoxFilter(MultArrays(redImageDouble, pDouble), r);
@@ -173,7 +175,7 @@ namespace com.csutil.algorithms.images {
                 var res2 = MultArrays(BoxFilter(a_g,  r), greenImageDouble);
                 var res3 = MultArrays(BoxFilter(a_b, r), blueImageDouble);
                 var res4 = BoxFilter(b, r);
-                var result = ConvertToByte(AddArrays(AddArrays(AddArrays(res1, res2), res3), res4));
+                var result = AddArrays(AddArrays(AddArrays(res1, res2), res3), res4);
                 return result;
             }
         }

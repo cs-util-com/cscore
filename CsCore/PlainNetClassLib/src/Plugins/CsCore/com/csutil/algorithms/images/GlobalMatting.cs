@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using com.csutil.math;
 
 namespace com.csutil.algorithms.images {
 
@@ -611,7 +612,18 @@ namespace com.csutil.algorithms.images {
             using (var t = Log.MethodEntered()) {
                 var imageGuidedFilter = new GuidedFilter(image, width, height, bytesPerPixel, r, eps);
                 var guidedFilterInstance = imageGuidedFilter.init(bytesPerPixel);
-                return GuidedFilter.RunGuidedFilter(alpha, guidedFilterInstance);
+                var guidedIm = GuidedFilter.RunGuidedFilter(alpha, guidedFilterInstance);
+                for (int x = 0; x < width; x++) {
+                    for (int y = 0; y < height; y++) {
+                        var col = GetColorAt(guidedIm, x, y);
+                        var temp = new double[] { col[0], col[1], col[2], col[3] };
+                        var val = temp[2];
+                        //SetColorAt(guidedIm, x, y, new []{(byte)val, (byte)val, (byte)val, (byte)val});
+                        // SetColorAt(guidedIm, x, y, new []{val, val, val, val});
+                        SetColorAt(guidedIm, x, y, new []{col[0], col[1], col[2], col[0]});
+                    }
+                }
+                return guidedIm;
             }
         }
 
