@@ -41,7 +41,9 @@ namespace com.csutil.injection {
         }
 
         public IEnumerable<T> GetAll<T>(object caller, bool createIfNull = true) {
-            return GetAll(GetEventKey<T>(), caller, createIfNull).Filter(x => x is T).Cast<T>();
+            return GetAll(GetEventKey<T>(), caller, createIfNull)
+                .Filter(x => x is T && (!(x is IDisposableV2) || (x is IDisposableV2 d && d.IsAlive(logErrorIfDisposed: true))))
+                .Cast<T>();
         }
 
         private IEnumerable<object> GetAll(string injectorKey, object caller, bool createIfNull) {

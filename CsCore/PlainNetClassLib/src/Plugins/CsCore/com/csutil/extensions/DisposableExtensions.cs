@@ -23,7 +23,11 @@ namespace com.csutil {
         }
 
         /// <summary> If the object is disposed (or currently in the process of being disposed) this will return false </summary>
-        public static bool IsAlive(this IDisposableV2 self) { return self.IsDisposed == DisposeState.Active; }
+        public static bool IsAlive(this IDisposableV2 self, bool logErrorIfDisposed = false) {
+            var isAlive = self.IsDisposed == DisposeState.Active;
+            if (!isAlive && logErrorIfDisposed) { Log.e("Object is already disposed: " + self.GetType()); }
+            return isAlive;
+        }
 
         /// <summary> Disposes the object if needed (and returns true) or if already disposed returns false </summary>
         public static bool DisposeV2(this IDisposableV2 self) {
