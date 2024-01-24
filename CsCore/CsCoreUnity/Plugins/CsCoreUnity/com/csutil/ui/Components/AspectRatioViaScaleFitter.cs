@@ -29,8 +29,10 @@ namespace com.csutil.ui.Components {
             if (rectTransform == null) { rectTransform = GetComponent<RectTransform>(); }
             if (targetTransform == null) { targetTransform = transform.parent.GetComponent<RectTransform>(); }
             if (relativeSize == Vector2.zero) {
+                var scale = rectTransform.localScale;
                 // use the targetTransform and rectTransform to calculate the current relative size:
-                relativeSize = new Vector2(rectTransform.rect.size.x / targetTransform.rect.size.x, rectTransform.rect.size.y / targetTransform.rect.size.y);
+                relativeSize = new Vector2(rectTransform.rect.size.x / targetTransform.rect.size.x * scale.x,
+                                           rectTransform.rect.size.y / targetTransform.rect.size.y * scale.y);
             }
 
             // Get the size of the target transform
