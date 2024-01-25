@@ -9,7 +9,7 @@ namespace com.csutil.ui.jsonschema {
 
         protected override Task Setup(string fieldName, string fullPath) {
             canvasGroup.interactable = field.readOnly != true;
-            return Task.FromResult(true);
+            return Task.CompletedTask;
         }
 
     }

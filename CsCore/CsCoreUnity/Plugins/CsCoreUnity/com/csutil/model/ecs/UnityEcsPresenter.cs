@@ -21,7 +21,7 @@ namespace com.csutil.model.ecs {
             var entitiesInRoot = model.Entities.Values.Filter(x => x.ParentId == null);
             AddViewsForEntityModelsRecursively(entitiesInRoot);
             model.OnIEntityUpdated += OnEntityUpdated;
-            return Task.FromResult(true);
+            return Task.CompletedTask;
         }
 
         public void Dispose() {

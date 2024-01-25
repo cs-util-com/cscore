@@ -70,7 +70,7 @@ namespace com.csutil.model.ecs {
                         Log.d($"Saving entity to disk: {instance} with {_taskQueue.GetRemainingScheduledTaskCount()} other tasks in queue");
                     }
                     file.SaveAsJson(json);
-                    return Task.FromResult(true);
+                    return Task.CompletedTask;
                 }, maxNrOfRetries: 3, initialExponent: 4);
             });
         }

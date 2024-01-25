@@ -60,7 +60,7 @@ namespace com.csutil.integrationTests.datastructures {
 
         public string myString1;
         public Task<ServerActionResult> SendToServer() { return Task.FromResult(ServerActionResult.SUCCESS); }
-        public Task RollbackLocalChanges(ServerActionResult reasonForRollback) { return Task.FromResult(true); }
+        public Task RollbackLocalChanges(ServerActionResult reasonForRollback) { return Task.CompletedTask; }
 
     }
 }
