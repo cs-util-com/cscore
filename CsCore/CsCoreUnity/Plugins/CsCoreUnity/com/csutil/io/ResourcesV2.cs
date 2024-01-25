@@ -70,6 +70,10 @@ namespace com.csutil {
                 return (T)(object)new MemoryStream(textAsset.bytes); 
             }
             if (ResourceCache.TryLoad(pathInResourcesFolder, out T result)) { return result; }
+            if (typeof(T).IsCastableTo<Sprite>()) {
+                Texture2D asTexture = LoadV2<Texture2D>(pathInResourcesFolder, forceAssetDbReimport);
+                return (T)(object)asTexture.ToSprite();
+            }
             return (T)(object)Resources.Load(pathInResourcesFolder, typeof(T));
         }
 
