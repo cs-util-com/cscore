@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using com.csutil;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -36,6 +37,7 @@ namespace ReuseScroller {
         }
 
         public void SetListData(List<T> listData, bool isReset = true) {
+            listData.ThrowErrorIfNull("listData");
             cellData = listData;
             ReloadData(isReset);
         }
@@ -85,6 +87,12 @@ namespace ReuseScroller {
         }
 
         public void ReloadData(bool isReset = false) {
+            if (rectTransform == null) {
+                rectTransform = GetComponent<RectTransform>();
+            }
+            if (scrollRect == null) {
+                scrollRect = GetComponent<ScrollRect>();
+            }
             Vector2 sizeDelta = scrollRect.content.sizeDelta;
             float contentSize = 0;
             for (int i = 0; i < cellData.Count; i++) {
