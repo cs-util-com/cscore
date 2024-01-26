@@ -89,7 +89,9 @@ namespace com.csutil.model {
             var ffm = new FeatureFlagManager<FeatureFlag>(featureFlagStore);
             var injector1 = IoC.inject.SetSingleton(ffm);
             disposables?.Add(ffm);
-            AppFlow.AddAppFlowTracker(new AppFlowToStore(analytics).WithBasicTrackingActive());
+            var appFlowTracker = new AppFlowToStore(analytics).WithBasicTrackingActive();
+            disposables?.Add(appFlowTracker);
+            AppFlow.AddAppFlowTracker(appFlowTracker);
             var xpSystem = new ProgressionSystem<FeatureFlag>(analytics, ffm);
             var injector2 = IoC.inject.SetSingleton<IProgressionSystem<FeatureFlag>>(xpSystem);
             disposables?.Add(xpSystem);

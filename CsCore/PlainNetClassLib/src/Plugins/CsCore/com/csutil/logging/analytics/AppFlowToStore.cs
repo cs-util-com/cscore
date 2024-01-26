@@ -20,6 +20,7 @@ namespace com.csutil.logging.analytics {
         public virtual void Dispose() {
             IsDisposed = DisposeState.DisposingStarted;
             store.DisposeV2();
+            EventBus.instance.UnsubscribeAll(this);
             IsDisposed = DisposeState.Disposed;
         }
 
