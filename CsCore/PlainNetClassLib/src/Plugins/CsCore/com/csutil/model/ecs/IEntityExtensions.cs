@@ -170,7 +170,10 @@ namespace com.csutil.model.ecs {
             foreach (var e in fullSubtreeLeavesFirst) {
                 e.Ecs.CreateVariant(e.Data, newIdsLookup);
             }
-            return self.Ecs.CreateVariant(self.Data, newIdsLookup);
+            var result = self.Ecs.CreateVariant(self.Data, newIdsLookup);
+            AssertV3.IsNull(result.ParentId, "result.ParentId");
+            AssertV3.AreNotEqual(result.Id, self.Id);
+            return result;
         }
 
         public static IEntity<T> GetChild<T>(this IEntity<T> mageEnemy, string name) where T : IEntityData {

@@ -66,10 +66,15 @@ namespace com.csutil.model.ecs {
         }
 
         private void CreateGoFor(IEntity<T> iEntity) {
-            var go = NewGameObjectFor(iEntity);
-            go.name = iEntity.Name;
+            if (_entityViews.ContainsKey(iEntity.Id)) { return; }
+            GameObject go = NewGameObjectFor(iEntity);
             _entityViews.Add(iEntity.Id, go);
+            go.name = iEntity.Name;
             if (iEntity.ParentId != null) {
+                var parent = iEntity.GetParent();
+                if (!_entityViews.ContainsKey(parent.Id)) {
+                    CreateGoFor(parent);
+                }
                 _entityViews[iEntity.ParentId].AddChild(go);
             } else {
                 targetView.AddChild(go);
@@ -90,6 +95,7 @@ namespace com.csutil.model.ecs {
 
         private void UpdateGoFor(IEntity<T> iEntity, T oldState, T newState) {
             var go = _entityViews[iEntity.Id];
+            go.SetActiveV2(iEntity.IsActive);
             if (oldState.Name != newState.Name) {
                 go.name = iEntity.Name;
             }
