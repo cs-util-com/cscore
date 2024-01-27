@@ -11,11 +11,11 @@ namespace com.csutil {
         }
 
         public static V GetParentListUiController<T, V>(this BaseCell<T> cell) where V : BaseController<T> {
-            return (V)cell.GetParentListUiController();
-        }
-
-        public static BaseController<T> GetParentListUiController<T>(this BaseCell<T> cell) {
-            return cell.GetComponentInParent<BaseController<T>>();
+            var result = cell.GetComponentInParent<V>(includeInactive: true);
+            if (result.IsNullOrDestroyed()) { // Check if null:
+                Log.e("Parent list UI controller was not found for " + cell.gameObject.FullQualifiedName(), cell.gameObject);
+            }
+            return result;
         }
 
     }
