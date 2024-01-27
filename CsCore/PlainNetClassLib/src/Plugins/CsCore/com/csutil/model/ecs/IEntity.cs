@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using Newtonsoft.Json;
 
 namespace com.csutil.model.ecs {
 
@@ -70,7 +71,11 @@ namespace com.csutil.model.ecs {
 
         public Pose3d() : this(Vector3.Zero, Quaternion.Identity, Vector3.One) {
         }
+        
+        public Pose3d(Vector3 position) : this(position, Quaternion.Identity, Vector3.One) {
+        }
 
+        [JsonConstructor]
         public Pose3d(Vector3 position, Quaternion rotation, Vector3 scale) {
             this.position = position;
             this.rotation = rotation;
