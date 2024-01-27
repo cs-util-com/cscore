@@ -290,7 +290,7 @@ namespace com.csutil {
 // Moved to separate namespace to not cause problems if a project uses TargetFramework netstandard2.1
 namespace com.csutil.netstandard2_1polyfill {
 
-    public static class IEnumerableExtensions {
+    public static class IEnumerableExtensions2_1 {
 
         public static HashSet<TSource> ToHashSet<TSource>(this IEnumerable<TSource> source) {
             var r = new HashSet<TSource>();

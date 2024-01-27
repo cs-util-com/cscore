@@ -206,7 +206,7 @@ namespace com.csutil.tests {
 
         [Fact]
         public void TestToHashSet() {
-            var h = com.csutil.netstandard2_1polyfill.IEnumerableExtensions.ToHashSet(new List<string>() { "A", "B", "A", "C" });
+            var h = netstandard2_1polyfill.IEnumerableExtensions2_1.ToHashSet(new List<string>() { "A", "B", "A", "C" });
             Assert.Equal(3, h.Count);
         }
 
