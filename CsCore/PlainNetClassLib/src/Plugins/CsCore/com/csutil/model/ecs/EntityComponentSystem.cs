@@ -52,9 +52,10 @@ namespace com.csutil.model.ecs {
         private readonly Dictionary<string, IEntity<T>> _entities = new Dictionary<string, IEntity<T>>();
 
         /// <summary> A lookup from templateId to all entityIds that are variants of that template </summary>
-        private readonly Dictionary<string, HashSet<string>> Variants = new Dictionary<string, HashSet<string>>();
+        private readonly Dictionary<string, HashSet<string>> _variants = new Dictionary<string, HashSet<string>>();
 
         public IReadOnlyDictionary<string, IEntity<T>> Entities => _entities;
+        public IEnumerable<string> TemplateIds => _variants.Keys;
 
         /// <summary> If set to true the T class used in IEntity<T> must be immutable in all fields </summary>
         public readonly bool IsModelImmutable;
@@ -78,7 +79,7 @@ namespace com.csutil.model.ecs {
         public void Dispose() {
             IsDisposed = DisposeState.DisposingStarted;
             OnDispose();
-            Variants.Clear();
+            _variants.Clear();
             TemplatesIo.DisposeV2();
             foreach (IEntity<T> entity in _entities.Values) {
                 ((Entity)entity).IsDisposed = DisposeState.Disposed;
@@ -112,7 +113,7 @@ namespace com.csutil.model.ecs {
 
         private void UpdateVariantsLookup(T entity) {
             if (entity.TemplateId != null) {
-                Variants.AddToValues(entity.TemplateId, entity.Id);
+                _variants.AddToValues(entity.TemplateId, entity.Id);
             }
         }
 
@@ -146,7 +147,7 @@ namespace com.csutil.model.ecs {
             entity.OnUpdate?.Invoke(oldEntryData, updatedEntityData);
 
             // If the entry is a template for other entries, then all variants need to be updated:
-            if (Variants.TryGetValue(updatedEntityData.Id, out var variantIds)) {
+            if (_variants.TryGetValue(updatedEntityData.Id, out var variantIds)) {
                 foreach (var variantId in variantIds) {
                     var newVariantState = TemplatesIo.RecreateVariantInstance(variantId);
                     InternalUpdate(newVariantState);
@@ -177,7 +178,7 @@ namespace com.csutil.model.ecs {
             var entity = _entities[entityId] as Entity;
             _entities.Remove(entityId);
             if (entity.TemplateId != null) {
-                Variants.Remove(entity.TemplateId);
+                _variants.Remove(entity.TemplateId);
             }
             var entityData = entity.Data;
             OnIEntityUpdated?.Invoke(entity, UpdateType.Remove, entityData, default);
