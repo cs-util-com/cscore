@@ -130,7 +130,7 @@ namespace com.csutil {
             var boxCollider = self.GetComponent<BoxCollider>();
             if (boxCollider != null) {
                 var spriteHeightInMeters = self.localBounds.extents.y * 2;
-                boxCollider.size = self.size * (boxColliderShrinkFactor * spriteHeightInMeters);
+                boxCollider.size = new Vector3(correctedSizeX * boxColliderShrinkFactor, spriteHeightInMeters * boxColliderShrinkFactor, boxCollider.size.z);
             }
         }
         
