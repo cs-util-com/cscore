@@ -209,7 +209,12 @@ namespace com.csutil.model.immutable {
             return list;
         }
 
-        public static ImmutableList<T> AddOrCreate<T>(this ImmutableList<T> self, T t) { return (self == null) ? ImmutableList.Create(t) : self.Add(t); }
+        public static ImmutableList<T> AddOrCreate<T>(this ImmutableList<T> self, T t, bool assertUnique = true) {
+            if (assertUnique) {
+                AssertV3.IsFalse(self.Contains(t), () => "The list already contains the element to add");
+            }
+            return (self == null) ? ImmutableList.Create(t) : self.Add(t);
+        }
 
         public static ImmutableDictionary<K, T> AddOrCreate<K, T>(this ImmutableDictionary<K, T> self, K key, T t) {
             if (self == null) { self = ImmutableDictionary<K, T>.Empty; }
