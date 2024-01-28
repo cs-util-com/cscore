@@ -16,26 +16,30 @@ namespace com.csutil.src.Plugins.CsCore.com.csutil.algorithms
 
         }
 
-        public bool ImageCompare(ImageResult img1, ImageResult img2) {
+        public ImageResult ImageCompare(ImageResult img1, ImageResult img2) {
+
+            ImageResult resultImage = img1;
 
             // Check if images are the same size
             if (img1.Width != img2.Width && img1.Height != img2.Height) {
-                return false;
+                return resultImage;
             }
 
             Color[] colors_img1 = LoadImageColors(img1);
             Color[] colors_img2 = LoadImageColors(img2);
 
             // Compare images
-            for (int i = 0; i < img1.Width; i++) {
+            for (int i = 0; i < colors_img1.Length; i++) {
 
                 if (colors_img1[i] != colors_img2[i]) {
-                    return false;
+
+                    ParseColorIntoData(resultImage, Color.FromArgb(255, 255, 0, 0), i);
+
                 }
 
             }
 
-            return true;
+            return resultImage;
 
         }
 
@@ -54,6 +58,15 @@ namespace com.csutil.src.Plugins.CsCore.com.csutil.algorithms
             }
 
             return colors;
+
+        }
+
+        private void ParseColorIntoData(ImageResult img, Color color, int index) {
+
+            img.Data[index * 4] = color.R;
+            img.Data[index * 4 + 1] = color.G;
+            img.Data[index * 4 + 2] = color.B;
+            img.Data[index * 4 + 3] = color.A;
 
         }
 
