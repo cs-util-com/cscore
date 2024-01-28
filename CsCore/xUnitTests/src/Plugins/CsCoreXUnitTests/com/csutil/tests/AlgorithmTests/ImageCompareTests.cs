@@ -1,5 +1,7 @@
 ﻿using com.csutil.io;
 using com.csutil.model;
+using com.csutil.src.Plugins.CsCore.com.csutil.algorithms;
+using StbImageSharp;
 using System.Collections.Generic;
 using Xunit;
 using Zio;
@@ -19,20 +21,32 @@ namespace com.csutil.tests.AlgorithmTests {
 
             var dir = EnvironmentV2.instance.GetOrAddTempFolder("TestImageComparePictures");
 
-            var imgRef = new FileRef() { url = "https://placekitten.com/1024/512" };
-            await imgRef.DownloadTo(dir);
-            Log.d("FileRef: " + JsonWriter.AsPrettyString(imgRef));
-            Assert.NotNull(imgRef.url);
-            Assert.NotNull(imgRef.fileName);
-            Assert.NotNull(imgRef.dir);
+            FileRef[] imgRef = {
+                new FileRef { url = "https://placekitten.com/1024/512" },
+                new FileRef { url = "https://www.veterinaire.mu/wp-content/uploads/2021/05/cat-1024x512.png" }
+            };
 
-            FileEntry imgEntry = imgRef.GetFileEntry(dir.FileSystem);
-            var img = await ImageLoader.LoadImageInBackground(imgEntry);
-            Assert.Equal(1024, img.Width);
-            Assert.Equal(512, img.Height);
+            ImageResult[] images = new ImageResult[2];
 
-            byte[] byteArray = new byte[] { 1, 2, 1 };
-            Assert.Equal(byteArray, img.Data);
+            for (int i = 0; i < imgRef.Length; i++) {
+
+                await imgRef[i].DownloadTo(dir);
+                Log.d("FileRef: " + JsonWriter.AsPrettyString(imgRef));
+                Assert.NotNull(imgRef[i].url);
+                Assert.NotNull(imgRef[i].fileName);
+                Assert.NotNull(imgRef[i].dir);
+
+                FileEntry imgEntry = imgRef[i].GetFileEntry(dir.FileSystem);
+                images[i] = await ImageLoader.LoadImageInBackground(imgEntry);
+
+                Assert.Equal(1024, images[i].Width);
+                Assert.Equal(512, images[i].Height);
+
+            }
+            
+            AaaaImageCompareAaaa compareObj = new AaaaImageCompareAaaa();
+            Assert.True(compareObj.ImageCompare(images[0], images[0]));
+            Assert.False(compareObj.ImageCompare(images[0], images[1]));
 
         }
 

@@ -19,7 +19,7 @@ namespace com.csutil.src.Plugins.CsCore.com.csutil.algorithms
         public bool ImageCompare(ImageResult img1, ImageResult img2) {
 
             // Check if images are the same size
-            if (img1.Width == img2.Width && img1.Height == img2.Height) {
+            if (img1.Width != img2.Width && img1.Height != img2.Height) {
                 return false;
             }
 
