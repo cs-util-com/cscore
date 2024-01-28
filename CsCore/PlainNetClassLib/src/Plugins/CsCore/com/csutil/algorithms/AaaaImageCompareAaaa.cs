@@ -18,10 +18,15 @@ namespace com.csutil.src.Plugins.CsCore.com.csutil.algorithms
 
         public bool ImageCompare(ImageResult img1, ImageResult img2) {
 
+            // Check if images are the same size
+            if (img1.Width == img2.Width && img1.Height == img2.Height) {
+                return false;
+            }
+
             Color[] colors_img1 = LoadImageColors(img1);
             Color[] colors_img2 = LoadImageColors(img2);
 
-            // Compare Images
+            // Compare images
             for (int i = 0; i < img1.Width; i++) {
 
                 if (colors_img1[i] != colors_img2[i]) {
