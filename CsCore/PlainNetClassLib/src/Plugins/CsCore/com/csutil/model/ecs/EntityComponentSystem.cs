@@ -139,7 +139,11 @@ namespace com.csutil.model.ecs {
             if (!oldAndNewSameEntry) {
                 // Compute json diff to know if the entry really changed and if not skip informing all variants about the change:
                 // This can happen eg if the variant overwrites the field that was just changed in the template
-                if (!TemplatesIo.HasChanges(oldEntryData, updatedEntityData)) { return; }
+                if (!TemplatesIo.HasChanges(oldEntryData, updatedEntityData)) {
+                    // Even if entity.Data and updatedEntityData contain the same content, the data must still be set to the new reference:
+                    entity.Data = updatedEntityData;
+                    return;
+                }
             }
             entity.Data = updatedEntityData;
             // At this point in the update method it is known that the entity really changed  
