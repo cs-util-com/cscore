@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
@@ -55,7 +56,7 @@ namespace com.csutil.model.ecs {
         private readonly Dictionary<string, HashSet<string>> _variants = new Dictionary<string, HashSet<string>>();
 
         public IReadOnlyDictionary<string, IEntity<T>> Entities => _entities;
-        public IEnumerable<string> TemplateIds => _variants.Keys;
+        public IReadOnlyCollection<string> TemplateIds => _variants.Keys;
 
         /// <summary> If set to true the T class used in IEntity<T> must be immutable in all fields </summary>
         public readonly bool IsModelImmutable;
@@ -207,10 +208,9 @@ namespace com.csutil.model.ecs {
             }
         }
 
-        public IEntity<T> CreateVariant(T entityData, Dictionary<string, string> newIdsLookup) {
+        public IEntity<T> CreateVariant(T entityData, IReadOnlyDictionary<string, string> newIdsLookup) {
             this.ThrowErrorIfDisposed();
-            var variant = TemplatesIo.CreateVariantInstanceOf(entityData, newIdsLookup);
-            return Add(variant);
+            return Add(TemplatesIo.CreateVariantInstanceOf(entityData, newIdsLookup));
         }
 
     }

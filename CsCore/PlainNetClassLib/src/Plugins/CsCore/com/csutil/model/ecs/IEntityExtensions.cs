@@ -19,6 +19,23 @@ namespace com.csutil.model.ecs {
             return self.Ecs.Entities[self.ParentId];
         }
 
+        public static bool IsTemplate<T>(this IEntity<T> commonParent) where T : IEntityData {
+            return commonParent.Ecs.TemplateIds.Contains(commonParent.Id);
+        }
+
+        public static bool IsVariant<T>(this IEntity<T> self) where T : IEntityData {
+            return self.TemplateId != null;
+        }
+
+        public static bool TryGetTemplate<T>(this IEntity<T> self, out IEntity<T> template) where T : IEntityData {
+            if (self.TemplateId != null) {
+                template = self.Ecs.Entities[self.TemplateId];
+                return true;
+            }
+            template = default;
+            return false;
+        }
+
         public static T GetParent<T>(this T self, IReadOnlyDictionary<string, T> allEntities) where T : IEntityData {
             if (self.ParentId == null) { return default; }
             return allEntities[self.ParentId];
@@ -160,17 +177,21 @@ namespace com.csutil.model.ecs {
             return Task.WhenAll(tasks);
         }
 
+        public static IEntity<T> CreateVariant<T>(this IEntity<T> self) where T : IEntityData {
+            return self.CreateVariant(out _);
+        }
+        
         /// <summary>
         /// Recursively creates variants of all entities in the subtree of the entity and returns a new root entity that has the variant ids in its children lists
         /// </summary>
-        public static IEntity<T> CreateVariant<T>(this IEntity<T> self) where T : IEntityData {
+        public static IEntity<T> CreateVariant<T>(this IEntity<T> self, out IReadOnlyDictionary<string, string> resultIdLookupTable) where T : IEntityData {
             var all = self.GetChildrenTreeBreadthFirst().ToList();
-            var newIdsLookup = all.ToDictionary(x => x.Id, x => "" + GuidV2.NewGuid());
+            resultIdLookupTable = all.ToDictionary(x => x.Id, x => "" + GuidV2.NewGuid());
             var fullSubtreeLeavesFirst = all.Skip(1).Reverse();
             foreach (var e in fullSubtreeLeavesFirst) {
-                e.Ecs.CreateVariant(e.Data, newIdsLookup);
+                e.Ecs.CreateVariant(e.Data, resultIdLookupTable);
             }
-            var result = self.Ecs.CreateVariant(self.Data, newIdsLookup);
+            var result = self.Ecs.CreateVariant(self.Data, resultIdLookupTable);
             AssertV3.IsNull(result.ParentId, "result.ParentId");
             AssertV3.AreNotEqual(result.Id, self.Id);
             return result;
@@ -201,6 +222,33 @@ namespace com.csutil.model.ecs {
 
         public static IEnumerable<IEntity<T>> FindEntitiesWithName<T>(this EntityComponentSystem<T> ecs, string name) where T : IEntityData {
             return ecs.Entities.Values.Filter(x => x.Name == name);
+        }
+
+        public static bool TryFindCommonParent<T>(this EntityComponentSystem<T> ecs, IEnumerable<string> entityIds, out IEntity<T> commonParent) where T : IEntityData {
+            // While walking up for each entity in the list, collec all its parents in a lookup table:
+            var entities = entityIds.Select(x => ecs.Entities[x]);
+            var intersectingIds = entities.First().CollectAllParents();
+            foreach (var entity in entities.Skip(1)) {
+                intersectingIds.Intersect(entity.CollectAllParents());
+            }
+            if (intersectingIds.Count == 0) {
+                commonParent = default;
+                return false;
+            }
+            commonParent = ecs.Entities[intersectingIds.First()];
+            return true;
+        }
+
+        public static IReadOnlyList<string> CollectAllParents<T>(this IEntity<T> entity) where T : IEntityData {
+            return CollectAllParents(entity, new List<string>());
+        }
+
+        private static IReadOnlyList<string> CollectAllParents<T>(IEntity<T> entity, List<string> parentsLookup) where T : IEntityData {
+            if (entity.ParentId != null) {
+                parentsLookup.Add(entity.ParentId);
+                CollectAllParents(entity.GetParent(), parentsLookup);
+            }
+            return parentsLookup;
         }
 
     }
