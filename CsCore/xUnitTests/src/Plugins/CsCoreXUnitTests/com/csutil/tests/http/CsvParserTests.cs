@@ -10,7 +10,6 @@ using Xunit;
 namespace com.csutil.tests.http {
 
     public class CsvParserTests {
-
         public CsvParserTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
         [Fact]
@@ -32,7 +31,7 @@ namespace com.csutil.tests.http {
             Assert.Equal("25", parsedData[1][1]);
             Assert.Equal("New York", parsedData[1][2]);
 
-            var json = CsvParser.ConvertToJson(parsedData);
+            var json = CsvParser.ConvertCsvToJArray(parsedData);
             Log.d(JsonWriter.AsPrettyString(json));
 
         }
@@ -57,7 +56,7 @@ namespace com.csutil.tests.http {
             public int Age { get; set; }
             public string Location { get; set; }
         }
-        
+
         [Fact]
         public async Task ExampleUsage3() {
             // Made ConvertToJson Test based on ´ExampleUsage1´
@@ -65,26 +64,59 @@ namespace com.csutil.tests.http {
             string sampleCsvData = "Name,Age,Location\nAlice,25,New York\nBob,30,San Francisco\n";
             using var stream = new MemoryStream(Encoding.Default.GetBytes(sampleCsvData));
             List<List<string>> parsedData = CsvParser.ReadCsvStream(stream);
-    
-            JArray dataAsJson = new JArray();
 
-            foreach (var row in parsedData)
-            {
-                JArray rowArray = new JArray(row.Select(JToken.FromObject));
-                dataAsJson.Add(rowArray);
-            }
+            var dataAsJson = CsvParser.ConvertCsvToJArray(parsedData);
+            
+            Assert.Equal("Alice", dataAsJson[0]["Name"].ToString());
+            Assert.Equal("25", dataAsJson[0]["Age"].ToString());
+            Assert.Equal("New York", dataAsJson[0]["Location"].ToString());
 
-            Assert.Equal(3, dataAsJson.Count); // 2 rows
-            Assert.Equal(3, ((JArray)dataAsJson[0]).Count); // 3 columns
+            Assert.Equal("Bob", dataAsJson[1]["Name"].ToString());
+            Assert.Equal("30", dataAsJson[1]["Age"].ToString());
+            Assert.Equal("San Francisco", dataAsJson[1]["Location"].ToString());
 
-            Assert.Equal("Name", dataAsJson[0][0].ToString());
-            Assert.Equal("Age", dataAsJson[0][1].ToString());
-            Assert.Equal("Location", dataAsJson[0][2].ToString());
-
-            Assert.Equal("Alice", dataAsJson[1][0].ToString());
-            Assert.Equal("25", dataAsJson[1][1].ToString());
-            Assert.Equal("New York", dataAsJson[1][2].ToString());
         }
 
+        [Fact]
+        public async Task ExampleUsage4() {
+            string sampleCsvData = "Name,Age,Location\nAlice,25,New York\nBob,30,San Francisco\n";
+
+            // Creating a MemoryStream from the CSV data
+            using var stream = new MemoryStream(Encoding.Default.GetBytes(sampleCsvData));
+
+            // Converting CSV data to a JSON array using CsvParser
+            var dataAsJson = CsvParser.ReadCsvStreamAsJson(stream);
+            
+
+            // Creating a List of MyUsers
+            List<MyUser> users = new List<MyUser>(dataAsJson.ToObject<List<MyUser>>());
+
+            // Assertions
+            Assert.NotNull(users); // Assert that the result is not null
+            Assert.Equal(2, users.Count); // Assert that the correct number of MyUser objects were deserialized
+
+            // Asserting details of the first user
+            Assert.Equal("Alice", users[0].Name);
+            Assert.Equal(25, users[0].Age);
+            Assert.Equal("New York", users[0].Location);
+
+            // Asserting details of the second user
+            Assert.Equal("Bob", users[1].Name);
+            Assert.Equal(30, users[1].Age);
+            Assert.Equal("San Francisco", users[1].Location);
+
+        }
+
+        private class MyUser {
+            public readonly string Name;
+            public readonly int? Age;
+            public readonly string Location;
+
+            public MyUser(string name, int? age, string location) {
+                Name = name;
+                Age = age;
+                Location = location;
+            }
+        }
     }
 }
