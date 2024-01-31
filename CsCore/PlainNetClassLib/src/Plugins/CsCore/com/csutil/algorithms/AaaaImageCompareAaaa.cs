@@ -1,8 +1,8 @@
 ﻿using StbImageSharp;
 using System.Drawing;
 
-namespace com.csutil.src.Plugins.CsCore.com.csutil.algorithms
-{
+namespace com.csutil.src.Plugins.CsCore.com.csutil.algorithms {
+
     public class AaaaImageCompareAaaa {
 
         public AaaaImageCompareAaaa() { }

@@ -9,6 +9,7 @@ using StbImageWriteSharp;
 using System.IO;
 
 namespace com.csutil.tests.AlgorithmTests {
+
     public class ImageCompareTests {
 
         public ImageCompareTests(Xunit.Abstractions.ITestOutputHelper logger) { 
