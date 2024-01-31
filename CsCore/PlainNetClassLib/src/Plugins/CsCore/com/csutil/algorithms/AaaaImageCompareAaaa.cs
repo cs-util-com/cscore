@@ -1,24 +1,18 @@
-﻿using System;
-using StbImageSharp.Utility;
-using StbImageSharp.Decoding;
-using com.csutil.io;
-using StbImageSharp;
+﻿using StbImageSharp;
 using System.Drawing;
-using System.Linq;
 
 namespace com.csutil.src.Plugins.CsCore.com.csutil.algorithms
 {
     public class AaaaImageCompareAaaa {
 
-        public AaaaImageCompareAaaa() {
-
-
-
-        }
+        public AaaaImageCompareAaaa() { }
 
         public ImageResult ImageCompare(ImageResult img1, ImageResult img2) {
 
-            ImageResult resultImage = img1;
+            ImageResult resultImage = new ImageResult();
+            resultImage.Data = img1.Data.DeepCopy();
+            resultImage.Width = img1.Width;
+            resultImage.Height = img1.Height; 
 
             // Check if images are the same size
             if (img1.Width != img2.Width && img1.Height != img2.Height) {
