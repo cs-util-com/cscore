@@ -13,7 +13,7 @@ namespace com.csutil.algorithms.images {
             visited = new bool[width, height];
         }
 
-        public void FloodFillAlgorithm(Mat<double> image) {
+        public void FloodFillAlgorithm(Mat image) {
             Stack<(int x, int y)> stack = new Stack<(int x, int y)>();
             int width = image.Cols;
             int height = image.Rows;
@@ -43,7 +43,7 @@ namespace com.csutil.algorithms.images {
             }
         }
 
-        private bool SeemsWhite(Mat<double> image, int x, int y) {
+        private bool SeemsWhite(Mat image, int x, int y) {
             var width = image.Cols;
             var color = GetColorAt(image, x, y);
             return color[0] > 240 && color[1] > 240 && color[2] > 240;
@@ -54,7 +54,7 @@ namespace com.csutil.algorithms.images {
             Array.Copy(color, 0, imageData, startIdx, color.Length);
         }
 
-        private static double[] GetColorAt(Mat<double> img, int x, int y) {
+        private static double[] GetColorAt(Mat img, int x, int y) {
             return new double[] { img[x,y], img[x,y+1], img[x,y + 2], img[x,y + 3] };
         }
     }
