@@ -153,10 +153,14 @@ namespace com.csutil.model.ecs {
 
             // If the entry is a template for other entries, then all variants need to be updated:
             if (_variants.TryGetValue(updatedEntityData.Id, out var variantIds)) {
-                foreach (var variantId in variantIds) {
-                    var newVariantState = TemplatesIo.RecreateVariantInstance(variantId);
-                    InternalUpdate(newVariantState);
-                }
+                UpdateVariantsWhenTemplateChanges(variantIds);
+            }
+        }
+        
+        protected virtual void UpdateVariantsWhenTemplateChanges(HashSet<string> variantIds) {
+            foreach (var variantId in variantIds) {
+                var newVariantState = TemplatesIo.RecreateVariantInstance(variantId);
+                InternalUpdate(newVariantState);
             }
         }
 

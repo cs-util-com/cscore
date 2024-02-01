@@ -158,8 +158,16 @@ namespace com.csutil.model.ecs {
         }
 
         private IComponentPresenter<T> GetComponentPresenter(IEntity<T> iEntity, string componentId) {
-            var components = _entityViews[iEntity.Id].GetComponentsInChildren<IComponentPresenter<T>>();
-            return components.Single(x => x.ComponentId == componentId);
+            var entityView = _entityViews[iEntity.Id];
+            var presenters = entityView.GetComponentsInChildren<IComponentPresenter<T>>();
+            try {
+                return presenters.Single(x => x.ComponentId == componentId);
+            } catch (Exception e) {
+                var component = iEntity.Components[componentId];
+                var allPresenters = entityView.GetComponents<Behaviour>().ToStringV2(x => "" + x);
+                Log.e($"Could not find a component presenter for component={component} in presenters={allPresenters}", e);
+                throw;
+            }
         }
 
         protected virtual void OnComponentUpdated(IEntity<T> iEntity, IComponentData oldState, KeyValuePair<string, IComponentData> updatedState, GameObject targetParentGo) {
