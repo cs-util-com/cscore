@@ -162,7 +162,14 @@ namespace com.csutil.model.ecs {
         }
 
         private IComponentPresenter<T> GetComponentPresenter(IEntity<T> iEntity, string componentId) {
-            return GetComponentPresenters(iEntity).Single(x => x.ComponentId == componentId);
+            try {
+                var componentPresenters = GetComponentPresenters(iEntity);
+                return componentPresenters.Single(x => x.ComponentId == componentId);
+            } catch (Exception e) {
+                var entityView = _entityViews[iEntity.Id];
+                Log.e($"Failed to find component with id={componentId} in entity={iEntity}", e, entityView);
+                throw;
+            }
         }
 
         private IComponentPresenter<T>[] GetComponentPresenters(IEntity<T> iEntity) {
