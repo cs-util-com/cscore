@@ -117,12 +117,18 @@ namespace com.csutil {
         }
 
         public static GameObject LoadPrefabPooled(string pathInResourcesFolder) {
-            var poolId = pathInResourcesFolder + " Pool";
+            return LoadPrefabPooled(pathInResourcesFolder + " Pool", () => LoadPrefab(pathInResourcesFolder));
+        }
+        
+        public static GameObject LoadPrefabPooled(string poolId, Func<GameObject> getPrefab) {
             var poolGo = InjectorExtensionsForUnity.GetSingletonGameObject(poolId);
             if (poolGo != null) {
                 return poolGo.GetComponent<SimpleObjectPool>().Spawn();
             } else {
-                var prefabToPool = LoadPrefab(pathInResourcesFolder);
+                var prefabToPool = getPrefab();
+                if (prefabToPool.IsPartOfEditorOnlyPrefab()) {
+                    prefabToPool = UnityEngine.Object.Instantiate(prefabToPool);
+                }
                 var newPoolGo = InjectorExtensionsForUnity.GetOrAddSingletonGameObject(poolId);
                 newPoolGo.GetOrAddComponent<SimpleObjectPool>().UseTemplate(prefabToPool);
                 return prefabToPool; // Use the instantiated prefab as the first instance

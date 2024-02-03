@@ -111,10 +111,11 @@ namespace com.csutil {
 
         public static bool Destroy(this UnityEngine.Object self, bool destroyNextFrame = false) {
             if (self.IsNullOrDestroyed()) { return false; }
+            if (self is GameObject go && go.HasComponent<PoolObject>(out var poolObj)) {
+                return poolObj.Despawn();
+            }
             try {
-                if (self is GameObject go && go.HasComponent<PoolObject>(out var poolObj)) {
-                    return poolObj.Despawn();
-                } else if (destroyNextFrame) {
+                if (destroyNextFrame) {
                     UnityEngine.Object.Destroy(self);
                 } else {
                     UnityEngine.Object.DestroyImmediate(self);
