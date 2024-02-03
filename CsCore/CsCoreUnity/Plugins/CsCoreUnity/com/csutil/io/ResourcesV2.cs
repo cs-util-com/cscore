@@ -20,7 +20,7 @@ namespace com.csutil {
             if (prefab == null) { throw new FileNotFoundException("Could not find prefab in any /Resources/.. folder under path='../" + pathInResourcesFolder + "'"); }
             var prefabInstance = InstantiatePrefab(prefab, keepReferenceToEditorPrefab);
             prefabInstance.name = pathInResourcesFolder;
-            AssertV3.AreEqual(Vector3.zero,prefabInstance.transform.localPosition, "prefabInstance.transform.localPosition");
+            AssertV3.AreEqual(Vector3.zero, prefabInstance.transform.localPosition, "prefabInstance.transform.localPosition");
             AssertV3.AreEqual(Quaternion.identity, prefabInstance.transform.localRotation, "prefabInstance.transform.localRotation");
             AssertV3.AreEqual(Vector3.one, prefabInstance.transform.localScale, "prefabInstance.transform.localScale");
             EventBus.instance.Publish(EventConsts.catTemplate, prefabInstance);
@@ -37,7 +37,7 @@ namespace com.csutil {
         /// <summary> Force AssetDB entry reload by Unity, otherwise Resources files are cached by it </summary>
         [System.Diagnostics.Conditional("DEBUG")] // To remove line in builts
         public static void ForceAssetDatabaseReimport(string pathInResources) {
-#if UNITY_EDITOR 
+#if UNITY_EDITOR
             if (Application.isPlaying) { return; }
             // Only way that I found to get the full path of assets is to load it and ask what its path is:
             var pathInAssets = UnityEditor.AssetDatabase.GetAssetPath(Resources.Load(pathInResources));
@@ -67,7 +67,7 @@ namespace com.csutil {
             if ((typeof(MemoryStream).IsCastableTo<T>())) {
                 TextAsset textAsset = LoadV2<TextAsset>(pathInResourcesFolder, forceAssetDbReimport);
                 if (textAsset == null) { throw new FileNotFoundException("No text asset found at " + pathInResourcesFolder); }
-                return (T)(object)new MemoryStream(textAsset.bytes); 
+                return (T)(object)new MemoryStream(textAsset.bytes);
             }
             if (ResourceCache.TryLoad(pathInResourcesFolder, out T result)) { return result; }
             if (typeof(T).IsCastableTo<Sprite>()) {
@@ -114,6 +114,19 @@ namespace com.csutil {
         // See https://answers.unity.com/answers/1190932/view.html
         public static bool IsPartOfEditorOnlyPrefab(this GameObject go) {
             return go.scene.rootCount == 0 || go.scene.name == null;
+        }
+
+        public static GameObject LoadPrefabPooled(string pathInResourcesFolder) {
+            var poolId = pathInResourcesFolder + " Pool";
+            var poolGo = InjectorExtensionsForUnity.GetSingletonGameObject(poolId);
+            if (poolGo != null) {
+                return poolGo.GetComponent<SimpleObjectPool>().Spawn();
+            } else {
+                var prefabToPool = LoadPrefab(pathInResourcesFolder);
+                var newPoolGo = InjectorExtensionsForUnity.GetOrAddSingletonGameObject(poolId);
+                newPoolGo.GetOrAddComponent<SimpleObjectPool>().UseTemplate(prefabToPool);
+                return prefabToPool; // Use the instantiated prefab as the first instance
+            }
         }
 
     }

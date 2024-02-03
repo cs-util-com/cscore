@@ -27,14 +27,14 @@ namespace com.csutil {
             return t != null ? t.GetComponentV2<T>() : null;
         }
 
-        private static GameObject GetOrAddSingletonGameObject(string goName) {
+        public static GameObject GetOrAddSingletonGameObject(string goName) {
             GameObject go = GetSingletonGameObject(goName);
             if (go != null) { return go; }
             return new GameObject(goName);
         }
 
         /// <summary> Works better then GameObject.Find </summary>
-        private static GameObject GetSingletonGameObject(string goName) {
+        public static GameObject GetSingletonGameObject(string goName) {
             var go = GameObject.Find(goName);
             if (go != null) { return go; }
             var list = Resources.FindObjectsOfTypeAll<GameObject>().Filter(x => x.name == goName).ToList();

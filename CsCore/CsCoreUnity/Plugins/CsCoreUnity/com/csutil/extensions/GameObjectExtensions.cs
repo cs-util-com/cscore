@@ -112,13 +112,15 @@ namespace com.csutil {
         public static bool Destroy(this UnityEngine.Object self, bool destroyNextFrame = false) {
             if (self.IsNullOrDestroyed()) { return false; }
             try {
-                if (destroyNextFrame) {
+                if (self is GameObject go && go.HasComponent<PoolObject>(out var poolObj)) {
+                    return poolObj.Despawn();
+                } else if (destroyNextFrame) {
                     UnityEngine.Object.Destroy(self);
                 } else {
                     UnityEngine.Object.DestroyImmediate(self);
                 }
-            } catch {
-                Log.e("Cant destroy object: " + self, self);
+            } catch (Exception e) {
+                Log.e($"Cant destroy object '{self}': {e}", e, self);
                 return false;
             }
             AssertV3.IsTrue(destroyNextFrame || self.IsDestroyed(), () => "gameObject was not destroyed");

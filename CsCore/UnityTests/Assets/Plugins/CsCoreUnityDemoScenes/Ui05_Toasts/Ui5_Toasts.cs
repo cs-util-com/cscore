@@ -22,10 +22,8 @@ namespace com.csutil.tests.ui {
             ViewStackHelper.MainViewStack().SwitchToView(someUiScreenPrefabName);
 
             yield return new WaitForSeconds(1);
-            var toast3 = Toast.Show("Some toast 3", "Lorem ipsum 3", 2500);
-            AssertV2.IsFalse(toast3.IsDestroyed(), "Toast was already destroyed");
+            Toast.Show("Some toast 3", "Lorem ipsum 3", 2500);
             yield return new WaitForSeconds(3);
-            AssertV2.IsTrue(toast3.IsDestroyed(), "Toast could not be destroyed");
 
             RootCanvas.GetAllRootCanvases().Single().gameObject.Destroy();
             Toast.Show("Some toast 4");
