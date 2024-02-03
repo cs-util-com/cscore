@@ -117,7 +117,7 @@ namespace com.csutil.model.ecs {
             newState.Components.CalcEntryChangesToOldStateV2<IReadOnlyDictionary<string, IComponentData>, string, IComponentData>(ref oldComps,
                 added => OnComponentAdded(iEntity, added, targetParentGo: go),
                 (_, updated) => OnComponentUpdated(iEntity, oldState.Components[updated.Key], updated, targetParentGo: go),
-                deleted => OnCompentRemoved(iEntity, deleted, targetParentGo: go)
+                deleted => OnComponentRemoved(iEntity, deleted, targetParentGo: go)
             );
         }
 
@@ -153,21 +153,20 @@ namespace com.csutil.model.ecs {
 
         protected abstract IComponentPresenter<T> AddComponentTo(GameObject targetGo, IComponentData componentModel, IEntity<T> iEntity);
 
-        protected virtual void OnCompentRemoved(IEntity<T> iEntity, string deleted, GameObject targetParentGo) {
-            GetComponentPresenter(iEntity, deleted).DisposeV2();
+        protected virtual void OnComponentRemoved(IEntity<T> iEntity, string deleted, GameObject targetParentGo) {
+            if (GetComponentPresenters(iEntity).Any(x => x.ComponentId == deleted)) {
+                GetComponentPresenter(iEntity, deleted).DisposeV2();
+            } else {
+                Log.d($"No component found for the deleted entity component with id={deleted} in entity={iEntity}");
+            }
         }
 
         private IComponentPresenter<T> GetComponentPresenter(IEntity<T> iEntity, string componentId) {
-            var entityView = _entityViews[iEntity.Id];
-            var presenters = entityView.GetComponentsInChildren<IComponentPresenter<T>>();
-            try {
-                return presenters.Single(x => x.ComponentId == componentId);
-            } catch (Exception e) {
-                var component = iEntity.Components[componentId];
-                var allPresenters = entityView.GetComponents<Behaviour>().ToStringV2(x => "" + x);
-                Log.e($"Could not find a component presenter for component={component} in presenters={allPresenters}", e);
-                throw;
-            }
+            return GetComponentPresenters(iEntity).Single(x => x.ComponentId == componentId);
+        }
+
+        private IComponentPresenter<T>[] GetComponentPresenters(IEntity<T> iEntity) {
+            return _entityViews[iEntity.Id].GetComponentsInChildren<IComponentPresenter<T>>(true);
         }
 
         protected virtual void OnComponentUpdated(IEntity<T> iEntity, IComponentData oldState, KeyValuePair<string, IComponentData> updatedState, GameObject targetParentGo) {
