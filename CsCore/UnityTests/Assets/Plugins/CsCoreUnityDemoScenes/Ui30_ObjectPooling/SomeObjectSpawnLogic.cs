@@ -21,7 +21,7 @@ namespace com.csutil.tests.ui {
                         GameObject obj = usePooling ? ResourcesV2.LoadPrefabPooled(prefabName) : ResourcesV2.LoadPrefab(prefabName);
                         
                         // Set the object parent and pose as usual:
-                        obj.transform.SetParent(parentForInstances.transform);
+                        obj.transform.SetParent(parentForInstances.transform, false);
                         obj.transform.position = new Vector3(j * 1.5f, 0, i % 20 + k);
                         
                         // Random return to pool time between 2 and 4 seconds:

@@ -18,6 +18,8 @@ namespace com.csutil {
         }
 
         private void OnTakeFromPool(GameObject obj) {
+            obj.transform.SetParent(null, false);
+            obj.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
             obj.SetActiveV2(true);
         }
 
