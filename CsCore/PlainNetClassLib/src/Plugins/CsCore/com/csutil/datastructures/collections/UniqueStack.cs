@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 
 namespace com.csutil {
-    
+
     public class UniqueStack<T> : IEnumerable<T> {
-        
+
         private HashSet<T> hashSet;
         private Stack<T> stack;
+        private static object mutateLock = new object();
 
         public UniqueStack() {
             hashSet = new HashSet<T>();
@@ -22,8 +23,10 @@ namespace com.csutil {
         public int Count => hashSet.Count;
 
         public void Clear() {
-            hashSet.Clear();
-            stack.Clear();
+            lock (mutateLock) {
+                hashSet.Clear();
+                stack.Clear();
+            }
         }
 
         public bool Contains(T item) {
@@ -31,17 +34,21 @@ namespace com.csutil {
         }
 
         public void Push(T item) {
-            if (hashSet.Add(item)) {
-                stack.Push(item);
-            } else {
-                throw new InvalidOperationException("The item is already in the stack");
+            lock (mutateLock) {
+                if (hashSet.Add(item)) {
+                    stack.Push(item);
+                } else {
+                    throw new InvalidOperationException("The item is already in the stack");
+                }
             }
         }
 
         public T Pop() {
-            T item = stack.Pop();
-            hashSet.Remove(item);
-            return item;
+            lock (mutateLock) {
+                T item = stack.Pop();
+                hashSet.Remove(item);
+                return item;
+            }
         }
 
         public T Peek() {
@@ -55,7 +62,7 @@ namespace com.csutil {
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() {
             return stack.GetEnumerator();
         }
-        
+
     }
-    
+
 }

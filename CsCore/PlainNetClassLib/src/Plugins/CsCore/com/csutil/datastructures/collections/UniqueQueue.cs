@@ -6,6 +6,7 @@ namespace com.csutil {
 
         private HashSet<T> hashSet;
         private Queue<T> queue;
+        private static object mutateLock = new object();
 
         public UniqueQueue() {
             hashSet = new HashSet<T>();
@@ -22,8 +23,10 @@ namespace com.csutil {
 
 
         public void Clear() {
-            hashSet.Clear();
-            queue.Clear();
+            lock (mutateLock) {
+                hashSet.Clear();
+                queue.Clear();
+            }
         }
 
 
@@ -33,17 +36,21 @@ namespace com.csutil {
 
 
         public void Enqueue(T item) {
-            if (hashSet.Add(item)) {
-                queue.Enqueue(item);
-            } else {
-                throw new System.InvalidOperationException("The item is already in the queue");
+            lock (mutateLock) {
+                if (hashSet.Add(item)) {
+                    queue.Enqueue(item);
+                } else {
+                    throw new System.InvalidOperationException("The item is already in the queue");
+                }
             }
         }
 
         public T Dequeue() {
-            T item = queue.Dequeue();
-            hashSet.Remove(item);
-            return item;
+            lock (mutateLock) {
+                T item = queue.Dequeue();
+                hashSet.Remove(item);
+                return item;
+            }
         }
 
 
