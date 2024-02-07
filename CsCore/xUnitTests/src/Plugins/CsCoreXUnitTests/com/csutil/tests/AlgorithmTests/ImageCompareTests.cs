@@ -47,6 +47,8 @@ namespace com.csutil.tests.AlgorithmTests {
                 Assert.Equal(1024, images[i].Width);
                 Assert.Equal(512, images[i].Height);
 
+                
+
             }
 
             // Compare test for different images -> should result in differences
@@ -57,7 +59,9 @@ namespace com.csutil.tests.AlgorithmTests {
             Assert.Equal(512, result.resultImage.Height);
 
             result.resultImage.Data = FlipImageHorizontally(result.resultImage.Data, result.resultImage.Width, result.resultImage.Height, result.resultImage.Data.Length);
-            Log.d("Distortion: " + result.distortion);
+            
+            // Threshhold can be set higher (maybe)
+            Assert.True(result.distortion > 0);
 
             using (Stream stream = File.OpenWrite(Path.Combine(Path.GetTempPath(), tmpFolderName + "\\result.png"))) {
 
@@ -74,7 +78,7 @@ namespace com.csutil.tests.AlgorithmTests {
             Assert.Equal(512, result2.resultImage.Height);
 
             result2.resultImage.Data = FlipImageHorizontally(result2.resultImage.Data, result2.resultImage.Width, result2.resultImage.Height, result2.resultImage.Data.Length);
-            Log.d("Distortion: " + result2.distortion);
+            Assert.Equal(0, result2.distortion);
 
             using (Stream stream = File.OpenWrite(Path.Combine(Path.GetTempPath(), tmpFolderName + "\\result2.png"))) {
 
