@@ -211,7 +211,7 @@ namespace com.csutil.model.immutable {
 
         public static ImmutableList<T> AddOrCreate<T>(this ImmutableList<T> self, T t, bool assertUnique = true) {
             if (assertUnique) {
-                AssertV3.IsFalse(self.Contains(t), () => "The list already contains the element to add");
+                AssertV3.IsTrue(self == null || !self.Contains(t), () => "The list already contains the element to add");
             }
             return (self == null) ? ImmutableList.Create(t) : self.Add(t);
         }
