@@ -34,6 +34,14 @@ namespace com.csutil.math {
             var newZ = CalcRunningMean(oldAverage.Z, newValue.Z, count);
             return new Vector3(newX, newY, newZ);
         }
+        
+        /// <summary> Internally uses Quaternion.Slerp to approximate the latest mean rotation </summary>
+        /// <param name="oldAverage"> The current average </param>
+        /// <param name="newValue"> The new value that should contribute to the old average </param>
+        /// <param name="count"> The number of elements that already contributed to the average </param>
+        public static Quaternion CalcRunningMean(this Quaternion oldAverage, Quaternion newValue, int count) {
+            return Quaternion.Slerp(oldAverage, newValue, 1f / count);
+        }
 
         /// <summary>
         /// This allows to calculate the mean of a list without storing all entries of the list.
