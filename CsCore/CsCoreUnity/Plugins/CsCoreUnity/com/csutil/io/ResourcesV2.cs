@@ -23,10 +23,10 @@ namespace com.csutil {
 
             var prefabInstanceTransform = prefabInstance.transform;
             if (!prefabInstance.HasComponent<RectTransform>(out var _)) {
-                AssertV3.AreEqual(Vector3.zero, prefabInstanceTransform.localPosition, "prefabInstance.transform.localPosition");
+                AssertV3.AreEqual(Vector3.zero, prefabInstanceTransform.localPosition, $"<<prefabInstance.transform.localPosition of pathInResourcesFolder={pathInResourcesFolder}>>");
+                AssertV3.AreEqual(Vector3.one, prefabInstanceTransform.localScale, $"<<prefabInstance.transform.localScale of pathInResourcesFolder={pathInResourcesFolder}>>");
             }
-            AssertV3.AreEqual(Quaternion.identity, prefabInstanceTransform.localRotation, "prefabInstance.transform.localRotation");
-            AssertV3.AreEqual(Vector3.one, prefabInstanceTransform.localScale, "prefabInstance.transform.localScale");
+            AssertV3.AreEqual(Quaternion.identity, prefabInstanceTransform.localRotation, $"<<prefabInstance.transform.localRotation of pathInResourcesFolder={pathInResourcesFolder}>>");
             EventBus.instance.Publish(EventConsts.catTemplate, prefabInstance);
             return prefabInstance;
         }

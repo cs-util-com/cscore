@@ -83,17 +83,17 @@ namespace com.csutil {
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         public static void AreEqual(bool expected, bool actual, string varName = "", params object[] args) {
-            Assert(expected == actual, () => $"Assert.AreEqual() FAILED: expected bool {varName}= {expected} NOT equal to actual {varName}= {actual}", args);
+            Assert(expected == actual, () => $"Assert.AreEqual() FAILED: Actual {varName}= {actual} NOT equal to expected bool= {expected}", args);
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         public static void AreEqual(long expected, long actual, string varName = "", params object[] args) {
-            Assert(expected == actual, () => $"Assert.AreEqual() FAILED: expected number {varName}= {expected} NOT equal to actual {varName}= {actual}", args);
+            Assert(expected == actual, () => $"Assert.AreEqual() FAILED: Actual {varName}= {actual} NOT equal to expected number= {expected}", args);
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         public static void AreEqual(double expected, double actual, string varName = "", params object[] args) {
-            Assert(expected == actual, () => $"Assert.AreEqual() FAILED: expected number {varName}= {expected} NOT equal to actual {varName}= {actual}", args);
+            Assert(expected == actual, () => $"Assert.AreEqual() FAILED: Actual {varName}= {actual} NOT equal to expected number= {expected}", args);
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
@@ -106,7 +106,7 @@ namespace com.csutil {
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         public static void AreEqual<T>(T expected, T actual, string varName = "", params object[] args) {
-            Assert(Equals(expected, actual), () => $"Assert.AreEqual() FAILED: expected {typeof(T)} {varName}= {expected} NOT equal to actual {varName}= {actual}", args);
+            Assert(Equals(expected, actual), () => $"Assert.AreEqual() FAILED: Actual {varName}= {actual} NOT equal to expected {typeof(T)}= {expected}", args);
         }
 
         private static string CalcMultiLineUnequalText<T>(IEnumerable<T> expected, IEnumerable<T> actual, string _ = LB + "   ") {
