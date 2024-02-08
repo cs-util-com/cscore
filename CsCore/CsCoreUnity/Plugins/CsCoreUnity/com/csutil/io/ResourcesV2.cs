@@ -20,9 +20,13 @@ namespace com.csutil {
             if (prefab == null) { throw new FileNotFoundException("Could not find prefab in any /Resources/.. folder under path='../" + pathInResourcesFolder + "'"); }
             var prefabInstance = InstantiatePrefab(prefab, keepReferenceToEditorPrefab);
             prefabInstance.name = pathInResourcesFolder;
-            AssertV3.AreEqual(Vector3.zero, prefabInstance.transform.localPosition, "prefabInstance.transform.localPosition");
-            AssertV3.AreEqual(Quaternion.identity, prefabInstance.transform.localRotation, "prefabInstance.transform.localRotation");
-            AssertV3.AreEqual(Vector3.one, prefabInstance.transform.localScale, "prefabInstance.transform.localScale");
+
+            var prefabInstanceTransform = prefabInstance.transform;
+            if (!prefabInstance.HasComponent<RectTransform>(out var _)) {
+                AssertV3.AreEqual(Vector3.zero, prefabInstanceTransform.localPosition, "prefabInstance.transform.localPosition");
+            }
+            AssertV3.AreEqual(Quaternion.identity, prefabInstanceTransform.localRotation, "prefabInstance.transform.localRotation");
+            AssertV3.AreEqual(Vector3.one, prefabInstanceTransform.localScale, "prefabInstance.transform.localScale");
             EventBus.instance.Publish(EventConsts.catTemplate, prefabInstance);
             return prefabInstance;
         }
