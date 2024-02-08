@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using ImageMagick;
 using Xunit;
 using Zio;
+using com.csutil.integrationTests.http;
 
 namespace com.csutil.tests {
 
@@ -69,7 +70,7 @@ namespace com.csutil.tests {
             // If the file does not exist or is invalid, download a random image and save it there:
             if (!imgFile.Exists || imgFile.GetFileSize() == 0) {
                 Log.d("Saving random image for testing to: " + imgFile.GetFullFileSystemPath());
-                var stream = await new Uri("https://placekitten.com/4000/4000").SendGET().GetResult<Stream>();
+                var stream = await new Uri(RestTests.IMG_PLACEHOLD_SERVICE_URL + "/4000/4000").SendGET().GetResult<Stream>();
                 stream = await stream.CopyToSeekableStreamIfNeeded(true);
                 imgFile.SaveStream(stream);
                 stream.Dispose();

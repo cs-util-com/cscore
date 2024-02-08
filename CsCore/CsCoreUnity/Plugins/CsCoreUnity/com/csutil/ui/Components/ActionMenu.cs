@@ -78,15 +78,15 @@ namespace com.csutil.ui {
         }
 
         internal virtual int SortMenuEntries(Entry x, Entry y) {
-            AssertV2.IsNotNull(x, "ActionMenu.Entry x");
-            AssertV2.IsNotNull(y, "ActionMenu.Entry y");
+            AssertV3.IsNotNull(x, "ActionMenu.Entry x");
+            AssertV3.IsNotNull(y, "ActionMenu.Entry y");
             if (x.isFavorite == y.isFavorite) { return 0; }
             if (x.isFavorite && !y.isFavorite) { return -1; }
             return 1;
         }
 
         private async Task SetupFavoriteLogic() {
-            AssertV2.IsTrue(entries.Count() == entries.Map(e => e.id).Distinct().Count(), "!! Entries with same id found in menu " + menuId);
+            AssertV3.IsTrue(entries.Count() == entries.Map(e => e.id).Distinct().Count(), () => "!! Entries with same id found in menu " + menuId);
             if (isMenuFavoriteLogicEnabled) {
                 foreach (var e in entries) { await SetupFavoriteLogic(e); }
             }
@@ -199,7 +199,7 @@ namespace com.csutil.ui {
             private TaskCompletionSource<Entry> taskComplSource;
 
             public async Task OnLoad(ActionMenu menu) {
-                AssertV2.IsNull(taskComplSource, "taskComplSource");
+                AssertV3.IsNull(taskComplSource, "taskComplSource");
                 taskComplSource = new TaskCompletionSource<Entry>();
                 map = targetView.GetLinkMap();
                 menu.viewMode = await menu.persistedSettings.Get(menu.menuId + " viewMode", menu.viewMode);

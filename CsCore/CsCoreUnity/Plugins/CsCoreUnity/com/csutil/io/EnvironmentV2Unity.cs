@@ -46,66 +46,6 @@ namespace com.csutil.io {
 
         public override CultureInfo CurrentUICulture { get => CurrentCulture; set => CurrentCulture = value; }
 
-        public static bool isUnityEditor {
-            get {
-#if UNITY_EDITOR
-                return true;
-#else
-                return false;
-#endif
-            }
-        }
-
-        public static bool isWindows {
-            get {
-#if UNITY_STANDALONE_WIN 
-                return true;
-#else
-                return false;
-#endif
-            }
-        }
-
-        public static bool isMacOs {
-            get {
-#if UNITY_STANDALONE_OSX 
-                return true;
-#else
-                return false;
-#endif
-            }
-        }
-
-        public static bool isLinux {
-            get {
-#if UNITY_STANDALONE_LINUX || UNITY_EDITOR_LINUX
-                return true;
-#else
-                return false;
-#endif
-            }
-        }
-
-        public static bool isAndroid {
-            get {
-#if UNITY_ANDROID
-                return true;
-#else
-                return false;
-#endif
-            }
-        }
-
-        public static bool isIos {
-            get {
-#if UNITY_IOS
-                return true;
-#else
-                return false;
-#endif
-            }
-        }
-
     }
 
     internal class UnitySystemInfo : EnvironmentV2.ISystemInfo {

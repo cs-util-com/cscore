@@ -18,6 +18,23 @@ namespace com.csutil.tests.threading {
         }
 
         [UnityTest]
+        public IEnumerator TestMainThread3() {
+            yield return TaskV2.Run(TestMainThread3Asnyc).AsCoroutine();
+        }
+
+        private async Task TestMainThread3Asnyc() {
+            Assert.False(MainThread.isMainThread);
+            bool wasCalled = false;
+            Assert.True(await MainThread.instance.ExecuteOnMainThreadAsync(async () => {
+                await TaskV2.Delay(100);
+                Assert.True(MainThread.isMainThread);
+                wasCalled = true;
+                return true;
+            }));
+            Assert.True(wasCalled);
+        }
+
+        [UnityTest]
         public IEnumerator TestAsyncTaskOnMainThread() {
             yield return TestAsyncTaskOnMainThreadAsync().AsCoroutine();
         }

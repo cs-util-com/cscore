@@ -31,7 +31,7 @@ namespace com.csutil.ui.jsonschema {
             if (!RegexValidator.IsAllInputCurrentlyValid(currentScreen)) {
                 return false;
             }
-            return vs.SwitchBackToLastView(gameObject, destroyViewStackWhenLastScreenReached, hideNotDestroyCurrentViewWhenGoingBackwards);
+            return vs.SwitchBackToLastView(gameObject, destroyViewStackWhenLastScreenReached, hideNotDestroyCurrentViewWhenGoingBackwards, destroyViewStackWhenLastScreenReached);
         }
 
     }

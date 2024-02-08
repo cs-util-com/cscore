@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -172,6 +173,18 @@ namespace com.csutil.tests {
             TestMoveWith(new string[] { "A", "B", "C", "D" });
         }
 
+        [Fact]
+        public void TestMove2() {
+            var list = ImmutableList<string>.Empty.AddRange(new string[] { "A", "B", "C", "D" });
+            Assert.Equal("[A, B, C, D]", list.ToStringV2());
+            var newList = list.Move("A", 3); // Move A to the end
+            Assert.Equal("[B, C, D, A]", newList.ToStringV2());
+            newList = list.Move("A", 0); // Move A back to the start
+            Assert.Equal("[A, B, C, D]", newList.ToStringV2());
+            // Moving A to index 4 is not possible:
+            Assert.Throws<ArgumentOutOfRangeException>(() => { list.Move("A", 4); });
+        }
+
         private static void TestMoveWith(IList<string> l) {
             l.Move(2, 3);
             Assert.Equal("[A, B, D, C]", l.ToStringV2());
@@ -193,7 +206,7 @@ namespace com.csutil.tests {
 
         [Fact]
         public void TestToHashSet() {
-            var h = com.csutil.netstandard2_1polyfill.IEnumerableExtensions.ToHashSet(new List<string>() { "A", "B", "A", "C" });
+            var h = netstandard2_1polyfill.IEnumerableExtensions2_1.ToHashSet(new List<string>() { "A", "B", "A", "C" });
             Assert.Equal(3, h.Count);
         }
 

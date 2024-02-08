@@ -15,7 +15,7 @@ namespace com.csutil.ui.jsonschema {
             slider.minValue = field.minimum.Value;
             slider.maxValue = field.maximum.Value;
             slider.wholeNumbers = field.GetJTokenType() == JTokenType.Integer;
-            return Task.FromResult(true);
+            return Task.CompletedTask;
         }
     }
 

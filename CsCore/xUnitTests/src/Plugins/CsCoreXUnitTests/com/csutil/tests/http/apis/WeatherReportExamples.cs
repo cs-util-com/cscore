@@ -38,12 +38,13 @@ namespace com.csutil.integrationTests.http {
             var latitude = double.Parse(response.geoplugin_latitude, CultureInfo.InvariantCulture);
             var longitude = double.Parse(response.geoplugin_longitude, CultureInfo.InvariantCulture);
             var report = await WttrInApi.GetWeather(latitude, longitude);
-            Log.d($"Full weather report for ({latitude},{longitude}): " + JsonWriter.AsPrettyString(report));
+            Log.d($"Full weather report for ({response.geoplugin_city}): " + JsonWriter.AsPrettyString(report));
             Assert.NotEmpty(report.weather.First().hourly.First().weatherDesc);
+            Assert.Equal(response.geoplugin_countryName, report.nearest_area.First().country.First().value);
         }
 
         /// <summary> MetaWeather seems to be down for quite a while, will check from time to time if its back  </summary>
-        private DateTime MetaWeatherComNextCheckIfBackOnline = new DateTime(2024, 01, 01);
+        private DateTime MetaWeatherComNextCheckIfBackOnline = new DateTime(2024, 04, 01);
 
         [Obsolete]
         [Fact]

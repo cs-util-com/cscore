@@ -20,7 +20,9 @@ namespace com.csutil {
             return Matrix4x4.Decompose(matrix, out scale, out rotation, out translation);
         }
 
-        public static Vector3 Transform(this Matrix4x4 transformationMatrix, Vector3 vecToTransform) { return Vector3.Transform(vecToTransform, transformationMatrix); }
+        public static Vector3 Transform(this Matrix4x4 transformationMatrix, Vector3 vecToTransform) {
+            return Vector3.Transform(vecToTransform, transformationMatrix);
+        }
 
         public static void Set(this ref Matrix4x4 self, int rowIndex, int columnIndex, float value) {
             if (rowIndex < 0 || rowIndex > 3 || columnIndex < 0 || columnIndex > 3) {
@@ -146,6 +148,23 @@ namespace com.csutil {
                 case 3: return new Vector4(ma.M41, ma.M42, ma.M43, ma.M44);
             }
             throw new InvalidOperationException("Invalid row index.");
+        }
+        
+        public static Matrix4x4 WithPosition(this Matrix4x4 self, Vector3 newPosition) {
+            self.M41 = newPosition.X;
+            self.M42 = newPosition.Y;
+            self.M43 = newPosition.Z;
+            return self;
+        }
+        
+        public static Matrix4x4 WithRotation(this Matrix4x4 self, Quaternion newRotation) {
+            self.Decompose(out var scale, out var _, out var translation);
+            return Compose(translation, newRotation, scale);
+        }
+        
+        public static Matrix4x4 WithScale(this Matrix4x4 self, Vector3 newScale) {
+            self.Decompose(out var _, out var rotation, out var translation);
+            return Compose(translation, rotation, newScale);
         }
 
     }

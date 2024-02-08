@@ -1,12 +1,14 @@
 {
     "name": "CsCoreUnityTests",
+    "rootNamespace": "",
     "references": [
         "CsCore",
         "CsCoreUnity",
         "CsCoreXUnitTests",
         "CsCoreUnityDemoScenes",
         "UnityEngine.TestRunner",
-        "UnityEditor.TestRunner"
+        "UnityEditor.TestRunner",
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

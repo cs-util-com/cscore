@@ -13,6 +13,7 @@ namespace com.csutil.editor {
         /// <summary> The priority value of the default Unity GameObject/UI menu </summary>
         private const int priorityOfUiMenu = 6;
         private const string UIv2menu = "GameObject/UI v2/";
+        private const string UIv2menuOld = UIv2menu + "Old/";
 
         [MenuItem(UIv2menu + "Root Canvas", false, priorityOfUiMenu + 1)]
         static void AddRootCanvas() {
@@ -27,12 +28,12 @@ namespace com.csutil.editor {
 
         [MenuItem(UIv2menu + "Views/ViewStack View", false, priorityOfUiMenu + 2)]
         static void AddViewInViewStack() {
-            var view = AddViewToMainViewStack(() =>ResourcesV2.LoadPrefab("Canvas/DefaultViewStackView"));
+            var view = AddViewToViewStack(() => ResourcesV2.LoadPrefab("Canvas/DefaultViewStackView"));
             view.name = "View " + (view.transform.GetSiblingIndex() + 1);
         }
 
         [MenuItem(UIv2menu + "Views/DefaultSideBar", false, priorityOfUiMenu + 2)]
-        static void DefaultSideBar() { AddViewToMainViewStack(() => ResourcesV2.LoadPrefab("DefaultSideBar")); }
+        static void DefaultSideBar() { AddViewToViewStack(() => ResourcesV2.LoadPrefab("DefaultSideBar")); }
 
         [MenuItem(UIv2menu + "DefaultScrollView", false, priorityOfUiMenu + 3)]
         static void DefaultScrollView() { AddPrefabToActiveView("DefaultScrollView"); }
@@ -76,9 +77,15 @@ namespace com.csutil.editor {
 
         [MenuItem(UIv2menu + "DefaultRadioButton", false, priorityOfUiMenu + 6)]
         static void DefaultRadioButton() { AddPrefabToActiveView("DefaultRadioButton"); }
-        
-        [MenuItem(UIv2menu + "DefaultInput", false, priorityOfUiMenu + 6)]
+
+        [MenuItem(UIv2menuOld + "DefaultInput", false, priorityOfUiMenu + 6)]
         static void DefaultInput() { AddPrefabToActiveView("DefaultInput"); }
+
+        [MenuItem(UIv2menu + "DefaultInputV2", false, priorityOfUiMenu + 6)]
+        static void DefaultInputV2() { AddPrefabToActiveView("DefaultInputV2"); }
+        
+        [MenuItem(UIv2menu + "DefaultText", false, priorityOfUiMenu + 6)]
+        static void DefaultText() { AddPrefabToActiveView("DefaultText"); }
 
         [MenuItem(UIv2menu + "DefaultDropDown", false, priorityOfUiMenu + 6)]
         static void DefaultDropDown() { AddPrefabToActiveView("DefaultDropDown"); }
@@ -131,11 +138,25 @@ namespace com.csutil.editor {
             return go;
         }
 
-        private static GameObject AddViewToMainViewStack(Func<GameObject> viewInViewStackCreator) {
-            GameObject mainViewStack = ViewStackHelper.MainViewStack().gameObject;
+        private static GameObject AddViewToViewStack(Func<GameObject> viewInViewStackCreator) {
+            if (Selection.activeGameObject != null) {
+                ViewStack foundViewStackDownwards = Selection.activeGameObject.GetComponentInChildren<ViewStack>();
+                if (foundViewStackDownwards != null) {
+                    return AddViewToViewStack(foundViewStackDownwards.gameObject, viewInViewStackCreator);
+                }
+                ViewStack foundViewStackUpwards = Selection.activeGameObject.GetComponentInParent<ViewStack>();
+                if (foundViewStackUpwards != null) {
+                    return AddViewToViewStack(foundViewStackUpwards.gameObject, viewInViewStackCreator);
+                }
+            }
+            // Else (create if needed and) use the main view stack:
+            return AddViewToViewStack(ViewStackHelper.MainViewStack().gameObject, viewInViewStackCreator);
+        }
+
+        private static GameObject AddViewToViewStack(GameObject viewStackGo, Func<GameObject> viewInViewStackCreator) {
             GameObject viewInViewStack = viewInViewStackCreator();
-            mainViewStack.AddChild(viewInViewStack);
-            viewInViewStack.name += " " + mainViewStack.GetChildCount();
+            viewStackGo.AddChild(viewInViewStack);
+            viewInViewStack.name += " " + viewStackGo.GetChildCount();
             viewInViewStack.GetOrAddComponent<RectTransform>().SetAnchorsStretchStretch();
             SelectInHirarchyUi(viewInViewStack);
             return viewInViewStack;
@@ -144,7 +165,7 @@ namespace com.csutil.editor {
         /// <summary> Returns the current selected element in a canvas or a view in a view stack </summary>
         private static GameObject GetSelectedCanvasChild() {
             GameObject selectedGo = Selection.activeGameObject;
-            if (selectedGo?.GetComponentV2<RectTransform>() != null) { return selectedGo; }
+            if (selectedGo != null && selectedGo.GetComponentV2<RectTransform>() != null) { return selectedGo; }
             if (GetLastActiveView() == null) { AddViewInViewStack(); }
             return GetLastActiveView();
         }

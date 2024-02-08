@@ -1,8 +1,10 @@
 {
     "name": "CsCoreUnityDemoScenes",
+    "rootNamespace": "",
     "references": [
         "CsCore",
-        "CsCoreUnity"
+        "CsCoreUnity",
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

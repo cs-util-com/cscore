@@ -16,7 +16,7 @@ namespace com.csutil.ui.jsonschema {
                 SetupRegexValidator();
             }
             if (field.maxLength != null) { input.characterLimit = field.maxLength.Value; }
-            return Task.FromResult(true);
+            return Task.CompletedTask;
         }
 
         private void SetupRegexValidator() {

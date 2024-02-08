@@ -12,7 +12,7 @@ namespace com.csutil.ui.jsonschema {
         public Button delete;
         public Button search;
 
-        protected override Task Setup(string fieldName, string fullPath) { return Task.FromResult(true); }
+        protected override Task Setup(string fieldName, string fullPath) { return Task.CompletedTask; }
 
     }
 

@@ -27,7 +27,7 @@ namespace com.csutil.ui {
             EventBus.instance.Subscribe(subscriber, eventName, (Button button) => {
                 if (button.HasComponent<Link>(out var link) && link.id == targetId) {
                     var unsubscribed = EventBus.instance.Unsubscribe(subscriber, eventName);
-                    AssertV2.IsTrue(unsubscribed, "unsubscribed event listener");
+                    AssertV3.IsTrue(unsubscribed, () => "unsubscribed event listener");
                     tcs.SetResult(button);
                 }
             });
@@ -46,7 +46,7 @@ namespace com.csutil.ui {
                 var isCorrectToggle = toggle.HasComponent<Link>(out var link) && link.id == targetId;
                 if (isCorrectToggle && isChecked == shouldBeChecked) {
                     var unsubscribed = EventBus.instance.Unsubscribe(subscriber, eventName);
-                    AssertV2.IsTrue(unsubscribed, "unsubscribed event listener");
+                    AssertV3.IsTrue(unsubscribed, () => "unsubscribed event listener");
                     tcs.SetResult(toggle);
                 }
             });
@@ -65,7 +65,7 @@ namespace com.csutil.ui {
                 var isCorrectInput = input.HasComponent<Link>(out var link) && link.id == targetId;
                 if (isCorrectInput && isTextAccepted(newText)) {
                     var unsubscribed = EventBus.instance.Unsubscribe(subscriber, eventName);
-                    AssertV2.IsTrue(unsubscribed, "unsubscribed event listener");
+                    AssertV3.IsTrue(unsubscribed, () => "unsubscribed event listener");
                     tcs.SetResult(input);
                 }
             });
@@ -84,7 +84,7 @@ namespace com.csutil.ui {
                 var isCorrectInput = dropdown.HasComponent<Link>(out var link) && link.id == targetId;
                 if (isCorrectInput && isTextAccepted(selection)) {
                     var unsubscribed = EventBus.instance.Unsubscribe(subscriber, eventName);
-                    AssertV2.IsTrue(unsubscribed, "unsubscribed event listener");
+                    AssertV3.IsTrue(unsubscribed, () => "unsubscribed event listener");
                     tcs.SetResult(dropdown);
                 }
             });

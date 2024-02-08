@@ -25,13 +25,12 @@ namespace com.csutil {
         /// and https://docs.microsoft.com/en-us/dotnet/api/system.data.datacolumn.expression
         /// </summary>
         /// <param name="formula"> eg "(1 + 2.5 * 4) / 2" </param>
-        public static double Calculate(string formula) {
+        public static double Calculate(string formula, bool logErrors = true) {
             try {
                 formula = formula.Replace(",", "."); // Allow e.g 0.5 + 0,5
                 return Convert.ToDouble(new System.Data.DataTable().Compute(formula, null));
-            }
-            catch (Exception e) {
-                Log.e($"Failed to calculate formula '{formula}': {e.Message}", e);
+            } catch (Exception e) {
+                if (logErrors) { Log.e($"Failed to calculate formula '{formula}': {e.Message}", e); }
                 throw;
             }
         }

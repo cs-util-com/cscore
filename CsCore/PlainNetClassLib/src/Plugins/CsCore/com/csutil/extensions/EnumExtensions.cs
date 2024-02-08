@@ -64,7 +64,7 @@ namespace com.csutil {
                 int entryAsInt = (int)(object)entry;
                 if (entryAsInt == 0) { continue; } // 0 is always a power of two
                 if ((entryAsInt & (entryAsInt - 1)) != 0) { // Check if the entry is a power of two:
-                    Log.e($"Enum {typeof(T)} cant be used with .ContainsFlag() because not all entries are a power of two, e.g. {entry}={entryAsInt}! "
+                    Log.w($"Enum {typeof(T)} cant be used with .ContainsFlag() because not all entries are a power of two, e.g. {entry}={entryAsInt}! "
                         + $"This error should only be ignored if you have enum entries that are composed from other enum entries (eg MyEnum.A = MyEnum.B | MyEnum.C)");
                 }
             }

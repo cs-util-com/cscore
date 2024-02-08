@@ -4,13 +4,23 @@ using System.Threading.Tasks;
 
 namespace com.csutil.model {
 
-    public abstract class BaseFeatureFlagStore<T, V> : KeyValueStoreTypeAdapter<T>, IDisposable
+    public abstract class BaseFeatureFlagStore<T, V> : KeyValueStoreTypeAdapter<T>
                                             where T : IFeatureFlag where V : IFeatureFlagLocalState {
 
         private readonly IKeyValueStore localStore;
+        
+        public DisposeState IsDisposed { get; private set; } = DisposeState.Active;
 
         public BaseFeatureFlagStore(IKeyValueStore localStore, IKeyValueStore remoteStore) : base(remoteStore) {
             this.localStore = localStore;
+        }
+        
+        public override void Dispose() {
+            base.Dispose();
+            IsDisposed = DisposeState.DisposingStarted;
+            store.DisposeV2();
+            localStore.DisposeV2();
+            IsDisposed = DisposeState.Disposed;
         }
 
         /// <summary>
@@ -29,11 +39,6 @@ namespace com.csutil.model {
             // Only the localState is stored to the local store, the rest skipped
             await localStore.Set(featureId, value.localState);
             return default(T); // No update of value so nothing old to return 
-        }
-
-        public void Dispose() {
-            store.Dispose();
-            localStore.Dispose();
         }
 
     }

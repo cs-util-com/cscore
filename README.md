@@ -1171,8 +1171,7 @@ More details how the Unity package manager works can be found here:
 * From the [Asset Store (https://assetstore.unity.com/packages/tools/integration/cscore-138254)](https://assetstore.unity.com/packages/tools/integration/cscore-138254) 
 * From the [/CsCore/UnityPackages folder](https://github.com/cs-util-com/cscore/raw/master/CsCore/UnityPackages/) 
 * From the `master` branch, you will have to link the `src` folders to your Unity project, see e.g. the linking bat script in 
-* `cscore\CsCore\PlainNetClassLib\src\linkThisIntoAUnityProject.bat`. This option makes sense e.g. if you want to submit pull requests to 
-* cscore. See also the section about **Sym Links** below.
+* `cscore\CsCore\PlainNetClassLib\src\linkThisIntoAUnityProject.bat`. This option makes sense e.g. if you want to submit pull requests to cscore. See also the section about **Sym Links** below.
 
 ### Optional experimental Unity features
 

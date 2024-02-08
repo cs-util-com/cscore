@@ -2,12 +2,21 @@
 using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using TMPro;
 using UnityEngine.UI;
 
 namespace com.csutil {
 
     public static class LocalizationExtensions {
 
+        public static void textLocalized(this TMP_InputField self, string key, params object[] args) {
+            I18n i18n = I18n.instance(self);
+            if (i18n == null) { i18n = SetupDefaultI18nInstance(self).Result; }
+            var localizedText = i18n.Get(key, args);
+            if (localizedText != self.text) { self.text = localizedText; }
+        }
+        
+        [Obsolete("Use TMP_InputField instead of InputField")]
         public static void textLocalized(this InputField self, string key, params object[] args) {
             I18n i18n = I18n.instance(self);
             if (i18n == null) { i18n = SetupDefaultI18nInstance(self).Result; }
@@ -15,6 +24,14 @@ namespace com.csutil {
             if (localizedText != self.text) { self.text = localizedText; }
         }
 
+        public static void textLocalized(this TMP_Text self, string key, params object[] args) {
+            I18n i18n = I18n.instance(self);
+            if (i18n == null) { i18n = SetupDefaultI18nInstance(self).Result; }
+            var localizedText = i18n.Get(key, args);
+            if (localizedText != self.text) { self.text = localizedText; }
+        }
+        
+        [Obsolete("Use TMP_Text instead of Text")]
         public static void textLocalized(this Text self, string key, params object[] args) {
             I18n i18n = I18n.instance(self);
             if (i18n == null) { i18n = SetupDefaultI18nInstance(self).Result; }

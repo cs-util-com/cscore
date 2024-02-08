@@ -41,7 +41,7 @@ namespace com.csutil {
                 var jsonString = await regressionStore.Get<string>(id, null);
                 var oldJson = JToken.Parse(jsonString);
                 var newJson = JToken.Parse(JsonWriter.GetWriter(objectsToCheck).Write(objectsToCheck));
-                var diff = new JsonDiffPatch().Diff(oldJson, newJson);
+                var diff = new JsonDiffPatch().DiffV2(oldJson, newJson);
                 return diff;
             }
         }

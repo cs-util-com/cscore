@@ -63,7 +63,7 @@ namespace com.csutil.progress {
         }
 
         private void OnProgressUpdate(object sender, IProgress _) {
-            AssertV2.IsTrue(sender == progressManager, "sender != pm (ProgressManager field)");
+            AssertV3.IsTrue(sender == progressManager, () => "sender != pm (ProgressManager field)");
             var percent = Math.Round(progressManager.combinedAvgPercent, 3);
             if (progressText != null) {
                 progressText.text = $"{percent}% ({progressManager.combinedCount}/{progressManager.combinedTotalCount})";

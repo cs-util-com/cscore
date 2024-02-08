@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using com.csutil.integrationTests.http;
 using com.csutil.model;
 using com.csutil.model.jsonschema;
 using Newtonsoft.Json;
@@ -20,7 +21,7 @@ namespace com.csutil.tests.model.jsonschema {
                 name = "Tom",
                 password = "12345678",
                 age = 50,
-                profilePic = new FileRef() { url = "https://placekitten.com/128/128" },
+                profilePic = new FileRef() { url = RestTests.IMG_PLACEHOLD_SERVICE_URL + "/128/128" },
                 tags = new List<string>() { "tag1" }
             };
 

@@ -15,11 +15,21 @@ namespace com.csutil.integrationTests.model {
         public FeatureUsageRuleSystemTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
         [Fact]
-        public async Task ExampleUsage1() {
-
+        public async Task ExampleUsage1New() {
+            // Create an analytics system and fill it with feature usage events:
+            var analytics = CreateLocalAnalyticsSystemV2();
+            await ExampleUsage1(analytics);
+        }
+        
+        [Obsolete]
+        [Fact]
+        public async Task ExampleUsage1Old() {
             // Create an analytics system and fill it with feature usage events:
             var analytics = CreateLocalAnalyticsSystem();
-
+            await ExampleUsage1(analytics);
+        }
+        
+        private async Task ExampleUsage1(ILocalAnalytics analytics) {
             var t = new MockDateTimeV2();
             IoC.inject.SetSingleton<IClock>(t, overrideExisting: true);
 
@@ -75,7 +85,7 @@ namespace com.csutil.integrationTests.model {
 
         }
 
-        async Task TestAllRules1(LocalAnalytics analytics, string featureId) {
+        async Task TestAllRules1(ILocalAnalytics analytics, string featureId) {
 
             var daysUsed = 20;
             var timesUsed = 200;
@@ -125,7 +135,7 @@ namespace com.csutil.integrationTests.model {
         }
 
         /// <summary> Same rules as in TestAllRules1 but inverted assertions </summary>
-        async Task TestAllRules2(LocalAnalytics analytics, string featureId) {
+        async Task TestAllRules2(ILocalAnalytics analytics, string featureId) {
 
             var daysUsed = 20;
             var timesUsed = 50;
@@ -189,8 +199,19 @@ namespace com.csutil.integrationTests.model {
         }
 
         [Fact]
-        public async Task ExampleUsage2() {
-            // Get your key from https://console.developers.google.com/apis/credentials
+        public async Task ExampleUsage2New() {
+            var analytics = CreateLocalAnalyticsSystemV2();
+            await ExampleUsage2(analytics);
+        }
+        
+        [Obsolete]
+        [Fact]
+        public async Task ExampleUsage2Old() {
+            var analytics = CreateLocalAnalyticsSystem();
+            await ExampleUsage2(analytics);
+        }
+        
+        private static async Task ExampleUsage2(ILocalAnalytics analytics) { // Get your key from https://console.developers.google.com/apis/credentials
             var apiKey = await IoC.inject.GetAppSecrets().GetSecret("GoogleSheetsV4Key");
             // https://docs.google.com/spreadsheets/d/1rl1vi-LUhOgoY_QrMJsm2UE0SdiL4EbOtLwfNPsavxQ contains the sheetId:
             var sheetId = "1rl1vi-LUhOgoY_QrMJsm2UE0SdiL4EbOtLwfNPsavxQ";
@@ -198,7 +219,6 @@ namespace com.csutil.integrationTests.model {
             var source = new GoogleSheetsKeyValueStore(new InMemoryKeyValueStore(), apiKey, sheetId, sheetName);
             var store = source.GetTypeAdapter<UsageRule>();
 
-            var analytics = CreateLocalAnalyticsSystem();
             IEnumerable<UsageRule> rules = await store.GetRulesInitialized(analytics);
             foreach (var rule in rules) {
                 if (await rule.isTrue()) {
@@ -209,15 +229,25 @@ namespace com.csutil.integrationTests.model {
 
         }
 
+        [Fact]
+        public async Task ExampleUsage3_NpsScoreSystemNew() {
+            var analytics = CreateLocalAnalyticsSystemV2();
+            await ExampleUsage3_NpsScoreSystem(analytics);
+        }
+        
+        [Obsolete]
         /// <summary> See https://github.com/cs-util-com/cscore/issues/54 </summary>
         [Fact]
-        public async Task ExampleUsage3_NpsScoreSystem() {
-
+        public async Task ExampleUsage3_NpsScoreSystemOld() {
+            var analytics = CreateLocalAnalyticsSystem();
+            await ExampleUsage3_NpsScoreSystem(analytics);
+        }
+        
+        private static async Task ExampleUsage3_NpsScoreSystem(ILocalAnalytics analytics) {
             var t = new MockDateTimeV2();
             IoC.inject.SetSingleton<IClock>(t, overrideExisting: true);
             t.mockUtcNow = DateTimeV2.ParseUtc("01.02.2011");
 
-            var analytics = CreateLocalAnalyticsSystem();
 
             // The user must have used the app at least on 3 different days before the NPS score should be collected
             UsageRule appUsedInTheLastXDays = analytics.NewAppUsedXDaysRule(3);
@@ -240,9 +270,18 @@ namespace com.csutil.integrationTests.model {
             
         }
 
-        private static LocalAnalytics CreateLocalAnalyticsSystem() {
+        [Obsolete("Use v2",true)]
+        private static ILocalAnalytics CreateLocalAnalyticsSystem() {
             LocalAnalytics analytics = new LocalAnalytics(new InMemoryKeyValueStore());
             analytics.createStoreFor = (_) => new InMemoryKeyValueStore().GetTypeAdapter<AppFlowEvent>();
+            // Setup the AppFlow logic to use the LocalAnalytics system:
+            AppFlow.AddAppFlowTracker(new AppFlowToStore(analytics));
+            return analytics;
+        }
+        
+        private static ILocalAnalytics CreateLocalAnalyticsSystemV2() {
+            var dir = EnvironmentV2.instance.GetNewInMemorySystem();
+            LocalAnalyticsV3 analytics = new LocalAnalyticsV3(dir);
             // Setup the AppFlow logic to use the LocalAnalytics system:
             AppFlow.AddAppFlowTracker(new AppFlowToStore(analytics));
             return analytics;
@@ -261,7 +300,7 @@ namespace com.csutil.integrationTests.model {
             }
         }
 
-        async Task AssertFeatureUsageDetected(LocalAnalytics analytics, string featureId, int expectedCount) {
+        async Task AssertFeatureUsageDetected(ILocalAnalytics analytics, string featureId, int expectedCount) {
             var featureEventStore = analytics.categoryStores[featureId];
             var allFeatureEvents = await featureEventStore.GetAll();
             Assert.Equal(expectedCount, allFeatureEvents.Count());

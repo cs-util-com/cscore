@@ -59,7 +59,7 @@ namespace com.csutil.ui.viewstack {
         private bool ShowNextScreenPrefab() {
             GameObject currentViewToHide = hideCurrentView ? gameObject : null;
             var stack = gameObject.GetViewStack();
-            AssertV2.IsTrue(nextScreenPrefab == null || nextScreenPrefab.IsPartOfEditorOnlyPrefab(), "nextScreenPrefab was not a prefab");
+            AssertV3.IsTrue(nextScreenPrefab == null || nextScreenPrefab.IsPartOfEditorOnlyPrefab(), () => "nextScreenPrefab was not a prefab");
             if (nextScreenPrefab != null) { return stack.ShowView(nextScreenPrefab, currentViewToHide) != null; }
             if (!nextScreenPrefabName.IsNullOrEmpty()) { return stack.ShowView(nextScreenPrefabName, currentViewToHide) != null; }
             return false;
@@ -70,7 +70,7 @@ namespace com.csutil.ui.viewstack {
         private bool GoForwards() { return gameObject.GetViewStack().SwitchToNextView(gameObject, hideCurrentView); }
 
         private bool GoBackwards() {
-            return gameObject.GetViewStack().SwitchBackToLastView(gameObject, destroyViewStackWhenLastScreenReached, hideNotDestroyCurrentViewWhenGoingBackwards);
+            return gameObject.GetViewStack().SwitchBackToLastView(gameObject, destroyViewStackWhenLastScreenReached, hideNotDestroyCurrentViewWhenGoingBackwards, destroyViewStackWhenLastScreenReached);
         }
 
     }

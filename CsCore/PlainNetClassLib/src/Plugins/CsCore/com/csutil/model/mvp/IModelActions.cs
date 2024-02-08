@@ -13,7 +13,7 @@
     /// Actions can be both mutations of the model but also events like button clicks or other user interactions.
     /// The IModelActions interface is used to decouple the presenter from the view and the model.
     /// The presenter can be reused with different views and models as long as they implement the IModelActions interface. </summary>
-    public interface IModelActions<M> {
+    public interface IModelActions<M> : IDisposableV2 {
         /// <summary> The model instance (that is currently loaded into the view) where the triggered actions can be performed on </summary>
         M Model { set; }
     }

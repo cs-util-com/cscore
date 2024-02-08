@@ -37,7 +37,7 @@ namespace com.csutil.testing {
 
             pm = new ProgressManager();
             var progressUis = ResourcesV2.FindAllInScene<ProgressUi>();
-            AssertV2.IsFalse(progressUis.IsNullOrEmpty(), "progressUi");
+            AssertV3.IsFalse(progressUis.IsNullOrEmpty(), () => "progressUis is null or empty");
             foreach (var progrUi in progressUis) { progrUi.progressManager = pm; }
 
             // On the parent canvas level collect all links:
@@ -72,7 +72,7 @@ namespace com.csutil.testing {
             allTests = XunitTestRunner.CollectAllTests(allClasses, (test) => {
                 // callback before a test is executed
             });
-            AssertV2.AreNotEqual(0, allTests.Count);
+            AssertV3.AreNotEqual(0, allTests.Count);
             StartCoroutine(ShowAllFoundTests(allTests));
             if (autoRunAllTests) {
                 links.Get<Text>("ButtonText").text = "Now running " + allTests.Count + " tests..";
@@ -90,7 +90,7 @@ namespace com.csutil.testing {
                         yield return RunTestCoroutine(test);
                     }
                 }
-                AssertV2.AreEqual(0, allTests.Filter(t => t.testTask.IsFaulted).Count());
+                AssertV3.AreEqual(0, allTests.Filter(t => t.testTask.IsFaulted).Count());
             }
         }
 

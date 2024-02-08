@@ -18,8 +18,8 @@ namespace com.csutil.ui.jsonschema {
         }
 
         private void Start() {
-            AssertV2.IsNotNull(field, "field", gameObject);
-            AssertV2.IsNotNull(menuOnClickVisibilityToggle, "menuOnClickVisibilityToggle", gameObject);
+            AssertV3.IsNotNull(field, "field", gameObject);
+            AssertV3.IsNotNull(menuOnClickVisibilityToggle, "menuOnClickVisibilityToggle", gameObject);
             CreateMenuEntryUis();
         }
 

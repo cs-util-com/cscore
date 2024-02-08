@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace com.csutil.model.ecs {
 
@@ -14,10 +16,13 @@ namespace com.csutil.model.ecs {
             public T Data { get; set; }
             public EntityComponentSystem<T> Ecs { get; private set; }
 
+            [JsonConstructor]
             public Entity(T data, EntityComponentSystem<T> ecs) {
                 Data = data;
                 Ecs = ecs;
             }
+
+            public Action<T, T> OnUpdate { get; set; }
 
             public string Id => Data.Id;
             public string Name => Data.Name;
@@ -30,14 +35,14 @@ namespace com.csutil.model.ecs {
 
             public override string ToString() { return Data.ToString(); }
 
-            public void Dispose() {
+            public virtual void Dispose() {
                 IsDisposed = DisposeState.DisposingStarted;
                 if (Ecs != null) { Ecs.Destroy(this); }
                 Ecs = null;
                 IsDisposed = DisposeState.Disposed;
             }
 
-            public DisposeState IsDisposed { get; private set; } = DisposeState.Active;
+            public DisposeState IsDisposed { get; set; } = DisposeState.Active;
 
         }
 
@@ -48,9 +53,10 @@ namespace com.csutil.model.ecs {
         private readonly Dictionary<string, IEntity<T>> _entities = new Dictionary<string, IEntity<T>>();
 
         /// <summary> A lookup from templateId to all entityIds that are variants of that template </summary>
-        private readonly Dictionary<string, HashSet<string>> Variants = new Dictionary<string, HashSet<string>>();
+        private readonly Dictionary<string, HashSet<string>> _variants = new Dictionary<string, HashSet<string>>();
 
         public IReadOnlyDictionary<string, IEntity<T>> Entities => _entities;
+        public IReadOnlyCollection<string> TemplateIds => _variants.Keys;
 
         /// <summary> If set to true the T class used in IEntity<T> must be immutable in all fields </summary>
         public readonly bool IsModelImmutable;
@@ -73,14 +79,21 @@ namespace com.csutil.model.ecs {
 
         public void Dispose() {
             IsDisposed = DisposeState.DisposingStarted;
+            OnDispose();
+            _variants.Clear();
             TemplatesIo.DisposeV2();
+            foreach (IEntity<T> entity in _entities.Values) {
+                ((Entity)entity).IsDisposed = DisposeState.Disposed;
+            }
             _entities.Clear();
-            Variants.Clear();
             OnIEntityUpdated = null;
             IsDisposed = DisposeState.Disposed;
         }
 
+        protected virtual void OnDispose() { }
+
         public IEntity<T> Add(T entityData) {
+            this.ThrowErrorIfDisposed();
             // First check if the entity already exists:
             if (_entities.TryGetValue(entityData.Id, out var existingEntity)) {
                 throw new InvalidOperationException("Entity already exists with id '" + entityData.Id + "' old=" + existingEntity.Data + " new=" + entityData);
@@ -101,19 +114,21 @@ namespace com.csutil.model.ecs {
 
         private void UpdateVariantsLookup(T entity) {
             if (entity.TemplateId != null) {
-                Variants.AddToValues(entity.TemplateId, entity.Id);
+                _variants.AddToValues(entity.TemplateId, entity.Id);
             }
         }
 
-        public void Update(T entityData) {
-            TemplatesIo?.SaveChanges(entityData);
-            // In case the entity is a template, update also all entities that inherit from the template:
+        public Task Update(T entityData) {
+            this.ThrowErrorIfDisposed();
+            var t = TemplatesIo?.SaveChanges(entityData);
             InternalUpdate(entityData);
+            return t;
         }
-        
+
         private void InternalUpdate(T updatedEntityData) {
             var entityId = updatedEntityData.Id;
             var entity = (Entity)_entities[entityId];
+            entity.ThrowErrorIfDisposed();
 
             var oldEntryData = entity.Data;
 
@@ -125,22 +140,32 @@ namespace com.csutil.model.ecs {
             if (!oldAndNewSameEntry) {
                 // Compute json diff to know if the entry really changed and if not skip informing all variants about the change:
                 // This can happen eg if the variant overwrites the field that was just changed in the template
-                if (!TemplatesIo.HasChanges(oldEntryData, updatedEntityData)) { return; }
+                if (!TemplatesIo.HasChanges(oldEntryData, updatedEntityData)) {
+                    // Even if entity.Data and updatedEntityData contain the same content, the data must still be set to the new reference:
+                    entity.Data = updatedEntityData;
+                    return;
+                }
             }
             entity.Data = updatedEntityData;
-            // At this point in the update method it is known that the entity really changed and 
+            // At this point in the update method it is known that the entity really changed  
             OnIEntityUpdated?.Invoke(entity, UpdateType.Update, oldEntryData, updatedEntityData);
+            entity.OnUpdate?.Invoke(oldEntryData, updatedEntityData);
 
             // If the entry is a template for other entries, then all variants need to be updated:
-            if (Variants.TryGetValue(updatedEntityData.Id, out var variantIds)) {
-                foreach (var variantId in variantIds) {
-                    var newVariantState = TemplatesIo.RecreateVariantInstance(variantId);
-                    InternalUpdate(newVariantState);
-                }
+            if (_variants.TryGetValue(updatedEntityData.Id, out var variantIds)) {
+                UpdateVariantsWhenTemplateChanges(variantIds);
+            }
+        }
+        
+        protected virtual void UpdateVariantsWhenTemplateChanges(HashSet<string> variantIds) {
+            foreach (var variantId in variantIds) {
+                var newVariantState = TemplatesIo.RecreateVariantInstance(variantId);
+                InternalUpdate(newVariantState);
             }
         }
 
         public async Task LoadSceneGraphFromDisk() {
+            this.ThrowErrorIfDisposed();
             await TemplatesIo.LoadAllTemplateFilesIntoMemory();
             foreach (var entityId in TemplatesIo.GetAllEntityIds()) {
                 Add(TemplatesIo.ComposeEntityInstance(entityId));
@@ -148,19 +173,21 @@ namespace com.csutil.model.ecs {
         }
 
         public IEntity<T> GetEntity(string entityId) {
+            this.ThrowErrorIfDisposed();
             return _entities[entityId];
         }
 
         public void Destroy(IEntity<T> entityToDestroy) {
+            this.ThrowErrorIfDisposed();
             if (!entityToDestroy.IsAlive()) { return; }
             Destroy(entityToDestroy.Id);
         }
-        
+
         private void Destroy(string entityId) {
             var entity = _entities[entityId] as Entity;
             _entities.Remove(entityId);
             if (entity.TemplateId != null) {
-                Variants.Remove(entity.TemplateId);
+                _variants.Remove(entity.TemplateId);
             }
             var entityData = entity.Data;
             OnIEntityUpdated?.Invoke(entity, UpdateType.Remove, entityData, default);
@@ -185,9 +212,9 @@ namespace com.csutil.model.ecs {
             }
         }
 
-        public IEntity<T> CreateVariant(T entityData, Dictionary<string, string> newIdsLookup) {
-            var variant = TemplatesIo.CreateVariantInstanceOf(entityData, newIdsLookup);
-            return Add(variant);
+        public IEntity<T> CreateVariant(T entityData, IReadOnlyDictionary<string, string> newIdsLookup) {
+            this.ThrowErrorIfDisposed();
+            return Add(TemplatesIo.CreateVariantInstanceOf(entityData, newIdsLookup));
         }
 
     }

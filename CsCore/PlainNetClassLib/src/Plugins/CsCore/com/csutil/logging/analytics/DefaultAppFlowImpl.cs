@@ -9,16 +9,20 @@ namespace com.csutil.logging.analytics {
     /// A producer consumer wrapper around a KeyValue store that automatically registeres for internet 
     /// connectivity to send the collected events to an external system like an Analytics tracking system
     /// </summary>
-    public abstract class DefaultAppFlowImpl : AppFlowToStore, IHasInternetListener, IDisposable {
+    public abstract class DefaultAppFlowImpl : AppFlowToStore, IHasInternetListener {
         private bool? oldHasInet;
 
         public DefaultAppFlowImpl(KeyValueStoreTypeAdapter<AppFlowEvent> store = null) : base(store) {
             InternetStateManager.AddListener(this);
         }
 
-        public void Dispose() { InternetStateManager.RemoveListener(this); }
+        public override void Dispose() {
+            base.Dispose();
+            InternetStateManager.RemoveListener(this);
+        }
 
         public async Task OnHasInternet(bool hasInet) {
+            this.ThrowErrorIfDisposed();
             if (oldHasInet != hasInet) {
                 if (oldHasInet != null) {
                     EventBus.instance.Publish(EventConsts.catSystem + EventConsts.INET_CHANGED, oldHasInet, hasInet);

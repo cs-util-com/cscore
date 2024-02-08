@@ -18,6 +18,16 @@ namespace com.csutil {
             }
         }
 
+        public void AddDisposable(IDisposable disposables) {
+            AddCleanupAction(() => {
+                if (disposables is IDisposableV2 d2) {
+                    d2.DisposeV2();
+                } else {
+                    disposables.Dispose();
+                }
+            });
+        }
+
         public void AddInjectorsCleanup(IEnumerable<Tuple<object, Type>> collectedInjectors) {
             foreach (var injector in collectedInjectors) {
                 AddInjectorCleanup(injector.Item1, injector.Item2);

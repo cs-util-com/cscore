@@ -48,6 +48,16 @@ namespace com.csutil.model.immutable {
             onStateChanged?.Invoke();
         }
 
+        public Action AddStateChangeListener(Action<S> onChanged, bool triggerInstantToInit = true) {
+            Action newListener = ImmutableExtensions.NewSubstateChangeListener(() => {
+                this.ThrowErrorIfDisposed();
+                return GetState();
+            }, onChanged);
+            onStateChanged += newListener;
+            if (triggerInstantToInit) { onChanged(GetState()); }
+            return newListener;
+        }
+
         public Action AddStateChangeListener<SubSub>(Func<S, SubSub> getSubSubState, Action<SubSub> onChanged, bool triggerInstantToInit = true) {
             Action newListener = ImmutableExtensions.NewSubstateChangeListener(() => {
                 this.ThrowErrorIfDisposed();

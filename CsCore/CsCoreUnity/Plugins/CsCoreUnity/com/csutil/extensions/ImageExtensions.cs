@@ -121,6 +121,19 @@ namespace com.csutil {
             }
             finally { RenderTexture.ReleaseTemporary(tempRenderTex); }
         }
+        
+        public static void SetSpriteRendererWidthToFitTextureAspectRatio(this SpriteRenderer self, float boxColliderShrinkFactor = 1f) {
+            var sprite = self.sprite;
+            var aspectRatio = sprite.textureRect.width / sprite.textureRect.height;
+            var correctedSizeX = aspectRatio * self.size.y;
+            self.size = new Vector2(correctedSizeX, self.size.y); 
+            var boxCollider = self.GetComponent<BoxCollider>();
+            if (boxCollider != null) {
+                var spriteHeightInMeters = self.localBounds.extents.y * 2;
+                boxCollider.size = new Vector3(correctedSizeX * boxColliderShrinkFactor, spriteHeightInMeters * boxColliderShrinkFactor, boxCollider.size.z);
+            }
+        }
+        
     }
 
 }

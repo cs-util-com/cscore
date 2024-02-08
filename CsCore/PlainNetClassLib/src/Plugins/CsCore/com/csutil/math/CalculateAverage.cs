@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace com.csutil.math {
 
@@ -17,6 +18,29 @@ namespace com.csutil.math {
         public static double CalcMean<T>(this IEnumerable<T> self, Func<T, double> selector) {
             if (self.IsEmpty()) { return double.NaN; }
             return self.Average(selector);
+        }
+
+        public static Vector3 CalcMean(this IEnumerable<Vector3> sequence) {
+            sequence = sequence.Cached();
+            var x = sequence.CalcMean(v => v.X);
+            var y = sequence.CalcMean(v => v.Y);
+            var z = sequence.CalcMean(v => v.Z);
+            return new Vector3((float)x, (float)y, (float)z);
+        }
+        
+        public static Vector3 CalcRunningMean(Vector3 oldAverage, Vector3 newValue, int count) {
+            var newX = CalcRunningMean(oldAverage.X, newValue.X, count);
+            var newY = CalcRunningMean(oldAverage.Y, newValue.Y, count);
+            var newZ = CalcRunningMean(oldAverage.Z, newValue.Z, count);
+            return new Vector3(newX, newY, newZ);
+        }
+        
+        /// <summary> Internally uses Quaternion.Slerp to approximate the latest mean rotation </summary>
+        /// <param name="oldAverage"> The current average </param>
+        /// <param name="newValue"> The new value that should contribute to the old average </param>
+        /// <param name="count"> The number of elements that already contributed to the average </param>
+        public static Quaternion CalcRunningMean(this Quaternion oldAverage, Quaternion newValue, int count) {
+            return Quaternion.Slerp(oldAverage, newValue, 1f / count);
         }
 
         /// <summary>

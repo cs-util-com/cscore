@@ -17,6 +17,8 @@ namespace com.csutil.integrationTests.http {
     [Collection("Sequential")] // Will execute tests in here sequentially
     public class RestTests {
 
+        public const string IMG_PLACEHOLD_SERVICE_URL = "https://loremflickr.com";
+
         public RestTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
         [Fact]
@@ -46,7 +48,7 @@ namespace com.csutil.integrationTests.http {
         public async Task DownloadTest1() {
             var h = 100;
             var w = 50;
-            var stream = await new Uri("https://placekitten.com/" + w + "/" + h).SendGET().GetResult<Stream>();
+            var stream = await new Uri(RestTests.IMG_PLACEHOLD_SERVICE_URL + $"/{w}/{h}").SendGET().GetResult<Stream>();
             var image = await ImageLoader.LoadAndDispose(stream);
             Assert.Equal(h, image.Height);
             Assert.Equal(w, image.Width);
@@ -56,7 +58,7 @@ namespace com.csutil.integrationTests.http {
         public async Task DownloadTest2() {
             var h = 110;
             var w = 60;
-            var bytes = await new Uri("https://placekitten.com/" + w + "/" + h).SendGET().GetResult<byte[]>();
+            var bytes = await new Uri(RestTests.IMG_PLACEHOLD_SERVICE_URL + $"/{w}/{h}").SendGET().GetResult<byte[]>();
             var image = await ImageLoader.LoadAndDispose(new MemoryStream(bytes));
             Assert.Equal(h, image.Height);
             Assert.Equal(w, image.Width);
@@ -66,7 +68,7 @@ namespace com.csutil.integrationTests.http {
         public async Task DownloadTest3() {
             var h = 110;
             var w = 60;
-            var stream = await new Uri("https://placekitten.com/" + w + "/" + h).SendGET().GetResult<Stream>();
+            var stream = await new Uri(RestTests.IMG_PLACEHOLD_SERVICE_URL + $"/{w}/{h}").SendGET().GetResult<Stream>();
             var image = await ImageLoader.LoadAndDispose(stream);
             Assert.Equal(h, image.Height);
             Assert.Equal(w, image.Width);
@@ -400,22 +402,22 @@ namespace com.csutil.integrationTests.http {
         public async Task TestPlaceholderImageServices() {
             var h = 100;
             var w = 50;
-            await TestPlaceholderImageService($"https://placekitten.com/{w}/{h}", h, w);
             await TestPlaceholderImageService($"https://loremflickr.com/{w}/{h}", h, w);
             await TestPlaceholderImageService($"https://baconmockup.com/{w}/{h}", h, w);
             await TestPlaceholderImageService($"https://placebear.com/{w}/{h}", h, w);
             await TestPlaceholderImageService($"https://placebeard.it/{w}x{h}", h, w);
             await TestPlaceholderImageService($"https://picsum.photos/{w}/{h}", h, w);
+            // await TestPlaceholderImageService($"https://placekitten.com/{w}/{h}", h, w);
             // await TestPlaceholderImageService($"https://www.placecage.com/{w}/{h}", h, w);
             // await TestPlaceholderImageService($"https://www.fillmurray.com/{w}/{h}", h, w);
             // await TestPlaceholderImageService($"https://www.stevensegallery.com/{w}/{h}", h, w);
         }
 
         private static async Task TestPlaceholderImageService(string placeholderImageServiceUrl, int h, int w) {
-            using var t = Log.MethodEnteredWith(placeholderImageServiceUrl);
+            using var t = Log.MethodEnteredWith("Service: " + placeholderImageServiceUrl);
             var s = await new Uri(placeholderImageServiceUrl).SendGET().GetResult<Stream>();
             var stream = await s.CopyToSeekableStreamIfNeeded(true);
-            Log.MethodDoneWith(t, placeholderImageServiceUrl);
+            Log.MethodDoneWith(t, "Service: " + placeholderImageServiceUrl);
             var image = await ImageLoader.LoadAndDispose(stream);
             Assert.Equal(h, image.Height);
             Assert.Equal(w, image.Width);
