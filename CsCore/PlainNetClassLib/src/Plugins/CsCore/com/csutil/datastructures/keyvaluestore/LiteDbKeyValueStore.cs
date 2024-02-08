@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using LiteDB;
 using UltraLiteDB;
 using Zio;
 
@@ -15,7 +16,7 @@ namespace com.csutil.keyvaluestore {
         private BsonMapper bsonMapper;
         private Stream dbStream;
         private UltraLiteDatabase db;
-        private UltraLiteCollection<BsonDocument> collection;
+        private ILiteCollection<BsonDocument> collection;
         private object threadLock = new object();
 
         public IKeyValueStore fallbackStore { get; set; }
