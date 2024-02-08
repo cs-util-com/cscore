@@ -61,7 +61,7 @@
 
   <!-- https://www.nuget.org/packages/Zio/ --> 
   <ItemGroup>
-    <PackageReference Include="Zio" Version="0.16.2" />
+    <PackageReference Include="Zio" Version="0.17.0" />
   </ItemGroup>
 
   <ItemGroup>
