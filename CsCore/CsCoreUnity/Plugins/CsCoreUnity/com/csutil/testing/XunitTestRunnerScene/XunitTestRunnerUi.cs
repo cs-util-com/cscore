@@ -12,7 +12,7 @@ namespace com.csutil.testing {
 
     public class XunitTestRunnerUi : BaseController<XunitTestRunner.Test> {
 
-        private const int timeoutInMs = 30000;
+        private const int timeoutInMs = 90000;
 
         public bool autoRunAllTests = false;
         public List<string> anyTypeInTargetAssembly = new List<string>() {
