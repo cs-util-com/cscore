@@ -24,12 +24,13 @@ namespace com.csutil.testing {
         };
         private IEnumerable<XunitTestRunner.Test> allTests;
         private ProgressManager pm;
-        private FileBasedKeyValueStore _historyStore;
+        private IKeyValueStore _historyStore;
 
         protected override void Start() {
             base.Start();
 
-            _historyStore = new FileBasedKeyValueStore(EnvironmentV2.instance.GetOrAddAppDataFolder("cscore XunitTestRunnerUi Test Execution History"));
+            _historyStore = PlayerPrefsStore.NewPreferencesUsingPlayerPrefs();
+            AssertHistoryStoreHasPersistedData().LogOnError();
 
             var assembliesToTest = anyTypeInTargetAssembly.Map(typeString => {
                 try { return Type.GetType(typeString).Assembly; } catch (Exception) {
@@ -67,6 +68,15 @@ namespace com.csutil.testing {
                 UpdateSearchFilter(links);
             }, 200);
         }
+
+        private async Task AssertHistoryStoreHasPersistedData() {
+            var testLKey = await _historyStore.Get<string>("TestKey", null);
+            if (testLKey != "TestValue") {
+                Debug.LogError($"Warning: No history data found in history store, this only makes sense if you are running the tests for the very first time");
+                await _historyStore.Set("TestKey", "TestValue");
+            }
+        }
+
         private static Toggle GetHidePassedTestsToggle(Dictionary<string, Link> links) { return links.Get<Toggle>("HidePassedTestsToggle"); }
 
         private void UpdateSearchFilter(Dictionary<string, Link> links) {
@@ -96,7 +106,7 @@ namespace com.csutil.testing {
         }
 
         private async Task<IOrderedEnumerable<XunitTestRunner.Test>> SortByLastTestExecutionDuration(IEnumerable<XunitTestRunner.Test> tests) {
-            var histories = await tests.MapAsync(x => _historyStore.Get<TestHistory>(x.name, null));
+            var histories = await tests.MapAsync(GetTestHistoryFor);
             var historyDict = histories.Filter(x => x != null).ToDictionary(x => x.Name, x => x);
             IOrderedEnumerable<XunitTestRunner.Test> result = tests.OrderBy(t => {
                 if (historyDict.TryGetValue(t.name, out var entry)) {
@@ -146,17 +156,30 @@ namespace com.csutil.testing {
         public void RunTest(XunitTestRunner.Test test) { StartCoroutine(RunTestCoroutine(test)); }
 
         private IEnumerator RunTestCoroutine(XunitTestRunner.Test test) {
-            yield return _historyStore.Set(test.name, new TestHistory(test.name, TestHistory.durationIfStartedButNeverFinished, false)).AsCoroutine();
+            yield return UpdateTestHistory(test, TestHistory.durationIfStartedButNeverFinished).AsCoroutine();
             var timing = StopwatchV2.StartNewV2();
             test.StartTest();
             ReloadData();
             yield return new WaitForEndOfFrame();
             yield return test.testTask.AsCoroutine((e) => { Log.e(e); }, timeoutInMs);
             timing.Stop();
-            var historyEntry = new TestHistory(test.name, timing.ElapsedMilliseconds, test.IsCompletedSuccessfull());
-            yield return _historyStore.Set(test.name, historyEntry).AsCoroutine();
+            yield return UpdateTestHistory(test, timing.ElapsedMilliseconds).AsCoroutine();
             ReloadData();
             yield return new WaitForEndOfFrame();
+        }
+
+        private const string PREFIX = "XUnityTest_";
+
+        private Task<TestHistory> GetTestHistoryFor(XunitTestRunner.Test test) {
+            return _historyStore.Get<TestHistory>(PREFIX + test.name, null);
+        }
+
+        private async Task UpdateTestHistory(XunitTestRunner.Test test, long timing) {
+            var testHistory = new TestHistory(test.name, timing, test.IsCompletedSuccessfull());
+            await _historyStore.Set(PREFIX + test.name, testHistory);
+            // Assert that it was stored:
+            var history = await GetTestHistoryFor(test);
+            AssertV3.IsNotNull(history, "history");
         }
 
     }

@@ -23,6 +23,7 @@ namespace com.csutil.testing {
             public Test(MethodInfo methodToTest) {
                 this.methodToTest = methodToTest;
                 this.name = methodToTest.ToStringV2();
+                this.name.ThrowErrorIfNullOrEmpty("name");
             }
 
             public override string ToString() {
