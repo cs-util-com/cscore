@@ -29,10 +29,10 @@ namespace com.csutil.http {
 #if !UNITY_WEBGL || UNITY_EDITOR
             var ping = await GetCurrentPingViaUnityPing(ipOrUrl, timeoutInMs);
             if (ping > 0) { return ping; }
-#endif
             // Try fallback to head request if Unity.Ping did not work:
             var ping2 = await GetCurrentPingViaHeadRequest(ipOrUrl, timeoutInMs);
             if (ping2 > 0) { return ping2; }
+#endif
             // If Unity.Ping did not work, eg because a URL was used instead of an IP fallback to default ping approach:
             try {
                 return await base.GetCurrentPing(ipOrUrl, timeoutInMs);
