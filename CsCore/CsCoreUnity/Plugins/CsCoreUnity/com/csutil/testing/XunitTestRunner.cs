@@ -45,6 +45,10 @@ namespace com.csutil.testing {
                 }
             }
 
+            public bool IsCompletedSuccessfull() {
+                return testTask != null && testTask.IsCompletedSuccessfully;
+            }
+            
         }
 
         public static List<Test> CollectAllTests(IEnumerable<Type> classesToTest, Action<Test> onTestStarted) {
