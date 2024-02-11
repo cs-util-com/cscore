@@ -215,10 +215,12 @@ namespace com.csutil.integrationTests.http {
             var openAi = new OpenAi(await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey"));
             int iterationThreshold = 5;
             List<string> imageUrls = new List<string>();
+
+            // Generate images and ask questions about them until we are confident that the image fits the prompt
             for (int iteration = 0; iteration < iterationThreshold; iteration++) {
                 var prompt = "A fascinating image from a children's storybook";
 
-                var url = await GenerateFascinatingImage(openAi, prompt);
+                var url = await GenerateImage(openAi, prompt);
                 imageUrls.Add(url);
                 Assert.NotEmpty(url);
 
@@ -227,19 +229,18 @@ namespace com.csutil.integrationTests.http {
                 // Check that Ai gave back at least one question
                 Assert.NotEmpty(questions);
 
-
                 var confidenceResponseFormat = new ConfidenceResponse() {
                     responseConfidences = new Dictionary<string, int>{
                     {"Does the image evoke a sense of wonder and imagination suitable for a children's storybook?", 100},
                     {"Are the colors vibrant and appealing to a younger audience?", 70},
                     {"Does the input image show a picture of a children's book?", 100},
                     {"Is there a dog in the picture?", 5}
-                }
+                    }
                 };
 
                 var messages = new List<VisionGpt.Line>() {
-                new VisionGpt.Line(VisionGpt.Role.system, content: "You are a helpful assistant designed to output JSON.")
-            };
+                    new VisionGpt.Line(VisionGpt.Role.system, content: "You are a helpful assistant designed to output JSON.")
+                    };
 
                 messages.AddQuestionsToImage(url, questions);
                 messages.AddUserLineWithJsonResultStructure("Rate the following questions with a confidence from 0 to 100 based on how well the question fits the image", confidenceResponseFormat);
@@ -261,7 +262,7 @@ namespace com.csutil.integrationTests.http {
             string result = JsonConvert.SerializeObject(imageUrls);
             File.WriteAllText(@".\VisionImages.json", result);
         }
-        private static async Task<string> GenerateFascinatingImage(OpenAi openAi, string prompt) {
+        private static async Task<string> GenerateImage(OpenAi openAi, string prompt) {
             var result = await openAi.TextToImage(new OpenAi.Image.Request() { prompt = prompt });
             return result.data.First().url;
         }
