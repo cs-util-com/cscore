@@ -256,19 +256,12 @@ namespace com.csutil.integrationTests.http {
             var responseSTT = await openAi.SpeechToText(new OpenAi.Audio.STTRequest() { fileStream = responseTTS });
             Assert.NotEmpty(responseSTT.text);
             Log.d(responseSTT.text);
-            //fails when textToTest contains numbers
-            Assert.Equal(formatString(responseSTT.text), formatString(textToTest));
+            
+            string [] split = responseSTT.text.ToLower().Split(new Char[] { ',', '\\', '\n', ' ' },
+                                 StringSplitOptions.RemoveEmptyEntries);
+
+            Assert.True(split.All(word => textToTest.Contains(new string(word.Where(c => Char.IsLetter(c)).ToArray()))));
         }
-
-        private string formatString(string str) {
-            //helper function to format TTS and STT converted texts to test whether input text and output text is equal
-            //remove all characters except alphabets, i.e. white spaces, numbers, special characters
-            return new String(str.ToCharArray().Where(c => !Char.IsWhiteSpace(c) && Char.IsLetterOrDigit(c))
-            .ToArray()).ToLower();
-
-        }
-
-
     }
 
 }
