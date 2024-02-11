@@ -310,6 +310,11 @@ namespace com.csutil.http.apis {
     }
     public class VisionGpt {
 
+        /// <summary>
+        /// Line class for representing a line of inquiry to VisionGPT. The field content needs to be 
+        /// generic object to support both one line string and List of string:object dictionary as content field
+        /// Reference: https://platform.openai.com/docs/guides/vision/quick-start
+        /// </summary>
         public class Line {
 
             public readonly string role;
