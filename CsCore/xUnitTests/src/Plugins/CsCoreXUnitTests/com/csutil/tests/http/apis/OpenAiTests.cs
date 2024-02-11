@@ -5,9 +5,6 @@ using System.Threading.Tasks;
 using com.csutil.http.apis;
 using com.csutil.model.jsonschema;
 using Xunit;
-using com.csutil.http;
-using Zio;
-using System.IO;
 
 namespace com.csutil.integrationTests.http {
 
