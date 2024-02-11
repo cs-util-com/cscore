@@ -20,6 +20,9 @@ namespace com.csutil.ui {
         }
 
         public static async Task<bool> Show(string caption, string message, string confirmBtnText = null, string dialogPrefabName = "Dialogs/DefaultDialog2", string cancelBtnText = null) {
+            if (!ApplicationV2.isPlaying) {
+                throw new System.NotSupportedException("Showing dialogs are only supported in play mode");
+            }
             var loader = new DialogLoader<ConfirmCancelDialog>(new ConfirmCancelDialog(caption, message, confirmBtnText, cancelBtnText));
             var rootCanvas = RootCanvas.GetOrAddRootCanvasV2().gameObject;
             GameObject dialogUi = loader.LoadDialogPrefab(new DefaultPresenter(), dialogPrefabName);

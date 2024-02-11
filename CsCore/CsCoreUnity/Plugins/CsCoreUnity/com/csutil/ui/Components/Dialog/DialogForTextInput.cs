@@ -30,6 +30,9 @@ namespace com.csutil.ui {
         }
 
         public static async Task<DialogResult> Show(string caption, string message, string confirmBtnText = null, Func<string, bool> validate = null, string dialogPrefabName = "Dialogs/DefaultInputDialog1") {
+            if (!ApplicationV2.isPlaying) {
+                throw new System.NotSupportedException("Showing dialogs are only supported in play mode");
+            }
             var loader = new DialogLoader<DialogForTextInput>(new DialogForTextInput(caption, message, confirmBtnText, validate));
             var rootCanvas = RootCanvas.GetOrAddRootCanvasV2().gameObject;
             GameObject dialogUi = loader.LoadDialogPrefab(new DefaultPresenter(), dialogPrefabName);
