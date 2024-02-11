@@ -206,6 +206,10 @@ namespace com.csutil.http.apis {
         }
 
         public class Audio {
+
+            /// <summary>
+            /// https://platform.openai.com/docs/api-reference/audio/createSpeech
+            /// </summary>
             public class TTSRequest {
                 public string input { get; set; }
                 public string model { get; set; } = "tts-1";
@@ -214,6 +218,9 @@ namespace com.csutil.http.apis {
                 public double speed { get; set; } = 1.0;
             }
 
+            /// <summary>
+            /// https://platform.openai.com/docs/api-reference/audio/createTranscription
+            /// </summary>
             public class STTRequest {
                 public Stream fileStream { get; set; }
                 public string model { get; set; } = "whisper-1";
@@ -315,7 +322,6 @@ namespace com.csutil.http.apis {
             public readonly string role;
             public readonly object content;
 
-
             public Line(string role, List<Dictionary<string, object>> content) {
                 this.role = role;
                 this.content = content;
@@ -333,7 +339,6 @@ namespace com.csutil.http.apis {
                 this.role = role.ToString();
                 this.content = content;
             }
-
         }
 
         public enum Role { system, user, assistant }
