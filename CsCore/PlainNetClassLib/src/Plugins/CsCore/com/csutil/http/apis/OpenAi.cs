@@ -442,11 +442,11 @@ namespace com.csutil.http.apis {
                     {"detail","high"}
                 }},
             });
-            self.Add(new VisionGpt.Line(VisionGpt.Role.user, content: content));
+            self.Add(new VisionGpt.Line(ChatGpt.Role.user, content: content));
         }
         public static void AddUserLineWithJsonResultStructure<T>(this ICollection<VisionGpt.Line> self, string userMessage, T exampleResponse) {
-            self.Add(new VisionGpt.Line(VisionGpt.Role.user, content: userMessage));
-            self.Add(new VisionGpt.Line(VisionGpt.Role.system, content: CreateJsonInstructions(exampleResponse)));
+            self.Add(new VisionGpt.Line(ChatGpt.Role.user, content: userMessage));
+            self.Add(new VisionGpt.Line(ChatGpt.Role.system, content: CreateJsonInstructions(exampleResponse)));
         }
 
         public static string CreateJsonInstructions<T>(T exampleResponse) {

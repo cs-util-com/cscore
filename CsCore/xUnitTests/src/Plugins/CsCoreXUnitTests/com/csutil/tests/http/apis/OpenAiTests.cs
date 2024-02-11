@@ -172,7 +172,7 @@ namespace com.csutil.integrationTests.http {
             Assert.NotEmpty(url);
 
             var messages = new List<VisionGpt.Line>() {
-                new VisionGpt.Line(VisionGpt.Role.system, content: "You are a helpful assistant designed to output JSON.")
+                new VisionGpt.Line(ChatGpt.Role.system, content: "You are a helpful assistant designed to output JSON.")
             };
 
             var yesNoResponseFormat = new YesNoResponse() {
