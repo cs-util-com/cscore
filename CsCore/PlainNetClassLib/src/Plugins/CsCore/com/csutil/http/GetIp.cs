@@ -7,8 +7,10 @@ namespace com.csutil {
     public class IpLookup {
 
         public class LocalIpAddress {
+            
             private readonly IPAddressInformation _fullIpInfo;
             public readonly NetworkInterface NetworkInfo;
+            
             public string Ip => _fullIpInfo.Address.ToString();
             public bool IsIpv4 => _fullIpInfo.Address.AddressFamily == AddressFamily.InterNetwork;
             public bool IsIpv6 => _fullIpInfo.Address.AddressFamily == AddressFamily.InterNetworkV6;
@@ -19,6 +21,9 @@ namespace com.csutil {
                 _fullIpInfo = fullIpInfo;
                 NetworkInfo = networkInfo;
             }
+            
+            public IPAddressInformation GetFullIpInfo() { return _fullIpInfo; }
+            
         }
 
         /// <summary> From https://forum.unity.com/threads/android-build-cant-get-ip-address.844843/#post-6429857 </summary>
