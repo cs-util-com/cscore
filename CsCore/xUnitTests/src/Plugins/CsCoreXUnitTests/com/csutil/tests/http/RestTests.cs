@@ -423,6 +423,20 @@ namespace com.csutil.integrationTests.http {
             Assert.Equal(w, image.Width);
         }
 
+        [Fact]
+        public async Task TestLocalIpDetection() {
+            var localIpV4 = IpLookup.GetLocalIPs();
+            var internetIp = await GetInternetIp();
+            Log.d($"Your internet IP is {internetIp} and your local IPs are: {localIpV4.ToStringV2FullJson()}");
+            Assert.False(localIpV4.IsNullOrEmpty());
+            Assert.DoesNotContain(localIpV4, x => x.Ip == internetIp);
+        }
+
+        private static async Task<string> GetInternetIp() {
+            HttpBinGetResp response = await new Uri("https://httpbin.org/get").SendGET().GetResult<HttpBinGetResp>();
+            return response.origin;
+        }
+
     }
 
 }

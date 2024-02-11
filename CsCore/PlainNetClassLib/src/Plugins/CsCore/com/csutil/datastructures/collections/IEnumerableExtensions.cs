@@ -68,6 +68,12 @@ namespace com.csutil {
             return bracket1 + filteredResultStrings.Reduce((x, y) => x + separator + y) + bracket2;
         }
 
+        public static string ToStringV2FullJson<T>(this IEnumerable<T> self) {
+            if (self is string) { return (string)(object)self; }
+            if (self is IEnumerable<string> s) { return s.ToStringV2(); }
+            return self.ToStringV2(c => JsonWriter.AsPrettyString(c));
+        }
+
         public static Dictionary<K, V> ToDictionary<K, V>(this IEnumerable<K> keys, IEnumerable<V> values) {
             return keys.Zip(values, (key, value) => new KeyValuePair<K, V>(key, value)).ToDictionary(p => p.Key, p => p.Value);
         }
