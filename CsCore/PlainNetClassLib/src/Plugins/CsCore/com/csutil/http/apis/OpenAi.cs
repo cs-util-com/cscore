@@ -206,6 +206,10 @@ namespace com.csutil.http.apis {
         }
 
         public class Audio {
+
+            /// <summary>
+            /// https://platform.openai.com/docs/api-reference/audio/createSpeech
+            /// </summary>
             public class TTSRequest {
                 public string input { get; set; }
                 public string model { get; set; } = "tts-1";
@@ -214,6 +218,9 @@ namespace com.csutil.http.apis {
                 public double speed { get; set; } = 1.0;
             }
 
+            /// <summary>
+            /// https://platform.openai.com/docs/api-reference/audio/createTranscription
+            /// </summary>
             public class STTRequest {
                 public Stream fileStream { get; set; }
                 public string model { get; set; } = "whisper-1";
@@ -310,17 +317,21 @@ namespace com.csutil.http.apis {
     }
     public class VisionGpt {
 
+        /// <summary>
+        /// Line class for representing a line of inquiry to VisionGPT. The field content needs to be 
+        /// generic object to support both one line string and List of string:object dictionary as content field
+        /// Reference: https://platform.openai.com/docs/guides/vision/quick-start
+        /// </summary>
         public class Line {
 
             public readonly string role;
             public readonly object content;
 
-
             public Line(string role, List<Dictionary<string, object>> content) {
                 this.role = role;
                 this.content = content;
             }
-            public Line(Role role, List<Dictionary<string, object>> content) {
+            public Line(ChatGpt.Role role, List<Dictionary<string, object>> content) {
                 this.role = role.ToString();
                 this.content = content;
             }
@@ -329,14 +340,11 @@ namespace com.csutil.http.apis {
                 this.role = role;
                 this.content = content;
             }
-            public Line(Role role, string content) {
+            public Line(ChatGpt.Role role, string content) {
                 this.role = role.ToString();
                 this.content = content;
             }
-
         }
-
-        public enum Role { system, user, assistant }
 
         public class Request {
 
@@ -418,11 +426,6 @@ namespace com.csutil.http.apis {
 
         public static void AddImageURL(this ICollection<VisionGpt.Line> self, string url) {
             var content = new List<Dictionary<string, object>>();
-            content.Add(new Dictionary<string, object>()
-            {
-                {"type","text"},
-                {"text","What's in this image?"},
-            });
 
             content.Add(new Dictionary<string, object>()
             {
@@ -432,7 +435,7 @@ namespace com.csutil.http.apis {
                     {"detail","high"}
                 }},
             });
-            self.Add(new VisionGpt.Line(VisionGpt.Role.user, content: content));
+            self.Add(new VisionGpt.Line(ChatGpt.Role.user, content: content));
         }
         public static void AddQuestionsToImage(this ICollection<VisionGpt.Line> self, string url, List<string> questions) {
             var content = new List<Dictionary<string, object>>();
@@ -461,19 +464,12 @@ namespace com.csutil.http.apis {
             self.Add(new VisionGpt.Line(VisionGpt.Role.user, content: content));
         }
         public static void AddUserLineWithJsonResultStructure<T>(this ICollection<VisionGpt.Line> self, string userMessage, T exampleResponse) {
-            self.Add(new VisionGpt.Line(VisionGpt.Role.user, content: userMessage));
-            self.Add(new VisionGpt.Line(VisionGpt.Role.system, content: CreateJsonInstructions(exampleResponse)));
+            self.Add(new VisionGpt.Line(ChatGpt.Role.user, content: userMessage));
+            self.Add(new VisionGpt.Line(ChatGpt.Role.system, content: CreateJsonInstructions(exampleResponse)));
         }
 
         public static string CreateJsonInstructions<T>(T exampleResponse) {
-            var schemaGenerator = new ModelToJsonSchema(nullValueHandling: Newtonsoft.Json.NullValueHandling.Ignore);
-            var className = typeof(T).Name;
-            JsonSchema schema = schemaGenerator.ToJsonSchema(className, exampleResponse);
-            var schemaJson = JsonWriter.GetWriter(exampleResponse).Write(schema);
-            var exampleJson = JsonWriter.GetWriter(exampleResponse).Write(exampleResponse);
-            var jsonSchemaInfos = " This is the json schema that describes the format you have to use for your json response: " + schemaJson;
-            var exampleJsonInfos = " And for that schema, this would an example of a valid response: " + exampleJson;
-            return jsonSchemaInfos + exampleJsonInfos;
+            return ChatGptExtensions.CreateJsonInstructions(exampleResponse);
         }
 
         public static T ParseNewLineContentAsJson<T>(this VisionGpt.Line newLine) {
