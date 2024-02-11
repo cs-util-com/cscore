@@ -331,7 +331,7 @@ namespace com.csutil.http.apis {
                 this.role = role;
                 this.content = content;
             }
-            public Line(Role role, List<Dictionary<string, object>> content) {
+            public Line(ChatGpt.Role role, List<Dictionary<string, object>> content) {
                 this.role = role.ToString();
                 this.content = content;
             }
@@ -340,13 +340,11 @@ namespace com.csutil.http.apis {
                 this.role = role;
                 this.content = content;
             }
-            public Line(Role role, string content) {
+            public Line(ChatGpt.Role role, string content) {
                 this.role = role.ToString();
                 this.content = content;
             }
         }
-
-        public enum Role { system, user, assistant }
 
         public class Request {
 
