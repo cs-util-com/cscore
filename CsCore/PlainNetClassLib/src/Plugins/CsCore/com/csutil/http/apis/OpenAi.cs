@@ -440,14 +440,7 @@ namespace com.csutil.http.apis {
         }
 
         public static string CreateJsonInstructions<T>(T exampleResponse) {
-            var schemaGenerator = new ModelToJsonSchema(nullValueHandling: Newtonsoft.Json.NullValueHandling.Ignore);
-            var className = typeof(T).Name;
-            JsonSchema schema = schemaGenerator.ToJsonSchema(className, exampleResponse);
-            var schemaJson = JsonWriter.GetWriter(exampleResponse).Write(schema);
-            var exampleJson = JsonWriter.GetWriter(exampleResponse).Write(exampleResponse);
-            var jsonSchemaInfos = " This is the json schema that describes the format you have to use for your json response: " + schemaJson;
-            var exampleJsonInfos = " And for that schema, this would an example of a valid response: " + exampleJson;
-            return jsonSchemaInfos + exampleJsonInfos;
+            return ChatGptExtensions.CreateJsonInstructions(exampleResponse);
         }
 
         public static T ParseNewLineContentAsJson<T>(this VisionGpt.Line newLine) {
