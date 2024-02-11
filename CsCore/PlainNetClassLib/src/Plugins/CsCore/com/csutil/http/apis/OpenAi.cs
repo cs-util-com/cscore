@@ -426,11 +426,6 @@ namespace com.csutil.http.apis {
 
         public static void AddImageURL(this ICollection<VisionGpt.Line> self, string url) {
             var content = new List<Dictionary<string, object>>();
-            content.Add(new Dictionary<string, object>()
-            {
-                {"type","text"},
-                {"text","What's in this image?"},
-            });
 
             content.Add(new Dictionary<string, object>()
             {
