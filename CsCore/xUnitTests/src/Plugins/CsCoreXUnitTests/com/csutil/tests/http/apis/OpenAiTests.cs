@@ -9,18 +9,15 @@ using com.csutil.http;
 using Zio;
 using System.IO;
 
-namespace com.csutil.integrationTests.http
-{
+namespace com.csutil.integrationTests.http {
 
-    public class OpenAiTests
-    {
+    public class OpenAiTests {
 
         public OpenAiTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
         [Obsolete("The .Complete API is deprecated, use .ChatGpt(..) instead")]
         [Fact]
-        public async Task ExampleUsage1_TextCompletion()
-        {
+        public async Task ExampleUsage1_TextCompletion() {
             var openAi = new OpenAi(await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey"));
             var prompt = "Complete this sentence with a funny short story: A cow walked ";
             var result = await openAi.Complete(prompt);
@@ -30,8 +27,7 @@ namespace com.csutil.integrationTests.http
         }
 
         //[Fact]
-        public async Task ExampleUsage2_ImageGeneration()
-        {
+        public async Task ExampleUsage2_ImageGeneration() {
             var openAi = new OpenAi(await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey"));
             var prompt = "A cute cat with a cowboy hat in cartoon style";
             var result = await openAi.TextToImage(new OpenAi.Image.Request() { prompt = prompt });
@@ -42,12 +38,10 @@ namespace com.csutil.integrationTests.http
         }
 
         //[Fact]
-        public async Task ExampleUsage2_ImageGeneration2()
-        {
+        public async Task ExampleUsage2_ImageGeneration2() {
             var openAi = new OpenAi(await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey"));
             var prompt = "A cute cat with a cowboy hat";
-            var result = await openAi.TextToImage(new OpenAi.Image.Request()
-            {
+            var result = await openAi.TextToImage(new OpenAi.Image.Request() {
                 prompt = prompt,
                 model = "dall-e-3",
                 quality = "hd",
@@ -60,8 +54,7 @@ namespace com.csutil.integrationTests.http
         }
 
         [Fact]
-        public async Task ExampleUsage3_ChatGpt()
-        {
+        public async Task ExampleUsage3_ChatGpt() {
             var openAi = new OpenAi(await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey"));
             var messages = new List<ChatGpt.Line>() {
                 new ChatGpt.Line(ChatGpt.Role.system, content: "You are a standup comedian. You are on stage and about to tell a joke."),
@@ -79,8 +72,7 @@ namespace com.csutil.integrationTests.http
         }
 
         [Fact]
-        public async Task ExampleUsage4_ChatGpt4()
-        {
+        public async Task ExampleUsage4_ChatGpt4() {
             var openAi = new OpenAi(await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey"));
             var messages = new List<ChatGpt.Line>() {
                 new ChatGpt.Line(ChatGpt.Role.system, content: "You are a standup comedian. You are on stage and about to tell a joke."),
@@ -101,8 +93,7 @@ namespace com.csutil.integrationTests.http
 
         /// <summary> An example of how to use the ChatGpt API to get a response that is automatically parsed as a json object </summary>
         [Fact]
-        public async Task ExampleUsage4_ChatGptJsonResponses()
-        {
+        public async Task ExampleUsage4_ChatGptJsonResponses() {
 
             var openAi = new OpenAi(await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey"));
             var messages = new List<ChatGpt.Line>();
@@ -111,8 +102,7 @@ namespace com.csutil.integrationTests.http
             { // The user inputs a question but the response should be automatically parsable as a YesNoResponse:
 
                 // Create an example object so that the AI knows how the response json should look like for user inputs:
-                var yesNoResponseFormat = new YesNoResponse()
-                {
+                var yesNoResponseFormat = new YesNoResponse() {
                     confidence = 100,
                     inputQuestionInterpreted = "Is the sky blue?",
                     yesNoAnswer = true,
@@ -158,11 +148,9 @@ namespace com.csutil.integrationTests.http
             Log.d("messages=" + JsonWriter.AsPrettyString(messages));
         }
 
-        private static async Task<EmotionalChatResponse> TalkToEmotionalAi(OpenAi openAi, List<ChatGpt.Line> messages, string userInput)
-        {
+        private static async Task<EmotionalChatResponse> TalkToEmotionalAi(OpenAi openAi, List<ChatGpt.Line> messages, string userInput) {
             using var timing = Log.MethodEnteredWith(userInput);
-            EmotionalChatResponse emotionalResponseFormat = new EmotionalChatResponse()
-            {
+            EmotionalChatResponse emotionalResponseFormat = new EmotionalChatResponse() {
                 emotionOfResponse = EmotionalChatResponse.Emotion.happy,
                 aiAnswer = "Thanks, that is very nice of you!"
             };
@@ -178,8 +166,7 @@ namespace com.csutil.integrationTests.http
 
 
         [Fact]
-        public async Task ExampleUsage5_ImageToText()
-        {
+        public async Task ExampleUsage5_ImageToText() {
             var openAi = new OpenAi(await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey"));
 
             var prompt = "A picture of a dog";
@@ -191,8 +178,7 @@ namespace com.csutil.integrationTests.http
                 new VisionGpt.Line(VisionGpt.Role.system, content: "You are a helpful assistant designed to output JSON.")
             };
 
-            var yesNoResponseFormat = new YesNoResponse()
-            {
+            var yesNoResponseFormat = new YesNoResponse() {
                 confidence = 100,
                 inputQuestionInterpreted = "Is there a cat in the image?",
                 yesNoAnswer = true,
@@ -219,8 +205,7 @@ namespace com.csutil.integrationTests.http
             Log.d("messages=" + JsonWriter.AsPrettyString(messages));
         }
 
-        private static ChatGpt.Request NewGpt4JsonRequestWithFullConversation(List<ChatGpt.Line> conversationSoFar)
-        {
+        private static ChatGpt.Request NewGpt4JsonRequestWithFullConversation(List<ChatGpt.Line> conversationSoFar) {
             var request = new ChatGpt.Request(conversationSoFar);
             // Use json as the response format:
             request.response_format = ChatGpt.Request.ResponseFormat.json;
@@ -228,8 +213,7 @@ namespace com.csutil.integrationTests.http
             return request;
         }
 
-        public class YesNoResponse
-        {
+        public class YesNoResponse {
 
             [Description("The confidence of the AI in the answer")]
             public int confidence { get; set; }
@@ -246,8 +230,7 @@ namespace com.csutil.integrationTests.http
         }
 
 
-        public class EmotionalChatResponse
-        {
+        public class EmotionalChatResponse {
 
             public enum Emotion { happy, sad, angry }
 
@@ -261,8 +244,7 @@ namespace com.csutil.integrationTests.http
 
 
         [Fact]
-        public async Task ExampleTTSandSTT()
-        {
+        public async Task ExampleTTSandSTT() {
             var openAi = new OpenAi(await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey"));
 
             string textToTest = "hello world";
