@@ -51,7 +51,11 @@ namespace com.csutil {
                     }
                 }
             }
-            get { return UnityEngine.Rendering.OnDemandRendering.effectiveRenderFrameRate; }
+            get {
+                var effectiveRenderFrameRate = UnityEngine.Rendering.OnDemandRendering.effectiveRenderFrameRate;
+                AssertV3.IsTrue(effectiveRenderFrameRate == -1 || effectiveRenderFrameRate > 5, () => "effectiveRenderFrameRate=" + effectiveRenderFrameRate);
+                return effectiveRenderFrameRate;
+            }
 #else
             set { Application.targetFrameRate = value; }
             get { return Application.targetFrameRate; }
@@ -74,8 +78,8 @@ namespace com.csutil {
             if (isPlaying) { return false; }
             var s = GameObject.Find(InjectorExtensionsForUnity.DEFAULT_SINGLETON_NAME);
             /* There seems to be a strange Unity editor bug that can cause Unity to crash
-             * if a root transform in the scene is interacted with while the scene is still 
-             * initializing (e.g during Editor startup). 
+             * if a root transform in the scene is interacted with while the scene is still
+             * initializing (e.g during Editor startup).
              */
             var unityCouldCrash = s == null || s.transform.GetSiblingIndex() == 0;
             // if (unityCouldCrash) { Log.w("Unity currently initializing, abording to avoid Unity crash"); }
@@ -91,7 +95,7 @@ namespace com.csutil {
             Application.Quit();
             #endif
         }
-        
+
     }
 
 }
