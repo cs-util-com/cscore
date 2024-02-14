@@ -51,8 +51,11 @@ namespace com.csutil.editor {
         [MenuItem(UIv2menu + "DefaultPanel", false, priorityOfUiMenu + 3)]
         static void DefaultPanel() { AddPrefabToActiveView("DefaultPanel"); }
 
-        [MenuItem(UIv2menu + "DefaultButton", false, priorityOfUiMenu + 4)]
+        [MenuItem(UIv2menuOld + "DefaultButton", false, priorityOfUiMenu + 4)]
         static void DefaultButton() { AddPrefabToActiveView("DefaultButton"); }
+        
+        [MenuItem(UIv2menu + "DefaultButtonV2", false, priorityOfUiMenu + 4)]
+        static void DefaultButtonV2() { AddPrefabToActiveView("DefaultButtonV2"); }
 
         [MenuItem(UIv2menu + "More Buttons/DefaultIconButton", false, priorityOfUiMenu + 5)]
         static void DefaultIconButton() { AddPrefabToActiveView("DefaultIconButton"); }
@@ -72,8 +75,11 @@ namespace com.csutil.editor {
         [MenuItem(UIv2menu + "More Buttons/DefaultFloatingActionButton", false, priorityOfUiMenu + 5)]
         static void DefaultFloatingActionButton() { AddPrefabToActiveView("DefaultFloatingActionButton"); }
 
-        [MenuItem(UIv2menu + "DefaultToggle", false, priorityOfUiMenu + 6)]
+        [MenuItem(UIv2menuOld + "DefaultToggle", false, priorityOfUiMenu + 6)]
         static void DefaultToggle() { AddPrefabToActiveView("DefaultToggle"); }
+        
+        [MenuItem(UIv2menu + "DefaultToggleV2", false, priorityOfUiMenu + 6)]
+        static void DefaultToggleV2() { AddPrefabToActiveView("DefaultToggleV2"); }
 
         [MenuItem(UIv2menu + "DefaultRadioButton", false, priorityOfUiMenu + 6)]
         static void DefaultRadioButton() { AddPrefabToActiveView("DefaultRadioButton"); }
@@ -87,8 +93,14 @@ namespace com.csutil.editor {
         [MenuItem(UIv2menu + "DefaultText", false, priorityOfUiMenu + 6)]
         static void DefaultText() { AddPrefabToActiveView("DefaultText"); }
 
-        [MenuItem(UIv2menu + "DefaultDropDown", false, priorityOfUiMenu + 6)]
+        [MenuItem(UIv2menuOld + "DefaultDropDown", false, priorityOfUiMenu + 6)]
         static void DefaultDropDown() { AddPrefabToActiveView("DefaultDropDown"); }
+        
+        [MenuItem(UIv2menu + "DefaultDropDownV3", false, priorityOfUiMenu + 6)]
+        static void DefaultDropDownV3() { AddPrefabToActiveView("DefaultDropDownV3"); }
+        
+        [MenuItem(UIv2menu + "DefaultDropDownV3WithText", false, priorityOfUiMenu + 6)]
+        static void DefaultDropDownV3WithText() { AddPrefabToActiveView("DefaultDropDownV3WithText"); }
 
         [MenuItem(UIv2menu + "DefaultImage", false, priorityOfUiMenu + 6)]
         static void DefaultImage() { AddPrefabToActiveView("DefaultImage"); }
@@ -96,9 +108,12 @@ namespace com.csutil.editor {
         [MenuItem(UIv2menu + "DefaultSlider", false, priorityOfUiMenu + 6)]
         static void DefaultSlider() { AddPrefabToActiveView("DefaultSlider"); }
 
-        [MenuItem(UIv2menu + "DefaultSliderWithText", false, priorityOfUiMenu + 6)]
+        [MenuItem(UIv2menuOld + "DefaultSliderWithText", false, priorityOfUiMenu + 6)]
         static void DefaultSliderWithText() { AddPrefabToActiveView("DefaultSliderWithText"); }
 
+        [MenuItem(UIv2menu + "DefaultSliderWithTextV2", false, priorityOfUiMenu + 6)]
+        static void DefaultSliderWithTextV2() { AddPrefabToActiveView("DefaultSliderWithTextV2"); }
+        
         [MenuItem(UIv2menu + "DefaultProgressBar", false, priorityOfUiMenu + 6)]
         static void DefaultProgressBar() { AddPrefabToActiveView("DefaultProgressBar"); }
 
