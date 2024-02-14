@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
@@ -199,6 +200,10 @@ namespace com.csutil {
             return go == parent || CheckEqualOrParent(parent, go.GetParent());
         }
 
+        public static void SetOptions(this TMP_Dropdown dropdown, string[] options, int currentSelection) {
+            dropdown.options = options.Map(x => new TMP_Dropdown.OptionData(x)).ToList();
+            dropdown.value = currentSelection;
+        }
 
         public static UnityAction<int> SetOnValueChangedAction(this Dropdown self, Func<int, bool> onValueChanged) {
             AssertV3.IsNotNull(self, "self (Dropdown)");
@@ -209,7 +214,36 @@ namespace com.csutil {
             return AddOnValueChangedAction(self, onValueChanged);
         }
 
+        public static UnityAction<int> SetOnValueChangedAction(this TMP_Dropdown self, Func<int, bool> onValueChanged) {
+            AssertV3.IsNotNull(self, "self (Dropdown)");
+            if (self.onValueChanged != null && self.onValueChanged.GetPersistentEventCount() > 0) {
+                Log.w("Overriding old onValueChanged listener for input field " + self, self.gameObject);
+            }
+            self.onValueChanged = new TMP_Dropdown.DropdownEvent(); // clear previous onValueChanged listeners
+            return AddOnValueChangedAction(self, onValueChanged);
+        }
+
         public static UnityAction<int> AddOnValueChangedAction(this Dropdown self, Func<int, bool> onValueChanged) {
+            if (onValueChanged != null) {
+                var oldSelection = self.value;
+                UnityAction<int> newListener = (newSection) => {
+                    if (newSection == oldSelection) { return; }
+                    // Ignore event event if it was triggered through code, only fire for actual user input:
+                    if (!self.ChangeInChildWasTriggeredByUserThroughEventSystem()) { return; }
+                    if (!onValueChanged(newSection)) {
+                        self.value = oldSelection;
+                    } else {
+                        oldSelection = newSection;
+                        EventBus.instance.Publish(EventConsts.catUi + UiEvents.DROPDOWN_CHANGED, self, newSection);
+                    }
+                };
+                self.onValueChanged.AddListener(newListener);
+                return newListener;
+            }
+            return null;
+        }
+
+        public static UnityAction<int> AddOnValueChangedAction(this TMP_Dropdown self, Func<int, bool> onValueChanged) {
             if (onValueChanged != null) {
                 var oldSelection = self.value;
                 UnityAction<int> newListener = (newSection) => {
