@@ -1,27 +1,12 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using com.csutil.math;
+﻿using System.Linq;
 using TMPro;
-using UnityEngine;
 using UnityEngine.UI;
 
 namespace com.csutil.settings {
 
-    public class GraphicsSettingsUi : Presenter<IGraphicsSettings> {
+    public class GraphicsSettingsUi : SettingsUi<IGraphicsSettings> {
 
-        public GameObject targetView { get; set; }
-
-        public Task OnLoad(IGraphicsSettings model) {
-            var links = targetView.GetLinkMap();
-            var fpsText = links.Get<TMP_Text>("CurrentFps");
-            MonitorCurrentFps(fpsText);
-
-            RefreshSettingsUi(model);
-            return Task.CompletedTask;
-        }
-
-        private void RefreshSettingsUi(IGraphicsSettings model) {
+        protected override void RefreshSettingsUi(IGraphicsSettings model) {
             var links = targetView.GetLinkMap();
 
             // VSync toggle
@@ -131,17 +116,6 @@ namespace com.csutil.settings {
                 RefreshSettingsUi(model);
                 return true;
             });
-        }
-
-        private void MonitorCurrentFps(TMP_Text fpsText) {
-            var fpsHistoryList = new FixedSizedQueue<int>(size: 20);
-            fpsText.ExecuteRepeated(() => {
-                var newFps = (int)(1f / Time.unscaledDeltaTime);
-                fpsHistoryList.Enqueue(newFps);
-                var medianFps = fpsHistoryList.CalcMedian();
-                fpsText.text = medianFps + " FPS";
-                return true;
-            }, delayInMsBetweenIterations: 100);
         }
 
     }
