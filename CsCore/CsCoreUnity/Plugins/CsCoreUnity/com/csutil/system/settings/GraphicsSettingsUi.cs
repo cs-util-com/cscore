@@ -12,12 +12,21 @@ namespace com.csutil.settings {
 
         public Task OnLoad(IGraphicsSettings model) {
             var links = targetView.GetLinkMap();
+            var fpsText = links.Get<TMP_Text>("CurrentFps");
+            MonitorCurrentFps(fpsText);
+
+            RefreshSettingsUi(model);
+            return Task.CompletedTask;
+        }
+
+        private void RefreshSettingsUi(IGraphicsSettings model) {
+            var links = targetView.GetLinkMap();
 
             // VSync toggle
             links.Get<Toggle>("VSyncToggle").isOn = model.UseVSync;
             links.Get<Toggle>("VSyncToggle").SetOnValueChangedAction(x => {
                 model.UseVSync = x;
-                OnLoad(model);
+                RefreshSettingsUi(model);
                 return true;
             });
 
@@ -25,7 +34,7 @@ namespace com.csutil.settings {
             links.Get<Toggle>("DynamicResolutionToggle").isOn = model.UseDynamicResolution;
             links.Get<Toggle>("DynamicResolutionToggle").SetOnValueChangedAction(x => {
                 model.UseDynamicResolution = x;
-                OnLoad(model);
+                RefreshSettingsUi(model);
                 return true;
             });
 
@@ -37,7 +46,7 @@ namespace com.csutil.settings {
             targetFrameRateInput.SetOnValueChangedAction(newFps => {
                 if (newFps > 5 && newFps < 120) {
                     model.TargetFrameRate = (int)newFps;
-                    OnLoad(model);
+                    RefreshSettingsUi(model);
                     return true;
                 }
                 return false;
@@ -48,7 +57,7 @@ namespace com.csutil.settings {
             qualityLevelDropdown.SetOptions(model.AvailableQualityLevels, model.QualityLevel);
             qualityLevelDropdown.SetOnValueChangedAction(x => {
                 model.QualityLevel = x;
-                OnLoad(model);
+                RefreshSettingsUi(model);
                 return true;
             });
 
@@ -58,17 +67,14 @@ namespace com.csutil.settings {
             resolutionDropdown.SetOptions(options, model.AvailableResolutions.IndexOf(model.CurrentResolution));
             resolutionDropdown.SetOnValueChangedAction(x => {
                 model.CurrentResolution = model.AvailableResolutions[x];
-                OnLoad(model);
+                RefreshSettingsUi(model);
                 return true;
             });
 
             // Shadow Quality
-            string[] names = ShadowQuality.GetNames(typeof(ShadowQuality));
-            var shadowQualityDropdown = links.Get<TMP_Dropdown>("ShadowQualityDropdown");
-            shadowQualityDropdown.SetOptions(names, model.QualityLevel);
-            shadowQualityDropdown.SetOnValueChangedAction(i => {
-                model.ShadowQuality = EnumUtil.Parse<ShadowQuality>(names[i]);
-                OnLoad(model);
+            links.Get<TMP_Dropdown>("ShadowQualityDropdown").SetOptionsEnum(model.ShadowQuality, newShadowQuality => {
+                model.ShadowQuality = newShadowQuality;
+                RefreshSettingsUi(model);
                 return true;
             });
 
@@ -78,7 +84,7 @@ namespace com.csutil.settings {
             shadowDistanceInput.SetOnValueChangedAction(x => {
                 if (float.TryParse(x, out float shadowRenderDistance) && shadowRenderDistance > 1 && shadowRenderDistance < 5000) {
                     model.ShadowDistance = shadowRenderDistance;
-                    OnLoad(model);
+                    RefreshSettingsUi(model);
                     return true;
                 }
                 return false;
@@ -90,7 +96,7 @@ namespace com.csutil.settings {
             cameraRenderDistanceInput.SetOnValueChangedAction(x => {
                 if (float.TryParse(x, out float camRenderDistance) && camRenderDistance > 1 && camRenderDistance < 5000) {
                     model.CameraRenderDistance = camRenderDistance;
-                    OnLoad(model);
+                    RefreshSettingsUi(model);
                     return true;
                 }
                 return false;
@@ -102,7 +108,7 @@ namespace com.csutil.settings {
             defaultSolverIterationsInput.SetOnValueChangedAction(x => {
                 if (int.TryParse(x, out int newSolverIterations) && newSolverIterations > 1 && newSolverIterations < 10) {
                     model.DefaultSolverIterations = newSolverIterations;
-                    OnLoad(model);
+                    RefreshSettingsUi(model);
                     return true;
                 }
                 return false;
@@ -112,7 +118,7 @@ namespace com.csutil.settings {
             links.Get<Toggle>("AutoSyncTransformsToggle").isOn = model.AutoSyncTransforms;
             links.Get<Toggle>("AutoSyncTransformsToggle").SetOnValueChangedAction(x => {
                 model.AutoSyncTransforms = x;
-                OnLoad(model);
+                RefreshSettingsUi(model);
                 return true;
             });
 
@@ -120,11 +126,26 @@ namespace com.csutil.settings {
             links.Get<Toggle>("ReusePhysicsCollisionCallbacksToggle").isOn = model.ReusePhysicsCollisionCallbacks;
             links.Get<Toggle>("ReusePhysicsCollisionCallbacksToggle").SetOnValueChangedAction(x => {
                 model.ReusePhysicsCollisionCallbacks = x;
-                OnLoad(model);
+                RefreshSettingsUi(model);
                 return true;
             });
-
-            return Task.CompletedTask;
+        }
+        
+        private void MonitorCurrentFps(TMP_Text fpsText) {
+            var lastFps = 0;
+            var lastFpsUpdate = Time.realtimeSinceStartup;
+            fpsText.ExecuteRepeated(() => {
+                var newFps = (int)(1f / Time.unscaledDeltaTime);
+                if (newFps != lastFps) {
+                    lastFps = newFps;
+                    fpsText.text = newFps + " FPS";
+                }
+                if (Time.realtimeSinceStartup - lastFpsUpdate > 1) {
+                    lastFpsUpdate = Time.realtimeSinceStartup;
+                    lastFps = 0;
+                }
+                return true;
+            }, delayInMsBetweenIterations: 500);
         }
 
     }

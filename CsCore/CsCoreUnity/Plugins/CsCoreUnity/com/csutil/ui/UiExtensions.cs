@@ -200,9 +200,32 @@ namespace com.csutil {
             return go == parent || CheckEqualOrParent(parent, go.GetParent());
         }
 
+        public static void SetOptions(this Dropdown dropdown, string[] options, int currentSelection) {
+            dropdown.options = options.Map(x => new Dropdown.OptionData(x)).ToList();
+            dropdown.value = currentSelection;
+        }
+
+        public static void SetOptionsEnum<T>(this Dropdown dropdown, T currentSelection, Func<T, bool> onValueChanged, string[] textsToShow = null) where T : Enum {
+            string[] names = Enum.GetNames(typeof(T));
+            if (textsToShow == null) { textsToShow = names; }
+            dropdown.SetOptions(textsToShow, names.IndexOf(currentSelection.ToString()));
+            dropdown.SetOnValueChangedAction(i => {
+                return onValueChanged((T)EnumUtil.Parse(typeof(T), names[i]));
+            });
+        }
+
         public static void SetOptions(this TMP_Dropdown dropdown, string[] options, int currentSelection) {
             dropdown.options = options.Map(x => new TMP_Dropdown.OptionData(x)).ToList();
             dropdown.value = currentSelection;
+        }
+
+        public static void SetOptionsEnum<T>(this TMP_Dropdown dropdown, T currentSelection, Func<T, bool> onValueChanged, string[] textsToShow = null) where T : Enum {
+            string[] names = Enum.GetNames(typeof(T));
+            if (textsToShow == null) { textsToShow = names; }
+            dropdown.SetOptions(textsToShow, names.IndexOf(currentSelection.ToString()));
+            dropdown.SetOnValueChangedAction(i => {
+                return onValueChanged((T)EnumUtil.Parse(typeof(T), names[i]));
+            });
         }
 
         public static UnityAction<int> SetOnValueChangedAction(this Dropdown self, Func<int, bool> onValueChanged) {
