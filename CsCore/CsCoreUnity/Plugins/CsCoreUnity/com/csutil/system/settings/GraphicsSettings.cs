@@ -1,5 +1,4 @@
 ﻿using System.Threading.Tasks;
-using com.csutil;
 using com.csutil.model.jsonschema;
 using com.csutil.ui;
 using UnityEngine;
@@ -29,7 +28,7 @@ namespace com.csutil.settings {
         bool UseDynamicResolution { get; set; }
 
         ShadowQuality ShadowQuality { get; set; }
-        
+
         float ShadowDistance { get; set; }
 
         float CameraRenderDistance { get; set; }
@@ -47,21 +46,25 @@ namespace com.csutil.settings {
 
     public class GraphicsSettings : MonoBehaviour, IGraphicsSettings {
 
-        public Camera mainCamera;
+        public Camera targetCamera;
 
         public Task Show(ViewStack viewStack) {
             return new GraphicsSettingsUi().ShowModelInView(this, "GraphicsSettingsUi", viewStack);
         }
 
         private void OnEnable() {
-            mainCamera.ThrowErrorIfNull("mainCamera");
+            if (targetCamera == null) {
+                Log.e("No target camera set, using Camera.main", gameObject);
+                targetCamera = Camera.main;
+            }
+            AssertV3.IsNotNull(targetCamera, "targetCamera");
         }
 
         // Resolutions
         public Resolution[] AvailableResolutions => Screen.resolutions;
         public Resolution CurrentResolution { get => Screen.currentResolution; set => Screen.SetResolution(value.width, value.height, Screen.fullScreen); }
 
-        public bool UseDynamicResolution { get => mainCamera.allowDynamicResolution; set => mainCamera.allowDynamicResolution = value; }
+        public bool UseDynamicResolution { get => targetCamera.allowDynamicResolution; set => targetCamera.allowDynamicResolution = value; }
 
         /// <summary> On mobile On should be faster </summary>
         public bool UseVSync { get => QualitySettings.vSyncCount > 0; set => QualitySettings.vSyncCount = value ? 1 : 0; }
@@ -75,7 +78,7 @@ namespace com.csutil.settings {
 
         public float ShadowDistance { get => QualitySettings.shadowDistance; set => QualitySettings.shadowDistance = value; }
 
-        public float CameraRenderDistance { get => mainCamera.farClipPlane; set => mainCamera.farClipPlane = value; }
+        public float CameraRenderDistance { get => targetCamera.farClipPlane; set => targetCamera.farClipPlane = value; }
 
         public bool AutoSyncTransforms { get => Physics.autoSyncTransforms; set => Physics.autoSyncTransforms = value; }
         public bool ReusePhysicsCollisionCallbacks { get => Physics.reuseCollisionCallbacks; set => Physics.reuseCollisionCallbacks = value; }

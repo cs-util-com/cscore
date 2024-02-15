@@ -1,5 +1,7 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using com.csutil.math;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -130,22 +132,16 @@ namespace com.csutil.settings {
                 return true;
             });
         }
-        
+
         private void MonitorCurrentFps(TMP_Text fpsText) {
-            var lastFps = 0;
-            var lastFpsUpdate = Time.realtimeSinceStartup;
+            var fpsHistoryList = new FixedSizedQueue<int>(size: 20);
             fpsText.ExecuteRepeated(() => {
                 var newFps = (int)(1f / Time.unscaledDeltaTime);
-                if (newFps != lastFps) {
-                    lastFps = newFps;
-                    fpsText.text = newFps + " FPS";
-                }
-                if (Time.realtimeSinceStartup - lastFpsUpdate > 1) {
-                    lastFpsUpdate = Time.realtimeSinceStartup;
-                    lastFps = 0;
-                }
+                fpsHistoryList.Enqueue(newFps);
+                var medianFps = fpsHistoryList.CalcMedian();
+                fpsText.text = medianFps + " FPS";
                 return true;
-            }, delayInMsBetweenIterations: 500);
+            }, delayInMsBetweenIterations: 100);
         }
 
     }

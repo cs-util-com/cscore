@@ -14,6 +14,14 @@ namespace com.csutil.math {
     /// </summary>
     public static class CalculateMedian {
 
+        public static float CalcMedian(this IEnumerable<int> self) {
+            return (float)CalcMedian(self, x => x);
+        }
+        
+        public static float CalcMedian(this IEnumerable<long> self) {
+            return (float)CalcMedian(self, x => x);
+        }
+        
         public static float CalcMedian(this IEnumerable<float> self) {
             return (float)CalcMedian(self, x => x);
         }
