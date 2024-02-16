@@ -33,19 +33,36 @@ namespace com.csutil.ui {
         public List<NamedColor> colors = new List<NamedColor>();
         private List<NamedColor> oldColors = new List<NamedColor>();
 
+        /// <summary> This can be expensive and by default theme colors dont
+        /// change regularly so the default is false, instead call UpdateUiIfColorsChanged
+        /// manually when the user changes the colors in a Theme settings UI. </summary>
+        public bool doAutomaticRuntimeColorUpdates = false;
+
         public bool TryGetColor(string colorName, out Color c) {
             c = Color.clear;
             if (colors.IsNullOrEmpty()) { return false; }
             AssertV3.IsNotNull(colorName, "colorName");
             AssertV3.IsFalse(colors.IsNullOrEmpty(), () => "colors.IsNullOrEmpty");
             var namedColor = colors.FirstOrDefault(x => x.colorName == colorName);
-            if (namedColor != null) { c = namedColor.colorValue; return true; }
+            if (namedColor != null) {
+                c = namedColor.colorValue;
+                return true;
+            }
             return false;
         }
 
         private void OnEnable() {
             InitColorsIfEmpty();
-            this.ExecuteRepeated(() => { CheckIfColorsChanged(); return true; }, 1000);
+            if (doAutomaticRuntimeColorUpdates) {
+                StartAutomaticRegularColorUpdates();
+            }
+        }
+        
+        public void StartAutomaticRegularColorUpdates() {
+            this.ExecuteRepeated(() => {
+                UpdateUiIfColorsChanged();
+                return true;
+            }, 1000);
         }
 
         private void InitColorsIfEmpty() {
@@ -77,11 +94,11 @@ namespace com.csutil.ui {
         private void OnValidate() {
             if (ApplicationV2.IsEditorOnValidateAllowed()) {
                 InitColorsIfEmpty();
-                CheckIfColorsChanged();
+                UpdateUiIfColorsChanged();
             }
         }
 
-        private void CheckIfColorsChanged() {
+        public void UpdateUiIfColorsChanged() {
             for (int i = 0; i < colors.Count; i++) {
                 if (oldColors.Count <= i || !EqualJson(colors[i], oldColors[i])) {
                     UpdateThemeColorMonos(colors[i]);
