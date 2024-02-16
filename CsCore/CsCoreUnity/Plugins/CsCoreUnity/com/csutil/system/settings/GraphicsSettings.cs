@@ -44,6 +44,9 @@ namespace com.csutil.settings {
 
         AliasingLevel AntiAliasingLevel { get; set; }
 
+        /// <summary>
+        /// Improves the clarity and detail of textures viewed at oblique angles. While it can make surfaces look better, particularly those at a distance, it might slightly affect performance
+        /// </summary>
         AnisotropicFiltering AnisotropicFiltering { get; set; }
         
         float ResolutionScalingFixedDPIFactor { get; set; }
