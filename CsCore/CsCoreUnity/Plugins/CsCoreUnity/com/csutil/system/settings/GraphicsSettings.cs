@@ -42,6 +42,16 @@ namespace com.csutil.settings {
         /// <summary> Small values (eg 2) should result in better performance. See https://unity.com/how-to/enhanced-physics-performance-smooth-gameplay#modify-solver-iterations </summary>
         int DefaultSolverIterations { get; set; }
 
+        AliasingLevel AntiAliasingLevel { get; set; }
+
+        AnisotropicFiltering AnisotropicFiltering { get; set; }
+        
+        float ResolutionScalingFixedDPIFactor { get; set; }
+        
+    }
+
+    public enum AliasingLevel {
+        Disabled = 0, Use_2x = 2, Use_4x = 4, Use_8x = 8
     }
 
     public class GraphicsSettings : MonoBehaviour, IGraphicsSettings {
@@ -84,6 +94,15 @@ namespace com.csutil.settings {
         public bool ReusePhysicsCollisionCallbacks { get => Physics.reuseCollisionCallbacks; set => Physics.reuseCollisionCallbacks = value; }
 
         public int DefaultSolverIterations { get => Physics.defaultSolverIterations; set => Physics.defaultSolverIterations = value; }
+
+        public AliasingLevel AntiAliasingLevel {
+            get => (AliasingLevel)QualitySettings.antiAliasing;
+            set => QualitySettings.antiAliasing = (int)value;
+        }
+        
+        public AnisotropicFiltering AnisotropicFiltering { get => QualitySettings.anisotropicFiltering; set => QualitySettings.anisotropicFiltering = value; }
+        
+        public float ResolutionScalingFixedDPIFactor { get => QualitySettings.resolutionScalingFixedDPIFactor; set => QualitySettings.resolutionScalingFixedDPIFactor = value; }
 
     }
 

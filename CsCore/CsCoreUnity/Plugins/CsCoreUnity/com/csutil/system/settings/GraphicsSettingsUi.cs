@@ -89,6 +89,36 @@ namespace com.csutil.settings {
                 return false;
             });
 
+            // AntiAliasingLevel
+            var antiAliasingLevelInput = links.Get<TMP_Dropdown>("AntiAliasingLevelInput");
+            antiAliasingLevelInput.SetOptionsEnum(model.AntiAliasingLevel, newAntiAliasingLevel => {
+                model.AntiAliasingLevel = newAntiAliasingLevel;
+                RefreshSettingsUi(model);
+                return true;
+            });
+
+
+            // AnisotropicFiltering
+            var anisotropicFilteringInput = links.Get<TMP_Dropdown>("AnisotropicFilteringInput");
+            anisotropicFilteringInput.SetOptionsEnum(model.AnisotropicFiltering, newAnisotropicFiltering => {
+                model.AnisotropicFiltering = newAnisotropicFiltering;
+                RefreshSettingsUi(model);
+                return true;
+            });
+
+            // ResolutionScalingFixedDPIFactor
+            var resolutionScalingFixedDPIFactorInput = links.Get<TMP_InputField>("ResolutionScalingFixedDPIFactorInput");
+            resolutionScalingFixedDPIFactorInput.SetTextWithoutNotify(model.ResolutionScalingFixedDPIFactor.ToString());
+            resolutionScalingFixedDPIFactorInput.SetOnValueChangedAction(x => {
+                if (x == "0") { x = "0,5"; }
+                if (float.TryParse(x, out float newResolutionScalingFixedDPIFactor) && newResolutionScalingFixedDPIFactor > 0.1f && newResolutionScalingFixedDPIFactor <= 1) {
+                    model.ResolutionScalingFixedDPIFactor = newResolutionScalingFixedDPIFactor;
+                    RefreshSettingsUi(model);
+                    return true;
+                }
+                return false;
+            });
+
             // DefaultSolverIterations
             var defaultSolverIterationsInput = links.Get<TMP_InputField>("DefaultSolverIterationsInput");
             defaultSolverIterationsInput.SetTextWithoutNotify(model.DefaultSolverIterations.ToString());
