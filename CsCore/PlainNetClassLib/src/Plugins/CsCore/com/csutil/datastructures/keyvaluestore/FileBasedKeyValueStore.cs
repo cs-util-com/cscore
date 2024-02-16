@@ -27,7 +27,7 @@ namespace com.csutil.keyvaluestore {
 
         private class PrimitiveWrapper { public object val; }
         /// <summary> Lock will be set while accessing the folder </summary>
-        private object folderAccessLock = new object();
+        protected object folderAccessLock = new object();
         private int openChanges = 0;
 
 
