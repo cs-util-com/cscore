@@ -53,8 +53,7 @@ namespace com.csutil.integrationTests.http {
             Assert.Empty(tests.Filter(x => x.IsCompletedSuccessfully));
         }
 
-        // [Fact]
-        [Obsolete]
+        [Fact]
         public async Task WttrInApiExample1() {
             GeoPluginNet.Response response = await GeoPluginNet.GetResponse();
             var report = await WttrInApi.GetWeather(response.geoplugin_city);
@@ -63,8 +62,7 @@ namespace com.csutil.integrationTests.http {
             Assert.Equal(response.geoplugin_countryName, report.nearest_area.First().country.First().value);
         }
 
-        // [Fact]
-        [Obsolete]
+        [Fact]
         public async Task WttrInApiExample2() {
             GeoPluginNet.Response response = await GeoPluginNet.GetResponse();
             var latitude = double.Parse(response.geoplugin_latitude, CultureInfo.InvariantCulture);

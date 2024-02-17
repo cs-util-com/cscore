@@ -15,7 +15,7 @@ namespace com.csutil.http.apis {
         public static async Task<Response> GetWeather(double latitude, double longitude) {
             var latitudeString = latitude.ToString(CultureInfo.InvariantCulture);
             var longitudeString = longitude.ToString(CultureInfo.InvariantCulture);
-            var url = new Uri($"https://wttr.in/~{latitudeString},{longitudeString}?M&format=j1");
+            var url = new Uri($"https://wttr.in/{latitudeString},{longitudeString}?M&format=j1");
             return await url.SendGET().GetResult<Response>();
         }
 
