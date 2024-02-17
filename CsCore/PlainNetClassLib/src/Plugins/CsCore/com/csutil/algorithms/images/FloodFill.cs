@@ -3,16 +3,10 @@ using System.Collections.Generic;
 using System.Net;
 
 namespace com.csutil.algorithms.images {
-    public class FloodFill {
-
-        private bool[,] visited;
-
-        public FloodFill(int width, int height) {
-            visited = new bool[width, height];
-        }
-
-        public byte[] FloodFillAlgorithm(byte[] image, int width, int height) {
+    public static class FloodFill {
+        public static  byte[] FloodFillAlgorithm(byte[] image, int width, int height) {
             var result = new byte[image.Length];
+            var visited = new bool[width, height];
             for (var a = 3; a < image.Length; a += 4) {
                 result[a] = 255;
             }
@@ -45,7 +39,7 @@ namespace com.csutil.algorithms.images {
             return result;
         }
 
-        private bool SeemsWhite(byte[] image, int x, int y, int width) {
+        private static bool SeemsWhite(byte[] image, int x, int y, int width) {
             var color = GetColorAt(image, x, y, 4, width);
             return color[0] > 240 && color[1] > 240 && color[2] > 240;
         }

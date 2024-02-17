@@ -350,6 +350,48 @@ namespace com.csutil.algorithms.images
 
         }
 
+        public static byte[] Dilate1D(byte[] imageData, int width, int height, int bytePerPixel, int kernelSize) {
+            var intermediateResult = Dilation1D(imageData, width, height, bytePerPixel, kernelSize, true);
+            return Dilation1D(intermediateResult, width, height, bytePerPixel, kernelSize, false);
+        }
+        
+        private static byte[] Dilation1D(byte[] imageData, int width, int height, int bytePerPixel, int kernelSize, bool horizontal)
+        {
+            byte[] dilatedImage = new byte[imageData.Length];
+
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    byte maxR = 0, maxG = 0, maxB = 0, maxA = 0;
+                    // Apply 1D kernel
+                    for (int k = -kernelSize; k <= kernelSize; k++)
+                    {
+                        var pixelX = horizontal ? x + k : x;
+                        var pixelY = horizontal ? y : y + k;
+                        if (pixelX < 0 || pixelX >= width || pixelY < 0 || pixelY >= height) continue;
+                        var pixelIndex = (pixelY * width + pixelX) * bytePerPixel;
+
+                        var r = imageData[pixelIndex];
+                        var g = imageData[pixelIndex + 1];
+                        var b = imageData[pixelIndex + 2];
+                        var a = imageData[pixelIndex + 3];
+
+                        maxR = Math.Max(maxR, r);
+                        maxG = Math.Max(maxG, g);
+                        maxB = Math.Max(maxB, b);
+                        maxA = Math.Max(maxA, a);
+                    }
+
+                    var currentIndex = (y * width + x) * bytePerPixel;
+                    dilatedImage[currentIndex] = maxR;
+                    dilatedImage[currentIndex + 1] = maxG;
+                    dilatedImage[currentIndex + 2] = maxB;
+                    dilatedImage[currentIndex + 3] = maxA;
+                }
+            }
+
+            return dilatedImage;
+        }
+        
         public static byte[] Dilate(byte[] input, int width, int height, int bytesPerPixel, int kernelSize) {
             var dilatedImage = new byte[input.Length];
 
