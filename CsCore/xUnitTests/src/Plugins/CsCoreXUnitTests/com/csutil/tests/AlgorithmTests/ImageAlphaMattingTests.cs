@@ -88,8 +88,8 @@ namespace com.csutil.tests.AlgorithmTests {
         [Fact]
         public async Task OnlyGuidedFilterWithMap() {
             var folder = EnvironmentV2.instance.GetOrAddAppDataFolder("ImageMattingTests");
-            var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            var imagePath = Path.Combine(appDataPath, "ImageMattingTests", "GT04-implementedAlpha");
+            //var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            //var imagePath = Path.Combine(appDataPath, "ImageMattingTests", "GT04-implementedAlpha");
             var alphaMattedFe = folder.GetChild("GT04-implementedAlpha.png");
             var alphaMatted = await ImageLoader.LoadImageInBackground(alphaMattedFe);
             var imageFe = folder.GetChild("GT04-image.png");
@@ -148,8 +148,10 @@ namespace com.csutil.tests.AlgorithmTests {
                 writer.WritePng(flipped, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
             }
         }
-        
-        
+
+
+
+
         private static async Task DownloadFileIfNeeded(FileEntry self, string url) {
             var imgFileRef = new MyFileRef() { url = url, fileName = self.Name };
             await imgFileRef.DownloadTo(self.Parent, useAutoCachedFileRef: true);
