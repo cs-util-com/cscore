@@ -47,6 +47,18 @@ namespace com.csutil.algorithms.images {
                 var result = new byte[p.Length];
                 if (gF is GuidedFilterMono mono) {
                     result = mono.FilterSingleChannel(p, channel);
+                    // TODO Fix that single channel image gets put aback together to original length with original alpha values
+                    // var zeros = new byte[result.Length];
+                    // var alpha = new byte[result.Length];
+                    // for (int i = 0; i < alpha.Length; i++) {
+                    //     alpha[i] = 255;
+                    // }
+                    // switch (channel) {
+                    //     case 0:
+                    //         result = CombineRGBA(result, zeros, zeros, alpha);
+                    //         break;
+                    // }
+                    
                 }
                 else {
                     var pc = SplitChannels(p, colorComponents, gF);

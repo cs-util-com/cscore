@@ -350,30 +350,51 @@ namespace com.csutil.algorithms.images
 
         }
 
-        public static byte[] Dilate(byte[] input, int width, int height) {
-            byte[] output = new byte[input.Length];
-            int stride = width;
+        public static byte[] Dilate(byte[] input, int width, int height, int bytesPerPixel, int kernelSize) {
+            var dilatedImage = new byte[input.Length];
 
-            for (int y = 1; y < height - 1; y++) {
-                for (int x = 1; x < width - 1; x++) {
-                    byte maxPixel = 0;
+            // Loop through each pixel in the image
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    // Find the maximum pixel value in the neighborhood defined by the kernel
+                    byte maxR = 0, maxG = 0, maxB = 0, maxA = 0;
 
-                    // Iterate through the structuring element
-                    for (int ky = -1; ky <= 1; ky++) {
-                        for (int kx = -1; kx <= 1; kx++) {
-                            int pixelIndex = (y + ky) * stride + (x + kx);
-                            maxPixel = Math.Max(maxPixel, input[pixelIndex]);
+                    for (int ky = -kernelSize; ky <= kernelSize; ky++) {
+                        for (int kx = -kernelSize; kx <= kernelSize; kx++) {
+                            var pixelX = x + kx;
+                            var pixelY = y + ky;
+
+                            // Ensure the pixel is within bounds
+                            if (pixelX >= 0 && pixelX < width && pixelY >= 0 && pixelY < height) {
+                                var pixelIndex = (pixelY * width + pixelX) * bytesPerPixel;
+
+                                // Extract RGBA values
+                                var r = input[pixelIndex];
+                                var g = input[pixelIndex + 1];
+                                var b = input[pixelIndex + 2];
+                                var a = input[pixelIndex + 3];
+
+                                // Update maximum values
+                                maxR = Math.Max(maxR, r);
+                                maxG = Math.Max(maxG, g);
+                                maxB = Math.Max(maxB, b);
+                                maxA = Math.Max(maxA, a);
+                            }
                         }
                     }
 
-                    output[y * stride + x] = maxPixel;
+                    // Set the pixel value in the dilated image
+                    var currentIndex = (y * width + x) * bytesPerPixel;
+                    dilatedImage[currentIndex] = maxR;
+                    dilatedImage[currentIndex + 1] = maxG;
+                    dilatedImage[currentIndex + 2] = maxB;
+                    dilatedImage[currentIndex + 3] = maxA;
                 }
             }
 
-            return output;
+            return dilatedImage;
+
         }
-
-
 
     }
 }

@@ -35,17 +35,36 @@ namespace com.csutil.tests.AlgorithmTests {
                 // Unlock the bits
                 bitmap.UnlockBits(bmpData);
                 var ff = new FloodFill(width, height);
-                ff.FloodFillAlgorithm(imageData, width, height);
+                var floodFilled = ff.FloodFillAlgorithm(imageData, width, height);
                 var test = folder.GetChild("FloodFilled.png");
                 {
                     using var stream = test.OpenOrCreateForReadWrite();
                     ImageWriter writer = new ImageWriter();
-                    var flippedResult = ImageUtility.FlipImageVertically(imageData, width, height, 4);
-                    writer.WritePng(flippedResult, width, height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
+                    writer.WritePng(floodFilled, width, height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
+                }
+                
+                var dilated = Filter.Dilate(floodFilled, width, height, 4, 30);
+                var dilationPng = folder.GetChild("Dilated.png");
+                {
+                    using var stream = dilationPng.OpenOrCreateForReadWrite();
+                    var writer = new ImageWriter();
+                    writer.WritePng(dilated, width, height, ColorComponents.RedGreenBlueAlpha, stream);
+                }
+
+                var trimap = TrimapGeneration.FromFloodFill(floodFilled, width, height, 4, 30);
+                var trimapPng = folder.GetChild("Trimap.png");
+                {
+                    using var stream = trimapPng.OpenOrCreateForReadWrite();
+                    var writer = new ImageWriter();
+                    writer.WritePng(trimap, width, height, ColorComponents.RedGreenBlueAlpha, stream);
                 }
             }
             
         }
+        
+        
+        
+        
         private static async Task DownloadFileIfNeeded(FileEntry self, string url)
         {
             var imgFileRef = new MyFileRef() { url = url, fileName = self.Name };

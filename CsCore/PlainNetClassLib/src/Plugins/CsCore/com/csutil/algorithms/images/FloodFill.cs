@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 
 namespace com.csutil.algorithms.images {
     public class FloodFill {
@@ -10,7 +11,11 @@ namespace com.csutil.algorithms.images {
             visited = new bool[width, height];
         }
 
-        public void FloodFillAlgorithm(byte[] image, int width, int height) {
+        public byte[] FloodFillAlgorithm(byte[] image, int width, int height) {
+            var result = new byte[image.Length];
+            for (var a = 3; a < image.Length; a += 4) {
+                result[a] = 255;
+            }
             Stack<(int x, int y)> stack = new Stack<(int x, int y)>();
 
             for (int x = 0; x < width; x++) {
@@ -25,7 +30,7 @@ namespace com.csutil.algorithms.images {
                                 continue;
                             }
 
-                            SetColorAt(image, cx, cy, width, new byte[] { 0, 0, 0, 255 }, 4);
+                            SetColorAt(result, cx, cy, width, new byte[] { 255, 255, 255, 255 }, 4);
                             visited[cx, cy] = true;
 
                             // Add neighboring pixels to the stack
@@ -37,6 +42,7 @@ namespace com.csutil.algorithms.images {
                     }
                 }
             }
+            return result;
         }
 
         private bool SeemsWhite(byte[] image, int x, int y, int width) {
@@ -45,12 +51,12 @@ namespace com.csutil.algorithms.images {
         }
 
         private static void SetColorAt(byte[] imageData, int x, int y, int width, byte[] color, int bytesPerPixel) {
-            int startIdx = (y * width + x) * bytesPerPixel;
+            var startIdx = (y * width + x) * bytesPerPixel;
             Array.Copy(color, 0, imageData, startIdx, color.Length);
         }
 
         private static byte[] GetColorAt(byte[] img, int x, int y, int bytesPerPixel, int width) {
-            int startIdx = (y * width + x) * bytesPerPixel;
+            var startIdx = (y * width + x) * bytesPerPixel;
             return new byte[] { img[startIdx], img[startIdx + 1], img[startIdx + 2], img[startIdx + 3] };
         }
     }
