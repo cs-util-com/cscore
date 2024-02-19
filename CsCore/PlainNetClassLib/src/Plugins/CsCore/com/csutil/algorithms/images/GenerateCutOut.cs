@@ -1,14 +1,20 @@
 ﻿using System;
 using ImageMagick;
+using StbImageSharp;
 
 namespace com.csutil.algorithms.images {
     public static class GenerateCutOut {
-        public static byte[] Generate(byte[] image, byte[] trimap, int width, int height, int bytesPerPixel) {
-            var imageMatting = new GlobalMatting(image.DeepCopy(), width, height, bytesPerPixel);
+        public static byte[] Generate(ImageResult imageRes, byte[] trimap, int kernelSize, double eps, int cutoffValue) {
+            var image = imageRes.Data.DeepCopy();
+            var width = imageRes.Width;
+            var height = imageRes.Height;
+            var bytesPerPixel = (int)imageRes.ColorComponents;
+            
+            var imageMatting = new GlobalMatting(image, width, height, bytesPerPixel);
             imageMatting.ExpansionOfKnownRegions(ref trimap, niter: 9);
             imageMatting.RunGlobalMatting(trimap, out var foreground, out var alphaData, out var conf);
             // filter the result with fast guided filter
-            var alpha = imageMatting.RunGuidedFilter(alphaData, r: 10, eps: 1e-5);
+            var alpha = imageMatting.RunGuidedFilter(alphaData, kernelSize, eps);
             
             
             for (int x = 0; x < width; ++x) {
@@ -20,8 +26,7 @@ namespace com.csutil.algorithms.images {
                     }
                 }
             }
-            // Safe cut out according to alpha region that is >= 128
-            var cutoffValue = 129;
+            // Safe cut out according to alpha region that is >= cutoffValue
             var cutout = image.DeepCopy();
             
             for (var x = 0; x < width; ++x) {
@@ -29,7 +34,6 @@ namespace com.csutil.algorithms.images {
                     var value = (int)GetColorAt(alpha, x, y, bytesPerPixel, width)[3];
                     var idx = (y * width + x) * bytesPerPixel;
                     cutout[idx + 3] = value >= cutoffValue ? (byte)value : (byte)0;
-                    // cutout[idx + 3] = (byte)value;
                 }
             }
             return cutout;

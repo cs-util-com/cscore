@@ -1,10 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net;
+using StbImageSharp;
 
 namespace com.csutil.algorithms.images {
     public static class FloodFill {
-        public static  byte[] FloodFillAlgorithm(byte[] image, int width, int height) {
+        
+        // Flood fill algorithm that floods the image from the border to the inside depending on the pixel value being above the floodValue
+        public static  byte[] FloodFillAlgorithm(ImageResult imageRes, int floodValue) {
+            var image = imageRes.Data.DeepCopy();
+            var width = imageRes.Width;
+            var height = imageRes.Height;
+            
             var result = new byte[image.Length];
             var visited = new bool[width, height];
             for (var a = 3; a < image.Length; a += 4) {
@@ -20,7 +26,7 @@ namespace com.csutil.algorithms.images {
                         while (stack.Count > 0) {
                             var (cx, cy) = stack.Pop();
                             if (cx < 0 || cx >= width || cy < 0 || cy >= height ||
-                                SeemsWhite(image, cx, cy, width) || visited[cx, cy]) {
+                                SeemsWhite(image, cx, cy, width, floodValue) || visited[cx, cy]) {
                                 continue;
                             }
 
@@ -39,9 +45,9 @@ namespace com.csutil.algorithms.images {
             return result;
         }
 
-        private static bool SeemsWhite(byte[] image, int x, int y, int width) {
+        private static bool SeemsWhite(byte[] image, int x, int y, int width, int floodValue) {
             var color = GetColorAt(image, x, y, 4, width);
-            return color[0] > 240 && color[1] > 240 && color[2] > 240;
+            return color[0] > floodValue && color[1] > floodValue && color[2] > floodValue;
         }
 
         private static void SetColorAt(byte[] imageData, int x, int y, int width, byte[] color, int bytesPerPixel) {

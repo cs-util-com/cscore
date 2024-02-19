@@ -17,9 +17,9 @@ namespace com.csutil.tests.AlgorithmTests {
             var width = dallEImage.Width;
             var height = dallEImage.Height;
             
-            var floodFilled = FloodFill.FloodFillAlgorithm(dallEImage.Data.DeepCopy(), width, height);
+            var floodFilled = FloodFill.FloodFillAlgorithm(dallEImage, 240);
             var trimap = TrimapGeneration.FromFloodFill(floodFilled, width, height, (int)dallEImage.ColorComponents, 30);
-            var cutout = GenerateCutOut.Generate(dallEImage.Data.DeepCopy(), trimap, width, height, (int)dallEImage.ColorComponents);
+            var cutout = GenerateCutOut.Generate(dallEImage, trimap, 10, 1e-5, 129);
             var cutoutPng = folder.GetChild("Cutout.png");
             {
                 await using var stream = cutoutPng.OpenOrCreateForReadWrite();
