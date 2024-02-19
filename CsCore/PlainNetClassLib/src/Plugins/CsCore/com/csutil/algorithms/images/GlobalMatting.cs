@@ -327,8 +327,8 @@ namespace com.csutil.algorithms.images {
             }
 
             // Erode the foreground and background
-            byte[] erodedBackground = Erode(background, w, h, r);
-            byte[] erodedForeground = Erode(foreground, w, h, r);
+            byte[] erodedBackground = Erode(background, w, h, 4, r);
+            byte[] erodedForeground = Erode(foreground, w, h, 4, r);
 
             // Increase unknown region
             for (int y = 0; y < h; ++y) {
@@ -339,7 +339,7 @@ namespace com.csutil.algorithms.images {
                 }
             }
         }
-
+        /*
         // Helper method to erode an image
         private byte[] Erode(byte[] image, int w, int h, int r) {
             byte[] erodedImage = new byte[image.Length];
@@ -373,7 +373,50 @@ namespace com.csutil.algorithms.images {
 
             return erodedImage;
         }
+        */
+        
+        // Erosion function that works as 2 seperate 1D filters for efficiency. Also currently requires 3 to 4 channel image 
+        private static byte[] Erode(byte[] image, int width, int height, int bytePerPixel, int kernelSize) {
+            var intermediateResult = Erosion1D(image, width, height, bytePerPixel, kernelSize, true);
+            return Erosion1D(intermediateResult, width, height, bytePerPixel, kernelSize, false);
+        }
 
+        private static byte[] Erosion1D(byte[] imageData, int width, int height, int bytePerPixel, int kernelSize, bool horizontal) {
+            var erodedImage = imageData.DeepCopy();
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    var erodePixel = true;
+                    for (int k = -kernelSize; k <= kernelSize; k++) {
+                        var pixelX = horizontal ? x + k : x;
+                        var pixelY = horizontal ? y : y + k;
+                        // continue if out of bounds
+                        if (pixelX < 0 || pixelX >= width || pixelY < 0 || pixelY >= height) continue;
+                        var pixelIndex = (pixelY * width + pixelX) * bytePerPixel;
+
+                        var r = imageData[pixelIndex];
+                        var g = imageData[pixelIndex + 1];
+                        var b = imageData[pixelIndex + 2];
+
+                        // If any channel is non-zero, the pixel is not part of the foreground
+                        if (r == 0 && g == 0 && b == 0) continue;
+                        erodePixel = false;
+                        break;
+                    }
+
+                    // Set the pixel value in the eroded image
+                    var currentIndex = (y * width + x) * bytePerPixel;
+                    if (!erodePixel) continue;
+                    // If all channels are 0, erode the pixel, but keep org alpha value
+                    erodedImage[currentIndex] = 0;
+                    erodedImage[currentIndex + 1] = 0;
+                    erodedImage[currentIndex + 2] = 0;
+                }
+            }
+
+            return erodedImage;
+        }
+        
+        
 
         // Helper method to generate a random float between 0 and 1
         private float RandomFloat() {
@@ -539,7 +582,6 @@ namespace com.csutil.algorithms.images {
                     switch (trimap[idx]) {
                         case 0:
                             SetColorAt(alpha, x, y, new byte[]{0,0,0,0});
-                            //alpha[idx] = 0;
                             conf[idx] = 255;
                             SetColorAt(foreground, x, y, new byte[] { 0, 0, 0 , 0});
                             break;
@@ -547,7 +589,6 @@ namespace com.csutil.algorithms.images {
                             Sample s = samples[y][x];
                             var alphaValue = (byte)(255 * s.alpha);
                             SetColorAt(alpha, x, y, new byte[]{alphaValue, alphaValue, alphaValue, alphaValue});
-                            //alpha[idx] = (byte)(255 * s.alpha);
                             conf[idx] = (byte)(255 * Math.Exp(-s.cost / 6));
                             Point p = foregroundBoundary[s.fi];
                             byte[] color = GetColorAt(image, p.X, p.Y);
@@ -555,7 +596,6 @@ namespace com.csutil.algorithms.images {
                             break;
                         case 255:
                             SetColorAt(alpha, x, y, new byte[]{255,255,255,255});
-                            //alpha[idx] = 255;
                             conf[idx] = 255;
                             byte[] fgColor = GetColorAt(image, x, y);
                             SetColorAt(foreground, x, y, fgColor);
@@ -613,13 +653,13 @@ namespace com.csutil.algorithms.images {
                 var imageGuidedFilter = new GuidedFilter(image, width, height, bytesPerPixel, r, eps);
                 var guidedFilterInstance = imageGuidedFilter.init(bytesPerPixel);
                 var guidedIm = GuidedFilter.RunGuidedFilter(alpha, guidedFilterInstance);
+                // This loop sets the alpha value to the maximum color channel value, while for a pixel all channel values should be the same
+                // This is needed as the guided filter does not operate on the alpha channel
                 for (int x = 0; x < width; x++) {
                     for (int y = 0; y < height; y++) {
                         var col = GetColorAt(guidedIm, x, y);
-                        var temp = new double[] { col[0], col[1], col[2], col[3] };
-                        var val = temp.Max();
-                        //SetColorAt(guidedIm, x, y, new []{(byte)val, (byte)val, (byte)val, (byte)val});
-                        SetColorAt(guidedIm, x, y, new []{col[0], col[1], col[2], (byte)val});
+                        var temp = new double[] { col[0], col[1], col[2]};
+                        SetColorAt(guidedIm, x, y, new []{col[0], col[1], col[2], (byte)temp.Max()});
                     }
                 }
                 return guidedIm;

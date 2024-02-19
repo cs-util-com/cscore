@@ -6,11 +6,11 @@ using StbImageWriteSharp;
 using Xunit;
 
 namespace com.csutil.tests.AlgorithmTests {
-    public class CutoutFromDallE {
+    public class CutoutGenerationTest {
         
 
         [Fact]
-        public async Task CutoutDallE() {
+        public async Task CutoutFromDallE() {
             var folder = EnvironmentV2.instance.GetOrAddAppDataFolder("CutoutGeneration");
             var downloadFolder = EnvironmentV2.instance.GetSpecialFolder(Environment.SpecialFolder.UserProfile).GetChildDir("Downloads");
             var dallEImage = await ImageLoader.LoadImageInBackground(downloadFolder.GetChild("unnamed.png"));
