@@ -24,7 +24,7 @@ namespace com.csutil.tests.AlgorithmTests {
             var width = image.Width;
             var height = image.Height;
             
-            var floodFilled = FloodFill.FloodFillAlgorithm(image.Data, width, height);
+            var floodFilled = FloodFill.FloodFillAlgorithm(image, 240);
             var test = folder.GetChild("FloodFilled.png");
             {
                 await using var stream = test.OpenOrCreateForReadWrite();
@@ -60,8 +60,9 @@ namespace com.csutil.tests.AlgorithmTests {
             var image = await ImageLoader.LoadImageInBackground(downloadFolder.GetChild("unnamed.png"));
             var width = image.Width;
             var height = image.Height;
+            var kernel = 30;
             
-            var floodFilled = FloodFill.FloodFillAlgorithm(image.Data, width, height);
+            var floodFilled = FloodFill.FloodFillAlgorithm(image, 240);
             var test = folder.GetChild("FloodFilled.png");
             {
                 await using var stream = test.OpenOrCreateForReadWrite();
@@ -70,16 +71,17 @@ namespace com.csutil.tests.AlgorithmTests {
                 writer.WritePng(flipped, width, height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
             }
             
-            var dilated = Filter.Dilate1D(floodFilled, width, height, 4, 30);
-            var dilationPng = folder.GetChild("Dilated.png");
+            var dilated = Filter.Dilate1D(floodFilled, width, height, 4, kernel);
+            var erodedFill = Filter.Erode(floodFilled, width, height, 4, kernel);
+            var dilationPng = folder.GetChild("Eroded.png");
             {
                 await using var stream = dilationPng.OpenOrCreateForReadWrite();
                 var writer = new ImageWriter();
-                var flipped = ImageUtility.FlipImageVertically(dilated, width, height, (int)image.ColorComponents);
+                var flipped = ImageUtility.FlipImageVertically(erodedFill, width, height, (int)image.ColorComponents);
                 writer.WritePng(flipped, width, height, ColorComponents.RedGreenBlueAlpha, stream);
             }
 
-            var trimap = TrimapGeneration.FromFloodFill(floodFilled, width, height, 4, 30);
+            var trimap = TrimapGeneration.FromFloodFill(floodFilled, width, height, 4, kernel);
             var trimapPng = folder.GetChild("Trimap.png");
             {
                 await using var stream = trimapPng.OpenOrCreateForReadWrite();

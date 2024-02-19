@@ -316,40 +316,47 @@ namespace com.csutil.algorithms.images
             return color;
         }
 
-        private byte[] Erode(byte[] image, int w, int h, int r) {
-            byte[] erodedImage = new byte[image.Length];
-            Array.Copy(image, erodedImage, image.Length);
-
-            for (int y = 0; y < h; ++y) {
-                for (int x = 0; x < w; ++x) {
-                    bool erodePixel = false;
-                    for (int dy = -r; dy <= r; ++dy) {
-                        for (int dx = -r; dx <= r; ++dx) {
-                            if (dx * dx + dy * dy <= r * r) {
-                                int nx = x + dx;
-                                int ny = y + dy;
-                                if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
-                                    int idx = (ny * w + nx) * 4;
-                                    // If any pixel in the neighborhood is 0, erode the current pixel
-                                    if (image[idx] == 0) {
-                                        erodePixel = true;
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    if (erodePixel) {
-                        int idx = (y * w + x) * 4;
-                        erodedImage[idx] = 0;
-                    }
-                }
-            }
-            return erodedImage;
-
-
+        
+        public static byte[] Erode(byte[] image, int width, int height, int bytePerPixel, int kernelSize) {
+            var intermediateResult = Erosion1D(image, width, height, bytePerPixel, kernelSize, true);
+            return Erosion1D(intermediateResult, width, height, bytePerPixel, kernelSize, false);
         }
 
+        private static byte[] Erosion1D(byte[] imageData, int width, int height, int bytePerPixel, int kernelSize, bool horizontal) {
+            var erodedImage = imageData.DeepCopy();
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    var erodePixel = false;
+                    for (int k = -kernelSize; k <= kernelSize; k++) {
+                        var pixelX = horizontal ? x + k : x;
+                        var pixelY = horizontal ? y : y + k;
+                        // continue if out of bounds
+                        if (pixelX < 0 || pixelX >= width || pixelY < 0 || pixelY >= height) continue;
+                        var pixelIndex = (pixelY * width + pixelX) * bytePerPixel;
+
+                        var r = imageData[pixelIndex];
+                        var g = imageData[pixelIndex + 1];
+                        var b = imageData[pixelIndex + 2];
+
+                        // If any channel is non-zero, the pixel is not part of the foreground
+                        if (r != 0 && g != 0 && b != 0) continue;
+                        erodePixel = true;
+                        break;
+                    }
+
+                    // Set the pixel value in the eroded image
+                    var currentIndex = (y * width + x) * bytePerPixel;
+                    if (!erodePixel) continue;
+                    // If all channels are 0, erode the pixel, but keep org alpha value
+                    erodedImage[currentIndex] = 0;
+                    erodedImage[currentIndex + 1] = 0;
+                    erodedImage[currentIndex + 2] = 0;
+                }
+            }
+
+            return erodedImage;
+        }
+        
         public static byte[] Dilate1D(byte[] imageData, int width, int height, int bytePerPixel, int kernelSize) {
             var intermediateResult = Dilation1D(imageData, width, height, bytePerPixel, kernelSize, true);
             return Dilation1D(intermediateResult, width, height, bytePerPixel, kernelSize, false);

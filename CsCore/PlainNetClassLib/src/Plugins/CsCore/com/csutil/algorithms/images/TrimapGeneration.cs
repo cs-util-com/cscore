@@ -2,13 +2,14 @@
 
 namespace com.csutil.algorithms.images {
     public static class TrimapGeneration {
-        public static byte[] FromFloodFill(byte[] floodFilled, int width, int height, int bytesPerPixel, int dilationKernel) {
+        public static byte[] FromFloodFill(byte[] floodFilled, int width, int height, int bytesPerPixel, int kernel) {
             var trimap = new byte[floodFilled.Length];
-            var dilatedFill = Filter.Dilate(floodFilled, width, height, bytesPerPixel, dilationKernel);
+            var dilatedFill = Filter.Dilate(floodFilled, width, height, bytesPerPixel, kernel);
+            var erodedFill = Filter.Erode(floodFilled, width, height, bytesPerPixel, kernel);
 
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < height; y++) {
-                    if (CanBeSemiTranparent(floodFilled, dilatedFill, width, x, y, bytesPerPixel)) {
+                    if (CanBeSemiTranparent(erodedFill, dilatedFill, width, x, y, bytesPerPixel)) {
                         SetColorAt(trimap, x, y, width, new byte[] {128, 128, 128, 128}, 4);
                     } else {
                         var color = GetColorAt(floodFilled, x, y, bytesPerPixel, width);
@@ -18,10 +19,10 @@ namespace com.csutil.algorithms.images {
             }
             return trimap;
         }
-        private static bool CanBeSemiTranparent(byte[] floodFilled, byte[] dilatedFill, int width, int x, int y, int bytesPerPixel) {
-            var floodColor = GetColorAt(floodFilled, x, y, bytesPerPixel, width);
+        private static bool CanBeSemiTranparent(byte[] erodedFill, byte[] dilatedFill, int width, int x, int y, int bytesPerPixel) {
+            var erodedColor = GetColorAt(erodedFill, x, y, bytesPerPixel, width);
             var dilatedColor = GetColorAt(dilatedFill, x, y, bytesPerPixel, width);
-            return dilatedColor[0] == 255 && floodColor[0] == 0;
+            return dilatedColor[0] == 255 && erodedColor[0] == 0;
         }
 
 
