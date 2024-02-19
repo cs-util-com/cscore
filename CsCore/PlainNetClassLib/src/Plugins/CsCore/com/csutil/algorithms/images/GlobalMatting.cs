@@ -382,52 +382,7 @@ namespace com.csutil.algorithms.images {
 
             return erodedImage;
         }
-        /*
         
-        // Erosion function that works as 2 separate 1D filters for efficiency. Also currently requires 3 to 4 channel image 
-        private static byte[] Erode(byte[] image, int width, int height, int bytePerPixel, int kernelSize) {
-            var intermediateResult = Erosion1D(image, width, height, bytePerPixel, kernelSize, true);
-            return Erosion1D(intermediateResult, width, height, bytePerPixel, kernelSize, false);
-        }
-
-        private static byte[] Erosion1D(byte[] imageData, int width, int height, int bytePerPixel, int kernelSize, bool horizontal) {
-            var erodedImage = imageData.DeepCopy();
-            for (int y = 0; y < height; y++) {
-                for (int x = 0; x < width; x++) {
-                    var erodePixel = false;
-                    for (int k = -kernelSize; k <= kernelSize; k++) {
-                        var pixelX = horizontal ? x + k : x;
-                        var pixelY = horizontal ? y : y + k;
-                        // continue if out of bounds
-                        if (pixelX < 0 || pixelX >= width || pixelY < 0 || pixelY >= height) continue;
-                        var pixelIndex = (pixelY * width + pixelX) * bytePerPixel;
-
-                        var r = imageData[pixelIndex];
-                        var g = imageData[pixelIndex + 1];
-                        var b = imageData[pixelIndex + 2];
-
-                        // If any channel is non-zero, the pixel is not part of the foreground
-                        if (r != 0 && g != 0 && b != 0) continue;
-                        erodePixel = true;
-                        break;
-                    }
-
-                    // Set the pixel value in the eroded image
-                    var currentIndex = (y * width + x) * bytePerPixel;
-                    if (!erodePixel) continue;
-                    // If all channels are 0, erode the pixel, but keep org alpha value
-                    erodedImage[currentIndex] = 0;
-                    erodedImage[currentIndex + 1] = 0;
-                    erodedImage[currentIndex + 2] = 0;
-                }
-            }
-
-            return erodedImage;
-        }
-        */
-        
-        
-
         // Helper method to generate a random float between 0 and 1
         private float RandomFloat() {
             Random rand = new Random();
@@ -669,7 +624,8 @@ namespace com.csutil.algorithms.images {
                     for (int y = 0; y < height; y++) {
                         var col = GetColorAt(guidedIm, x, y);
                         var temp = new double[] { col[0], col[1], col[2]};
-                        SetColorAt(guidedIm, x, y, new []{col[0], col[1], col[2], (byte)temp.Max()});
+                        var max = (byte)temp.Max();
+                        SetColorAt(guidedIm, x, y, new []{max, max, max, max});
                     }
                 }
                 return guidedIm;

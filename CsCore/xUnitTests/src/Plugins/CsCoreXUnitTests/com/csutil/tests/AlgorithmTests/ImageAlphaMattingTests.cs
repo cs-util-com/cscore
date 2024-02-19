@@ -54,26 +54,6 @@ namespace com.csutil.tests.AlgorithmTests {
                     }
                 }
             }
-            // Safe cut out according to alpha region that is >= 128
-            var cutoffValue = 129;
-            var cutout = image.Data;
-
-            for (var x = 0; x < image.Width; ++x) {
-                for (var y = 0; y < image.Height; ++y) {
-                    var value = (int)alpha.GetPixel(x, y).A;
-                    var idx = (y * image.Width + x) * (int)image.ColorComponents;
-                    cutout[idx + 3] = value >= cutoffValue ? (byte)value : (byte)0;
-                    // cutout[idx + 3] = (byte)value;
-                }
-            }
-            
-            {
-                var cutoutFile = folder.GetChild("Cutout" + cutoffValue + ".png");
-                ImageWriter writer = new ImageWriter();
-                await using var stream = cutoutFile.OpenOrCreateForReadWrite();
-                var flipped = ImageUtility.FlipImageVertically(cutout, image.Width, image.Height, (int)image.ColorComponents);
-                writer.WritePng(flipped, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
-            }
             {
                 var finalAlphaFile = folder.GetChild("OurAlpha.png");
                 ImageWriter writer = new ImageWriter();

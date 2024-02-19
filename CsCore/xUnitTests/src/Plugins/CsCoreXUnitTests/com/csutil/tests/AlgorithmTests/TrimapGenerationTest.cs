@@ -33,7 +33,7 @@ namespace com.csutil.tests.AlgorithmTests {
                 writer.WritePng(flipped, width, height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
             }
             
-            var dilated = Filter.Dilate(floodFilled, width, height, 4, 30);
+            var dilated = Filter.DilateNaive(floodFilled, width, height, 4, 30);
             var dilationPng = folder.GetChild("DilatedNaive.png");
             {
                 await using var stream = dilationPng.OpenOrCreateForReadWrite();
@@ -71,7 +71,7 @@ namespace com.csutil.tests.AlgorithmTests {
                 writer.WritePng(flipped, width, height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
             }
             
-            var dilated = Filter.Dilate1D(floodFilled, width, height, 4, kernel);
+            var dilated = Filter.Dilate(floodFilled, width, height, 4, kernel);
             var erodedFill = Filter.Erode(floodFilled, width, height, 4, kernel);
             var dilationPng = folder.GetChild("Eroded.png");
             {

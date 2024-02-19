@@ -26,7 +26,7 @@ namespace com.csutil.algorithms.images {
                         while (stack.Count > 0) {
                             var (cx, cy) = stack.Pop();
                             if (cx < 0 || cx >= width || cy < 0 || cy >= height ||
-                                SeemsWhite(image, cx, cy, width, floodValue) || visited[cx, cy]) {
+                                SeemsValue(image, cx, cy, width, floodValue) || visited[cx, cy]) {
                                 continue;
                             }
 
@@ -45,7 +45,7 @@ namespace com.csutil.algorithms.images {
             return result;
         }
 
-        private static bool SeemsWhite(byte[] image, int x, int y, int width, int floodValue) {
+        private static bool SeemsValue(byte[] image, int x, int y, int width, int floodValue) {
             var color = GetColorAt(image, x, y, 4, width);
             return color[0] > floodValue && color[1] > floodValue && color[2] > floodValue;
         }

@@ -357,7 +357,7 @@ namespace com.csutil.algorithms.images
             return erodedImage;
         }
         
-        public static byte[] Dilate1D(byte[] imageData, int width, int height, int bytePerPixel, int kernelSize) {
+        public static byte[] Dilate(byte[] imageData, int width, int height, int bytePerPixel, int kernelSize) {
             var intermediateResult = Dilation1D(imageData, width, height, bytePerPixel, kernelSize, true);
             return Dilation1D(intermediateResult, width, height, bytePerPixel, kernelSize, false);
         }
@@ -399,7 +399,7 @@ namespace com.csutil.algorithms.images
             return dilatedImage;
         }
         
-        public static byte[] Dilate(byte[] input, int width, int height, int bytesPerPixel, int kernelSize) {
+        public static byte[] DilateNaive(byte[] input, int width, int height, int bytesPerPixel, int kernelSize) {
             var dilatedImage = new byte[input.Length];
 
             // Loop through each pixel in the image

@@ -10,7 +10,7 @@ namespace com.csutil.algorithms.images {
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < height; y++) {
                     if (CanBeSemiTranparent(erodedFill, dilatedFill, width, x, y, bytesPerPixel)) {
-                        SetColorAt(trimap, x, y, width, new byte[] {128, 128, 128, 128}, 4);
+                        SetColorAt(trimap, x, y, width, new byte[] {128, 128, 128, 255}, 4);
                     } else {
                         var color = GetColorAt(floodFilled, x, y, bytesPerPixel, width);
                         SetColorAt(trimap, x, y, width, color, bytesPerPixel);

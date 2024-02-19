@@ -12,11 +12,12 @@ namespace com.csutil.algorithms.images {
         /// </summary>
         /// <param name="imageRes">ImageResult data which has the image data and its properties</param> 
         /// <param name="floodValue">Value used as threshold to where the image shall set pixels to 0 for the flooded region</param> 
-        /// <param name="kernelSize">Size of the box used for dilation, erosion in the trimap generation</param> 
+        /// <param name="trimapKernel">Size of the box used for dilation, erosion in the trimap generation</param>
+        /// <param name="guidedKernel">Size of kernel used for the box filter in the guided filter application</param> 
         /// <param name="eps">Epsilon parameter of the guided filter</param> 
         /// <param name="cutoffValue">All alpha values below this get set to 0, above are kept as they were in the alpha map</param> 
         /// <returns>Cutout generated according to the trimap and chosen cutoff value</returns>
-        public static byte[] Generate(ImageResult imageRes, int floodValue, int kernelSize, double eps, int cutoffValue) {
+        public static byte[] Generate(ImageResult imageRes, int floodValue, int trimapKernel, int guidedKernel, double eps, int cutoffValue) {
             var image = imageRes.Data.DeepCopy();
             var width = imageRes.Width;
             var height = imageRes.Height;
@@ -24,13 +25,13 @@ namespace com.csutil.algorithms.images {
             
             
             var floodFilled = FloodFill.FloodFillAlgorithm(imageRes, floodValue);
-            var trimap = TrimapGeneration.FromFloodFill(floodFilled, width, height, (int)imageRes.ColorComponents, 10);
+            var trimap = TrimapGeneration.FromFloodFill(floodFilled, width, height, (int)imageRes.ColorComponents, trimapKernel);
             
             var imageMatting = new GlobalMatting(image, width, height, bytesPerPixel);
             imageMatting.ExpansionOfKnownRegions(ref trimap, niter: 9);
             imageMatting.RunGlobalMatting(trimap, out var foreground, out var alphaData, out var conf);
             // filter the result with fast guided filter
-            var alpha = imageMatting.RunGuidedFilter(alphaData, kernelSize, eps);
+            var alpha = imageMatting.RunGuidedFilter(alphaData, guidedKernel, eps);
             
             
             for (int x = 0; x < width; ++x) {
