@@ -10,12 +10,12 @@ namespace com.csutil.algorithms.images {
         /// Generates a cutout from the original data in imageRes. The trimap is created by flooding the original from the border according to the
         /// floodValue and then dilating and eroding this region to generate the area where semi transparency might exist.
         /// </summary>
-        /// <param name="imageRes"></param> ImageResult data which has the image data and its properties
-        /// <param name="floodValue"></param> Value used as threshold to where the image shall set pixels to 0 for the flooded region
-        /// <param name="kernelSize"></param> Size of the box used for dilation, erosion in the trimap generation
-        /// <param name="eps"></param> Epsilon parameter of the guided filter
-        /// <param name="cutoffValue"></param> All alpha values below this get set to 0, above are kept as they were in the alpha map
-        /// <returns></returns>
+        /// <param name="imageRes">ImageResult data which has the image data and its properties</param> 
+        /// <param name="floodValue">Value used as threshold to where the image shall set pixels to 0 for the flooded region</param> 
+        /// <param name="kernelSize">Size of the box used for dilation, erosion in the trimap generation</param> 
+        /// <param name="eps">Epsilon parameter of the guided filter</param> 
+        /// <param name="cutoffValue">All alpha values below this get set to 0, above are kept as they were in the alpha map</param> 
+        /// <returns>Cutout generated according to the trimap and chosen cutoff value</returns>
         public static byte[] Generate(ImageResult imageRes, int floodValue, int kernelSize, double eps, int cutoffValue) {
             var image = imageRes.Data.DeepCopy();
             var width = imageRes.Width;
