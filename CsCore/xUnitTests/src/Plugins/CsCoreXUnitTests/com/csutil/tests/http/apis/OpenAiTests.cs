@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using com.csutil.http.apis;
 using com.csutil.model.jsonschema;
 using Newtonsoft.Json.Linq;
 using Xunit;
+using Zio;
 
 namespace com.csutil.integrationTests.http {
 
@@ -135,6 +137,43 @@ namespace com.csutil.integrationTests.http {
             Log.d(generatedImageUrls.ToStringV2("", "", " \n\n "));
         }
         
+        /// <summary> Shows how to use the OpenAI API to generate multiple images in parallel using the
+        /// DALL-E 3 model with different randomized input parameters </summary>
+        //[Fact]
+        public async Task ExampleUsage_BulkImageGeneration() {
+            var targetFolder = EnvironmentV2.instance.GetOrAddTempFolder("cscore BULK IMAGE GENERATION");
+            var prompt = "A cute cat with a cowboy hat";
+            var tasks = new List<Task>();
+            // For image gen. rate limits per minute see https://platform.openai.com/docs/guides/rate-limits/usage-tiers 
+            for (int i = 0; i < 7; i++) {
+                tasks.Add(GenerateAndSaveDalle3Image(prompt, targetFolder));
+            }
+            await Task.WhenAll(tasks);
+        }
+
+        private static async Task GenerateAndSaveDalle3Image(string prompt, DirectoryEntry folderToSaveTo) {
+            var rnd = new Random();
+            var request = new OpenAi.Image.Request() {
+                prompt = prompt,
+                model = "dall-e-3",
+                quality = rnd.ShuffleEntries(new[] { "standard", "hd" }).First(),
+                style = rnd.ShuffleEntries(new[] { "natural", "vivid" }).First()
+            };
+            var openAi = new OpenAi(await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey"));
+            var result = await openAi.TextToImage(request);
+            Assert.NotEmpty(result.data);
+            var generatedImageUrls = result.data.Map(x => new Uri(x.url));
+            foreach (var url in generatedImageUrls) {
+                Log.d("url=" + url);
+                var targetFile = folderToSaveTo.GetChild($"{request.style} {request.quality} image {DateTimeV2.Now.ToLocalUiStringV2()} {url.Segments.Last()}");
+                Stream imageStream = await url.SendGET().GetResult<Stream>();
+                imageStream = await imageStream.CopyToSeekableStreamIfNeeded(true);
+                await targetFile.SaveStreamAsync(imageStream);
+                imageStream.Dispose();
+                Log.d("Downloaded " + targetFile.GetFullFileSystemPath());
+            }
+        }
+
         private static async Task<EmotionalChatResponse> TalkToEmotionalAi(OpenAi openAi, List<ChatGpt.Line> messages, string userInput) {
             using var timing = Log.MethodEnteredWith(userInput);
             EmotionalChatResponse emotionalResponseFormat = new EmotionalChatResponse() {
