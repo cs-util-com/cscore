@@ -196,12 +196,8 @@ namespace com.csutil.http.apis {
                 formContent.Add("prompt", requestParam.prompt);
             }
 
-            DirectoryEntry dir = EnvironmentV2.instance.GetNewInMemorySystem();
-            FileEntry fileToUpload = dir.GetChild("speech.mp3");
-            await fileToUpload.SaveStreamAsync(requestParam.fileStream, resetStreamToStart: false);
-
             RestRequest uri = new Uri("https://api.openai.com/v1/audio/transcriptions").SendPOST().WithAuthorization(apiKey)
-            .AddFileViaForm(fileToUpload).WithFormContent(formContent);
+            .AddStreamViaForm(requestParam.fileStream, "speech.mp3").WithFormContent(formContent);
             return await uri.GetResult<Audio.STTResponse>();
         }
 
