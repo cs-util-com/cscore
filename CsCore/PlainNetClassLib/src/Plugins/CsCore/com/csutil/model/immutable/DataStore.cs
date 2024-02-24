@@ -16,6 +16,7 @@ namespace com.csutil.model.immutable {
         public string storeName;
         public  StateReducer<T> reducer { get; }
         public Action onStateChanged { get; set; }
+        public object LastDispatchedAction { get; private set; }
 
         public DataStore(StateReducer<T> reducer, T initialState = default(T), params Middleware<T>[] middlewares) {
             this.state = initialState;
@@ -53,6 +54,7 @@ namespace com.csutil.model.immutable {
             lock (threadLock) {
                 a = dispatcher(action);
             }
+            LastDispatchedAction = a;
             UpdateListeners();
             return a;
         }

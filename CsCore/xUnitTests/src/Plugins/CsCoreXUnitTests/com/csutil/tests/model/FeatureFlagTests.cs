@@ -56,9 +56,9 @@ namespace com.csutil.integrationTests.model {
             // https://docs.google.com/spreadsheets/d/1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM contains the sheetId:
             var sheetId = "1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM";
             var sheetName = "MySheet1"; // Has to match the sheet name
-            HashSet<Tuple<object, Type>> collectedInjectors = new HashSet<Tuple<object, Type>>();
-            var xpSys = await DefaultProgressionSystem.SetupWithGSheets(apiKey, sheetId, sheetName, collectedInjectors);
-            cleanup.AddInjectorsCleanup(collectedInjectors);
+            IDisposableCollection disposables = new IDisposableCollection();
+            var xpSys = await DefaultProgressionSystem.SetupWithGSheets(apiKey, sheetId, sheetName, disposables);
+            cleanup.AddDisposable(disposables);
 
             // The DefaultProgressionSystem will give 1 xp for each mutation:
             AppFlow.TrackEvent(EventConsts.catMutation, "Some mutation"); // Would also be triggered by DataStore
@@ -158,15 +158,14 @@ namespace com.csutil.integrationTests.model {
 
             var eventCount = 1000;
 
-            var store = new ObservableKeyValueStore(new InMemoryKeyValueStore());
+            // Set the store to be the target of the local analytics so that whenever any 
+            var dir = EnvironmentV2.instance.GetNewInMemorySystem();
+            ILocalAnalytics analytics = new LocalAnalyticsV3(dir);
+            var store = analytics.store as ObservableKeyValueStore;
             // Lets assume the users xp correlates with the number of triggered local analytics events:
             store.CollectionChanged += delegate {
                 xpSystem.currentXp++;
             };
-
-            // Set the store to be the target of the local analytics so that whenever any 
-            LocalAnalytics analytics = new LocalAnalytics(store);
-            analytics.createStoreFor = (_) => new InMemoryKeyValueStore().GetTypeAdapter<AppFlowEvent>();
 
             // Setup the AppFlow logic to use LocalAnalytics:
             AppFlow.AddAppFlowTracker(new AppFlowToStore(analytics));
@@ -179,7 +178,9 @@ namespace com.csutil.integrationTests.model {
             // Get the analtics store for category "Mutations":
             var mutationStore = await analytics.GetStoreForCategory(EventConsts.catMutation).GetAll();
             Assert.Equal(eventCount, mutationStore.Count()); // All events so far were mutations
-            Assert.True(eventCount <= xpSystem.currentXp); // The user received xp for each mutation
+            var latestXp = await xpSystem.GetLatestXp();
+            // The user received xp for each mutation:
+            Assert.True(eventCount <= latestXp, $"eventCount={eventCount} <= latestXp={latestXp}"); 
 
             Assert.Equal(1000, flag4.requiredXp); // The user needs >= 1000 xp for the feature
 
@@ -199,25 +200,43 @@ namespace com.csutil.integrationTests.model {
             public Task<IEnumerable<FeatureFlag>> GetLockedFeatures() { throw new NotImplementedException(); }
 
             public Task<IEnumerable<FeatureFlag>> GetUnlockedFeatures() { throw new NotImplementedException(); }
+            
+            public Task<int> GetLatestXp() { return Task.FromResult(currentXp); }
 
+            public void Dispose() { throw new NotImplementedException(); }
+            
+            public DisposeState IsDisposed { get; }
+            
         }
 
+        [Obsolete("See TestDefaultProgressionSystem2 instead")]
         [Fact]
         public async Task TestDefaultProgressionSystem() {
-
-            using var cleanup = new CleanupHelper();
-
             // Get your key from https://console.developers.google.com/apis/credentials
             var apiKey = await IoC.inject.GetAppSecrets().GetSecret("GoogleSheetsV4Key");
             // https://docs.google.com/spreadsheets/d/1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM contains the sheetId:
             var sheetId = "1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM";
             var sheetName = "MySheet1"; // Has to match the sheet name
             var googleSheetsStore = new GoogleSheetsKeyValueStore(new InMemoryKeyValueStore(), apiKey, sheetId, sheetName);
+            await RunTestDefaultProgressionSystem(googleSheetsStore);
+        }
+
+        [Fact]
+        public async Task TestDefaultProgressionSystem2() {
+            // https://docs.google.com/spreadsheets/d/1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM contains the sheetId:
+            var uri = new Uri("https://docs.google.com/spreadsheets/d/e/2PACX-1vRoktXHWp9P014GbReS-ueS980qt3uU5taGKhsJifG6jTtvws7Rcg06tsMa2evVDUp3OPRZQuOKR2MM/pub?output=csv");
+            var googleSheetsStore = new GoogleSheetsKeyValueStoreV2(new InMemoryKeyValueStore(), uri);
+            await RunTestDefaultProgressionSystem(googleSheetsStore);
+        }
+
+        private async Task RunTestDefaultProgressionSystem(IKeyValueStore googleSheetsStore) {
+            using var cleanup = new CleanupHelper();
             var ffm = new FeatureFlagManager<FeatureFlag>(new FeatureFlagStore(new InMemoryKeyValueStore(), googleSheetsStore));
             var injector1 = IoC.inject.SetSingleton<FeatureFlagManager<FeatureFlag>>(ffm);
             cleanup.AddInjectorCleanup<FeatureFlagManager<FeatureFlag>>(injector1);
 
-            LocalAnalytics analytics = new LocalAnalytics();
+            var dir = EnvironmentV2.instance.GetNewInMemorySystem();
+            ILocalAnalytics analytics = new LocalAnalyticsV3(dir);
             AppFlow.AddAppFlowTracker(new AppFlowToStore(analytics));
             var xpSystem = new ProgressionSystem<FeatureFlag>(analytics, ffm);
             var injector2 = IoC.inject.SetSingleton<IProgressionSystem<FeatureFlag>>(xpSystem);
@@ -247,7 +266,7 @@ namespace com.csutil.integrationTests.model {
         }
 
         // Cleanup from previous tests (needed because persistance to disc is used):
-        private static async Task CleanupFilesFromTest(LocalAnalytics analytics, ProgressionSystem<FeatureFlag> xpSystem) {
+        private static async Task CleanupFilesFromTest(ILocalAnalytics analytics, ProgressionSystem<FeatureFlag> xpSystem) {
             // First trigger 1 event for each relevant catory to load the category stores:
             foreach (var category in xpSystem.xpFactors.Keys) { AppFlow.TrackEvent(category, "Dummy Event"); }
             await analytics.RemoveAll(); // Then clear all stores
@@ -258,15 +277,19 @@ namespace com.csutil.integrationTests.model {
         public async Task ExtensiveDefaultProgressionSystemTests() {
 
             using var cleanup = new CleanupHelper();
-            HashSet<Tuple<object, Type>> collectedInjectors = new HashSet<Tuple<object, Type>>();
+            IDisposableCollection disposables = new IDisposableCollection();
 
             // Get your key from https://console.developers.google.com/apis/credentials
             var apiKey = await IoC.inject.GetAppSecrets().GetSecret("GoogleSheetsV4Key");
             // https://docs.google.com/spreadsheets/d/1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM contains the sheetId:
             var sheetId = "1KBamVmgEUX-fyogMJ48TT6h2kAMKyWU1uBL5skCGRBM";
             var sheetName = "MySheet1"; // Has to match the sheet name
-            ProgressionSystem<FeatureFlag> xpSys = await NewInMemoryTestXpSystem(apiKey, sheetId, sheetName, collectedInjectors);
-            cleanup.AddInjectorsCleanup(collectedInjectors);
+            ProgressionSystem<FeatureFlag> xpSys = await NewInMemoryTestXpSystemV2(apiKey, sheetId, sheetName, disposables);
+            await ExtensiveDefaultProgressionSystemTests2(cleanup, disposables, xpSys);
+        }
+        
+        private static async Task ExtensiveDefaultProgressionSystemTests2(CleanupHelper cleanup, IDisposableCollection disposables, ProgressionSystem<FeatureFlag> xpSys) {
+            cleanup.AddDisposable(disposables);
 
             Assert.Empty(await xpSys.analytics.GetStoreForCategory(EventConsts.catMutation).GetAllKeys());
             Assert.Equal(0, await xpSys.GetLatestXp());
@@ -310,14 +333,25 @@ namespace com.csutil.integrationTests.model {
             Log.MethodDone(t);
         }
 
-        private static async Task<ProgressionSystem<FeatureFlag>> NewInMemoryTestXpSystem(string apiKey, string sheetId, string sheetName, HashSet<Tuple<object, Type>> collectedInjectors = null) {
+        [Obsolete("Use v2", true)]
+        private static async Task<ProgressionSystem<FeatureFlag>> NewInMemoryTestXpSystem(string apiKey, string sheetId, string sheetName, IDisposableCollection disposables = null) {
             var cachedFlags = new InMemoryKeyValueStore();
             var googleSheetsStore = new GoogleSheetsKeyValueStore(cachedFlags, apiKey, sheetId, sheetName);
             var cachedFlagsLocalData = new InMemoryKeyValueStore();
             var analytics = new LocalAnalytics(new InMemoryKeyValueStore());
             analytics.createStoreFor = (_ => new InMemoryKeyValueStore().GetTypeAdapter<AppFlowEvent>());
             var featureFlagStore = new FeatureFlagStore(cachedFlagsLocalData, googleSheetsStore);
-            return await DefaultProgressionSystem.Setup(featureFlagStore, analytics, collectedInjectors);
+            return await DefaultProgressionSystem.Setup(featureFlagStore, analytics, disposables);
+        }
+        
+        private static async Task<ProgressionSystem<FeatureFlag>> NewInMemoryTestXpSystemV2(string apiKey, string sheetId, string sheetName, IDisposableCollection disposables = null) {
+            var cachedFlags = new InMemoryKeyValueStore();
+            var googleSheetsStore = new GoogleSheetsKeyValueStore(cachedFlags, apiKey, sheetId, sheetName);
+            var cachedFlagsLocalData = new InMemoryKeyValueStore();
+            var dir = EnvironmentV2.instance.GetNewInMemorySystem();
+            var analytics = new LocalAnalyticsV3(dir);
+            var featureFlagStore = new FeatureFlagStore(cachedFlagsLocalData, googleSheetsStore);
+            return await DefaultProgressionSystem.SetupV2(featureFlagStore, analytics, disposables);
         }
 
     }

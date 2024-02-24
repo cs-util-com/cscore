@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 namespace com.csutil.model.immutable {
 
@@ -33,10 +34,14 @@ namespace com.csutil.model.immutable {
             if (oldState != null && oldState.GetType().IsPrimitiveOrSimple()) { return !Equals(oldState, newState); }
             if (newState != null && newState.GetType().IsPrimitiveOrSimple()) { return !Equals(oldState, newState); }
             if (typeof(S).IsKeyValuePairType()) {
-                try { return CompareKeyValuePairContent(oldState, newState); } catch (Exception e) {
+                try { return WasKeyValuePairModified(oldState, newState); } catch (Exception e) {
                     Log.w("Accessing KeyValuePair failed: " + e);
                     Debugger.Break();
                 }
+            }
+            // If both are enumerables then use SequenceEqual to compare them:
+            if (oldState is IEnumerable oldEnum && newState is IEnumerable newEnum) {
+                return !oldEnum.Cast<object>().SequenceEqual(newEnum.Cast<object>());
             }
             if (Nullable.GetUnderlyingType(typeof(S)) != null) { return !Equals(oldState, newState); }
             if (!ReferenceEquals(oldState, newState)) { return true; }
@@ -44,14 +49,16 @@ namespace com.csutil.model.immutable {
             return false;
         }
 
-        private static bool CompareKeyValuePairContent<S>(S oldState, S newState) {
+        private static bool WasKeyValuePairModified<S>(S oldState, S newState) {
             var keyProp = typeof(S).GetProperty("Key");
             var valueProp = typeof(S).GetProperty("Value");
             var oldKey = keyProp.GetValue(oldState, null);
             var newKey = keyProp.GetValue(newState, null);
             var oldValue = valueProp.GetValue(oldState, null);
             var newValue = valueProp.GetValue(newState, null);
-            return WasModified(oldKey, newKey) || WasModified(oldValue, newValue);
+            AssertV3.IsTrue(Equals(oldKey, newKey),
+                () => $"Key of KeyValuePair must not change, oldKey={oldKey} newKey={newKey}");
+            return !Equals(oldKey, newKey) || WasModified(oldValue, newValue);
         }
 
         public static bool WasModifiedInLastDispatch(IsMutable mutableData) {

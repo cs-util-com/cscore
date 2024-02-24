@@ -51,7 +51,7 @@ namespace com.csutil.animations {
         }
 
         private static Transform GetNextChild(Transform parent, int currentIndex, bool loopChildren) {
-            AssertV2.AreNotEqual(0, parent.childCount);
+            AssertV3.AreNotEqual(0, parent.childCount);
             if (currentIndex + 1 >= parent.childCount) { return loopChildren ? parent.GetChild(0) : null; }
             return parent.GetChild(currentIndex + 1);
         }

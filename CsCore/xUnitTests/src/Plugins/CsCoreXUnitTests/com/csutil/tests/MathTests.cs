@@ -32,6 +32,19 @@ namespace com.csutil.tests {
             Assert.Equal(6f, average);
             Assert.Equal(6f, someNumbers.CalcMedian());
 
+            // Mean and Median are also usable with Vector3:
+            var someVectors = new List<Vector3>();
+            someVectors.Add(new Vector3(0, 0, 0));
+            someVectors.Add(new Vector3(2, 2, 2));
+            someVectors.Add(new Vector3(4, 4, 4));
+            Assert.Equal(new Vector3(2, 2, 2), someVectors.CalcMean());
+            Assert.Equal(new Vector3(2, 2, 2), someVectors.CalcMedian());
+            someVectors.Add(new Vector3(999, 999, 999));
+            Assert.Equal(new Vector3(2, 2, 2), someVectors.CalcMedian());
+            Assert.NotEqual(new Vector3(2, 2, 2), someVectors.CalcMean());
+            someVectors.Add(new Vector3(999, 999, 999));
+            Assert.Equal(new Vector3(4, 4, 4), someVectors.CalcMedian());
+
         }
 
         private static float AddValue(List<float> self, float newValue, float oldAverage) {
@@ -142,20 +155,40 @@ namespace com.csutil.tests {
             TestGetRotationDeltaWith(100, 80);
             TestGetRotationDeltaWith(350, 10);
             TestGetRotationDeltaWith(10, 350);
+
+            // Generate 100k random angles and test if the diff is correct:
+            var rnd = new Random();
+            for (int i = 0; i < 100000; i++) {
+                var angle1 = rnd.NextFloat(0, 360);
+                var angle2 = rnd.NextFloat(0, 360);
+                TestGetRotationDeltaWith(angle1, angle2);
+            }
         }
 
-        private static void TestGetRotationDeltaWith(float angle1, float angle2) {
-            var q1 = Quaternion.CreateFromAxisAngle(Vector3.UnitY, angle1 * degreeToRad);
-            var q2 = Quaternion.CreateFromAxisAngle(Vector3.UnitY, angle2 * degreeToRad);
+        private static void TestGetRotationDeltaWith(float angle1InDegree, float angle2InDegree) {
+            var q1 = Quaternion.CreateFromAxisAngle(Vector3.UnitY, angle1InDegree * degreeToRad);
+            var q2 = Quaternion.CreateFromAxisAngle(Vector3.UnitY, angle2InDegree * degreeToRad);
             var delta = q1.GetRotationDeltaTo(q2);
 
             // Now rotate a vector by this diff and check if the signed angle between the 2 vectors makes sense:
-            var expectedAngle = (angle2 - angle1 + 360d) % 360d;
+            var expectedAngleInDegree = (angle2InDegree - angle1InDegree + 360d) % 360d;
             var a = Vector3.UnitX;
             var b = a.Rotate(delta);
-            var angleInRad = a.AngleSignedInRadTo(b, Vector3.UnitY) * radToDegree;
-            angleInRad = (angleInRad + 360d) % 360d;
-            Assert.Equal(expectedAngle, Math.Round(angleInRad, 3));
+            var actualAngleInDegree = a.AngleSignedInRadTo(b, Vector3.UnitY) * radToDegree;
+            actualAngleInDegree = (actualAngleInDegree + 360d) % 360d;
+            Assert_AlmostEqual(expectedAngleInDegree, actualAngleInDegree);
+
+            // Compare also with the result of GetRotationDeltaInDegreeTo:
+            var deltaAngleInDegree = q1.GetRotationDeltaInDegreeTo(q2);
+            if (expectedAngleInDegree > 180) { expectedAngleInDegree = 360 - expectedAngleInDegree; }
+            if (actualAngleInDegree > 180) { actualAngleInDegree = 360 - actualAngleInDegree; }
+            Assert_AlmostEqual(expectedAngleInDegree, deltaAngleInDegree);
+            Assert_AlmostEqual(actualAngleInDegree, deltaAngleInDegree);
+        }
+
+        private static void Assert_AlmostEqual(double a, double b, double maxDelta = 0.1) {
+            var diff = Math.Abs(a - b);
+            Assert.True(diff < maxDelta, $"Expected {a} to be almost equal to {b} but diff was {diff}");
         }
 
         [Fact]
@@ -184,7 +217,7 @@ namespace com.csutil.tests {
             Assert.True(success);
             var digits = 6;
             Assert.True(translation.IsAlmostEqual(translation2, decimals: digits));
-            Assert.True(rotation.IsSimilarTo(rotation2, digits: digits));
+            Assert.True(rotation.Equals(rotation2, digits: digits));
             Assert.True(scale.IsAlmostEqual(scale2, decimals: digits));
 
         }
@@ -193,7 +226,7 @@ namespace com.csutil.tests {
         public void TestBezierTrajectoryDeformation() {
             List<Matrix4x4> trajectory = new List<Matrix4x4>();
             // All individual points are titled 45 degree but are they are all on a straight line so this rotation does not affect the trajectory
-            var inputRot = Quaternion.CreateFromYawPitchRoll(0, 45, 0);
+            var inputRot = Quaternion.CreateFromYawPitchRoll(0, 45 * degreeToRad, 0);
             trajectory.Add(Matrix4x4Extensions.Compose(Vector3.Zero, inputRot, Vector3.One));
             trajectory.Add(Matrix4x4Extensions.Compose(new Vector3(0.5f, 0.5f, 0.5f), inputRot, Vector3.One));
             trajectory.Add(Matrix4x4Extensions.Compose(new Vector3(1, 1, 1), inputRot, Vector3.One));
@@ -305,7 +338,6 @@ namespace com.csutil.tests {
 
         private static void TestGetEulerAnglesWith(float pitch, float yaw, float roll) {
             var inputEulers = new Vector3(pitch, yaw, roll);
-            var digits = 1;
             var rotation = Quaternion.CreateFromYawPitchRoll(yaw * degreeToRad, pitch * degreeToRad, roll * degreeToRad);
             var eulers = rotation.GetEulerAnglesAsPitchYawRoll();
             var rotation2 = Quaternion.CreateFromYawPitchRoll(eulers.Y * degreeToRad, eulers.X * degreeToRad, eulers.Z * degreeToRad);
@@ -315,7 +347,8 @@ namespace com.csutil.tests {
             // Inverting the quaternion is the same rotation
             if (Math.Sign(diff.W) == -1) { diff = -diff; }
 
-            Assert.True(diff.IsSimilarTo(Quaternion.Identity, digits: digits), $"diff={diff} from \n rotation ={rotation} (eulers={inputEulers}) to \n rotation2={rotation2} (eulers={eulers2})");
+            Assert.True(diff.Equals(Quaternion.Identity, digits: 1),
+                $"diff={diff} from \n rotation ={rotation} (eulers={inputEulers}) to \n rotation2={rotation2} (eulers={eulers2})");
             // Assert.True(eulers.IsSimilarTo(inputEulers, digits: digits), $"Eulers: {eulers} != {inputEulers}");
             // Assert.True(eulers.IsSimilarTo(eulers2, digits: digits), $"Eulers: {eulers} != {eulers2}");
         }
@@ -381,6 +414,24 @@ namespace com.csutil.tests {
                 Assert.Equal(2, m.Get(0, 0));
                 var row = m.GetRow(0);
                 Assert.Equal(new Vector4(2, 0, 0, 0), row);
+            }
+
+            [Fact]
+            public void TestMatrix4x4SetPositionRotationScale() {
+                var matrix = Matrix4x4.Identity;
+                var testPostion = new Vector3(1, 2, 3);
+                var testRotation = Quaternion.CreateFromYawPitchRoll(45 * degreeToRad, 95 * degreeToRad, 110 * degreeToRad);
+                var testScale = new Vector3(4, 4, 4);
+                
+                var newMatrix = matrix.WithPosition(testPostion).WithRotation(testRotation).WithScale(testScale);
+                Assert.Equal(Matrix4x4.Identity, matrix); // The old matrix m is not changed
+                
+                // The new matrix has the expected values:
+                newMatrix.Decompose(out var scale, out var rotation, out var translation);
+                Assert.Equal(testPostion, translation);
+                var rotDelta = testRotation.GetRotationDeltaInDegreeTo(rotation);
+                Assert.True(rotDelta < 0.1, $"rotDelta={rotDelta}");
+                Assert.Equal(testScale, scale);
             }
 
             [Fact]

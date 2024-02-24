@@ -13,7 +13,7 @@ namespace com.csutil.ui {
         private void OnValidate() { UpdateScaler(); } // Called in editor
 
         public void Start() {
-            AssertV2.IsTrue(gameObject.GetComponentV2<Canvas>().isRootCanvasV2(), $"{nameof(CanvasScalerV2)} should be added on the root canvas level!", gameObject);
+            AssertV3.IsTrue(gameObject.GetComponentV2<Canvas>().isRootCanvasV2(), () => $"{nameof(CanvasScalerV2)} should be added on the root canvas level!", gameObject);
             this.ExecuteRepeated(UpdateScaler, 100);
         }
 

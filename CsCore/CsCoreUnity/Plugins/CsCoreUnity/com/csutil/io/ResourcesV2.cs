@@ -17,9 +17,16 @@ namespace com.csutil {
         public static GameObject LoadPrefab(string pathInResourcesFolder, bool keepReferenceToEditorPrefab = false) {
             // Log.d($"LoadPrefab '{pathInResourcesFolder}'");
             GameObject prefab = LoadV2<GameObject>(pathInResourcesFolder);
-            if (prefab == null) { throw new Exception("Could not find prefab at path='" + pathInResourcesFolder + "'"); }
+            if (prefab == null) { throw new FileNotFoundException("Could not find prefab in any /Resources/.. folder under path='../" + pathInResourcesFolder + "'"); }
             var prefabInstance = InstantiatePrefab(prefab, keepReferenceToEditorPrefab);
             prefabInstance.name = pathInResourcesFolder;
+
+            var prefabInstanceTransform = prefabInstance.transform;
+            if (!prefabInstance.HasComponent<RectTransform>(out var _)) {
+                AssertV3.AreEqual(Vector3.zero, prefabInstanceTransform.localPosition, $"<<prefabInstance.transform.localPosition of pathInResourcesFolder={pathInResourcesFolder}>>");
+                AssertV3.AreEqual(Vector3.one, prefabInstanceTransform.localScale, $"<<prefabInstance.transform.localScale of pathInResourcesFolder={pathInResourcesFolder}>>");
+            }
+            AssertV3.AreEqual(Quaternion.identity, prefabInstanceTransform.localRotation, $"<<prefabInstance.transform.localRotation of pathInResourcesFolder={pathInResourcesFolder}>>");
             EventBus.instance.Publish(EventConsts.catTemplate, prefabInstance);
             return prefabInstance;
         }
@@ -34,7 +41,7 @@ namespace com.csutil {
         /// <summary> Force AssetDB entry reload by Unity, otherwise Resources files are cached by it </summary>
         [System.Diagnostics.Conditional("DEBUG")] // To remove line in builts
         public static void ForceAssetDatabaseReimport(string pathInResources) {
-#if UNITY_EDITOR 
+#if UNITY_EDITOR
             if (Application.isPlaying) { return; }
             // Only way that I found to get the full path of assets is to load it and ask what its path is:
             var pathInAssets = UnityEditor.AssetDatabase.GetAssetPath(Resources.Load(pathInResources));
@@ -64,9 +71,13 @@ namespace com.csutil {
             if ((typeof(MemoryStream).IsCastableTo<T>())) {
                 TextAsset textAsset = LoadV2<TextAsset>(pathInResourcesFolder, forceAssetDbReimport);
                 if (textAsset == null) { throw new FileNotFoundException("No text asset found at " + pathInResourcesFolder); }
-                return (T)(object)new MemoryStream(textAsset.bytes); 
+                return (T)(object)new MemoryStream(textAsset.bytes);
             }
             if (ResourceCache.TryLoad(pathInResourcesFolder, out T result)) { return result; }
+            if (typeof(T).IsCastableTo<Sprite>()) {
+                Texture2D asTexture = LoadV2<Texture2D>(pathInResourcesFolder, forceAssetDbReimport);
+                return (T)(object)asTexture.ToSprite();
+            }
             return (T)(object)Resources.Load(pathInResourcesFolder, typeof(T));
         }
 
@@ -87,7 +98,7 @@ namespace com.csutil {
         /// </summary>
         public static T LoadScriptableObjectInstance<T>(string pathInResourcesFolder) where T : ScriptableObject {
             var so = LoadV2<T>(pathInResourcesFolder);
-            AssertV2.IsNotNull(so, "ScriptableObject (" + typeof(T) + ") instance " + pathInResourcesFolder);
+            AssertV3.IsNotNull(so, "ScriptableObject (" + typeof(T) + ") instance " + pathInResourcesFolder);
             return so;
         }
 
@@ -107,6 +118,25 @@ namespace com.csutil {
         // See https://answers.unity.com/answers/1190932/view.html
         public static bool IsPartOfEditorOnlyPrefab(this GameObject go) {
             return go.scene.rootCount == 0 || go.scene.name == null;
+        }
+
+        public static GameObject LoadPrefabPooled(string pathInResourcesFolder) {
+            return LoadPrefabPooled(pathInResourcesFolder + " Pool", () => LoadPrefab(pathInResourcesFolder));
+        }
+        
+        public static GameObject LoadPrefabPooled(string poolId, Func<GameObject> getPrefab) {
+            var poolGo = InjectorExtensionsForUnity.GetSingletonGameObject(poolId);
+            if (poolGo != null) {
+                return poolGo.GetComponent<SimpleObjectPool>().Spawn();
+            } else {
+                var prefabToPool = getPrefab();
+                if (prefabToPool.IsPartOfEditorOnlyPrefab()) {
+                    prefabToPool = UnityEngine.Object.Instantiate(prefabToPool);
+                }
+                var newPoolGo = InjectorExtensionsForUnity.GetOrAddSingletonGameObject(poolId);
+                newPoolGo.GetOrAddComponent<SimpleObjectPool>().UseTemplate(prefabToPool);
+                return prefabToPool; // Use the instantiated prefab as the first instance
+            }
         }
 
     }

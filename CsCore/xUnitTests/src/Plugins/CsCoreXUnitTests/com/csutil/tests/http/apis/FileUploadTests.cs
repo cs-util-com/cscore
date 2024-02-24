@@ -75,9 +75,9 @@ namespace com.csutil.integrationTests.http {
 
             DirectoryEntry dir = EnvironmentV2.instance.GetNewInMemorySystem();
             FileEntry fileToUpload = dir.GetChild("test.jpg");
-            using (var stream = await new Uri("https://placekitten.com/50/50").SendGET().GetResult<Stream>()) {
+            using (var stream = await new Uri(RestTests.IMG_PLACEHOLD_SERVICE_URL + "/50/50").SendGET().GetResult<Stream>()) {
                 // Download a test file to use it for the upload test:
-                await fileToUpload.SaveStreamAsync(stream, resetStreamToStart: false); 
+                await fileToUpload.SaveStreamAsync(stream, resetStreamToStart: false);
             }
 
             using (var streamToUpload = fileToUpload.OpenForRead()) {

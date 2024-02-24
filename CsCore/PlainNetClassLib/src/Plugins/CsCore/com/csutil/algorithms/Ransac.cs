@@ -19,7 +19,7 @@ namespace com.csutil.algorithms {
             }
             M bestModel = default(M);
             for (int i = 0; i < iterations; i++) {
-                var maybeInliers = com.csutil.netstandard2_1polyfill.IEnumerableExtensions.ToHashSet(rnd.SampleElemsToGetRandomSubset(elems, minSampleSize));
+                var maybeInliers = IEnumerableExtensions2_1.ToHashSet(rnd.SampleElemsToGetRandomSubset(elems, minSampleSize));
                 var model = createModel(maybeInliers); // Fit that sub-sample to the model
                 var alsoInliers = new List<E>();
                 var outliers = new List<E>();

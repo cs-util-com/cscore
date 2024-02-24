@@ -83,6 +83,9 @@ namespace com.csutil.logging {
             var text = "    <-- " + methodName + " finished after " + timing.ElapsedMilliseconds + " ms";
             if (timingV2 != null) { text += ", " + timingV2.GetAllocatedMemBetweenStartAndStop(); }
            #if DEBUG
+            if (!args.IsNullOrEmpty()) {
+                text += ", args = "+args.ToStringV2(x => "" + x);
+            }
             if (DisposableExtensions.DEBUG_ThrownExceptionDetectedInCurrentContext()) {
                 text += " (DUE TO EXCEPTION THROWN)";
             }

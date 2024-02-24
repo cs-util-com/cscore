@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace com.csutil.math {
 
@@ -26,6 +27,14 @@ namespace com.csutil.math {
             if (list.IsEmpty()) { return double.NaN; }
             var mid = (list.Count - 1) / 2;
             return list.NthOrderStatistic(mid);
+        }
+
+        public static Vector3 CalcMedian(this IEnumerable<Vector3> sequence) {
+            sequence = sequence.Cached(); 
+            var x = sequence.CalcMedian(v => v.X);
+            var y = sequence.CalcMedian(v => v.Y);
+            var z = sequence.CalcMedian(v => v.Z);
+            return new Vector3((float)x, (float)y, (float)z);
         }
 
         /// <summary>

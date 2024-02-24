@@ -32,8 +32,10 @@ namespace com.csutil {
                 self.ApplyAllCookiesToRequest();
                 resp.debugInfo = self.method + " " + self.url;
                 // Log.d("Sending: " + resp);
+            } catch (Exception ex) {
+                resp.onError(self, ex);
+                throw;
             }
-            catch (Exception ex) { resp.onError(self, ex); throw; }
             var req = self.SendWebRequest();
             timer.AssertUnderXms(40);
             while (!req.isDone) {
@@ -43,8 +45,10 @@ namespace com.csutil {
                         timer.Restart();
                         resp.onProgress.InvokeIfNotNull(resp.progressInPercent.value);
                     }
+                } catch (Exception ex) {
+                    resp.onError(self, ex);
+                    throw;
                 }
-                catch (Exception ex) { resp.onError(self, ex); throw; }
                 yield return resp.wait;
                 if (timer.ElapsedMilliseconds > resp.maxMsWithoutProgress) { self.Abort(); }
             }
@@ -56,8 +60,10 @@ namespace com.csutil {
                 if (self.error.IsNullOrEmpty()) { resp.progressInPercent.SetNewValue(100); }
                 resp.getResult = () => { return self.GetResult<T>(); };
                 ProcessServerDate(self.uri, self.GetResponseHeader("date"));
+            } catch (Exception ex) {
+                resp.onError(self, ex);
+                throw;
             }
-            catch (Exception ex) { resp.onError(self, ex); throw; }
         }
 
         /// <summary> If available will process and broadcast the received server date </summary>
@@ -71,8 +77,7 @@ namespace com.csutil {
                 if (serverUtcDate.HasValue) {
                     EventBus.instance.Publish(DateTimeV2.SERVER_UTC_DATE, uri, serverUtcDate.Value);
                 }
-            }
-            catch (Exception e) { Log.w("Failed parsing server UTC date: " + e); }
+            } catch (Exception e) { Log.w("Failed parsing server UTC date: " + e); }
         }
 
         private static void SetupDownloadAndUploadHanders<T>(UnityWebRequest self, Response<T> resp) {
@@ -80,16 +85,16 @@ namespace com.csutil {
             switch (self.method) {
                 case UnityWebRequest.kHttpVerbPUT:
                 case UnityWebRequest.kHttpVerbPOST:
-                    AssertV2.IsNotNull(self.uploadHandler, "Put/Post-request had no uploadHandler set");
+                    AssertV3.IsNotNull(self.uploadHandler, "Put/Post-request had no uploadHandler set");
                     break;
             }
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         private static void AssertResponseLooksNormal<T>(UnityWebRequest self, Response<T> resp) {
-            AssertV2.IsNotNull(self, "WebRequest object was null: " + resp);
+            AssertV3.IsNotNull(self, "WebRequest object was null: " + resp);
             if (self != null) {
-                AssertV2.IsTrue(self.isDone, "Request never finished: " + resp);
+                AssertV3.IsTrue(self.isDone, () => "Request never finished: " + resp);
                 if (self.isNetworkError) { Log.w("isNetworkError=true for " + resp); }
                 if (self.error != null) { Log.w("error=" + self.error + " for " + resp); }
                 if (self.isHttpError) { Log.w("isHttpError=true for " + resp); }
@@ -102,26 +107,25 @@ namespace com.csutil {
             if (self.isNetworkError || self.isHttpError) {
                 resp.onError.InvokeIfNotNull(self, new Exception("[" + self.responseCode + "] " + self.error));
             } else { // .onResult is only informed if there was no network or http error:
-                try { resp.onResult?.Invoke(self.GetResult<T>()); }
-                catch (Exception e) { resp.onError.InvokeIfNotNull(self, e); }
+                try { resp.onResult?.Invoke(self.GetResult<T>()); } catch (Exception e) { resp.onError.InvokeIfNotNull(self, e); }
             }
         }
 
         public static T GetResult<T>(this UnityWebRequest self) { return self.GetResult<T>(JsonReader.GetReader()); }
 
         public static T GetResult<T>(this UnityWebRequest self, IJsonReader r) {
-            AssertV2.IsTrue(self.isDone, "web request was not done!");
+            AssertV3.IsTrue(self.isDone, () => "web request was not done!");
             if (TypeCheck.AreEqual<T, UnityWebRequest>()) { return (T)(object)self; }
             if (typeof(Texture2D).IsCastableTo(typeof(T))) {
-                AssertV2.IsTrue(self.downloadHandler is DownloadHandlerTexture,
-                    "self.downloadHandler was not a DownloadHandlerTexture but a " + self.downloadHandler.GetType());
+                AssertV3.IsTrue(self.downloadHandler is DownloadHandlerTexture,
+                    () => "self.downloadHandler was not a DownloadHandlerTexture but a " + self.downloadHandler.GetType());
                 var h = (DownloadHandlerTexture)self.downloadHandler;
                 return (T)(object)h.texture;
                 //return (T)(object)DownloadHandlerTexture.GetContent(self);
             }
             if (typeof(AudioClip).IsCastableTo(typeof(T))) {
-                AssertV2.IsTrue(self.downloadHandler is DownloadHandlerAudioClip,
-                    "self.downloadHandler was not a DownloadHandlerTexture but a " + self.downloadHandler.GetType());
+                AssertV3.IsTrue(self.downloadHandler is DownloadHandlerAudioClip,
+                    () => "self.downloadHandler was not a DownloadHandlerTexture but a " + self.downloadHandler.GetType());
                 var h = (DownloadHandlerAudioClip)self.downloadHandler;
                 return (T)(object)h.audioClip;
             }
@@ -173,7 +177,7 @@ namespace com.csutil {
         public static UnityWebRequest SetRequestHeaders(this UnityWebRequest self, IEnumerable<KeyValuePair<string, IEnumerable<string>>> headersToAdd) {
             if (!headersToAdd.IsNullOrEmpty()) {
                 foreach (var h in headersToAdd) {
-                    AssertV2.AreEqual(1, h.Value.Count());
+                    AssertV3.AreEqual(1, h.Value.Count());
                     self.SetRequestHeader(h.Key, h.Value.First());
                 }
             }

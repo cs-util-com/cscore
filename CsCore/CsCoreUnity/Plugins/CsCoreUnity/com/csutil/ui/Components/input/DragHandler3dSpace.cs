@@ -5,14 +5,16 @@ using UnityEngine.EventSystems;
 namespace com.csutil.ui {
 
     /// <summary> Allows dragging objects in 3D space </summary>
-    [RequireComponent(typeof(Collider))]
-    public class DragHandler3dSpace : MonoBehaviour, IBeginDragHandler, IDragHandler {
+    public class DragHandler3dSpace : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler {
 
         public Transform targetToDrag;
         public bool keepDistanceToCam = true;
+        public bool keepRelativeRotation = false;
 
-        private Vector3 localDragStartOffsetOnRt;
-        private float distanceAtDragStart;
+        private Vector3 _localDragStartOffsetOnRt;
+        private float _distanceAtDragStart;
+        private Quaternion _relativeRotation;
+        private PointerEventData _latestPointerEventData;
 
         private void Start() {
             AssertCamWithPhysicsRaycasterFoundInScene();
@@ -33,20 +35,37 @@ namespace com.csutil.ui {
         }
 
         public void OnBeginDrag(PointerEventData e) {
-            localDragStartOffsetOnRt = targetToDrag.position - e.pointerCurrentRaycast.worldPosition;
-            distanceAtDragStart = (e.pressEventCamera.transform.position - targetToDrag.position).magnitude;
+            var targetPosition = targetToDrag.position;
+            _localDragStartOffsetOnRt = targetPosition - e.pointerCurrentRaycast.worldPosition;
+            var cam = e.pressEventCamera.transform;
+            _distanceAtDragStart = (cam.position - targetPosition).magnitude;
+            AssertV3.IsFalse(_distanceAtDragStart == 0, () => "targetToDrag is at the same position as the camera");
+            _relativeRotation = Quaternion.Inverse(cam.rotation) * targetToDrag.rotation;
+            _latestPointerEventData = e;
         }
 
         public void OnDrag(PointerEventData e) {
+            _latestPointerEventData = e;
             if (e.pointerCurrentRaycast.worldPosition == Vector3.zero) { return; }
-            var newWorldPos = e.pointerCurrentRaycast.worldPosition + localDragStartOffsetOnRt;
+            var newWorldPos = e.pointerCurrentRaycast.worldPosition + _localDragStartOffsetOnRt;
             if (keepDistanceToCam) {
                 var camPos = e.pressEventCamera.transform.position;
                 var direction = (newWorldPos - camPos).normalized;
-                targetToDrag.position = camPos + direction * distanceAtDragStart;
+                targetToDrag.position = camPos + direction * _distanceAtDragStart;
             } else {
                 targetToDrag.position = newWorldPos;
             }
+            if (keepRelativeRotation) {
+                targetToDrag.rotation = e.pressEventCamera.transform.rotation * _relativeRotation;
+            }
+        }
+
+        public void OnEndDrag(PointerEventData eventData) {
+            _latestPointerEventData = null;
+        }
+
+        public void Update() {
+            if (_latestPointerEventData != null && _latestPointerEventData.dragging) { OnDrag(_latestPointerEventData); }
         }
 
     }

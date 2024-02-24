@@ -22,7 +22,7 @@ namespace com.csutil.ui.Components {
 
         private Task<Texture2D> StartLoading(string imageUrl) {
             var runningTask = this.StartCoroutineAsTask(LoadFromUrlCoroutine(imageUrl, response), () => {
-                AssertV2.AreEqual(imageUrlCurrentlyLoadingFrom, imageUrl); // Check that there was not a new url set in the meantime
+                AssertV3.AreEqual(imageUrlCurrentlyLoadingFrom, imageUrl); // Check that there was not a new url set in the meantime
                 var result = response.getResult();
                 response = null; // Set back to null to indicate the task is done
                 return result;

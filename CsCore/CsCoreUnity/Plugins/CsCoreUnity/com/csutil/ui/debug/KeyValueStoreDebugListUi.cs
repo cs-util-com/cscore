@@ -19,7 +19,7 @@ namespace com.csutil.ui.debug {
 
         private void OnKeyValueStoreChanged(object sender, NotifyCollectionChangedEventArgs e) {
             var store = sender as ObservableKeyValueStore;
-            AssertV2.IsNotNull(store, "sender as ObservableKeyValueStore");
+            AssertV3.IsNotNull(store, "sender as ObservableKeyValueStore");
             switch (e.Action) {
                 case NotifyCollectionChangedAction.Add:
                     CellData.Add(ToEntry(e.NewItems));
@@ -53,7 +53,7 @@ namespace com.csutil.ui.debug {
         }
 
         private static KeyValuePair<string, object> GetSingleEntry(IList updatedItems) {
-            AssertV2.AreEqual(1, updatedItems.Count);
+            AssertV3.AreEqual(1, updatedItems.Count);
             var pair = (KeyValuePair<string, object>)updatedItems[0];
             return pair;
         }

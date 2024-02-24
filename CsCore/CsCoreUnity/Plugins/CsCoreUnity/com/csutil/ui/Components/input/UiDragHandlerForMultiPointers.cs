@@ -28,7 +28,7 @@ namespace com.csutil.ui {
         public PointerEventData latestFinger2;
 
         private void Start() {
-            if (onDrag.IsNullOrEmpty()) { onDrag.AddListener(ApplyNoRotation); }
+            if (onDrag.IsNullOrEmptyV2()) { onDrag.AddListener(ApplyNoRotation); }
         }
 
         /// <summary> Will update full transform including position, rotation and scale </summary>
@@ -95,7 +95,7 @@ namespace com.csutil.ui {
         }
 
         [System.Serializable]
-        public class OnDragEvent : UnityEvent<Vector2, Vector3, Quaternion> { }
+        public class OnDragEvent : UnityEventV2<Vector2, Vector3, Quaternion> { }
 
     }
 

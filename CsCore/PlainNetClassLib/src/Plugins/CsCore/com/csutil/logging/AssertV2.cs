@@ -204,7 +204,7 @@ namespace com.csutil {
 
         /// <summary> Log out successful assetions, <see cref="AssertV2.onAssertSuccess"/> when this is useful </summary>
         public static void SetupPrintDebuggingSuccessfulAssertions() {
-            AssertV2.onAssertSuccess = (msg, args) => {
+            onAssertSuccess = (msg, args) => {
                 Log.d($"SUCCESSFUL ASSERT, did NOT throw: <<<{msg}>>>", Log.ArgsPlusStackFrameIfNeeded(args, skipFrames: 3));
             };
         }

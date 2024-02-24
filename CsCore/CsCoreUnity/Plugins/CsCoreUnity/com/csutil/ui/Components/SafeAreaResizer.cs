@@ -17,7 +17,7 @@ namespace com.csutil.ui {
         }
 
         private void Start() {
-            AssertV2.IsFalse(gameObject.GetComponentV2<Canvas>().isRootCanvasV2(), $"{nameof(SafeAreaResizer)} should NOT be added on the root canvas level!", gameObject);
+            AssertV3.IsFalse(gameObject.GetComponentV2<Canvas>().isRootCanvasV2(), () => $"{nameof(SafeAreaResizer)} should NOT be added on the root canvas level!", gameObject);
         }
 
         private void OnRectTransformDimensionsChange() { Recalc(); }
@@ -48,7 +48,7 @@ namespace com.csutil.ui {
 
                 //AssertV2.IsTrue(anchorMin.y <= ONE, "anchorMin.y=" + anchorMin.y);
                 //AssertV2.IsTrue(anchorMax.y <= ONE, "anchorMax.y=" + anchorMax.y);
-                AssertV2.IsTrue(rt.localScale.magnitude > 0, "rt.localScale=" + rt.localScale);
+                AssertV3.IsTrue(rt.localScale.magnitude > 0, () => "rt.localScale=" + rt.localScale);
                 if (anchorMax.x > ONE || anchorMax.y > ONE) { return; }
                 if (anchorMin.x == 0 && anchorMin.y == 0 && (anchorMax.x < MIN || anchorMax.y < MIN)) { return; }
 

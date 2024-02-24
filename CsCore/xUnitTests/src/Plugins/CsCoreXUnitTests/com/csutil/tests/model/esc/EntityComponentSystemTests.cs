@@ -12,6 +12,9 @@ namespace com.csutil.tests.model.esc {
 
     public class EntityComponentSystemTests {
 
+        private const float radToDegree = 180f / MathF.PI;
+        private const float degreeToRad = MathF.PI / 180f;
+
         public EntityComponentSystemTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
         [Fact]
@@ -30,21 +33,21 @@ namespace com.csutil.tests.model.esc {
                     new EnemyComponent() { Id = "c1", Health = 100, Mana = 10 }
                 )
             };
-            templates.SaveChanges(enemyTemplate);
+            await templates.SaveChanges(enemyTemplate);
 
             // An instance that has a different health value than the template:
             Entity variant1 = templates.CreateVariantInstanceOf(enemyTemplate, NewIdDict(enemyTemplate));
             (variant1.Components.Single().Value as EnemyComponent).Health = 200;
-            templates.SaveChanges(variant1); // Save it as a variant of the enemyTemplate
+            await templates.SaveChanges(variant1); // Save it as a variant of the enemyTemplate
 
             // Create a variant2 of the variant1
             Entity variant2 = templates.CreateVariantInstanceOf(variant1, NewIdDict(variant1));
             (variant2.Components.Single().Value as EnemyComponent).Mana = 20;
-            templates.SaveChanges(variant2);
+            await templates.SaveChanges(variant2);
 
             // Updating variant 1 should also update variant2:
             (variant1.Components.Single().Value as EnemyComponent).Health = 300;
-            templates.SaveChanges(variant1);
+            await templates.SaveChanges(variant1);
             variant2 = templates.ComposeEntityInstance(variant2.Id);
             Assert.Equal(300, (variant2.Components.Single().Value as EnemyComponent).Health);
 
@@ -110,7 +113,7 @@ namespace com.csutil.tests.model.esc {
             Assert.Same(e2.GetParent(), entityGroup);
 
             { // Local and global poses can be accessed like this:
-                var rot90Degree = Quaternion.CreateFromYawPitchRoll(MathF.PI / 2, 0, 0);
+                var rot90Degree = Quaternion.CreateFromYawPitchRoll(90 * degreeToRad, 0, 0);
                 Assert.Equal(rot90Degree, entityGroup.GlobalPose().rotation);
                 Assert.Equal(rot90Degree, entityGroup.LocalPose().rotation);
 
@@ -120,7 +123,7 @@ namespace com.csutil.tests.model.esc {
 
                 // e1 has a local rotation that is opposite of the parent 90 degree, the 2 cancel each other out:
                 Assert.Equal(Quaternion.Identity, e1.GlobalPose().rotation);
-                var rotMinus90Degree = Quaternion.CreateFromYawPitchRoll(-MathF.PI / 2, 0, 0);
+                var rotMinus90Degree = Quaternion.CreateFromYawPitchRoll(-90 * degreeToRad, 0, 0);
                 Assert.Equal(rotMinus90Degree, e1.LocalPose().rotation);
 
                 // e1 is in the center of the parent, its global pos isnt affected by the rotation of the parent:
@@ -174,29 +177,66 @@ namespace com.csutil.tests.model.esc {
             var ecs = new EntityComponentSystem<Entity>(null, isModelImmutable: false);
 
             var e1 = ecs.Add(new Entity() {
-                LocalPose = Pose.NewMatrix(new Vector3(0, 1, 0))
+                LocalPose = Pose3d.NewMatrix(new Vector3(0, 1, 0))
             });
 
             var e2 = e1.AddChild(new Entity() {
-                LocalPose = Pose.NewMatrix(new Vector3(0, 1, 0), 90)
+                LocalPose = Pose3d.NewMatrix(new Vector3(0, 1, 0), 90)
             });
 
             var e3 = e2.AddChild(new Entity() {
-                LocalPose = Pose.NewMatrix(new Vector3(0, 0, 2), 0, 2)
+                LocalPose = Pose3d.NewMatrix(new Vector3(0, 0, 2), 0, 2)
             });
 
             var e4 = e3.AddChild(new Entity() {
-                LocalPose = Pose.NewMatrix(new Vector3(0, 0, -1), -90)
+                LocalPose = Pose3d.NewMatrix(new Vector3(0, 0, -1), -90)
             });
 
             var e5 = e4.AddChild(new Entity() {
-                LocalPose = Pose.NewMatrix(new Vector3(0, -1, 0), 0, 0.5f)
+                LocalPose = Pose3d.NewMatrix(new Vector3(0, -1, 0), 0, 0.5f)
             });
 
             var pose = e5.GlobalPose();
             Assert.Equal(Quaternion.Identity, pose.rotation);
             Assert_AlmostEqual(Vector3.One, pose.scale);
             Assert.Equal(Vector3.Zero, pose.position);
+
+        }
+
+        [Fact]
+        public void TestPoseOperators() {
+
+            var poseTranslation = new Vector3(5, 10, 15);
+            Matrix4x4 matrix = Pose3d.NewMatrix(poseTranslation, 180);
+            var pose = matrix.ToPose();
+            Assert_AlmostEqual(matrix, pose.ToMatrix4x4());
+            Assert.Equal(poseTranslation, pose.position);
+            Assert_AlmostEqual(Quaternion.CreateFromYawPitchRoll(180 * degreeToRad, 0, 0), pose.rotation);
+            Assert_AlmostEqual(Vector3.One, pose.scale);
+
+            var vecX_1_0_0 = Vector3.UnitX;
+
+            // Counterclockwise rotation around the y/up axis:
+            var rot90Degree = Quaternion.CreateFromYawPitchRoll(90 * degreeToRad, 0, 0);
+            // The x axis is now pointing to the negative z axis:
+            Assert_AlmostEqual(-Vector3.UnitZ, rot90Degree.ToMatrix4X4().Transform(vecX_1_0_0));
+
+            // The pose has a position and rotation set which means (1,0,0) will end up rotated by 180 degree: 
+            Assert.Equal(-Vector3.UnitX + poseTranslation, pose.ToMatrix4x4().Transform(vecX_1_0_0));
+
+            { // To make it easier to work with poses they can be modified with operators:
+                // Change the position of the pose:
+                pose += vecX_1_0_0;
+                Assert.Equal(vecX_1_0_0 + poseTranslation, pose.position);
+                // Change the scale of the pose:
+                pose *= 2;
+                Assert.Equal(new Vector3(2, 2, 2), pose.scale);
+                // Add a 90 degree rotation to the pose:
+                pose = rot90Degree * pose;
+                Assert_AlmostEqual(Quaternion.CreateFromYawPitchRoll((90 + 180) * degreeToRad, 0, 0), pose.rotation);
+                Assert.Equal(new Vector3(2, 2, 2), pose.scale);
+                Assert.Equal(vecX_1_0_0 + poseTranslation, pose.position);
+            }
 
         }
 
@@ -215,7 +255,7 @@ namespace com.csutil.tests.model.esc {
                 {
                     var entity1 = ecs.Add(new Entity() { Name = "Entity1" });
                     var entity11 = entity1.AddChild(new Entity() { Name = "Entity2" });
-                    entity1.SaveChanges();
+                    await entity1.SaveChanges();
 
                     var variant1 = entity1.CreateVariant();
                     Assert.NotEqual(variant1.Id, entity1.Id);
@@ -244,13 +284,13 @@ namespace com.csutil.tests.model.esc {
                     Name = "Sword",
                     Components = CreateComponents(new SwordComponent() { Damage = 10 })
                 });
-                baseEnemy.SaveChanges();
+                await baseEnemy.SaveChanges();
 
                 // Accessing components and children entities: 
                 Assert.NotNull(baseEnemy.GetComponent<EnemyComponent>());
                 Assert.Null(baseEnemy.GetComponent<SwordComponent>());
                 Assert.NotNull(baseEnemy.GetChildren().Single().GetComponent<SwordComponent>());
-                
+
                 // Define a variant of the base enemy which is stronger and has a shield:
                 var bossEnemy = baseEnemy.CreateVariant();
                 bossEnemy.Data.Name = "BossEnemy";
@@ -259,13 +299,13 @@ namespace com.csutil.tests.model.esc {
                     Name = "Shield",
                     Components = CreateComponents(new ShieldComponent() { Defense = 10 })
                 });
-                bossEnemy.SaveChanges();
+                await bossEnemy.SaveChanges();
 
                 // Define a mage variant that has mana but no sword
                 var mageEnemy = baseEnemy.CreateVariant();
                 mageEnemy.Data.Name = "MageEnemy";
                 mageEnemy.GetComponent<EnemyComponent>().Mana = 100;
-                mageEnemy.SaveChanges();
+                await mageEnemy.SaveChanges();
 
                 Assert.NotSame(mageEnemy, baseEnemy);
                 Assert.NotSame(mageEnemy.Data, baseEnemy.Data);
@@ -284,12 +324,12 @@ namespace com.csutil.tests.model.esc {
                 // Now that the sword is removed from the mage it can be added to the boss enemy: 
                 bossEnemy.AddChild(sword);
 
-                bossEnemy.SaveChanges();
-                mageEnemy.SaveChanges();
+                await bossEnemy.SaveChanges();
+                await mageEnemy.SaveChanges();
 
                 // Updates to the prefabs also result in the variants being updated
                 baseEnemy.GetComponent<EnemyComponent>().Health = 150;
-                baseEnemy.SaveChanges();
+                await baseEnemy.SaveChanges();
 
                 // The mage enemy health wasnt modified so with the template update it now has also 150 health:
                 Assert.Equal(150, mageEnemy.GetComponent<EnemyComponent>().Health);
@@ -303,24 +343,24 @@ namespace com.csutil.tests.model.esc {
                 bossEnemy.GetComponent<EnemyComponent>().Mana = 50;
                 // These boss enemy changes are NOT persisted (no call to SaveChanges) so they are lost once
                 // baseEnemy saves its changes (and with that also updates all direct and indirect variants):
-                baseEnemy.SaveChanges();
+                await baseEnemy.SaveChanges();
                 // The health is back to the 200 value as it was before and the mana is back to 0:
                 Assert.Equal(200, bossEnemy.GetComponent<EnemyComponent>().Health);
                 Assert.Equal(0, bossEnemy.GetComponent<EnemyComponent>().Mana);
 
-                bossEnemy.SaveChanges();
-                mageEnemy.SaveChanges();
+                await bossEnemy.SaveChanges();
+                await mageEnemy.SaveChanges();
 
                 // All created entities are added to the scene graph and persisted to disk
                 var scene = ecs.Add(new Entity() { Name = "Scene" });
                 var enemy1 = scene.AddChild(baseEnemy.CreateVariant());
-                enemy1.Data.LocalPose = Pose.NewMatrix(new Vector3(1, 0, 0));
+                enemy1.Data.LocalPose = Pose3d.NewMatrix(new Vector3(1, 0, 0));
                 var enemy2 = scene.AddChild(bossEnemy.CreateVariant());
-                enemy2.Data.LocalPose = Pose.NewMatrix(new Vector3(0, 0, 1));
+                enemy2.Data.LocalPose = Pose3d.NewMatrix(new Vector3(0, 0, 1));
                 var enemy3 = scene.AddChild(mageEnemy.CreateVariant());
-                enemy3.Data.LocalPose = Pose.NewMatrix(new Vector3(-1, 0, 0));
+                enemy3.Data.LocalPose = Pose3d.NewMatrix(new Vector3(-1, 0, 0));
 
-                scene.SaveChanges();
+                await scene.SaveChanges();
 
                 // Simulate the user closing the application and starting it again
                 ecs.Dispose();
@@ -353,9 +393,23 @@ namespace com.csutil.tests.model.esc {
             return dict;
         }
 
-        private void Assert_AlmostEqual(Vector3 a, Vector3 b, float allowedDelta = 0.000001f) {
-            var length = (a - b).Length();
-            Assert.True(length < allowedDelta, $"Expected {a} to be almost equal to {b} but the difference is {length}");
+        private void Assert_AlmostEqual(Vector3 expected, Vector3 actual, float allowedDelta = 0.000001f) {
+            var distance = (expected - actual).Length();
+            Assert.True(distance < allowedDelta, $"Expected {expected} but was {actual} (distance={distance}>{allowedDelta})");
+        }
+
+        private void Assert_AlmostEqual(Quaternion expected, Quaternion actual, double allowedDelta = 0.1) {
+            var angle = expected.GetRotationDeltaInDegreeTo(actual);
+            Assert.True(angle < allowedDelta, $"Expected {expected} but was {actual} (angle={angle}>{allowedDelta})");
+        }
+
+        private void Assert_AlmostEqual(Matrix4x4 expected, Matrix4x4 actual, float allowedDelta = 0.000001f) {
+            // Decompose the matrices into their components and compare them:
+            expected.Decompose(out var scaleExp, out var rotExp, out var posExp);
+            actual.Decompose(out var scaleActual, out var rotActual, out var posActual);
+            Assert_AlmostEqual(scaleExp, scaleActual, allowedDelta);
+            Assert_AlmostEqual(rotExp, rotActual, allowedDelta);
+            Assert_AlmostEqual(posExp, posActual, allowedDelta);
         }
 
         private abstract class Component : IComponentData {
@@ -380,24 +434,18 @@ namespace com.csutil.tests.model.esc {
     }
 
     public class Entity : IEntityData {
-
         public string Id { get; set; } = "" + GuidV2.NewGuid();
         public string Name { get; set; }
         public string TemplateId { get; set; }
         public Matrix4x4? LocalPose { get; set; }
         public IReadOnlyDictionary<string, IComponentData> Components { get; set; }
         public bool IsActive { get; set; } = true;
-
         public string ParentId { get; set; }
-
         public IReadOnlyList<string> ChildrenIds => MutablehildrenIds;
         [JsonIgnore] // Dont include the children ids two times
         public List<string> MutablehildrenIds { get; } = new List<string>();
-
         public string GetId() { return Id; }
-
         public override string ToString() { return $"{Name} ({Id})"; }
-
     }
 
     public static class EntityExtensions {

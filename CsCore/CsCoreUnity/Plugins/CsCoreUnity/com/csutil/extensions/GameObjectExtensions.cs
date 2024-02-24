@@ -110,18 +110,21 @@ namespace com.csutil {
         public static bool IsNullOrDestroyed(this UnityEngine.Object self) { return self == null; }
 
         public static bool Destroy(this UnityEngine.Object self, bool destroyNextFrame = false) {
-            if (self == null) { return false; }
+            if (self.IsNullOrDestroyed()) { return false; }
+            if (self is GameObject go && go.HasComponent<PoolObject>(out var poolObj)) {
+                return poolObj.Despawn();
+            }
             try {
                 if (destroyNextFrame) {
                     UnityEngine.Object.Destroy(self);
                 } else {
                     UnityEngine.Object.DestroyImmediate(self);
                 }
-            } catch {
-                Log.e("Cant destroy object: " + self, self);
+            } catch (Exception e) {
+                Log.e($"Cant destroy object '{self}': {e}", e, self);
                 return false;
             }
-            AssertV2.IsTrue(destroyNextFrame || self.IsDestroyed(), "gameObject was not destroyed");
+            AssertV3.IsTrue(destroyNextFrame || self.IsDestroyed(), () => "gameObject was not destroyed");
             return true;
         }
 
@@ -145,13 +148,29 @@ namespace com.csutil {
         }
 
         public static void AddOnDestroyListener(this GameObject self, Action onDestroyCallback) {
-            self.GetOrAddComponent<OnDestroyListener>().onDestroy.AddListener(() => { onDestroyCallback(); });
+            self.GetOrAddComponent<OnDestroyListener>().onDestroy.AddListenerV2(() => { onDestroyCallback(); });
         }
 
         /// <summary> When the <see cref="GameObject"/> is destroyed call Dispose on a target <see cref="IDisposable"/> </summary>
         public static T SetUpDisposeOnDestroy<T>(this GameObject self, T objectToDispose) where T : IDisposable {
-            self.AddComponent<DisposerMono>().disposable = objectToDispose;
+            self.AddComponent<OnDestroyMono>().onDestroy.AddListenerV2(() => {
+                if (objectToDispose is IDisposableV2 dV2) {
+                    dV2.DisposeV2();
+                } else {
+                    objectToDispose?.Dispose();
+                }
+            });
             return objectToDispose;
+        }
+
+        public static void UnregisterOnDestroy<T>(this GameObject self, object injector) {
+            UnregisterOnDestroy(self, injector, typeof(T));
+        }
+        
+        public static void UnregisterOnDestroy(this GameObject self, object injector, Type type) {
+            self.AddComponent<OnDestroyMono>().onDestroy.AddListenerV2(() => {
+                IoC.inject.UnregisterInjector(injector, type);
+            });
         }
 
         /// <summary> When the target <see cref="GameObject"/> is destroyed call Dispose on a <see cref="IDisposable"/> </summary>

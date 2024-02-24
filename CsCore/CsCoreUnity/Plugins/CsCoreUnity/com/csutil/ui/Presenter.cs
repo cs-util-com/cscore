@@ -1,6 +1,7 @@
 ﻿using com.csutil.model.immutable;
 using System;
 using System.Threading.Tasks;
+using com.csutil.ui;
 using UnityEngine;
 
 namespace com.csutil {
@@ -27,8 +28,15 @@ namespace com.csutil {
 
         /// <summary> Connects a model with a view </summary>
         /// <returns> A task that can be awaited on, that returns the fully setup presenter </returns>
+        public static Task<T> ShowModelInView<T>(this Presenter<T> presenter, T model, string viewPrefabName) {
+            presenter.targetView = ViewStackHelper.MainViewStack().SwitchToView(viewPrefabName);
+            return presenter.LoadModelIntoView(model);
+        }
+
+        /// <summary> Connects a model with a view </summary>
+        /// <returns> A task that can be awaited on, that returns the fully setup presenter </returns>
         public static async Task<T> LoadModelIntoView<T>(this Presenter<T> self, T model) {
-            AssertV2.IsNotNull(self.targetView, "presenter.targetView");
+            AssertV3.IsNotNull(self.targetView, "presenter.targetView");
             if (model == null) { Log.w($"Passed model (of type={typeof(T).Name}]) was NULL"); }
 
             var presenterName = self.GetType().Name;
@@ -63,6 +71,19 @@ namespace com.csutil {
             return tcs.Task;
         }
 
+        /// <summary> Switches back to the previous view in the ViewStack </summary>
+        /// <param name="viewDoneTcs"> A task completion source that is set to finished, the task of the tcs is typically used by the presenter to return its Task in
+        /// the <see cref="Presenter{T}.OnLoad"/> method so that multiple componets like this SwitchBackToLastView method here can set it to complete independently </param>
+        public static void SwitchBackToLastView<T>(this Presenter<T> self, TaskCompletionSource<bool> viewDoneTcs, bool destroyFinalView = false, bool hideNotDestroyCurrentView = false) {
+            try {
+                self.targetView.GetViewStack().SwitchBackToLastView(self.targetView, destroyFinalView, hideNotDestroyCurrentView);
+                viewDoneTcs.TrySetResult(true);
+            } catch (Exception e) {
+                viewDoneTcs.TrySetException(e);
+                throw;
+            }
+        }
+
     }
 
     /// <summary>
@@ -74,9 +95,15 @@ namespace com.csutil {
 
     public static class PresenterWithActionsExtensions {
 
+        public static async Task ShowModelInView<T, V>(this PresenterWithActions<T, V> presenter, T model, string prefabName) where V : IModelActions<T> {
+            presenter.targetView = ViewStackHelper.MainViewStack().SwitchToView(prefabName);
+            await presenter.LoadModelIntoView(model);
+        }
+
         /// <summary> Connects a model with a view </summary>
         /// <returns> A task that can be awaited on, that returns the fully setup presenter </returns>
         public static Task<T> LoadModelIntoView<T, V>(this PresenterWithActions<T, V> self, T model) where V : IModelActions<T> {
+            if (self.targetView.IsNullOrDestroyed()) { throw new InvalidOperationException("presenter.targetView not yet set"); }
             self.actions.ThrowErrorIfNull("presenter.actions");
             self.actions.Model = model;
             Presenter<T> presenter = self;

@@ -19,6 +19,7 @@ namespace com.csutil.keyvaluestore {
         public void Dispose() {
             IsDisposed = DisposeState.DisposingStarted;
             fallbackStore?.Dispose();
+            CollectionChanged = null;
             IsDisposed = DisposeState.Disposed;
         }
 

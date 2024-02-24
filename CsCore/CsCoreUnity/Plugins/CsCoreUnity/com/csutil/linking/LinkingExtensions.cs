@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using TMPro;
 using UnityEngine;
 
 namespace com.csutil {
@@ -43,8 +44,24 @@ namespace com.csutil {
         public static T Get<T>(this Link self) {
             if (typeof(T) == typeof(GameObject)) { return (T)(object)self.gameObject; }
             var comp = self.GetComponentV2<T>();
+            if (comp == null) { CheckTmpAlternativePossible<T>(self); }
             return comp == null ? (T)(object)null : comp;
         }
+        
+        /// <summary> This method checks if the UI already switched to using TMP while the code still uses the
+        /// old UI components and throws in improved exception instead of just returning null </summary>
+        private static void CheckTmpAlternativePossible<T>(Link self) {
+            if (typeof(T) == typeof(UnityEngine.UI.Text)) {
+                if (self.HasComponent<TMP_Text>(out var tmpText)) {
+                    throw Log.e("Found TMP_Text instead of UnityEngine.UI.Text for " + self.id, tmpText);
+                }
+            } else if (typeof(T) == typeof(UnityEngine.UI.InputField)) {
+                if (self.HasComponent<TMP_InputField>(out var tmpInputField)) {
+                    throw Log.e("Found TMP_InputField instead of UnityEngine.UI.InputField for " + self.id, tmpInputField);
+                }
+            }
+        }
+        
     }
 
 }

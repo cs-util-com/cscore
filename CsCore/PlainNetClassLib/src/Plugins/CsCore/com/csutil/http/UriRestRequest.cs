@@ -115,7 +115,10 @@ namespace com.csutil.http {
             if (TypeCheck.AreEqual<T, Stream>()) { return (T)(object)await content.ReadAsStreamAsync(); }
             if (TypeCheck.AreEqual<T, byte[]>()) { return (T)(object)await content.ReadAsByteArrayAsync(); }
             var respText = await content.ReadAsStringAsync();
-            if (typeof(T) == typeof(string)) { return (T)(object)respText; }
+            if (HttpStatusCode.OK != resp.StatusCode && !respText.IsNullOrEmpty()) { Log.w($"{resp.StatusCode} response:\n{respText}"); }
+            if (typeof(T) == typeof(string)) {
+                return (T)(object)respText;
+            }
             AssertV3.IsNotNull(respText, "respText");
             AssertV3.IsNotNull(respText.IsNullOrEmpty(), "respText.IsNullOrEmpty");
             try { return jsonReader.Read<T>(respText); } catch (JsonReaderException e) { throw new JsonReaderException("Cant parse to JSON: " + respText, e); }

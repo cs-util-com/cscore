@@ -19,12 +19,12 @@ namespace com.csutil.http.apis {
 
         /// <summary> See also https://platform.openai.com/docs/guides/chat/chat-vs-completions : "Because gpt-3.5-turbo performs at a
         /// similar capability to text-davinci-003 but at 10% the price per token, we recommend gpt-3.5-turbo for most use cases." </summary>
-        [Obsolete("This API is deprecated, use .ChatGpt(..) instead")]
+        [Obsolete("This API is deprecated, use .ChatGpt(..) instead", true)]
         public Task<Text.CompletionsResponse> Complete(string prompt) {
             return Complete(new Text.CompletionsRequest() { prompt = prompt });
         }
 
-        [Obsolete("This API is deprecated, use .ChatGpt(..) instead")]
+        [Obsolete("This API is deprecated, use .ChatGpt(..) instead", true)]
         public Task<Text.CompletionsResponse> Complete(Text.CompletionsRequest requestParams) {
             var request = new Uri("https://api.openai.com/v1/completions").SendPOST();
             return request.WithAuthorization(apiKey).WithJsonContent(requestParams).GetResult<Text.CompletionsResponse>();
@@ -51,7 +51,7 @@ namespace com.csutil.http.apis {
         public class Text {
 
             /// <summary> See https://platform.openai.com/docs/api-reference/completions </summary>
-            [Obsolete("This API is deprecated, use .ChatGpt(..) instead")]
+            [Obsolete("This API is deprecated, use .ChatGpt(..) instead", true)]
             public class CompletionsRequest {
 
                 /// <summary> The prompt(s) to generate completions for, encoded as a string, array of strings, array of tokens, or array of token arrays.

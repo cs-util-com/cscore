@@ -3027,7 +3027,7 @@
             Tries to parse the specified string into a <see cref="T:Zio.UPath"/>
             </summary>
             <param name="path">The path as a string.</param>
-            <param name="pathInfo">The path parsed if successfull.</param>
+            <param name="pathInfo">The path parsed if successful.</param>
             <returns><c>true</c> if path was parsed successfully, <c>false</c> otherwise.</returns>
         </member>
         <member name="M:Zio.UPath.CompareTo(Zio.UPath)">

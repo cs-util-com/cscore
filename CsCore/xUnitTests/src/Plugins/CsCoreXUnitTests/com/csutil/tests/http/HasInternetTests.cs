@@ -34,7 +34,7 @@ namespace com.csutil.integrationTests.http {
         Task IHasInternetListener.OnHasInternet(bool hasInet) {
             this.hasInet = hasInet;
             Assert.True(hasInet);
-            return Task.FromResult(true);
+            return Task.CompletedTask;
         }
 
     }

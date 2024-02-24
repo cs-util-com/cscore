@@ -12,8 +12,8 @@ namespace com.csutil.ui {
         private void OnEnable() {
             if (scaler == null) { scaler = gameObject.GetComponentV2<CanvasScalerV2>(); }
             if (es == null) { es = EventSystem.current; }
-            AssertV2.IsNotNull(scaler, "No CanvasScalerV2 assigned");
-            AssertV2.IsNotNull(es, "No event system found in scene");
+            AssertV3.IsNotNull(scaler, "No CanvasScalerV2 assigned");
+            AssertV3.IsNotNull(es, "No event system found in scene");
         }
 
         private void Update() {

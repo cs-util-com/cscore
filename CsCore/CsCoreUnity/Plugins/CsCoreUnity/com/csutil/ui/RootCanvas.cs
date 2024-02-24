@@ -2,6 +2,7 @@
 using com.csutil.netstandard2_1polyfill;
 #endif
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using UnityEngine;
@@ -26,13 +27,18 @@ namespace com.csutil.ui {
             // Check if there is a root canvas that has a ViewStack attached:
             var rootCanvasesWithViewStack = roots.Filter(x => x.GetComponentV2<ViewStack>() != null);
             if (!rootCanvasesWithViewStack.IsNullOrEmpty()) {
-                AssertV2.AreEqual(1, rootCanvasesWithViewStack.Count(), "rootCanvasesWithViewStack");
+                AssertV3.AreEqual(1, rootCanvasesWithViewStack.Count(), "rootCanvasesWithViewStack");
                 return rootCanvasesWithViewStack.First();
             }
             return FilterForBestRootCanvas(roots);
         }
 
-        private static Canvas FilterForBestRootCanvas(IOrderedEnumerable<Canvas> roots) {
+        private static Canvas FilterForBestRootCanvas(IEnumerable<Canvas> roots) {
+
+            // If some of the canvases are in screen space overlay mode, prefer those:
+            var screenSpaceCanvases = roots.Filter(x => x.renderMode == RenderMode.ScreenSpaceOverlay);
+            if (!screenSpaceCanvases.IsEmpty()) { roots = screenSpaceCanvases; }
+
             // Prefer canvas objects that are on the root level of the open scene:
             var canvasesOnRootOfScene = roots.Filter(x => x.gameObject.GetParent() == null);
             if (!canvasesOnRootOfScene.IsNullOrEmpty()) {
@@ -51,7 +57,7 @@ namespace com.csutil.ui {
 
         /// <summary> Returns a list of root canvases where the first one is the visually most top canvas </summary>
         public static IOrderedEnumerable<Canvas> GetAllRootCanvases() {
-            return ResourcesV2.FindAllInScene<Canvas>().Map(x => x.rootCanvasV2()).ToHashSet().Filter(x => !x.HasComponent<IgnoreRootCanvas>(out var _)).OrderByDescending(x => x.sortingOrder);
+            return ResourcesV2.FindAllInScene<Canvas>().Map(x => x.rootCanvasV2()).ToHashSet().Filter(x => !(x.HasComponent<IgnoreRootCanvas>(out var i) && i.enabled)).OrderByDescending(x => x.sortingOrder);
         }
 
         public static Canvas CreateNewRootCanvas(string rootCanvasPrefab = "Canvas/DefaultRootCanvas") {

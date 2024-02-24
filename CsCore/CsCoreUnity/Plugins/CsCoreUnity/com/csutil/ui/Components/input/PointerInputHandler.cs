@@ -8,10 +8,10 @@ namespace com.csutil.ui {
     /// <summary> Can detect inputs like click, double click and long press </summary>
     public class PointerInputHandler : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointerUpHandler {
 
-        public UnityEvent onClick = new UnityEvent();
-        public UnityEvent onDoubleClick = new UnityEvent();
-        public UnityEvent onLongPressStart = new UnityEvent();
-        public UnityEvent onLongPressEnd = new UnityEvent();
+        public UnityEventV2 onClick = new UnityEventV2();
+        public UnityEventV2 onDoubleClick = new UnityEventV2();
+        public UnityEventV2 onLongPressStart = new UnityEventV2();
+        public UnityEventV2 onLongPressEnd = new UnityEventV2();
 
         public int longPressDurInMs = 500;
         public int doubleClickTimeoutInMs = 300;
@@ -50,7 +50,7 @@ namespace com.csutil.ui {
 
         private async Task HandleLongPress() {
             // Only execute long press detection if there are listeners registered:
-            if (onLongPressStart.IsNullOrEmpty() && onLongPressEnd.IsNullOrEmpty()) { return; }
+            if (onLongPressStart.IsNullOrEmptyV2() && onLongPressEnd.IsNullOrEmptyV2()) { return; }
 
             var isPointerUpAgain = pointerUpTask.Task;
             await TaskV2.Delay(longPressDurInMs);

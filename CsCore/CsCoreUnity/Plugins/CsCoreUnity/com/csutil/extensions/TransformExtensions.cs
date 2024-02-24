@@ -26,6 +26,10 @@ namespace com.csutil {
             };
         }
 
+        public static Vector3 ToLocalPosition(this Transform self, Vector3 globalPosition) {
+            return self.InverseTransformPoint(globalPosition);
+        }
+        
     }
 
     public class Transformation {

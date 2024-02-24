@@ -36,8 +36,8 @@ namespace com.csutil.ui {
         public bool TryGetColor(string colorName, out Color c) {
             c = Color.clear;
             if (colors.IsNullOrEmpty()) { return false; }
-            AssertV2.IsNotNull(colorName, "colorName");
-            AssertV2.IsFalse(colors.IsNullOrEmpty(), "colors.IsNullOrEmpty");
+            AssertV3.IsNotNull(colorName, "colorName");
+            AssertV3.IsFalse(colors.IsNullOrEmpty(), () => "colors.IsNullOrEmpty");
             var namedColor = colors.FirstOrDefault(x => x.colorName == colorName);
             if (namedColor != null) { c = namedColor.colorValue; return true; }
             return false;

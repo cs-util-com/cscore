@@ -9,13 +9,27 @@ namespace com.csutil {
         public const double radToDegree = 180d / Math.PI;
         private const double halfPi = Math.PI / 2d;
 
-        public static bool IsSimilarTo(this Quaternion q1, Quaternion q2, int digits) {
+        public static bool Equals(this Quaternion q1, Quaternion q2, int digits) {
             return Math.Round(q1.X, digits) == Math.Round(q2.X, digits)
                 && Math.Round(q1.Y, digits) == Math.Round(q2.Y, digits)
                 && Math.Round(q1.Z, digits) == Math.Round(q2.Z, digits)
                 && Math.Round(q1.W, digits) == Math.Round(q2.W, digits);
         }
 
+        public static bool IsSimilarTo(this Quaternion q1, Quaternion q2, double degreeDifferenceThreshold = 0.1) {
+            return q1.GetRotationDeltaInDegreeTo(q2) < degreeDifferenceThreshold;
+        }
+
+        public static double GetRotationDeltaInDegreeTo(this Quaternion q1, Quaternion q2) {
+            return GetRotationDeltaInRadTo(q1, q2) * radToDegree;
+        }
+
+        public static double GetRotationDeltaInRadTo(this Quaternion q1, Quaternion q2) {
+            return Math.Acos(Math.Min(Math.Abs(Quaternion.Dot(q1, q2)), 1.0)) * 2.0;
+        }
+
+        public static Matrix4x4 ToMatrix4X4(this Quaternion self) { return Matrix4x4.CreateFromQuaternion(self); }
+        
         /// <summary> diff * q1 = q2  --->  diff = q2 * inverse(q1) </summary>
         public static Quaternion GetRotationDeltaTo(this Quaternion q1, Quaternion q2) { return Quaternion.Inverse(q1) * q2; }
 
@@ -64,6 +78,18 @@ namespace com.csutil {
             var rotated = Vector3.Transform(vector, self);
             if (roundResult) { rotated = rotated.Round(6); }
             return rotated;
+        }
+
+        public static Quaternion LookRotation(Vector3 directionVector, Vector3 upVector) {
+            var dir = Vector3.Normalize(directionVector);
+            var right = Vector3.Normalize(Vector3.Cross(upVector, dir));
+            var up = Vector3.Cross(dir, right);
+            var rotMat = new Matrix4x4(
+                right.X, right.Y, right.Z, 0,
+                up.X, up.Y, up.Z, 0,
+                dir.X, dir.Y, dir.Z,
+                0, 0, 0, 0, 1);
+            return Quaternion.CreateFromRotationMatrix(rotMat);
         }
 
     }

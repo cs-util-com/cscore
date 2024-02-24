@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
+using System.Threading.Tasks;
 
 namespace com.csutil.model.ecs {
 
@@ -16,6 +17,23 @@ namespace com.csutil.model.ecs {
         public static IEntity<T> GetParent<T>(this IEntity<T> self) where T : IEntityData {
             if (self.ParentId == null) { return default; }
             return self.Ecs.Entities[self.ParentId];
+        }
+
+        public static bool IsTemplate<T>(this IEntity<T> commonParent) where T : IEntityData {
+            return commonParent.Ecs.TemplateIds.Contains(commonParent.Id);
+        }
+
+        public static bool IsVariant<T>(this IEntity<T> self) where T : IEntityData {
+            return self.TemplateId != null;
+        }
+
+        public static bool TryGetTemplate<T>(this IEntity<T> self, out IEntity<T> template) where T : IEntityData {
+            if (self.TemplateId != null) {
+                template = self.Ecs.Entities[self.TemplateId];
+                return true;
+            }
+            template = default;
+            return false;
         }
 
         public static T GetParent<T>(this T self, IReadOnlyDictionary<string, T> allEntities) where T : IEntityData {
@@ -63,6 +81,11 @@ namespace com.csutil.model.ecs {
                 newParent.Ecs.Update(mutateChildrenListInNewParent(newParent, child.Id));
                 return child;
             }
+        }
+        
+        public static void SetActive<T>(this IEntity<T> self, bool newIsActive, Func<IEntity<T>, bool, T> setActive) where T : IEntityData {
+            if (self.IsActive == newIsActive) { return; }
+            self.Ecs.Update(setActive(self, newIsActive));
         }
 
         public static bool Destroy<T>(this IEntity<T> self, Func<IEntity<T>, string, T> removeChildIdFromParent) where T : IEntityData {
@@ -119,39 +142,59 @@ namespace com.csutil.model.ecs {
             return localPose * parent.GlobalPoseMatrix(allEntities);
         }
 
-        public static Pose GlobalPose<T>(this IEntity<T> self) where T : IEntityData {
-            self.GlobalPoseMatrix().Decompose(out Vector3 scale, out Quaternion rotation, out Vector3 position);
-            return new Pose(position, rotation, scale);
+        public static Matrix4x4 ToLocalPose<T>(this IEntity<T> self, Matrix4x4 globalPose) where T : IEntityData {
+            var parent = self.GetParent();
+            if (parent == null) { return globalPose; }
+            return parent.GlobalPoseMatrix().Inverse() * globalPose;
+        }
+        
+        public static Pose3d GlobalPose<T>(this IEntity<T> self) where T : IEntityData {
+            return self.GlobalPoseMatrix().ToPose();
         }
 
-        public static Pose GlobalPose<T>(this T self, IReadOnlyDictionary<string, T> allEntities) where T : IEntityData {
-            self.GlobalPoseMatrix(allEntities).Decompose(out Vector3 scale, out Quaternion rotation, out Vector3 position);
-            return new Pose(position, rotation, scale);
+        public static Pose3d ToPose(this Matrix4x4 matrix) {
+            if (matrix == Matrix4x4.Identity) {
+                return new Pose3d(Vector3.Zero, Quaternion.Identity, Vector3.One);
+            }
+            matrix.Decompose(out Vector3 scale, out Quaternion rotation, out Vector3 position);
+            return new Pose3d(position, rotation, scale);
+        }
+        
+        public static Pose3d GlobalPose<T>(this T self, IReadOnlyDictionary<string, T> allEntities) where T : IEntityData {
+            return self.GlobalPoseMatrix(allEntities).ToPose();
         }
 
-        public static Pose LocalPose<T>(this IEntity<T> self) where T : IEntityData {
+        public static Pose3d LocalPose<T>(this IEntity<T> self) where T : IEntityData {
             var localPose = self.LocalPose;
-            if (!localPose.HasValue) { return new Pose(Vector3.Zero, Quaternion.Identity, Vector3.One); }
-            localPose.Value.Decompose(out Vector3 scale, out Quaternion rotation, out Vector3 position);
-            return new Pose(position, rotation, scale);
+            if (!localPose.HasValue) { return Matrix4x4.Identity.ToPose(); }
+            return localPose.Value.ToPose();
         }
 
-        public static void SaveChanges<T>(this IEntity<T> self) where T : IEntityData {
+        public static Task SaveChanges<T>(this IEntity<T> self) where T : IEntityData {
             var fullSubtree = self.GetChildrenTreeBreadthFirst();
-            foreach (var e in fullSubtree) { e.Ecs.Update(e.Data); }
+            var tasks = new List<Task>();
+            foreach (var e in fullSubtree) { tasks.Add(e.Ecs.Update(e.Data)); }
+            return Task.WhenAll(tasks);
         }
 
+        public static IEntity<T> CreateVariant<T>(this IEntity<T> self) where T : IEntityData {
+            return self.CreateVariant(out _);
+        }
+        
         /// <summary>
         /// Recursively creates variants of all entities in the subtree of the entity and returns a new root entity that has the variant ids in its children lists
         /// </summary>
-        public static IEntity<T> CreateVariant<T>(this IEntity<T> self) where T : IEntityData {
+        public static IEntity<T> CreateVariant<T>(this IEntity<T> self, out IReadOnlyDictionary<string, string> resultIdLookupTable) where T : IEntityData {
             var all = self.GetChildrenTreeBreadthFirst().ToList();
-            var newIdsLookup = all.ToDictionary(x => x.Id, x => "" + GuidV2.NewGuid());
+            resultIdLookupTable = all.ToDictionary(x => x.Id, x => "" + GuidV2.NewGuid());
             var fullSubtreeLeavesFirst = all.Skip(1).Reverse();
             foreach (var e in fullSubtreeLeavesFirst) {
-                e.Ecs.CreateVariant(e.Data, newIdsLookup);
+                e.Ecs.CreateVariant(e.Data, resultIdLookupTable);
             }
-            return self.Ecs.CreateVariant(self.Data, newIdsLookup);
+            var result = self.Ecs.CreateVariant(self.Data, resultIdLookupTable);
+            AssertV3.IsNull(result.ParentId, "result.ParentId");
+            AssertV3.AreNotEqual(result.Id, self.Id);
+            return result;
         }
 
         public static IEntity<T> GetChild<T>(this IEntity<T> mageEnemy, string name) where T : IEntityData {
@@ -164,12 +207,12 @@ namespace com.csutil.model.ecs {
         }
 
         /// <summary> Recursively searches for all components of the specified type in the entity and all its children </summary>
-        public static IEnumerable<V> GetComponentsInChildren<T, V>(this IEntity<T> self) where T : IEntityData where V : IComponentData {
+        public static IEnumerable<V> GetComponentsInChildren<T, V>(this IEntity<T> self) where T : IEntityData {
             return self.GetChildrenTreeBreadthFirst().SelectMany(x => x.Components.Values).Where(c => c is V).Cast<V>();
         }
 
         /// <summary> Recursively searches the entity and all its children until a component of the specified type is found </summary>
-        public static V GetComponentInChildren<T, V>(this IEntity<T> self) where T : IEntityData where V : IComponentData {
+        public static V GetComponentInChildren<T, V>(this IEntity<T> self) where T : IEntityData {
             return self.GetComponentsInChildren<T, V>().FirstOrDefault();
         }
 
@@ -179,6 +222,33 @@ namespace com.csutil.model.ecs {
 
         public static IEnumerable<IEntity<T>> FindEntitiesWithName<T>(this EntityComponentSystem<T> ecs, string name) where T : IEntityData {
             return ecs.Entities.Values.Filter(x => x.Name == name);
+        }
+
+        public static bool TryFindCommonParent<T>(this EntityComponentSystem<T> ecs, IEnumerable<string> entityIds, out IEntity<T> commonParent) where T : IEntityData {
+            // While walking up for each entity in the list, collec all its parents in a lookup table:
+            var entities = entityIds.Select(x => ecs.Entities[x]);
+            var intersectingIds = entities.First().CollectAllParents();
+            foreach (var entity in entities.Skip(1)) {
+                intersectingIds.Intersect(entity.CollectAllParents());
+            }
+            if (intersectingIds.Count == 0) {
+                commonParent = default;
+                return false;
+            }
+            commonParent = ecs.Entities[intersectingIds.First()];
+            return true;
+        }
+
+        public static IReadOnlyList<string> CollectAllParents<T>(this IEntity<T> entity) where T : IEntityData {
+            return CollectAllParents(entity, new List<string>());
+        }
+
+        private static IReadOnlyList<string> CollectAllParents<T>(IEntity<T> entity, List<string> parentsLookup) where T : IEntityData {
+            if (entity.ParentId != null) {
+                parentsLookup.Add(entity.ParentId);
+                CollectAllParents(entity.GetParent(), parentsLookup);
+            }
+            return parentsLookup;
         }
 
     }
@@ -212,6 +282,10 @@ namespace com.csutil.model.ecs {
             comp = default;
             return false;
         }
+        
+        public static bool HasComponent<V>(this IEntityData self) where V : IComponentData {
+            return self.Components.Values.Any(c => c is V);
+        }
 
         [Conditional("DEBUG")]
         private static void AssertOnlySingleCompOfType<V>(IEntityData self) where V : IComponentData {
@@ -220,6 +294,14 @@ namespace com.csutil.model.ecs {
             if (compTypeCount > 1) {
                 throw new ArgumentException($"The entity {self.Id} has {compTypeCount} components of type {typeof(V).Name} but only one is allowed");
             }
+        }
+        
+        public static bool IsNullOrInactive(this IEntityData self) {
+            return self == null || !self.IsActive;
+        }
+        
+        public static bool IsNullOrInactive(this IComponentData self) {
+            return self == null || !self.IsActive;
         }
 
     }

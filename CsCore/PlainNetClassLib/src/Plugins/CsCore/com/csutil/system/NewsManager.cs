@@ -8,11 +8,23 @@ namespace com.csutil.system {
 
     public class NewsManager {
 
+        [Obsolete("Use NewManagerViaGSheetsV2 instead")]
         public static NewsManager NewManagerViaGSheets(string apiKey, string sheetId, string sheetName, IKeyValueStore onDeviceEventsStore) {
             var newsDir = EnvironmentV2.instance.GetOrAddTempFolder("NewsManagerCache");
             var gSheetsCache = new FileBasedKeyValueStore(newsDir.GetChildDir("GSheetsData"));
             var newsLocalDataCache = new FileBasedKeyValueStore(newsDir.GetChildDir("LocalData"));
             IKeyValueStore newsStore = new GoogleSheetsKeyValueStore(gSheetsCache, apiKey, sheetId, sheetName);
+            if (onDeviceEventsStore != null) {
+                newsStore = new DualStore(newsStore, onDeviceEventsStore);
+            }
+            return new NewsManager(newsLocalDataCache.GetTypeAdapter<News.LocalData>(), newsStore.GetTypeAdapter<News>());
+        }
+        
+        public static NewsManager NewManagerViaGSheetsV2(Uri csvUri, IKeyValueStore onDeviceEventsStore) {
+            var newsDir = EnvironmentV2.instance.GetOrAddTempFolder("NewsManagerCache");
+            var gSheetsCache = new FileBasedKeyValueStore(newsDir.GetChildDir("GSheetsData"));
+            var newsLocalDataCache = new FileBasedKeyValueStore(newsDir.GetChildDir("LocalData"));
+            IKeyValueStore newsStore = new GoogleSheetsKeyValueStoreV2(gSheetsCache, csvUri);
             if (onDeviceEventsStore != null) {
                 newsStore = new DualStore(newsStore, onDeviceEventsStore);
             }

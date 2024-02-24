@@ -175,7 +175,7 @@ namespace com.csutil.tests.model.immutable {
                             isEmailConfirmed = true
                         });
                     }
-                    return Task.FromResult(true);
+                    return Task.CompletedTask;
                 }
 
             }

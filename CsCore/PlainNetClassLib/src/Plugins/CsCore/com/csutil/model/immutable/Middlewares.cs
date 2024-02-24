@@ -19,6 +19,7 @@ namespace com.csutil.model.immutable {
         }
 
         /// <summary> This middleware will automatically log all dispatched actions to the store to the AppFlow logic to track them there </summary>
+        [Obsolete("Use store.AddStoreMutationEventBroadcaster() instead")]
         public static Middleware<T> NewMutationBroadcasterMiddleware<T>(object extraArgument = null) {
             return (IDataStore<T> store) => {
                 return (Dispatcher innerDispatcher) => {
@@ -31,13 +32,21 @@ namespace com.csutil.model.immutable {
             };
         }
 
-        public static Middleware<T> NewLoggingMiddleware<T>() {
+        /// <summary> Broadcasts all actions on the EventBus that are dispatched to the store </summary>
+        public static Action AddStoreMutationEventBroadcaster<T>(this IDataStore<T> store) {
+            return store.AddStateChangeListener(x => x, delegate {
+                object action = store.LastDispatchedAction;
+                EventBus.instance.Publish(EventConsts.catMutation, "" + action, action);
+            }, triggerInstantToInit: false);
+        }
+
+        public static Middleware<T> NewLoggingMiddleware<T>(bool showStateDiff = true, int maxMsBudgetForLoggingChanges = 1000) {
             return (store) => {
                 return (Dispatcher innerDispatcher) => {
 #if !DEBUG
                     return innerDispatcher;
 #endif
-                    return NewLoggingDispatcher(store, innerDispatcher);
+                    return NewLoggingDispatcher(store, innerDispatcher, maxMsBudgetForLoggingChanges, showStateDiff);
                 };
             };
         }
@@ -56,7 +65,7 @@ namespace com.csutil.model.immutable {
             };
         }
 
-        private static Dispatcher NewLoggingDispatcher<T>(IDataStore<T> store, Dispatcher innerDispatcher, int maxMsBugetForLoggingChanges = 1000) {
+        private static Dispatcher NewLoggingDispatcher<T>(IDataStore<T> store, Dispatcher innerDispatcher, int maxMsBudgetForLoggingChanges, bool showStateDiff) {
             var showChangesJson = true;
             return (action) => {
                 if (action is IsValid v && !v.IsValid()) {
@@ -78,13 +87,15 @@ namespace com.csutil.model.immutable {
                 if (copyOfActionSupported) { AssertActionDidNotChangeDuringDispatch(actionBeforeDispatch, action); }
 
                 if (!StateCompare.WasModified(previousState, newState)) {
-                    Log.w($"The action was not handled by any of the reducers of Store<{store.GetState().GetType().Name}>:"
+                    var state = store.GetState();
+                    var modelTypeName = state == null ? $"Store({store}" : $"Store<{state.GetType().Name}>";
+                    Log.w($"The action was not handled by any of the reducers of {modelTypeName}:"
                         + "\n" + asJson("" + action.GetType().Name, action));
                 } else {
                     var t = StopwatchV2.StartNewV2("NewLoggingMiddleware->NewLoggingDispatcher");
-                    ShowChanges(action, previousState, newState);
+                    ShowChanges(action, previousState, newState, showStateDiff);
                     t.StopV2();
-                    if (t.ElapsedMilliseconds > maxMsBugetForLoggingChanges) {
+                    if (t.ElapsedMilliseconds > maxMsBudgetForLoggingChanges) {
                         showChangesJson = false;
                         Log.e("Disabling logging of json diff from store mutation, since it became to slow (store content to large): " + t);
                     }
@@ -128,13 +139,14 @@ namespace com.csutil.model.immutable {
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_FULL_LOGGING")]
-        private static void ShowChanges<T>(object action, T previousState, T newState) {
+        private static void ShowChanges<T>(object action, T previousState, T newState, bool showStateDiff) {
             try {
-                JToken diff = MergeJson.GetDiff(previousState, newState);
                 Log.d(asJson("" + action.GetType().Name, action));
-                Log.d(asJson("previousState -> newState diff", diff));
-            }
-            catch (Exception e) { Log.e(e); }
+                if (showStateDiff) {
+                    JToken diff = MergeJson.GetDiff(previousState, newState);
+                    Log.d(asJson("previousState -> newState diff", diff));
+                }
+            } catch (Exception e) { Log.e(e); }
         }
 
         private static string asJson(string varName, object result) { return varName + "=" + JsonWriter.AsPrettyString(result); }

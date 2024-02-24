@@ -9,16 +9,16 @@ namespace com.csutil {
     public static class TreeFlattenTraverse {
 
         public static IEnumerable<T> BreadthFirst<T>(T root, Func<T, IEnumerable<T>> childrenSelector) {
-            var queue = new Queue<T>();
+            var queue = new UniqueQueue<T>();
             queue.Enqueue(root);
             return BreadthFirst(queue, childrenSelector).Cached();
         }
 
         public static IEnumerable<T> BreadthFirst<T>(IEnumerable<T> source, Func<T, IEnumerable<T>> childrenSelector) {
-            return BreadthFirst(new Queue<T>(source), childrenSelector).Cached();
+            return BreadthFirst(new UniqueQueue<T>(source), childrenSelector).Cached();
         }
 
-        private static IEnumerable<T> BreadthFirst<T>(Queue<T> queue, Func<T, IEnumerable<T>> childrenSelector) {
+        private static IEnumerable<T> BreadthFirst<T>(UniqueQueue<T> queue, Func<T, IEnumerable<T>> childrenSelector) {
             // From https://stackoverflow.com/a/63967111/165106
             while (queue.Count > 0) {
                 var current = queue.Dequeue();
@@ -36,7 +36,7 @@ namespace com.csutil {
         public static IEnumerable<T> DepthFirst<T>(IEnumerable<T> source, Func<T, IEnumerable<T>> childrenSelector) {
             // From https://stackoverflow.com/a/31881243/165106
             var e = source.GetEnumerator();
-            var stack = new Stack<IEnumerator<T>>();
+            var stack = new UniqueStack<IEnumerator<T>>();
             try {
                 while (true) {
                     while (e.MoveNext()) {

@@ -1,4 +1,6 @@
 using System.IO;
+using System.Threading.Tasks;
+using com.csutil.ui;
 using UnityEngine;
 
 namespace com.csutil {
@@ -20,6 +22,25 @@ namespace com.csutil {
             Input.compass.enabled = true;
             Input.location.Start(desiredAccuracyInMeters, updateDistanceInMeters); // https://docs.unity3d.com/ScriptReference/LocationService.Start.html
             self.enabled = true;
+        }
+
+        public static async Task RequestFineLocationPermissionIfNeeded(this LocationService locationService,
+            string message, string caption = "GPS positioning needs to be enabled") {
+            {
+                if (EnvironmentV2.isUnityEditor) { return; }
+                while (!locationService.isEnabledByUser) {
+                    await Dialog.ShowInfoDialog(
+                        caption,
+                        message,
+                        "OK");
+#if PLATFORM_ANDROID
+                    if (!UnityEngine.Android.Permission.HasUserAuthorizedPermission(UnityEngine.Android.Permission.FineLocation)) {
+                        UnityEngine.Android.Permission.RequestUserPermission(UnityEngine.Android.Permission.FineLocation);
+                        await TaskV2.Delay(1000);
+                    }
+#endif
+                }
+            }
         }
 
         public static int ToAngleInDegree(this ScreenOrientation self) {

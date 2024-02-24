@@ -56,7 +56,14 @@ namespace com.csutil.ui.jsonschema {
 
         public static void LinkViewToModel(this Dictionary<string, FieldView> self, string key, string text) { self[key].LinkToModel(text); }
 
-        public static void LinkToModel(this FieldView self, string text) { self.mainLink.Get<Text>().text = text; }
+        public static void LinkToModel(this FieldView self, string text) {
+            var textUi = self.mainLink.Get<Text>();
+            if (textUi != null) {
+                textUi.text = text;
+            } else {
+                Log.e($"{self.GetType().Name} '{self.fieldName}' has no Text component to set text={text}");
+            }
+        }
 
         public static FieldView LinkViewToModel(this Dictionary<string, FieldView> self, string key, string val, Action<string> onNewVal) {
             var fv = self.Get<FieldView>(key);

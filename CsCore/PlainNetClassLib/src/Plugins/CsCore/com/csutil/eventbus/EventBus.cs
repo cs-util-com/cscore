@@ -79,8 +79,14 @@ namespace com.csutil {
                     return subscriberDelegates.Map(subscriberDelegate => {
                         try {
                             object result;
-                            if (subscriberDelegate.DynamicInvokeV2(args, out result, throwPublishErrors)) { return result; }
-                        } catch (Exception e) { if (throwPublishErrors) { throw; } else { Log.e(e); } }
+                            if (subscriberDelegate.DynamicInvokeV2(args, out result, throwPublishErrors)) {
+                                return result;
+                            }
+                        } catch (Exception e) {
+                            if (throwPublishErrors) {
+                                throw;
+                            } else { Log.e(e); }
+                        }
                         return null;
                     });
                 }

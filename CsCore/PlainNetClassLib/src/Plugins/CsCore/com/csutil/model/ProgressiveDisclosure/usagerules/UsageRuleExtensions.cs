@@ -9,7 +9,7 @@ namespace com.csutil.model.usagerules {
 
     public static class UsageRuleExtensions {
 
-        public static UsageRule SetupUsing(this UsageRule self, LocalAnalytics analytics) {
+        public static UsageRule SetupUsing(this UsageRule self, ILocalAnalytics analytics) {
             self.isTrue = async () => {
                 switch (self.ruleType) {
 
@@ -50,7 +50,7 @@ namespace com.csutil.model.usagerules {
             return tSinceLatestLaunch.TotalDays < self.days;
         }
 
-        public static async Task<bool> IsFeatureUsedInTheLastXDays(this UsageRule self, LocalAnalytics analytics) {
+        public static async Task<bool> IsFeatureUsedInTheLastXDays(this UsageRule self, ILocalAnalytics analytics) {
             var allEvents = await analytics.GetAllEventsForCategory(self.categoryId);
             if (allEvents.IsNullOrEmpty()) { return false; }
             DateTime lastEvent = allEvents.Last().GetDateTimeUtc();
@@ -58,12 +58,12 @@ namespace com.csutil.model.usagerules {
             return lastEventVsNow.TotalDays <= self.days;
         }
 
-        public static async Task<bool> IsFeatureUsedXTimes(this UsageRule self, LocalAnalytics analytics) {
+        public static async Task<bool> IsFeatureUsedXTimes(this UsageRule self, ILocalAnalytics analytics) {
             var startEvents = await analytics.GetStartEvents(self.categoryId);
             return startEvents.CountIsAbove(self.timesUsed.Value - 1);
         }
 
-        public static async Task<IEnumerable<AppFlowEvent>> GetStartEvents(this LocalAnalytics self, string categoryId) {
+        public static async Task<IEnumerable<AppFlowEvent>> GetStartEvents(this ILocalAnalytics self, string categoryId) {
             var allEvents = await self.GetAllEventsForCategory(categoryId);
             return allEvents.Filter(x => x.action == EventConsts.START);
         }
@@ -72,17 +72,17 @@ namespace com.csutil.model.usagerules {
             return self.GroupBy(x => x.GetDateTimeUtc().Date, x => x);
         }
 
-        public static async Task<bool> IsAppUsedXDays(this UsageRule self, LocalAnalytics analytics) {
+        public static async Task<bool> IsAppUsedXDays(this UsageRule self, ILocalAnalytics analytics) {
             var allEvents = await analytics.GetAll();
             return allEvents.GroupByDay().CountIsAbove(self.days.Value - 1);
         }
 
-        public static async Task<bool> IsFeatureUsedXDays(this UsageRule self, LocalAnalytics analytics) {
+        public static async Task<bool> IsFeatureUsedXDays(this UsageRule self, ILocalAnalytics analytics) {
             var allEvents = await analytics.GetAllEventsForCategory(self.categoryId);
             return allEvents.GroupByDay().CountIsAbove(self.days.Value - 1);
         }
 
-        public static async Task<bool> IsNotificationMinXDaysOld(this UsageRule self, LocalAnalytics analytics) {
+        public static async Task<bool> IsNotificationMinXDaysOld(this UsageRule self, ILocalAnalytics analytics) {
             var allEvents = await analytics.GetAllEventsForCategory(EventConsts.catUsage);
             var showEvents = allEvents.Filter(x => x.action == EventConsts.SHOW + "_" + self.categoryId);
             if (showEvents.IsNullOrEmpty()) { return false; }
@@ -91,12 +91,12 @@ namespace com.csutil.model.usagerules {
             return firstShownVsNow.TotalDays >= self.days;
         }
 
-        private static async Task<IEnumerable<AppFlowEvent>> GetAllEventsForCategory(this LocalAnalytics self, string categoryId) {
+        private static async Task<IEnumerable<AppFlowEvent>> GetAllEventsForCategory(this ILocalAnalytics self, string categoryId) {
             if (!self.categoryStores.ContainsKey(categoryId)) { return Enumerable.Empty<AppFlowEvent>(); }
             return await self.categoryStores[categoryId].GetAll();
         }
 
-        public static async Task<IEnumerable<UsageRule>> GetRulesInitialized(this KeyValueStoreTypeAdapter<UsageRule> self, LocalAnalytics analytics) {
+        public static async Task<IEnumerable<UsageRule>> GetRulesInitialized(this KeyValueStoreTypeAdapter<UsageRule> self, ILocalAnalytics analytics) {
             var rules = await self.GetAll();
             foreach (var rule in rules) {
                 if (!rule.concatRuleIds.IsNullOrEmpty()) {

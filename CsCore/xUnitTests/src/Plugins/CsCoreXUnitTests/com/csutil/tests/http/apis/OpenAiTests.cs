@@ -12,46 +12,8 @@ namespace com.csutil.integrationTests.http {
 
         public OpenAiTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
-        [Obsolete("The .Complete API is deprecated, use .ChatGpt(..) instead")]
         [Fact]
-        public async Task ExampleUsage1_TextCompletion() {
-            var openAi = new OpenAi(await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey"));
-            var prompt = "Complete this sentence with a funny short story: A cow walked ";
-            var result = await openAi.Complete(prompt);
-            var completion = result.choices.Single().text;
-            Assert.NotEmpty(completion);
-            Log.d(prompt + completion);
-        }
-
-        //[Fact]
-        public async Task ExampleUsage2_ImageGeneration() {
-            var openAi = new OpenAi(await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey"));
-            var prompt = "A cute cat with a cowboy hat in cartoon style";
-            var result = await openAi.TextToImage(new OpenAi.Image.Request() { prompt = prompt });
-            Assert.NotEmpty(result.data);
-            var generatedImageUrls = result.data.Map(x => x.url);
-            Assert.NotEmpty(generatedImageUrls);
-            Log.d(generatedImageUrls.ToStringV2("", "", " \n\n "));
-        }
-
-        //[Fact]
-        public async Task ExampleUsage2_ImageGeneration2() {
-            var openAi = new OpenAi(await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey"));
-            var prompt = "A cute cat with a cowboy hat";
-            var result = await openAi.TextToImage(new OpenAi.Image.Request() {
-                prompt = prompt,
-                model = "dall-e-3",
-                quality = "hd",
-                style = "natural"
-            });
-            Assert.NotEmpty(result.data);
-            var generatedImageUrls = result.data.Map(x => x.url);
-            Assert.NotEmpty(generatedImageUrls);
-            Log.d(generatedImageUrls.ToStringV2("", "", " \n\n "));
-        }
-
-        [Fact]
-        public async Task ExampleUsage3_ChatGpt() {
+        public async Task ExampleUsage1_ChatGpt() {
             var openAi = new OpenAi(await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey"));
             var messages = new List<ChatGpt.Line>() {
                 new ChatGpt.Line(ChatGpt.Role.system, content: "You are a standup comedian. You are on stage and about to tell a joke."),
@@ -69,7 +31,7 @@ namespace com.csutil.integrationTests.http {
         }
 
         [Fact]
-        public async Task ExampleUsage4_ChatGpt4() {
+        public async Task ExampleUsage2_ChatGpt4() {
             var openAi = new OpenAi(await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey"));
             var messages = new List<ChatGpt.Line>() {
                 new ChatGpt.Line(ChatGpt.Role.system, content: "You are a standup comedian. You are on stage and about to tell a joke."),
@@ -90,7 +52,7 @@ namespace com.csutil.integrationTests.http {
 
         /// <summary> An example of how to use the ChatGpt API to get a response that is automatically parsed as a json object </summary>
         [Fact]
-        public async Task ExampleUsage4_ChatGptJsonResponses() {
+        public async Task ExampleUsage3_ChatGptJsonResponses() {
 
             var openAi = new OpenAi(await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey"));
             var messages = new List<ChatGpt.Line>();
@@ -145,6 +107,33 @@ namespace com.csutil.integrationTests.http {
             Log.d("messages=" + JsonWriter.AsPrettyString(messages));
         }
 
+        //[Fact]
+        public async Task ExampleUsage_ImageGeneration() {
+            var openAi = new OpenAi(await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey"));
+            var prompt = "A cute cat with a cowboy hat in cartoon style";
+            var result = await openAi.TextToImage(new OpenAi.Image.Request() { prompt = prompt });
+            Assert.NotEmpty(result.data);
+            var generatedImageUrls = result.data.Map(x => x.url);
+            Assert.NotEmpty(generatedImageUrls);
+            Log.d(generatedImageUrls.ToStringV2("", "", " \n\n "));
+        }
+
+        //[Fact]
+        public async Task ExampleUsage_ImageGenerationHighQuality() {
+            var openAi = new OpenAi(await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey"));
+            var prompt = "A cute cat with a cowboy hat";
+            var result = await openAi.TextToImage(new OpenAi.Image.Request() {
+                prompt = prompt,
+                model = "dall-e-3",
+                quality = "hd",
+                style = "natural"
+            });
+            Assert.NotEmpty(result.data);
+            var generatedImageUrls = result.data.Map(x => x.url);
+            Assert.NotEmpty(generatedImageUrls);
+            Log.d(generatedImageUrls.ToStringV2("", "", " \n\n "));
+        }
+        
         private static async Task<EmotionalChatResponse> TalkToEmotionalAi(OpenAi openAi, List<ChatGpt.Line> messages, string userInput) {
             using var timing = Log.MethodEnteredWith(userInput);
             EmotionalChatResponse emotionalResponseFormat = new EmotionalChatResponse() {

@@ -55,17 +55,23 @@ namespace com.csutil {
             }
         }
 
+        /// <summary> Includes the data stream of the passed in file in the form content of the request </summary>
         public static RestRequest AddFileViaForm(this RestRequest self, FileEntry fileToUpload, string key = "file") {
-            var fileStream = fileToUpload.OpenForRead();
-            var streamContent = new StreamContent(fileStream);
+            return AddStreamViaForm(self, fileToUpload.OpenForRead(), fileToUpload.Name, key);
+        }
+
+        /// <summary> Similar to <see cref="AddFileViaForm"/> this includes a data stream in the form content of the request </summary>
+        /// <param name="fileName"> The name that will be used in the submitted form, will likely be used by the server as the file name </param>
+        public static RestRequest AddStreamViaForm(this RestRequest self, Stream streamToUpload, string fileName, string key = "file") {
+            var streamContent = new StreamContent(streamToUpload);
             streamContent.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data") {
                 Name = key,
-                FileName = fileToUpload.Name
+                FileName = fileName
             };
             self.WithFormContent(new Dictionary<string, object>() { { key, streamContent } });
             self.RequestStartedTask.ContinueWith(delegate {
                 if (self.onProgress != null) {
-                    fileStream.MonitorPositionForProgress(progress => {
+                    streamToUpload.MonitorPositionForProgress(progress => {
                         self.onProgress(progress);
                     }, self.CancellationTokenSource).LogOnError();
                 }

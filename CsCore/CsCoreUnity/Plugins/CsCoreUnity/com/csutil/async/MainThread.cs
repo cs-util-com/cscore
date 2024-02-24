@@ -9,39 +9,35 @@ namespace com.csutil {
 
     public class MainThread : MonoBehaviour {
 
+        private static MainThread _instance;
+
         public static MainThread instance {
             get {
-                AssertV2.IsTrue(ApplicationV2.isPlaying, "In EDIT mode!");
-                return IoC.inject.GetOrAddComponentSingleton<MainThread>(new object());
+                if (_instance.IsNullOrDestroyed()) {
+                    if (Application.isPlaying) {
+                        _instance = new GameObject("MainThread").AddComponent<MainThread>();
+                        _instance.mainThreadRef = Thread.CurrentThread;
+                        _instance.stopWatch = Stopwatch.StartNew();
+                        DontDestroyOnLoad(_instance.gameObject);
+                    } else {
+                        throw Log.e("MainThread not initialized during playmode via MainThread.instance");
+                    }
+                }
+                return _instance;
             }
         }
 
         /// <summary> Will be false if the app is still in initialization phase and the
         /// main thread is not yet ready to use </summary>
-        public static bool IsReadyToUse => mainThreadRef != null;
-        
-        public static bool isMainThread { get { return mainThreadRef.Equals(Thread.CurrentThread); } }
+        public static bool IsReadyToUse => _instance != null;
 
-        private static Thread mainThreadRef;
+        public static bool isMainThread => IsReadyToUse && instance.mainThreadRef.Equals(Thread.CurrentThread);
+
+        private Thread mainThreadRef;
 
         public long maxAllowedTaskDurationInMsPerFrame = 33;
         private Stopwatch stopWatch;
-        private bool WasInitializedWhilePlaying { get { return stopWatch != null; } }
-        private ConcurrentQueue<Action> actionsForMainThread = new ConcurrentQueue<Action>();
-
-        private void Awake() {
-            if (mainThreadRef != null) { throw Log.e("There is already a MainThread"); }
-            mainThreadRef = Thread.CurrentThread;
-        }
-
-        private void OnEnable() {
-            if (mainThreadRef != Thread.CurrentThread) { mainThreadRef = Thread.CurrentThread; }
-            stopWatch = Stopwatch.StartNew();
-        }
-
-        private void OnDestroy() {
-            mainThreadRef = null;
-        }
+        private readonly ConcurrentQueue<Action> actionsForMainThread = new ConcurrentQueue<Action>();
 
         private void Update() {
             if (!actionsForMainThread.IsEmpty) {
@@ -79,15 +75,7 @@ namespace com.csutil {
         }
 
         public void ExecuteOnMainThread(Action a) {
-            if (ApplicationV2.isPlaying) { AssertV2.IsNotNull(mainThreadRef, "mainThreadRef"); }
-            if (WasInitializedWhilePlaying) {
-                actionsForMainThread.Enqueue(a);
-            } else if (!ApplicationV2.isPlaying) {
-                Log.d("ExecuteOnMainThread: Application not playing, action will be instantly executed now");
-                a();
-            } else {
-                throw Log.e("MainThread not initialized via MainThread.instance");
-            }
+            actionsForMainThread.Enqueue(a);
         }
 
         [Obsolete("It's recommended to use ExecuteOnMainThreadAsync instead")]
