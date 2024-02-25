@@ -86,5 +86,99 @@ namespace com.csutil.algorithms.images
             }
             return result;
         }
+
+        private static Mat<T> Add(Mat<T> a, Mat<T> b)
+        {
+            if (a.Width != b.Width || a.Height != b.Height || a.Channels != b.Channels)
+                throw new ArgumentException("Matrices dimensions or channels do not match.");
+
+            Mat<T> result = new Mat<T>(a.Height, a.Width, a.Channels);
+
+            Parallel.For(0, a.data.Length, i =>
+            {
+                if (typeof(T) == typeof(int))
+                    result.data[i] = (T)(object)(((int)(object)a.data[i]) + ((int)(object)b.data[i]));
+                else if (typeof(T) == typeof(double))
+                    result.data[i] = (T)(object)(((double)(object)a.data[i]) + ((double)(object)b.data[i]));
+                else if (typeof(T) == typeof(byte))
+                    result.data[i] = (T)(object)(byte)(((byte)(object)a.data[i]) + ((byte)(object)b.data[i]));
+                else if (typeof(T) == typeof(float))
+                    result.data[i] = (T)(object)(((float)(object)a.data[i]) + ((float)(object)b.data[i]));
+            });
+
+            return result;
+        }
+
+        private static Mat<T> Multiply(Mat<T> a, Mat<T> b)
+        {
+            if (a.Width != b.Height)
+                throw new ArgumentException("Matrix A's width must match Matrix B's height.");
+
+            Mat<T> result = new Mat<T>(a.Height, b.Width, 1);
+
+            Parallel.For(0, result.Height, i =>
+            {
+                for (int j = 0; j < result.Width; j++)
+                {
+                    if (typeof(T) == typeof(int))
+                    {
+                        int sum = 0;
+                        for (int k = 0; k < a.Width; k++)
+                        {
+                            result.data[i * result.Width + j] = (T)(object)(((int)(object)a.data[i * a.Width + k] * (int)(object)b.data[k * b.Width + j]));
+                        }
+                    }
+                    if (typeof(T) == typeof(float))
+                    {
+                        float sum = 0;
+                        for (int k = 0; k < a.Width; k++)
+                        {
+                            result.data[i * result.Width + j] = (T)(object)(((float)(object)a.data[i * a.Width + k] * (float)(object)b.data[k * b.Width + j]));
+                        }
+                    }
+                    if (typeof(T) == typeof(double))
+                    {
+                        double sum = 0;
+                        for (int k = 0; k < a.Width; k++)
+                        {
+                            result.data[i * result.Width + j] = (T)(object)(((double)(object)a.data[i * a.Width + k] * (double)(object)b.data[k * b.Width + j]));
+                        }
+                    }
+                    if (typeof(T) == typeof(byte))
+                    {
+                        byte sum = 0;
+                        for (int k = 0; k < a.Width; k++)
+                        {
+                            result.data[i * result.Width + j] = (T)(object)(((byte)(object)a.data[i * a.Width + k] * (byte)(object)b.data[k * b.Width + j]));
+                        }
+                    }
+                }
+            });
+
+            return result;
+        }
+        public string PrintMatrix()
+        {
+            var result = "";
+            for (int i = 0; i < Height; i++)
+            {
+                for (int j = 0; j < Width; j++)
+                {
+                    // Access the element at [i, j] and print it, followed by a space
+                    result += (data[i * Width + j] + " ");
+                }
+                // After printing all columns in the current row, print a newline character
+                result += "\n";
+            }
+            return result;
+        }
+
+        public static Mat<T> operator +(Mat<T> a, Mat<T> b)
+        {
+            return Add(a, b);
+        }
+        public static Mat<T> operator *(Mat<T> a, Mat<T> b)
+        { return Multiply(a, b); }
+
     }
 }
