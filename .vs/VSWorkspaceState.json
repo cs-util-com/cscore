@@ -1,16 +1,7 @@
 {
   "ExpandedNodes": [
-    "",
-    "\\CsCore",
-    "\\CsCore\\xUnitTests",
-    "\\CsCore\\xUnitTests\\src",
-    "\\CsCore\\xUnitTests\\src\\Plugins",
-    "\\CsCore\\xUnitTests\\src\\Plugins\\CsCoreXUnitTests",
-    "\\CsCore\\xUnitTests\\src\\Plugins\\CsCoreXUnitTests\\com",
-    "\\CsCore\\xUnitTests\\src\\Plugins\\CsCoreXUnitTests\\com\\csutil",
-    "\\CsCore\\xUnitTests\\src\\Plugins\\CsCoreXUnitTests\\com\\csutil\\tests",
-    "\\CsCore\\xUnitTests\\src\\Plugins\\CsCoreXUnitTests\\com\\csutil\\tests\\AlgorithmTests"
+    ""
   ],
-  "SelectedNode": "\\CsCore\\CsCore.sln",
+  "SelectedNode": "\\CsCore.sln",
   "PreviewInSolutionExplorer": false
 }
