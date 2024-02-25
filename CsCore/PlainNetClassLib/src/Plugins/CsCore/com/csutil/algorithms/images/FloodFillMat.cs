@@ -7,9 +7,9 @@ namespace com.csutil.algorithms.images
 {
     public class FloodFillMat
     {
-        public static Mat FloodFillAlgorithm(Mat image, int floodValue)
+        public static Mat<byte> FloodFillAlgorithm(Mat<byte> image, int floodValue)
         {
-            var result = new Mat(image.Width, image.Height, image.Channels);
+            var result = new Mat<byte>(image.Width, image.Height, image.Channels);
             var width = result.Width;
             var height = result.Height; 
             var visited = new bool[width, height];
@@ -33,7 +33,7 @@ namespace com.csutil.algorithms.images
                                 continue;
                             }
 
-                            result.SetPixel(cx,cy,new double[] { 255, 255, 255, 255 });
+                            result.SetPixel(cx,cy,new byte[] { 255, 255, 255, 255 });
                             visited[cx, cy] = true;
 
                             // Add neighboring pixels to the stack
@@ -48,7 +48,7 @@ namespace com.csutil.algorithms.images
             return result;
         }
 
-        private static bool SeemsValue(Mat image, int x, int y, int floodValue)
+        private static bool SeemsValue(Mat<byte> image, int x, int y, int floodValue)
         {
             var color = image.GetPixel(x, y);
             return color[0] > floodValue && color[1] > floodValue && color[2] > floodValue;

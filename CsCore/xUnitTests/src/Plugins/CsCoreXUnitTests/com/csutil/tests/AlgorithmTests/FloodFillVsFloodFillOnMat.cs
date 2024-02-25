@@ -50,13 +50,12 @@ namespace com.csutil.tests.AlgorithmTests
             await DownloadFileIfNeeded(imageFile, "http://atilimcetin.com/global-matting/GT04-image.png");
 
             var image = await ImageLoader.LoadImageInBackground(imageFile);
-            var mat = Mat.ConvertByteToMat(image.Data, image.Width, image.Height, (int)image.ColorComponents);
+            var mat = new Mat<byte>(image.Width, image.Height, (int)image.ColorComponents, image.Data);
             var time = Stopwatch.StartNew();
-            var imageResult1 = FloodFillMat.FloodFillAlgorithm(mat, 50);
+            var imageResult = FloodFillMat.FloodFillAlgorithm(mat, 50);
             time.Stop();
             var stoptime = time.ElapsedMilliseconds;
-            var imageResult = Mat.ConvertBackToByte(imageResult1);
-            var flippedResult = ImageUtility.FlipImageVertically(imageResult, image.Width, image.Height, (int)image.ColorComponents);
+            var flippedResult = ImageUtility.FlipImageVertically(imageResult.data, image.Width, image.Height, (int)image.ColorComponents);
             var test = folder.GetChild("FloodMat" + stoptime + ".png");
             {
                 using var stream = test.OpenOrCreateForWrite();
