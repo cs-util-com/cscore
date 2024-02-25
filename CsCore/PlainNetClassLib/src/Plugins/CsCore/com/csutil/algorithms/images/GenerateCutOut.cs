@@ -48,7 +48,7 @@ namespace com.csutil.algorithms.images {
             
             for (var x = 0; x < width; ++x) {
                 for (var y = 0; y < height; ++y) {
-                    var value = (int)GetColorAt(alpha, x, y, bytesPerPixel, width)[3];
+                    var value = (int)GetColorAt(alpha, x, y, bytesPerPixel, width)[0];
                     var idx = (y * width + x) * bytesPerPixel;
                     cutout[idx + 3] = value >= cutoffValue ? (byte)value : (byte)0;
                 }
