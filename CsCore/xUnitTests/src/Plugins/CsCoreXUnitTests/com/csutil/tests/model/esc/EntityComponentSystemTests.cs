@@ -168,9 +168,9 @@ namespace com.csutil.tests.model.esc {
         }
 
         [Fact]
-        public async Task TestEcsPoseMath() {
+        public async Task TestEcsEntityNesting() {
 
-            /* A test that composes a complex nested scene graph and checks if the
+            /* A test that composes a complex nested scene graph and checks if attributes like the
              * global pose of the most inner entity is back at the origin (validated that
              * same result is achieved with Unity) */
 
@@ -200,6 +200,19 @@ namespace com.csutil.tests.model.esc {
             Assert.Equal(Quaternion.Identity, pose.rotation);
             Assert_AlmostEqual(Vector3.One, pose.scale);
             Assert.Equal(Vector3.Zero, pose.position);
+
+            Assert.True(e5.IsActiveSelf());
+            Assert.True(e5.IsActiveInHierarchy());
+            e2.SetActiveSelf(false);
+            Assert.False(e2.IsActiveSelf());
+            Assert.False(e5.IsActiveInHierarchy());
+            Assert.True(e5.IsActiveSelf());
+            e5.SetActiveSelf(false);
+            Assert.False(e5.IsActiveSelf());
+            e2.SetActiveSelf(true);
+            Assert.False(e5.IsActiveInHierarchy());
+            e5.SetActiveSelf(true);
+            Assert.True(e5.IsActiveInHierarchy());
 
         }
 
@@ -484,6 +497,15 @@ namespace com.csutil.tests.model.esc {
         private static Entity RemoveChildIdFromParent(IEntity<Entity> parent, string childIdToRemove) {
             parent.Data.MutablehildrenIds.Remove(childIdToRemove);
             return parent.Data;
+        }
+
+        public static void SetActiveSelf(this IEntity<Entity> self, bool active) {
+            self.SetActiveSelf(active, SetActiveInternal);
+        }
+
+        private static Entity SetActiveInternal(IEntity<Entity> entity, bool active) {
+            entity.Data.IsActive = active;
+            return entity.Data;
         }
 
     }

@@ -80,7 +80,7 @@ namespace com.csutil.model.ecs {
                 targetView.AddChild(go);
             }
             iEntity.LocalPose().ApplyTo(go.transform);
-            go.SetActive(iEntity.IsActive);
+            go.SetActive(iEntity.IsActiveSelf());
             foreach (var x in iEntity.Components) {
                 OnComponentAdded(iEntity, x, targetParentGo: go);
             }
@@ -95,7 +95,7 @@ namespace com.csutil.model.ecs {
 
         private void UpdateGoFor(IEntity<T> iEntity, T oldState, T newState) {
             var go = _entityViews[iEntity.Id];
-            go.SetActiveV2(iEntity.IsActive);
+            go.SetActiveV2(iEntity.IsActiveSelf());
             if (oldState.Name != newState.Name) {
                 go.name = iEntity.Name;
             }
@@ -109,8 +109,8 @@ namespace com.csutil.model.ecs {
             if (oldState.LocalPose != newState.LocalPose) {
                 OnPoseUpdate(iEntity, go, iEntity.LocalPose());
             }
-            var newIsActiveState = newState.IsActive;
-            if (oldState.IsActive != newIsActiveState) {
+            var newIsActiveState = newState.IsActiveSelf();
+            if (oldState.IsActiveSelf() != newIsActiveState) {
                 OnToggleActiveState(go, newIsActiveState);
             }
             var oldComps = oldState.Components;

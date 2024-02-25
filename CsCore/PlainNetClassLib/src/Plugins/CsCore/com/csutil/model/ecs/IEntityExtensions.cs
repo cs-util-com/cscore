@@ -82,8 +82,8 @@ namespace com.csutil.model.ecs {
                 return child;
             }
         }
-        
-        public static void SetActive<T>(this IEntity<T> self, bool newIsActive, Func<IEntity<T>, bool, T> setActive) where T : IEntityData {
+
+        public static void SetActiveSelf<T>(this IEntity<T> self, bool newIsActive, Func<IEntity<T>, bool, T> setActive) where T : IEntityData {
             if (self.IsActive == newIsActive) { return; }
             self.Ecs.Update(setActive(self, newIsActive));
         }
@@ -216,6 +216,18 @@ namespace com.csutil.model.ecs {
             return self.GetComponentsInChildren<T, V>().FirstOrDefault();
         }
 
+        public static bool IsActiveSelf<T>(this IEntity<T> self) where T : IEntityData {
+            return self.IsActive;
+        }
+
+        public static bool IsActiveSelf(this IEntityData self) {
+            return self.IsActive;
+        }
+
+        public static bool IsActiveInHierarchy<T>(this IEntity<T> self) where T : IEntityData {
+            return self.IsActive && self.CollectAllParents().Map(id => self.Ecs.GetEntity(id)).All(x => x.IsActive);
+        }
+
     }
 
     public static class EcsExtensions {
@@ -295,13 +307,13 @@ namespace com.csutil.model.ecs {
                 throw new ArgumentException($"The entity {self.Id} has {compTypeCount} components of type {typeof(V).Name} but only one is allowed");
             }
         }
-        
-        public static bool IsNullOrInactive(this IEntityData self) {
-            return self == null || !self.IsActive;
-        }
-        
+
         public static bool IsNullOrInactive(this IComponentData self) {
             return self == null || !self.IsActive;
+        }
+
+        public static bool IsActiveSelf(this IComponentData self) {
+            return self.IsActive;
         }
 
     }
