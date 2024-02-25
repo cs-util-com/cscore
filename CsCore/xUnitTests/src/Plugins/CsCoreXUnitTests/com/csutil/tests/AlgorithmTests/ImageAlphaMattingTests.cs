@@ -48,7 +48,7 @@ namespace com.csutil.tests.AlgorithmTests {
             for (int x = 0; x < trimap.Width; ++x) {
                 for (int y = 0; y < trimap.Height; ++y) {
                     if (trimap.GetPixel(x, y).R == 0) {
-                        alpha.SetPixel(x, y, new Pixel(0, 0, 0, 0));
+                        alpha.SetPixel(x, y, new Pixel(0, 0, 0, 255));
                     } else if (trimap.GetPixel(x, y).R == 255) {
                         alpha.SetPixel(x, y, new Pixel(255, 255, 255, 255));
                     }

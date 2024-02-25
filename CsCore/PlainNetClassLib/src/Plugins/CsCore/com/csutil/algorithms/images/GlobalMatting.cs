@@ -546,14 +546,14 @@ namespace com.csutil.algorithms.images {
                     int idx = (y * width + x) * bytesPerPixel;
                     switch (trimap[idx]) {
                         case 0:
-                            SetColorAt(alpha, x, y, new byte[]{0,0,0,0});
+                            SetColorAt(alpha, x, y, new byte[]{0,0,0,255});
                             conf[idx] = 255;
-                            SetColorAt(foreground, x, y, new byte[] { 0, 0, 0 , 0});
+                            SetColorAt(foreground, x, y, new byte[] { 0, 0, 0 , 255});
                             break;
                         case 128:
                             Sample s = samples[y][x];
                             var alphaValue = (byte)(255 * s.alpha);
-                            SetColorAt(alpha, x, y, new byte[]{alphaValue, alphaValue, alphaValue, alphaValue});
+                            SetColorAt(alpha, x, y, new byte[]{alphaValue, alphaValue, alphaValue, 255});
                             conf[idx] = (byte)(255 * Math.Exp(-s.cost / 6));
                             Point p = foregroundBoundary[s.fi];
                             byte[] color = GetColorAt(image, p.X, p.Y);
@@ -625,7 +625,7 @@ namespace com.csutil.algorithms.images {
                         var col = GetColorAt(guidedIm, x, y);
                         var temp = new double[] { col[0], col[1], col[2]};
                         var max = (byte)temp.Max();
-                        SetColorAt(guidedIm, x, y, new []{max, max, max, max});
+                        SetColorAt(guidedIm, x, y, new []{max, max, max, (byte)255});
                     }
                 }
                 return guidedIm;

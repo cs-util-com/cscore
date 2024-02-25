@@ -17,7 +17,7 @@ namespace com.csutil.tests.AlgorithmTests {
             var width = dallEImage.Width;
             var height = dallEImage.Height;
             
-            var cutout = GenerateCutOut.Generate(dallEImage, 240, 10, 10, 1e-5, 100);
+            var cutout = GenerateCutOut.Generate(dallEImage, 240, 5, 10, 1e-5, 140);
             var cutoutPng = folder.GetChild("Cutout.png");
             {
                 await using var stream = cutoutPng.OpenOrCreateForReadWrite();
