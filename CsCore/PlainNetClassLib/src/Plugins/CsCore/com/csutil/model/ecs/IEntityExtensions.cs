@@ -72,6 +72,7 @@ namespace com.csutil.model.ecs {
             Func<IEntity<T>, string, T> removeChildIdFromOldParent,
             Func<IEntity<T>, string, T> mutateChildrenListInNewParent) where T : IEntityData {
             {
+                newParent.ThrowErrorIfNull("newParent");
                 if (child.ParentId == newParent.Id) { return child; }
                 // Remove the child from the old parent:
                 if (child.ParentId != null) {

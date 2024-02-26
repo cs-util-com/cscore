@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
+using com.csutil.model.immutable;
 using Newtonsoft.Json;
 
 namespace com.csutil.model.ecs {
@@ -133,11 +132,11 @@ namespace com.csutil.model.ecs {
             var oldEntryData = entity.Data;
 
             // e.g. if the entries are mutable this will mostly be true:
-            var oldAndNewSameEntry = ReferenceEquals(oldEntryData, updatedEntityData);
-            if (IsModelImmutable && oldAndNewSameEntry) {
+            var wasModified = StateCompare.WasModified(oldEntryData, updatedEntityData);
+            if (IsModelImmutable && !wasModified) {
                 return; // only for immutable data it is now clear that no update is required
             }
-            if (!oldAndNewSameEntry) {
+            if (wasModified) {
                 // Compute json diff to know if the entry really changed and if not skip informing all variants about the change:
                 // This can happen eg if the variant overwrites the field that was just changed in the template
                 if (!TemplatesIo.HasChanges(oldEntryData, updatedEntityData)) {
