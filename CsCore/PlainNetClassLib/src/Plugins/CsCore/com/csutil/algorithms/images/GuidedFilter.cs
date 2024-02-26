@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.XPath;
+using com.csutil.http.apis;
 using com.csutil.io;
 
 namespace com.csutil.algorithms.images {
@@ -32,41 +33,50 @@ namespace com.csutil.algorithms.images {
             this.r = r;
             this.eps = eps;
         }
-        public GuidedFilter init(int channels) {
+        
+        // Assumes images are store in RGB order 
+        public GuidedFilter Init(int channels) {
             if(channels == 1) {
                 return new GuidedFilterMono(image, width, height, colorComponents, 2 * r + 1, eps);
             }
-            if(channels == 4) {
+            if(channels == 4 || channels == 3) {
                 return new GuidedFilterColor(image, width, height, colorComponents, 2 * r + 1, eps);
             }
             throw new Exception("not correct channel image");
         }
         public abstract class GuidedFilterImpl {
+            /// <summary>
+            /// Filters the image given to the GuidedFilter instance gF with the image given in p.
+            /// Color components here has to be the number of channels image p has not the image of the GuidedFilter instance!
+            /// </summary>
+            /// <param name="p">Image with which the filter is guided</param>
+            /// <param name="colorComponents">Color channel amount of image p, currently work for single or RGB and RGBA</param>
+            /// <param name="gF">GuidedFilter instance with all needed information of the </param>
+            /// <returns>The result of guiding the instanced image with image p</returns>
             public static byte[] Filter(in byte[] p, int colorComponents, GuidedFilter gF) {
                 var channel = FindFirstByte(p);
                 var result = new byte[p.Length];
-                if (gF is GuidedFilterMono mono) {
-                    result = mono.FilterSingleChannel(p, channel);
-                    // TODO Fix that single channel image gets put aback together to original length with original alpha values
-                    // var zeros = new byte[result.Length];
-                    // var alpha = new byte[result.Length];
-                    // for (int i = 0; i < alpha.Length; i++) {
-                    //     alpha[i] = 255;
-                    // }
-                    // switch (channel) {
-                    //     case 0:
-                    //         result = CombineRGBA(result, zeros, zeros, alpha);
-                    //         break;
-                    // }
-                    
+                if (colorComponents == 1) {
+                    if (gF is GuidedFilterMono mono)
+                        result = mono.FilterSingleChannel(p, channel);
+                    else {
+                        
+                        result = ConvertToByte(((GuidedFilterColor)gF).FilterSingleChannel(p));
+                    }
+                        
                 }
                 else {
                     var pc = SplitChannels(p, colorComponents, gF);
                     var guidedChannels = new List<double[]>();
-                    for(int i = 0; i < pc.Count -1; ++i) {
+                    //only do this for RGB, but not for alpha channel
+                    for(int i = 0; i < 3; ++i) {
                         guidedChannels.Add(((GuidedFilterColor)gF).FilterSingleChannel(pc[i]));
                     }
-                    result = CombineRGBA(guidedChannels[0], guidedChannels[1], guidedChannels[2],ConvertToDouble(pc[3]), gF.width * gF.height); //Only for 4 Channel Image!!!!
+                    var orgImg = SplitChannels(gF.image, colorComponents, gF);
+                    if (colorComponents == 3)
+                        result = CombineRGB(guidedChannels[0], guidedChannels[1], guidedChannels[2], gF.width * gF.height);
+                    else
+                        result = CombineRGBA(guidedChannels[0], guidedChannels[1], guidedChannels[2],ConvertToDouble(orgImg[3]), gF.width * gF.height); //Only for 4 Channel Image!!!!
                 }
                 return result; 
             }
@@ -281,14 +291,29 @@ namespace com.csutil.algorithms.images {
             }
             return result;
         }
+        
+        private static byte[] CombineRGB(double[] red, double[] green, double[] blue, int length) {
+            var result = new byte[length * 3];
+            for (int i = 0; i < length * 3; i++) {
+                switch (i % 3) {
+                    case 0:
+                        result[i] = (byte)Math.Min(Math.Max(red[i /3], 0), 255);
+                        break;
+                    case 1:
+                        result[i] = (byte)Math.Min(Math.Max(green[i /3], 0), 255);
+                        break;
+                    case 2:
+                        result[i] = (byte)Math.Min(Math.Max(blue[i /3], 0), 255);
+                        break;
+                }
+            }
+            return result;
+        }
+        
         public  byte[] CreateSingleChannel(byte[] image, int channel) {
             var newIm = new byte[image.Length / colorComponents];
             var count = 0;
             for (var i = 0; i < image.Length / colorComponents; i++) {
-                // if (i % colorComponents == channel) {
-                //     newIm[count] = image[i];
-                //     count++;
-                // }
                 newIm[i] = image[i * 4 + channel];
             }
             return newIm;

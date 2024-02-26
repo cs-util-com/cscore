@@ -616,7 +616,7 @@ namespace com.csutil.algorithms.images {
         public byte[] RunGuidedFilter(byte[] alpha, int r, double eps) {
             using (var t = Log.MethodEntered()) {
                 var imageGuidedFilter = new GuidedFilter(image, width, height, bytesPerPixel, r, eps);
-                var guidedFilterInstance = imageGuidedFilter.init(bytesPerPixel);
+                var guidedFilterInstance = imageGuidedFilter.Init(bytesPerPixel);
                 var guidedIm = GuidedFilter.RunGuidedFilter(alpha, guidedFilterInstance);
                 // This loop sets the alpha value to the maximum color channel value, while for a pixel all channel values should be the same
                 // This is needed as the guided filter does not operate on the alpha channel

@@ -30,29 +30,57 @@ namespace com.csutil.tests.AlgorithmTests {
             await DownloadFileIfNeeded(imageFile, "http://atilimcetin.com/global-matting/GT04-image.png");
             var image = await ImageLoader.LoadImageInBackground(imageFile);
             
-            var guidedFilter = new GuidedFilter(image.Data, image.Width, image.Height, (int)image.ColorComponents, radius, eps);
+            var guidedFilter = new GuidedFilter(image.Data, image.Width, image.Height, 4, radius, eps);
+            
             for (var i = 0; i < (int)image.ColorComponents - 1; i++) {
                 var imageSingleChannel = guidedFilter.CreateSingleChannel(image.Data, i);
-                var guidedCurrent = new GuidedFilter(imageSingleChannel, image.Width, image.Height, (int)image.ColorComponents, radius, eps);
-                var guidedMono = guidedCurrent.init(1);
-                var singleGuided = GuidedFilter.GuidedFilterImpl.Filter(imageSingleChannel, (int)image.ColorComponents, guidedMono);
-                var currentFile = folder.GetChild("SingleChanel" + i + ".png");
+                var guidedCurrent = new GuidedFilter(imageSingleChannel, image.Width, image.Height, 1, radius, eps);
+                var guidedMono = guidedCurrent.Init(1);
+                var singleGuided = GuidedFilter.GuidedFilterImpl.Filter(imageSingleChannel, 1, guidedMono);
+
+                var singleImage = Combine(imageSingleChannel, i);
+                var currentFile = folder.GetChild("SingleChannel" + i + ".png");
                 {
                     await using var stream = currentFile.OpenOrCreateForReadWrite();
                     var writer = new ImageWriter();
-                    var flippedRes = ImageUtility.FlipImageVertically(imageSingleChannel, image.Width, image.Height, (int)image.ColorComponents);
-                    writer.WritePng(flippedRes, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
+                    var flippedRes = ImageUtility.FlipImageVertically(singleImage, image.Width, image.Height, 3);
+                    writer.WritePng(flippedRes, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlue, stream);
                 }
+                var singleFiltered = Combine(singleGuided, i);
                 currentFile = folder.GetChild("SingleFiltered" + i + ".png");
                 {
                     await using var stream = currentFile.OpenOrCreateForReadWrite();
                     var writer = new ImageWriter();
-                    var flippedRes = ImageUtility.FlipImageVertically(singleGuided, image.Width, image.Height, (int)image.ColorComponents);
-                    writer.WritePng(flippedRes, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
+                    var flippedRes = ImageUtility.FlipImageVertically(singleFiltered, image.Width, image.Height, 3);
+                    writer.WritePng(flippedRes, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlue, stream);
                 }
             }
+            
+            
         }
-        
+        private static byte[] Combine(byte[] singleChannel, int channel) {
+            var result = new byte[singleChannel.Length * 3];
+            var zeros = new byte[singleChannel.Length ];
+            if (channel == 0)
+                result = CombineRGB(singleChannel, zeros, zeros, singleChannel.Length);
+            else if(channel == 1)
+                result = CombineRGB(zeros, singleChannel, zeros, singleChannel.Length);
+            else
+                result = CombineRGB(zeros, zeros, singleChannel, singleChannel.Length);
+            return result;
+        }
+        private static byte[] CombineRGB(byte[] red, byte[] green, byte[] blue, int length) {
+            var result = new byte[length * 3];
+            for (int i = 0; i < length * 3; i++) {
+                result[i] = (i % 3) switch {
+                    0 => red[i / 3],
+                    1 => green[i / 3],
+                    2 => blue[i / 3],
+                    _ => result[i]
+                };
+            }
+            return result;
+        }
         
         
         [Fact]
@@ -65,7 +93,7 @@ namespace com.csutil.tests.AlgorithmTests {
             var image = await ImageLoader.LoadImageInBackground(imageFile);
 
             var guidedFilter = new GuidedFilter(image.Data, image.Width, image.Height, (int)image.ColorComponents, radius, eps);
-            var guidedFilterFinal = guidedFilter.init(4);
+            var guidedFilterFinal = guidedFilter.Init(4);
             var colorFiltered = GuidedFilter.GuidedFilterImpl.Filter(image.Data, 4, guidedFilterFinal);
             var flippedCf = ImageUtility.FlipImageVertically(colorFiltered, image.Width, image.Height, (int)image.ColorComponents);
             var colorFilteredFile = folder.GetChild("ColorFiltered.png");
