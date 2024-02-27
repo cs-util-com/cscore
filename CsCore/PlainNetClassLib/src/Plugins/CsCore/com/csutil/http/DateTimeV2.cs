@@ -68,7 +68,7 @@ namespace com.csutil {
         /// <summary> Can be overwritten, by default any remote time that is max 5sec different to local time is accepted </summary>
         public Func<TimeSpan, bool> IsAcceptableDistanceToLocalTime = (diff) => diff.TotalMillisecondsAbs() < 5000;
 
-        public DateTimeV2() {
+        protected DateTimeV2() {
             EventBus.instance.Subscribe(this, SERVER_UTC_DATE, (Uri uri, DateTime utcDate) => onUtcUpdate(uri, utcDate));
         }
 
