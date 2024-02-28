@@ -1,10 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using com.csutil.http.apis;
 using com.csutil.model.jsonschema;
-using Newtonsoft.Json.Linq;
 using Xunit;
 
 namespace com.csutil.integrationTests.http {
@@ -151,6 +150,47 @@ namespace com.csutil.integrationTests.http {
             return emotionalChatResponse;
         }
 
+
+        [Fact]
+        public async Task ExampleUsage5_ImageToText() {
+            var openAi = new OpenAi(await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey"));
+
+            var prompt = "A picture of a dog";
+            var result = await openAi.TextToImage(new OpenAi.Image.Request() { prompt = prompt });
+            var url = result.data.First().url;
+            Assert.NotEmpty(url);
+
+            var messages = new List<VisionGpt.Line>() {
+                new VisionGpt.Line(ChatGpt.Role.system, content: "You are a helpful assistant designed to output JSON.")
+            };
+
+            var yesNoResponseFormat = new YesNoResponse() {
+                confidence = 100,
+                inputQuestionInterpreted = "Is there a cat in the image?",
+                yesNoAnswer = true,
+                explanation = "The cat is in the picture because I see a small feline with whiskers."
+            };
+            messages.AddImageURL(url);
+            messages.AddUserLineWithJsonResultStructure("Is there a dog in the picture?", yesNoResponseFormat);
+
+            // Send the messages to the AI and get the response:
+            var response = await openAi.ImageToText(new VisionGpt.Request(messages));
+            VisionGpt.Line newLine = response.choices.Single().message;
+            messages.Add(newLine);
+
+            // Parse newLine.content as a YesNoResponse:
+            var yesNoResponse = newLine.ParseNewLineContentAsJson<YesNoResponse>();
+
+            // Dogs can look up, lets hope the AI knows that too:
+            Assert.True(yesNoResponse.yesNoAnswer);
+            // The AI is very confident in its answer:
+            Assert.True(yesNoResponse.confidence > 50);
+            // The AI also explains why it gave the answer:
+            Assert.NotEmpty(yesNoResponse.explanation);
+            // Show the entire conversation to make it clear how the responses look as strings:
+            Log.d("messages=" + JsonWriter.AsPrettyString(messages));
+        }
+
         private static ChatGpt.Request NewGpt4JsonRequestWithFullConversation(List<ChatGpt.Line> conversationSoFar) {
             var request = new ChatGpt.Request(conversationSoFar);
             // Use json as the response format:
@@ -177,7 +217,7 @@ namespace com.csutil.integrationTests.http {
 
 
         public class EmotionalChatResponse {
-            
+
             public enum Emotion { happy, sad, angry }
 
             [Description("How the AI feels about the users question")]
@@ -188,6 +228,24 @@ namespace com.csutil.integrationTests.http {
 
         }
 
+
+        [Fact]
+        public async Task ExampleTTSandSTT() {
+            var openAi = new OpenAi(await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey"));
+
+            string textToTest = "hello world";
+            var responseTTS = await openAi.TextToSpeech(new OpenAi.Audio.TTSRequest() { input = textToTest });
+            Assert.NotNull(responseTTS);
+
+            var responseSTT = await openAi.SpeechToText(new OpenAi.Audio.STTRequest() { fileStream = responseTTS });
+            Assert.NotEmpty(responseSTT.text);
+            Log.d(responseSTT.text);
+
+            string[] split = responseSTT.text.ToLower().Split(new Char[] { ',', '\\', '\n', ' ' },
+                                 StringSplitOptions.RemoveEmptyEntries);
+
+            Assert.True(split.All(word => textToTest.Contains(new string(word.Where(c => Char.IsLetter(c)).ToArray()))));
+        }
     }
 
 }
