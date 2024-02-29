@@ -1,18 +1,11 @@
-﻿
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Net.Mime;
-using System.Runtime.InteropServices;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using com.csutil.algorithms.images;
 using com.csutil.io;
 using com.csutil.model;
-using StbImageSharp;
 using StbImageWriteSharp;
 using Xunit;
 using Zio;
-using ColorComponents = StbImageSharp.ColorComponents;
 
 
 namespace com.csutil.tests.AlgorithmTests {

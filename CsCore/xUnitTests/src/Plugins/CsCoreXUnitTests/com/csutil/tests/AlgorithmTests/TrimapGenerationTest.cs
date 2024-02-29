@@ -1,16 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Threading.Tasks;
 using com.csutil.algorithms.images;
-using com.csutil.model;
 using StbImageWriteSharp;
 using Xunit;
-using Zio;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.Runtime.CompilerServices;
-using com.csutil.http.apis;
 using com.csutil.io;
 
 namespace com.csutil.tests.AlgorithmTests {
