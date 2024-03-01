@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using com.csutil.algorithms.images;
 using com.csutil.io;
 using com.csutil.model;
 using StbImageSharp;
+using StbImageWriteSharp;
 using Xunit;
 using Zio;
 
@@ -19,26 +21,20 @@ namespace com.csutil.tests.AlgorithmTests {
         public async Task TestGlobalMatting() {
 
             var folder = EnvironmentV2.instance.GetOrAddAppDataFolder("ImageMattingTests");
-
             var imageFile = folder.GetChild("GT04-image.png");
             await DownloadFileIfNeeded(imageFile, "http://atilimcetin.com/global-matting/GT04-image.png");
-
             var trimapFile = folder.GetChild("GT04-trimap.png");
             await DownloadFileIfNeeded(trimapFile, "http://atilimcetin.com/global-matting/GT04-trimap.png");
-
             var resultOfOriginalCppImplementation = folder.GetChild("GT04-alpha.png");
             await DownloadFileIfNeeded(resultOfOriginalCppImplementation, "http://atilimcetin.com/global-matting/GT04-alpha.png");
-
-            ImageResult image = await ImageLoader.LoadImageInBackground(imageFile);
+            var image = await ImageLoader.LoadImageInBackground(imageFile);
             var trimap = await ImageLoader.LoadImageInBackground(trimapFile);
-            var trimatByes = trimap.Data;
-            var imageMatting = new GlobalMatting(image.Data, image.Width, image.Height, (int)image.ColorComponents);
-            imageMatting.ExpansionOfKnownRegions(ref trimatByes, niter: 9);
-
-            imageMatting.RunGlobalMatting(trimatByes, out var foreground, out var alphaData, out var conf);
-
+            var trimapBytes = trimap.Data;
+            var imageMatting = new GlobalMatting(image.Data.DeepCopy(), image.Width, image.Height, (int)image.ColorComponents);
+            imageMatting.ExpansionOfKnownRegions(ref trimapBytes, niter: 9);
+            imageMatting.RunGlobalMatting(trimapBytes, out var foreground, out var alphaData, out var conf);
             // filter the result with fast guided filter
-            alphaData = imageMatting.RunGuidedFilter(alphaData, r: 10, eps: 1e-5);
+            var alphaDataGuided = imageMatting.RunGuidedFilter(alphaData, r: 10, eps: 1e-5);
 
             var alpha = new ImageResult {
                 Width = image.Width,
@@ -46,26 +42,27 @@ namespace com.csutil.tests.AlgorithmTests {
                 SourceComponents = image.ColorComponents,
                 ColorComponents = image.ColorComponents,
                 BitsPerChannel = image.BitsPerChannel,
-                Data = alphaData
+                Data = alphaDataGuided
             };
 
             for (int x = 0; x < trimap.Width; ++x) {
                 for (int y = 0; y < trimap.Height; ++y) {
                     if (trimap.GetPixel(x, y).R == 0) {
-                        alpha.SetPixel(x, y, new Pixel(0, 0, 0, 0));
+                        alpha.SetPixel(x, y, new Pixel(0, 0, 0, 255));
                     } else if (trimap.GetPixel(x, y).R == 255) {
                         alpha.SetPixel(x, y, new Pixel(255, 255, 255, 255));
                     }
                 }
             }
-
-            // Save the result:
-            var alphaBytes = alpha.Data;
-            var resultPngFile = folder.GetChild("GT04-alpha.png");
-            // Use a encoder that supports transparency:
-            // TODO 
-
+            {
+                var finalAlphaFile = folder.GetChild("OurAlpha.png");
+                ImageWriter writer = new ImageWriter();
+                await using var stream = finalAlphaFile.OpenOrCreateForReadWrite();
+                var flipped = ImageUtility.FlipImageVertically(alpha.Data, image.Width, image.Height, (int)image.ColorComponents);
+                writer.WritePng(flipped, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
+            }
         }
+
 
         private static async Task DownloadFileIfNeeded(FileEntry self, string url) {
             var imgFileRef = new MyFileRef() { url = url, fileName = self.Name };
@@ -101,11 +98,12 @@ namespace com.csutil.tests.AlgorithmTests {
             int index = (y * self.Width + x) * (int)self.ColorComponents;
             if ((int)self.ColorComponents == 3) {
                 return new Pixel(self.Data[index], self.Data[index + 1], self.Data[index + 2], 255);
-            } else if ((int)self.ColorComponents == 4) {
-                return new Pixel(self.Data[index], self.Data[index + 1], self.Data[index + 2], self.Data[index + 3]);
-            } else {
-                throw new Exception("ColorComponents=" + self.ColorComponents);
             }
+            if ((int)self.ColorComponents == 4) {
+                return new Pixel(self.Data[index], self.Data[index + 1], self.Data[index + 2], self.Data[index + 3]);
+            }
+            throw new Exception("ColorComponents=" + self.ColorComponents);
+
         }
 
         public static void SetPixel(this ImageResult self, int x, int y, Pixel p) {
