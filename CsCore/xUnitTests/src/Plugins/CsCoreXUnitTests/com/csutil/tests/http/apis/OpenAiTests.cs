@@ -6,6 +6,7 @@ using com.csutil.http.apis;
 using com.csutil.model.jsonschema;
 using Xunit;
 using Newtonsoft.Json;
+using System.IO;
 
 
 
@@ -224,7 +225,7 @@ namespace com.csutil.integrationTests.http {
                 };
 
                 var messages = new List<VisionGpt.Line>() {
-                    new VisionGpt.Line(VisionGpt.Role.system, content: "You are a helpful assistant designed to output JSON.")
+                    new VisionGpt.Line(ChatGpt.Role.system, content: "You are a helpful assistant designed to output JSON.")
                     };
 
                 messages.AddQuestionsToImage(url, questions);

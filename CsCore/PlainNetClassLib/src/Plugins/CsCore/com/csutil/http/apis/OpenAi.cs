@@ -457,7 +457,7 @@ namespace com.csutil.http.apis {
                 });
             });
 
-            self.Add(new VisionGpt.Line(VisionGpt.Role.user, content: content));
+            self.Add(new VisionGpt.Line(ChatGpt.Role.user, content: content));
         }
         public static void AddUserLineWithJsonResultStructure<T>(this ICollection<VisionGpt.Line> self, string userMessage, T exampleResponse) {
             self.Add(new VisionGpt.Line(ChatGpt.Role.user, content: userMessage));
