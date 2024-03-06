@@ -257,22 +257,20 @@ namespace com.csutil.http.apis {
         }
 
         public static string CreateJsonInstructions<T>(params T[] exampleResponses) {
-            if (exampleResponses.IsNullOrEmpty()) return null;
+            if (exampleResponses.IsNullOrEmpty()) throw new InvalidOperationException();
             
             var schemaGenerator = new ModelToJsonSchema(nullValueHandling: Newtonsoft.Json.NullValueHandling.Ignore);
             var className = typeof(T).Name;
             JsonSchema schema = schemaGenerator.ToJsonSchema(className, exampleResponses[0]);
             var schemaJson = JsonWriter.GetWriter(exampleResponses[0]).Write(schema);
             var jsonSchemaInfos = " This is the json schema that describes the format you have to use for your json response: " + schemaJson;
-            var exampleJsonInfos = " ";
-            if (!exampleResponses.IsEmpty()) {
-                exampleJsonInfos += " And for that schema, these would be examples of a valid response:";
-                
-                foreach (T exampleResponse in exampleResponses) {
-                    var exampleJson = JsonWriter.GetWriter(exampleResponses).Write(exampleResponses);
-                    exampleJsonInfos += " " + exampleJson;
-                }
+            var exampleJsonInfos = " And for that schema, these would be examples of a valid response:";
+            
+            foreach (T exampleResponse in exampleResponses) {
+                var exampleJson = JsonWriter.GetWriter(exampleResponses).Write(exampleResponses);
+                exampleJsonInfos += " " + exampleJson;
             }
+            
             return jsonSchemaInfos + exampleJsonInfos;
         }
 
