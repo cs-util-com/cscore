@@ -35,7 +35,7 @@
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <AllowUnsafeBlocks>False</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -48,6 +48,7 @@
   <ItemGroup>
     <!-- Version 13.0.2 chosen because https://docs.unity3d.com/Packages/com.unity.nuget.newtonsoft-json@3.2/manual/index.html 3.2.1 uses this version -->
     <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
+    <PackageReference Include="StbImageWriteSharp" Version="1.16.7" />
   </ItemGroup>
 
   <!-- https://www.nuget.org/packages/System.Collections.Immutable/ -->

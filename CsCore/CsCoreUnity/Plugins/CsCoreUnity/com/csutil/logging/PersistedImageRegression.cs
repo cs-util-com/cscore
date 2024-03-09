@@ -156,7 +156,7 @@ namespace com.csutil {
         }
 
 #if ENABLE_IMAGE_MAGICK
-        private bool AreVisuallyDifferent(Texture2D img1, Texture2D img2, Config config) {
+        private bool AreVisuallyDifferent(Texture2D img1, Texture2D img2, ConFfig config) {
             using (ImageMagick.MagickImage s1 = new ImageMagick.MagickImage()) {
                 s1.Read(img1.EncodeToJPG(config.screenshotQuality));
                 using (ImageMagick.MagickImage s2 = new ImageMagick.MagickImage()) {
