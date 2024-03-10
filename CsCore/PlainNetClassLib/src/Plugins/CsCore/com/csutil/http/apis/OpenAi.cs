@@ -394,14 +394,21 @@ namespace com.csutil.http.apis {
             self.Add(new ChatGpt.Line(ChatGpt.Role.system, content: CreateJsonInstructions(exampleResponse)));
         }
 
-        public static string CreateJsonInstructions<T>(T exampleResponse) {
+        public static string CreateJsonInstructions<T>(params T[] exampleResponses) {
+            if (exampleResponses.IsNullOrEmpty()) throw new InvalidOperationException();
+            
             var schemaGenerator = new ModelToJsonSchema(nullValueHandling: Newtonsoft.Json.NullValueHandling.Ignore);
             var className = typeof(T).Name;
-            JsonSchema schema = schemaGenerator.ToJsonSchema(className, exampleResponse);
-            var schemaJson = JsonWriter.GetWriter(exampleResponse).Write(schema);
-            var exampleJson = JsonWriter.GetWriter(exampleResponse).Write(exampleResponse);
+            JsonSchema schema = schemaGenerator.ToJsonSchema(className, exampleResponses[0]);
+            var schemaJson = JsonWriter.GetWriter(exampleResponses[0]).Write(schema);
             var jsonSchemaInfos = " This is the json schema that describes the format you have to use for your json response: " + schemaJson;
-            var exampleJsonInfos = " And for that schema, this would an example of a valid response: " + exampleJson;
+            var exampleJsonInfos = " And for that schema, these would be examples of a valid response:";
+            
+            foreach (T exampleResponse in exampleResponses) {
+                var exampleJson = JsonWriter.GetWriter(exampleResponses).Write(exampleResponses);
+                exampleJsonInfos += " " + exampleJson;
+            }
+            
             return jsonSchemaInfos + exampleJsonInfos;
         }
 
