@@ -41,4 +41,10 @@ Global
 		{F6CFF900-5C89-4BDC-BE57-F447F270A8F2}.Release|x86.ActiveCfg = Release|Any CPU
 		{F6CFF900-5C89-4BDC-BE57-F447F270A8F2}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {ED22DAA4-0961-49E0-A0DE-B5ABE66FCBD3}
+	EndGlobalSection
 EndGlobal
