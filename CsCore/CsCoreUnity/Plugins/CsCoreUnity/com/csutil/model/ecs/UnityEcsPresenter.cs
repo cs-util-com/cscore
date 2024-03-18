@@ -17,7 +17,7 @@ namespace com.csutil.model.ecs {
         public DisposeState IsDisposed { get; private set; }
 
         public virtual Task OnLoad(EntityComponentSystem<T> model) {
-            targetView.ThrowErrorIfNull("Root GameObject of the ECS presenter");
+            targetView.ThrowErrorIfNullOrDestroyed("Root GameObject of the ECS presenter");
             var entitiesInRoot = model.Entities.Values.Filter(x => x.ParentId == null);
             AddViewsForEntityModelsRecursively(entitiesInRoot);
             model.OnIEntityUpdated += OnEntityUpdated;

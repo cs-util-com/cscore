@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using UnityEngine;
 
@@ -182,6 +183,17 @@ namespace com.csutil {
             if (self == null) { return false; } // Reached root of GO tree
             if (self == potentialGrandParent) { return true; }
             return IsGrandChildOf(self.GetParent(), potentialGrandParent);
+        }
+
+        public static void ThrowErrorIfNullOrDestroyed(this UnityEngine.Object self, string paramName, UnityEngine.Object context = null, [CallerMemberName] string methodName = null) {
+            if (self.IsNullOrDestroyed()) {
+                Debugger.Break();
+                if (!context.IsNullOrDestroyed()) {
+                    throw Log.e($"{paramName} (Method {methodName}) was null or destroyed", context);
+                } else {
+                    throw Log.e($"{paramName} (Method {methodName}) was null or destroyed");
+                }
+            }
         }
 
     }

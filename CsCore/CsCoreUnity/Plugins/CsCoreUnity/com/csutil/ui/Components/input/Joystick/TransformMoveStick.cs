@@ -19,7 +19,7 @@ namespace com.csutil.ui {
         private Vector2 delta;
 
         private void OnEnable() {
-            camera.ThrowErrorIfNull("camera");
+            camera.ThrowErrorIfNullOrDestroyed("camera", this);
             camTransform = camera.transform;
             gameObject.GetComponentV2<JoystickUi>().onJoystickChanged.AddListener(OnForceChange);
         }

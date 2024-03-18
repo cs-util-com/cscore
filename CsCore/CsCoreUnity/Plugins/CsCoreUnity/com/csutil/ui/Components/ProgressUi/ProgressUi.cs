@@ -81,7 +81,7 @@ namespace com.csutil.progress {
             if (enableProgressUiFading) {
                 if (canvasGroupFader == null) {
                     canvasGroupFader = GetProgressUiGo().GetComponentInParents<CanvasGroupFader>();
-                    canvasGroupFader.ThrowErrorIfNull("canvasGroupFader");
+                    canvasGroupFader.ThrowErrorIfNullOrDestroyed("canvasGroupFader", this);
                     canvasGroupFader.GetCanvasGroup().alpha = 0;
                 }
                 if (percent == 0 || percent >= 100) {
