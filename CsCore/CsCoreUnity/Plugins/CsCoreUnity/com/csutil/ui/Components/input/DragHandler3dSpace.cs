@@ -51,10 +51,9 @@ namespace com.csutil.ui {
             _latestPointerEventData = e;
             if (keepDistanceToCam) {
                 if (e.pointerCurrentRaycast.worldPosition == Vector3.zero) { return; }
-                var newWorldPos = e.pointerCurrentRaycast.worldPosition + _localDragStartOffsetOnRt;
-                var camPos = e.pressEventCamera.transform.position;
-                var direction = (newWorldPos - camPos).normalized;
-                var newPosition = camPos + direction * _distanceAtDragStart;
+                var direction2d = e.pointerCurrentRaycast.screenPosition;
+                var newPosition = e.pressEventCamera.ScreenToWorldPoint(new Vector3(direction2d.x, direction2d.y, _distanceAtDragStart));
+                newPosition += _localDragStartOffsetOnRt;
                 var newDelta = newPosition - targetToDrag.position;
                 positionDeltaHistory.Enqueue(newDelta);
                 var mean = positionDeltaHistory.CalcMean(x => x.sqrMagnitude);
