@@ -39,6 +39,14 @@ namespace com.csutil.model.ecs {
             IsDisposed = DisposeState.Disposed;
         }
 
+        public void SetJsonSerializer(Func<JsonSerializer> newSerializer) {
+            GetJsonSerializer = newSerializer;
+        }
+        
+        public void SetJsonSerializer(JsonSerializer newSerializer) {
+            GetJsonSerializer = () => newSerializer;
+        }
+        
         /// <summary> Loads all template files from disk into memory </summary>
         public async Task LoadAllTemplateFilesIntoMemory() {
             this.ThrowErrorIfDisposed();
