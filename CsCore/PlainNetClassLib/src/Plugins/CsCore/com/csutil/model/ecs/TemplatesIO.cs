@@ -42,11 +42,11 @@ namespace com.csutil.model.ecs {
         public void SetJsonSerializer(Func<JsonSerializer> newSerializer) {
             GetJsonSerializer = newSerializer;
         }
-        
+
         public void SetJsonSerializer(JsonSerializer newSerializer) {
             GetJsonSerializer = () => newSerializer;
         }
-        
+
         /// <summary> Loads all template files from disk into memory </summary>
         public async Task LoadAllTemplateFilesIntoMemory() {
             this.ThrowErrorIfDisposed();
@@ -165,7 +165,10 @@ namespace com.csutil.model.ecs {
             var diff = _jsonDiffPatch.DiffV2(sourceJson, backAsJson);
             if (diff != null) {
                 Log.e($"Not all props of {typeof(T)} were deserialized, diff: {diff}");
-                Log.e($"Full json of both version: sourceJson: {sourceJson} and backAsJson: {backAsJson}");
+                Log.e("Full json of both versions to compare with https://www.diffchecker.com/text-compare/ "
+                    + "\n(first sourceJson, then backAsJson)");
+                Log.e(sourceJson.ToPrettyString());
+                Log.e(backAsJson.ToPrettyString());
             }
         }
 

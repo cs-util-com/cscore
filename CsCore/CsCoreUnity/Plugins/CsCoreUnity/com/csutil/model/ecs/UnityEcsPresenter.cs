@@ -69,7 +69,7 @@ namespace com.csutil.model.ecs {
             if (_entityViews.ContainsKey(iEntity.Id)) { return; }
             GameObject go = NewGameObjectFor(iEntity);
             _entityViews.Add(iEntity.Id, go);
-            go.name = iEntity.Name;
+            go.name = "" + iEntity;
             if (iEntity.ParentId != null) {
                 var parent = iEntity.GetParent();
                 if (!_entityViews.ContainsKey(parent.Id)) {
@@ -96,8 +96,8 @@ namespace com.csutil.model.ecs {
         private void UpdateGoFor(IEntity<T> iEntity, T oldState, T newState) {
             var go = _entityViews[iEntity.Id];
             go.SetActiveV2(iEntity.IsActiveSelf());
-            if (oldState.Name != newState.Name) {
-                go.name = iEntity.Name;
+            if (oldState.Name != "" + newState) {
+                go.name = "" + iEntity;
             }
             if (oldState.ParentId != newState.ParentId) {
                 if (newState.ParentId != null) {
@@ -146,7 +146,10 @@ namespace com.csutil.model.ecs {
             }
             createdComponent.ComponentId = added.Value.GetId();
             if (createdComponent is Behaviour mono) {
-                mono.enabled = added.Value.IsActive;
+                mono.enabled = true; // Force to trigger onEnable once (often needed by presenters to init some values)
+                if (mono.enabled != added.Value.IsActive) {
+                    mono.enabled = added.Value.IsActive;
+                }
             }
             createdComponent.OnUpdateUnityComponent(iEntity, default, added.Value);
         }
