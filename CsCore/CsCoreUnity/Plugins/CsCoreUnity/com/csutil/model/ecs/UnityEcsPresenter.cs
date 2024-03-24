@@ -157,10 +157,12 @@ namespace com.csutil.model.ecs {
         protected abstract IComponentPresenter<T> AddComponentTo(GameObject targetGo, IComponentData componentModel, IEntity<T> iEntity);
 
         protected virtual void OnComponentRemoved(IEntity<T> iEntity, string deleted, GameObject targetParentGo) {
-            if (GetComponentPresenters(iEntity).Any(x => x.ComponentId == deleted)) {
+            var allPresenters = GetComponentPresenters(iEntity);
+            if (allPresenters.Any(x => x.ComponentId == deleted)) {
                 GetComponentPresenter(iEntity, deleted).DisposeV2();
             } else {
-                Log.d($"No component found for the deleted entity component with id={deleted} in entity={iEntity}");
+                Log.d($"No component found for the deleted entity component with id={deleted} in entity={iEntity}. "
+                    + $"allPresenters={allPresenters.ToStringV2(x => "\n" + x)}", targetParentGo);
             }
         }
 
@@ -170,7 +172,7 @@ namespace com.csutil.model.ecs {
                 return componentPresenters.Single(x => x.ComponentId == componentId);
             } catch (Exception e) {
                 var entityView = _entityViews[iEntity.Id];
-                Log.e($"Failed to find component with id={componentId} in entity={iEntity}", e, entityView);
+                Log.e($"Failed to find exactly 1 component with id={componentId} in entity={iEntity}", e, entityView);
                 throw;
             }
         }
