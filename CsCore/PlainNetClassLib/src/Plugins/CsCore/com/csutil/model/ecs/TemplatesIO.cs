@@ -164,11 +164,11 @@ namespace com.csutil.model.ecs {
             var backAsJson = ToJToken(resultingEntity, GetJsonSerializer());
             var diff = _jsonDiffPatch.DiffV2(sourceJson, backAsJson);
             if (diff != null) {
-                Log.e($"Not all props of {typeof(T)} were deserialized, diff: {diff}");
-                Log.e("Full json of both versions to compare with https://www.diffchecker.com/text-compare/ "
+                Log.e($"Detected diff in reconstruction from json of {typeof(T)}: {diff}");
+                Log.w("Full json of both versions to compare with https://www.diffchecker.com/text-compare/ "
                     + "\n(first sourceJson, then backAsJson)");
-                Log.e(sourceJson.ToPrettyString());
-                Log.e(backAsJson.ToPrettyString());
+                Log.w(sourceJson.ToPrettyString());
+                Log.w(backAsJson.ToPrettyString());
             }
         }
 
