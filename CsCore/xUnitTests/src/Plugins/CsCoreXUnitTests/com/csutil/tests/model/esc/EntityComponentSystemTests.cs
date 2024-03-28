@@ -396,6 +396,65 @@ namespace com.csutil.tests.model.esc {
                 Assert.Equal(new Vector3(1, 0, 0), enemy1.LocalPose().position);
                 var enemy2 = scene.GetChildren().ElementAt(1);
                 Assert.NotNull(enemy2.GetComponentInChildren<Entity, ShieldComponent>());
+
+                {
+                    // Destroying / deleting templates causes variants to inherit from the
+                    // parent template (or changing to not be a variant anymore):
+                    Assert.True(enemy1.IsVariant());
+                    Assert.False(enemy1.IsTemplate());
+                    Assert.True(enemy2.IsVariant());
+                    Assert.False(enemy2.IsTemplate());
+                    Assert.True(enemy1.TryGetTemplate(out var enemyTemplate));
+                    {
+                        Assert.True(enemyTemplate.IsTemplate());
+                        Assert.Equal("EnemyTemplate", enemyTemplate.Name);
+                        Assert.True(enemyTemplate.Ecs.TryGetVariants(enemyTemplate.Id, out var variants1));
+                        Assert.Equal(3, variants1.Count());
+                    }
+
+                    Assert.True(enemy2.TryGetTemplate(out var bossEnemy));
+                    Assert.True(enemyTemplate.IsTemplate());
+                    Assert.False(enemyTemplate.IsVariant());
+                    Assert.True(bossEnemy.IsTemplate());
+                    { // Template 2 (bossEnemy) is a variant itself (of baseEnemy):
+                        Assert.True(bossEnemy.IsVariant());
+                        Assert.Equal("BossEnemy", bossEnemy.Name);
+                        Assert.True(bossEnemy.TryGetTemplate(out var bossEnemyTemplate));
+                        Assert.Same(enemyTemplate, bossEnemyTemplate);
+                    }
+                    bossEnemy.Destroy();
+                    Assert.True(bossEnemy.IsDestroyed());
+                    // The variant of the destroyed template is now based on the parent template:
+                    Assert.False(enemy2.IsDestroyed());
+                    Assert.True(enemy2.IsVariant());
+                    Assert.True(enemy2.TryGetTemplate(out var newTemplate2));
+                    Assert.NotEqual(bossEnemy.Id, newTemplate2.Id);
+                    Assert.Equal("EnemyTemplate", newTemplate2.Name);
+
+                    {
+                        Assert.True(enemyTemplate.IsTemplate());
+                        Assert.True(enemyTemplate.Ecs.TryGetVariants(enemyTemplate.Id, out var variants1));
+                        Assert.Equal(2, variants1.Count());
+
+                    }
+                    enemyTemplate.Destroy();
+                    Assert.True(enemyTemplate.IsDestroyed());
+                    Assert.False(enemy1.IsDestroyed());
+                    // Since template1 did not have a parent template enemy1 is no longer a variant:
+                    enemy1.TryGetTemplate(out var newTemplate1);
+                    Assert.Equal(null, newTemplate1);
+                    Assert.False(enemy1.IsVariant());
+
+                    // Destroying a variant does not affect the parent template:
+                    var firstChildInBossEnemyVariant = enemy2.GetChildren().First();
+                    firstChildInBossEnemyVariant.Destroy();
+                    Assert.True(firstChildInBossEnemyVariant.IsDestroyed());
+                    Assert.DoesNotContain(firstChildInBossEnemyVariant, enemy2.GetChildren());
+                    var firstChildInBossEnemyTemplate = bossEnemy.GetChildren().First();
+                    Assert.False(firstChildInBossEnemyTemplate.IsDestroyed());
+                    Assert.Contains(firstChildInBossEnemyTemplate, bossEnemy.GetChildren());
+
+                }
             }
         }
 
@@ -476,7 +535,7 @@ namespace com.csutil.tests.model.esc {
         }
 
         public static bool Destroy(this IEntity<Entity> self) {
-            return self.Destroy(RemoveChildIdFromParent);
+            return self.Destroy(RemoveChildIdFromParent, ChangeTemplate);
         }
 
         private static Entity SetParentIdInChild(IEntity<Entity> child, string newParentId) {
@@ -497,6 +556,11 @@ namespace com.csutil.tests.model.esc {
         private static Entity RemoveChildIdFromParent(IEntity<Entity> parent, string childIdToRemove) {
             parent.Data.MutablehildrenIds.Remove(childIdToRemove);
             return parent.Data;
+        }
+
+        private static Entity ChangeTemplate(IEntity<Entity> entity, string newTemplateId) {
+            entity.Data.TemplateId = newTemplateId;
+            return entity.Data;
         }
 
         public static void SetActiveSelf(this IEntity<Entity> self, bool active) {

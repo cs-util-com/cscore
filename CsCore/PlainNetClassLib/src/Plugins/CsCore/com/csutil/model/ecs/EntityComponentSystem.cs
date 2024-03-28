@@ -155,7 +155,19 @@ namespace com.csutil.model.ecs {
                 UpdateVariantsWhenTemplateChanges(variantIds);
             }
         }
-        
+
+        /// <summary> Returns direct variants of an entity if the entity is a template </summary>
+        public virtual bool TryGetVariants(string templateId, out IEnumerable<IEntity<T>> variantIds) {
+            this.ThrowErrorIfDisposed();
+            if (_variants.TryGetValue(templateId, out var variants)) {
+                variantIds = variants.Map(id => _entities[id]);
+                return true;
+            } else {
+                variantIds = null;
+                return false;
+            }
+        }
+
         protected virtual void UpdateVariantsWhenTemplateChanges(HashSet<string> variantIds) {
             foreach (var variantId in variantIds) {
                 var newVariantState = TemplatesIo.RecreateVariantInstance(variantId);

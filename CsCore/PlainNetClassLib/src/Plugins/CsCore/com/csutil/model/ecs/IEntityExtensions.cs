@@ -89,22 +89,32 @@ namespace com.csutil.model.ecs {
             self.Ecs.Update(setActive(self, newIsActive));
         }
 
-        public static bool Destroy<T>(this IEntity<T> self, Func<IEntity<T>, string, T> removeChildIdFromParent) where T : IEntityData {
+        public static bool Destroy<T>(this IEntity<T> self, Func<IEntity<T>, string, T> removeChildIdFromParent, Func<IEntity<T>, string, T> changeTemplate) where T : IEntityData {
             if (self.IsDestroyed()) { return false; }
+
+            var ecs = self.Ecs;
+            var newTemplate = self.TemplateId;
+            if (ecs.TryGetVariants(self.Id, out var variants)) {
+                foreach (var variant in variants) {
+                    var updatedVariant = changeTemplate(variant, newTemplate);
+                    ecs.Update(updatedVariant);
+                }
+            }
+
             if (self.ParentId != null) {
                 self.RemoveFromParent(c => c.Data, removeChildIdFromParent);
             }
-            self.DestroyAllChildrenRecursively(removeChildIdFromParent);
-            self.Ecs.Destroy(self);
+            self.DestroyAllChildrenRecursively(removeChildIdFromParent, changeTemplate);
+            ecs.Destroy(self);
             return true;
         }
 
-        private static void DestroyAllChildrenRecursively<T>(this IEntity<T> self, Func<IEntity<T>, string, T> removeChildIdFromParent) where T : IEntityData {
+        private static void DestroyAllChildrenRecursively<T>(this IEntity<T> self, Func<IEntity<T>, string, T> removeChildIdFromParent, Func<IEntity<T>, string, T> changeTemplate) where T : IEntityData {
             var children = self.GetChildren();
             if (children != null) {
                 var childrenToDelete = children.ToList();
                 foreach (var child in childrenToDelete) {
-                    child.Destroy(removeChildIdFromParent);
+                    child.Destroy(removeChildIdFromParent, changeTemplate);
                 }
             }
         }
@@ -118,7 +128,10 @@ namespace com.csutil.model.ecs {
             if (parent == null) {
                 throw new ArgumentException("The child " + child.Id + " has no parent");
             }
+            AssertV3.IsTrue(parent.ChildrenIds.Contains(child.Id), () => "The parent " + parent.Id + " does not contain the child " + child.Id);
             var updatedParent = removeChildIdFromParent(parent, child.Id);
+            AssertV3.IsFalse(parent.ChildrenIds.Contains(child.Id), () => "The parent " + parent.Id + " still contains the child " + child.Id);
+
             child.Ecs.Update(updatedParent);
             // The parent cant tell the ecs anymore that the ParentIds list needs to be updated so the child needs to do this: 
             var updatedChild = removeParentIdFromChild(child);
@@ -148,7 +161,7 @@ namespace com.csutil.model.ecs {
             if (parent == null) { return globalPose; }
             return parent.GlobalPoseMatrix().Inverse() * globalPose;
         }
-        
+
         public static Pose3d GlobalPose<T>(this IEntity<T> self) where T : IEntityData {
             return self.GlobalPoseMatrix().ToPose();
         }
@@ -160,7 +173,7 @@ namespace com.csutil.model.ecs {
             matrix.Decompose(out Vector3 scale, out Quaternion rotation, out Vector3 position);
             return new Pose3d(position, rotation, scale);
         }
-        
+
         public static Pose3d GlobalPose<T>(this T self, IReadOnlyDictionary<string, T> allEntities) where T : IEntityData {
             return self.GlobalPoseMatrix(allEntities).ToPose();
         }
@@ -181,7 +194,7 @@ namespace com.csutil.model.ecs {
         public static IEntity<T> CreateVariant<T>(this IEntity<T> self) where T : IEntityData {
             return self.CreateVariant(out _);
         }
-        
+
         /// <summary>
         /// Recursively creates variants of all entities in the subtree of the entity and returns a new root entity that has the variant ids in its children lists
         /// </summary>
@@ -295,7 +308,7 @@ namespace com.csutil.model.ecs {
             comp = default;
             return false;
         }
-        
+
         public static bool HasComponent<V>(this IEntityData self) where V : IComponentData {
             return self.Components.Values.Any(c => c is V);
         }
