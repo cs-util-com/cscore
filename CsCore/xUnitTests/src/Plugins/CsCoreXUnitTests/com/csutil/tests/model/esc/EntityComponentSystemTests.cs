@@ -406,77 +406,105 @@ namespace com.csutil.tests.model.esc {
                 var baseVariant3 = scene.GetChildren().ElementAt(0);
                 Assert.Equal("Base Variant 3", baseVariant3.Name);
                 Assert.Equal(new Vector3(1, 0, 0), baseVariant3.LocalPose().position);
-                var mageVariant = scene.GetChildren().ElementAt(1);
-                Assert.NotNull(mageVariant.GetComponentInChildren<Entity, ShieldComponent>());
+                var mageEnemy = scene.GetChildren().ElementAt(1);
+                Assert.NotNull(mageEnemy.GetComponentInChildren<Entity, ShieldComponent>());
 
                 {
                     // Destroying / deleting templates causes variants to inherit from the
                     // parent template (or changing to not be a variant anymore):
                     Assert.True(baseVariant3.IsVariant());
                     Assert.False(baseVariant3.IsTemplate());
-                    Assert.True(mageVariant.IsVariant());
-                    Assert.False(mageVariant.IsTemplate());
+                    Assert.True(mageEnemy.IsVariant());
+                    Assert.False(mageEnemy.IsTemplate());
                     Assert.True(baseVariant3.TryGetTemplate(out var enemyTemplate));
                     {
                         Assert.True(enemyTemplate.IsTemplate());
                         Assert.Equal("EnemyTemplate", enemyTemplate.Name);
-                        Assert.True(enemyTemplate.Ecs.TryGetVariants(enemyTemplate.Id, out var enemyTemplateVariants));
+                        Assert.True(enemyTemplate.TryGetVariants(out var enemyTemplateVariants));
                         Assert.Equal(3, enemyTemplateVariants.Count());
                         var boss = enemyTemplateVariants.Single(x => x.Name == "BossEnemy");
-                        var mage = enemyTemplateVariants.Single(x => x.Name == "MageEnemy");
-                        var baseVar3 = enemyTemplateVariants.Single(x => x.Name == "Base Variant 3");
+                        var mageRef2 = enemyTemplateVariants.Single(x => x.Name == "MageEnemy");
+                        var baseVar3Ref2 = enemyTemplateVariants.Single(x => x.Name == "Base Variant 3");
                         Assert.True(boss.IsTemplate());
-                        Assert.True(mage.IsTemplate());
-                        Assert.False(baseVar3.IsTemplate());
+                        Assert.True(mageRef2.IsTemplate());
+                        Assert.False(baseVar3Ref2.IsTemplate());
                     }
 
-                    Assert.True(mageVariant.TryGetTemplate(out var bossEnemy));
+                    Assert.True(mageEnemy.TryGetTemplate(out var bossEnemy));
                     Assert.True(enemyTemplate.IsTemplate());
                     Assert.False(enemyTemplate.IsVariant());
                     Assert.True(bossEnemy.IsTemplate());
+                    Assert.NotEmpty(bossEnemy.GetChildren());
                     { // Template 2 (bossEnemy) is a variant itself (of baseEnemy):
                         Assert.True(bossEnemy.IsVariant());
                         Assert.Equal("BossEnemy", bossEnemy.Name);
                         Assert.True(bossEnemy.TryGetTemplate(out var bossEnemyTemplate));
                         Assert.Same(enemyTemplate, bossEnemyTemplate);
                     }
-                    Assert.True(await bossEnemy.Destroy());
-                    Assert.True(bossEnemy.IsDestroyed());
-                    // The variant of the destroyed template is now based on the parent template:
-                    Assert.False(mageVariant.IsDestroyed());
-                    Assert.True(mageVariant.IsVariant());
-                    Assert.True(mageVariant.TryGetTemplate(out var newTemplate2));
-                    Assert.NotEqual(bossEnemy.Id, newTemplate2.Id);
-                    Assert.Equal("EnemyTemplate", newTemplate2.Name);
-                    Assert.DoesNotContain(bossEnemy.Id, templatesIo.GetAllEntityIds());
-                    Assert.Contains(enemyTemplate.Id, templatesIo.GetAllEntityIds());
+                    { // Destroying a template (which is a variant itself) makes the variants be variants of the parent template:
+                        Assert.True(bossEnemy.TryGetVariants(out var bossVariants));
+                        var bossVariant = Assert.Single(bossVariants);
+                        { // One of the variants of enemyTemplate is the boss variant: 
+                            Assert.True(enemyTemplate.TryGetVariants(out var variantsRef2));
+                            Assert.Equal(3, variantsRef2.Count());
+                            Assert.Contains(bossEnemy, variantsRef2);
+                            Assert.DoesNotContain(bossVariant, variantsRef2);
+                        }
+                        Assert.True(await bossEnemy.Destroy());
+                        Assert.True(bossEnemy.IsDestroyed());
+                        Assert.False(bossVariant.IsDestroyed());
+                        // The variant of the destroyed template is now based on the parent template:
+                        Assert.True(bossVariant.TryGetTemplate(out var newTemplate));
+                        Assert.Same(enemyTemplate, newTemplate);
 
-                    {
+                        Assert.DoesNotContain(bossEnemy.Id, templatesIo.GetAllEntityIds());
+                        Assert.DoesNotContain(bossEnemy.Id, ecs.TemplateIds);
+                        Assert.Contains(enemyTemplate.Id, templatesIo.GetAllEntityIds());
+                        Assert.Contains(enemyTemplate.Id, ecs.TemplateIds);
                         Assert.True(enemyTemplate.IsTemplate());
-                        Assert.True(enemyTemplate.Ecs.TryGetVariants(enemyTemplate.Id, out var variants1));
-                        Assert.Equal(2, variants1.Count());
+                        { // Still 3 variants but now the destroyed bossEnemy is no longer a variant:
+                            Assert.True(enemyTemplate.TryGetVariants(out var variantsRef3));
+                            Assert.Equal(3, variantsRef3.Count());
+                            Assert.DoesNotContain(bossEnemy, variantsRef3);
+                            Assert.Contains(bossVariant, variantsRef3);
+                        }
                     }
-                    Assert.True(await enemyTemplate.Destroy());
-                    await enemyTemplate.SaveChanges();
-                    Assert.True(enemyTemplate.IsDestroyed());
-                    Assert.False(baseVariant3.IsDestroyed());
-                    // Since template1 did not have a parent template enemy1 is no longer a variant:
-                    baseVariant3.TryGetTemplate(out var newTemplate1);
-                    Assert.Equal(null, newTemplate1);
-                    Assert.False(baseVariant3.IsVariant());
+                    {
+                        Assert.False(mageEnemy.IsDestroyed());
+                        Assert.True(mageEnemy.IsVariant());
+                        Assert.True(mageEnemy.TryGetTemplate(out var enemyTemplateRef2));
+                        Assert.NotEqual(bossEnemy.Id, enemyTemplateRef2.Id);
+                        Assert.Equal(enemyTemplate.Id, enemyTemplateRef2.Id);
+                        Assert.Same(enemyTemplate, enemyTemplateRef2);
+                        Assert.Equal("EnemyTemplate", enemyTemplateRef2.Name);
+                    }
 
-                    // Destroying a variant does not affect the parent template:
-                    var firstChildInBossEnemyVariant = mageVariant.GetChildren().First();
-                    Assert.True(await firstChildInBossEnemyVariant.Destroy());
-                    await firstChildInBossEnemyVariant.SaveChanges();
-                    Assert.True(firstChildInBossEnemyVariant.IsDestroyed());
-                    Assert.DoesNotContain(firstChildInBossEnemyVariant, mageVariant.GetChildren());
-                    var firstChildInBossEnemyTemplate = bossEnemy.GetChildren().First();
-                    Assert.False(firstChildInBossEnemyTemplate.IsDestroyed());
-                    Assert.Contains(firstChildInBossEnemyTemplate, bossEnemy.GetChildren());
+                    { // Destroying a variant does not affect the parent template:
+                        var firstChildInMageVariant = mageEnemy.GetChildren().First();
+                        var nameOfFirstChildInMageVariant = firstChildInMageVariant.Name;
+                        Assert.True(await firstChildInMageVariant.Destroy());
+                        Assert.True(firstChildInMageVariant.IsDestroyed());
+                        Assert.DoesNotContain(firstChildInMageVariant, mageEnemy.GetChildren());
+                        Assert.True(mageEnemy.TryGetTemplate(out var mageTemplate));
+                        var firstChildInMageTemplate = mageTemplate.GetChildren().First();
+                        Assert.False(firstChildInMageTemplate.IsDestroyed());
+                        Assert.Equal(nameOfFirstChildInMageVariant, firstChildInMageTemplate.Name);
+                    }
 
+                    { // Destroying a template makes the variants to be no variants anymore
+                        Assert.True(await enemyTemplate.Destroy());
+                        Assert.True(enemyTemplate.IsDestroyed());
+                        Assert.False(baseVariant3.IsDestroyed());
+                        // Since template1 did not have a parent template enemy1 is no longer a variant:
+                        baseVariant3.TryGetTemplate(out var newTemplate1);
+                        Assert.Equal(null, newTemplate1);
+                        Assert.False(baseVariant3.IsVariant());
+                        Assert.False(mageEnemy.IsVariant());
+                    }
                 }
+
             }
+
         }
 
         private IReadOnlyDictionary<string, IComponentData> CreateComponents(IComponentData component) {

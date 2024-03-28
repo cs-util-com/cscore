@@ -10,24 +10,29 @@ namespace com.csutil.model.ecs {
     public static class IEntityExtensions {
 
         public static IEnumerable<IEntity<T>> GetChildren<T>(this IEntity<T> self) where T : IEntityData {
+            self.ThrowErrorIfDisposed();
             if (self.ChildrenIds == null) { return null; }
             return self.ChildrenIds.Map(x => self.Ecs.GetEntity(x));
         }
 
         public static IEntity<T> GetParent<T>(this IEntity<T> self) where T : IEntityData {
+            self.ThrowErrorIfDisposed();
             if (self.ParentId == null) { return default; }
             return self.Ecs.Entities[self.ParentId];
         }
 
-        public static bool IsTemplate<T>(this IEntity<T> commonParent) where T : IEntityData {
-            return commonParent.Ecs.TemplateIds.Contains(commonParent.Id);
+        public static bool IsTemplate<T>(this IEntity<T> self) where T : IEntityData {
+            self.ThrowErrorIfDisposed();
+            return self.Ecs.TemplateIds.Contains(self.Id);
         }
 
         public static bool IsVariant<T>(this IEntity<T> self) where T : IEntityData {
+            self.ThrowErrorIfDisposed();
             return self.TemplateId != null;
         }
 
         public static bool TryGetTemplate<T>(this IEntity<T> self, out IEntity<T> template) where T : IEntityData {
+            self.ThrowErrorIfDisposed();
             if (self.TemplateId != null) {
                 template = self.Ecs.Entities[self.TemplateId];
                 return true;
@@ -36,12 +41,18 @@ namespace com.csutil.model.ecs {
             return false;
         }
 
+        public static bool TryGetVariants<T>(this IEntity<T> self, out IEnumerable<IEntity<T>> variants) where T : IEntityData {
+            self.ThrowErrorIfDisposed();
+            return self.Ecs.TryGetVariants(self.Id, out variants);
+        }
+
         public static T GetParent<T>(this T self, IReadOnlyDictionary<string, T> allEntities) where T : IEntityData {
             if (self.ParentId == null) { return default; }
             return allEntities[self.ParentId];
         }
 
         public static IEntity<T> AddChild<T>(this IEntity<T> parent, T childData, Func<IEntity<T>, string, T> setParentIdInChild, Func<IEntity<T>, string, T> mutateChildrenListInParentEntity) where T : IEntityData {
+            parent.ThrowErrorIfDisposed();
             var newChild = parent.Ecs.Add(childData);
             if (newChild.ParentId != parent.Id) {
                 parent.Ecs.Update(setParentIdInChild(newChild, parent.Id));
@@ -54,6 +65,8 @@ namespace com.csutil.model.ecs {
         }
 
         public static IEntity<T> AddChild<T>(this IEntity<T> parent, IEntity<T> existingChild, Func<IEntity<T>, string, T> setParentIdInChild, Func<IEntity<T>, string, T> mutateChildrenListInParentEntity) where T : IEntityData {
+            parent.ThrowErrorIfDisposed();
+            existingChild.ThrowErrorIfDisposed();
             if (existingChild.ParentId != null) {
                 throw new InvalidOperationException("Parent already set to " + existingChild.ParentId);
             }
@@ -72,7 +85,9 @@ namespace com.csutil.model.ecs {
             Func<IEntity<T>, string, T> removeChildIdFromOldParent,
             Func<IEntity<T>, string, T> mutateChildrenListInNewParent) where T : IEntityData {
             {
+                child.ThrowErrorIfDisposed();
                 newParent.ThrowErrorIfNull("newParent");
+                newParent.ThrowErrorIfDisposed();
                 if (child.ParentId == newParent.Id) { return child; }
                 // Remove the child from the old parent:
                 if (child.ParentId != null) {
@@ -85,6 +100,7 @@ namespace com.csutil.model.ecs {
         }
 
         public static void SetActiveSelf<T>(this IEntity<T> self, bool newIsActive, Func<IEntity<T>, bool, T> setActive) where T : IEntityData {
+            self.ThrowErrorIfDisposed();
             if (self.IsActive == newIsActive) { return; }
             self.Ecs.Update(setActive(self, newIsActive));
         }
@@ -120,10 +136,15 @@ namespace com.csutil.model.ecs {
         }
 
         public static bool IsDestroyed<T>(this IEntity<T> self) where T : IEntityData {
-            return self.Ecs == null;
+            var result = !self.IsAlive();
+            if (result != (self.Ecs == null)) {
+                throw Log.e("IsAlive()=" + result + " but Ecs=" + self.Ecs);
+            }
+            return result;
         }
 
         public static void RemoveFromParent<T>(this IEntity<T> child, Func<IEntity<T>, T> removeParentIdFromChild, Func<IEntity<T>, string, T> removeChildIdFromParent) where T : IEntityData {
+            child.ThrowErrorIfDisposed();
             var parent = child.GetParent();
             if (parent == null) {
                 throw new ArgumentException("The child " + child.Id + " has no parent");
@@ -140,6 +161,7 @@ namespace com.csutil.model.ecs {
 
         /// <summary> Combines the local pose of the entity with the pose of all its parents </summary>
         public static Matrix4x4 GlobalPoseMatrix<T>(this IEntity<T> self) where T : IEntityData {
+            self.ThrowErrorIfDisposed();
             var lp = self.LocalPose;
             Matrix4x4 localPose = lp.HasValue ? lp.Value : Matrix4x4.Identity;
             var parent = self.GetParent();
@@ -157,12 +179,14 @@ namespace com.csutil.model.ecs {
         }
 
         public static Matrix4x4 ToLocalPose<T>(this IEntity<T> self, Matrix4x4 globalPose) where T : IEntityData {
+            self.ThrowErrorIfDisposed();
             var parent = self.GetParent();
             if (parent == null) { return globalPose; }
             return parent.GlobalPoseMatrix().Inverse() * globalPose;
         }
 
         public static Pose3d GlobalPose<T>(this IEntity<T> self) where T : IEntityData {
+            self.ThrowErrorIfDisposed();
             return self.GlobalPoseMatrix().ToPose();
         }
 
@@ -179,6 +203,7 @@ namespace com.csutil.model.ecs {
         }
 
         public static Pose3d LocalPose<T>(this IEntity<T> self) where T : IEntityData {
+            self.ThrowErrorIfDisposed();
             var localPose = self.LocalPose;
             if (!localPose.HasValue) { return Matrix4x4.Identity.ToPose(); }
             return localPose.Value.ToPose();
@@ -200,6 +225,7 @@ namespace com.csutil.model.ecs {
         /// Recursively creates variants of all entities in the subtree of the entity and returns a new root entity that has the variant ids in its children lists
         /// </summary>
         public static IEntity<T> CreateVariant<T>(this IEntity<T> self, out IReadOnlyDictionary<string, string> resultIdLookupTable) where T : IEntityData {
+            self.ThrowErrorIfDisposed();
             var all = self.GetChildrenTreeBreadthFirst().ToList();
             resultIdLookupTable = all.ToDictionary(x => x.Id, x => "" + GuidV2.NewGuid());
             var fullSubtreeLeavesFirst = all.Skip(1).Reverse();
@@ -212,12 +238,13 @@ namespace com.csutil.model.ecs {
             return result;
         }
 
-        public static IEntity<T> GetChild<T>(this IEntity<T> mageEnemy, string name) where T : IEntityData {
-            return mageEnemy.GetChildren().Single(x => x.Name == name);
+        public static IEntity<T> GetChild<T>(this IEntity<T> self, string name) where T : IEntityData {
+            return self.GetChildren().Single(x => x.Name == name);
         }
 
         /// <summary> Returns the full subtree under the entity in a breath first order </summary>
         public static IEnumerable<IEntity<T>> GetChildrenTreeBreadthFirst<T>(this IEntity<T> self) where T : IEntityData {
+            self.ThrowErrorIfDisposed();
             return TreeFlattenTraverse.BreadthFirst(self, x => x.GetChildren());
         }
 
@@ -232,6 +259,7 @@ namespace com.csutil.model.ecs {
         }
 
         public static bool IsActiveSelf<T>(this IEntity<T> self) where T : IEntityData {
+            self.ThrowErrorIfDisposed();
             return self.IsActive;
         }
 
@@ -240,6 +268,7 @@ namespace com.csutil.model.ecs {
         }
 
         public static bool IsActiveInHierarchy<T>(this IEntity<T> self) where T : IEntityData {
+            self.ThrowErrorIfDisposed();
             return self.IsActive && self.CollectAllParents().Map(id => self.Ecs.GetEntity(id)).All(x => x.IsActive);
         }
 

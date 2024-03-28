@@ -147,6 +147,7 @@ namespace com.csutil.model.ecs {
                 }
             }
             entity.Data = updatedEntityData;
+            UpdateVariantsLookup(entity.Data);
             // At this point in the update method it is known that the entity really changed  
             OnIEntityUpdated?.Invoke(entity, UpdateType.Update, oldEntryData, updatedEntityData);
             entity.OnUpdate?.Invoke(oldEntryData, updatedEntityData);
@@ -198,8 +199,13 @@ namespace com.csutil.model.ecs {
         private Task Destroy(string entityId) {
             var entity = _entities[entityId] as Entity;
             _entities.Remove(entityId);
+            if (_variants.ContainsKey(entityId)) {
+                _variants.Remove(entityId);
+            }
             if (entity.TemplateId != null) {
-                _variants.Remove(entity.TemplateId);
+                if (!_variants.RemoveFromValues(entity.TemplateId, entityId)) {
+                    throw new InvalidOperationException("Failed to remove variant id from template variants");
+                }
             }
             var entityData = entity.Data;
             OnIEntityUpdated?.Invoke(entity, UpdateType.Remove, entityData, default);

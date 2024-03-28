@@ -22,6 +22,20 @@ namespace com.csutil {
             self[key].Add(value);
         }
 
+        public static bool RemoveFromValues<T, V>(this IDictionary<T, HashSet<V>> self, T key, V value) {
+            if (self.TryGetValue(key, out HashSet<V> values)) {
+                if (values.Remove(value)) {
+                    if (values.IsEmpty()) {
+                        self.Remove(key);
+                    } else {
+                        self[key] = values;
+                    }
+                    return true;
+                }
+            }
+            return false;
+        }
+
         public static V GetValue<T, V>(this IDictionary<T, V> self, T key, V fallback) {
             return self.TryGetValue(key, out V value) ? value : fallback;
         }
