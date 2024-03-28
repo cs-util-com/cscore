@@ -293,23 +293,23 @@ namespace com.csutil.tests.model.esc {
                 }
 
                 // Define a base enemy template with a sword:
-                var baseEnemy = ecs.Add(new Entity() {
+                var enemyTemplate = ecs.Add(new Entity() {
                     Name = "EnemyTemplate",
                     Components = CreateComponents(new EnemyComponent() { Health = 100, Mana = 0 })
                 });
-                baseEnemy.AddChild(new Entity() {
+                enemyTemplate.AddChild(new Entity() {
                     Name = "Sword",
                     Components = CreateComponents(new SwordComponent() { Damage = 10 })
                 });
-                await baseEnemy.SaveChanges();
+                await enemyTemplate.SaveChanges();
 
                 // Accessing components and children entities: 
-                Assert.NotNull(baseEnemy.GetComponent<EnemyComponent>());
-                Assert.Null(baseEnemy.GetComponent<SwordComponent>());
-                Assert.NotNull(baseEnemy.GetChildren().Single().GetComponent<SwordComponent>());
+                Assert.NotNull(enemyTemplate.GetComponent<EnemyComponent>());
+                Assert.Null(enemyTemplate.GetComponent<SwordComponent>());
+                Assert.NotNull(enemyTemplate.GetChildren().Single().GetComponent<SwordComponent>());
 
                 // Define a variant of the base enemy which is stronger and has a shield:
-                var bossEnemy = baseEnemy.CreateVariant();
+                var bossEnemy = enemyTemplate.CreateVariant();
                 bossEnemy.Data.Name = "BossEnemy";
                 bossEnemy.GetComponent<EnemyComponent>().Health = 200;
                 bossEnemy.AddChild(new Entity() {
@@ -319,16 +319,16 @@ namespace com.csutil.tests.model.esc {
                 await bossEnemy.SaveChanges();
 
                 // Define a mage variant that has mana but no sword
-                var mageEnemy = baseEnemy.CreateVariant();
+                var mageEnemy = enemyTemplate.CreateVariant();
                 mageEnemy.Data.Name = "MageEnemy";
                 mageEnemy.GetComponent<EnemyComponent>().Mana = 100;
                 await mageEnemy.SaveChanges();
 
-                Assert.NotSame(mageEnemy, baseEnemy);
-                Assert.NotSame(mageEnemy.Data, baseEnemy.Data);
+                Assert.NotSame(mageEnemy, enemyTemplate);
+                Assert.NotSame(mageEnemy.Data, enemyTemplate.Data);
 
                 var sword = mageEnemy.GetChild("Sword");
-                Assert.NotEqual(sword, baseEnemy.GetChild("Sword"));
+                Assert.NotEqual(sword, enemyTemplate.GetChild("Sword"));
                 Assert.True(sword.IsVariant());
 
                 // Switching the parent of the sword from the mage to the boss enemy should fail
@@ -351,8 +351,8 @@ namespace com.csutil.tests.model.esc {
                 Assert.Equal(3, bossEnemy.GetChildren().Count());
 
                 // Updates to the prefabs also result in the variants being updated
-                baseEnemy.GetComponent<EnemyComponent>().Health = 150;
-                await baseEnemy.SaveChanges();
+                enemyTemplate.GetComponent<EnemyComponent>().Health = 150;
+                await enemyTemplate.SaveChanges();
 
                 // The mage enemy health wasnt modified so with the template update it now has also 150 health:
                 Assert.Equal(150, mageEnemy.GetComponent<EnemyComponent>().Health);
@@ -366,7 +366,7 @@ namespace com.csutil.tests.model.esc {
                 bossEnemy.GetComponent<EnemyComponent>().Mana = 50;
                 // These boss enemy changes are NOT persisted (no call to SaveChanges) so they are lost once
                 // baseEnemy saves its changes (and with that also updates all direct and indirect variants):
-                await baseEnemy.SaveChanges();
+                await enemyTemplate.SaveChanges();
                 // The health is back to the 200 value as it was before and the mana is back to 0:
                 Assert.Equal(200, bossEnemy.GetComponent<EnemyComponent>().Health);
                 Assert.Equal(0, bossEnemy.GetComponent<EnemyComponent>().Mana);
@@ -376,12 +376,13 @@ namespace com.csutil.tests.model.esc {
 
                 // All created entities are added to the scene graph and persisted to disk
                 var scene = ecs.Add(new Entity() { Name = "Scene" });
-                var enemy1 = scene.AddChild(baseEnemy.CreateVariant());
-                enemy1.Data.LocalPose = Pose3d.NewMatrix(new Vector3(1, 0, 0));
-                var enemy2 = scene.AddChild(bossEnemy.CreateVariant());
-                enemy2.Data.LocalPose = Pose3d.NewMatrix(new Vector3(0, 0, 1));
-                var enemy3 = scene.AddChild(mageEnemy.CreateVariant());
-                enemy3.Data.LocalPose = Pose3d.NewMatrix(new Vector3(-1, 0, 0));
+                var baseVariant3 = scene.AddChild(enemyTemplate.CreateVariant());
+                baseVariant3.Data.Name = "Base Variant 3";
+                baseVariant3.Data.LocalPose = Pose3d.NewMatrix(new Vector3(1, 0, 0));
+                var bossVariant = scene.AddChild(bossEnemy.CreateVariant());
+                bossVariant.Data.LocalPose = Pose3d.NewMatrix(new Vector3(0, 0, 1));
+                var mageVariant = scene.AddChild(mageEnemy.CreateVariant());
+                mageVariant.Data.LocalPose = Pose3d.NewMatrix(new Vector3(-1, 0, 0));
 
                 await scene.SaveChanges();
 
@@ -402,27 +403,34 @@ namespace com.csutil.tests.model.esc {
                 var scene = ecs.FindEntitiesWithName("Scene").Single();
 
                 Assert.Equal(3, scene.GetChildren().Count());
-                var enemy1 = scene.GetChildren().ElementAt(0);
-                Assert.Equal(new Vector3(1, 0, 0), enemy1.LocalPose().position);
-                var enemy2 = scene.GetChildren().ElementAt(1);
-                Assert.NotNull(enemy2.GetComponentInChildren<Entity, ShieldComponent>());
+                var baseVariant3 = scene.GetChildren().ElementAt(0);
+                Assert.Equal("Base Variant 3", baseVariant3.Name);
+                Assert.Equal(new Vector3(1, 0, 0), baseVariant3.LocalPose().position);
+                var mageVariant = scene.GetChildren().ElementAt(1);
+                Assert.NotNull(mageVariant.GetComponentInChildren<Entity, ShieldComponent>());
 
                 {
                     // Destroying / deleting templates causes variants to inherit from the
                     // parent template (or changing to not be a variant anymore):
-                    Assert.True(enemy1.IsVariant());
-                    Assert.False(enemy1.IsTemplate());
-                    Assert.True(enemy2.IsVariant());
-                    Assert.False(enemy2.IsTemplate());
-                    Assert.True(enemy1.TryGetTemplate(out var enemyTemplate));
+                    Assert.True(baseVariant3.IsVariant());
+                    Assert.False(baseVariant3.IsTemplate());
+                    Assert.True(mageVariant.IsVariant());
+                    Assert.False(mageVariant.IsTemplate());
+                    Assert.True(baseVariant3.TryGetTemplate(out var enemyTemplate));
                     {
                         Assert.True(enemyTemplate.IsTemplate());
                         Assert.Equal("EnemyTemplate", enemyTemplate.Name);
-                        Assert.True(enemyTemplate.Ecs.TryGetVariants(enemyTemplate.Id, out var variants1));
-                        Assert.Equal(3, variants1.Count());
+                        Assert.True(enemyTemplate.Ecs.TryGetVariants(enemyTemplate.Id, out var enemyTemplateVariants));
+                        Assert.Equal(3, enemyTemplateVariants.Count());
+                        var boss = enemyTemplateVariants.Single(x => x.Name == "BossEnemy");
+                        var mage = enemyTemplateVariants.Single(x => x.Name == "MageEnemy");
+                        var baseVar3 = enemyTemplateVariants.Single(x => x.Name == "Base Variant 3");
+                        Assert.True(boss.IsTemplate());
+                        Assert.True(mage.IsTemplate());
+                        Assert.False(baseVar3.IsTemplate());
                     }
 
-                    Assert.True(enemy2.TryGetTemplate(out var bossEnemy));
+                    Assert.True(mageVariant.TryGetTemplate(out var bossEnemy));
                     Assert.True(enemyTemplate.IsTemplate());
                     Assert.False(enemyTemplate.IsVariant());
                     Assert.True(bossEnemy.IsTemplate());
@@ -435,33 +443,34 @@ namespace com.csutil.tests.model.esc {
                     Assert.True(await bossEnemy.Destroy());
                     Assert.True(bossEnemy.IsDestroyed());
                     // The variant of the destroyed template is now based on the parent template:
-                    Assert.False(enemy2.IsDestroyed());
-                    Assert.True(enemy2.IsVariant());
-                    Assert.True(enemy2.TryGetTemplate(out var newTemplate2));
+                    Assert.False(mageVariant.IsDestroyed());
+                    Assert.True(mageVariant.IsVariant());
+                    Assert.True(mageVariant.TryGetTemplate(out var newTemplate2));
                     Assert.NotEqual(bossEnemy.Id, newTemplate2.Id);
                     Assert.Equal("EnemyTemplate", newTemplate2.Name);
+                    Assert.DoesNotContain(bossEnemy.Id, templatesIo.GetAllEntityIds());
+                    Assert.Contains(enemyTemplate.Id, templatesIo.GetAllEntityIds());
 
                     {
                         Assert.True(enemyTemplate.IsTemplate());
                         Assert.True(enemyTemplate.Ecs.TryGetVariants(enemyTemplate.Id, out var variants1));
                         Assert.Equal(2, variants1.Count());
-
                     }
                     Assert.True(await enemyTemplate.Destroy());
                     await enemyTemplate.SaveChanges();
                     Assert.True(enemyTemplate.IsDestroyed());
-                    Assert.False(enemy1.IsDestroyed());
+                    Assert.False(baseVariant3.IsDestroyed());
                     // Since template1 did not have a parent template enemy1 is no longer a variant:
-                    enemy1.TryGetTemplate(out var newTemplate1);
+                    baseVariant3.TryGetTemplate(out var newTemplate1);
                     Assert.Equal(null, newTemplate1);
-                    Assert.False(enemy1.IsVariant());
+                    Assert.False(baseVariant3.IsVariant());
 
                     // Destroying a variant does not affect the parent template:
-                    var firstChildInBossEnemyVariant = enemy2.GetChildren().First();
+                    var firstChildInBossEnemyVariant = mageVariant.GetChildren().First();
                     Assert.True(await firstChildInBossEnemyVariant.Destroy());
                     await firstChildInBossEnemyVariant.SaveChanges();
                     Assert.True(firstChildInBossEnemyVariant.IsDestroyed());
-                    Assert.DoesNotContain(firstChildInBossEnemyVariant, enemy2.GetChildren());
+                    Assert.DoesNotContain(firstChildInBossEnemyVariant, mageVariant.GetChildren());
                     var firstChildInBossEnemyTemplate = bossEnemy.GetChildren().First();
                     Assert.False(firstChildInBossEnemyTemplate.IsDestroyed());
                     Assert.Contains(firstChildInBossEnemyTemplate, bossEnemy.GetChildren());
