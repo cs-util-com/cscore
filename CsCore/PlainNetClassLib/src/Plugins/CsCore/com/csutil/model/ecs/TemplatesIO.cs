@@ -105,11 +105,14 @@ namespace com.csutil.model.ecs {
             return _entityDir.GetChild(entityId);
         }
 
-        public void Delete(string entityId) {
+        public async Task Delete(string entityId) {
             if (EntityCache.Remove(entityId)) {
                 var entityFile = GetEntityFileForId(entityId);
                 if (entityFile.Exists) {
-                    entityFile.DeleteV2();
+                    await TaskV2.TryWithExponentialBackoff(() => {
+                        entityFile.DeleteV2();
+                        return Task.CompletedTask;
+                    }, maxNrOfRetries: 3, initialExponent: 4);
                 }
             }
         }

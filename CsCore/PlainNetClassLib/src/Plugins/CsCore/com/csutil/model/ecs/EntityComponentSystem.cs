@@ -36,7 +36,7 @@ namespace com.csutil.model.ecs {
 
             public virtual void Dispose() {
                 IsDisposed = DisposeState.DisposingStarted;
-                if (Ecs != null) { Ecs.Destroy(this); }
+                if (Ecs != null) { Ecs.Destroy(this).LogOnError(); }
                 Ecs = null;
                 IsDisposed = DisposeState.Disposed;
             }
@@ -72,6 +72,7 @@ namespace com.csutil.model.ecs {
         public enum UpdateType { Add, Remove, Update }
 
         public EntityComponentSystem(TemplatesIO<T> templatesIo, bool isModelImmutable) {
+            templatesIo.ThrowErrorIfNull("templatesIo");
             TemplatesIo = templatesIo;
             IsModelImmutable = isModelImmutable;
         }
@@ -188,13 +189,13 @@ namespace com.csutil.model.ecs {
             return _entities[entityId];
         }
 
-        public void Destroy(IEntity<T> entityToDestroy) {
+        public Task Destroy(IEntity<T> entityToDestroy) {
             this.ThrowErrorIfDisposed();
-            if (!entityToDestroy.IsAlive()) { return; }
-            Destroy(entityToDestroy.Id);
+            if (!entityToDestroy.IsAlive()) { return Task.CompletedTask; }
+            return Destroy(entityToDestroy.Id);
         }
 
-        private void Destroy(string entityId) {
+        private Task Destroy(string entityId) {
             var entity = _entities[entityId] as Entity;
             _entities.Remove(entityId);
             if (entity.TemplateId != null) {
@@ -204,6 +205,7 @@ namespace com.csutil.model.ecs {
             OnIEntityUpdated?.Invoke(entity, UpdateType.Remove, entityData, default);
             entity.DisposeV2();
             DisposeEntityData(entityData);
+            return TemplatesIo.Delete(entityId);
         }
 
         private static void DisposeEntityData(T entityData) {

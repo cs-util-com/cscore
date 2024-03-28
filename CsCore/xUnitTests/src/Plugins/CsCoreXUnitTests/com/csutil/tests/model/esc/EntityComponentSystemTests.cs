@@ -91,7 +91,9 @@ namespace com.csutil.tests.model.esc {
         [Fact]
         public async Task ExampleUsageOfEcs() {
 
-            var ecs = new EntityComponentSystem<Entity>(null, isModelImmutable: false);
+            var entityDir = EnvironmentV2.instance.GetNewInMemorySystem();
+            var templatesIo = new TemplatesIO<Entity>(entityDir);
+            var ecs = new EntityComponentSystem<Entity>(templatesIo, isModelImmutable: false);
 
             var entityGroup = ecs.Add(new Entity() {
                 LocalPose = Matrix4x4.CreateRotationY(MathF.PI / 2) // 90 degree rotation around y axis
@@ -145,8 +147,8 @@ namespace com.csutil.tests.model.esc {
             Assert.Equal(3, ecs.Entities.Count);
             Assert.Same(e2, entityGroup.GetChildren().Single());
             Assert.Null(e1.GetParent());
-            Assert.True(e1.Destroy());
-            Assert.False(e1.Destroy());
+            Assert.True(await e1.Destroy());
+            Assert.False(await e1.Destroy());
             // e1 is now fully removed from the scene graph and destroyed:
             Assert.Equal(2, ecs.Entities.Count);
 
@@ -155,7 +157,7 @@ namespace com.csutil.tests.model.esc {
             var e3 = e2.AddChild(new Entity());
             var e4 = e3.AddChild(new Entity());
 
-            Assert.True(e2.Destroy());
+            Assert.True(await e2.Destroy());
             Assert.Empty(entityGroup.GetChildren());
 
             Assert.True(e2.IsDestroyed());
@@ -174,7 +176,9 @@ namespace com.csutil.tests.model.esc {
              * global pose of the most inner entity is back at the origin (validated that
              * same result is achieved with Unity) */
 
-            var ecs = new EntityComponentSystem<Entity>(null, isModelImmutable: false);
+            var entityDir = EnvironmentV2.instance.GetNewInMemorySystem();
+            var templatesIo = new TemplatesIO<Entity>(entityDir);
+            var ecs = new EntityComponentSystem<Entity>(templatesIo, isModelImmutable: false);
 
             var e1 = ecs.Add(new Entity() {
                 LocalPose = Pose3d.NewMatrix(new Vector3(0, 1, 0))
@@ -325,6 +329,7 @@ namespace com.csutil.tests.model.esc {
 
                 var sword = mageEnemy.GetChild("Sword");
                 Assert.NotEqual(sword, baseEnemy.GetChild("Sword"));
+                Assert.True(sword.IsVariant());
 
                 // Switching the parent of the sword from the mage to the boss enemy should fail
                 Assert.Throws<InvalidOperationException>(() => bossEnemy.AddChild(sword));
@@ -339,6 +344,11 @@ namespace com.csutil.tests.model.esc {
 
                 await bossEnemy.SaveChanges();
                 await mageEnemy.SaveChanges();
+
+                // The sword is still a variant of the sword in the EnemyTemplate
+                Assert.True(sword.IsVariant());
+                // The BossEnemy should now have 3 children (2 swords and 1 shield):
+                Assert.Equal(3, bossEnemy.GetChildren().Count());
 
                 // Updates to the prefabs also result in the variants being updated
                 baseEnemy.GetComponent<EnemyComponent>().Health = 150;
@@ -422,7 +432,7 @@ namespace com.csutil.tests.model.esc {
                         Assert.True(bossEnemy.TryGetTemplate(out var bossEnemyTemplate));
                         Assert.Same(enemyTemplate, bossEnemyTemplate);
                     }
-                    bossEnemy.Destroy();
+                    Assert.True(await bossEnemy.Destroy());
                     Assert.True(bossEnemy.IsDestroyed());
                     // The variant of the destroyed template is now based on the parent template:
                     Assert.False(enemy2.IsDestroyed());
@@ -437,7 +447,8 @@ namespace com.csutil.tests.model.esc {
                         Assert.Equal(2, variants1.Count());
 
                     }
-                    enemyTemplate.Destroy();
+                    Assert.True(await enemyTemplate.Destroy());
+                    await enemyTemplate.SaveChanges();
                     Assert.True(enemyTemplate.IsDestroyed());
                     Assert.False(enemy1.IsDestroyed());
                     // Since template1 did not have a parent template enemy1 is no longer a variant:
@@ -447,7 +458,8 @@ namespace com.csutil.tests.model.esc {
 
                     // Destroying a variant does not affect the parent template:
                     var firstChildInBossEnemyVariant = enemy2.GetChildren().First();
-                    firstChildInBossEnemyVariant.Destroy();
+                    Assert.True(await firstChildInBossEnemyVariant.Destroy());
+                    await firstChildInBossEnemyVariant.SaveChanges();
                     Assert.True(firstChildInBossEnemyVariant.IsDestroyed());
                     Assert.DoesNotContain(firstChildInBossEnemyVariant, enemy2.GetChildren());
                     var firstChildInBossEnemyTemplate = bossEnemy.GetChildren().First();
@@ -534,7 +546,7 @@ namespace com.csutil.tests.model.esc {
             child.RemoveFromParent(RemoveParentIdFromChild, RemoveChildIdFromParent);
         }
 
-        public static bool Destroy(this IEntity<Entity> self) {
+        public static Task<bool> Destroy(this IEntity<Entity> self) {
             return self.Destroy(RemoveChildIdFromParent, ChangeTemplate);
         }
 

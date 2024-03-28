@@ -89,7 +89,7 @@ namespace com.csutil.model.ecs {
             self.Ecs.Update(setActive(self, newIsActive));
         }
 
-        public static bool Destroy<T>(this IEntity<T> self, Func<IEntity<T>, string, T> removeChildIdFromParent, Func<IEntity<T>, string, T> changeTemplate) where T : IEntityData {
+        public static async Task<bool> Destroy<T>(this IEntity<T> self, Func<IEntity<T>, string, T> removeChildIdFromParent, Func<IEntity<T>, string, T> changeTemplate) where T : IEntityData {
             if (self.IsDestroyed()) { return false; }
 
             var ecs = self.Ecs;
@@ -97,24 +97,24 @@ namespace com.csutil.model.ecs {
             if (ecs.TryGetVariants(self.Id, out var variants)) {
                 foreach (var variant in variants) {
                     var updatedVariant = changeTemplate(variant, newTemplate);
-                    ecs.Update(updatedVariant);
+                    await ecs.Update(updatedVariant);
                 }
             }
 
             if (self.ParentId != null) {
                 self.RemoveFromParent(c => c.Data, removeChildIdFromParent);
             }
-            self.DestroyAllChildrenRecursively(removeChildIdFromParent, changeTemplate);
-            ecs.Destroy(self);
+            await self.DestroyAllChildrenRecursively(removeChildIdFromParent, changeTemplate);
+            await ecs.Destroy(self);
             return true;
         }
 
-        private static void DestroyAllChildrenRecursively<T>(this IEntity<T> self, Func<IEntity<T>, string, T> removeChildIdFromParent, Func<IEntity<T>, string, T> changeTemplate) where T : IEntityData {
+        private static async Task DestroyAllChildrenRecursively<T>(this IEntity<T> self, Func<IEntity<T>, string, T> removeChildIdFromParent, Func<IEntity<T>, string, T> changeTemplate) where T : IEntityData {
             var children = self.GetChildren();
             if (children != null) {
                 var childrenToDelete = children.ToList();
                 foreach (var child in childrenToDelete) {
-                    child.Destroy(removeChildIdFromParent, changeTemplate);
+                    await child.Destroy(removeChildIdFromParent, changeTemplate);
                 }
             }
         }
@@ -185,6 +185,7 @@ namespace com.csutil.model.ecs {
         }
 
         public static Task SaveChanges<T>(this IEntity<T> self) where T : IEntityData {
+            self.ThrowErrorIfDisposed();
             var fullSubtree = self.GetChildrenTreeBreadthFirst();
             var tasks = new List<Task>();
             foreach (var e in fullSubtree) { tasks.Add(e.Ecs.Update(e.Data)); }
