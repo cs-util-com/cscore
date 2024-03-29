@@ -218,6 +218,16 @@ namespace com.csutil.tests.model.esc {
             e5.SetActiveSelf(true);
             Assert.True(e5.IsActiveInHierarchy());
 
+            var e2GlobalPose = e2.GlobalPose();
+            Assert_AlmostEqual(new Vector3(0, 2, 0), e2GlobalPose.position);
+            var localE2Pos = e1.ToLocalPose(e2.GlobalPose().ToMatrix4x4());
+            Assert_AlmostEqual(new Vector3(0, 1, 0), localE2Pos.ToPose().position);
+            var identity = e1.ToLocalPose(e1.GlobalPose().ToMatrix4x4());
+            Assert_AlmostEqual(Vector3.Zero, identity.ToPose().position);
+            
+            var calculatedLocale2Pose = e2.CalcLocalPoseInParent(e2GlobalPose.ToMatrix4x4());
+            Assert_AlmostEqual(new Vector3(0, 1, 0), calculatedLocale2Pose.ToPose().position);
+
         }
 
         [Fact]

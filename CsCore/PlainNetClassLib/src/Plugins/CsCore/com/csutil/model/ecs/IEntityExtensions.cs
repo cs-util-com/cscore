@@ -178,16 +178,26 @@ namespace com.csutil.model.ecs {
             return localPose * parent.GlobalPoseMatrix(allEntities);
         }
 
-        public static Matrix4x4 ToLocalPose<T>(this IEntity<T> self, Matrix4x4 globalPose) where T : IEntityData {
+        public static Matrix4x4 CalcLocalPoseInParent<T>(this IEntity<T> self, Matrix4x4 globalPose) where T : IEntityData {
             self.ThrowErrorIfDisposed();
             var parent = self.GetParent();
             if (parent == null) { return globalPose; }
-            return parent.GlobalPoseMatrix().Inverse() * globalPose;
+            return parent.ToLocalPose(globalPose);
+        }
+        
+        public static Matrix4x4 ToLocalPose<T>(this IEntity<T> self, Matrix4x4 globalPose) where T : IEntityData {
+            self.ThrowErrorIfDisposed();
+            return self.GlobalPoseMatrix().Inverse() * globalPose;
         }
 
         public static Pose3d GlobalPose<T>(this IEntity<T> self) where T : IEntityData {
             self.ThrowErrorIfDisposed();
             return self.GlobalPoseMatrix().ToPose();
+        }
+
+        public static Pose3d ToPose(this Matrix4x4? matrix) {
+            if (matrix == null) { return null; }
+            return matrix.Value.ToPose();
         }
 
         public static Pose3d ToPose(this Matrix4x4 matrix) {

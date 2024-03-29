@@ -82,6 +82,8 @@ namespace com.csutil.model.ecs {
             this.scale = scale;
         }
 
+        public override string ToString() { return $"Pose3d(pos={position}, rot={rotation}, scale={scale})"; }
+
         protected bool Equals(Pose3d other) {
             return position.Equals(other.position) && rotation.Equals(other.rotation) && scale.Equals(other.scale);
         }
