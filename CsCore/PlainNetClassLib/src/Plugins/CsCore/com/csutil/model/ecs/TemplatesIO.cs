@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using com.csutil.json;
 using JsonDiffPatchDotNet;
@@ -57,6 +58,12 @@ namespace com.csutil.model.ecs {
             }
             await Task.WhenAll(tasks);
         }
+        
+        public async Task<List<T>> LoadAllEntitiesFromDisk() {
+            this.ThrowErrorIfDisposed();
+            await LoadAllTemplateFilesIntoMemory();
+            return GetAllEntityIds().Map(entityId => ComposeEntityInstance(entityId)).ToList();
+        }
 
         private void LoadJTokenFromFile(FileEntry templateFile, JsonSerializer jsonSerializer) {
             var templateId = templateFile.Name;
@@ -68,6 +75,7 @@ namespace com.csutil.model.ecs {
         }
 
         public Task SaveChanges(T instance) {
+            this.ThrowErrorIfDisposed();
             var entityId = instance.GetId();
             var json = UpdateJsonState(instance);
             var file = GetEntityFileForId(entityId);
@@ -106,6 +114,7 @@ namespace com.csutil.model.ecs {
         }
 
         public async Task Delete(string entityId) {
+            this.ThrowErrorIfDisposed();
             if (EntityCache.Remove(entityId)) {
                 var entityFile = GetEntityFileForId(entityId);
                 if (entityFile.Exists) {
@@ -128,6 +137,7 @@ namespace com.csutil.model.ecs {
         /// <param name="newIdsLookup"> Requires to pass in a filled dictionary with the current entity ids
         /// mapping to new ones that will be used for the new instances </param>
         public T CreateVariantInstanceOf(T entity, IReadOnlyDictionary<string, string> newIdsLookup) {
+            this.ThrowErrorIfDisposed();
             var templateId = entity.GetId();
             if (!IsSavedToFiles(templateId)) {
                 throw new InvalidOperationException($"The passed entity {entity} first needs to be saved once before it can be used as a template");
@@ -176,6 +186,7 @@ namespace com.csutil.model.ecs {
         }
 
         public IEnumerable<string> GetAllEntityIds() {
+            this.ThrowErrorIfDisposed();
             return _entityDir.EnumerateFiles().Map(x => x.Name);
         }
 

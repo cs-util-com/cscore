@@ -177,12 +177,18 @@ namespace com.csutil.model.ecs {
             }
         }
 
+        [Obsolete("Use LoadAllEntitiesFromDisk() instead", true)]
         public async Task LoadSceneGraphFromDisk() {
             this.ThrowErrorIfDisposed();
             await TemplatesIo.LoadAllTemplateFilesIntoMemory();
             foreach (var entityId in TemplatesIo.GetAllEntityIds()) {
                 Add(TemplatesIo.ComposeEntityInstance(entityId));
             }
+        }
+
+        public Task<List<T>> LoadAllEntitiesFromDisk() {
+            this.ThrowErrorIfDisposed();
+            return TemplatesIo.LoadAllEntitiesFromDisk();
         }
 
         public IEntity<T> GetEntity(string entityId) {

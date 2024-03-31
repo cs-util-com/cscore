@@ -224,7 +224,7 @@ namespace com.csutil.tests.model.esc {
             Assert_AlmostEqual(new Vector3(0, 1, 0), localE2Pos.ToPose().position);
             var identity = e1.ToLocalPose(e1.GlobalPose().ToMatrix4x4());
             Assert_AlmostEqual(Vector3.Zero, identity.ToPose().position);
-            
+
             var calculatedLocale2Pose = e2.CalcLocalPoseInParent(e2GlobalPose.ToMatrix4x4());
             Assert_AlmostEqual(new Vector3(0, 1, 0), calculatedLocale2Pose.ToPose().position);
 
@@ -405,7 +405,13 @@ namespace com.csutil.tests.model.esc {
                 var templatesIo = new TemplatesIO<Entity>(dir);
                 var ecs = new EntityComponentSystem<Entity>(templatesIo, isModelImmutable: false);
                 Assert.Empty(ecs.Entities);
-                await ecs.LoadSceneGraphFromDisk();
+
+                // Load the scene from disk and continue editing it:
+                var entitiesOnDisk = await ecs.LoadAllEntitiesFromDisk();
+                foreach (var entity in entitiesOnDisk) {
+                    ecs.Add(entity);
+                }
+
                 Assert.Equal(17, dir.EnumerateFiles().Count());
                 Assert.Equal(17, ecs.Entities.Count);
                 // The user loads the scene from disk and can continue editing it
