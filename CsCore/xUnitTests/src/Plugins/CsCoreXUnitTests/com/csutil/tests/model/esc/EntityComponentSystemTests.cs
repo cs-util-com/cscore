@@ -228,6 +228,19 @@ namespace com.csutil.tests.model.esc {
             var calculatedLocale2Pose = e2.CalcLocalPoseInParent(e2GlobalPose.ToMatrix4x4());
             Assert_AlmostEqual(new Vector3(0, 1, 0), calculatedLocale2Pose.ToPose().position);
 
+            { // The global pose of e2 should stay the same when its removed or added to new parents:
+                Assert_AlmostEqual(new Vector3(0, 2, 0), e2.GlobalPose().position);
+                // Change the partent of e2, the global pose of e2 should be the same as before:
+                e2.RemoveFromParent();
+                Assert.Null(e2.GetParent());
+                Assert_AlmostEqual(new Vector3(0, 2, 0), e2.GlobalPose().position);
+                e2.SetParent(e1);
+                // Add e2 back to e1, the global pose of e2 should be the same as before:
+                Assert_AlmostEqual(new Vector3(0, 2, 0), e2.GlobalPose().position);
+                e2.SetParent(e1);
+                Assert_AlmostEqual(new Vector3(0, 2, 0), e2.GlobalPose().position);
+            }
+
         }
 
         [Fact]
@@ -591,12 +604,27 @@ namespace com.csutil.tests.model.esc {
             return parent.AddChild(childData, SetParentIdInChild, AddToChildrenListOfParent);
         }
 
-        public static IEntity<Entity> AddChild(this IEntity<Entity> parent, IEntity<Entity> childData) {
-            return parent.AddChild(childData, SetParentIdInChild, AddToChildrenListOfParent);
+        public static IEntity<Entity> SetParent(this IEntity<Entity> self, IEntity<Entity> newParent, bool keepGlobalPose = true) {
+            if (self.ParentId != null) { self.RemoveFromParent(keepGlobalPose); }
+            return newParent.AddChild(self, keepGlobalPose);
         }
 
-        public static void RemoveFromParent(this IEntity<Entity> child) {
+        public static IEntity<Entity> AddChild(this IEntity<Entity> parent, IEntity<Entity> existingChild, bool keepGlobalPose = true) {
+            var oldGlobalPose = existingChild.GlobalPoseMatrix();
+            var updatedChild = parent.AddChild(existingChild, SetParentIdInChild, AddToChildrenListOfParent);
+            if (keepGlobalPose) { updatedChild.SetGlobalPose(oldGlobalPose); }
+            return updatedChild;
+        }
+
+        public static void RemoveFromParent(this IEntity<Entity> child, bool keepGlobalPose = true) {
+            var oldGlobalPose = child.GlobalPoseMatrix();
             child.RemoveFromParent(RemoveParentIdFromChild, RemoveChildIdFromParent);
+            if (keepGlobalPose) { child.SetGlobalPose(oldGlobalPose); }
+        }
+
+        public static void SetGlobalPose(this IEntity<Entity> child, Matrix4x4 globalPose) {
+            var newLocalPose = child.CalcLocalPoseInParent(globalPose);
+            child.Data.LocalPose = newLocalPose;
         }
 
         public static Task<bool> Destroy(this IEntity<Entity> self) {

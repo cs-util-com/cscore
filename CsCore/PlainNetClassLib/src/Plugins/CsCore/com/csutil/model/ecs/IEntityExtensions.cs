@@ -51,24 +51,33 @@ namespace com.csutil.model.ecs {
             return allEntities[self.ParentId];
         }
 
-        public static IEntity<T> AddChild<T>(this IEntity<T> parent, T childData, Func<IEntity<T>, string, T> setParentIdInChild, Func<IEntity<T>, string, T> mutateChildrenListInParentEntity) where T : IEntityData {
+        /// <summary> This method is typically used for newly created entities to add them to the ecs. </summary>
+        public static IEntity<T> AddChild<T>(this IEntity<T> parent, T newEntityData, Func<IEntity<T>, string, T> setParentIdInChild, Func<IEntity<T>, string, T> mutateChildrenListInParentEntity) where T : IEntityData {
             parent.ThrowErrorIfDisposed();
-            var newChild = parent.Ecs.Add(childData);
+            if (newEntityData.ParentId != null) { // The new entity should not have a parent yet
+                throw new InvalidOperationException("Parent already set to " + newEntityData.ParentId);
+            }
+            var newChild = parent.Ecs.Add(newEntityData);
             if (newChild.ParentId != parent.Id) {
                 parent.Ecs.Update(setParentIdInChild(newChild, parent.Id));
             }
             if (newChild.ParentId != parent.Id) {
                 throw new ArgumentException("The childData.ParentId must be the same as the parent.Id: " + parent.Id + " != " + newChild.ParentId);
             }
-            parent.Ecs.Update(mutateChildrenListInParentEntity(parent, childData.Id));
+            parent.Ecs.Update(mutateChildrenListInParentEntity(parent, newEntityData.Id));
             return newChild;
         }
 
+        /// <summary> This method is typically used to add an existing entity to a parent entity. </summary>
+        /// <returns> The updated child entity </returns>
         public static IEntity<T> AddChild<T>(this IEntity<T> parent, IEntity<T> existingChild, Func<IEntity<T>, string, T> setParentIdInChild, Func<IEntity<T>, string, T> mutateChildrenListInParentEntity) where T : IEntityData {
             parent.ThrowErrorIfDisposed();
             existingChild.ThrowErrorIfDisposed();
             if (existingChild.ParentId != null) {
                 throw new InvalidOperationException("Parent already set to " + existingChild.ParentId);
+            }
+            if (parent.Id == existingChild.Id) {
+                throw new InvalidOperationException("The parent and the child are the same entity");
             }
             if (existingChild.ParentId != parent.Id) {
                 parent.Ecs.Update(setParentIdInChild(existingChild, parent.Id));
@@ -88,6 +97,9 @@ namespace com.csutil.model.ecs {
                 child.ThrowErrorIfDisposed();
                 newParent.ThrowErrorIfNull("newParent");
                 newParent.ThrowErrorIfDisposed();
+                if (newParent.Id == child.Id) {
+                    throw new InvalidOperationException("The new parent and the child are the same entity");
+                }
                 if (child.ParentId == newParent.Id) { return child; }
                 // Remove the child from the old parent:
                 if (child.ParentId != null) {
