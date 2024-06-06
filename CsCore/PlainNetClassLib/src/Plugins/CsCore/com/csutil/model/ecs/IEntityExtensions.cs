@@ -201,6 +201,12 @@ namespace com.csutil.model.ecs {
             self.ThrowErrorIfDisposed();
             return self.GlobalPoseMatrix().Inverse() * globalPose;
         }
+        
+        // ToGlobalPose (which takes an IEntity in and a local pose in that entities space and calculates the global pose)
+        public static Matrix4x4 ToGlobalPose<T>(this IEntity<T> self, Matrix4x4 localPose) where T : IEntityData {
+            self.ThrowErrorIfDisposed();
+            return self.GlobalPoseMatrix() * localPose;
+        }
 
         public static Pose3d GlobalPose<T>(this IEntity<T> self) where T : IEntityData {
             self.ThrowErrorIfDisposed();
@@ -278,6 +284,18 @@ namespace com.csutil.model.ecs {
         /// <summary> Recursively searches the entity and all its children until a component of the specified type is found </summary>
         public static V GetComponentInChildren<T, V>(this IEntity<T> self) where T : IEntityData {
             return self.GetComponentsInChildren<T, V>().FirstOrDefault();
+        }
+
+        public static bool TryGetComponentInParents<T, V>(this IEntity<T> self, out V foundComp, out IEntity<T> parent) where T : IEntityData where V : IComponentData {
+            foreach (var parentId in self.CollectAllParents()) {
+                parent = self.Ecs.GetEntity(parentId);
+                if (parent.TryGetComponent(out foundComp)) {
+                    return true;
+                }
+            }
+            parent = default;
+            foundComp = default;
+            return false;
         }
 
         public static bool IsActiveSelf<T>(this IEntity<T> self) where T : IEntityData {
