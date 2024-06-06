@@ -21,7 +21,7 @@ namespace com.csutil.model.ecs {
                 Ecs = ecs;
             }
 
-            public Action<T, T> OnUpdate { get; set; }
+            public Action<T, IEntity<T>> OnUpdate { get; set; }
 
             public string Id => Data.Id;
             public string Name => Data.Name;
@@ -67,7 +67,7 @@ namespace com.csutil.model.ecs {
         /// <summary>
         /// 
         /// </summary>
-        public delegate void IEntityUpdateListener(IEntity<T> iEntityWrapper, UpdateType type, T oldState, T newState);
+        public delegate void IEntityUpdateListener(IEntity<T> iEntity, UpdateType updateType, T oldState, T newState);
 
         public enum UpdateType { Add, Remove, Update }
 
@@ -150,7 +150,15 @@ namespace com.csutil.model.ecs {
             UpdateVariantsLookup(entity.Data);
             // At this point in the update method it is known that the entity really changed  
             OnIEntityUpdated?.Invoke(entity, UpdateType.Update, oldEntryData, updatedEntityData);
-            entity.OnUpdate?.Invoke(oldEntryData, updatedEntityData);
+            entity.OnUpdate?.Invoke(oldEntryData, entity);
+            // Also update all components of that entity that implement IEntityUpdateListener:
+            if (updatedEntityData.Components != null) {
+                foreach (var comp in updatedEntityData.Components.Values) {
+                    if (comp is IParentEntityUpdateListener<T> l) {
+                        l.OnParentEntityUpdate(oldEntryData, entity);
+                    }
+                }
+            }
 
             // If the entry is a template for other entries, then all variants need to be updated:
             if (_variants.TryGetValue(updatedEntityData.Id, out var variantIds)) {

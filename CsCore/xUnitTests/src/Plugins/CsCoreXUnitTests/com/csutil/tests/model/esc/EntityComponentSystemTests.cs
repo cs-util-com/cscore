@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
-using com.csutil.model;
 using com.csutil.model.ecs;
 using Newtonsoft.Json;
 using Xunit;
@@ -98,6 +97,11 @@ namespace com.csutil.tests.model.esc {
             var entityGroup = ecs.Add(new Entity() {
                 LocalPose = Matrix4x4.CreateRotationY(MathF.PI / 2) // 90 degree rotation around y axis
             });
+            entityGroup.OnUpdate = (oldEntityState, updatedEntity) => {
+                Log.MethodEntered(); // The entity changed in the ecs
+                // Since its a mutable datamodel the oldEntityState will already have changed:
+                Assert.Same(oldEntityState, updatedEntity.Data);
+            };
 
             var e1 = entityGroup.AddChild(new Entity() {
                 LocalPose = Matrix4x4.CreateRotationY(-MathF.PI / 2), // -90 degree rotation around y axis
@@ -183,6 +187,10 @@ namespace com.csutil.tests.model.esc {
             var e1 = ecs.Add(new Entity() {
                 LocalPose = Pose3d.NewMatrix(new Vector3(0, 1, 0))
             });
+            e1.OnUpdate = (oldEntityState, updatedEntity) => { // The entity changed in the ecs
+                // Since its a mutable datamodel the oldEntityState will already have changed:
+                Assert.Same(oldEntityState, updatedEntity.Data);
+            };
 
             var e2 = e1.AddChild(new Entity() {
                 LocalPose = Pose3d.NewMatrix(new Vector3(0, 1, 0), 90)
@@ -294,6 +302,10 @@ namespace com.csutil.tests.model.esc {
 
                 {
                     var entity1 = ecs.Add(new Entity() { Name = "Entity1" });
+                    entity1.OnUpdate = (oldEntityState, updatedEntity) => { // The entity changed in the ecs
+                        // Since its a mutable datamodel the oldEntityState will already have changed:
+                        Assert.Same(oldEntityState, updatedEntity.Data);
+                    };
                     var entity11 = entity1.AddChild(new Entity() { Name = "Entity2" });
                     await entity1.SaveChanges();
 
@@ -302,6 +314,14 @@ namespace com.csutil.tests.model.esc {
                     // The ids of the children are different:
                     Assert.NotEqual(entity1.ChildrenIds.Single(), variant1.ChildrenIds.Single());
                     Assert.NotSame(entity1.GetChildren().Single(), variant1.GetChildren().Single());
+
+                    // Ensure that the variant and parent entity1 do not share any event listeners:
+                    Assert.Null(variant1.OnUpdate);
+                    Assert.NotNull(entity1.OnUpdate);
+                    variant1.OnUpdate = (oldEntityState, updatedEntity) => { // The entity changed in the ecs
+                        // Since its a mutable datamodel the oldEntityState will already have changed:
+                        Assert.Same(oldEntityState, updatedEntity.Data);
+                    };
 
                     var variant11 = entity11.CreateVariant();
                     Assert.NotEqual(entity11.Id, variant11.Id);
@@ -568,9 +588,27 @@ namespace com.csutil.tests.model.esc {
             public bool IsActive { get; set; } = true;
         }
 
-        private class EnemyComponent : Component {
+        private class EnemyComponent : Component, IParentEntityUpdateListener<Entity> {
             public int Mana { get; set; }
             public int Health;
+
+            // It is possible for a component to listen to any changes happening to the parent entity
+            // This is only useful for listeners to statechanges that only need to react to changes of the own entity!
+            public void OnParentEntityUpdate(Entity oldEntityState, IEntity<Entity> updatedEntity) {
+                var changeDiff = MergeJson.GetDiffV2(oldEntityState, updatedEntity.Data);
+                // Even in a mutable datamodel (like the one in this test) it will happen when templates or variants change that
+                // entirely new instances of the entities are created, so the changeDiff will not always be empty:
+                if (!changeDiff.IsNullOrEmpty()) {
+                    var entityUpdateDiff = changeDiff.ToString();
+                    Log.MethodEnteredWith(entityUpdateDiff);
+                } else {
+                    Assert.Same(oldEntityState, updatedEntity.Data);
+                }
+                if (this.IsActiveSelf() && updatedEntity.IsActiveInHierarchy()) {
+                    // .. Do some further update logic here that reacts to state change of the entity
+                }
+            }
+
         }
 
         private class SwordComponent : Component {
