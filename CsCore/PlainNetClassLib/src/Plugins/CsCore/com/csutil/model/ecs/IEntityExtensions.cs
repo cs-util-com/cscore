@@ -379,6 +379,11 @@ namespace com.csutil.model.ecs {
             return false;
         }
 
+        public static bool TryGetComponents<V>(this IEntityData self, out IEnumerable<V> components) where V : IComponentData {
+            components = self.Components.Values.OfType<V>();
+            return components.Any();
+        }
+
         public static bool HasComponent<V>(this IEntityData self) where V : IComponentData {
             return self.Components.Values.Any(c => c is V);
         }
