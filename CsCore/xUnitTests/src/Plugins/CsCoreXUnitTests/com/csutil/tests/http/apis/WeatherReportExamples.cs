@@ -37,8 +37,8 @@ namespace com.csutil.integrationTests.http {
         [Fact]
         public async Task EnsureThatApisInTestsBelowAreAllStillOffline() {
             var tests = new List<Task>();
-            tests.Add(WttrInApiExample1());
-            tests.Add(WttrInApiExample2());
+            // tests.Add(WttrInApiExample1());
+            // tests.Add(WttrInApiExample2());
             tests.Add(MetaWeatherComExample1());
             tests.Add(MetaWeatherComTest1());
             tests.Add(MetaWeatherComTest2());

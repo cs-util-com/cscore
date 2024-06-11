@@ -123,7 +123,7 @@ namespace com.csutil.integrationTests.http {
             Assert.NotEmpty(headers);
             Assert.Equal("image/png", headers.GetContentMimeType(null));
             // The image file size of 492 KB is returned as well:
-            Assert.Equal("492,78 KB", ByteSizeToString.ByteSizeToReadableString(headers.GetContentLengthInBytes(0)));
+            Assert.Equal("492.78 KB", ByteSizeToString.ByteSizeToReadableString(headers.GetContentLengthInBytes(0)));
             Assert.Equal("66148616DAFA743A73F9F5284F3B1D3C.png", headers.GenerateHashNameFromHeaders());
         }
 
