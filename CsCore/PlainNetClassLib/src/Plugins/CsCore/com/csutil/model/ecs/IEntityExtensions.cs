@@ -363,7 +363,7 @@ namespace com.csutil.model.ecs {
             return (V)comps.Values.SingleOrDefault(comp => comp is V);
         }
 
-        public static bool TryGetComponent<V>(this IEntityData self, out V comp) where V : IComponentData {
+        public static bool TryGetComponent<V>(this IEntityData self, out V comp) {
             var comps = self.Components;
             // Take a shortcut for the common case where the most requested component has the same id as the entity:
             if (comps.TryGetValue(self.Id, out var comp2) && comp2 is V v) {
@@ -379,7 +379,7 @@ namespace com.csutil.model.ecs {
             return false;
         }
 
-        public static bool TryGetComponents<V>(this IEntityData self, out IEnumerable<V> components) where V : IComponentData {
+        public static bool TryGetComponents<V>(this IEntityData self, out IEnumerable<V> components) {
             components = self.Components.Values.OfType<V>();
             return components.Any();
         }
