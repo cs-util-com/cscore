@@ -36,40 +36,40 @@ namespace com.csutil.integrationTests.model {
             string featureId = "feature1";
 
             {
-                var startDate = DateTimeV2.ParseUtc("01.01.2011");
-                var endDate = DateTimeV2.ParseUtc("19.01.2011");
+                var startDate = DateTimeV2.ParseUtc("2011-01-01");
+                var endDate = DateTimeV2.ParseUtc("2011-01-19");
 
                 SimulateUsage(featureId, 100, t, startDate, endDate);
                 await AssertFeatureUsageDetected(analytics, featureId, 100);
             }
-            t.mockUtcNow = DateTimeV2.ParseUtc("01.02.2011");
+            t.mockUtcNow = DateTimeV2.ParseUtc("2011-02-01");
             await TestAllRules1(analytics, featureId);
 
             { // Simulate more usage in the next 5 days:
-                var startDate = DateTimeV2.ParseUtc("20.01.2011");
-                var endDate = DateTimeV2.ParseUtc("25.01.2011");
+                var startDate = DateTimeV2.ParseUtc("2011-01-20");
+                var endDate = DateTimeV2.ParseUtc("2011-01-25");
 
                 SimulateUsage(featureId, 100, t, startDate, endDate);
                 await AssertFeatureUsageDetected(analytics, featureId, 200);
             }
             // Simulate a month without any usage:
-            t.mockUtcNow = DateTimeV2.ParseUtc("01.03.2011");
+            t.mockUtcNow = DateTimeV2.ParseUtc("2011-03-01");
             await TestAllRules2(analytics, featureId);
 
             { // Simulate that a usage notification is shown and test the related rule:
                 var notificationId = "notification1";
                 var daysAgo = 20;
 
-                t.mockUtcNow = DateTimeV2.ParseUtc("01.03.2011");
+                t.mockUtcNow = DateTimeV2.ParseUtc("2011-03-01");
                 // Simulate that notification1 is shown to the user (e.g. by the usageRule system):
                 AppFlow.TrackEvent(EventConsts.catUsage, EventConsts.SHOW + "_" + notificationId);
 
-                t.mockUtcNow = DateTimeV2.ParseUtc("02.03.2011"); // Simulate a day passing by
+                t.mockUtcNow = DateTimeV2.ParseUtc("2011-03-02"); // Simulate a day passing by
                 UsageRule notificationMinXDaysOld = analytics.NewNotificationMinXDaysOldRule(notificationId, daysAgo);
                 Assert.False(await notificationMinXDaysOld.isTrue());
                 Assert.False(await notificationMinXDaysOld.IsNotificationMinXDaysOld(analytics));
 
-                t.mockUtcNow = DateTimeV2.ParseUtc("25.03.2011"); // Simulate more time passing by
+                t.mockUtcNow = DateTimeV2.ParseUtc("2011-03-25"); // Simulate more time passing by
                 Assert.True(await notificationMinXDaysOld.IsNotificationMinXDaysOld(analytics));
                 Assert.True(await notificationMinXDaysOld.isTrue());
 
@@ -78,7 +78,7 @@ namespace com.csutil.integrationTests.model {
                 Assert.False(await notificationMinXDaysOld.IsNotificationMinXDaysOld(analytics));
                 Assert.False(await notificationMinXDaysOld.isTrue());
                 
-                t.mockUtcNow = DateTimeV2.ParseUtc("15.04.2011"); // Simulate more time passing by
+                t.mockUtcNow = DateTimeV2.ParseUtc("2011-04-15"); // Simulate more time passing by
                 Assert.True(await notificationMinXDaysOld.IsNotificationMinXDaysOld(analytics));
                 Assert.True(await notificationMinXDaysOld.isTrue());
             }

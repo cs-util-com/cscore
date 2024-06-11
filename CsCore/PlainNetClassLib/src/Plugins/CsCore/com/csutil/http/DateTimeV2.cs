@@ -31,7 +31,7 @@ namespace com.csutil {
         }
 
         /// <summary> Parses a date string to a DateTime object </summary>
-        /// <param name="utcTime"> e.g. "22.03.2011 01:26:00" </param>
+        /// <param name="utcTime"> e.g. "2011-03-22 01:26:00" </param>
         public static DateTime ParseUtc(string utcTime) {
             if (long.TryParse(utcTime, out long unixTimeInMs)) { return NewDateTimeFromUnixTimestamp(unixTimeInMs); }
             if (utcTime.Contains("GMT")) {
