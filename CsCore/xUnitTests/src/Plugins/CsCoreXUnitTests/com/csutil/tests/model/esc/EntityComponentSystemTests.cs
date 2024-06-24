@@ -456,7 +456,7 @@ namespace com.csutil.tests.model.esc {
                 Assert.Equal("Base Variant 3", baseVariant3.Name);
                 Assert.Equal(new Vector3(1, 0, 0), baseVariant3.LocalPose().position);
                 var mageEnemy = scene.GetChildren().ElementAt(1);
-                Assert.NotNull(mageEnemy.GetComponentInChildren<Entity, ShieldComponent>());
+                Assert.NotNull(mageEnemy.GetComponentInSelfAndChildren<Entity, ShieldComponent>());
 
                 {
                     // Destroying / deleting templates causes variants to inherit from the

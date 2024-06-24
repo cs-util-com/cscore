@@ -239,7 +239,7 @@ namespace com.csutil.model.ecs {
 
         public static Task SaveChanges<T>(this IEntity<T> self) where T : IEntityData {
             self.ThrowErrorIfDisposed();
-            var fullSubtree = self.GetChildrenTreeBreadthFirst();
+            var fullSubtree = self.GetSelfAndChildrenTreeBreadthFirst();
             var tasks = new List<Task>();
             foreach (var e in fullSubtree) { tasks.Add(e.Ecs.Update(e.Data)); }
             return Task.WhenAll(tasks);
@@ -254,7 +254,7 @@ namespace com.csutil.model.ecs {
         /// </summary>
         public static IEntity<T> CreateVariant<T>(this IEntity<T> self, out IReadOnlyDictionary<string, string> resultIdLookupTable) where T : IEntityData {
             self.ThrowErrorIfDisposed();
-            var all = self.GetChildrenTreeBreadthFirst().ToList();
+            var all = self.GetSelfAndChildrenTreeBreadthFirst().ToList();
             resultIdLookupTable = all.ToDictionary(x => x.Id, x => "" + GuidV2.NewGuid());
             var fullSubtreeLeavesFirst = all.Skip(1).Reverse();
             foreach (var e in fullSubtreeLeavesFirst) {
@@ -271,19 +271,19 @@ namespace com.csutil.model.ecs {
         }
 
         /// <summary> Returns the full subtree under the entity in a breath first order </summary>
-        public static IEnumerable<IEntity<T>> GetChildrenTreeBreadthFirst<T>(this IEntity<T> self) where T : IEntityData {
+        public static IEnumerable<IEntity<T>> GetSelfAndChildrenTreeBreadthFirst<T>(this IEntity<T> self) where T : IEntityData {
             self.ThrowErrorIfDisposed();
             return TreeFlattenTraverse.BreadthFirst(self, x => x.GetChildren());
         }
 
         /// <summary> Recursively searches for all components of the specified type in the entity and all its children </summary>
-        public static IEnumerable<V> GetComponentsInChildren<T, V>(this IEntity<T> self) where T : IEntityData {
-            return self.GetChildrenTreeBreadthFirst().SelectMany(x => x.Components.Values).Where(c => c is V).Cast<V>();
+        public static IEnumerable<V> GetComponentsInSelfAndChildren<T, V>(this IEntity<T> self) where T : IEntityData {
+            return self.GetSelfAndChildrenTreeBreadthFirst().SelectMany(x => x.Components.Values).Where(c => c is V).Cast<V>();
         }
 
         /// <summary> Recursively searches the entity and all its children until a component of the specified type is found </summary>
-        public static V GetComponentInChildren<T, V>(this IEntity<T> self) where T : IEntityData {
-            return self.GetComponentsInChildren<T, V>().FirstOrDefault();
+        public static V GetComponentInSelfAndChildren<T, V>(this IEntity<T> self) where T : IEntityData {
+            return self.GetComponentsInSelfAndChildren<T, V>().FirstOrDefault();
         }
 
         public static bool TryGetComponentInParents<T, V>(this IEntity<T> self, out V foundComp, out IEntity<T> parent) where T : IEntityData where V : IComponentData {
