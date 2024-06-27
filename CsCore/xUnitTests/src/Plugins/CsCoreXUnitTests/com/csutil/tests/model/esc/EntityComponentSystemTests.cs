@@ -97,7 +97,7 @@ namespace com.csutil.tests.model.esc {
             var entityGroup = ecs.Add(new Entity() {
                 LocalPose = Matrix4x4.CreateRotationY(MathF.PI / 2) // 90 degree rotation around y axis
             });
-            entityGroup.OnUpdate = (oldEntityState, updatedEntity) => {
+            entityGroup.OnUpdate = (oldEntityState, updatedEntity, updateType) => {
                 Log.MethodEntered(); // The entity changed in the ecs
                 // Since its a mutable datamodel the oldEntityState will already have changed:
                 Assert.Same(oldEntityState, updatedEntity.Data);
@@ -187,7 +187,7 @@ namespace com.csutil.tests.model.esc {
             var e1 = ecs.Add(new Entity() {
                 LocalPose = Pose3d.NewMatrix(new Vector3(0, 1, 0))
             });
-            e1.OnUpdate = (oldEntityState, updatedEntity) => { // The entity changed in the ecs
+            e1.OnUpdate = (oldEntityState, updatedEntity, updateType) => { // The entity changed in the ecs
                 // Since its a mutable datamodel the oldEntityState will already have changed:
                 Assert.Same(oldEntityState, updatedEntity.Data);
             };
@@ -302,7 +302,7 @@ namespace com.csutil.tests.model.esc {
 
                 {
                     var entity1 = ecs.Add(new Entity() { Name = "Entity1" });
-                    entity1.OnUpdate = (oldEntityState, updatedEntity) => { // The entity changed in the ecs
+                    entity1.OnUpdate = (oldEntityState, updatedEntity, updateType) => { // The entity changed in the ecs
                         // Since its a mutable datamodel the oldEntityState will already have changed:
                         Assert.Same(oldEntityState, updatedEntity.Data);
                     };
@@ -318,7 +318,7 @@ namespace com.csutil.tests.model.esc {
                     // Ensure that the variant and parent entity1 do not share any event listeners:
                     Assert.Null(variant1.OnUpdate);
                     Assert.NotNull(entity1.OnUpdate);
-                    variant1.OnUpdate = (oldEntityState, updatedEntity) => { // The entity changed in the ecs
+                    variant1.OnUpdate = (oldEntityState, updatedEntity, updateType) => { // The entity changed in the ecs
                         // Since its a mutable datamodel the oldEntityState will already have changed:
                         Assert.Same(oldEntityState, updatedEntity.Data);
                     };

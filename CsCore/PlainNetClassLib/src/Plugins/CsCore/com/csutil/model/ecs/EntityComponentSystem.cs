@@ -21,7 +21,7 @@ namespace com.csutil.model.ecs {
                 Ecs = ecs;
             }
 
-            public Action<T, IEntity<T>> OnUpdate { get; set; }
+            public Action<T, IEntity<T>, UpdateType> OnUpdate { get; set; }
 
             public string Id => Data.Id;
             public string Name => Data.Name;
@@ -73,7 +73,13 @@ namespace com.csutil.model.ecs {
         /// </summary>
         public delegate void IEntityUpdateListener(IEntity<T> iEntity, UpdateType updateType, T oldState, T newState);
 
-        public enum UpdateType { Add, Remove, Update }
+        public enum UpdateType {
+            Add,
+            Remove,
+            Update,
+            /// <summary> Used when the entity was updated by the ECS because the template of the entity was updated </summary>
+            TemplateUpdate
+        }
 
         public EntityComponentSystem(TemplatesIO<T> templatesIo, bool isModelImmutable) {
             templatesIo.ThrowErrorIfNull("templatesIo");
@@ -122,14 +128,14 @@ namespace com.csutil.model.ecs {
             }
         }
 
-        public Task Update(T entityData) {
+        public Task Update(T entityData, UpdateType updateType = UpdateType.Update) {
             this.ThrowErrorIfDisposed();
             var t = TemplatesIo?.SaveChanges(entityData);
-            InternalUpdate(entityData);
+            InternalUpdate(entityData, updateType);
             return t;
         }
 
-        private void InternalUpdate(T updatedEntityData) {
+        private void InternalUpdate(T updatedEntityData, UpdateType updateType) {
             var entityId = updatedEntityData.Id;
             var entity = (Entity)_entities[entityId];
             entity.ThrowErrorIfDisposed();
@@ -153,8 +159,8 @@ namespace com.csutil.model.ecs {
             entity.Data = updatedEntityData;
             UpdateVariantsLookup(entity.Data);
             // At this point in the update method it is known that the entity really changed  
-            OnIEntityUpdated?.Invoke(entity, UpdateType.Update, oldEntryData, updatedEntityData);
-            entity.OnUpdate?.Invoke(oldEntryData, entity);
+            OnIEntityUpdated?.Invoke(entity, updateType, oldEntryData, updatedEntityData);
+            entity.OnUpdate?.Invoke(oldEntryData, entity, updateType);
             // Also update all components of that entity that implement IEntityUpdateListener:
             if (updatedEntityData.Components != null) {
                 foreach (var comp in updatedEntityData.Components.Values) {
@@ -185,7 +191,7 @@ namespace com.csutil.model.ecs {
         protected virtual void UpdateVariantsWhenTemplateChanges(HashSet<string> variantIds) {
             foreach (var variantId in variantIds) {
                 var newVariantState = TemplatesIo.RecreateVariantInstance(variantId);
-                InternalUpdate(newVariantState);
+                InternalUpdate(newVariantState, UpdateType.TemplateUpdate);
             }
         }
 
