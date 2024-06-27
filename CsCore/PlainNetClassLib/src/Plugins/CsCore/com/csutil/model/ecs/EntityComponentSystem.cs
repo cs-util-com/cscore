@@ -32,7 +32,11 @@ namespace com.csutil.model.ecs {
             public IReadOnlyList<string> ChildrenIds => Data.ChildrenIds;
             public bool IsActive => Data.IsActive;
 
-            public override string ToString() { return Data.ToString(); }
+            public override string ToString() {
+                var str = Data.ToString();
+                if (!this.IsAlive()) { str = $"(DESTROYED) {str}"; }
+                return str;
+            }
 
             public virtual void Dispose() {
                 IsDisposed = DisposeState.DisposingStarted;

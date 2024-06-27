@@ -47,7 +47,14 @@ namespace com.csutil.model.ecs {
         }
 
         private void OnEntityUpdated(IEntity<T> iEntity, EntityComponentSystem<T>.UpdateType type, T oldstate, T newstate) {
-            MainThread.Invoke(() => { HandleEntityUpdate(iEntity, type, oldstate, newstate); });
+            AssertV3.IsTrue(iEntity.IsAlive(), () => "Entity is not alive");
+            MainThread.Invoke(() => {
+                // If the entity is no longer alive after the main thread switch, ignore the update (except for remove events):
+                var isUpdateInMainThreadStillPossible = iEntity.IsAlive() || type == EntityComponentSystem<T>.UpdateType.Remove;
+                if (isUpdateInMainThreadStillPossible) {
+                    HandleEntityUpdate(iEntity, type, oldstate, newstate);
+                }
+            });
         }
 
         private void HandleEntityUpdate(IEntity<T> iEntity, EntityComponentSystem<T>.UpdateType type, T oldstate, T newstate) {
@@ -97,6 +104,9 @@ namespace com.csutil.model.ecs {
 
         private void UpdateGoFor(IEntity<T> iEntity, T oldState, T newState) {
             var go = _entityViews[iEntity.Id];
+            if (go.IsDestroyed()) {
+                throw Log.e($"The entity view for {iEntity.GetFullEcsPathString()} was destroyed");
+            }
             go.SetActiveV2(iEntity.IsActiveSelf());
             if (oldState.Name != "" + newState) {
                 go.name = "" + iEntity;

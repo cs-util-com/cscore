@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
@@ -337,6 +338,15 @@ namespace com.csutil.model.ecs {
 
         public static IReadOnlyList<string> CollectAllParents<T>(this IEntity<T> entity) where T : IEntityData {
             return CollectAllParents(entity, new List<string>());
+        }
+        
+        public static IReadOnlyList<IEntity<T>> CollectAllParentEntities<T>(this IEntity<T> entity) where T : IEntityData {
+            return entity.CollectAllParents().Map(x => entity.Ecs.GetEntity(x)).ToImmutableList();
+        }
+        
+        public static string GetFullEcsPathString<T>(this IEntity<T> iEntity) where T : IEntityData {
+            var fromRootToEntity = iEntity.CollectAllParentEntities().Reverse().AddViaUnion(iEntity);
+            return "[ Root -> " + fromRootToEntity.ToStringV2(x => "" + x, bracket1: "", separator: " -> ", bracket2: "") + "]";
         }
 
         private static IReadOnlyList<string> CollectAllParents<T>(IEntity<T> entity, List<string> parentsLookup) where T : IEntityData {
