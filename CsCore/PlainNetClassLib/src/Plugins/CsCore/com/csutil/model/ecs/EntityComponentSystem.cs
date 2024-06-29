@@ -214,6 +214,11 @@ namespace com.csutil.model.ecs {
             return _entities[entityId];
         }
 
+        public bool TryGetEntity(string entityId, out IEntity<T> entity) {
+            this.ThrowErrorIfDisposed();
+            return _entities.TryGetValue(entityId, out entity);
+        }
+
         public Task Destroy(IEntity<T> entityToDestroy) {
             this.ThrowErrorIfDisposed();
             if (!entityToDestroy.IsAlive()) { return Task.CompletedTask; }

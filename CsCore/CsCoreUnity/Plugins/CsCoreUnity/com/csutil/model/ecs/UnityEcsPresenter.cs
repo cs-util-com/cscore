@@ -96,8 +96,12 @@ namespace com.csutil.model.ecs {
         protected abstract GameObject NewGameObjectFor(IEntity<T> iEntity);
 
         private void RemoveGoFor(IEntity<T> iEntity, T removedEntity) {
-            _entityViews[iEntity.Id].Destroy();
-            if (!_entityViews.Remove(iEntity.Id)) {
+            if (_entityViews.ContainsKey(iEntity.Id)) {
+                _entityViews[iEntity.Id].Destroy();
+                if (!_entityViews.Remove(iEntity.Id)) {
+                    Log.e($"Failed to remove GO view/presenter of entity={iEntity}");
+                }
+            } else {
                 Log.e($"Failed to remove GO view/presenter of entity={iEntity}");
             }
         }
