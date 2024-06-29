@@ -66,7 +66,8 @@ namespace com.csutil.model.ecs {
                     RemoveGoFor(iEntity, oldstate);
                     break;
                 case EntityComponentSystem<T>.UpdateType.Update:
-                    UpdateGoFor(iEntity, oldstate, newstate);
+                case EntityComponentSystem<T>.UpdateType.TemplateUpdate:    
+                    UpdateGoFor(iEntity, oldstate, newstate, type);
                     break;
                 default: throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
@@ -106,7 +107,7 @@ namespace com.csutil.model.ecs {
             }
         }
 
-        private void UpdateGoFor(IEntity<T> iEntity, T oldState, T newState) {
+        private void UpdateGoFor(IEntity<T> iEntity, T oldState, T newState, EntityComponentSystem<T>.UpdateType type) {
             var go = _entityViews[iEntity.Id];
             if (go.IsDestroyed()) {
                 throw Log.e($"The entity view for {iEntity.GetFullEcsPathString()} was destroyed");

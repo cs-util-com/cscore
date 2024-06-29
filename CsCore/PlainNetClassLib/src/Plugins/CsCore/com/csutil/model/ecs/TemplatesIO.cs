@@ -180,8 +180,11 @@ namespace com.csutil.model.ecs {
                 Log.e($"Detected diff in reconstruction from json of {typeof(T)}: {diff}");
                 Log.w("Full json of both versions to compare with https://www.diffchecker.com/text-compare/ "
                     + "\n(first sourceJson, then backAsJson)");
-                Log.w(sourceJson.ToPrettyString());
-                Log.w(backAsJson.ToPrettyString());
+                var sourceJsonString = sourceJson.ToPrettyString();
+                var backAsJsonString = backAsJson.ToPrettyString();
+                Log.w(sourceJsonString);
+                Log.w(backAsJsonString);
+                Debugger.Break();
             }
         }
 
