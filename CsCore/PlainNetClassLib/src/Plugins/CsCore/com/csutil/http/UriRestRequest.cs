@@ -71,8 +71,20 @@ namespace com.csutil.http {
                     form.Add(new ByteArrayContent(bytes), formEntry.Key);
                 } else if (formEntry.Value is string formString) {
                     form.Add(new StringContent(formString), formEntry.Key);
+                } else if (formEntry.Value is int formInt) {
+                    form.Add(new StringContent("" + formInt), formEntry.Key);
+                } else if (formEntry.Value is long formLong) {
+                    form.Add(new StringContent("" + formLong), formEntry.Key);
+                } else if (formEntry.Value is float formFloat) {
+                    form.Add(new StringContent("" + formFloat), formEntry.Key);
+                } else if (formEntry.Value is double formDouble) {
+                    form.Add(new StringContent("" + formDouble), formEntry.Key);
+                } else if (formEntry.Value is decimal formDecimal) {
+                    form.Add(new StringContent("" + formDecimal), formEntry.Key);
+                } else if (formEntry.Value is bool formBool) {
+                    form.Add(new StringContent("" + formBool), formEntry.Key);
                 } else {
-                    Log.e("Did not handle form data entry of type " + formEntry.Value.GetType());
+                    throw Log.e($"Did not handle form data entry of type {formEntry.Value.GetType()}: {formEntry}");
                 }
             }
             httpContent = form;

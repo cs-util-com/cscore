@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net;
 using System.Threading.Tasks;
 using com.csutil.model.jsonschema;
@@ -181,7 +182,7 @@ namespace com.csutil.http.apis {
         /// </summary>
         public async Task<Stream> TextToSpeech(Audio.TTSRequest requestParam) {
             return await new Uri("https://api.openai.com/v1/audio/speech").SendPOST().WithAuthorization(apiKey)
-            .WithJsonContent(requestParam).GetResult<Stream>();
+                .WithJsonContent(requestParam).GetResult<Stream>();
         }
 
         /// <summary> https://platform.openai.com/docs/guides/speech-to-text
@@ -197,7 +198,7 @@ namespace com.csutil.http.apis {
             }
 
             RestRequest uri = new Uri("https://api.openai.com/v1/audio/transcriptions").SendPOST().WithAuthorization(apiKey)
-            .AddStreamViaForm(requestParam.fileStream, "speech.mp3").WithFormContent(formContent);
+                .AddStreamViaForm(requestParam.fileStream, "speech.mp3").WithFormContent(formContent);
             return await uri.GetResult<Audio.STTResponse>();
         }
 
@@ -396,19 +397,19 @@ namespace com.csutil.http.apis {
 
         public static string CreateJsonInstructions<T>(params T[] exampleResponses) {
             if (exampleResponses.IsNullOrEmpty()) throw new InvalidOperationException();
-            
+
             var schemaGenerator = new ModelToJsonSchema(nullValueHandling: Newtonsoft.Json.NullValueHandling.Ignore);
             var className = typeof(T).Name;
             JsonSchema schema = schemaGenerator.ToJsonSchema(className, exampleResponses[0]);
             var schemaJson = JsonWriter.GetWriter(exampleResponses[0]).Write(schema);
             var jsonSchemaInfos = " This is the json schema that describes the format you have to use for your json response: " + schemaJson;
             var exampleJsonInfos = " And for that schema, these would be examples of a valid response:";
-            
+
             foreach (T exampleResponse in exampleResponses) {
                 var exampleJson = JsonWriter.GetWriter(exampleResponses).Write(exampleResponses);
                 exampleJsonInfos += " " + exampleJson;
             }
-            
+
             return jsonSchemaInfos + exampleJsonInfos;
         }
 
@@ -430,37 +431,35 @@ namespace com.csutil.http.apis {
         public static void AddImageURL(this ICollection<VisionGpt.Line> self, string url) {
             var content = new List<Dictionary<string, object>>();
 
-            content.Add(new Dictionary<string, object>()
-            {
-                {"type","image_url"},
-                {"image_url",new Dictionary<string,string>{
-                    {"url",url},
-                    {"detail","high"}
-                }},
+            content.Add(new Dictionary<string, object>() {
+                { "type", "image_url" }, {
+                    "image_url", new Dictionary<string, string> {
+                        { "url", url },
+                        { "detail", "high" }
+                    }
+                },
             });
             self.Add(new VisionGpt.Line(ChatGpt.Role.user, content: content));
         }
         public static void AddQuestionsToImage(this ICollection<VisionGpt.Line> self, string url, List<string> questions) {
             var content = new List<Dictionary<string, object>>();
-            content.Add(new Dictionary<string, object>()
-            {
-                {"type","text"},
-                {"text","Rate the following questions with a confidence from 0 to 100 based on how well the question fits the image"},
+            content.Add(new Dictionary<string, object>() {
+                { "type", "text" },
+                { "text", "Rate the following questions with a confidence from 0 to 100 based on how well the question fits the image" },
             });
 
-            content.Add(new Dictionary<string, object>()
-            {
-                {"type","image_url"},
-                {"image_url",new Dictionary<string,string>{
-                    {"url",url},
-                    {"detail","high"}
-                }},
+            content.Add(new Dictionary<string, object>() {
+                { "type", "image_url" }, {
+                    "image_url", new Dictionary<string, string> {
+                        { "url", url },
+                        { "detail", "high" }
+                    }
+                },
             });
             questions.ForEach(question => {
-                content.Add(new Dictionary<string, object>()
-                {
-                    {"type","text"},
-                    {"text",question},
+                content.Add(new Dictionary<string, object>() {
+                    { "type", "text" },
+                    { "text", question },
                 });
             });
 
@@ -483,7 +482,13 @@ namespace com.csutil.http.apis {
             if (responseText.EndsWith("\n```")) {
                 responseText = responseText.Replace("\n```", "");
             }
-            return JsonReader.GetReader().Read<T>(responseText);
+            try {
+                return JsonReader.GetReader().Read<T>(responseText);
+            } catch (Exception e) {
+                Log.e($"Failed to parse the response as json: {responseText}", e);
+                Debugger.Break();
+                throw;
+            }
         }
 
     }
