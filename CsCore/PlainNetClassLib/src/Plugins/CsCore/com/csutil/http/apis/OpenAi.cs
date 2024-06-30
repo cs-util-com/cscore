@@ -60,7 +60,7 @@ namespace com.csutil.http.apis {
                 public string prompt { get; set; }
 
                 /// <summary> See https://beta.openai.com/docs/models/overview </summary>
-                public string model { get; set; } = "text-davinci-003";
+                public string model { get; set; } = "gpt-3.5-turbo";
 
                 /// <summary> What sampling temperature to use. Higher values means the model will take more risks.
                 /// Try 0.9 for more creative applications, and 0 (argmax sampling) for ones with a well-defined answer.
@@ -259,7 +259,7 @@ namespace com.csutil.http.apis {
         public class Request {
 
             /// <summary> See https://beta.openai.com/docs/models/overview </summary>
-            public string model = "gpt-3.5-turbo-1106";
+            public string model = "gpt-3.5-turbo";
 
             /// <summary> The maximum number of tokens to generate in the completion.
             /// The token count of your prompt plus max_tokens cannot exceed the model's context length.
@@ -345,7 +345,7 @@ namespace com.csutil.http.apis {
         public class Request {
 
             /// <summary> See https://beta.openai.com/docs/models/overview </summary>
-            public string model = "gpt-4-vision-preview";
+            public string model = "gpt-4o";
 
             /// <summary> The maximum number of tokens to generate in the completion.
             /// The token count of your prompt plus max_tokens cannot exceed the model's context length.

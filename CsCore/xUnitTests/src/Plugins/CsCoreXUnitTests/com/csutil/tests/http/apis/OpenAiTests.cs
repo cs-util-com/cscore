@@ -46,7 +46,7 @@ namespace com.csutil.integrationTests.http {
                 new ChatGpt.Line(ChatGpt.Role.user, content: "Why did the chicken cross the road?"),
             };
             var request = new ChatGpt.Request(messages);
-            request.model = "gpt-4-1106-preview"; // See https://platform.openai.com/docs/models/gpt-4
+            request.model = "gpt-4o"; // See https://platform.openai.com/docs/models/gpt-4
             var response = await openAi.ChatGpt(request);
             ChatGpt.Line newLine = response.choices.Single().message;
             Assert.Equal("" + ChatGpt.Role.assistant, newLine.role);
@@ -235,7 +235,7 @@ namespace com.csutil.integrationTests.http {
         }
 
         [Fact]
-        public async Task ExampleUsage6_analyseImage() {
+        public async Task ExampleUsage6_AnalyseImage() {
 
             var openAi = new OpenAi(await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey"));
             int iterationThreshold = 5;
