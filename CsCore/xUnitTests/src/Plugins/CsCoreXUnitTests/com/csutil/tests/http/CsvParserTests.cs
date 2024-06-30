@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using com.csutil.io;
@@ -10,6 +9,7 @@ using Xunit;
 namespace com.csutil.tests.http {
 
     public class CsvParserTests {
+
         public CsvParserTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
         [Fact]
@@ -31,7 +31,7 @@ namespace com.csutil.tests.http {
             Assert.Equal("25", parsedData[1][1]);
             Assert.Equal("New York", parsedData[1][2]);
 
-            var json = CsvParser.ConvertCsvToJArray(parsedData);
+            var json = CsvParser.ConvertToJson(parsedData);
             Log.d(JsonWriter.AsPrettyString(json));
 
         }
@@ -40,6 +40,7 @@ namespace com.csutil.tests.http {
         public async Task ExampleUsage2() {
 
             string sampleCsvData = "Name,Age,Location\nAlice,25,New York\nBob,30,San Francisco\n";
+
             using var stream = new MemoryStream(Encoding.Default.GetBytes(sampleCsvData));
             List<Person> parsedData = CsvParser.ReadCsvStreamAs<List<Person>>(stream);
 
@@ -51,22 +52,14 @@ namespace com.csutil.tests.http {
 
         }
 
-        private class Person {
-            public string Name { get; set; }
-            public int Age { get; set; }
-            public string Location { get; set; }
-        }
-
         [Fact]
         public async Task ExampleUsage3() {
-            // Made ConvertToJson Test based on ´ExampleUsage1´
 
             string sampleCsvData = "Name,Age,Location\nAlice,25,New York\nBob,30,San Francisco\n";
-            using var stream = new MemoryStream(Encoding.Default.GetBytes(sampleCsvData));
-            List<List<string>> parsedData = CsvParser.ReadCsvStream(stream);
 
-            var dataAsJson = CsvParser.ConvertCsvToJArray(parsedData);
-            
+            using var stream = new MemoryStream(Encoding.Default.GetBytes(sampleCsvData));
+            var dataAsJson = CsvParser.ReadCsvStreamAs<JArray>(stream);
+
             Assert.Equal("Alice", dataAsJson[0]["Name"].ToString());
             Assert.Equal("25", dataAsJson[0]["Age"].ToString());
             Assert.Equal("New York", dataAsJson[0]["Location"].ToString());
@@ -79,44 +72,33 @@ namespace com.csutil.tests.http {
 
         [Fact]
         public async Task ExampleUsage4() {
+
             string sampleCsvData = "Name,Age,Location\nAlice,25,New York\nBob,30,San Francisco\n";
 
-            // Creating a MemoryStream from the CSV data
             using var stream = new MemoryStream(Encoding.Default.GetBytes(sampleCsvData));
+            List<Person> parsedUserList = CsvParser.ReadCsvStreamAs<List<Person>>(stream);
 
-            // Converting CSV data to a JSON array using CsvParser
-            var dataAsJson = CsvParser.ReadCsvStreamAsJson(stream);
-            
-
-            // Creating a List of MyUsers
-            List<MyUser> users = new List<MyUser>(dataAsJson.ToObject<List<MyUser>>());
-
-            // Assertions
-            Assert.NotNull(users); // Assert that the result is not null
-            Assert.Equal(2, users.Count); // Assert that the correct number of MyUser objects were deserialized
+            Assert.NotNull(parsedUserList); // Assert that the result is not null
+            Assert.Equal(2, parsedUserList.Count); // Assert that the correct number of MyUser objects were deserialized
 
             // Asserting details of the first user
-            Assert.Equal("Alice", users[0].Name);
-            Assert.Equal(25, users[0].Age);
-            Assert.Equal("New York", users[0].Location);
+            Assert.Equal("Alice", parsedUserList[0].Name);
+            Assert.Equal(25, parsedUserList[0].Age);
+            Assert.Equal("New York", parsedUserList[0].Location);
 
             // Asserting details of the second user
-            Assert.Equal("Bob", users[1].Name);
-            Assert.Equal(30, users[1].Age);
-            Assert.Equal("San Francisco", users[1].Location);
+            Assert.Equal("Bob", parsedUserList[1].Name);
+            Assert.Equal(30, parsedUserList[1].Age);
+            Assert.Equal("San Francisco", parsedUserList[1].Location);
 
         }
 
-        private class MyUser {
-            public readonly string Name;
-            public readonly int? Age;
-            public readonly string Location;
-
-            public MyUser(string name, int? age, string location) {
-                Name = name;
-                Age = age;
-                Location = location;
-            }
+        private class Person {
+            public string Name { get; set; }
+            public int Age { get; set; }
+            public string Location { get; set; }
         }
+
     }
+
 }
