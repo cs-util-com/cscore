@@ -59,6 +59,11 @@
     <PackageReference Include="SharpZipLib" Version="1.4.2" />
   </ItemGroup>
 
+  <!-- https://www.nuget.org/packages/StbImageWriteSharp/ -->
+  <ItemGroup>
+    <PackageReference Include="StbImageWriteSharp" Version="1.16.7" />
+  </ItemGroup>
+
   <!-- https://www.nuget.org/packages/Zio/ --> 
   <ItemGroup>
     <PackageReference Include="Zio" Version="0.17.0" />
