@@ -1,13 +1,16 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using com.csutil.http.apis;
 using com.csutil.model.jsonschema;
-using Newtonsoft.Json.Linq;
 using Xunit;
+using Newtonsoft.Json;
+using System.IO;
 using Zio;
+
+
 
 namespace com.csutil.integrationTests.http {
 
@@ -190,12 +193,157 @@ namespace com.csutil.integrationTests.http {
             return emotionalChatResponse;
         }
 
+
+        [Fact]
+        public async Task ExampleUsage5_ImageToText() {
+            var openAi = new OpenAi(await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey"));
+
+            var prompt = "A picture of a dog";
+            var result = await openAi.TextToImage(new OpenAi.Image.Request() { prompt = prompt });
+            var url = result.data.First().url;
+            Assert.NotEmpty(url);
+
+            var messages = new List<VisionGpt.Line>() {
+                new VisionGpt.Line(ChatGpt.Role.system, content: "You are a helpful assistant designed to output JSON.")
+            };
+
+            var yesNoResponseFormat = new YesNoResponse() {
+                confidence = 100,
+                inputQuestionInterpreted = "Is there a cat in the image?",
+                yesNoAnswer = true,
+                explanation = "The cat is in the picture because I see a small feline with whiskers."
+            };
+            messages.AddImageURL(url);
+            messages.AddUserLineWithJsonResultStructure("Is there a dog in the picture?", yesNoResponseFormat);
+
+            // Send the messages to the AI and get the response:
+            var response = await openAi.ImageToText(new VisionGpt.Request(messages));
+            VisionGpt.Line newLine = response.choices.Single().message;
+            messages.Add(newLine);
+
+            // Parse newLine.content as a YesNoResponse:
+            var yesNoResponse = newLine.ParseNewLineContentAsJson<YesNoResponse>();
+
+            // Dogs can look up, lets hope the AI knows that too:
+            Assert.True(yesNoResponse.yesNoAnswer);
+            // The AI is very confident in its answer:
+            Assert.True(yesNoResponse.confidence > 50);
+            // The AI also explains why it gave the answer:
+            Assert.NotEmpty(yesNoResponse.explanation);
+            // Show the entire conversation to make it clear how the responses look as strings:
+            Log.d("messages=" + JsonWriter.AsPrettyString(messages));
+        }
+
+        [Fact]
+        public async Task ExampleUsage6_analyseImage() {
+
+            var openAi = new OpenAi(await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey"));
+            int iterationThreshold = 5;
+            List<string> imageUrls = new List<string>();
+
+            // Generate images and ask questions about them until we are confident that the image fits the prompt
+            for (int iteration = 0; iteration < iterationThreshold; iteration++) {
+                var prompt = "A fascinating image from a children's storybook";
+
+                var url = await GenerateImage(openAi, prompt);
+                imageUrls.Add(url);
+                Assert.NotEmpty(url);
+
+                List<string> questions = await GenerateQuestionsBasedOnPrompt(openAi, prompt);
+
+                // Check that Ai gave back at least one question
+                Assert.NotEmpty(questions);
+
+                var confidenceResponseFormat = new ConfidenceResponse() {
+                    responseConfidences = new Dictionary<string, int>{
+                    {"Does the image evoke a sense of wonder and imagination suitable for a children's storybook?", 100},
+                    {"Are the colors vibrant and appealing to a younger audience?", 70},
+                    {"Does the input image show a picture of a children's book?", 100},
+                    {"Is there a dog in the picture?", 5}
+                    }
+                };
+
+                var messages = new List<VisionGpt.Line>() {
+                    new VisionGpt.Line(ChatGpt.Role.system, content: "You are a helpful assistant designed to output JSON.")
+                    };
+
+                messages.AddQuestionsToImage(url, questions);
+                messages.AddUserLineWithJsonResultStructure("Rate the following questions with a confidence from 0 to 100 based on how well the question fits the image", confidenceResponseFormat);
+
+                // Send the messages to the AI and get the response:
+                var response = await openAi.ImageToText(new VisionGpt.Request(messages));
+                VisionGpt.Line newLine = response.choices.Single().message;
+                messages.Add(newLine);
+
+                // Parse newLine.content as a YesNoResponse:
+                var confidencesResponse = newLine.ParseNewLineContentAsJson<ConfidenceResponse>();
+
+                var isConfident = IsCofidenceHighEnough(confidencesResponse.responseConfidences.Values.ToList());
+                if (isConfident) {
+                    break;
+                }
+
+            }
+            string result = JsonConvert.SerializeObject(imageUrls);
+            File.WriteAllText(@".\VisionImages.json", result);
+        }
+        private static async Task<string> GenerateImage(OpenAi openAi, string prompt) {
+            var result = await openAi.TextToImage(new OpenAi.Image.Request() { prompt = prompt });
+            return result.data.First().url;
+        }
+
+        private static async Task<List<string>> GenerateQuestionsBasedOnPrompt(OpenAi openAi, string prompt, int numberOfQuestions = 5) {
+            var messages = new List<ChatGpt.Line>();
+            messages.Add(new ChatGpt.Line(ChatGpt.Role.system, content: "You are a helpful assistant designed to output JSON."));
+
+            var questionsResponseFormat = new QuestionsResponse() {
+                questions = new List<string>{
+                    "Does the image evoke a sense of wonder and imagination suitable for a children's storybook?",
+                    "Are the colors vibrant and appealing to a younger audience?",
+                    "Does the input image show a picture of a children's book?"
+                }
+            };
+
+            string requestPrompt = "Generate a list of " + numberOfQuestions + " good questions that allow based on the users input prompt '{" + prompt + "}' and an image generated by an AI to evaluate if the AI generated image fits well with the user prompt";
+
+            messages.AddUserLineWithJsonResultStructure(requestPrompt, questionsResponseFormat);
+
+            // Send the messages to the AI and get the response:
+            var response = await openAi.ChatGpt(NewGpt4JsonRequestWithFullConversation(messages));
+            ChatGpt.Line newLine = response.choices.Single().message;
+            messages.Add(newLine);
+
+            // Parse newLine.content as a QuestionsResponse:
+            var questionsResponse = newLine.ParseNewLineContentAsJson<QuestionsResponse>();
+            return questionsResponse.questions;
+        }
+
+        private Boolean IsCofidenceHighEnough(List<int> confidences, int threshhold = 50) {
+            foreach (int i in confidences) {
+                if (i < threshhold) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         private static ChatGpt.Request NewGpt4JsonRequestWithFullConversation(List<ChatGpt.Line> conversationSoFar) {
             var request = new ChatGpt.Request(conversationSoFar);
             // Use json as the response format:
             request.response_format = ChatGpt.Request.ResponseFormat.json;
             request.model = "gpt-4-1106-preview"; // See https://platform.openai.com/docs/models/gpt-4
             return request;
+        }
+
+        public class QuestionsResponse {
+
+            [Description("Questions to ask VisionGpt")]
+            public List<string> questions { get; set; }
+        }
+
+        public class ConfidenceResponse {
+            [Description("Confidence for each Response")]
+            public Dictionary<string, int> responseConfidences { get; set; }
         }
 
         public class YesNoResponse {
@@ -216,7 +364,7 @@ namespace com.csutil.integrationTests.http {
 
 
         public class EmotionalChatResponse {
-            
+
             public enum Emotion { happy, sad, angry }
 
             [Description("How the AI feels about the users question")]
@@ -227,6 +375,24 @@ namespace com.csutil.integrationTests.http {
 
         }
 
+
+        [Fact]
+        public async Task ExampleTTSandSTT() {
+            var openAi = new OpenAi(await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey"));
+
+            string textToTest = "hello world";
+            var responseTTS = await openAi.TextToSpeech(new OpenAi.Audio.TTSRequest() { input = textToTest });
+            Assert.NotNull(responseTTS);
+
+            var responseSTT = await openAi.SpeechToText(new OpenAi.Audio.STTRequest() { fileStream = responseTTS });
+            Assert.NotEmpty(responseSTT.text);
+            Log.d(responseSTT.text);
+
+            string[] split = responseSTT.text.ToLower().Split(new Char[] { ',', '\\', '\n', ' ' },
+                                 StringSplitOptions.RemoveEmptyEntries);
+
+            Assert.True(split.All(word => textToTest.Contains(new string(word.Where(c => Char.IsLetter(c)).ToArray()))));
+        }
     }
 
 }
