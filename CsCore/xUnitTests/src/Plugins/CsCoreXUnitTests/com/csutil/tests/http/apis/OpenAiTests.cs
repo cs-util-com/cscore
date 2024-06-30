@@ -1,3 +1,6 @@
+//#define RUN_EXPENSIVE_TESTS
+// TODO enable this define to run the expensive tests OpenAI tests as well
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,7 +12,6 @@ using Xunit;
 using Newtonsoft.Json;
 using System.IO;
 using Zio;
-
 
 namespace com.csutil.integrationTests.http {
 
@@ -112,8 +114,10 @@ namespace com.csutil.integrationTests.http {
             Log.d("messages=" + JsonWriter.AsPrettyString(messages));
         }
 
-        //[Fact]
-        public async Task ExampleUsage_ImageGeneration() {
+        #if RUN_EXPENSIVE_TESTS
+        [Fact]
+        #endif
+        public async Task ExampleUsage5_TextToImage() {
             var openAi = new OpenAi(await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey"));
             var prompt = "A cute cat with a cowboy hat in cartoon style";
             var result = await openAi.TextToImage(new OpenAi.Image.Request() { prompt = prompt });
@@ -123,8 +127,10 @@ namespace com.csutil.integrationTests.http {
             Log.d(generatedImageUrls.ToStringV2("", "", " \n\n "));
         }
 
-        //[Fact]
-        public async Task ExampleUsage_ImageGenerationHighQuality() {
+        #if RUN_EXPENSIVE_TESTS
+        [Fact]
+        #endif
+        public async Task ExampleUsage6_ImageGenerationHighQuality() {
             var openAi = new OpenAi(await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey"));
             var prompt = "A cute cat with a cowboy hat";
             var result = await openAi.TextToImage(new OpenAi.Image.Request() {
@@ -141,13 +147,16 @@ namespace com.csutil.integrationTests.http {
 
         /// <summary> Shows how to use the OpenAI API to generate multiple images in parallel using the
         /// DALL-E 3 model with different randomized input parameters </summary>
-        //[Fact]
-        public async Task ExampleUsage_BulkImageGeneration() {
+        #if RUN_EXPENSIVE_TESTS
+        [Fact]
+        #endif
+        public async Task ExampleUsage6_BulkImageGeneration() {
+            var parallelImgGenTaskCount = 2; // Up to 7 should be possible in the first API tier, later you are allowed to go higher
             var targetFolder = EnvironmentV2.instance.GetOrAddTempFolder("cscore BULK IMAGE GENERATION");
             var prompt = "A cute cat with a cowboy hat";
             var tasks = new List<Task>();
             // For image gen. rate limits per minute see https://platform.openai.com/docs/guides/rate-limits/usage-tiers 
-            for (int i = 0; i < 7; i++) {
+            for (int i = 0; i < parallelImgGenTaskCount; i++) {
                 tasks.Add(GenerateAndSaveDalle3Image(prompt, targetFolder));
             }
             await Task.WhenAll(tasks);
@@ -192,9 +201,10 @@ namespace com.csutil.integrationTests.http {
             return emotionalChatResponse;
         }
 
-
+        #if RUN_EXPENSIVE_TESTS
         [Fact]
-        public async Task ExampleUsage5_ImageToText() {
+        #endif
+        public async Task ExampleUsage6_ImageToText() {
             var openAi = new OpenAi(await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey"));
 
             var prompt = "A picture of a dog";
@@ -233,8 +243,10 @@ namespace com.csutil.integrationTests.http {
             Log.d("messages=" + JsonWriter.AsPrettyString(messages));
         }
 
+        #if RUN_EXPENSIVE_TESTS
         [Fact]
-        public async Task ExampleUsage6_AnalyseImage() {
+        #endif
+        public async Task ExampleUsage7_AnalyseImage() {
 
             var openAi = new OpenAi(await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey"));
             int iterationThreshold = 5;
@@ -286,6 +298,28 @@ namespace com.csutil.integrationTests.http {
             string result = JsonConvert.SerializeObject(imageUrls);
             File.WriteAllText(@".\VisionImages.json", result);
         }
+
+        #if RUN_EXPENSIVE_TESTS
+        [Fact]
+        #endif
+        public async Task ExampleUsage8_TextToSpeechAndSpeechToText() {
+            var openAi = new OpenAi(await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey"));
+
+            string textToTest = "hello world";
+            var responseTTS = await openAi.TextToSpeech(new OpenAi.Audio.TTSRequest() { input = textToTest });
+            Assert.NotNull(responseTTS);
+
+            var responseSTT = await openAi.SpeechToText(new OpenAi.Audio.STTRequest() { fileStream = responseTTS });
+            Assert.NotEmpty(responseSTT.text);
+            Log.d(responseSTT.text);
+
+            string[] split = responseSTT.text.ToLower().Split(new Char[] { ',', '\\', '\n', ' ' },
+                StringSplitOptions.RemoveEmptyEntries);
+
+            // Both words (Hello & world) should be in the response:
+            Assert.True(split.All(word => textToTest.Contains(new string(word.Where(c => Char.IsLetter(c)).ToArray()))));
+        }
+
         private static async Task<string> GenerateImage(OpenAi openAi, string prompt) {
             var result = await openAi.TextToImage(new OpenAi.Image.Request() { prompt = prompt });
             return result.data.First().url;
@@ -375,24 +409,6 @@ namespace com.csutil.integrationTests.http {
 
         }
 
-
-        [Fact]
-        public async Task ExampleTTSandSTT() {
-            var openAi = new OpenAi(await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey"));
-
-            string textToTest = "hello world";
-            var responseTTS = await openAi.TextToSpeech(new OpenAi.Audio.TTSRequest() { input = textToTest });
-            Assert.NotNull(responseTTS);
-
-            var responseSTT = await openAi.SpeechToText(new OpenAi.Audio.STTRequest() { fileStream = responseTTS });
-            Assert.NotEmpty(responseSTT.text);
-            Log.d(responseSTT.text);
-
-            string[] split = responseSTT.text.ToLower().Split(new Char[] { ',', '\\', '\n', ' ' },
-                StringSplitOptions.RemoveEmptyEntries);
-
-            Assert.True(split.All(word => textToTest.Contains(new string(word.Where(c => Char.IsLetter(c)).ToArray()))));
-        }
     }
 
 }
