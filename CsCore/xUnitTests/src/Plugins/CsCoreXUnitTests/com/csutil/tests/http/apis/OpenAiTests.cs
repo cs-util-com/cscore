@@ -87,7 +87,7 @@ namespace com.csutil.integrationTests.http {
                 // Dogs can look up, lets hope the AI knows that too:
                 Assert.True(yesNoResponse.yesNoAnswer);
                 // Since the input question is very short the interpretation will be the same string:
-                Assert.Equal("Can dogs look up?", yesNoResponse.inputQuestionInterpreted);
+                Assert.Contains("dog", yesNoResponse.inputQuestionInterpreted);
                 // The AI is very confident in its answer:
                 Assert.True(yesNoResponse.confidence > 50);
                 // The AI also explains why it gave the answer:

@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
-using System.Xml.Serialization;
-using StbImageSharp;
 
 namespace com.csutil.algorithms.images {
+
     public class Mat<T> {
         public int Width { get; private set; }
         public int Height { get; private set; }
@@ -148,4 +144,5 @@ namespace com.csutil.algorithms.images {
         public static Mat<T> operator *(Mat<T> a, Mat<T> b) { return Multiply(a, b); }
 
     }
+
 }

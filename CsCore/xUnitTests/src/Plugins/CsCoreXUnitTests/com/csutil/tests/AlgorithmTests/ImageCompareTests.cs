@@ -7,6 +7,7 @@ using Xunit;
 using Zio;
 using StbImageWriteSharp;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace com.csutil.tests.AlgorithmTests {
 
@@ -17,7 +18,7 @@ namespace com.csutil.tests.AlgorithmTests {
         }
 
         [Fact]
-        public async void TestImageCompare() {
+        public async Task TestImageCompare() {
             var folderForImageDiffing = EnvironmentV2.instance.GetOrAddTempFolder("TestImageComparePictures");
 
             FileRef[] imagesToDownload = {
