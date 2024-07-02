@@ -188,6 +188,10 @@ namespace com.csutil.algorithms.images {
             Array.Copy(color, 0, imageData, startIdx, color.Length);
         }
 
+        public static byte[] Erode(this ImageResult image, int kernelSize) {
+            return Erode(image.Data, image.Width, image.Height, (int)image.ColorComponents, kernelSize);
+        }
+
         public static byte[] Erode(byte[] image, int width, int height, int bytePerPixel, int kernelSize) {
             var intermediateResult = Erosion1D(image, width, height, bytePerPixel, kernelSize, true);
             return Erosion1D(intermediateResult, width, height, bytePerPixel, kernelSize, false);
@@ -227,6 +231,10 @@ namespace com.csutil.algorithms.images {
             return erodedImage;
         }
 
+        public static byte[] Dilate(this ImageResult image, int kernelSize) {
+            return Dilate(image.Data, image.Width, image.Height, (int)image.ColorComponents, kernelSize);
+        }
+
         public static byte[] Dilate(byte[] imageData, int width, int height, int bytePerPixel, int kernelSize) {
             var intermediateResult = Dilation1D(imageData, width, height, bytePerPixel, kernelSize, true);
             return Dilation1D(intermediateResult, width, height, bytePerPixel, kernelSize, false);
@@ -257,50 +265,6 @@ namespace com.csutil.algorithms.images {
                     }
 
                     var currentIndex = (y * width + x) * bytePerPixel;
-                    dilatedImage[currentIndex] = maxR;
-                    dilatedImage[currentIndex + 1] = maxG;
-                    dilatedImage[currentIndex + 2] = maxB;
-                    dilatedImage[currentIndex + 3] = maxA;
-                }
-            }
-            return dilatedImage;
-        }
-
-        public static byte[] DilateNaive(byte[] input, int width, int height, int bytesPerPixel, int kernelSize) {
-            var dilatedImage = new byte[input.Length];
-
-            // Loop through each pixel in the image
-            for (int y = 0; y < height; y++) {
-                for (int x = 0; x < width; x++) {
-                    // Find the maximum pixel value in the neighborhood defined by the kernel
-                    byte maxR = 0, maxG = 0, maxB = 0, maxA = 0;
-
-                    for (int ky = -kernelSize; ky <= kernelSize; ky++) {
-                        for (int kx = -kernelSize; kx <= kernelSize; kx++) {
-                            var pixelX = x + kx;
-                            var pixelY = y + ky;
-
-                            // Ensure the pixel is within bounds
-                            if (pixelX >= 0 && pixelX < width && pixelY >= 0 && pixelY < height) {
-                                var pixelIndex = (pixelY * width + pixelX) * bytesPerPixel;
-
-                                // Extract RGBA values
-                                var r = input[pixelIndex];
-                                var g = input[pixelIndex + 1];
-                                var b = input[pixelIndex + 2];
-                                var a = input[pixelIndex + 3];
-
-                                // Update maximum values
-                                maxR = Math.Max(maxR, r);
-                                maxG = Math.Max(maxG, g);
-                                maxB = Math.Max(maxB, b);
-                                maxA = Math.Max(maxA, a);
-                            }
-                        }
-                    }
-
-                    // Set the pixel value in the dilated image
-                    var currentIndex = (y * width + x) * bytesPerPixel;
                     dilatedImage[currentIndex] = maxR;
                     dilatedImage[currentIndex + 1] = maxG;
                     dilatedImage[currentIndex + 2] = maxB;

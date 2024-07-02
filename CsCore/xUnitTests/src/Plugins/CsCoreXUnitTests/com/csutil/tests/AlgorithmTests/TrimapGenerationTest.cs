@@ -1,70 +1,40 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using com.csutil.algorithms.images;
 using StbImageWriteSharp;
 using Xunit;
-using com.csutil.io;
 
 namespace com.csutil.tests.AlgorithmTests {
 
     public class TrimapGenerationTest {
 
-        [Fact]
-        public async Task TrimapNaive() {
+        public TrimapGenerationTest(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
-            var folder = EnvironmentV2.instance.GetOrAddAppDataFolder("FloodFillTesting");
-            var downloadFolder = EnvironmentV2.instance.GetSpecialFolder(Environment.SpecialFolder.UserProfile).GetChildDir("Downloads");
-            var image = await ImageLoader.LoadImageInBackground(downloadFolder.GetChild("unnamed.png"));
+        [Fact]
+        public async Task TestTrimapGeneration() {
+
+            var folder = EnvironmentV2.instance.GetOrAddTempFolder("TestTrimapGeneration");
+            var image = await MyImageFileRef.DownloadFileIfNeeded(folder, "https://raw.githubusercontent.com/cs-util-com/cscore/update/release_1_10_prep/CsCore/assets/16999.jpg");
 
             var width = image.Width;
             var height = image.Height;
+            var kernel = 1;
 
-            var floodFilled = FloodFill.RunFloodFillAlgorithm(image, 240);
+            var floodFilled = image.RunFloodFillAlgorithm(240);
             {
                 var test = folder.GetChild("FloodFilled.png");
                 await using var stream = test.OpenOrCreateForReadWrite();
                 var flipped = ImageUtility.FlipImageVertically(floodFilled, width, height, (int)image.ColorComponents);
-                new ImageWriter().WritePng(flipped, width, height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
+                new ImageWriter().WritePng(flipped, width, height, ColorComponents.RedGreenBlueAlpha, stream);
             }
 
-            var dilated = Filter.DilateNaive(floodFilled, width, height, 4, 30);
+            var dilated = Filter.Dilate(floodFilled, width, height, 4, kernel);
             {
-                var dilationPng = folder.GetChild("DilatedNaive.png");
+                var dilationPng = folder.GetChild("Dilated.png");
                 await using var stream = dilationPng.OpenOrCreateForReadWrite();
                 var flipped = ImageUtility.FlipImageVertically(dilated, width, height, (int)image.ColorComponents);
                 new ImageWriter().WritePng(flipped, width, height, ColorComponents.RedGreenBlueAlpha, stream);
             }
 
-            var trimap = TrimapGeneration.FromFloodFill(floodFilled, width, height, 4, 30);
-            {
-                var trimapPng = folder.GetChild("TrimapNaive.png");
-                await using var stream = trimapPng.OpenOrCreateForReadWrite();
-                var flipped = ImageUtility.FlipImageVertically(trimap, width, height, (int)image.ColorComponents);
-                new ImageWriter().WritePng(flipped, width, height, ColorComponents.RedGreenBlueAlpha, stream);
-            }
-
-        }
-
-        [Fact]
-        public async Task TrimapEfficient() {
-
-            var folder = EnvironmentV2.instance.GetOrAddAppDataFolder("FloodFillTesting");
-            var downloadFolder = EnvironmentV2.instance.GetSpecialFolder(Environment.SpecialFolder.UserProfile).GetChildDir("Downloads");
-            var image = await ImageLoader.LoadImageInBackground(downloadFolder.GetChild("unnamed.png"));
-
-            var width = image.Width;
-            var height = image.Height;
-            var kernel = 30;
-
-            var floodFilled = FloodFill.RunFloodFillAlgorithm(image, 240);
-            {
-                var test = folder.GetChild("FloodFilled.png");
-                await using var stream = test.OpenOrCreateForReadWrite();
-                var flipped = ImageUtility.FlipImageVertically(floodFilled, width, height, (int)image.ColorComponents);
-                new ImageWriter().WritePng(flipped, width, height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
-            }
-
-            var dilated = Filter.Dilate(floodFilled, width, height, 4, kernel);
             var erodedFill = Filter.Erode(floodFilled, width, height, 4, kernel);
             {
                 var dilationPng = folder.GetChild("Eroded.png");
@@ -80,6 +50,8 @@ namespace com.csutil.tests.AlgorithmTests {
                 var flipped = ImageUtility.FlipImageVertically(trimap, width, height, (int)image.ColorComponents);
                 new ImageWriter().WritePng(flipped, width, height, ColorComponents.RedGreenBlueAlpha, stream);
             }
+
+            Log.d("TrimapGenerationTest done, see the results in the temp folder: " + folder.GetFullFileSystemPath());
 
         }
 
