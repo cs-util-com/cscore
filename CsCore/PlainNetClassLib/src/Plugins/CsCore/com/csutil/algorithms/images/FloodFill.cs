@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using StbImageSharp;
 
 namespace com.csutil.algorithms.images {
@@ -14,33 +13,14 @@ namespace com.csutil.algorithms.images {
             var height = self.Height;
 
             var result = new byte[image.Length];
-            var visited = new bool[width, height];
             for (var a = 3; a < image.Length; a += 4) {
                 result[a] = 255;
             }
-            Stack<(int x, int y)> stack = new Stack<(int x, int y)>();
 
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < height; y++) {
-                    if (!visited[x, y]) {
-                        stack.Push((x, y));
-
-                        while (stack.Count > 0) {
-                            var (cx, cy) = stack.Pop();
-                            if (cx < 0 || cx >= width || cy < 0 || cy >= height ||
-                                SeemsValue(image, cx, cy, width, colorThreshold) || visited[cx, cy]) {
-                                continue;
-                            }
-
-                            SetColorAt(result, cx, cy, width, white, 4);
-                            visited[cx, cy] = true;
-
-                            // Add neighboring pixels to the stack
-                            stack.Push((cx, cy + 1));
-                            stack.Push((cx, cy - 1));
-                            stack.Push((cx - 1, cy));
-                            stack.Push((cx + 1, cy));
-                        }
+                    if (SeemsValue(image, x, y, width, colorThreshold)) {
+                        SetColorAt(result, x, y, width, white, 4);
                     }
                 }
             }
