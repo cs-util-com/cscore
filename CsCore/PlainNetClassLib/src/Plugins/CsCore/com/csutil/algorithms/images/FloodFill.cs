@@ -3,14 +3,19 @@ using System.Collections.Generic;
 using StbImageSharp;
 
 namespace com.csutil.algorithms.images {
+
     public static class FloodFill {
-        
-        // Flood fill algorithm that floods the image from the border to the inside depending on the pixel value being above the floodValue
-        public static  byte[] FloodFillAlgorithm(ImageResult imageRes, int floodValue) {
+
+        /// <summary> Flood fill algorithm that floods the image from the border to the
+        /// inside depending on the pixel value being above the floodValue </summary>
+        /// <param name="imageRes"></param>
+        /// <param name="floodValue"></param>
+        /// <returns></returns>
+        public static byte[] FloodFillAlgorithm(ImageResult imageRes, int floodValue) {
             var image = imageRes.Data.DeepCopy();
             var width = imageRes.Width;
             var height = imageRes.Height;
-            
+
             var result = new byte[image.Length];
             var visited = new bool[width, height];
             for (var a = 3; a < image.Length; a += 4) {
@@ -59,5 +64,7 @@ namespace com.csutil.algorithms.images {
             var startIdx = (y * width + x) * bytesPerPixel;
             return new byte[] { img[startIdx], img[startIdx + 1], img[startIdx + 2], img[startIdx + 3] };
         }
+
     }
+
 }

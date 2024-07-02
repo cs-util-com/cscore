@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Threading.Tasks;
 using com.csutil.algorithms.images;
-using com.csutil.io;
 using com.csutil.model;
 using StbImageSharp;
 using StbImageWriteSharp;
@@ -21,14 +18,16 @@ namespace com.csutil.tests.AlgorithmTests {
         public async Task TestGlobalMatting() {
 
             var folder = EnvironmentV2.instance.GetOrAddTempFolder("TestGlobalMatting");
+
             var imageFile = folder.GetChild("GT04-image.png");
-            await DownloadFileIfNeeded(imageFile, "https://raw.githubusercontent.com/cs-util/global-matting/master/GT04-image.png");
+            var image = await MyImageFileRef.DownloadFileIfNeeded(imageFile, "https://raw.githubusercontent.com/cs-util/global-matting/master/GT04-image.png");
+
             var trimapFile = folder.GetChild("GT04-trimap.png");
-            await DownloadFileIfNeeded(trimapFile, "https://raw.githubusercontent.com/cs-util/global-matting/master/GT04-trimap.png");
-            var resultOfOriginalCppImplementation = folder.GetChild("GT04-alpha.png");
-            await DownloadFileIfNeeded(resultOfOriginalCppImplementation, "https://raw.githubusercontent.com/cs-util/global-matting/master/GT04-alpha.png");
-            var image = await ImageLoader.LoadImageInBackground(imageFile);
-            var trimap = await ImageLoader.LoadImageInBackground(trimapFile);
+            var trimap = await MyImageFileRef.DownloadFileIfNeeded(trimapFile, "https://raw.githubusercontent.com/cs-util/global-matting/master/GT04-trimap.png");
+
+            var resultOfOriginalCppImplementation = folder.GetChild("GT04-alpha (result of original Cpp implementation).png");
+            await MyImageFileRef.DownloadFileIfNeeded(resultOfOriginalCppImplementation, "https://raw.githubusercontent.com/cs-util/global-matting/master/GT04-alpha.png");
+
             var trimapBytes = trimap.Data;
             var imageMatting = new GlobalMatting(image.Data.DeepCopy(), image.Width, image.Height, (int)image.ColorComponents);
             imageMatting.ExpansionOfKnownRegions(ref trimapBytes, niter: 9);
@@ -54,15 +53,13 @@ namespace com.csutil.tests.AlgorithmTests {
                     }
                 }
             }
-            {
-                var finalAlphaFile = folder.GetChild("OurAlpha.png");
-                ImageWriter writer = new ImageWriter();
-                await using var stream = finalAlphaFile.OpenOrCreateForReadWrite();
-                var flipped = ImageUtility.FlipImageVertically(alpha.Data, image.Width, image.Height, (int)image.ColorComponents);
-                writer.WritePng(flipped, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
-            }
-        }
 
+            var finalAlphaFile = folder.GetChild("FinalAlphaResult.png");
+            await using var stream = finalAlphaFile.OpenOrCreateForReadWrite();
+            var flipped = ImageUtility.FlipImageVertically(alpha.Data, image.Width, image.Height, (int)image.ColorComponents);
+            new ImageWriter().WritePng(flipped, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
+
+        }
 
         private static async Task DownloadFileIfNeeded(FileEntry self, string url) {
             var imgFileRef = new MyImageFileRef() { url = url, fileName = self.Name };
@@ -72,16 +69,19 @@ namespace com.csutil.tests.AlgorithmTests {
     }
 
     public struct Pixel {
+
         public byte R;
         public byte G;
         public byte B;
         public byte A;
+
         public Pixel(byte r, byte g, byte b, byte a) {
             R = r;
             G = g;
             B = b;
             A = a;
         }
+
     }
 
     public static class ImageResultExtensions {

@@ -4,7 +4,6 @@ using com.csutil.src.Plugins.CsCore.com.csutil.algorithms;
 using StbImageSharp;
 using Xunit;
 using Zio;
-using StbImageWriteSharp;
 using System.IO;
 using System.Threading.Tasks;
 

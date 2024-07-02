@@ -1,40 +1,54 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using StbImageSharp;
 
-namespace com.csutil.algorithms.images { 
+namespace com.csutil.algorithms.images {
+
     public class ImageUtility {
+
+        public static byte[] FlipImageHorizontally(ImageResult sourceImage) {
+            return FlipImageHorizontally(sourceImage.Data, sourceImage.Width, sourceImage.Height, (int)sourceImage.ColorComponents);
+        }
+        
         public static byte[] FlipImageHorizontally(byte[] imageData, int width, int height, int bytesPerPixel) {
             var flippedImage = new byte[imageData.Length];
-
             for (var y = 0; y < height; y++) {
                 for (var x = 0; x < width; x++) {
                     var originalIndex = (y * width + x) * bytesPerPixel;
                     var flippedIndex = (y * width + (width - 1 - x)) * bytesPerPixel;
-
                     for (var byteIndex = 0; byteIndex < bytesPerPixel; byteIndex++) {
                         flippedImage[flippedIndex + byteIndex] = imageData[originalIndex + byteIndex];
                     }
                 }
             }
-
             return flippedImage;
+        }
+
+        public static byte[] FlipImageVertically(ImageResult sourceImage) {
+            return FlipImageVertically(sourceImage.Data, sourceImage.Width, sourceImage.Height, (int)sourceImage.ColorComponents);
         }
 
         public static byte[] FlipImageVertically(byte[] imageData, int width, int height, int bytesPerPixel) {
             var flippedImage = new byte[imageData.Length];
-
             for (var y = 0; y < height; y++) {
                 for (var x = 0; x < width; x++) {
                     var originalIndex = (y * width + x) * bytesPerPixel;
                     var flippedIndex = ((height - 1 - y) * width + x) * bytesPerPixel;
-
                     for (var byteIndex = 0; byteIndex < bytesPerPixel; byteIndex++) {
                         flippedImage[flippedIndex + byteIndex] = imageData[originalIndex + byteIndex];
                     }
                 }
             }
+            return flippedImage;
+        }
 
+        public static byte[] FlipImageVerticallyVariant2(byte[] imageData, int width, int height, int bytesPerPixel = 4) {
+            byte[] flippedImage = new byte[imageData.Length];
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width * bytesPerPixel; x++) {
+                    var originalIndex = y * width * bytesPerPixel + x;
+                    var flippedIndex = (height - 1 - y) * width * bytesPerPixel + x;
+                    flippedImage[flippedIndex] = imageData[originalIndex];
+                }
+            }
             return flippedImage;
         }
 

@@ -1,11 +1,11 @@
 ﻿using System;
+
 namespace com.csutil.algorithms.images {
-    
-    
+
+
     /* Deprecated Version by the newer Version in Filter.cs
      this was the naive approach which was horribly slow.
      */
-
 
 
     public static class ImageBlur {
@@ -25,8 +25,9 @@ namespace com.csutil.algorithms.images {
 
         //Potentially optimizable by skipping pixels already in for loop instead of checking throgh if statement 
 
-        //Todo fix for alpha value to always be the same alpha as the pixel originally had
+        [Obsolete("Use Filter.BoxFilter instead, which is much faster", true)]
         public static byte[] RunBoxBlur(byte[] image, int width, int height, int halfKernel, int bytePerPixel) {
+            //Todo fix for alpha value to always be the same alpha as the pixel originally had
             var result = new byte[image.Length];
             for (var y = 0; y < height; y++) {
                 for (var x = 0; x < width; x++) {
@@ -59,7 +60,8 @@ namespace com.csutil.algorithms.images {
 
             return result;
         }
-        
+
+        [Obsolete("Use Filter.BoxFilter instead, which is much faster", true)]
         public static double[] RunBoxBlurDouble(double[] image, int width, int height, int halfKernel, int bytePerPixel) {
             var result = new double[image.Length];
             for (var y = 0; y < height; y++) {
@@ -91,10 +93,10 @@ namespace com.csutil.algorithms.images {
 
             return result;
         }
-        
+
         private static void SetColorAtDouble(double[] imageData, int x, int y, int width, double[] color, int bytesPerPixel) {
             int startIdx = (y * width + x) * bytesPerPixel;
-            var colorWithOriginalAlpha = new [] { color[0], color[1], color[2], imageData[startIdx + 3] };
+            var colorWithOriginalAlpha = new[] { color[0], color[1], color[2], imageData[startIdx + 3] };
             Array.Copy(color, 0, imageData, startIdx, color.Length);
         }
 
