@@ -2,7 +2,9 @@
 using com.csutil.algorithms.images;
 using StbImageWriteSharp;
 using System.Threading.Tasks;
+using StbImageSharp;
 using Xunit;
+using ColorComponents = StbImageWriteSharp.ColorComponents;
 
 namespace com.csutil.tests.AlgorithmTests {
 
@@ -18,7 +20,7 @@ namespace com.csutil.tests.AlgorithmTests {
             var tempFolder = EnvironmentV2.instance.GetOrAddTempFolder("BoxFilter4ChannelTest");
             var image = await AlgorithmTests.MyImageFileRef.DownloadFileIfNeeded(tempFolder, "https://raw.githubusercontent.com/cs-util/global-matting/master/GT04-image.png");
 
-            byte[] boxFilterResult = Filter.BoxFilter(image.Data, image.Width, image.Height, BoxFilterRadius, (int)image.ColorComponents);
+            var boxFilterResult = image.RunBoxFilter(BoxFilterRadius);
 
             var outputFile = tempFolder.GetChild("BoxFilter" + BoxFilterRadius * 2 + ".png");
             using var outputStream = outputFile.OpenOrCreateForWrite();
@@ -37,7 +39,7 @@ namespace com.csutil.tests.AlgorithmTests {
             var image = await MyImageFileRef.DownloadFileIfNeeded(imageFile, "https://raw.githubusercontent.com/cs-util/global-matting/master/GT04-image.png");
 
             byte[] boxBlurResult = ImageBlur.RunBoxBlur(image.Data, image.Width, image.Height, BoxFilterRadius, (int)image.ColorComponents);
-            
+
             var outputFile = tempFolder.GetChild("OldBoxFilterByte" + BoxFilterRadius + ".png");
             using var outputStream = outputFile.OpenOrCreateForWrite();
             var flippedResult = ImageUtility.FlipImageVertically(boxBlurResult, image.Width, image.Height, (int)image.ColorComponents);
@@ -55,8 +57,8 @@ namespace com.csutil.tests.AlgorithmTests {
             var image = await MyImageFileRef.DownloadFileIfNeeded(imageFile, "https://raw.githubusercontent.com/cs-util/global-matting/master/GT04-image.png");
 
             var boxBlurInput = GuidedFilter.ConvertToDouble(image.Data);
-            double[] boxBlurResult = ImageBlur.RunBoxBlurDouble(boxBlurInput, image.Width, image.Height, 21, (int)image.ColorComponents);
-            
+            double[] boxBlurResult = ImageBlur.RunBoxBlurDouble(boxBlurInput, image.Width, image.Height, BoxFilterRadius, (int)image.ColorComponents);
+
             var outputFile = folder.GetChild("OldBoxfilterDouble" + BoxFilterRadius + ".png");
             using var outputStream = outputFile.OpenOrCreateForWrite();
             var byteIm = GuidedFilter.ConvertToByte(boxBlurResult);

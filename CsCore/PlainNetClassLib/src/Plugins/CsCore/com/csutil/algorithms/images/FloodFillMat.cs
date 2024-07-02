@@ -5,10 +5,10 @@ using StbImageSharp;
 
 namespace com.csutil.algorithms.images {
 
-    public class FloodFillMat {
+    public static class FloodFillMat {
 
         [Obsolete("Consider using FloodFill.FloodFillAlgorithm instead")]
-        public static Mat<byte> FloodFillAlgorithm(Mat<byte> image, int floodValue) {
+        public static Mat<byte> RunFloodFillAlgorithm(this Mat<byte> image, int floodValue) {
             var result = new Mat<byte>(image.Width, image.Height, image.Channels);
             var width = result.Width;
             var height = result.Height;

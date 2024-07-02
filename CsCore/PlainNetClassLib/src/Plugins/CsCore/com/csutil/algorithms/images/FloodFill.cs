@@ -8,13 +8,13 @@ namespace com.csutil.algorithms.images {
 
         /// <summary> Flood fill algorithm that floods the image from the border to the
         /// inside depending on the pixel value being above the floodValue </summary>
-        /// <param name="imageRes"></param>
+        /// <param name="self"></param>
         /// <param name="floodValue"></param>
         /// <returns></returns>
-        public static byte[] FloodFillAlgorithm(ImageResult imageRes, int floodValue) {
-            var image = imageRes.Data.DeepCopy();
-            var width = imageRes.Width;
-            var height = imageRes.Height;
+        public static byte[] RunFloodFillAlgorithm(this ImageResult self, int floodValue) {
+            var image = self.Data.DeepCopy();
+            var width = self.Width;
+            var height = self.Height;
 
             var result = new byte[image.Length];
             var visited = new bool[width, height];

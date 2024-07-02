@@ -19,7 +19,7 @@ namespace com.csutil.tests.AlgorithmTests {
             var width = image.Width;
             var height = image.Height;
 
-            var floodFilled = FloodFill.FloodFillAlgorithm(image, 240);
+            var floodFilled = FloodFill.RunFloodFillAlgorithm(image, 240);
             {
                 var test = folder.GetChild("FloodFilled.png");
                 await using var stream = test.OpenOrCreateForReadWrite();
@@ -56,7 +56,7 @@ namespace com.csutil.tests.AlgorithmTests {
             var height = image.Height;
             var kernel = 30;
 
-            var floodFilled = FloodFill.FloodFillAlgorithm(image, 240);
+            var floodFilled = FloodFill.RunFloodFillAlgorithm(image, 240);
             {
                 var test = folder.GetChild("FloodFilled.png");
                 await using var stream = test.OpenOrCreateForReadWrite();

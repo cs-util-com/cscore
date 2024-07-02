@@ -2,26 +2,9 @@
 
 namespace com.csutil.algorithms.images {
 
-
-    /* Deprecated Version by the newer Version in Filter.cs
-     this was the naive approach which was horribly slow.
-     */
-
-
+    /// <summary> Deprecated Version by the newer Version in Filter.cs this was the naive approach which was horribly slow. </summary>
+    [Obsolete("Use Filter.BoxFilter instead, which is much faster", true)]
     public static class ImageBlur {
-
-        // Helper method to set the color at a specific location in the image array
-        private static void SetColorAt(byte[] imageData, int x, int y, int width, byte[] color, int bytesPerPixel) {
-            int startIdx = (y * width + x) * bytesPerPixel;
-            var colorWithOriginalAlpha = new byte[] { color[0], color[1], color[2], imageData[startIdx + 3] };
-            Array.Copy(color, 0, imageData, startIdx, color.Length);
-        }
-
-        // Helper method to get color at a given position
-        private static byte[] GetColorAt(byte[] img, int x, int y, int bytesPerPixel, int width) {
-            int startIdx = (y * width + x) * bytesPerPixel;
-            return new byte[] { img[startIdx], img[startIdx + 1], img[startIdx + 2], img[startIdx + 3] };
-        }
 
         //Potentially optimizable by skipping pixels already in for loop instead of checking throgh if statement 
 
@@ -61,6 +44,21 @@ namespace com.csutil.algorithms.images {
             return result;
         }
 
+        // Helper method to set the color at a specific location in the image array
+        [Obsolete("Use Filter.BoxFilter instead, which is much faster", true)]
+        private static void SetColorAt(byte[] imageData, int x, int y, int width, byte[] color, int bytesPerPixel) {
+            int startIdx = (y * width + x) * bytesPerPixel;
+            var colorWithOriginalAlpha = new byte[] { color[0], color[1], color[2], imageData[startIdx + 3] };
+            Array.Copy(color, 0, imageData, startIdx, color.Length);
+        }
+
+        // Helper method to get color at a given position
+        [Obsolete("Use Filter.BoxFilter instead, which is much faster", true)]
+        private static byte[] GetColorAt(byte[] img, int x, int y, int bytesPerPixel, int width) {
+            int startIdx = (y * width + x) * bytesPerPixel;
+            return new byte[] { img[startIdx], img[startIdx + 1], img[startIdx + 2], img[startIdx + 3] };
+        }
+
         [Obsolete("Use Filter.BoxFilter instead, which is much faster", true)]
         public static double[] RunBoxBlurDouble(double[] image, int width, int height, int halfKernel, int bytePerPixel) {
             var result = new double[image.Length];
@@ -94,6 +92,7 @@ namespace com.csutil.algorithms.images {
             return result;
         }
 
+        [Obsolete("Use Filter.BoxFilter instead, which is much faster", true)]
         private static void SetColorAtDouble(double[] imageData, int x, int y, int width, double[] color, int bytesPerPixel) {
             int startIdx = (y * width + x) * bytesPerPixel;
             var colorWithOriginalAlpha = new[] { color[0], color[1], color[2], imageData[startIdx + 3] };
@@ -101,9 +100,12 @@ namespace com.csutil.algorithms.images {
         }
 
         // Helper method to get color at a given position
+        [Obsolete("Use Filter.BoxFilter instead, which is much faster", true)]
         private static double[] GetColorAtDouble(double[] img, int x, int y, int bytesPerPixel, int width) {
             int startIdx = (y * width + x) * bytesPerPixel;
             return new double[] { img[startIdx], img[startIdx + 1], img[startIdx + 2], img[startIdx + 3] };
         }
+
     }
+
 }
