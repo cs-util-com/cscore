@@ -6,12 +6,9 @@ namespace com.csutil.algorithms.images {
 
     public static class FloodFill {
 
-        /// <summary> Flood fill algorithm that floods the image from the border to the
-        /// inside depending on the pixel value being above the floodValue </summary>
-        /// <param name="self"></param>
-        /// <param name="floodValue"></param>
-        /// <returns></returns>
-        public static byte[] RunFloodFillAlgorithm(this ImageResult self, int floodValue) {
+        private static readonly byte[] white = new byte[] { 255, 255, 255, 255 };
+
+        public static byte[] RunFloodFillAlgorithm(this ImageResult self, int colorThreshold = 240) {
             var image = self.Data.DeepCopy();
             var width = self.Width;
             var height = self.Height;
@@ -31,11 +28,11 @@ namespace com.csutil.algorithms.images {
                         while (stack.Count > 0) {
                             var (cx, cy) = stack.Pop();
                             if (cx < 0 || cx >= width || cy < 0 || cy >= height ||
-                                SeemsValue(image, cx, cy, width, floodValue) || visited[cx, cy]) {
+                                SeemsValue(image, cx, cy, width, colorThreshold) || visited[cx, cy]) {
                                 continue;
                             }
 
-                            SetColorAt(result, cx, cy, width, new byte[] { 255, 255, 255, 255 }, 4);
+                            SetColorAt(result, cx, cy, width, white, 4);
                             visited[cx, cy] = true;
 
                             // Add neighboring pixels to the stack
@@ -50,9 +47,9 @@ namespace com.csutil.algorithms.images {
             return result;
         }
 
-        private static bool SeemsValue(byte[] image, int x, int y, int width, int floodValue) {
+        private static bool SeemsValue(byte[] image, int x, int y, int width, int colorThreshold) {
             var color = GetColorAt(image, x, y, 4, width);
-            return color[0] > floodValue && color[1] > floodValue && color[2] > floodValue;
+            return color[0] > colorThreshold && color[1] > colorThreshold && color[2] > colorThreshold;
         }
 
         private static void SetColorAt(byte[] imageData, int x, int y, int width, byte[] color, int bytesPerPixel) {
