@@ -18,7 +18,7 @@ namespace com.csutil.tests.AlgorithmTests {
 
             var width = image.Width;
             var height = image.Height;
-            var kernel = 3;
+            var kernel = 2;
 
             var floodFilled = image.RunFloodFillAlgorithm(240);
             {
@@ -30,7 +30,7 @@ namespace com.csutil.tests.AlgorithmTests {
 
             var dilated = Filter.Dilate(floodFilled, width, height, 4, kernel);
             {
-                var dilationPng = folder.GetChild("3_Dilated.png");
+                var dilationPng = folder.GetChild("4_Dilated.png");
                 await using var stream = dilationPng.OpenOrCreateForReadWrite();
                 var flipped = ImageUtility.FlipImageVertically(dilated, width, height, (int)image.ColorComponents);
                 new ImageWriter().WritePng(flipped, width, height, ColorComponents.RedGreenBlueAlpha, stream);
@@ -46,7 +46,7 @@ namespace com.csutil.tests.AlgorithmTests {
 
             var closed = Filter.Erode(dilated, width, height, 4, kernel);
             {
-                var dilationPng = folder.GetChild("2_Closed (Dilated then Eroded).png");
+                var dilationPng = folder.GetChild("3_Closed (Dilated then Eroded).png");
                 await using var stream = dilationPng.OpenOrCreateForReadWrite();
                 var flipped = ImageUtility.FlipImageVertically(closed, width, height, (int)image.ColorComponents);
                 new ImageWriter().WritePng(flipped, width, height, ColorComponents.RedGreenBlueAlpha, stream);
@@ -60,11 +60,19 @@ namespace com.csutil.tests.AlgorithmTests {
                 new ImageWriter().WritePng(flipped, width, height, ColorComponents.RedGreenBlueAlpha, stream);
             }
 
-            var trimap = TrimapGeneration.FromFloodFill(floodFilled, width, height, 4, kernel);
+            var trimapV1 = TrimapGeneration.FromFloodFill(floodFilled, width, height, 4, kernel);
             {
-                var trimapPng = folder.GetChild("4_Trimap.png");
+                var trimapPng = folder.GetChild("2_1_Trimap.png");
                 await using var stream = trimapPng.OpenOrCreateForReadWrite();
-                var flipped = ImageUtility.FlipImageVertically(trimap, width, height, (int)image.ColorComponents);
+                var flipped = ImageUtility.FlipImageVertically(trimapV1, width, height, (int)image.ColorComponents);
+                new ImageWriter().WritePng(flipped, width, height, ColorComponents.RedGreenBlueAlpha, stream);
+            }
+
+            var trimapVariant2 = TrimapGeneration.FromClosedFloodFill(floodFilled, width, height, 4, kernel);
+            {
+                var trimapPng = folder.GetChild("2_2_Trimap (Closed Flood Fill).png");
+                await using var stream = trimapPng.OpenOrCreateForReadWrite();
+                var flipped = ImageUtility.FlipImageVertically(trimapVariant2, width, height, (int)image.ColorComponents);
                 new ImageWriter().WritePng(flipped, width, height, ColorComponents.RedGreenBlueAlpha, stream);
             }
 

@@ -5,10 +5,10 @@ namespace com.csutil.algorithms.images {
     public static class TrimapGeneration {
 
         public static byte[] FromFloodFill(byte[] floodFilled, int width, int height, int bytesPerPixel, int kernel) {
-            var trimap = new byte[floodFilled.Length];
             var dilatedFill = Filter.Dilate(floodFilled, width, height, bytesPerPixel, kernel);
             var erodedFill = Filter.Erode(floodFilled, width, height, bytesPerPixel, kernel);
 
+            var trimap = new byte[floodFilled.Length];
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < height; y++) {
                     if (CanBeSemiTransparent(erodedFill, dilatedFill, width, x, y, bytesPerPixel)) {
@@ -20,6 +20,12 @@ namespace com.csutil.algorithms.images {
                 }
             }
             return trimap;
+        }
+
+        public static byte[] FromClosedFloodFill(byte[] floodFilled, int width, int height, int bytesPerPixel, int kernel) {
+            // The floodfilled image alone can have a very noise border, so instead a closed (dilated then eroded) version could be used:
+            var closed = Filter.Erode(Filter.Dilate(floodFilled, width, height, bytesPerPixel, kernel), width, height, bytesPerPixel, kernel);
+            return FromFloodFill(closed, width, height, bytesPerPixel, kernel);
         }
 
         private static bool CanBeSemiTransparent(byte[] erodedFill, byte[] dilatedFill, int width, int x, int y, int bytesPerPixel) {
