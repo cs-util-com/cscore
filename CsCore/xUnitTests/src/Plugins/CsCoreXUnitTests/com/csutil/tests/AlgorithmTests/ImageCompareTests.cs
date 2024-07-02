@@ -2,7 +2,6 @@
 using com.csutil.model;
 using com.csutil.src.Plugins.CsCore.com.csutil.algorithms;
 using StbImageSharp;
-using System.Collections.Generic;
 using Xunit;
 using Zio;
 using StbImageWriteSharp;
@@ -21,12 +20,12 @@ namespace com.csutil.tests.AlgorithmTests {
         public async Task TestImageCompare() {
             var folderForImageDiffing = EnvironmentV2.instance.GetOrAddTempFolder("TestImageComparePictures");
 
-            FileRef[] imagesToDownload = {
-                new FileRef {
+            MyImageFileRef[] imagesToDownload = {
+                new MyImageFileRef {
                     url = "https://raw.githubusercontent.com/cs-util-com/cscore/master/CsCore/assets/diffing%20image%201.png",
                     fileName = "diffing image 1.png"
                 },
-                new FileRef {
+                new MyImageFileRef {
                     url = "https://raw.githubusercontent.com/cs-util-com/cscore/master/CsCore/assets/diffing%20image%202.jpg",
                     fileName = "diffing image 2.jpg"
                 },
@@ -64,15 +63,6 @@ namespace com.csutil.tests.AlgorithmTests {
 
             Log.d($"Stored diffing result images in {folderForImageDiffing.GetFullFileSystemPath()} "
                 + $"\n Open diffing file: {imgFileThatHighlightsDifferences.GetFullFileSystemPath()}");
-        }
-
-
-        private class FileRef : IFileRef {
-            public string dir { get; set; }
-            public string fileName { get; set; }
-            public string url { get; set; }
-            public Dictionary<string, object> checksums { get; set; }
-            public string mimeType { get; set; }
         }
 
     }

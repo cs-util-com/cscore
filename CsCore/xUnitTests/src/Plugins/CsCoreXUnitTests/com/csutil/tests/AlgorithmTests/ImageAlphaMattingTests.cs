@@ -20,13 +20,13 @@ namespace com.csutil.tests.AlgorithmTests {
         [Fact]
         public async Task TestGlobalMatting() {
 
-            var folder = EnvironmentV2.instance.GetOrAddAppDataFolder("ImageMattingTests");
+            var folder = EnvironmentV2.instance.GetOrAddTempFolder("TestGlobalMatting");
             var imageFile = folder.GetChild("GT04-image.png");
-            await DownloadFileIfNeeded(imageFile, "http://atilimcetin.com/global-matting/GT04-image.png");
+            await DownloadFileIfNeeded(imageFile, "https://raw.githubusercontent.com/cs-util/global-matting/master/GT04-image.png");
             var trimapFile = folder.GetChild("GT04-trimap.png");
-            await DownloadFileIfNeeded(trimapFile, "http://atilimcetin.com/global-matting/GT04-trimap.png");
+            await DownloadFileIfNeeded(trimapFile, "https://raw.githubusercontent.com/cs-util/global-matting/master/GT04-trimap.png");
             var resultOfOriginalCppImplementation = folder.GetChild("GT04-alpha.png");
-            await DownloadFileIfNeeded(resultOfOriginalCppImplementation, "http://atilimcetin.com/global-matting/GT04-alpha.png");
+            await DownloadFileIfNeeded(resultOfOriginalCppImplementation, "https://raw.githubusercontent.com/cs-util/global-matting/master/GT04-alpha.png");
             var image = await ImageLoader.LoadImageInBackground(imageFile);
             var trimap = await ImageLoader.LoadImageInBackground(trimapFile);
             var trimapBytes = trimap.Data;
@@ -65,16 +65,8 @@ namespace com.csutil.tests.AlgorithmTests {
 
 
         private static async Task DownloadFileIfNeeded(FileEntry self, string url) {
-            var imgFileRef = new MyFileRef() { url = url, fileName = self.Name };
+            var imgFileRef = new MyImageFileRef() { url = url, fileName = self.Name };
             await imgFileRef.DownloadTo(self.Parent, useAutoCachedFileRef: true);
-        }
-
-        private class MyFileRef : IFileRef {
-            public string dir { get; set; }
-            public string fileName { get; set; }
-            public string url { get; set; }
-            public Dictionary<string, object> checksums { get; set; }
-            public string mimeType { get; set; }
         }
 
     }

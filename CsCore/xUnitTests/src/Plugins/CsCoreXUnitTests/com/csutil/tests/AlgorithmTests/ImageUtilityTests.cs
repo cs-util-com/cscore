@@ -21,10 +21,10 @@ namespace com.csutil.tests.AlgorithmTests {
         [Fact]
         public async Task RunUtility_ShouldApplyBlurCorrectly() {
 
-            var folder = EnvironmentV2.instance.GetOrAddAppDataFolder("UtilityTesting");
+            var folder = EnvironmentV2.instance.GetOrAddTempFolder("RunUtility_ShouldApplyBlurCorrectly");
 
             var imageFile = folder.GetChild("GT04-image.png");
-            await DownloadFileIfNeeded(imageFile, "http://atilimcetin.com/global-matting/GT04-image.png");
+            await DownloadFileIfNeeded(imageFile, "https://raw.githubusercontent.com/cs-util/global-matting/master/GT04-image.png");
 
             var image = await ImageLoader.LoadImageInBackground(imageFile);
             var flippedResult = ImageUtility.FlipImageVertically(image.Data, image.Width, image.Height, (int)image.ColorComponents);
@@ -42,7 +42,7 @@ namespace com.csutil.tests.AlgorithmTests {
                 writer.WritePng(horizontalflip, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
             }
             //Cropping works just keeping in mind that imageLoader flips the image beforehand so if you want to crop bottom right you need to crop now at top left
-            var cropImage = ImageUtility.CroppingImage(image.Data,image.Width,image.Height, (int)(image.ColorComponents), 0, 0, image.Width-300, image.Height-300);
+            var cropImage = ImageUtility.CroppingImage(image.Data, image.Width, image.Height, (int)(image.ColorComponents), 0, 0, image.Width - 300, image.Height - 300);
             var test3 = folder.GetChild("CropImage.png");
             {
                 using var stream = test3.OpenOrCreateForWrite();
@@ -54,7 +54,7 @@ namespace com.csutil.tests.AlgorithmTests {
             {
                 using var stream = test4.OpenOrCreateForWrite();
                 ImageWriter writer = new ImageWriter();
-                writer.WritePng(resizedImage, image.Width + 400, image.Height + 400 , StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
+                writer.WritePng(resizedImage, image.Width + 400, image.Height + 400, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
             }
             var resizedImage2 = ImageUtility.ResizeImage(image.Data, image.Width, image.Height, (int)(image.ColorComponents), image.Width - 400, image.Height - 400);
             var test5 = folder.GetChild("DownsizedImage.png");
@@ -66,16 +66,10 @@ namespace com.csutil.tests.AlgorithmTests {
         }
 
         private static async Task DownloadFileIfNeeded(FileEntry self, string url) {
-            var imgFileRef = new MyFileRef() { url = url, fileName = self.Name };
+            var imgFileRef = new MyImageFileRef() { url = url, fileName = self.Name };
             await imgFileRef.DownloadTo(self.Parent, useAutoCachedFileRef: true);
         }
-        private class MyFileRef : IFileRef {
-            public string dir { get; set; }
-            public string fileName { get; set; }
-            public string url { get; set; }
-            public Dictionary<string, object> checksums { get; set; }
-            public string mimeType { get; set; }
-        }
-    }
-}
 
+    }
+
+}

@@ -9,22 +9,22 @@ using Zio;
 
 
 namespace com.csutil.tests.AlgorithmTests {
+
     public class GuidedFilterTest {
 
         private int radius = 11;
-        private double eps = (255*255) * (0.9*0.9);
-        
-        
+        private double eps = (255 * 255) * (0.9 * 0.9);
+
         [Fact]
         public async Task SingleChannelGuidedFilterTest() {
 
-            var folder = EnvironmentV2.instance.GetOrAddAppDataFolder("GuidedTesting");
+            var folder = EnvironmentV2.instance.GetOrAddTempFolder("SingleChannelGuidedFilterTest");
             var imageFile = folder.GetChild("GT04-image.png");
-            await DownloadFileIfNeeded(imageFile, "http://atilimcetin.com/global-matting/GT04-image.png");
+            await DownloadFileIfNeeded(imageFile, "https://raw.githubusercontent.com/cs-util/global-matting/master/GT04-image.png");
             var image = await ImageLoader.LoadImageInBackground(imageFile);
-            
+
             var guidedFilter = new GuidedFilter(image.Data, image.Width, image.Height, 4, radius, eps);
-            
+
             for (var i = 0; i < (int)image.ColorComponents - 1; i++) {
                 var imageSingleChannel = guidedFilter.CreateSingleChannel(image.Data, i);
                 var guidedCurrent = new GuidedFilter(imageSingleChannel, image.Width, image.Height, 1, radius, eps);
@@ -48,15 +48,15 @@ namespace com.csutil.tests.AlgorithmTests {
                     writer.WritePng(flippedRes, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlue, stream);
                 }
             }
-            
-            
+
+
         }
         private static byte[] Combine(byte[] singleChannel, int channel) {
             var result = new byte[singleChannel.Length * 3];
-            var zeros = new byte[singleChannel.Length ];
+            var zeros = new byte[singleChannel.Length];
             if (channel == 0)
                 result = CombineRGB(singleChannel, zeros, zeros, singleChannel.Length);
-            else if(channel == 1)
+            else if (channel == 1)
                 result = CombineRGB(zeros, singleChannel, zeros, singleChannel.Length);
             else
                 result = CombineRGB(zeros, zeros, singleChannel, singleChannel.Length);
@@ -74,15 +74,15 @@ namespace com.csutil.tests.AlgorithmTests {
             }
             return result;
         }
-        
-        
+
+
         [Fact]
         public async Task ColorGuidedFilterTest() {
 
-            var folder = EnvironmentV2.instance.GetOrAddAppDataFolder("GuidedTesting");
+            var folder = EnvironmentV2.instance.GetOrAddTempFolder("ColorGuidedFilterTest");
 
             var imageFile = folder.GetChild("GT04-image.png");
-            await DownloadFileIfNeeded(imageFile, "http://atilimcetin.com/global-matting/GT04-image.png");
+            await DownloadFileIfNeeded(imageFile, "https://raw.githubusercontent.com/cs-util/global-matting/master/GT04-image.png");
             var image = await ImageLoader.LoadImageInBackground(imageFile);
 
             var guidedFilter = new GuidedFilter(image.Data, image.Width, image.Height, (int)image.ColorComponents, radius, eps);
@@ -96,20 +96,12 @@ namespace com.csutil.tests.AlgorithmTests {
                 writer.WritePng(flippedCf, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
             }
         }
-        
-        
-        
-        
+
         private static async Task DownloadFileIfNeeded(FileEntry self, string url) {
-            var imgFileRef = new MyFileRef() { url = url, fileName = self.Name };
+            var imgFileRef = new MyImageFileRef() { url = url, fileName = self.Name };
             await imgFileRef.DownloadTo(self.Parent, useAutoCachedFileRef: true);
         }
-        private class MyFileRef : IFileRef {
-            public string dir { get; set; }
-            public string fileName { get; set; }
-            public string url { get; set; }
-            public Dictionary<string, object> checksums { get; set; }
-            public string mimeType { get; set; }
-        }
+
     }
+
 }

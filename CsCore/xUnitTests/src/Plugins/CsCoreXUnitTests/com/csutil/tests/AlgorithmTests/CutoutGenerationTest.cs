@@ -1,30 +1,27 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using com.csutil.algorithms.images;
-using com.csutil.io;
 using StbImageWriteSharp;
 using Xunit;
 
 namespace com.csutil.tests.AlgorithmTests {
+
     public class CutoutGenerationTest {
-        
+
+        public CutoutGenerationTest(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
         [Fact]
-        public async Task CutoutFromDallE() {
-            var folder = EnvironmentV2.instance.GetOrAddAppDataFolder("CutoutGeneration");
-            var downloadFolder = EnvironmentV2.instance.GetSpecialFolder(Environment.SpecialFolder.UserProfile).GetChildDir("Downloads");
-            var dallEImage = await ImageLoader.LoadImageInBackground(downloadFolder.GetChild("unnamed.png"));
-            var width = dallEImage.Width;
-            var height = dallEImage.Height;
-            
-            var cutout = GenerateCutOut.Generate(dallEImage, 240, 5, 10, 1e-5, 140);
-            var cutoutPng = folder.GetChild("Cutout.png");
-            {
-                await using var stream = cutoutPng.OpenOrCreateForReadWrite();
-                var writer = new ImageWriter();
-                var flipped = ImageUtility.FlipImageVertically(cutout, width, height, (int)dallEImage.ColorComponents);
-                writer.WritePng(flipped, width, height, ColorComponents.RedGreenBlueAlpha, stream);
-            }
+        public async Task CutoutGenerationTest1() {
+            var tempFolder = EnvironmentV2.instance.GetOrAddTempFolder("CutoutGenerationTest1");
+            var inputImage = await MyImageFileRef.LoadImage(tempFolder, "https://raw.githubusercontent.com/cs-util-com/cscore/update/release_1_10_prep/CsCore/assets/16999.jpg");
+
+            // Generate a cutout of the input image:
+            var cutoutResult = GenerateCutOut.Generate(inputImage, 240, 5, 10, 1e-5, 140);
+
+            await using var targetStream = tempFolder.GetChild("Cutout.png").OpenOrCreateForReadWrite();
+            var flipped = ImageUtility.FlipImageVertically(cutoutResult, inputImage.Width, inputImage.Height, (int)inputImage.ColorComponents);
+            new ImageWriter().WritePng(flipped, inputImage.Width, inputImage.Height, ColorComponents.RedGreenBlueAlpha, targetStream);
         }
+
     }
+
 }

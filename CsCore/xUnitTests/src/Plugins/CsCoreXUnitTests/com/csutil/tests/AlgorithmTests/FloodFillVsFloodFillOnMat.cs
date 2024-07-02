@@ -11,21 +11,17 @@ using StbImageWriteSharp;
 using Xunit;
 using Zio;
 
-namespace com.csutil.tests.AlgorithmTests
-{
-    public class FloodFillVsFloodFillOnMat
-    {
+namespace com.csutil.tests.AlgorithmTests {
+    public class FloodFillVsFloodFillOnMat {
         public FloodFillVsFloodFillOnMat(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
-
         [Fact]
-        public async Task FloodFillTest()
-        {
+        public async Task FloodFillTest() {
 
-            var folder = EnvironmentV2.instance.GetOrAddAppDataFolder("FloodFilterTesting");
+            var folder = EnvironmentV2.instance.GetOrAddTempFolder("FloodFillTest");
 
             var imageFile = folder.GetChild("GT04-image.png");
-            await DownloadFileIfNeeded(imageFile, "http://atilimcetin.com/global-matting/GT04-image.png");
+            await DownloadFileIfNeeded(imageFile, "https://raw.githubusercontent.com/cs-util/global-matting/master/GT04-image.png");
             var image = await ImageLoader.LoadImageInBackground(imageFile);
             var time = Stopwatch.StartNew();
             var imageResult = FloodFill.FloodFillAlgorithm(image, 50);
@@ -41,13 +37,12 @@ namespace com.csutil.tests.AlgorithmTests
         }
 
         [Fact]
-        public async Task FloodFillOnMatTest()
-        {
+        public async Task FloodFillOnMatTest() {
 
-            var folder = EnvironmentV2.instance.GetOrAddAppDataFolder("FloodFillonMatTesting");
+            var folder = EnvironmentV2.instance.GetOrAddTempFolder("FloodFillOnMatTest");
 
             var imageFile = folder.GetChild("GT04-image.png");
-            await DownloadFileIfNeeded(imageFile, "http://atilimcetin.com/global-matting/GT04-image.png");
+            await DownloadFileIfNeeded(imageFile, "https://raw.githubusercontent.com/cs-util/global-matting/master/GT04-image.png");
 
             var image = await ImageLoader.LoadImageInBackground(imageFile);
             var mat = new Mat<byte>(image.Width, image.Height, (int)image.ColorComponents, image.Data);
@@ -57,27 +52,17 @@ namespace com.csutil.tests.AlgorithmTests
             var stoptime = time.ElapsedMilliseconds;
             var flippedResult = ImageUtility.FlipImageVertically(imageResult.data, image.Width, image.Height, (int)image.ColorComponents);
             var test = folder.GetChild("FloodMat" + stoptime + ".png");
-            {
-                using var stream = test.OpenOrCreateForWrite();
-                ImageWriter writer = new ImageWriter();
-                writer.WritePng(flippedResult, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
-            }
+
+            using var stream = test.OpenOrCreateForWrite();
+            ImageWriter writer = new ImageWriter();
+            writer.WritePng(flippedResult, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
         }
 
-
-
-        private static async Task DownloadFileIfNeeded(FileEntry self, string url)
-        {
-            var imgFileRef = new MyFileRef() { url = url, fileName = self.Name };
+        private static async Task DownloadFileIfNeeded(FileEntry self, string url) {
+            var imgFileRef = new MyImageFileRef() { url = url, fileName = self.Name };
             await imgFileRef.DownloadTo(self.Parent, useAutoCachedFileRef: true);
         }
-        private class MyFileRef : IFileRef
-        {
-            public string dir { get; set; }
-            public string fileName { get; set; }
-            public string url { get; set; }
-            public Dictionary<string, object> checksums { get; set; }
-            public string mimeType { get; set; }
-        }
+
     }
+
 }
