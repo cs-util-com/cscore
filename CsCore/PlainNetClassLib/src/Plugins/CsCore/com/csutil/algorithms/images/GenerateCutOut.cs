@@ -3,7 +3,7 @@ using StbImageSharp;
 
 namespace com.csutil.algorithms.images {
 
-    public static class GenerateCutOut {
+    public static class GenerateCutOutAlgo {
 
         /// <summary>
         /// Generates a cutout from the original data in imageRes. The trimap is created by flooding the original from the border according to the
@@ -16,7 +16,7 @@ namespace com.csutil.algorithms.images {
         /// <param name="eps">Epsilon parameter of the guided filter</param> 
         /// <param name="cutoffValue">All alpha values below this get set to 0, above are kept as they were in the alpha map</param> 
         /// <returns>Cutout generated according to the trimap and chosen cutoff value</returns>
-        public static byte[] Generate(ImageResult imageRes, int floodValue, int trimapKernel, int guidedKernel, double eps, int cutoffValue) {
+        public static byte[] RunCutOutAlgo(ImageResult imageRes, int floodValue, int trimapKernel, int guidedKernel, double eps, int cutoffValue) {
             var image = imageRes.Data.DeepCopy();
             var width = imageRes.Width;
             var height = imageRes.Height;
@@ -41,6 +41,7 @@ namespace com.csutil.algorithms.images {
                     }
                 }
             }
+            
             // Safe cut out according to alpha region that is >= cutoffValue
             var cutout = image.DeepCopy();
 
