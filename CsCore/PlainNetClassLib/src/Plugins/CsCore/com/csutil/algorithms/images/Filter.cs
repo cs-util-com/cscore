@@ -105,6 +105,12 @@ namespace com.csutil.algorithms.images {
 
         }
 
+        // Helper method to get color at a given position
+        private static byte[] GetColorAt(byte[] img, int x, int y, int bytesPerPixel, int width) {
+            int startIdx = (y * width + x) * bytesPerPixel;
+            return new byte[] { img[startIdx], img[startIdx + 1], img[startIdx + 2], img[startIdx + 3] };
+        }
+
         private static void SetColorAt(byte[] imageData, int x, int y, int width, byte[] color, int bytesPerPixel) {
             int startIdx = (y * width + x) * bytesPerPixel;
             Array.Copy(color, 0, imageData, startIdx, color.Length);
@@ -115,55 +121,55 @@ namespace com.csutil.algorithms.images {
 
             if (kernalSize % 2 == 0) kernalSize++;
             var hBlur = new double[img.Length];
-            var avg = (double)1 / kernalSize;
+            var avg = 1.0 / kernalSize;
             Array.Copy(img, hBlur, img.Length);
+
+            var tmpColor = new double[channels];
+
             for (int j = 0; j < height; j++) {
                 var hSum = new double[] { 0f };
                 var iAvg = new double[] { 0f };
                 for (int x = 0; x < kernalSize; x++) {
-                    var tmpColor = GetColorAt(img, x, j, channels, width);
-                    hSum[0] += (double)tmpColor[0];
+                    GetColorAt(img, x, j, channels, width, tmpColor);
+                    hSum[0] += tmpColor[0];
                 }
                 iAvg[0] = hSum[0] * avg;
                 for (int i = 0; i < width; i++) {
                     if (i - kernalSize / 2 >= 0 && i + 1 + kernalSize / 2 < width) {
-                        var tmp_pColor = GetColorAt(img, i - kernalSize / 2, j, channels, width);
-                        hSum[0] -= (double)tmp_pColor[0];
-                        var tmp_nColor = GetColorAt(img, i + 1 + kernalSize / 2, j, channels, width);
-                        hSum[0] += (double)tmp_nColor[0];
-                        //
+                        GetColorAt(img, i - kernalSize / 2, j, channels, width, tmpColor);
+                        hSum[0] -= tmpColor[0];
+                        GetColorAt(img, i + 1 + kernalSize / 2, j, channels, width, tmpColor);
+                        hSum[0] += tmpColor[0];
                         iAvg[0] = hSum[0] * avg;
                     }
-                    var bAvg = new double[iAvg.Length];
-                    bAvg[0] = (double)iAvg[0];
+                    var bAvg = new double[1];
+                    bAvg[0] = iAvg[0];
                     SetColorAt(hBlur, i, j, width, bAvg, channels);
-
                 }
-
             }
+
             var total = new double[hBlur.Length];
             Array.Copy(hBlur, total, hBlur.Length);
+
             for (int i = 0; i < width; i++) {
                 var tSum = new double[] { 0f };
                 var iAvg = new double[] { 0f };
                 for (int y = 0; y < kernalSize; y++) {
-                    var tmpColor = GetColorAt(hBlur, i, y, channels, width);
-                    tSum[0] += (double)tmpColor[0];
+                    GetColorAt(hBlur, i, y, channels, width, tmpColor);
+                    tSum[0] += tmpColor[0];
                 }
                 iAvg[0] = tSum[0] * avg;
 
                 for (int j = 0; j < height; j++) {
                     if (j - kernalSize / 2 >= 0 && j + 1 + kernalSize / 2 < height) {
-                        var tmp_pColor = GetColorAt(hBlur, i, j - kernalSize / 2, channels, width);
-                        tSum[0] -= (double)tmp_pColor[0];
-                        var tmp_nColor = GetColorAt(hBlur, i, j + 1 + kernalSize / 2, channels, width);
-                        tSum[0] += (double)tmp_nColor[0];
-
+                        GetColorAt(hBlur, i, j - kernalSize / 2, channels, width, tmpColor);
+                        tSum[0] -= tmpColor[0];
+                        GetColorAt(hBlur, i, j + 1 + kernalSize / 2, channels, width, tmpColor);
+                        tSum[0] += tmpColor[0];
                         iAvg[0] = tSum[0] * avg;
-
                     }
-                    var bAvg = new double[iAvg.Length];
-                    bAvg[0] = (double)iAvg[0];
+                    var bAvg = new double[1];
+                    bAvg[0] = iAvg[0];
                     SetColorAt(total, i, j, width, bAvg, channels);
                 }
             }
@@ -171,24 +177,16 @@ namespace com.csutil.algorithms.images {
         }
 
         // Helper method to get color at a given position
-        private static byte[] GetColorAt(byte[] img, int x, int y, int bytesPerPixel, int width) {
+        private static void GetColorAt(double[] img, int x, int y, int bytesPerPixel, int width, double[] color) {
             int startIdx = (y * width + x) * bytesPerPixel;
-            return new byte[] { img[startIdx], img[startIdx + 1], img[startIdx + 2], img[startIdx + 3] };
+            for (int i = 0; i < bytesPerPixel; i++) {
+                color[i] = img[startIdx + i];
+            }
         }
 
         private static void SetColorAt(double[] imageData, int x, int y, int width, double[] color, int bytesPerPixel) {
             int startIdx = (y * width + x) * bytesPerPixel;
             Array.Copy(color, 0, imageData, startIdx, color.Length);
-        }
-
-        // Helper method to get color at a given position
-        private static double[] GetColorAt(double[] img, int x, int y, int bytesPerPixel, int width) {
-            int startIdx = (y * width + x) * bytesPerPixel;
-            var color = new double[bytesPerPixel];
-            for (int i = 0; i < bytesPerPixel; i++) {
-                color[i] = img[startIdx + i];
-            }
-            return color;
         }
 
         public static byte[] Erode(byte[] image, int width, int height, int bytePerPixel, int kernelSize) {
