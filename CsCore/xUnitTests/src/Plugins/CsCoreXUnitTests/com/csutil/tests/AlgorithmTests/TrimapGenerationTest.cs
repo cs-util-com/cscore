@@ -10,6 +10,38 @@ namespace com.csutil.tests.AlgorithmTests {
         public TrimapGenerationTest(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
         [Fact]
+        public async Task TestFloodFillVsColorCheckAlgo() {
+
+            var folder = EnvironmentV2.instance.GetOrAddTempFolder("TestFloodFillVsColorCheckAlgo");
+            var imgFile = folder.GetChild("0_inputImage.jpg");
+            var image = await MyImageFileRef.DownloadFileIfNeeded(imgFile, "https://raw.githubusercontent.com/cs-util-com/cscore/update/release_1_10_prep/CsCore/assets/16999.jpg");
+
+            var width = image.Width;
+            var height = image.Height;
+
+            var time1 = Log.MethodEntered("RunColorCheckAlgorithm");
+            var colorChecked = image.RunColorCheckAlgorithm();
+            Log.MethodDone(time1);
+            {
+                var test = folder.GetChild("2_ColorChecked.png");
+                await using var stream = test.OpenOrCreateForReadWrite();
+                var flipped = ImageUtility.FlipImageVertically(colorChecked, width, height, (int)image.ColorComponents);
+                new ImageWriter().WritePng(flipped, width, height, ColorComponents.RedGreenBlueAlpha, stream);
+            }
+
+            var time2 = Log.MethodEntered("RunFloodFill");
+            var floodFilled = image.RunFloodFill();
+            Log.MethodDone(time2);
+            {
+                var test = folder.GetChild("1_FloodFilled.png");
+                await using var stream = test.OpenOrCreateForReadWrite();
+                var flipped = ImageUtility.FlipImageVertically(floodFilled, width, height, (int)image.ColorComponents);
+                new ImageWriter().WritePng(flipped, width, height, ColorComponents.RedGreenBlueAlpha, stream);
+            }
+
+        }
+
+        [Fact]
         public async Task TestTrimapGeneration() {
 
             var folder = EnvironmentV2.instance.GetOrAddTempFolder("TestTrimapGeneration");
