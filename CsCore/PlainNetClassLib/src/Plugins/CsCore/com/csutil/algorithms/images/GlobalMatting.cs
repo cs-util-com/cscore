@@ -8,6 +8,8 @@ namespace com.csutil.algorithms.images {
     /// <summary> Ported version of https://raw.githubusercontent.com/atilimcetin/global-matting/master/globalmatting.cpp </summary>
     public class GlobalMatting {
 
+        Random rand = new Random();
+        
         private byte[] image;
         private int width;
         private int height;
@@ -326,7 +328,6 @@ namespace com.csutil.algorithms.images {
 
         // Helper method to generate a random float between 0 and 1
         private float RandomFloat() {
-            Random rand = new Random();
             return (float)rand.NextDouble();
         }
 
@@ -344,8 +345,6 @@ namespace com.csutil.algorithms.images {
             samples = new Sample[h][];
             for (int i = 0; i < h; i++)
                 samples[i] = new Sample[w];
-
-            Random rand = new Random();
 
             for (int y = 0; y < h; ++y) {
                 for (int x = 0; x < w; ++x) {
@@ -461,7 +460,6 @@ namespace com.csutil.algorithms.images {
             List<Point> backgroundBoundary = FindBoundaryPixels(trimap, 0, 128);
 
             int n = foregroundBoundary.Count + backgroundBoundary.Count;
-            Random rand = new Random();
             for (int i = 0; i < n; ++i) {
                 int x = rand.Next(width);
                 int y = rand.Next(height);
