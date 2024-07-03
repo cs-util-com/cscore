@@ -225,7 +225,7 @@ namespace com.csutil.algorithms.images {
                     var im = GetColorAt(image, x, y);
 
                     for (var j = y - r; j <= y + r; ++j) {
-                        for (var i = x-r; i <= x + r; ++i) {
+                        for (var i = x - r; i <= x + r; ++i) {
                             if (i < 0 || i >= w || j < 0 || j >= h)
                                 continue;
                             if (!ColorIsValue(trimap, i, j, bytesPerPixel, 0) && !ColorIsValue(trimap, i, j, bytesPerPixel, 255))
@@ -237,21 +237,20 @@ namespace com.csutil.algorithms.images {
                             if (!(pd <= r) || !(cd <= c))
                                 continue;
                             if (ColorIsValue(trimap, i, j, bytesPerPixel, 0))
-                                SetColorAt(trimap, x, y, new byte[] {1,1,1,255});
+                                SetColorAt(trimap, x, y, new byte[] { 1, 1, 1, 255 });
                             else if (ColorIsValue(trimap, i, j, bytesPerPixel, 255))
-                                SetColorAt(trimap, x, y, new byte[] {254,254,254,255});
+                                SetColorAt(trimap, x, y, new byte[] { 254, 254, 254, 255 });
                         }
                     }
                 }
             }
-            
+
             for (int x = 0; x < width; ++x)
-                for (int y = 0; y < height; ++y)
-                {
+                for (int y = 0; y < height; ++y) {
                     if (ColorIsValue(trimap, x, y, bytesPerPixel, 1))
-                        SetColorAt(trimap, x, y, new byte[] {0,0,0,255});
+                        SetColorAt(trimap, x, y, new byte[] { 0, 0, 0, 255 });
                     else if (ColorIsValue(trimap, x, y, bytesPerPixel, 254))
-                        SetColorAt(trimap, x, y, new byte[] {255,255,255,255});
+                        SetColorAt(trimap, x, y, new byte[] { 255, 255, 255, 255 });
 
                 }
         }
@@ -286,10 +285,10 @@ namespace com.csutil.algorithms.images {
                             float cd = ColorDist(I, I2);
 
                             if (pd <= r && cd <= c) {
-                                if(ColorIsValue(trimap, i, j, bytesPerPixel, 0))
-                                    SetColorAt(updatedTrimap, x, y, new byte[] {1,1,1,255});
+                                if (ColorIsValue(trimap, i, j, bytesPerPixel, 0))
+                                    SetColorAt(updatedTrimap, x, y, new byte[] { 1, 1, 1, 255 });
                                 else if (ColorIsValue(trimap, i, j, bytesPerPixel, 255))
-                                    SetColorAt(updatedTrimap, x, y, new byte[] {254,254,254,255});
+                                    SetColorAt(updatedTrimap, x, y, new byte[] { 254, 254, 254, 255 });
                             }
                         }
                     }
@@ -300,9 +299,10 @@ namespace com.csutil.algorithms.images {
             for (int x = 0; x < w; ++x) {
                 for (int y = 0; y < h; ++y) {
                     if (ColorIsValue(updatedTrimap, x, y, bytesPerPixel, 1))
-                        SetColorAt(trimap, x, y, new byte[] {0,0,0,255});
+                        SetColorAt(trimap, x, y, new byte[] { 0, 0, 0, 255 });
                     else if (ColorIsValue(updatedTrimap, x, y, bytesPerPixel, 254))
-                        SetColorAt(trimap, x, y, new byte[] {255,255,255,255});;
+                        SetColorAt(trimap, x, y, new byte[] { 255, 255, 255, 255 });
+                    ;
                 }
             }
         }
@@ -319,21 +319,21 @@ namespace com.csutil.algorithms.images {
             for (int y = 0; y < h; ++y) {
                 for (int x = 0; x < w; ++x) {
                     if (ColorIsValue(trimap, x, y, bytesPerPixel, 0))
-                        SetColorAt(background, x, y, new byte[] {1,1,1,255});
+                        SetColorAt(background, x, y, new byte[] { 1, 1, 1, 255 });
                     else if (ColorIsValue(trimap, x, y, bytesPerPixel, 255))
-                        SetColorAt(foreground, x, y, new byte[] {1,1,1,255});
+                        SetColorAt(foreground, x, y, new byte[] { 1, 1, 1, 255 });
                 }
             }
 
             // Erode the foreground and background
-            byte[] erodedBackground = Filter.Erode(background, w, h,  4,r);
-            byte[] erodedForeground = Filter.Erode(foreground, w, h,  4,r);
+            byte[] erodedBackground = Filter.Erode(background, w, h, 4, r);
+            byte[] erodedForeground = Filter.Erode(foreground, w, h, 4, r);
 
             // Increase unknown region
             for (int y = 0; y < h; ++y) {
                 for (int x = 0; x < w; ++x) {
                     if (ColorIsValue(erodedBackground, x, y, bytesPerPixel, 0) && ColorIsValue(erodedForeground, x, y, bytesPerPixel, 0))
-                        SetColorAt(trimap, x, y, new byte[]{128,128,128,255}); // Set to unknown
+                        SetColorAt(trimap, x, y, new byte[] { 128, 128, 128, 255 }); // Set to unknown
                 }
             }
         }
@@ -348,7 +348,7 @@ namespace com.csutil.algorithms.images {
             }
             return result;
         }
-        
+
         // Helper method to erode an image
         private byte[] Erode(byte[] image, int w, int h, int r) {
             byte[] erodedImage = new byte[image.Length];
@@ -363,7 +363,7 @@ namespace com.csutil.algorithms.images {
                                 int nx = x + dx;
                                 int ny = y + dy;
                                 if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
-                                    int idx = (ny * w + nx)*bytesPerPixel;
+                                    int idx = (ny * w + nx) * bytesPerPixel;
                                     // If any pixel in the neighborhood is 0, erode the current pixel
                                     if (image[idx] == 0) {
                                         erodePixel = true;
@@ -382,7 +382,7 @@ namespace com.csutil.algorithms.images {
 
             return erodedImage;
         }
-        
+
         // Helper method to generate a random float between 0 and 1
         private float RandomFloat() {
             Random rand = new Random();
@@ -546,21 +546,21 @@ namespace com.csutil.algorithms.images {
                     int idx = (y * width + x) * bytesPerPixel;
                     switch (trimap[idx]) {
                         case 0:
-                            SetColorAt(alpha, x, y, new byte[]{0,0,0,255});
+                            SetColorAt(alpha, x, y, new byte[] { 0, 0, 0, 255 });
                             conf[idx] = 255;
-                            SetColorAt(foreground, x, y, new byte[] { 0, 0, 0 , 255});
+                            SetColorAt(foreground, x, y, new byte[] { 0, 0, 0, 255 });
                             break;
                         case 128:
                             Sample s = samples[y][x];
                             var alphaValue = (byte)(255 * s.alpha);
-                            SetColorAt(alpha, x, y, new byte[]{alphaValue, alphaValue, alphaValue, 255});
+                            SetColorAt(alpha, x, y, new byte[] { alphaValue, alphaValue, alphaValue, 255 });
                             conf[idx] = (byte)(255 * Math.Exp(-s.cost / 6));
                             Point p = foregroundBoundary[s.fi];
                             byte[] color = GetColorAt(image, p.X, p.Y);
                             SetColorAt(foreground, x, y, color);
                             break;
                         case 255:
-                            SetColorAt(alpha, x, y, new byte[]{255,255,255,255});
+                            SetColorAt(alpha, x, y, new byte[] { 255, 255, 255, 255 });
                             conf[idx] = 255;
                             byte[] fgColor = GetColorAt(image, x, y);
                             SetColorAt(foreground, x, y, fgColor);
@@ -607,7 +607,7 @@ namespace com.csutil.algorithms.images {
                 // Check if image and trimap have the same size
                 if (image.Length != trimap.Length)
                     throw new ArgumentException("image and trimap must have the same size");
-        
+
                 // Call the helper function to perform the global matting
                 GlobalMattingHelper(trimap, out foreground, out alpha, out conf);
             }
@@ -623,9 +623,9 @@ namespace com.csutil.algorithms.images {
                 for (int x = 0; x < width; x++) {
                     for (int y = 0; y < height; y++) {
                         var col = GetColorAt(guidedIm, x, y);
-                        var temp = new double[] { col[0], col[1], col[2]};
+                        var temp = new double[] { col[0], col[1], col[2] };
                         var max = (byte)temp.Max();
-                        SetColorAt(guidedIm, x, y, new []{max, max, max, (byte)255});
+                        SetColorAt(guidedIm, x, y, new[] { max, max, max, (byte)255 });
                     }
                 }
                 return guidedIm;
