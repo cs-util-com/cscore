@@ -59,10 +59,6 @@ namespace com.csutil.algorithms.images {
             return result;
         }
 
-
-        // Similarly, you would need to convert other functions like calculating alpha,
-        // color cost, etc., into C# methods.
-
         // Calculate alpha value (Eq. 2 in the C++ code)
         private float CalculateAlpha(byte[] F, byte[] B, byte[] I) {
             float result = 0;
@@ -130,7 +126,7 @@ namespace com.csutil.algorithms.images {
         // Helper method to get color at a given position
         private byte[] GetColorAt(byte[] img, int x, int y) {
             int startIdx = (y * width + x) * bytesPerPixel;
-            return new byte[] { img[startIdx], img[startIdx + 1], img[startIdx + 2], img[startIdx + 3] };
+            return new byte[] { img[startIdx], img[startIdx + 1], img[startIdx + 2] };
         }
 
         // Method for expansion of known regions
@@ -195,11 +191,6 @@ namespace com.csutil.algorithms.images {
             if (image.Length != width * height * bytesPerPixel)
                 throw new ArgumentException("image must have CV_8UC3 type (3 channels) but was bytesPerPixel=" + bytesPerPixel);
 
-            // Assuming trimap is a single channel image
-            /* this does not work for byte[] type images as we just have all but one channel at 0
-            if (trimap.Length != width * height)
-                throw new ArgumentException("trimap must have CV_8UC1 type (1 channel)");
-            */
             // Loop through iterations and call helper functions
             for (int i = 0; i < niter; ++i) {
                 // Calculate the scaling factor for the radius and color difference threshold
@@ -230,12 +221,14 @@ namespace com.csutil.algorithms.images {
                                 continue;
                             if (!ColorIsValue(trimap, i, j, bytesPerPixel, 0) && !ColorIsValue(trimap, i, j, bytesPerPixel, 255))
                                 continue;
+
                             var imCur = GetColorAt(image, i, j);
                             var pd = (float)Math.Sqrt(Sqr(x - i) + Sqr(y - j));
                             var cd = ColorDist(im, imCur);
 
                             if (!(pd <= r) || !(cd <= c))
                                 continue;
+
                             if (ColorIsValue(trimap, i, j, bytesPerPixel, 0))
                                 SetColorAt(trimap, x, y, new byte[] { 1, 1, 1, 255 });
                             else if (ColorIsValue(trimap, i, j, bytesPerPixel, 255))
@@ -245,64 +238,12 @@ namespace com.csutil.algorithms.images {
                 }
             }
 
-            for (int x = 0; x < width; ++x)
+            for (int x = 0; x < width; ++x) {
                 for (int y = 0; y < height; ++y) {
                     if (ColorIsValue(trimap, x, y, bytesPerPixel, 1))
                         SetColorAt(trimap, x, y, new byte[] { 0, 0, 0, 255 });
                     else if (ColorIsValue(trimap, x, y, bytesPerPixel, 254))
                         SetColorAt(trimap, x, y, new byte[] { 255, 255, 255, 255 });
-
-                }
-        }
-
-        // Method to expand known regions in the trimap
-        public void ExpansionOfKnownRegionsHelper(byte[] trimap, int r, float c) {
-            int w = width;
-            int h = height;
-
-            // Temporary array to mark changes without affecting the original trimap during the process
-            byte[] updatedTrimap = new byte[trimap.Length];
-            Array.Copy(trimap, updatedTrimap, trimap.Length);
-
-            for (int x = 0; x < w; ++x) {
-                for (int y = 0; y < h; ++y) {
-                    if (!ColorIsValue(trimap, x, y, bytesPerPixel, 128))
-                        continue;
-
-                    byte[] I = GetColorAt(image, x, y);
-
-                    for (int j = y - r; j <= y + r; ++j) {
-                        for (int i = x - r; i <= x + r; ++i) {
-                            if (i < 0 || i >= w || j < 0 || j >= h)
-                                continue;
-
-                            if (!ColorIsValue(trimap, i, j, bytesPerPixel, 0) && !ColorIsValue(trimap, i, j, bytesPerPixel, 255))
-                                continue;
-
-                            byte[] I2 = GetColorAt(image, i, j);
-
-                            float pd = (float)Math.Sqrt(Sqr(x - i) + Sqr(y - j));
-                            float cd = ColorDist(I, I2);
-
-                            if (pd <= r && cd <= c) {
-                                if (ColorIsValue(trimap, i, j, bytesPerPixel, 0))
-                                    SetColorAt(updatedTrimap, x, y, new byte[] { 1, 1, 1, 255 });
-                                else if (ColorIsValue(trimap, i, j, bytesPerPixel, 255))
-                                    SetColorAt(updatedTrimap, x, y, new byte[] { 254, 254, 254, 255 });
-                            }
-                        }
-                    }
-                }
-            }
-
-            // Apply the changes to the original trimap
-            for (int x = 0; x < w; ++x) {
-                for (int y = 0; y < h; ++y) {
-                    if (ColorIsValue(updatedTrimap, x, y, bytesPerPixel, 1))
-                        SetColorAt(trimap, x, y, new byte[] { 0, 0, 0, 255 });
-                    else if (ColorIsValue(updatedTrimap, x, y, bytesPerPixel, 254))
-                        SetColorAt(trimap, x, y, new byte[] { 255, 255, 255, 255 });
-                    ;
                 }
             }
         }
@@ -588,51 +529,36 @@ namespace com.csutil.algorithms.images {
         }
 
         public void RunGlobalMatting(byte[] trimap, out byte[] foreground, out byte[] alpha, out byte[] conf) {
-            using (var t = Log.MethodEntered()) {
-                // Check if the image or trimap is empty
-                if (image == null || image.Length == 0)
-                    throw new ArgumentException("image is empty");
-                if (trimap == null || trimap.Length == 0)
-                    throw new ArgumentException("trimap is empty");
+            if (image == null || image.Length == 0)
+                throw new ArgumentException("image is empty");
+            if (trimap == null || trimap.Length == 0)
+                throw new ArgumentException("trimap is empty");
 
-                // Assuming bytesPerPixel is the number of channels (e.g., 3 for an RGB image)
-                if (image.Length != width * height * bytesPerPixel)
-                    throw new ArgumentException("image must have CV_8UC3 type (3 channels) but was bytesPerPixel=" + bytesPerPixel);
+            if (image.Length != width * height * bytesPerPixel)
+                throw new ArgumentException("image must have CV_8UC3 type (3 channels) but was bytesPerPixel=" + bytesPerPixel);
 
-                // Assuming trimap is a single channel image
-                /* does not work for byte[] type single channel images they way we use them here, as they have empty channels just set to 0
-                if (trimap.Length != width * height)
-                    throw new ArgumentException("trimap must have CV_8UC1 type (1 channel)");
-                */
-                // Check if image and trimap have the same size
-                if (image.Length != trimap.Length)
-                    throw new ArgumentException("image and trimap must have the same size");
+            if (image.Length != trimap.Length)
+                throw new ArgumentException("image and trimap must have the same size");
 
-                // Call the helper function to perform the global matting
-                GlobalMattingHelper(trimap, out foreground, out alpha, out conf);
-            }
+            GlobalMattingHelper(trimap, out foreground, out alpha, out conf);
         }
 
         public byte[] RunGuidedFilter(byte[] alpha, int r, double eps) {
-            using (var t = Log.MethodEntered()) {
-                var imageGuidedFilter = new GuidedFilter(image, width, height, bytesPerPixel, r, eps);
-                var guidedFilterInstance = imageGuidedFilter.Init(bytesPerPixel);
-                var guidedIm = GuidedFilter.RunGuidedFilter(alpha, guidedFilterInstance);
-                // This loop sets the alpha value to the maximum color channel value, while for a pixel all channel values should be the same
-                // This is needed as the guided filter does not operate on the alpha channel
-                for (int x = 0; x < width; x++) {
-                    for (int y = 0; y < height; y++) {
-                        var col = GetColorAt(guidedIm, x, y);
-                        var temp = new double[] { col[0], col[1], col[2] };
-                        var max = (byte)temp.Max();
-                        SetColorAt(guidedIm, x, y, new[] { max, max, max, (byte)255 });
-                    }
+            var imageGuidedFilter = new GuidedFilter(image, width, height, bytesPerPixel, r, eps);
+            var guidedFilterInstance = imageGuidedFilter.Init(bytesPerPixel);
+            var guidedIm = GuidedFilter.RunGuidedFilter(alpha, guidedFilterInstance);
+
+            for (int x = 0; x < width; x++) {
+                for (int y = 0; y < height; y++) {
+                    var col = GetColorAt(guidedIm, x, y);
+                    var temp = new double[] { col[0], col[1], col[2] };
+                    var max = (byte)temp.Max();
+                    SetColorAt(guidedIm, x, y, new[] { max, max, max, (byte)255 });
                 }
-                return guidedIm;
             }
+
+            return guidedIm;
         }
-
-
     }
 
 }
