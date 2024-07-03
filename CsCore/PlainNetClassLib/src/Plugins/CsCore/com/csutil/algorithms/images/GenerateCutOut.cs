@@ -22,7 +22,7 @@ namespace com.csutil.algorithms.images {
             var height = imageRes.Height;
             var bytesPerPixel = (int)imageRes.ColorComponents;
 
-            var floodFilled = imageRes.RunFloodFillAlgorithm(floodValue);
+            var floodFilled = imageRes.RunColorCheckAlgorithm(floodValue);
             var trimap = TrimapGeneration.FromFloodFill(floodFilled, width, height, (int)imageRes.ColorComponents, trimapKernel);
 
             var imageMatting = new GlobalMatting(image, width, height, bytesPerPixel);

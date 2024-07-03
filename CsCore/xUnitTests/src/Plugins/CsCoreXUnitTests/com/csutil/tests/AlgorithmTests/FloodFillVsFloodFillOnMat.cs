@@ -15,7 +15,7 @@ namespace com.csutil.tests.AlgorithmTests {
             var folder = EnvironmentV2.instance.GetOrAddTempFolder("FloodFillVsFloodFillOnMat");
             var image = await MyImageFileRef.DownloadFileIfNeeded(folder, "https://raw.githubusercontent.com/cs-util/global-matting/master/GT04-image.png");
 
-            byte[] imageResult = image.RunFloodFillAlgorithm(50);
+            byte[] imageResult = image.RunColorCheckAlgorithm(50);
 
             var outputFile = folder.GetChild("FloodFillResult.png");
             using var outputStream = outputFile.OpenOrCreateForWrite();

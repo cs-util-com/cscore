@@ -20,7 +20,7 @@ namespace com.csutil.tests.AlgorithmTests {
             var height = image.Height;
             var kernel = 2;
 
-            var floodFilled = image.RunFloodFillAlgorithm(240);
+            var floodFilled = image.RunColorCheckAlgorithm(240);
             {
                 var test = folder.GetChild("1_FloodFilled.png");
                 await using var stream = test.OpenOrCreateForReadWrite();

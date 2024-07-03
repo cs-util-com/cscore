@@ -7,7 +7,7 @@ namespace com.csutil.algorithms.images {
 
         private static readonly byte[] white = new byte[] { 255, 255, 255, 255 };
 
-        public static byte[] RunFloodFillAlgorithm(this ImageResult self, int colorThreshold = 240) {
+        public static byte[] RunColorCheckAlgorithm(this ImageResult self, int colorThreshold = 240) {
             var image = self.Data.DeepCopy();
             var width = self.Width;
             var height = self.Height;
