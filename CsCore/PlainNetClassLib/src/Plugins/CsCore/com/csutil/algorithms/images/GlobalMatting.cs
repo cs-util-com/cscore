@@ -134,6 +134,7 @@ namespace com.csutil.algorithms.images {
             return intensity0 - intensity1; //Same as return intensity0.CompareTo(intensity1);
         }
 
+        // TODO remove colorCache to allow parallel processing
         private byte[] colorCache = new byte[4];
 
         // Helper method to get color at a given position
