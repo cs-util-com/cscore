@@ -25,12 +25,10 @@ namespace com.csutil.algorithms.images {
             this.bytesPerPixel = bytesPerPixel;
         }
 
-        // Example of converting a function to calculate the squared value
-        private static float Sqr(float a) {
+        private static double Sqr(double a) {
             return a * a;
         }
 
-        // Assuming a Point struct similar to cv::Point
         public struct Point {
             public int X, Y;
 
@@ -75,58 +73,57 @@ namespace com.csutil.algorithms.images {
         }
 
         // Calculate alpha value (Eq. 2 in the C++ code)
-        private float CalculateAlpha(PixelRgb F, PixelRgb B, PixelRgb I) {
-            float result = 0;
-            float div = 1e-6f;
+        private double CalculateAlpha(PixelRgb F, PixelRgb B, PixelRgb I) {
+            double result = 0;
+            double div = 1e-6d;
             result += (I.R - B.R) * (F.R - B.R);
             div += (F.R - B.R) * (F.R - B.R);
             result += (I.G - B.G) * (F.G - B.G);
             div += (F.G - B.G) * (F.G - B.G);
             result += (I.B - B.B) * (F.B - B.B);
             div += (F.B - B.B) * (F.B - B.B);
-            return Math.Min(Math.Max(result / div, 0.0f), 1.0f);
+            return Math.Min(Math.Max(result / div, 0.0d), 1.0d);
         }
 
         // Color cost (Eq. 3 in the C++ code)
-        private float ColorCost(PixelRgb F, PixelRgb B, PixelRgb I, float alpha) {
-            float result = 0;
-            var oneMinusAlpha = 1 - alpha;
+        private double ColorCost(PixelRgb F, PixelRgb B, PixelRgb I, double alpha) {
+            double result = 0;
+            double oneMinusAlpha = 1 - alpha;
             result += Sqr(I.R - (alpha * F.R + oneMinusAlpha * B.R));
             result += Sqr(I.G - (alpha * F.G + oneMinusAlpha * B.G));
             result += Sqr(I.B - (alpha * F.B + oneMinusAlpha * B.B));
-            return (float)Math.Sqrt(result);
+            return Math.Sqrt(result);
         }
 
-        // Equation 4: Distance cost between two points
-        public static float DistCost(Point p0, Point p1, float minDist) {
-            var dist = Sqr(p0.X - p1.X) + Sqr(p0.Y - p1.Y);
-            return (float)Math.Sqrt(dist) / minDist;
+        // Distance cost between two points
+        private static double DistCost(Point p0, Point p1, double minDist) {
+            var a = p0.X - p1.X;
+            var b = p0.Y - p1.Y;
+            var dist = Math.Sqrt(a * a + b * b);
+            return dist / minDist;
         }
 
         // Color distance between two pixels
-        public static float ColorDist(PixelRgb I0, PixelRgb I1) {
-            float result = 0;
-
-            result += Sqr(I0.R - I1.R);
-            result += Sqr(I0.G - I1.G);
-            result += Sqr(I0.B - I1.B);
-
-            return (float)Math.Sqrt(result);
+        private static double ColorDist(PixelRgb I0, PixelRgb I1) {
+            var r = I0.R - I1.R;
+            var g = I0.G - I1.G;
+            var b = I0.B - I1.B;
+            return Math.Sqrt(r * r + g * g + b * b);
         }
 
         // Nearest distance from a point to any point in a boundary
-        public static float NearestDistance(List<Point> boundary, Point p) {
-            float minDist2 = float.MaxValue;
-            foreach (var bp in boundary) {
-                float dist2 = Sqr(bp.X - p.X) + Sqr(bp.Y - p.Y);
-                minDist2 = Math.Min(minDist2, dist2);
+        private static double NearestDistance(List<Point> boundary, Point p) {
+            double minDist2 = double.MaxValue;
+            foreach (var pBoundary in boundary) {
+                var a = pBoundary.X - p.X;
+                var b = pBoundary.Y - p.Y;
+                minDist2 = Math.Min(minDist2, a * a + b * b);
             }
-
-            return (float)Math.Sqrt(minDist2);
+            return Math.Sqrt(minDist2);
         }
 
         // Comparison delegate for sorting by intensity
-        public int CompareIntensity(Point p0, Point p1) {
+        private int CompareIntensity(Point p0, Point p1) {
             var c0 = GetColorAt(image, p0.X, p0.Y);
             var c1 = GetColorAt(image, p1.X, p1.Y);
 
@@ -145,7 +142,7 @@ namespace com.csutil.algorithms.images {
         }
 
         // Method for expansion of known regions
-        public void ExpansionOfKnownRegions(ref byte[] trimap, int r, float c) {
+        public void ExpansionOfKnownRegions(ref byte[] trimap, int r, double c) {
             for (int x = 0; x < width; ++x) {
                 for (int y = 0; y < height; ++y) {
                     int idx = (y * width + x) * bytesPerPixel;
@@ -167,8 +164,8 @@ namespace com.csutil.algorithms.images {
 
                             var I2 = GetColorAt(image, i, j);
 
-                            float pd = (float)Math.Sqrt(Sqr(x - i) + Sqr(y - j));
-                            float cd = ColorDist(I, I2);
+                            double pd = Math.Sqrt(Sqr(x - i) + Sqr(y - j));
+                            double cd = ColorDist(I, I2);
 
                             if (pd <= r && cd <= c) {
                                 if (trimap[neighborIdx] == 0)
@@ -211,14 +208,14 @@ namespace com.csutil.algorithms.images {
                 // Calculate the scaling factor for the radius and color difference threshold
                 // The original C++ code seems to use 'niter - i' for the threshold, which decreases with each iteration.
                 // It is not clear what the intended effect is, so you might need to adjust this based on the expected behavior.
-                float scalingFactor = (float)(niter - i) / niter;
+                double scalingFactor = (double)(niter - i) / niter;
                 ExpansionOfKnownRegionsHelper(image, trimap, i + 1, scalingFactor);
             }
             ErodeFB(ref trimap, 2);
         }
 
         // This method performs an expansion of known regions
-        public void ExpansionOfKnownRegionsHelper(byte[] image, byte[] trimap, int r, float c) {
+        public void ExpansionOfKnownRegionsHelper(byte[] image, byte[] trimap, int r, double c) {
             int w = width;
             int h = height;
             // ... (Conversion logic) ...
@@ -226,23 +223,21 @@ namespace com.csutil.algorithms.images {
             // ... 
             for (var x = 0; x < w; ++x) {
                 for (var y = 0; y < h; ++y) {
-                    if (!ColorIsValue(trimap, x, y, 128))
-                        continue;
+                    if (!ColorIsValue(trimap, x, y, 128)) { continue; }
+
                     var im = GetColorAt(image, x, y);
 
                     for (var j = y - r; j <= y + r; ++j) {
                         for (var i = x - r; i <= x + r; ++i) {
-                            if (i < 0 || i >= w || j < 0 || j >= h)
-                                continue;
-                            if (!ColorIsValue(trimap, i, j, 0) && !ColorIsValue(trimap, i, j, 255))
-                                continue;
+                            if (i < 0 || i >= w || j < 0 || j >= h) { continue; }
+
+                            if (!ColorIsValue(trimap, i, j, 0) && !ColorIsValue(trimap, i, j, 255)) { continue; }
 
                             var imCur = GetColorAt(image, i, j);
-                            var pd = (float)Math.Sqrt(Sqr(x - i) + Sqr(y - j));
+                            var pd = Math.Sqrt(Sqr(x - i) + Sqr(y - j));
                             var cd = ColorDist(im, imCur);
 
-                            if (!(pd <= r) || !(cd <= c))
-                                continue;
+                            if (!(pd <= r) || !(cd <= c)) { continue; }
 
                             if (ColorIsValue(trimap, i, j, 0)) {
                                 colorCache[0] = 1;
@@ -347,8 +342,8 @@ namespace com.csutil.algorithms.images {
 
         public struct Sample {
             public int fi, bj;
-            public float df, db;
-            public float cost, alpha;
+            public double df, db;
+            public double cost, alpha;
         }
 
         // Method to calculate alpha patch match
@@ -369,7 +364,7 @@ namespace com.csutil.algorithms.images {
                         samples[y][x].bj = rand.Next(backgroundBoundary.Count);
                         samples[y][x].df = NearestDistance(foregroundBoundary, p);
                         samples[y][x].db = NearestDistance(backgroundBoundary, p);
-                        samples[y][x].cost = float.MaxValue;
+                        samples[y][x].cost = double.MaxValue;
                     }
                 }
             }
@@ -412,8 +407,8 @@ namespace com.csutil.algorithms.images {
                             Point bp = backgroundBoundary[s2.bj];
                             var F = GetColorAt(image, fp.X, fp.Y);
                             var B = GetColorAt(image, bp.X, bp.Y);
-                            float alpha = CalculateAlpha(F, B, I);
-                            float cost = ColorCost(F, B, I, alpha) + DistCost(p, fp, s.df) + DistCost(p, bp, s.db);
+                            double alpha = CalculateAlpha(F, B, I);
+                            double cost = ColorCost(F, B, I, alpha) + DistCost(p, fp, s.df) + DistCost(p, bp, s.db);
 
                             // If new cost is lower, update the sample
                             if (cost < s.cost) {
@@ -429,16 +424,16 @@ namespace com.csutil.algorithms.images {
                     int w2 = Math.Max(foregroundBoundary.Count, backgroundBoundary.Count);
 
                     for (int k = 0;; k++) {
-                        float r = w2 * (float)Math.Pow(0.5, k);
+                        double r = w2 * Math.Pow(0.5, k);
 
                         if (r < 1) { break; }
 
 
-                        int di = (int)(r * rand.NextFloat());
-                        int dj = (int)(r * rand.NextFloat());
+                        int di = (int)(r * rand.NextDouble());
+                        int dj = (int)(r * rand.NextDouble());
 
-                        int fi = s.fi + (rand.NextFloat() > 0.5 ? di : -di);
-                        int bj = s.bj + (rand.NextFloat() > 0.5 ? dj : -dj);
+                        int fi = s.fi + (rand.NextDouble() > 0.5 ? di : -di);
+                        int bj = s.bj + (rand.NextDouble() > 0.5 ? dj : -dj);
 
                         if (fi < 0 || fi >= foregroundBoundary.Count || bj < 0 || bj >= backgroundBoundary.Count) { continue; }
 
@@ -449,8 +444,8 @@ namespace com.csutil.algorithms.images {
                         var F = GetColorAt(image, fp.X, fp.Y);
                         var B = GetColorAt(image, bp.X, bp.Y);
 
-                        float alpha = CalculateAlpha(F, B, I);
-                        float cost = ColorCost(F, B, I, alpha) + DistCost(p, fp, s.df) + DistCost(p, bp, s.db);
+                        double alpha = CalculateAlpha(F, B, I);
+                        double cost = ColorCost(F, B, I, alpha) + DistCost(p, fp, s.df) + DistCost(p, bp, s.db);
 
                         // If new cost is lower, update the sample
                         if (cost < s.cost) {
