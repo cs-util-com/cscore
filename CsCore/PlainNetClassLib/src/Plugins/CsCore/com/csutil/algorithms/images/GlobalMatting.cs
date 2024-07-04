@@ -38,7 +38,7 @@ namespace com.csutil.algorithms.images {
             }
         }
 
-        public struct PixelRgb {
+        private struct PixelRgb {
             public byte R, G, B;
 
             public PixelRgb(byte r, byte g, byte b) {
@@ -49,7 +49,7 @@ namespace com.csutil.algorithms.images {
         }
 
         // Method to find boundary pixels
-        public List<Point> FindBoundaryPixels(byte[] trimap, byte a, byte b) {
+        private List<Point> FindBoundaryPixels(byte[] trimap, byte a, byte b) {
             List<Point> result = new List<Point>();
 
             for (int x = 1; x < width - 1; ++x) {
@@ -141,56 +141,6 @@ namespace com.csutil.algorithms.images {
             return new PixelRgb(img[startIdx], img[startIdx + 1], img[startIdx + 2]);
         }
 
-        // Method for expansion of known regions
-        public void ExpansionOfKnownRegions(ref byte[] trimap, int r, double c) {
-            for (int x = 0; x < width; ++x) {
-                for (int y = 0; y < height; ++y) {
-                    int idx = (y * width + x) * bytesPerPixel;
-
-                    if (trimap[idx] != 128) // Assuming 128 represents the unknown region
-                        continue;
-
-                    var I = GetColorAt(image, x, y);
-
-                    for (int j = y - r; j <= y + r; ++j) {
-                        for (int i = x - r; i <= x + r; ++i) {
-                            if (i < 0 || i >= width || j < 0 || j >= height)
-                                continue;
-
-                            int neighborIdx = (j * width + i) * bytesPerPixel;
-
-                            if (trimap[neighborIdx] != 0 && trimap[neighborIdx] != 255)
-                                continue;
-
-                            var I2 = GetColorAt(image, i, j);
-
-                            double pd = Math.Sqrt(Sqr(x - i) + Sqr(y - j));
-                            double cd = ColorDist(I, I2);
-
-                            if (pd <= r && cd <= c) {
-                                if (trimap[neighborIdx] == 0)
-                                    trimap[idx] = 1;
-                                else if (trimap[neighborIdx] == 255)
-                                    trimap[idx] = 254;
-                            }
-                        }
-                    }
-                }
-            }
-
-            // Update the trimap values
-            for (int x = 0; x < width; ++x) {
-                for (int y = 0; y < height; ++y) {
-                    int idx = (y * width + x) * bytesPerPixel;
-
-                    if (trimap[idx] == 1)
-                        trimap[idx] = 0;
-                    else if (trimap[idx] == 254)
-                        trimap[idx] = 255;
-                }
-            }
-        }
-
         // Method to expand known regions in the trimap with checks
         public void ExpansionOfKnownRegions(ref byte[] trimap, int niter) {
             // Check if the image or trimap is empty
@@ -215,12 +165,10 @@ namespace com.csutil.algorithms.images {
         }
 
         // This method performs an expansion of known regions
-        public void ExpansionOfKnownRegionsHelper(byte[] image, byte[] trimap, int r, double c) {
+        private void ExpansionOfKnownRegionsHelper(byte[] image, byte[] trimap, int r, double c) {
             int w = width;
             int h = height;
             // ... (Conversion logic) ...
-            // Loop through pixels and perform calculations based on the C++ logic
-            // ... 
             for (var x = 0; x < w; ++x) {
                 for (var y = 0; y < h; ++y) {
                     if (!ColorIsValue(trimap, x, y, 128)) { continue; }
@@ -245,14 +193,12 @@ namespace com.csutil.algorithms.images {
                                 colorCache[2] = 1;
                                 colorCache[3] = 255;
                                 SetColorAt(trimap, x, y, colorCache);
-                                // SetColorAt(trimap, x, y, new byte[] { 1, 1, 1, 255 });
                             } else if (ColorIsValue(trimap, i, j, 255)) {
                                 colorCache[0] = 254;
                                 colorCache[1] = 254;
                                 colorCache[2] = 254;
                                 colorCache[3] = 255;
                                 SetColorAt(trimap, x, y, colorCache);
-                                // SetColorAt(trimap, x, y, new byte[] { 254, 254, 254, 255 });
                             }
                         }
                     }
@@ -306,48 +252,14 @@ namespace com.csutil.algorithms.images {
             return color.R == value && color.G == value && color.B == value;
         }
 
-        // Helper method to erode an image
-        private byte[] Erode(byte[] image, int w, int h, int r) {
-            byte[] erodedImage = new byte[image.Length];
-            Array.Copy(image, erodedImage, image.Length);
-
-            for (int y = 0; y < h; ++y) {
-                for (int x = 0; x < w; ++x) {
-                    bool erodePixel = false;
-                    for (int dy = -r; dy <= r; ++dy) {
-                        for (int dx = -r; dx <= r; ++dx) {
-                            if (dx * dx + dy * dy <= r * r) {
-                                int nx = x + dx;
-                                int ny = y + dy;
-                                if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
-                                    int idx = (ny * w + nx) * bytesPerPixel;
-                                    // If any pixel in the neighborhood is 0, erode the current pixel
-                                    if (image[idx] == 0) {
-                                        erodePixel = true;
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    if (erodePixel) {
-                        int idx = (y * w + x) * bytesPerPixel;
-                        erodedImage[idx] = 0;
-                    }
-                }
-            }
-
-            return erodedImage;
-        }
-
-        public struct Sample {
+        private struct Sample {
             public int fi, bj;
             public double df, db;
             public double cost, alpha;
         }
 
         // Method to calculate alpha patch match
-        public void CalculateAlphaPatchMatch(byte[] trimap, List<Point> foregroundBoundary, List<Point> backgroundBoundary, out Sample[][] samples) {
+        private void CalculateAlphaPatchMatch(byte[] trimap, List<Point> foregroundBoundary, List<Point> backgroundBoundary, out Sample[][] samples) {
             int w = width;
             int h = height;
 
@@ -464,7 +376,7 @@ namespace com.csutil.algorithms.images {
 
         }
 
-        public void GlobalMattingHelper(byte[] trimap, out byte[] foreground, out byte[] alpha, out byte[] conf) {
+        private void GlobalMattingHelper(byte[] trimap, out byte[] foreground, out byte[] alpha, out byte[] conf) {
             List<Point> foregroundBoundary = FindBoundaryPixels(trimap, 255, 128);
             List<Point> backgroundBoundary = FindBoundaryPixels(trimap, 0, 128);
 
@@ -569,9 +481,9 @@ namespace com.csutil.algorithms.images {
                     SetColorAt(guidedIm, x, y, new PixelRgb(max, max, max));
                 }
             }
-
             return guidedIm;
         }
+
     }
 
 }
