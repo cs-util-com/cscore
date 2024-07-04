@@ -90,9 +90,10 @@ namespace com.csutil.algorithms.images {
         // Color cost (Eq. 3 in the C++ code)
         private float ColorCost(PixelRgb F, PixelRgb B, PixelRgb I, float alpha) {
             float result = 0;
-            result += Sqr(I.R - (alpha * F.R + (1 - alpha) * B.R));
-            result += Sqr(I.G - (alpha * F.G + (1 - alpha) * B.G));
-            result += Sqr(I.B - (alpha * F.B + (1 - alpha) * B.B));
+            var oneMinusAlpha = 1 - alpha;
+            result += Sqr(I.R - (alpha * F.R + oneMinusAlpha * B.R));
+            result += Sqr(I.G - (alpha * F.G + oneMinusAlpha * B.G));
+            result += Sqr(I.B - (alpha * F.B + oneMinusAlpha * B.B));
             return (float)Math.Sqrt(result);
         }
 
@@ -132,7 +133,7 @@ namespace com.csutil.algorithms.images {
             int intensity0 = c0.R + c0.G + c0.B;
             int intensity1 = c1.R + c1.G + c1.B;
 
-            return intensity0.CompareTo(intensity1);
+            return intensity0 - intensity1; //Same as return intensity0.CompareTo(intensity1);
         }
 
         private byte[] colorCache = new byte[4];
