@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using com.csutil.math;
 
 namespace com.csutil.algorithms.images {
 
@@ -9,6 +7,8 @@ namespace com.csutil.algorithms.images {
     public class GlobalMatting {
 
         private byte[] black = new byte[] { 0, 0, 0, 255 };
+        private byte[] almostBlack = new byte[] { 1, 1, 1, 255 };
+        private byte[] gray = new byte[] { 128, 128, 128, 255 };
         private byte[] white = new byte[] { 255, 255, 255, 255 };
 
         Random rand = new Random();
@@ -54,6 +54,7 @@ namespace com.csutil.algorithms.images {
 
             for (int x = 1; x < width - 1; ++x) {
                 for (int y = 1; y < height - 1; ++y) {
+                    // trimap is a linear array with all pixels from all rows concatenated and each pixel has bytesPerPixel bytes/entries in the array
                     int idx = (y * width + x) * bytesPerPixel; // Calculate the index for the current pixel
 
                     // Check the current pixel's value and its neighbors to find boundary pixels
@@ -88,7 +89,7 @@ namespace com.csutil.algorithms.images {
         // Color cost (Eq. 3 in the C++ code)
         private double ColorCost(PixelRgb F, PixelRgb B, PixelRgb I, double alpha) {
             double result = 0;
-            double oneMinusAlpha = 1 - alpha;
+            double oneMinusAlpha = 1d - alpha;
             result += Sqr(I.R - (alpha * F.R + oneMinusAlpha * B.R));
             result += Sqr(I.G - (alpha * F.G + oneMinusAlpha * B.G));
             result += Sqr(I.B - (alpha * F.B + oneMinusAlpha * B.B));
@@ -137,6 +138,7 @@ namespace com.csutil.algorithms.images {
 
         // Helper method to get color at a given position
         private PixelRgb GetColorAt(byte[] img, int x, int y) {
+            // img is a linear array with all pixels from all rows concatenated and each pixel has bytesPerPixel bytes/entries in the array
             int startIdx = (y * width + x) * bytesPerPixel;
             return new PixelRgb(img[startIdx], img[startIdx + 1], img[startIdx + 2]);
         }
@@ -227,9 +229,9 @@ namespace com.csutil.algorithms.images {
             for (int y = 0; y < h; ++y) {
                 for (int x = 0; x < w; ++x) {
                     if (ColorIsValue(trimap, x, y, 0))
-                        SetColorAt(background, x, y, new byte[] { 1, 1, 1, 255 });
+                        SetColorAt(background, x, y, almostBlack);
                     else if (ColorIsValue(trimap, x, y, 255))
-                        SetColorAt(foreground, x, y, new byte[] { 1, 1, 1, 255 });
+                        SetColorAt(foreground, x, y, almostBlack);
                 }
             }
 
@@ -241,7 +243,7 @@ namespace com.csutil.algorithms.images {
             for (int y = 0; y < h; ++y) {
                 for (int x = 0; x < w; ++x) {
                     if (ColorIsValue(erodedBackground, x, y, 0) && ColorIsValue(erodedForeground, x, y, 0))
-                        SetColorAt(trimap, x, y, new byte[] { 128, 128, 128, 255 }); // Set to unknown
+                        SetColorAt(trimap, x, y, gray); // Set to unknown
                 }
             }
         }
@@ -403,6 +405,7 @@ namespace com.csutil.algorithms.images {
 
             for (int y = 0; y < height; ++y) {
                 for (int x = 0; x < width; ++x) {
+                    // trimap is a linear array with all pixels from all rows concatenated and each pixel has bytesPerPixel bytes/entries in the array
                     int idx = (y * width + x) * bytesPerPixel;
                     switch (trimap[idx]) {
                         case 0:
@@ -411,11 +414,15 @@ namespace com.csutil.algorithms.images {
                             SetColorAt(foreground, x, y, black);
                             break;
                         case 128:
-                            Sample s = samples[y][x];
-                            var alphaValue = (byte)(255 * s.alpha);
-                            SetColorAt(alpha, x, y, new byte[] { alphaValue, alphaValue, alphaValue, 255 });
-                            conf[idx] = (byte)(255 * Math.Exp(-s.cost / 6));
-                            Point p = foregroundBoundary[s.fi];
+                            Sample sample = samples[y][x];
+                            byte alphaValue = (byte)(255d * sample.alpha);
+                            colorCache[0] = alphaValue;
+                            colorCache[1] = alphaValue;
+                            colorCache[2] = alphaValue;
+                            colorCache[3] = 255;
+                            SetColorAt(alpha, x, y, colorCache);
+                            conf[idx] = (byte)(255 * Math.Exp(-sample.cost / 6d));
+                            Point p = foregroundBoundary[sample.fi];
                             var color = GetColorAt(image, p.X, p.Y);
                             SetColorAt(foreground, x, y, color);
                             break;
@@ -432,11 +439,13 @@ namespace com.csutil.algorithms.images {
 
         // Helper method to set the color at a specific location in the image array
         private void SetColorAt(byte[] imageData, int x, int y, byte[] color) {
+            // imageData is a linear array with all pixels from all rows concatenated and each pixel has bytesPerPixel bytes/entries in the array
             int startIdx = (y * width + x) * bytesPerPixel;
             Array.Copy(color, 0, imageData, startIdx, color.Length);
         }
 
         private void SetColorAt(byte[] imageData, int x, int y, PixelRgb color) {
+            // imageData is a linear array with all pixels from all rows concatenated and each pixel has bytesPerPixel bytes/entries in the array
             int startIdx = (y * width + x) * bytesPerPixel;
             imageData[startIdx] = color.R;
             imageData[startIdx + 1] = color.G;
@@ -447,10 +456,8 @@ namespace com.csutil.algorithms.images {
         private int IntensityComp(Point p0, Point p1) {
             var c0 = GetColorAt(image, p0.X, p0.Y);
             var c1 = GetColorAt(image, p1.X, p1.Y);
-
             int sumC0 = c0.R + c0.G + c0.B;
             int sumC1 = c1.R + c1.G + c1.B;
-
             return sumC0.CompareTo(sumC1);
         }
 
