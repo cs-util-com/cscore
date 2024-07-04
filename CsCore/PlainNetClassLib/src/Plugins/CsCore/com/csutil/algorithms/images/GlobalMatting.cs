@@ -12,7 +12,7 @@ namespace com.csutil.algorithms.images {
         private byte[] white = new byte[] { 255, 255, 255, 255 };
 
         Random rand = new Random();
-        
+
         private byte[] image;
         private int width;
         private int height;
@@ -374,15 +374,15 @@ namespace com.csutil.algorithms.images {
             }
 
             // Create and shuffle coordinates
-            List<Point> coords1 = new List<Point>();
+            List<Point> coords1 = new List<Point>(h * w);
             for (int y = 0; y < h; ++y)
                 for (int x = 0; x < w; ++x)
                     coords1.Add(new Point(x, y));
-            var coords2 = rand.ShuffleEntries(coords1);
 
             // Propagation
             for (int iter = 0; iter < 10; ++iter) {
-                foreach (Point p in coords2) {
+                var shuffeledCoords = rand.ShuffleEntries(coords1);
+                foreach (Point p in shuffeledCoords) {
                     int x = p.X;
                     int y = p.Y;
 
@@ -542,7 +542,7 @@ namespace com.csutil.algorithms.images {
 
             int sumC0 = c0.R + c0.G + c0.B;
             int sumC1 = c1.R + c1.G + c1.B;
-            
+
             return sumC0.CompareTo(sumC1);
         }
 
@@ -569,9 +569,8 @@ namespace com.csutil.algorithms.images {
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < height; y++) {
                     var col = GetColorAt(guidedIm, x, y);
-                    var temp = new double[] { col.R, col.G, col.B };
-                    var max = (byte)temp.Max();
-                    SetColorAt(guidedIm, x, y, new[] { max, max, max, (byte)255 });
+                    var max = Math.Max(col.R, Math.Max(col.G, col.B));
+                    SetColorAt(guidedIm, x, y, new PixelRgb(max, max, max));
                 }
             }
 
