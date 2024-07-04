@@ -125,6 +125,8 @@ namespace com.csutil.algorithms.images {
             return intensity0.CompareTo(intensity1);
         }
 
+        private byte[] colorCache = new byte[4];
+
         // Helper method to get color at a given position
         private byte[] GetColorAt(byte[] img, int x, int y) {
             int startIdx = (y * width + x) * bytesPerPixel;
@@ -231,10 +233,21 @@ namespace com.csutil.algorithms.images {
                             if (!(pd <= r) || !(cd <= c))
                                 continue;
 
-                            if (ColorIsValue(trimap, i, j, bytesPerPixel, 0))
-                                SetColorAt(trimap, x, y, new byte[] { 1, 1, 1, 255 });
-                            else if (ColorIsValue(trimap, i, j, bytesPerPixel, 255))
-                                SetColorAt(trimap, x, y, new byte[] { 254, 254, 254, 255 });
+                            if (ColorIsValue(trimap, i, j, bytesPerPixel, 0)) {
+                                colorCache[0] = 1;
+                                colorCache[1] = 1;
+                                colorCache[2] = 1;
+                                colorCache[3] = 255;
+                                SetColorAt(trimap, x, y, colorCache);
+                                // SetColorAt(trimap, x, y, new byte[] { 1, 1, 1, 255 });
+                            } else if (ColorIsValue(trimap, i, j, bytesPerPixel, 255)) {
+                                colorCache[0] = 254;
+                                colorCache[1] = 254;
+                                colorCache[2] = 254;
+                                colorCache[3] = 255;
+                                SetColorAt(trimap, x, y, colorCache);
+                                // SetColorAt(trimap, x, y, new byte[] { 254, 254, 254, 255 });
+                            }
                         }
                     }
                 }
