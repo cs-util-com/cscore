@@ -8,6 +8,9 @@ namespace com.csutil.algorithms.images {
     /// <summary> Ported version of https://raw.githubusercontent.com/atilimcetin/global-matting/master/globalmatting.cpp </summary>
     public class GlobalMatting {
 
+        private byte[] black = new byte[] { 0, 0, 0, 255 };
+        private byte[] white = new byte[] { 255, 255, 255, 255 };
+
         Random rand = new Random();
         
         private byte[] image;
@@ -37,6 +40,16 @@ namespace com.csutil.algorithms.images {
             }
         }
 
+        public struct PixelRgb {
+            public byte R, G, B;
+
+            public PixelRgb(byte r, byte g, byte b) {
+                R = r;
+                G = g;
+                B = b;
+            }
+        }
+
         // Method to find boundary pixels
         public List<Point> FindBoundaryPixels(byte[] trimap, byte a, byte b) {
             List<Point> result = new List<Point>();
@@ -62,28 +75,24 @@ namespace com.csutil.algorithms.images {
         }
 
         // Calculate alpha value (Eq. 2 in the C++ code)
-        private float CalculateAlpha(byte[] F, byte[] B, byte[] I) {
+        private float CalculateAlpha(PixelRgb F, PixelRgb B, PixelRgb I) {
             float result = 0;
             float div = 1e-6f;
-            for (int c = 0; c < 3; ++c) {
-                float f = F[c];
-                float b = B[c];
-                float i = I[c];
-                result += (i - b) * (f - b);
-                div += (f - b) * (f - b);
-            }
+            result += (I.R - B.R) * (F.R - B.R);
+            div += (F.R - B.R) * (F.R - B.R);
+            result += (I.G - B.G) * (F.G - B.G);
+            div += (F.G - B.G) * (F.G - B.G);
+            result += (I.B - B.B) * (F.B - B.B);
+            div += (F.B - B.B) * (F.B - B.B);
             return Math.Min(Math.Max(result / div, 0.0f), 1.0f);
         }
 
         // Color cost (Eq. 3 in the C++ code)
-        private float ColorCost(byte[] F, byte[] B, byte[] I, float alpha) {
+        private float ColorCost(PixelRgb F, PixelRgb B, PixelRgb I, float alpha) {
             float result = 0;
-            for (int c = 0; c < 3; ++c) {
-                float f = F[c];
-                float b = B[c];
-                float i = I[c];
-                result += Sqr(i - (alpha * f + (1 - alpha) * b));
-            }
+            result += Sqr(I.R - (alpha * F.R + (1 - alpha) * B.R));
+            result += Sqr(I.G - (alpha * F.G + (1 - alpha) * B.G));
+            result += Sqr(I.B - (alpha * F.B + (1 - alpha) * B.B));
             return (float)Math.Sqrt(result);
         }
 
@@ -94,11 +103,12 @@ namespace com.csutil.algorithms.images {
         }
 
         // Color distance between two pixels
-        public static float ColorDist(byte[] I0, byte[] I1) {
+        public static float ColorDist(PixelRgb I0, PixelRgb I1) {
             float result = 0;
 
-            for (int c = 0; c < 3; ++c)
-                result += Sqr(I0[c] - I1[c]);
+            result += Sqr(I0.R - I1.R);
+            result += Sqr(I0.G - I1.G);
+            result += Sqr(I0.B - I1.B);
 
             return (float)Math.Sqrt(result);
         }
@@ -116,11 +126,11 @@ namespace com.csutil.algorithms.images {
 
         // Comparison delegate for sorting by intensity
         public int CompareIntensity(Point p0, Point p1) {
-            byte[] c0 = GetColorAt(image, p0.X, p0.Y);
-            byte[] c1 = GetColorAt(image, p1.X, p1.Y);
+            var c0 = GetColorAt(image, p0.X, p0.Y);
+            var c1 = GetColorAt(image, p1.X, p1.Y);
 
-            int intensity0 = c0[0] + c0[1] + c0[2];
-            int intensity1 = c1[0] + c1[1] + c1[2];
+            int intensity0 = c0.R + c0.G + c0.B;
+            int intensity1 = c1.R + c1.G + c1.B;
 
             return intensity0.CompareTo(intensity1);
         }
@@ -128,9 +138,9 @@ namespace com.csutil.algorithms.images {
         private byte[] colorCache = new byte[4];
 
         // Helper method to get color at a given position
-        private byte[] GetColorAt(byte[] img, int x, int y) {
+        private PixelRgb GetColorAt(byte[] img, int x, int y) {
             int startIdx = (y * width + x) * bytesPerPixel;
-            return new byte[] { img[startIdx], img[startIdx + 1], img[startIdx + 2] };
+            return new PixelRgb(img[startIdx], img[startIdx + 1], img[startIdx + 2]);
         }
 
         // Method for expansion of known regions
@@ -142,7 +152,7 @@ namespace com.csutil.algorithms.images {
                     if (trimap[idx] != 128) // Assuming 128 represents the unknown region
                         continue;
 
-                    byte[] I = GetColorAt(image, x, y);
+                    var I = GetColorAt(image, x, y);
 
                     for (int j = y - r; j <= y + r; ++j) {
                         for (int i = x - r; i <= x + r; ++i) {
@@ -154,7 +164,7 @@ namespace com.csutil.algorithms.images {
                             if (trimap[neighborIdx] != 0 && trimap[neighborIdx] != 255)
                                 continue;
 
-                            byte[] I2 = GetColorAt(image, i, j);
+                            var I2 = GetColorAt(image, i, j);
 
                             float pd = (float)Math.Sqrt(Sqr(x - i) + Sqr(y - j));
                             float cd = ColorDist(I, I2);
@@ -215,7 +225,7 @@ namespace com.csutil.algorithms.images {
             // ... 
             for (var x = 0; x < w; ++x) {
                 for (var y = 0; y < h; ++y) {
-                    if (!ColorIsValue(trimap, x, y, bytesPerPixel, 128))
+                    if (!ColorIsValue(trimap, x, y, 128))
                         continue;
                     var im = GetColorAt(image, x, y);
 
@@ -223,7 +233,7 @@ namespace com.csutil.algorithms.images {
                         for (var i = x - r; i <= x + r; ++i) {
                             if (i < 0 || i >= w || j < 0 || j >= h)
                                 continue;
-                            if (!ColorIsValue(trimap, i, j, bytesPerPixel, 0) && !ColorIsValue(trimap, i, j, bytesPerPixel, 255))
+                            if (!ColorIsValue(trimap, i, j, 0) && !ColorIsValue(trimap, i, j, 255))
                                 continue;
 
                             var imCur = GetColorAt(image, i, j);
@@ -233,14 +243,14 @@ namespace com.csutil.algorithms.images {
                             if (!(pd <= r) || !(cd <= c))
                                 continue;
 
-                            if (ColorIsValue(trimap, i, j, bytesPerPixel, 0)) {
+                            if (ColorIsValue(trimap, i, j, 0)) {
                                 colorCache[0] = 1;
                                 colorCache[1] = 1;
                                 colorCache[2] = 1;
                                 colorCache[3] = 255;
                                 SetColorAt(trimap, x, y, colorCache);
                                 // SetColorAt(trimap, x, y, new byte[] { 1, 1, 1, 255 });
-                            } else if (ColorIsValue(trimap, i, j, bytesPerPixel, 255)) {
+                            } else if (ColorIsValue(trimap, i, j, 255)) {
                                 colorCache[0] = 254;
                                 colorCache[1] = 254;
                                 colorCache[2] = 254;
@@ -255,10 +265,10 @@ namespace com.csutil.algorithms.images {
 
             for (int x = 0; x < width; ++x) {
                 for (int y = 0; y < height; ++y) {
-                    if (ColorIsValue(trimap, x, y, bytesPerPixel, 1))
-                        SetColorAt(trimap, x, y, new byte[] { 0, 0, 0, 255 });
-                    else if (ColorIsValue(trimap, x, y, bytesPerPixel, 254))
-                        SetColorAt(trimap, x, y, new byte[] { 255, 255, 255, 255 });
+                    if (ColorIsValue(trimap, x, y, 1))
+                        SetColorAt(trimap, x, y, black);
+                    else if (ColorIsValue(trimap, x, y, 254))
+                        SetColorAt(trimap, x, y, white);
                 }
             }
         }
@@ -274,9 +284,9 @@ namespace com.csutil.algorithms.images {
             // Initialize foreground and background maps
             for (int y = 0; y < h; ++y) {
                 for (int x = 0; x < w; ++x) {
-                    if (ColorIsValue(trimap, x, y, bytesPerPixel, 0))
+                    if (ColorIsValue(trimap, x, y, 0))
                         SetColorAt(background, x, y, new byte[] { 1, 1, 1, 255 });
-                    else if (ColorIsValue(trimap, x, y, bytesPerPixel, 255))
+                    else if (ColorIsValue(trimap, x, y, 255))
                         SetColorAt(foreground, x, y, new byte[] { 1, 1, 1, 255 });
                 }
             }
@@ -288,21 +298,16 @@ namespace com.csutil.algorithms.images {
             // Increase unknown region
             for (int y = 0; y < h; ++y) {
                 for (int x = 0; x < w; ++x) {
-                    if (ColorIsValue(erodedBackground, x, y, bytesPerPixel, 0) && ColorIsValue(erodedForeground, x, y, bytesPerPixel, 0))
+                    if (ColorIsValue(erodedBackground, x, y, 0) && ColorIsValue(erodedForeground, x, y, 0))
                         SetColorAt(trimap, x, y, new byte[] { 128, 128, 128, 255 }); // Set to unknown
                 }
             }
         }
 
         // Checks for up to 3 size length color array if the color is equal to the input value
-        private bool ColorIsValue(byte[] array, int x, int y, int bytePerPixel, int value) {
-            var result = false;
+        private bool ColorIsValue(byte[] array, int x, int y, int value) {
             var color = GetColorAt(array, x, y);
-            bytePerPixel = bytesPerPixel == 4 ? 3 : bytePerPixel;
-            for (int b = 0; b < bytePerPixel; b++) {
-                result = color[b] == value;
-            }
-            return result;
+            return color.R == value && color.G == value && color.B == value;
         }
 
         // Helper method to erode an image
@@ -356,7 +361,7 @@ namespace com.csutil.algorithms.images {
 
             for (int y = 0; y < h; ++y) {
                 for (int x = 0; x < w; ++x) {
-                    if (ColorIsValue(trimap, x, y, bytesPerPixel, 128)) {
+                    if (ColorIsValue(trimap, x, y, 128)) {
                         Point p = new Point(x, y);
 
                         samples[y][x].fi = rand.Next(foregroundBoundary.Count);
@@ -381,10 +386,10 @@ namespace com.csutil.algorithms.images {
                     int x = p.X;
                     int y = p.Y;
 
-                    if (!ColorIsValue(trimap, x, y, bytesPerPixel, 128)) { continue; }
+                    if (!ColorIsValue(trimap, x, y, 128)) { continue; }
 
 
-                    byte[] I = GetColorAt(image, x, y);
+                    var I = GetColorAt(image, x, y);
 
                     Sample s = samples[y][x];
 
@@ -396,7 +401,7 @@ namespace com.csutil.algorithms.images {
                             if (x2 < 0 || x2 >= w || y2 < 0 || y2 >= h)
                                 continue;
 
-                            if (!ColorIsValue(trimap, x2, y2, bytesPerPixel, 128))
+                            if (!ColorIsValue(trimap, x2, y2, 128))
                                 continue;
 
                             Sample s2 = samples[y2][x2];
@@ -440,8 +445,8 @@ namespace com.csutil.algorithms.images {
                         Point fp = foregroundBoundary[fi];
                         Point bp = backgroundBoundary[bj];
 
-                        byte[] F = GetColorAt(image, fp.X, fp.Y);
-                        byte[] B = GetColorAt(image, bp.X, bp.Y);
+                        var F = GetColorAt(image, fp.X, fp.Y);
+                        var B = GetColorAt(image, bp.X, bp.Y);
 
                         float alpha = CalculateAlpha(F, B, I);
                         float cost = ColorCost(F, B, I, alpha) + DistCost(p, fp, s.df) + DistCost(p, bp, s.db);
@@ -472,9 +477,9 @@ namespace com.csutil.algorithms.images {
                 int x = rand.Next(width);
                 int y = rand.Next(height);
 
-                if (ColorIsValue(trimap, x, y, bytesPerPixel, 0))
+                if (ColorIsValue(trimap, x, y, 0))
                     backgroundBoundary.Add(new Point(x, y));
-                else if (ColorIsValue(trimap, x, y, bytesPerPixel, 255))
+                else if (ColorIsValue(trimap, x, y, 255))
                     foregroundBoundary.Add(new Point(x, y));
             }
 
@@ -493,9 +498,9 @@ namespace com.csutil.algorithms.images {
                     int idx = (y * width + x) * bytesPerPixel;
                     switch (trimap[idx]) {
                         case 0:
-                            SetColorAt(alpha, x, y, new byte[] { 0, 0, 0, 255 });
+                            SetColorAt(alpha, x, y, black);
                             conf[idx] = 255;
-                            SetColorAt(foreground, x, y, new byte[] { 0, 0, 0, 255 });
+                            SetColorAt(foreground, x, y, black);
                             break;
                         case 128:
                             Sample s = samples[y][x];
@@ -503,13 +508,13 @@ namespace com.csutil.algorithms.images {
                             SetColorAt(alpha, x, y, new byte[] { alphaValue, alphaValue, alphaValue, 255 });
                             conf[idx] = (byte)(255 * Math.Exp(-s.cost / 6));
                             Point p = foregroundBoundary[s.fi];
-                            byte[] color = GetColorAt(image, p.X, p.Y);
+                            var color = GetColorAt(image, p.X, p.Y);
                             SetColorAt(foreground, x, y, color);
                             break;
                         case 255:
-                            SetColorAt(alpha, x, y, new byte[] { 255, 255, 255, 255 });
+                            SetColorAt(alpha, x, y, white);
                             conf[idx] = 255;
-                            byte[] fgColor = GetColorAt(image, x, y);
+                            var fgColor = GetColorAt(image, x, y);
                             SetColorAt(foreground, x, y, fgColor);
                             break;
                     }
@@ -523,14 +528,21 @@ namespace com.csutil.algorithms.images {
             Array.Copy(color, 0, imageData, startIdx, color.Length);
         }
 
+        private void SetColorAt(byte[] imageData, int x, int y, PixelRgb color) {
+            int startIdx = (y * width + x) * bytesPerPixel;
+            imageData[startIdx] = color.R;
+            imageData[startIdx + 1] = color.G;
+            imageData[startIdx + 2] = color.B;
+        }
+
         // Helper method to compare the intensity of two colors
         private int IntensityComp(Point p0, Point p1) {
-            byte[] c0 = GetColorAt(image, p0.X, p0.Y);
-            byte[] c1 = GetColorAt(image, p1.X, p1.Y);
+            var c0 = GetColorAt(image, p0.X, p0.Y);
+            var c1 = GetColorAt(image, p1.X, p1.Y);
 
-            int sumC0 = c0[0] + c0[1] + c0[2];
-            int sumC1 = c1[0] + c1[1] + c1[2];
-
+            int sumC0 = c0.R + c0.G + c0.B;
+            int sumC1 = c1.R + c1.G + c1.B;
+            
             return sumC0.CompareTo(sumC1);
         }
 
@@ -557,7 +569,7 @@ namespace com.csutil.algorithms.images {
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < height; y++) {
                     var col = GetColorAt(guidedIm, x, y);
-                    var temp = new double[] { col[0], col[1], col[2] };
+                    var temp = new double[] { col.R, col.G, col.B };
                     var max = (byte)temp.Max();
                     SetColorAt(guidedIm, x, y, new[] { max, max, max, (byte)255 });
                 }
