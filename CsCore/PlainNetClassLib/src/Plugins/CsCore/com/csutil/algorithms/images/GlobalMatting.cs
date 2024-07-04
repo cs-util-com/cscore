@@ -6,9 +6,10 @@ namespace com.csutil.algorithms.images {
     /// <summary> Ported version of https://raw.githubusercontent.com/atilimcetin/global-matting/master/globalmatting.cpp </summary>
     public class GlobalMatting {
 
-        private byte[] black = new byte[] { 0, 0, 0, 255 };
-        private byte[] almostBlack = new byte[] { 1, 1, 1, 255 };
-        private byte[] gray = new byte[] { 128, 128, 128, 255 };
+        private byte[] black = new byte[] { 0, 0, 0, 0 };
+        private byte[] almostBlack = new byte[] { 1, 1, 1, 1 };
+        private byte[] gray = new byte[] { 128, 128, 128, 128 };
+        private byte[] almostWhite = new byte[] { 254, 254, 254, 254 };
         private byte[] white = new byte[] { 255, 255, 255, 255 };
 
         Random rand = new Random();
@@ -191,17 +192,9 @@ namespace com.csutil.algorithms.images {
                             if (!(pd <= r) || !(cd <= c)) { continue; }
 
                             if (ColorIsValue(trimap, i, j, 0)) {
-                                colorCache[0] = 1;
-                                colorCache[1] = 1;
-                                colorCache[2] = 1;
-                                colorCache[3] = 255;
-                                SetColorAt(trimap, x, y, colorCache);
+                                SetColorAt(trimap, x, y, almostBlack);
                             } else if (ColorIsValue(trimap, i, j, 255)) {
-                                colorCache[0] = 254;
-                                colorCache[1] = 254;
-                                colorCache[2] = 254;
-                                colorCache[3] = 255;
-                                SetColorAt(trimap, x, y, colorCache);
+                                SetColorAt(trimap, x, y, almostWhite);
                             }
                         }
                     }
