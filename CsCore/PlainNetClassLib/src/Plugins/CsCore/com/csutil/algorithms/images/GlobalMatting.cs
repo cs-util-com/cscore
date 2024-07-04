@@ -251,12 +251,12 @@ namespace com.csutil.algorithms.images {
         }
 
         // Method to perform erosion on foreground and background regions
-        public void ErodeFB(ref byte[] trimap, int r) {
+        private void ErodeFB(ref byte[] trimap, int r) {
             int w = width;
             int h = height;
-
-            byte[] foreground = new byte[w * h * bytesPerPixel];
-            byte[] background = new byte[w * h * bytesPerPixel];
+            var size = w * h * bytesPerPixel;
+            byte[] foreground = new byte[size];
+            byte[] background = new byte[size];
 
             // Initialize foreground and background maps
             for (int y = 0; y < h; ++y) {
@@ -326,11 +326,6 @@ namespace com.csutil.algorithms.images {
             return erodedImage;
         }
 
-        // Helper method to generate a random float between 0 and 1
-        private float RandomFloat() {
-            return (float)rand.NextDouble();
-        }
-
         public struct Sample {
             public int fi, bj;
             public float df, db;
@@ -361,20 +356,20 @@ namespace com.csutil.algorithms.images {
             }
 
             // Create and shuffle coordinates
-            List<Point> coords = new List<Point>();
+            List<Point> coords1 = new List<Point>();
             for (int y = 0; y < h; ++y)
                 for (int x = 0; x < w; ++x)
-                    coords.Add(new Point(x, y));
-            coords = coords.OrderBy(a => RandomFloat()).ToList();
+                    coords1.Add(new Point(x, y));
+            var coords2 = rand.ShuffleEntries(coords1);
 
             // Propagation
             for (int iter = 0; iter < 10; ++iter) {
-                foreach (Point p in coords) {
+                foreach (Point p in coords2) {
                     int x = p.X;
                     int y = p.Y;
 
-                    if (!ColorIsValue(trimap, x, y, bytesPerPixel, 128))
-                        continue;
+                    if (!ColorIsValue(trimap, x, y, bytesPerPixel, 128)) { continue; }
+
 
                     byte[] I = GetColorAt(image, x, y);
 
@@ -417,17 +412,17 @@ namespace com.csutil.algorithms.images {
                     for (int k = 0;; k++) {
                         float r = w2 * (float)Math.Pow(0.5, k);
 
-                        if (r < 1)
-                            break;
+                        if (r < 1) { break; }
 
-                        int di = (int)(r * RandomFloat());
-                        int dj = (int)(r * RandomFloat());
 
-                        int fi = s.fi + (RandomFloat() > 0.5 ? di : -di);
-                        int bj = s.bj + (RandomFloat() > 0.5 ? dj : -dj);
+                        int di = (int)(r * rand.NextFloat());
+                        int dj = (int)(r * rand.NextFloat());
 
-                        if (fi < 0 || fi >= foregroundBoundary.Count || bj < 0 || bj >= backgroundBoundary.Count)
-                            continue;
+                        int fi = s.fi + (rand.NextFloat() > 0.5 ? di : -di);
+                        int bj = s.bj + (rand.NextFloat() > 0.5 ? dj : -dj);
+
+                        if (fi < 0 || fi >= foregroundBoundary.Count || bj < 0 || bj >= backgroundBoundary.Count) { continue; }
+
 
                         Point fp = foregroundBoundary[fi];
                         Point bp = backgroundBoundary[bj];
