@@ -57,7 +57,6 @@ namespace com.csutil.algorithms.images {
         // Method to find boundary pixels
         private List<Point> FindBoundaryPixels(byte[] trimap, byte a, byte b) {
             List<Point> result = new List<Point>();
-
             for (int x = 1; x < width - 1; ++x) {
                 for (int y = 1; y < height - 1; ++y) {
                     // trimap is a linear array with all pixels from all rows concatenated and each pixel has bytesPerPixel bytes/entries in the array
@@ -75,7 +74,6 @@ namespace com.csutil.algorithms.images {
                     }
                 }
             }
-
             return result;
         }
 
@@ -120,28 +118,18 @@ namespace com.csutil.algorithms.images {
 
         // Nearest distance from a point to any point in a boundary
         private static double NearestDistance(List<Point> boundary, Point p) {
-            double minDist2 = double.MaxValue;
+            double minDist = double.MaxValue;
             foreach (var pBoundary in boundary) {
-                var a = pBoundary.X - p.X;
-                var b = pBoundary.Y - p.Y;
-                minDist2 = Math.Min(minDist2, a * a + b * b);
+                var x = pBoundary.X - p.X;
+                var y = pBoundary.Y - p.Y;
+                var distanceSquared = x * x + y * y;
+                minDist = Math.Min(minDist, distanceSquared);
             }
-            return Math.Sqrt(minDist2);
-        }
-
-        // Comparison delegate for sorting by intensity
-        private int CompareIntensity(Point p0, Point p1) {
-            var c0 = GetColorAt(image, p0.X, p0.Y);
-            var c1 = GetColorAt(image, p1.X, p1.Y);
-
-            int intensity0 = c0.R + c0.G + c0.B;
-            int intensity1 = c1.R + c1.G + c1.B;
-
-            return intensity0 - intensity1; //Same as return intensity0.CompareTo(intensity1);
+            return Math.Sqrt(minDist);
         }
 
         // TODO remove colorCache to allow parallel processing
-        private readonly byte[] colorCache = new byte[4];
+        private readonly byte[] _colorCache = new byte[4];
 
         // Helper method to get color at a given position
         private PixelRgb GetColorAt(byte[] img, int x, int y) {
@@ -423,11 +411,11 @@ namespace com.csutil.algorithms.images {
                         case 128:
                             Sample sample = samples[y][x];
                             byte alphaValue = (byte)(255d * sample.alpha);
-                            colorCache[0] = alphaValue;
-                            colorCache[1] = alphaValue;
-                            colorCache[2] = alphaValue;
-                            colorCache[3] = 255;
-                            SetColorAt(alpha, x, y, colorCache);
+                            _colorCache[0] = alphaValue;
+                            _colorCache[1] = alphaValue;
+                            _colorCache[2] = alphaValue;
+                            _colorCache[3] = 255;
+                            SetColorAt(alpha, x, y, _colorCache);
                             conf[idx] = (byte)(255 * Math.Exp(-sample.cost / 6d));
                             Point p = foregroundBoundary[sample.fi];
                             var color = GetColorAt(image, p.X, p.Y);
