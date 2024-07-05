@@ -21,15 +21,20 @@ namespace com.csutil.algorithms.images {
         private readonly int height;
         private readonly int bytesPerPixel;
 
-        public GlobalMatting(ImageResult image)
-            : this(image.Data.DeepCopy(), image.Width, image.Height, (int)image.ColorComponents) {
+        private readonly int iterationCount;
+        private readonly bool doRandomBoundaryPixelSampling;
+
+        public GlobalMatting(ImageResult image, bool doRandomBoundaryPixelSampling = true, int iterationCount = 10)
+            : this(image.Data.DeepCopy(), image.Width, image.Height, (int)image.ColorComponents, doRandomBoundaryPixelSampling, iterationCount) {
         }
 
-        public GlobalMatting(byte[] image, int width, int height, int bytesPerPixel) {
+        public GlobalMatting(byte[] image, int width, int height, int bytesPerPixel, bool doRandomBoundaryPixelSampling = true, int iterationCount = 10) {
             this.image = image;
             this.width = width;
             this.height = height;
             this.bytesPerPixel = bytesPerPixel;
+            this.doRandomBoundaryPixelSampling = doRandomBoundaryPixelSampling;
+            this.iterationCount = iterationCount;
         }
 
         private static double Sqr(double a) {
@@ -70,7 +75,11 @@ namespace com.csutil.algorithms.images {
             }
         }
 
-        // Method to find boundary pixels
+        /// <summary> Method to find boundary pixels </summary>
+        /// <param name="trimap"></param>
+        /// <param name="alpha"> The alpha to look for for the returned list </param>
+        /// <param name="borderAlpha"> The border alpha that if found in neighbors will add the current pixel to the result </param>
+        /// <returns></returns>
         private List<Point> FindBoundaryPixels(byte[] trimap, byte alpha, byte borderAlpha) {
             List<Point> result = new List<Point>();
             for (int x = 1; x < width - 1; ++x) {
@@ -107,12 +116,12 @@ namespace com.csutil.algorithms.images {
         }
 
         // Color cost (Eq. 3 in the C++ code)
-        private double ColorCost(PixelRgb F, PixelRgb B, PixelRgb I, double alpha) {
+        private double ColorCost(PixelRgb foreground, PixelRgb background, PixelRgb I, double alpha) {
             double result = 0;
             double oneMinusAlpha = 1d - alpha;
-            result += Sqr(I.R - (alpha * F.R + oneMinusAlpha * B.R));
-            result += Sqr(I.G - (alpha * F.G + oneMinusAlpha * B.G));
-            result += Sqr(I.B - (alpha * F.B + oneMinusAlpha * B.B));
+            result += Sqr(I.R - (alpha * foreground.R + oneMinusAlpha * background.R));
+            result += Sqr(I.G - (alpha * foreground.G + oneMinusAlpha * background.G));
+            result += Sqr(I.B - (alpha * foreground.B + oneMinusAlpha * background.B));
             return Math.Sqrt(result);
         }
 
@@ -125,23 +134,11 @@ namespace com.csutil.algorithms.images {
         }
 
         // Color distance between two pixels
-        private static double ColorDist(PixelRgb I0, PixelRgb I1) {
-            var r = I0.R - I1.R;
-            var g = I0.G - I1.G;
-            var b = I0.B - I1.B;
+        private static double ColorDist(PixelRgb i0, PixelRgb i1) {
+            var r = i0.R - i1.R;
+            var g = i0.G - i1.G;
+            var b = i0.B - i1.B;
             return Math.Sqrt(r * r + g * g + b * b);
-        }
-
-        [Obsolete("Use NearestDistance instead")]
-        private static double NearestDistanceOld(Dictionary<Point, double> boundary, Point p) {
-            double minDist = double.MaxValue;
-            foreach (var pBoundary in boundary.Keys) {
-                var x = pBoundary.X - p.X;
-                var y = pBoundary.Y - p.Y;
-                var distanceSquared = x * x + y * y;
-                minDist = Math.Min(minDist, distanceSquared);
-            }
-            return Math.Sqrt(minDist);
         }
 
         // Nearest distance from a point to any point in a boundary
@@ -170,9 +167,6 @@ namespace com.csutil.algorithms.images {
                 }
             }
         }
-
-        // TODO remove colorCache to allow parallel processing
-        private readonly byte[] _colorCache = new byte[4];
 
         // Helper method to get color at a given position
         private PixelRgb GetColorAt(byte[] img, int x, int y) {
@@ -323,7 +317,6 @@ namespace com.csutil.algorithms.images {
             Log.MethodDone(t);
 
             var t2 = Log.MethodEntered("Propagate iterations");
-            var iterationCount = 10;
             for (int i = 0; i < iterationCount; ++i) {
                 DoPropagateIteration(trimap, foregroundBoundary, backgroundBoundary, samples, w, h);
             }
@@ -364,10 +357,10 @@ namespace com.csutil.algorithms.images {
                         // ... Calculate cost ...
                         Point fp = foregroundBoundary[s2.foregroundListIndex];
                         Point bp = backgroundBoundary[s2.backgroundListIndex];
-                        var F = GetColorAt(image, fp.X, fp.Y);
-                        var B = GetColorAt(image, bp.X, bp.Y);
-                        double alpha = CalculateAlpha(F, B, I);
-                        double cost = ColorCost(F, B, I, alpha) + DistCost(p, fp, s.df) + DistCost(p, bp, s.db);
+                        var foregroundColor = GetColorAt(image, fp.X, fp.Y);
+                        var backgroundColor = GetColorAt(image, bp.X, bp.Y);
+                        double alpha = CalculateAlpha(foregroundColor, backgroundColor, I);
+                        double cost = ColorCost(foregroundColor, backgroundColor, I, alpha) + DistCost(p, fp, s.df) + DistCost(p, bp, s.db);
 
                         // If new cost is lower, update the sample
                         if (cost < s.cost) {
@@ -418,22 +411,27 @@ namespace com.csutil.algorithms.images {
             }
         }
 
+        private readonly byte[] _colorCache = new byte[4];
+
         private void GlobalMattingHelper(byte[] trimap, out byte[] foreground, out byte[] alpha, out byte[] conf) {
             var t = Log.MethodEntered();
             var foregroundBoundary = FindBoundaryPixels(trimap, 255, 128);
             var backgroundBoundary = FindBoundaryPixels(trimap, 0, 128);
 
-            int n = foregroundBoundary.Count + backgroundBoundary.Count;
-            for (int i = 0; i < n; ++i) {
-                int x = rand.Next(width);
-                int y = rand.Next(height);
-                if (ColorIsValue(trimap, x, y, 0))
-                    backgroundBoundary.Add(new Point(x, y));
-                else if (ColorIsValue(trimap, x, y, 255))
-                    foregroundBoundary.Add(new Point(x, y));
+            if (doRandomBoundaryPixelSampling) {
+                // Randomly sample boundary pixels
+                int n = foregroundBoundary.Count + backgroundBoundary.Count;
+                for (int i = 0; i < n; ++i) {
+                    int x = rand.Next(width);
+                    int y = rand.Next(height);
+                    if (ColorIsValue(trimap, x, y, 0))
+                        backgroundBoundary.Add(new Point(x, y));
+                    else if (ColorIsValue(trimap, x, y, 255))
+                        foregroundBoundary.Add(new Point(x, y));
+                }
+                foregroundBoundary = foregroundBoundary.Distinct().ToList();
+                backgroundBoundary = backgroundBoundary.Distinct().ToList();
             }
-            foregroundBoundary = foregroundBoundary.Distinct().ToList();
-            backgroundBoundary = backgroundBoundary.Distinct().ToList();
 
             foregroundBoundary.Sort((p0, p1) => IntensityComp(p0, p1));
             backgroundBoundary.Sort((p0, p1) => IntensityComp(p0, p1));
@@ -465,7 +463,7 @@ namespace com.csutil.algorithms.images {
                             _colorCache[2] = alphaValue;
                             _colorCache[3] = 255;
                             SetColorAt(alpha, x, y, _colorCache);
-                            conf[idx] = (byte)(255 * Math.Exp(-sample.cost / 6d));
+                            conf[idx] = (byte)(255d * Math.Exp(-sample.cost / 6d));
                             Point p = foregroundBoundary[sample.foregroundListIndex];
                             var color = GetColorAt(image, p.X, p.Y);
                             SetColorAt(foreground, x, y, color);

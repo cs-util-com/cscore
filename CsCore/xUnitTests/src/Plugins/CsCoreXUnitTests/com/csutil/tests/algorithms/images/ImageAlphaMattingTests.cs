@@ -3,6 +3,7 @@ using com.csutil.algorithms.images;
 using StbImageSharp;
 using StbImageWriteSharp;
 using Xunit;
+using Zio;
 
 namespace com.csutil.tests.AlgorithmTests {
 
@@ -10,12 +11,20 @@ namespace com.csutil.tests.AlgorithmTests {
 
         public ImageAlphaMattingTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
-        /// <summary> Ported example usage from https://github.com/atilimcetin/global-matting/tree/master#code  </summary>
         [Fact]
-        public async Task TestGlobalMatting() {
+        public async Task TestGlobalMattingNormal() {
+            var folder = EnvironmentV2.instance.GetOrAddTempFolder("TestGlobalMattingNormal");
+            await TestGlobalMatting(folder);
+        }
 
-            var folder = EnvironmentV2.instance.GetOrAddTempFolder("TestGlobalMatting");
+        [Fact]
+        public async Task TestGlobalMattingFast() {
+            var folder = EnvironmentV2.instance.GetOrAddTempFolder("TestGlobalMattingFast");
+            await TestGlobalMatting(folder, iterationCount: 2, doOptionalExpansionOfKnownRegions: false, doRandomBoundaryPixelSampling: false);
+        }
 
+        /// <summary> Ported example usage from https://github.com/atilimcetin/global-matting/tree/master#code  </summary>
+        private static async Task TestGlobalMatting(DirectoryEntry folder, int iterationCount = 10, bool doOptionalExpansionOfKnownRegions = true, int radius = 25, double eps = 1e-5, bool doRandomBoundaryPixelSampling = true) {
             var imageFile = folder.GetChild("GT04-image.png");
             var image = await MyImageFileRef.DownloadFileIfNeeded(imageFile, "https://raw.githubusercontent.com/cs-util/global-matting/master/GT04-image.png");
 
@@ -26,12 +35,14 @@ namespace com.csutil.tests.AlgorithmTests {
             await MyImageFileRef.DownloadFileIfNeeded(resultOfOriginalCppImplementation, "https://raw.githubusercontent.com/cs-util/global-matting/master/GT04-alpha.png");
 
             var trimapBytes = trimap.Data;
-            var imageMatting = new GlobalMatting(image);
-            imageMatting.ExpansionOfKnownRegions(ref trimapBytes, niter: 9);
+            var imageMatting = new GlobalMatting(image, doRandomBoundaryPixelSampling, iterationCount);
+            if (doOptionalExpansionOfKnownRegions) {
+                imageMatting.ExpansionOfKnownRegions(ref trimapBytes, niter: 9);
+            }
             imageMatting.RunGlobalMatting(trimapBytes, out var foreground, out var alphaData, out var conf);
 
             // filter the result with fast guided filter
-            var alphaDataGuided = imageMatting.RunGuidedFilter(alphaData, radius: 10, eps: 1e-5);
+            var alphaDataGuided = imageMatting.RunGuidedFilter(alphaData, radius, eps);
 
             var alpha = new ImageResult {
                 Width = image.Width,
@@ -58,7 +69,6 @@ namespace com.csutil.tests.AlgorithmTests {
             new ImageWriter().WritePng(flipped, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
 
             Log.d("See result in " + folder.GetFullFileSystemPath());
-
         }
 
     }
