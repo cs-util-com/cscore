@@ -273,6 +273,7 @@ namespace com.csutil.algorithms.images {
             for (int i = 0; i < h; i++)
                 samples[i] = new Sample[w];
 
+            // For all gray/uncertain trimap values find the closest foreground and background pixels
             for (int y = 0; y < h; ++y) {
                 for (int x = 0; x < w; ++x) {
                     if (ColorIsValue(trimap, x, y, 128)) {
@@ -286,97 +287,99 @@ namespace com.csutil.algorithms.images {
                 }
             }
 
-            // Create and shuffle coordinates
+            var iterationCount = 10;
+            for (int i = 0; i < iterationCount; ++i) {
+                DoPropagateIteration(trimap, foregroundBoundary, backgroundBoundary, samples, w, h);
+            }
+
+        }
+
+        private void DoPropagateIteration(byte[] trimap, List<Point> foregroundBoundary, List<Point> backgroundBoundary, Sample[][] samples, int w, int h) {
+
+            // Create and shuffle coordinate points
             List<Point> coords1 = new List<Point>(h * w);
             for (int y = 0; y < h; ++y)
                 for (int x = 0; x < w; ++x)
                     coords1.Add(new Point(x, y));
 
-            // Propagation
-            for (int iter = 0; iter < 10; ++iter) {
-                var shuffeledCoords = rand.ShuffleEntries(coords1);
-                foreach (Point p in shuffeledCoords) {
-                    int x = p.X;
-                    int y = p.Y;
+            var shuffeledCoords = rand.ShuffleEntries(coords1);
+            foreach (Point p in shuffeledCoords) {
+                int x = p.X;
+                int y = p.Y;
 
-                    if (!ColorIsValue(trimap, x, y, 128)) { continue; }
+                // Only look at the uncertain(gray) pixels in the trimap
+                if (!ColorIsValue(trimap, x, y, 128)) { continue; }
 
+                var I = GetColorAt(image, x, y);
 
-                    var I = GetColorAt(image, x, y);
+                Sample s = samples[y][x];
 
-                    Sample s = samples[y][x];
+                // Propagation: Check the neighbors' samples
+                for (int y2 = y - 1; y2 <= y + 1; ++y2) {
+                    for (int x2 = x - bytesPerPixel; x2 <= x + bytesPerPixel; x2 += bytesPerPixel) {
+                        if (x2 < 0 || x2 >= w || y2 < 0 || y2 >= h)
+                            continue;
 
-                    // Propagation
+                        if (!ColorIsValue(trimap, x2, y2, 128))
+                            continue;
 
-                    // Propagation: Check the neighbors' samples
-                    for (int y2 = y - 1; y2 <= y + 1; ++y2) {
-                        for (int x2 = x - bytesPerPixel; x2 <= x + bytesPerPixel; x2 += bytesPerPixel) {
-                            if (x2 < 0 || x2 >= w || y2 < 0 || y2 >= h)
-                                continue;
+                        Sample s2 = samples[y2][x2];
 
-                            if (!ColorIsValue(trimap, x2, y2, 128))
-                                continue;
-
-                            Sample s2 = samples[y2][x2];
-
-                            // ... Calculate cost ...
-                            Point fp = foregroundBoundary[s2.fi];
-                            Point bp = backgroundBoundary[s2.bj];
-                            var F = GetColorAt(image, fp.X, fp.Y);
-                            var B = GetColorAt(image, bp.X, bp.Y);
-                            double alpha = CalculateAlpha(F, B, I);
-                            double cost = ColorCost(F, B, I, alpha) + DistCost(p, fp, s.df) + DistCost(p, bp, s.db);
-
-                            // If new cost is lower, update the sample
-                            if (cost < s.cost) {
-                                s.fi = s2.fi;
-                                s.bj = s2.bj;
-                                s.cost = cost;
-                                s.alpha = alpha;
-                            }
-                        }
-                    }
-
-                    // Random walk
-                    int w2 = Math.Max(foregroundBoundary.Count, backgroundBoundary.Count);
-
-                    for (int k = 0;; k++) {
-                        double r = w2 * Math.Pow(0.5, k);
-
-                        if (r < 1) { break; }
-
-                        int di = (int)(r * rand.NextDouble());
-                        int dj = (int)(r * rand.NextDouble());
-
-                        int fi = s.fi + (rand.NextDouble() > 0.5 ? di : -di);
-                        int bj = s.bj + (rand.NextDouble() > 0.5 ? dj : -dj);
-
-                        if (fi < 0 || fi >= foregroundBoundary.Count || bj < 0 || bj >= backgroundBoundary.Count) { continue; }
-
-                        Point fp = foregroundBoundary[fi];
-                        Point bp = backgroundBoundary[bj];
-
+                        // ... Calculate cost ...
+                        Point fp = foregroundBoundary[s2.fi];
+                        Point bp = backgroundBoundary[s2.bj];
                         var F = GetColorAt(image, fp.X, fp.Y);
                         var B = GetColorAt(image, bp.X, bp.Y);
-
                         double alpha = CalculateAlpha(F, B, I);
                         double cost = ColorCost(F, B, I, alpha) + DistCost(p, fp, s.df) + DistCost(p, bp, s.db);
 
                         // If new cost is lower, update the sample
                         if (cost < s.cost) {
-                            s.fi = fi;
-                            s.bj = bj;
+                            s.fi = s2.fi;
+                            s.bj = s2.bj;
                             s.cost = cost;
                             s.alpha = alpha;
                         }
                     }
-
-                    // After propagation and random walk, assign the sample back
-                    samples[y][x] = s;
-
                 }
-            }
 
+                // Random walk
+                int w2 = Math.Max(foregroundBoundary.Count, backgroundBoundary.Count);
+
+                for (int k = 0;; k++) {
+                    double r = w2 * Math.Pow(0.5, k);
+
+                    if (r < 1) { break; }
+
+                    int di = (int)(r * rand.NextDouble());
+                    int dj = (int)(r * rand.NextDouble());
+
+                    int fi = s.fi + (rand.NextDouble() > 0.5 ? di : -di);
+                    int bj = s.bj + (rand.NextDouble() > 0.5 ? dj : -dj);
+
+                    if (fi < 0 || fi >= foregroundBoundary.Count || bj < 0 || bj >= backgroundBoundary.Count) { continue; }
+
+                    Point fp = foregroundBoundary[fi];
+                    Point bp = backgroundBoundary[bj];
+
+                    var F = GetColorAt(image, fp.X, fp.Y);
+                    var B = GetColorAt(image, bp.X, bp.Y);
+
+                    double alpha = CalculateAlpha(F, B, I);
+                    double cost = ColorCost(F, B, I, alpha) + DistCost(p, fp, s.df) + DistCost(p, bp, s.db);
+
+                    // If new cost is lower, update the sample
+                    if (cost < s.cost) {
+                        s.fi = fi;
+                        s.bj = bj;
+                        s.cost = cost;
+                        s.alpha = alpha;
+                    }
+                }
+
+                // After propagation and random walk, assign the sample back
+                samples[y][x] = s;
+            }
         }
 
         private void GlobalMattingHelper(byte[] trimap, out byte[] foreground, out byte[] alpha, out byte[] conf) {
