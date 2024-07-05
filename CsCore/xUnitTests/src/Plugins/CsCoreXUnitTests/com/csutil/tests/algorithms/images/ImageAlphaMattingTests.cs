@@ -29,9 +29,9 @@ namespace com.csutil.tests.AlgorithmTests {
             var imageMatting = new GlobalMatting(image);
             imageMatting.ExpansionOfKnownRegions(ref trimapBytes, niter: 9);
             imageMatting.RunGlobalMatting(trimapBytes, out var foreground, out var alphaData, out var conf);
-            
+
             // filter the result with fast guided filter
-            var alphaDataGuided = imageMatting.RunGuidedFilter(alphaData, r: 10, eps: 1e-5);
+            var alphaDataGuided = imageMatting.RunGuidedFilter(alphaData, radius: 10, eps: 1e-5);
 
             var alpha = new ImageResult {
                 Width = image.Width,

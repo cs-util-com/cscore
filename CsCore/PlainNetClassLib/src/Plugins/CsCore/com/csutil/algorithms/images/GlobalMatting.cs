@@ -277,7 +277,6 @@ namespace com.csutil.algorithms.images {
                 for (int x = 0; x < w; ++x) {
                     if (ColorIsValue(trimap, x, y, 128)) {
                         Point p = new Point(x, y);
-
                         samples[y][x].fi = rand.Next(foregroundBoundary.Count);
                         samples[y][x].bj = rand.Next(backgroundBoundary.Count);
                         samples[y][x].df = NearestDistance(foregroundBoundary, p);

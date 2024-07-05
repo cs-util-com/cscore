@@ -56,7 +56,7 @@ namespace com.csutil.tests.AlgorithmTests {
                     new ImageWriter().WritePng(flippedRes, image.Width, image.Height, ColorComponents.RedGreenBlue, stream);
                 }
             }
-            
+
         }
 
         private static byte[] CombineRgb(byte[] singleChannel, int channel) {
