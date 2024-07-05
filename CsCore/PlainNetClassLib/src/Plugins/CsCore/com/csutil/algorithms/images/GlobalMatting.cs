@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using StbImageSharp;
 
 namespace com.csutil.algorithms.images {
@@ -42,6 +43,21 @@ namespace com.csutil.algorithms.images {
                 X = x;
                 Y = y;
             }
+
+            public override string ToString() { return "(" + X + "," + Y + ")"; }
+
+            public bool Equals(Point other) {
+                return X == other.X && Y == other.Y;
+            }
+
+            public override bool Equals(object obj) {
+                return obj is Point other && Equals(other);
+            }
+
+            public override int GetHashCode() {
+                return (X * 397) ^ Y;
+            }
+
         }
 
         private struct PixelRgb {
@@ -55,7 +71,7 @@ namespace com.csutil.algorithms.images {
         }
 
         // Method to find boundary pixels
-        private List<Point> FindBoundaryPixels(byte[] trimap, byte a, byte b) {
+        private List<Point> FindBoundaryPixels(byte[] trimap, byte alpha, byte borderAlpha) {
             List<Point> result = new List<Point>();
             for (int x = 1; x < width - 1; ++x) {
                 for (int y = 1; y < height - 1; ++y) {
@@ -63,11 +79,11 @@ namespace com.csutil.algorithms.images {
                     int idx = (y * width + x) * bytesPerPixel; // Calculate the index for the current pixel
 
                     // Check the current pixel's value and its neighbors to find boundary pixels
-                    if (trimap[idx] == a) {
-                        if (trimap[idx - width] == b || // pixel above
-                            trimap[idx + width] == b || // pixel below
-                            trimap[idx - bytesPerPixel] == b || // pixel to the left
-                            trimap[idx + bytesPerPixel] == b) // pixel to the right
+                    if (trimap[idx] == alpha) {
+                        if (trimap[idx - width] == borderAlpha || // pixel above
+                            trimap[idx + width] == borderAlpha || // pixel below
+                            trimap[idx - bytesPerPixel] == borderAlpha || // pixel to the left
+                            trimap[idx + bytesPerPixel] == borderAlpha) // pixel to the right
                         {
                             result.Add(new Point(x, y));
                         }
@@ -116,16 +132,43 @@ namespace com.csutil.algorithms.images {
             return Math.Sqrt(r * r + g * g + b * b);
         }
 
-        // Nearest distance from a point to any point in a boundary
-        private static double NearestDistance(List<Point> boundary, Point p) {
+        [Obsolete("Use NearestDistance instead")]
+        private static double NearestDistanceOld(Dictionary<Point, double> boundary, Point p) {
             double minDist = double.MaxValue;
-            foreach (var pBoundary in boundary) {
+            foreach (var pBoundary in boundary.Keys) {
                 var x = pBoundary.X - p.X;
                 var y = pBoundary.Y - p.Y;
                 var distanceSquared = x * x + y * y;
                 minDist = Math.Min(minDist, distanceSquared);
             }
             return Math.Sqrt(minDist);
+        }
+
+        // Nearest distance from a point to any point in a boundary
+        private double NearestDistance(Dictionary<Point, double> boundaryDistance, Point p) {
+            while (true) {
+                if (boundaryDistance.TryGetValue(p, out double dist)) { return dist; }
+                // If the point is not in the boundary, expand the entries in the dict by 1 in all directions and check again
+                var pointsArray = boundaryDistance.Keys.ToArray();
+                foreach (var pointWithKnownDistance in pointsArray) {
+                    var x = pointWithKnownDistance.X;
+                    var y = pointWithKnownDistance.Y;
+                    if (x < 0 || y < 0 || x >= width || y >= height) { continue; }
+                    var knownBoundaryDist = boundaryDistance[pointWithKnownDistance];
+                    // For the pointWithKnownDistance collect the distance entries in all 4 directions and use the lowest value
+                    var left = new Point(x - 1, y);
+                    if (!boundaryDistance.ContainsKey(left)) { boundaryDistance[left] = knownBoundaryDist + 1; }
+
+                    var right = new Point(x + 1, y);
+                    if (!boundaryDistance.ContainsKey(right)) { boundaryDistance[right] = knownBoundaryDist + 1; }
+
+                    var up = new Point(x, y + 1);
+                    if (!boundaryDistance.ContainsKey(up)) { boundaryDistance[up] = knownBoundaryDist + 1; }
+
+                    var down = new Point(x, y - 1);
+                    if (!boundaryDistance.ContainsKey(down)) { boundaryDistance[down] = knownBoundaryDist + 1; }
+                }
+            }
         }
 
         // TODO remove colorCache to allow parallel processing
@@ -247,7 +290,7 @@ namespace com.csutil.algorithms.images {
         }
 
         private struct Sample {
-            public int fi, bj;
+            public int foregroundListIndex, backgroundListIndex;
             public double df, db;
             public double cost, alpha;
         }
@@ -257,29 +300,34 @@ namespace com.csutil.algorithms.images {
             int w = width;
             int h = height;
 
+            var t = Log.MethodEntered("Calc forground and background distances");
             samples = new Sample[h][];
             for (int i = 0; i < h; i++)
                 samples[i] = new Sample[w];
 
             // For all gray/uncertain trimap values find the closest foreground and background pixels
+            Dictionary<Point, double> foregroundBoundaryDict = foregroundBoundary.ToDictionary(p => p, p => 0d);
+            Dictionary<Point, double> backgroundBoundaryDict = backgroundBoundary.ToDictionary(p => p, p => 0d);
             for (int y = 0; y < h; ++y) {
                 for (int x = 0; x < w; ++x) {
                     if (ColorIsValue(trimap, x, y, 128)) {
                         Point p = new Point(x, y);
-                        samples[y][x].fi = rand.Next(foregroundBoundary.Count);
-                        samples[y][x].bj = rand.Next(backgroundBoundary.Count);
-                        samples[y][x].df = NearestDistance(foregroundBoundary, p);
-                        samples[y][x].db = NearestDistance(backgroundBoundary, p);
+                        samples[y][x].foregroundListIndex = rand.Next(foregroundBoundary.Count);
+                        samples[y][x].backgroundListIndex = rand.Next(backgroundBoundary.Count);
+                        samples[y][x].df = NearestDistance(foregroundBoundaryDict, p);
+                        samples[y][x].db = NearestDistance(backgroundBoundaryDict, p);
                         samples[y][x].cost = double.MaxValue;
                     }
                 }
             }
+            Log.MethodDone(t);
 
+            var t2 = Log.MethodEntered("Propagate iterations");
             var iterationCount = 10;
             for (int i = 0; i < iterationCount; ++i) {
                 DoPropagateIteration(trimap, foregroundBoundary, backgroundBoundary, samples, w, h);
             }
-
+            Log.MethodDone(t2);
         }
 
         private void DoPropagateIteration(byte[] trimap, List<Point> foregroundBoundary, List<Point> backgroundBoundary, Sample[][] samples, int w, int h) {
@@ -314,8 +362,8 @@ namespace com.csutil.algorithms.images {
                         Sample s2 = samples[y2][x2];
 
                         // ... Calculate cost ...
-                        Point fp = foregroundBoundary[s2.fi];
-                        Point bp = backgroundBoundary[s2.bj];
+                        Point fp = foregroundBoundary[s2.foregroundListIndex];
+                        Point bp = backgroundBoundary[s2.backgroundListIndex];
                         var F = GetColorAt(image, fp.X, fp.Y);
                         var B = GetColorAt(image, bp.X, bp.Y);
                         double alpha = CalculateAlpha(F, B, I);
@@ -323,8 +371,8 @@ namespace com.csutil.algorithms.images {
 
                         // If new cost is lower, update the sample
                         if (cost < s.cost) {
-                            s.fi = s2.fi;
-                            s.bj = s2.bj;
+                            s.foregroundListIndex = s2.foregroundListIndex;
+                            s.backgroundListIndex = s2.backgroundListIndex;
                             s.cost = cost;
                             s.alpha = alpha;
                         }
@@ -342,8 +390,8 @@ namespace com.csutil.algorithms.images {
                     int di = (int)(r * rand.NextDouble());
                     int dj = (int)(r * rand.NextDouble());
 
-                    int fi = s.fi + (rand.NextDouble() > 0.5 ? di : -di);
-                    int bj = s.bj + (rand.NextDouble() > 0.5 ? dj : -dj);
+                    int fi = s.foregroundListIndex + (rand.NextDouble() > 0.5 ? di : -di);
+                    int bj = s.backgroundListIndex + (rand.NextDouble() > 0.5 ? dj : -dj);
 
                     if (fi < 0 || fi >= foregroundBoundary.Count || bj < 0 || bj >= backgroundBoundary.Count) { continue; }
 
@@ -358,8 +406,8 @@ namespace com.csutil.algorithms.images {
 
                     // If new cost is lower, update the sample
                     if (cost < s.cost) {
-                        s.fi = fi;
-                        s.bj = bj;
+                        s.foregroundListIndex = fi;
+                        s.backgroundListIndex = bj;
                         s.cost = cost;
                         s.alpha = alpha;
                     }
@@ -372,19 +420,20 @@ namespace com.csutil.algorithms.images {
 
         private void GlobalMattingHelper(byte[] trimap, out byte[] foreground, out byte[] alpha, out byte[] conf) {
             var t = Log.MethodEntered();
-            List<Point> foregroundBoundary = FindBoundaryPixels(trimap, 255, 128);
-            List<Point> backgroundBoundary = FindBoundaryPixels(trimap, 0, 128);
+            var foregroundBoundary = FindBoundaryPixels(trimap, 255, 128);
+            var backgroundBoundary = FindBoundaryPixels(trimap, 0, 128);
 
             int n = foregroundBoundary.Count + backgroundBoundary.Count;
             for (int i = 0; i < n; ++i) {
                 int x = rand.Next(width);
                 int y = rand.Next(height);
-
                 if (ColorIsValue(trimap, x, y, 0))
                     backgroundBoundary.Add(new Point(x, y));
                 else if (ColorIsValue(trimap, x, y, 255))
                     foregroundBoundary.Add(new Point(x, y));
             }
+            foregroundBoundary = foregroundBoundary.Distinct().ToList();
+            backgroundBoundary = backgroundBoundary.Distinct().ToList();
 
             foregroundBoundary.Sort((p0, p1) => IntensityComp(p0, p1));
             backgroundBoundary.Sort((p0, p1) => IntensityComp(p0, p1));
@@ -417,7 +466,7 @@ namespace com.csutil.algorithms.images {
                             _colorCache[3] = 255;
                             SetColorAt(alpha, x, y, _colorCache);
                             conf[idx] = (byte)(255 * Math.Exp(-sample.cost / 6d));
-                            Point p = foregroundBoundary[sample.fi];
+                            Point p = foregroundBoundary[sample.foregroundListIndex];
                             var color = GetColorAt(image, p.X, p.Y);
                             SetColorAt(foreground, x, y, color);
                             break;
