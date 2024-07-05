@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using StbImageSharp;
 
 namespace com.csutil.algorithms.images {
 
@@ -18,6 +19,10 @@ namespace com.csutil.algorithms.images {
         private int width;
         private int height;
         private int bytesPerPixel;
+
+        public GlobalMatting(ImageResult image)
+            : this(image.Data.DeepCopy(), image.Width, image.Height, (int)image.ColorComponents) {
+        }
 
         public GlobalMatting(byte[] image, int width, int height, int bytesPerPixel) {
             this.image = image;
@@ -147,6 +152,7 @@ namespace com.csutil.algorithms.images {
 
         // Method to expand known regions in the trimap with checks
         public void ExpansionOfKnownRegions(ref byte[] trimap, int niter) {
+            var t = Log.MethodEnteredWith("niter=" + niter);
             // Check if the image or trimap is empty
             if (image == null || image.Length == 0)
                 throw new ArgumentException("image is empty");
@@ -166,6 +172,7 @@ namespace com.csutil.algorithms.images {
                 ExpansionOfKnownRegionsHelper(image, trimap, i + 1, scalingFactor);
             }
             ErodeFB(ref trimap, 2);
+            Log.MethodDone(t);
         }
 
         // This method performs an expansion of known regions
@@ -242,10 +249,13 @@ namespace com.csutil.algorithms.images {
             }
         }
 
-        // Checks for up to 3 size length color array if the color is equal to the input value
-        private bool ColorIsValue(byte[] array, int x, int y, int value) {
-            var color = GetColorAt(array, x, y);
-            return color.R == value && color.G == value && color.B == value;
+        private bool ColorIsValue(byte[] array, int x, int y, int alpha) {
+            // var color = GetColorAt(array, x, y);
+            // return color.R == alpha && color.G == alpha && color.B == alpha;
+
+            // Since the 3 channels are the same, we can just check the first channel: 
+            int startIdx = (y * width + x) * bytesPerPixel;
+            return array[startIdx] == alpha;
         }
 
         private struct Sample {
@@ -373,6 +383,7 @@ namespace com.csutil.algorithms.images {
         }
 
         private void GlobalMattingHelper(byte[] trimap, out byte[] foreground, out byte[] alpha, out byte[] conf) {
+            var t = Log.MethodEntered();
             List<Point> foregroundBoundary = FindBoundaryPixels(trimap, 255, 128);
             List<Point> backgroundBoundary = FindBoundaryPixels(trimap, 0, 128);
 
@@ -390,7 +401,9 @@ namespace com.csutil.algorithms.images {
             foregroundBoundary.Sort((p0, p1) => IntensityComp(p0, p1));
             backgroundBoundary.Sort((p0, p1) => IntensityComp(p0, p1));
 
+            var t2 = Log.MethodEntered("CalculateAlphaPatchMatch");
             CalculateAlphaPatchMatch(trimap, foregroundBoundary, backgroundBoundary, out var samples);
+            Log.MethodDone(t2);
 
             // Initialize output arrays
             foreground = new byte[width * height * bytesPerPixel];
@@ -429,6 +442,7 @@ namespace com.csutil.algorithms.images {
                     }
                 }
             }
+            Log.MethodDone(t);
         }
 
         // Helper method to set the color at a specific location in the image array
@@ -470,8 +484,8 @@ namespace com.csutil.algorithms.images {
             GlobalMattingHelper(trimap, out foreground, out alpha, out conf);
         }
 
-        public byte[] RunGuidedFilter(byte[] alpha, int r, double eps) {
-            var imageGuidedFilter = new GuidedFilter(image, width, height, bytesPerPixel, r, eps);
+        public byte[] RunGuidedFilter(byte[] alpha, int radius, double eps) {
+            var imageGuidedFilter = new GuidedFilter(image, width, height, bytesPerPixel, radius, eps);
             var guidedFilterInstance = imageGuidedFilter.Init(bytesPerPixel);
             var guidedIm = GuidedFilter.RunGuidedFilter(alpha, guidedFilterInstance);
 

@@ -26,9 +26,10 @@ namespace com.csutil.tests.AlgorithmTests {
             await MyImageFileRef.DownloadFileIfNeeded(resultOfOriginalCppImplementation, "https://raw.githubusercontent.com/cs-util/global-matting/master/GT04-alpha.png");
 
             var trimapBytes = trimap.Data;
-            var imageMatting = new GlobalMatting(image.Data.DeepCopy(), image.Width, image.Height, (int)image.ColorComponents);
+            var imageMatting = new GlobalMatting(image);
             imageMatting.ExpansionOfKnownRegions(ref trimapBytes, niter: 9);
             imageMatting.RunGlobalMatting(trimapBytes, out var foreground, out var alphaData, out var conf);
+            
             // filter the result with fast guided filter
             var alphaDataGuided = imageMatting.RunGuidedFilter(alphaData, r: 10, eps: 1e-5);
 

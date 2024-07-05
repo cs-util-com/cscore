@@ -10,19 +10,19 @@ namespace com.csutil.algorithms.images {
         /// floodValue and then dilating and eroding this region to generate the area where semi transparency might exist.
         /// </summary>
         /// <param name="imageRes">ImageResult data which has the image data and its properties</param> 
-        /// <param name="floodValue">Value used as threshold to where the image shall set pixels to 0 for the flooded region</param> 
+        /// <param name="colorThreshold">Value used as threshold to where the image shall set pixels to 0 for the flooded region</param> 
         /// <param name="trimapKernel">Size of the box used for dilation, erosion in the trimap generation</param>
         /// <param name="guidedKernel">Size of kernel used for the box filter in the guided filter application</param> 
         /// <param name="eps">Epsilon parameter of the guided filter</param> 
         /// <param name="cutoffValue">All alpha values below this get set to 0, above are kept as they were in the alpha map</param> 
         /// <returns>Cutout generated according to the trimap and chosen cutoff value</returns>
-        public static byte[] RunCutOutAlgo(ImageResult imageRes, int floodValue, int trimapKernel, int guidedKernel, double eps, int cutoffValue) {
+        public static byte[] RunCutOutAlgo(ImageResult imageRes, int colorThreshold, int trimapKernel, int guidedKernel, double eps, int cutoffValue) {
             var image = imageRes.Data.DeepCopy();
             var width = imageRes.Width;
             var height = imageRes.Height;
             var bytesPerPixel = (int)imageRes.ColorComponents;
 
-            var floodFilled = imageRes.RunColorCheckAlgorithm(floodValue);
+            var floodFilled = imageRes.RunColorCheckAlgorithm(colorThreshold);
             var trimap = TrimapGeneration.FromFloodFill(floodFilled, width, height, (int)imageRes.ColorComponents, trimapKernel);
 
             var imageMatting = new GlobalMatting(image, width, height, bytesPerPixel);
@@ -41,7 +41,7 @@ namespace com.csutil.algorithms.images {
                     }
                 }
             }
-            
+
             // Safe cut out according to alpha region that is >= cutoffValue
             var cutout = image.DeepCopy();
 
