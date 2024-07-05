@@ -57,6 +57,8 @@ namespace com.csutil.tests.AlgorithmTests {
             var flipped = ImageUtility.FlipImageVertically(alpha.Data, image.Width, image.Height, (int)image.ColorComponents);
             new ImageWriter().WritePng(flipped, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
 
+            Log.d("See result in " + folder.GetFullFileSystemPath());
+
         }
 
     }

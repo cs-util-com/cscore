@@ -7,18 +7,18 @@ namespace com.csutil.algorithms.images {
     /// <summary> Ported version of https://raw.githubusercontent.com/atilimcetin/global-matting/master/globalmatting.cpp </summary>
     public class GlobalMatting {
 
-        private byte[] black = new byte[] { 0, 0, 0, 0 };
-        private byte[] almostBlack = new byte[] { 1, 1, 1, 1 };
-        private byte[] gray = new byte[] { 128, 128, 128, 128 };
-        private byte[] almostWhite = new byte[] { 254, 254, 254, 254 };
-        private byte[] white = new byte[] { 255, 255, 255, 255 };
+        private readonly byte[] black = new byte[] { 0, 0, 0, 0 };
+        private readonly byte[] almostBlack = new byte[] { 1, 1, 1, 1 };
+        private readonly byte[] gray = new byte[] { 128, 128, 128, 128 };
+        private readonly byte[] almostWhite = new byte[] { 254, 254, 254, 254 };
+        private readonly byte[] white = new byte[] { 255, 255, 255, 255 };
 
-        Random rand = new Random();
+        private readonly Random rand = new Random();
 
-        private byte[] image;
-        private int width;
-        private int height;
-        private int bytesPerPixel;
+        private readonly byte[] image;
+        private readonly int width;
+        private readonly int height;
+        private readonly int bytesPerPixel;
 
         public GlobalMatting(ImageResult image)
             : this(image.Data.DeepCopy(), image.Width, image.Height, (int)image.ColorComponents) {
@@ -141,7 +141,7 @@ namespace com.csutil.algorithms.images {
         }
 
         // TODO remove colorCache to allow parallel processing
-        private byte[] colorCache = new byte[4];
+        private readonly byte[] colorCache = new byte[4];
 
         // Helper method to get color at a given position
         private PixelRgb GetColorAt(byte[] img, int x, int y) {
@@ -345,7 +345,6 @@ namespace com.csutil.algorithms.images {
 
                         if (r < 1) { break; }
 
-
                         int di = (int)(r * rand.NextDouble());
                         int dj = (int)(r * rand.NextDouble());
 
@@ -353,7 +352,6 @@ namespace com.csutil.algorithms.images {
                         int bj = s.bj + (rand.NextDouble() > 0.5 ? dj : -dj);
 
                         if (fi < 0 || fi >= foregroundBoundary.Count || bj < 0 || bj >= backgroundBoundary.Count) { continue; }
-
 
                         Point fp = foregroundBoundary[fi];
                         Point bp = backgroundBoundary[bj];
