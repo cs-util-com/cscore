@@ -3,7 +3,7 @@ using com.csutil.algorithms.images;
 using StbImageWriteSharp;
 using Xunit;
 
-namespace com.csutil.tests.AlgorithmTests {
+namespace com.csutil.tests.AlgorithmTests.images {
 
     public class ImageUtilityTests {
 

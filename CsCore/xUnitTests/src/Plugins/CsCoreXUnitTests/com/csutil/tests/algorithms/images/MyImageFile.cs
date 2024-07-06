@@ -5,7 +5,7 @@ using com.csutil.model;
 using StbImageSharp;
 using Zio;
 
-namespace com.csutil.tests.AlgorithmTests {
+namespace com.csutil.tests.AlgorithmTests.images {
 
     /// <summary> Used for testing the different image algorithms </summary>
     public class MyImageFileRef : IFileRef {

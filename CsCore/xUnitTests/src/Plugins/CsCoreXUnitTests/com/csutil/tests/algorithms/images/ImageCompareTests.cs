@@ -7,7 +7,7 @@ using Zio;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace com.csutil.tests.AlgorithmTests {
+namespace com.csutil.tests.AlgorithmTests.images {
 
     public class ImageCompareTests {
 
