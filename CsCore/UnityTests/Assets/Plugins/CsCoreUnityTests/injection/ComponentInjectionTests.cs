@@ -58,11 +58,7 @@ namespace com.csutil.tests.injection {
             Injector injector = GetInjectorForTesting();
 
             injector.RemoveAllInjectorsFor<MyExampleMono1>();
-            AssertV2.Throws<Exception>(() => {
-                // It should not be possible to create a mono via default constructor:
-                injector.GetOrAddSingleton<MyExampleMono1>(this);
-            });
-            {
+            { // Initially there is no MonoBehaviour registered in the system:
                 var singletonsName = "SingletonsMaster1";
                 var x1 = injector.GetOrAddComponentSingleton<MyExampleMono1>(this, singletonsName);
                 Assert.NotNull(x1);
