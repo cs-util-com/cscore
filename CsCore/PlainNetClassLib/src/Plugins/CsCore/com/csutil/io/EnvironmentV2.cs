@@ -46,6 +46,16 @@ namespace com.csutil {
             }
         }
 
+        public static bool isUnity {
+            get {
+#if UNITY_5_3_OR_NEWER
+                return true;
+#else
+                return false;
+#endif
+            }
+        }
+
         public static bool isDebugMode {
             get {
 #if DEBUG

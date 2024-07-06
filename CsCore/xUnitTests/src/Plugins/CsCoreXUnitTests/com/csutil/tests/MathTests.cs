@@ -101,9 +101,9 @@ namespace com.csutil.tests {
             Assert.True(8 < ColorMath.CalcContrastRatio(whiteBrightnes, blueBrightness));
 
             var green = ColorMath.RgbToHsv(0, 1, 0);
-            Assert.Equal("[0,3333333, 1, 1]", green.ToStringV2(c => "" + c));
+            Assert.Equal("[0.3333333, 1, 1]", green.ToStringV2(c => c.ToStringV2()));
             ColorMath.InvertHue(green); // Green becomes purple
-            Assert.Equal("[0,8333333, 1, 1]", green.ToStringV2(c => "" + c));
+            Assert.Equal("[0.8333333, 1, 1]", green.ToStringV2(c => c.ToStringV2()));
             AssertEqualRgb("[1, 0, 1]", green); // Purple is red + blue
 
 
@@ -111,7 +111,7 @@ namespace com.csutil.tests {
 
         private static void AssertEqualRgb(string rgb, float[] hsvColor) {
             var redRgb = ColorMath.HsvToRgb(hsvColor[0], hsvColor[1], hsvColor[2]);
-            Assert.Equal(rgb, redRgb.ToStringV2(c => "" + c));
+            Assert.Equal(rgb, redRgb.ToStringV2(c => c.ToStringV2()));
         }
 
 

@@ -42,9 +42,11 @@ namespace com.csutil.keyvaluestore {
         }
 
         private void CloseAndReopenZip() {
-            this._zipFileSystem.Dispose();
-            this._zipFileSystem = SourceZipFile.OpenOrCreateAsZip();
-            this.folderForAllFiles = _zipFileSystem.GetRootDirectory();
+            lock (folderAccessLock) {
+                this._zipFileSystem.Dispose();
+                this._zipFileSystem = SourceZipFile.OpenOrCreateAsZip();
+                this.folderForAllFiles = _zipFileSystem.GetRootDirectory();
+            }
         }
 
         public override void Dispose() {

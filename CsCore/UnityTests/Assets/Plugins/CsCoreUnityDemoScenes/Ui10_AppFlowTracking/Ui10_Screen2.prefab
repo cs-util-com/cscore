@@ -1,19 +1,5 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &1082395723048171731
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 338747990550162294}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 544358e3651005141809e3fd767a8a71, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  id: ScreenTitle
-  syncWithGOName: 1
 --- !u!1 &8936524265433788256
 GameObject:
   m_ObjectHideFlags: 0
@@ -42,13 +28,14 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4381707120634717254}
   - {fileID: 2483601044440897066}
   - {fileID: 8741955120936766360}
   - {fileID: 7579540874640326092}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
+  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -98,6 +85,7 @@ PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
+    serializedVersion: 3
     m_TransformParent: {fileID: 8936524265433788257}
     m_Modifications:
     - target: {fileID: 4294247159623846142, guid: 7099ab4aea109b243a409d9f127e826e,
@@ -211,6 +199,9 @@ PrefabInstance:
       value: DefaultButtonWithIcon
       objectReference: {fileID: 0}
     m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7099ab4aea109b243a409d9f127e826e, type: 3}
 --- !u!224 &2483601044440897066 stripped
 RectTransform:
@@ -223,6 +214,7 @@ PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
+    serializedVersion: 3
     m_TransformParent: {fileID: 8936524265433788257}
     m_Modifications:
     - target: {fileID: 4294247159623846142, guid: 7099ab4aea109b243a409d9f127e826e,
@@ -336,6 +328,9 @@ PrefabInstance:
       value: DefaultButtonWithIcon
       objectReference: {fileID: 0}
     m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7099ab4aea109b243a409d9f127e826e, type: 3}
 --- !u!224 &8741955120936766360 stripped
 RectTransform:
@@ -348,6 +343,7 @@ PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
+    serializedVersion: 3
     m_TransformParent: {fileID: 8936524265433788257}
     m_Modifications:
     - target: {fileID: 4294247159623846142, guid: 7099ab4aea109b243a409d9f127e826e,
@@ -461,6 +457,9 @@ PrefabInstance:
       value: DefaultButtonWithIcon
       objectReference: {fileID: 0}
     m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7099ab4aea109b243a409d9f127e826e, type: 3}
 --- !u!224 &7579540874640326092 stripped
 RectTransform:
@@ -473,6 +472,7 @@ PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
+    serializedVersion: 3
     m_TransformParent: {fileID: 8936524265433788257}
     m_Modifications:
     - target: {fileID: 320953420027845127, guid: e313a78bd5fde864c8d9cb2cb764a187,
@@ -514,6 +514,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: DefaultActionBar
+      objectReference: {fileID: 0}
+    - target: {fileID: 4365372862602767701, guid: e313a78bd5fde864c8d9cb2cb764a187,
+        type: 3}
+      propertyPath: id
+      value: ScreenTitle
       objectReference: {fileID: 0}
     - target: {fileID: 5367348112909252967, guid: e313a78bd5fde864c8d9cb2cb764a187,
         type: 3}
@@ -686,16 +691,13 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e313a78bd5fde864c8d9cb2cb764a187, type: 3}
 --- !u!224 &4381707120634717254 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 5612786063431223322, guid: e313a78bd5fde864c8d9cb2cb764a187,
-    type: 3}
-  m_PrefabInstance: {fileID: 8154449127039544412}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &338747990550162294 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 8473828115249956650, guid: e313a78bd5fde864c8d9cb2cb764a187,
     type: 3}
   m_PrefabInstance: {fileID: 8154449127039544412}
   m_PrefabAsset: {fileID: 0}

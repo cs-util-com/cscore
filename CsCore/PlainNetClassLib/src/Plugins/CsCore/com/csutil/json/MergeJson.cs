@@ -30,6 +30,15 @@ namespace com.csutil {
             return res;
         }
 
+        public static JToken GetDiffV2<T>(T a, T b) {
+            return GetDiffV2(a, b, () => JsonSerializer.Create(JsonNetSettings.defaultSettings));
+        }
+        
+        public static JToken GetDiffV2<T>(T a, T b, Func<JsonSerializer> serializer) {
+            return new JsonDiffPatch().DiffV2(ToJToken(a, serializer()), ToJToken(b, serializer()));
+        }
+        
+        [Obsolete("use GetDiffV2 instead")]
         public static JToken GetDiff<T>(T a, T b) {
             return GetDiff(a, b, () => JsonSerializer.Create(JsonNetSettings.defaultSettings));
         }
@@ -39,6 +48,7 @@ namespace com.csutil {
             return new JsonDiffPatch().Diff(ToJToken(a, s), ToJToken(b, s));
         }
 
+        [Obsolete("use GetDiffV2 instead")]
         public static JToken GetDiff<T>(T a, T b, Func<JsonSerializer> serializer) {
             return new JsonDiffPatch().Diff(ToJToken(a, serializer()), ToJToken(b, serializer()));
         }

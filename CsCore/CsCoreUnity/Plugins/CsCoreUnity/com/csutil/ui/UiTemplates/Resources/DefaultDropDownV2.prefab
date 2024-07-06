@@ -276,7 +276,7 @@ GameObject:
   - component: {fileID: 4687615551941461710}
   - component: {fileID: 1948592951662405265}
   m_Layer: 0
-  m_Name: DefaultDropDownV2
+  m_Name: Panel2_DropDown1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

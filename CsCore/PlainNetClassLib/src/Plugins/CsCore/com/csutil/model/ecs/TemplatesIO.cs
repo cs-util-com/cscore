@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using com.csutil.json;
 using JsonDiffPatchDotNet;
@@ -39,6 +40,14 @@ namespace com.csutil.model.ecs {
             IsDisposed = DisposeState.Disposed;
         }
 
+        public void SetJsonSerializer(Func<JsonSerializer> newSerializer) {
+            GetJsonSerializer = newSerializer;
+        }
+
+        public void SetJsonSerializer(JsonSerializer newSerializer) {
+            GetJsonSerializer = () => newSerializer;
+        }
+
         /// <summary> Loads all template files from disk into memory </summary>
         public async Task LoadAllTemplateFilesIntoMemory() {
             this.ThrowErrorIfDisposed();
@@ -48,6 +57,12 @@ namespace com.csutil.model.ecs {
                 tasks.Add(TaskV2.Run((() => LoadJTokenFromFile(templateFile, jsonSerializer))));
             }
             await Task.WhenAll(tasks);
+        }
+        
+        public async Task<List<T>> LoadAllEntitiesFromDisk() {
+            this.ThrowErrorIfDisposed();
+            await LoadAllTemplateFilesIntoMemory();
+            return GetAllEntityIds().Map(entityId => ComposeEntityInstance(entityId)).ToList();
         }
 
         private void LoadJTokenFromFile(FileEntry templateFile, JsonSerializer jsonSerializer) {
@@ -60,6 +75,7 @@ namespace com.csutil.model.ecs {
         }
 
         public Task SaveChanges(T instance) {
+            this.ThrowErrorIfDisposed();
             var entityId = instance.GetId();
             var json = UpdateJsonState(instance);
             var file = GetEntityFileForId(entityId);
@@ -97,11 +113,15 @@ namespace com.csutil.model.ecs {
             return _entityDir.GetChild(entityId);
         }
 
-        public void Delete(string entityId) {
+        public async Task Delete(string entityId) {
+            this.ThrowErrorIfDisposed();
             if (EntityCache.Remove(entityId)) {
                 var entityFile = GetEntityFileForId(entityId);
                 if (entityFile.Exists) {
-                    entityFile.DeleteV2();
+                    await TaskV2.TryWithExponentialBackoff(() => {
+                        entityFile.DeleteV2();
+                        return Task.CompletedTask;
+                    }, maxNrOfRetries: 3, initialExponent: 4);
                 }
             }
         }
@@ -117,6 +137,7 @@ namespace com.csutil.model.ecs {
         /// <param name="newIdsLookup"> Requires to pass in a filled dictionary with the current entity ids
         /// mapping to new ones that will be used for the new instances </param>
         public T CreateVariantInstanceOf(T entity, IReadOnlyDictionary<string, string> newIdsLookup) {
+            this.ThrowErrorIfDisposed();
             var templateId = entity.GetId();
             if (!IsSavedToFiles(templateId)) {
                 throw new InvalidOperationException($"The passed entity {entity} first needs to be saved once before it can be used as a template");
@@ -156,12 +177,19 @@ namespace com.csutil.model.ecs {
             var backAsJson = ToJToken(resultingEntity, GetJsonSerializer());
             var diff = _jsonDiffPatch.DiffV2(sourceJson, backAsJson);
             if (diff != null) {
-                Log.e($"Not all props of {typeof(T)} were deserialized, diff: {diff}");
-                Log.e($"Full json of both version: sourceJson: {sourceJson} and backAsJson: {backAsJson}");
+                Log.e($"Detected diff in reconstruction from json of {typeof(T)}: {diff}");
+                Log.w("Full json of both versions to compare with https://www.diffchecker.com/text-compare/ "
+                    + "\n(first sourceJson, then backAsJson)");
+                var sourceJsonString = sourceJson.ToPrettyString();
+                var backAsJsonString = backAsJson.ToPrettyString();
+                Log.w(sourceJsonString);
+                Log.w(backAsJsonString);
+                Debugger.Break();
             }
         }
 
         public IEnumerable<string> GetAllEntityIds() {
+            this.ThrowErrorIfDisposed();
             return _entityDir.EnumerateFiles().Map(x => x.Name);
         }
 

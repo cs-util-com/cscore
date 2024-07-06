@@ -5,7 +5,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>com.csutil.cscore</PackageId>
     <!-- https://www.nuget.org/packages/com.csutil.cscore -->
-    <Version>1.9.0</Version>
+    <Version>1.10.0</Version>
     <Authors>csutil.com</Authors>
     <Company>csutil.com</Company>
     <Product>cscore</Product>
@@ -57,6 +57,11 @@
   <!-- https://www.nuget.org/packages/SharpZipLib/ -->
   <ItemGroup>
     <PackageReference Include="SharpZipLib" Version="1.4.2" />
+  </ItemGroup>
+
+  <!-- https://www.nuget.org/packages/StbImageWriteSharp/ -->
+  <ItemGroup>
+    <PackageReference Include="StbImageWriteSharp" Version="1.16.7" />
   </ItemGroup>
 
   <!-- https://www.nuget.org/packages/Zio/ --> 

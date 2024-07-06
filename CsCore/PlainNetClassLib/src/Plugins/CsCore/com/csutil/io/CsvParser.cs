@@ -21,7 +21,7 @@ namespace com.csutil.io {
             return rawSheetData;
         }
 
-        public static JArray ReadCsvStreamAsJson(Stream csvStream) {
+        private static JArray ReadCsvStreamAsJson(Stream csvStream) {
             return ConvertToJson(ReadCsvStream(csvStream));
         }
 

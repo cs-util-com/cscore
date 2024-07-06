@@ -42,7 +42,12 @@ namespace Xunit {
 
         private static bool Eq(object objA, object objB) {
             if (ReferenceEquals(objA, objB)) { return true; }
-            if (Numbers.HasNumberType(objA) && Numbers.HasNumberType(objB)) { return Convert.ToDouble(objA) == Convert.ToDouble(objB); }
+            if (Numbers.HasNumberType(objA) && Numbers.HasNumberType(objB)) {
+                if (double.IsNaN(Convert.ToDouble(objA)) && double.IsNaN(Convert.ToDouble(objB))) {
+                    return true;
+                }
+                return Convert.ToDouble(objA) == Convert.ToDouble(objB);
+            }
             if (objA is IComparable c1 && objB is IComparable c2) { return c1.CompareTo(c2) == 0; }
             return objA == objB || Equals(objA, objB);
         }

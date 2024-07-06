@@ -40,8 +40,12 @@ namespace com.csutil {
 #endif
         {
             EnforceMustBeEnum<T>();
-            if (enumString.IsNullOrEmpty()) { throw new ArgumentException("Cant parse null or emtpy string to enum " + typeof(T)); }
-            return (T)Enum.Parse(typeof(T), enumString.Replace(" ", ""));
+            return (T)Parse(typeof(T), enumString);
+        }
+        
+        public static object Parse(Type type, string enumString) {
+            if (enumString.IsNullOrEmpty()) { throw new ArgumentException("Cant parse null or emtpy string to enum " + type); }
+            return Enum.Parse(type, enumString.Replace(" ", ""));
         }
 
         public static bool IsEnum<T>() { return typeof(T).IsEnum; }

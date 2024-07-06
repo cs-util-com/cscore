@@ -123,7 +123,7 @@ namespace com.csutil.integrationTests.http {
             Assert.NotEmpty(headers);
             Assert.Equal("image/png", headers.GetContentMimeType(null));
             // The image file size of 492 KB is returned as well:
-            Assert.Equal("492,78 KB", ByteSizeToString.ByteSizeToReadableString(headers.GetContentLengthInBytes(0)));
+            Assert.Equal("492.78 KB", ByteSizeToString.ByteSizeToReadableString(headers.GetContentLengthInBytes(0)));
             Assert.Equal("66148616DAFA743A73F9F5284F3B1D3C.png", headers.GenerateHashNameFromHeaders());
         }
 
@@ -421,6 +421,20 @@ namespace com.csutil.integrationTests.http {
             var image = await ImageLoader.LoadAndDispose(stream);
             Assert.Equal(h, image.Height);
             Assert.Equal(w, image.Width);
+        }
+
+        [Fact]
+        public async Task TestLocalIpDetection() {
+            var localIpV4 = IpLookup.GetLocalIPs();
+            var internetIp = await GetInternetIp();
+            Log.d($"Your internet IP is {internetIp} and your local IPs are: {localIpV4.ToStringV2FullJson()}");
+            Assert.False(localIpV4.IsNullOrEmpty());
+            Assert.DoesNotContain(localIpV4, x => x.Ip == internetIp);
+        }
+
+        private static async Task<string> GetInternetIp() {
+            HttpBinGetResp response = await new Uri("https://httpbin.org/get").SendGET().GetResult<HttpBinGetResp>();
+            return response.origin;
         }
 
     }

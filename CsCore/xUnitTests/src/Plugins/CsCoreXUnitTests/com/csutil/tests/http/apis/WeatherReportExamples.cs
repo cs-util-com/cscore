@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
@@ -33,7 +35,35 @@ namespace com.csutil.integrationTests.http {
         }
 
         [Fact]
+        public async Task EnsureThatApisInTestsBelowAreAllStillOffline() {
+            var tests = new List<Task>();
+            // tests.Add(WttrInApiExample1());
+            // tests.Add(WttrInApiExample2());
+            tests.Add(MetaWeatherComExample1());
+            tests.Add(MetaWeatherComTest1());
+            tests.Add(MetaWeatherComTest2());
+
+            // Check that all the tests failed because the APIs are all still offline:
+            try { await Task.WhenAll(tests); } catch (Exception e) { }
+            for (int i = 0; i < tests.Count; i++) {
+                if (tests[i].IsCompletedSuccessfully) {
+                    throw new Exception("Test " + i + " was not expected to be successful");
+                }
+            }
+            Assert.Empty(tests.Filter(x => x.IsCompletedSuccessfully));
+        }
+
+        [Fact]
         public async Task WttrInApiExample1() {
+            GeoPluginNet.Response response = await GeoPluginNet.GetResponse();
+            var report = await WttrInApi.GetWeather(response.geoplugin_city);
+            Log.d($"Full weather report for ({response.geoplugin_city}): " + JsonWriter.AsPrettyString(report));
+            Assert.NotEmpty(report.weather.First().hourly.First().weatherDesc);
+            Assert.Equal(response.geoplugin_countryName, report.nearest_area.First().country.First().value);
+        }
+
+        [Fact]
+        public async Task WttrInApiExample2() {
             GeoPluginNet.Response response = await GeoPluginNet.GetResponse();
             var latitude = double.Parse(response.geoplugin_latitude, CultureInfo.InvariantCulture);
             var longitude = double.Parse(response.geoplugin_longitude, CultureInfo.InvariantCulture);
@@ -43,14 +73,9 @@ namespace com.csutil.integrationTests.http {
             Assert.Equal(response.geoplugin_countryName, report.nearest_area.First().country.First().value);
         }
 
-        /// <summary> MetaWeather seems to be down for quite a while, will check from time to time if its back  </summary>
-        private DateTime MetaWeatherComNextCheckIfBackOnline = new DateTime(2024, 04, 01);
-
+        // [Fact]
         [Obsolete]
-        [Fact]
         public async Task MetaWeatherComExample1() {
-
-            if (DateTimeV2.Now < MetaWeatherComNextCheckIfBackOnline) { return; }
 
             var ipLookupResult = await IpApiCom.GetResponse();
             string yourCity = ipLookupResult.city;
@@ -67,11 +92,9 @@ namespace com.csutil.integrationTests.http {
 
         }
 
+        // [Fact]
         [Obsolete]
-        [Fact]
         public async Task MetaWeatherComTest1() {
-
-            if (DateTimeV2.Now < MetaWeatherComNextCheckIfBackOnline) { return; }
 
             var berlinName = "Berlin";
             float berlinLatitude = 52.50f;
@@ -95,16 +118,15 @@ namespace com.csutil.integrationTests.http {
 
         }
 
+        // [Fact]
         [Obsolete]
-        [Fact]
         public async Task MetaWeatherComTest2() {
-
-            if (DateTimeV2.Now < MetaWeatherComNextCheckIfBackOnline) { return; }
 
             var cityName = "Berlin";
             var w = await MetaWeather.GetWeather(cityName);
             var summary1 = w.consolidated_weather.Map(report => report.weather_state_name);
             Assert.NotEmpty(summary1);
+
         }
 
     }

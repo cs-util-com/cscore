@@ -17,7 +17,7 @@ namespace com.csutil.model.ecs {
         public DisposeState IsDisposed { get; private set; }
 
         public virtual Task OnLoad(EntityComponentSystem<T> model) {
-            targetView.ThrowErrorIfNull("Root GameObject of the ECS presenter");
+            targetView.ThrowErrorIfNullOrDestroyed("Root GameObject of the ECS presenter");
             var entitiesInRoot = model.Entities.Values.Filter(x => x.ParentId == null);
             AddViewsForEntityModelsRecursively(entitiesInRoot);
             model.OnIEntityUpdated += OnEntityUpdated;
@@ -47,7 +47,14 @@ namespace com.csutil.model.ecs {
         }
 
         private void OnEntityUpdated(IEntity<T> iEntity, EntityComponentSystem<T>.UpdateType type, T oldstate, T newstate) {
-            MainThread.Invoke(() => { HandleEntityUpdate(iEntity, type, oldstate, newstate); });
+            AssertV3.IsTrue(iEntity.IsAlive(), () => "Entity is not alive");
+            MainThread.Invoke(() => {
+                // If the entity is no longer alive after the main thread switch, ignore the update (except for remove events):
+                var isUpdateInMainThreadStillPossible = iEntity.IsAlive() || type == EntityComponentSystem<T>.UpdateType.Remove;
+                if (isUpdateInMainThreadStillPossible) {
+                    HandleEntityUpdate(iEntity, type, oldstate, newstate);
+                }
+            });
         }
 
         private void HandleEntityUpdate(IEntity<T> iEntity, EntityComponentSystem<T>.UpdateType type, T oldstate, T newstate) {
@@ -59,7 +66,8 @@ namespace com.csutil.model.ecs {
                     RemoveGoFor(iEntity, oldstate);
                     break;
                 case EntityComponentSystem<T>.UpdateType.Update:
-                    UpdateGoFor(iEntity, oldstate, newstate);
+                case EntityComponentSystem<T>.UpdateType.TemplateUpdate:    
+                    UpdateGoFor(iEntity, oldstate, newstate, type);
                     break;
                 default: throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
@@ -69,7 +77,7 @@ namespace com.csutil.model.ecs {
             if (_entityViews.ContainsKey(iEntity.Id)) { return; }
             GameObject go = NewGameObjectFor(iEntity);
             _entityViews.Add(iEntity.Id, go);
-            go.name = iEntity.Name;
+            go.name = "" + iEntity;
             if (iEntity.ParentId != null) {
                 var parent = iEntity.GetParent();
                 if (!_entityViews.ContainsKey(parent.Id)) {
@@ -80,7 +88,7 @@ namespace com.csutil.model.ecs {
                 targetView.AddChild(go);
             }
             iEntity.LocalPose().ApplyTo(go.transform);
-            go.SetActive(iEntity.IsActive);
+            go.SetActive(iEntity.IsActiveSelf());
             foreach (var x in iEntity.Components) {
                 OnComponentAdded(iEntity, x, targetParentGo: go);
             }
@@ -89,15 +97,24 @@ namespace com.csutil.model.ecs {
         protected abstract GameObject NewGameObjectFor(IEntity<T> iEntity);
 
         private void RemoveGoFor(IEntity<T> iEntity, T removedEntity) {
-            _entityViews[iEntity.Id].Destroy();
-            _entityViews.Remove(iEntity.Id);
+            if (_entityViews.ContainsKey(iEntity.Id)) {
+                _entityViews[iEntity.Id].Destroy();
+                if (!_entityViews.Remove(iEntity.Id)) {
+                    Log.e($"Failed to remove GO view/presenter of entity={iEntity}");
+                }
+            } else {
+                Log.e($"Failed to remove GO view/presenter of entity={iEntity}");
+            }
         }
 
-        private void UpdateGoFor(IEntity<T> iEntity, T oldState, T newState) {
+        private void UpdateGoFor(IEntity<T> iEntity, T oldState, T newState, EntityComponentSystem<T>.UpdateType type) {
             var go = _entityViews[iEntity.Id];
-            go.SetActiveV2(iEntity.IsActive);
-            if (oldState.Name != newState.Name) {
-                go.name = iEntity.Name;
+            if (go.IsDestroyed()) {
+                throw Log.e($"The entity view for {iEntity.GetFullEcsPathString()} was destroyed");
+            }
+            go.SetActiveV2(iEntity.IsActiveSelf());
+            if (oldState.Name != "" + newState) {
+                go.name = "" + iEntity;
             }
             if (oldState.ParentId != newState.ParentId) {
                 if (newState.ParentId != null) {
@@ -109,8 +126,8 @@ namespace com.csutil.model.ecs {
             if (oldState.LocalPose != newState.LocalPose) {
                 OnPoseUpdate(iEntity, go, iEntity.LocalPose());
             }
-            var newIsActiveState = newState.IsActive;
-            if (oldState.IsActive != newIsActiveState) {
+            var newIsActiveState = newState.IsActiveSelf();
+            if (oldState.IsActiveSelf() != newIsActiveState) {
                 OnToggleActiveState(go, newIsActiveState);
             }
             var oldComps = oldState.Components;
@@ -142,22 +159,28 @@ namespace com.csutil.model.ecs {
         protected virtual void OnComponentAdded(IEntity<T> iEntity, KeyValuePair<string, IComponentData> added, GameObject targetParentGo) {
             var createdComponent = AddComponentTo(targetParentGo, added.Value, iEntity);
             if (createdComponent == null) {
-                throw Log.e($"AddComponentTo returned NULL for component={added.Value} and targetParentGo={targetParentGo}", targetParentGo);
+                Log.d($"AddComponentTo returned NULL for component={added.Value} and targetParentGo={targetParentGo}", targetParentGo);
+            } else {
+                createdComponent.ComponentId = added.Value.GetId();
+                if (createdComponent is Behaviour mono) {
+                    mono.enabled = true; // Force to trigger onEnable once (often needed by presenters to init some values)
+                    if (mono.enabled != added.Value.IsActive) {
+                        mono.enabled = added.Value.IsActive;
+                    }
+                }
+                createdComponent.OnUpdateUnityComponent(iEntity, default, added.Value);
             }
-            createdComponent.ComponentId = added.Value.GetId();
-            if (createdComponent is Behaviour mono) {
-                mono.enabled = added.Value.IsActive;
-            }
-            createdComponent.OnUpdateUnityComponent(iEntity, default, added.Value);
         }
 
         protected abstract IComponentPresenter<T> AddComponentTo(GameObject targetGo, IComponentData componentModel, IEntity<T> iEntity);
 
         protected virtual void OnComponentRemoved(IEntity<T> iEntity, string deleted, GameObject targetParentGo) {
-            if (GetComponentPresenters(iEntity).Any(x => x.ComponentId == deleted)) {
+            var allPresenters = GetComponentPresenters(iEntity);
+            if (allPresenters.Any(x => x.ComponentId == deleted)) {
                 GetComponentPresenter(iEntity, deleted).DisposeV2();
             } else {
-                Log.d($"No component found for the deleted entity component with id={deleted} in entity={iEntity}");
+                Log.d($"No component found for the deleted entity component with id={deleted} in entity={iEntity}. "
+                    + $"allPresenters={allPresenters.ToStringV2(x => "\n" + x)}", targetParentGo);
             }
         }
 
@@ -167,7 +190,7 @@ namespace com.csutil.model.ecs {
                 return componentPresenters.Single(x => x.ComponentId == componentId);
             } catch (Exception e) {
                 var entityView = _entityViews[iEntity.Id];
-                Log.e($"Failed to find component with id={componentId} in entity={iEntity}", e, entityView);
+                Log.e($"Failed to find exactly 1 component with id={componentId} in entity={iEntity}", e, entityView);
                 throw;
             }
         }

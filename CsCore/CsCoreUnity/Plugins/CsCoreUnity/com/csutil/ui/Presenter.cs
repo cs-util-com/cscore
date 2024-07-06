@@ -29,7 +29,11 @@ namespace com.csutil {
         /// <summary> Connects a model with a view </summary>
         /// <returns> A task that can be awaited on, that returns the fully setup presenter </returns>
         public static Task<T> ShowModelInView<T>(this Presenter<T> presenter, T model, string viewPrefabName) {
-            presenter.targetView = ViewStackHelper.MainViewStack().SwitchToView(viewPrefabName);
+            return ShowModelInView(presenter, model, viewPrefabName, ViewStackHelper.MainViewStack());
+        }
+        
+        public static Task<T> ShowModelInView<T>(this Presenter<T> presenter, T model, string viewPrefabName, ViewStack viewStack) {
+            presenter.targetView = viewStack.SwitchToView(viewPrefabName);
             return presenter.LoadModelIntoView(model);
         }
 

@@ -78,4 +78,11 @@ namespace com.csutil.model.jsonschema {
         public InputLengthAttribute(int min, int max = 0) { minLength = min; maxLength = max; }
     }
 
+    /// <summary> A class must have 2 of these annotations per dropdownId, one on a string[] field (For the dropdown options) and
+    /// one on an int field (for the selected index in the dropdown) </summary>
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
+    public class DropDownAttribute : Attribute {
+        public string dropdownId;
+    }
+
 }

@@ -8,7 +8,7 @@ namespace com.csutil.editor {
 
         private static TransformData copiedTransformValues;
 
-        [MenuItem("Edit/Copy Transform Values %#c", false, -101)]
+        [MenuItem("CONTEXT/RectTransform/Copy Transform Values %#c", false, -102)]
         public static void CopyTransformValues() {
             if (Selection.gameObjects.Length == 0) return;
             var transformToCopy = Selection.gameObjects[0].transform;
@@ -34,7 +34,7 @@ namespace com.csutil.editor {
             }
         }
 
-        [MenuItem("Edit/Paste Transform Values %#v", false, -101)]
+        [MenuItem("CONTEXT/RectTransform/Paste Transform Values %#v", false, -101)]
         public static void PasteTransformValues() {
             foreach (var selection in Selection.gameObjects) {
                 Transform targetTransform = selection.transform;

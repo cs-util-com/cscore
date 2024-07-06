@@ -11,5 +11,5 @@ namespace com.csutil.model {
         string mimeType { get; set; }
 
     }
-
+    
 }

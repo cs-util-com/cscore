@@ -10,6 +10,11 @@ namespace com.csutil.tests.system {
         public SystemTests(Xunit.Abstractions.ITestOutputHelper logger) { logger.UseAsLoggingOutput(); }
 
         [Fact]
+        public void TestDateTimeV2() {
+            Assert.Equal(3, DateTimeV2.ParseUtc("2011-03-22 01:26:00").Month);
+        }
+
+        [Fact]
         public void TestGuidV2() {
 
             for (int i = 0; i < 1000; i++) {

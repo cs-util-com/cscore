@@ -23,6 +23,7 @@ namespace com.csutil.testing {
             public Test(MethodInfo methodToTest) {
                 this.methodToTest = methodToTest;
                 this.name = methodToTest.ToStringV2();
+                this.name.ThrowErrorIfNullOrEmpty("name");
             }
 
             public override string ToString() {
@@ -45,6 +46,10 @@ namespace com.csutil.testing {
                 }
             }
 
+            public bool IsCompletedSuccessfull() {
+                return testTask != null && testTask.IsCompletedSuccessfully;
+            }
+            
         }
 
         public static List<Test> CollectAllTests(IEnumerable<Type> classesToTest, Action<Test> onTestStarted) {

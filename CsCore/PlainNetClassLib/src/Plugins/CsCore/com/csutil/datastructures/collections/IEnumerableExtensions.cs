@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -66,6 +67,18 @@ namespace com.csutil {
             var filteredResultStrings = args.Map(x => "" + toString(x)).Filter(x => !x.IsNullOrEmpty());
             if (filteredResultStrings.IsNullOrEmpty()) { return bracket1 + bracket2; }
             return bracket1 + filteredResultStrings.Reduce((x, y) => x + separator + y) + bracket2;
+        }
+        
+        public static string ToStringV2(this float self) { return self.ToString(CultureInfo.InvariantCulture); }
+        public static string ToStringV2(this double self) { return self.ToString(CultureInfo.InvariantCulture); }
+        public static string ToStringV2(this decimal self) { return self.ToString(CultureInfo.InvariantCulture); }
+        public static string ToStringV2(this int self) { return self.ToString(CultureInfo.InvariantCulture); }
+        public static string ToStringV2(this long self) { return self.ToString(CultureInfo.InvariantCulture); }
+
+        public static string ToStringV2FullJson<T>(this IEnumerable<T> self) {
+            if (self is string) { return (string)(object)self; }
+            if (self is IEnumerable<string> s) { return s.ToStringV2(); }
+            return self.ToStringV2(c => JsonWriter.AsPrettyString(c));
         }
 
         public static Dictionary<K, V> ToDictionary<K, V>(this IEnumerable<K> keys, IEnumerable<V> values) {

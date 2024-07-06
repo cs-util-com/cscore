@@ -57,6 +57,10 @@ namespace com.csutil.model.immutable {
             if (triggerInstantToInit) { onChanged(GetState()); }
             return newListener;
         }
+        
+        public void RemoveStateChangeListener(Action onChanged) {
+            onStateChanged -= onChanged;
+        }
 
         public Action AddStateChangeListener<SubSub>(Func<S, SubSub> getSubSubState, Action<SubSub> onChanged, bool triggerInstantToInit = true) {
             Action newListener = ImmutableExtensions.NewSubstateChangeListener(() => {

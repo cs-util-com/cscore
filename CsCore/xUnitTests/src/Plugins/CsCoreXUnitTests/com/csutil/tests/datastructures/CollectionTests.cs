@@ -222,9 +222,9 @@ namespace com.csutil.tests {
                 var a = new HashSet<string>() { "a", "b" };
                 var b = new HashSet<string>() { "c", "d" };
                 Assert.True(a.AddRange(b));
-                Assert.Equal("[a, b, c, d]", a.ToStringV2(x => "" + x));
+                Assert.Equal("[a, b, c, d]", a.ToStringV2(x => x));
                 Assert.False(a.AddRange(b));
-                Assert.Equal("[a, b, c, d]", a.ToStringV2(x => "" + x));
+                Assert.Equal("[a, b, c, d]", a.ToStringV2(x => x));
             }
         }
 

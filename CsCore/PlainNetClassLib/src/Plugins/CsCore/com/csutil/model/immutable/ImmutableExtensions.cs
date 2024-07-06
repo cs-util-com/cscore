@@ -187,8 +187,9 @@ namespace com.csutil.model.immutable {
             }
             return dict;
         }
-        
+
         public static ImmutableDictionary<T, V> MutateEntry<T, V>(this ImmutableDictionary<T, V> dict, T key, object action, StateReducer<V> reducer) {
+            AssertV3.IsTrue(dict.ContainsKey(key), () => "Could not find key in dictionary to apply action=" + action);
             var elem = dict[key];
             var newValue = reducer(elem, action);
             if (StateCompare.WasModified(elem, newValue)) { dict = dict.SetItem(key, newValue); }

@@ -21,7 +21,7 @@ namespace com.csutil.testing {
                 var allTestsTasks = new List<Task>();
                 foreach (var testToRun in self) {
                     try {
-                        var testTask = testToRun.RunTest().WithTimeout(30000);
+                        var testTask = testToRun.RunTest().WithTimeout(90000);
                         allTestsTasks.Add(testTask);
                         await testTask;
                     } catch (Exception) { } // All task errors will be thrown below together 

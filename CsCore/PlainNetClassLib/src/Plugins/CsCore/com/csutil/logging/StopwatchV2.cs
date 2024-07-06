@@ -13,7 +13,7 @@ namespace com.csutil {
         public string methodName;
         public Action onDispose;
         private long lastLogStep = 0;
-        
+
         public bool doMemoryLogging = false;
         public bool forceFullMemoryCollection = ShouldCaptureFullMemory();
 
@@ -72,23 +72,26 @@ namespace com.csutil {
         }
 
         private long GetCurrentProcessPrivateMemorySize64() {
-            
+
             // WebGL does not support PrivateMemorySize64:
             if (EnvironmentV2.isWebGL) { return 0; }
-            
+
             // In latest Unity versions PrivateMemorySize64 seems to not work anymore for Android, so disabled:
             if (EnvironmentV2.isAndroid && !EnvironmentV2.isUnityEditor) { return 0; }
-            
+
             try {
                 using (var p = Process.GetCurrentProcess()) { return p.PrivateMemorySize64; }
             } catch (Exception e) {
                 Log.e("GetCurrentProcessPrivateMemorySize64 failed: " + e, e);
                 return 0;
             }
-            
+
         }
 
-        public string GetAllocatedMemBetweenStartAndStop() {
+        public string GetAllocatedMemBetweenStartAndStop(bool returnEmtpyStringIfZero = false) {
+            if (returnEmtpyStringIfZero && allocatedManagedMemBetweenStartAndStop == 0 && allocatedMemBetweenStartAndStop == 0) {
+                return "";
+            }
             return "allocated managed mem: " + ByteSizeToString.ByteSizeToReadableString(allocatedManagedMemBetweenStartAndStop)
                 + ", allocated mem: " + ByteSizeToString.ByteSizeToReadableString(allocatedMemBetweenStartAndStop);
         }

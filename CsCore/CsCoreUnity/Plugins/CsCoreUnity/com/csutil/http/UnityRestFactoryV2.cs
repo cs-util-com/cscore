@@ -26,12 +26,12 @@ namespace com.csutil.http {
             if (ApplicationV2.platform.IsAnyOf(RuntimePlatform.WebGLPlayer) && ApplicationV2.isPlaying) {
                 return await GetCurrentPingViaHeadRequest(ipOrUrl, timeoutInMs);
             }
-#if !UNITY_WEBGL
+#if !UNITY_WEBGL || UNITY_EDITOR
             var ping = await GetCurrentPingViaUnityPing(ipOrUrl, timeoutInMs);
             if (ping > 0) { return ping; }
             // Try fallback to head request if Unity.Ping did not work:
-            ping = await GetCurrentPingViaHeadRequest(ipOrUrl, timeoutInMs);
-            if (ping > 0) { return ping; }
+            var ping2 = await GetCurrentPingViaHeadRequest(ipOrUrl, timeoutInMs);
+            if (ping2 > 0) { return ping2; }
 #endif
             // If Unity.Ping did not work, eg because a URL was used instead of an IP fallback to default ping approach:
             try {
@@ -50,7 +50,7 @@ namespace com.csutil.http {
             return timer.ElapsedMilliseconds;
         }
 
-#if !UNITY_WEBGL
+#if !UNITY_WEBGL || UNITY_EDITOR
         private static Task<long> GetCurrentPingViaUnityPing(string ip, int timeoutInMs = DEFAULT_PING_TIMEOUT) {
             if (!ApplicationV2.isPlaying) { return GetCurrentPingViaUnityPingInMainThread(ip, timeoutInMs); }
             return MainThread.Invoke<long>(() => GetCurrentPingViaUnityPingInMainThread(ip, timeoutInMs));

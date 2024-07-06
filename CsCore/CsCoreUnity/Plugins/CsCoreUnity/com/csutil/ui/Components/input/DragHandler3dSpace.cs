@@ -1,4 +1,5 @@
 using System.Linq;
+using com.csutil.math;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -15,6 +16,8 @@ namespace com.csutil.ui {
         private float _distanceAtDragStart;
         private Quaternion _relativeRotation;
         private PointerEventData _latestPointerEventData;
+
+        private FixedSizedQueue<Vector3> positionDeltaHistory = new FixedSizedQueue<Vector3>(3);
 
         private void Start() {
             AssertCamWithPhysicsRaycasterFoundInScene();
@@ -46,14 +49,26 @@ namespace com.csutil.ui {
 
         public void OnDrag(PointerEventData e) {
             _latestPointerEventData = e;
-            if (e.pointerCurrentRaycast.worldPosition == Vector3.zero) { return; }
-            var newWorldPos = e.pointerCurrentRaycast.worldPosition + _localDragStartOffsetOnRt;
             if (keepDistanceToCam) {
-                var camPos = e.pressEventCamera.transform.position;
-                var direction = (newWorldPos - camPos).normalized;
-                targetToDrag.position = camPos + direction * _distanceAtDragStart;
+                if (e.pointerCurrentRaycast.worldPosition == Vector3.zero) { return; }
+                var direction2d = e.pointerCurrentRaycast.screenPosition;
+                var newPosition = e.pressEventCamera.ScreenToWorldPoint(new Vector3(direction2d.x, direction2d.y, _distanceAtDragStart));
+                newPosition += _localDragStartOffsetOnRt;
+                var newDelta = newPosition - targetToDrag.position;
+                positionDeltaHistory.Enqueue(newDelta);
+                var mean = positionDeltaHistory.CalcMean(x => x.sqrMagnitude);
+                if (newDelta.sqrMagnitude < mean * 2) {
+                    targetToDrag.position = newPosition;
+                }
             } else {
-                targetToDrag.position = newWorldPos;
+                if (e.pointerCurrentRaycast.worldPosition == Vector3.zero) { return; }
+                var newWorldPos = e.pointerCurrentRaycast.worldPosition + _localDragStartOffsetOnRt;
+                var newDelta = newWorldPos - targetToDrag.position;
+                positionDeltaHistory.Enqueue(newDelta);
+                var mean = positionDeltaHistory.CalcMean(x => x.sqrMagnitude);
+                if (newDelta.sqrMagnitude < mean * 2) {
+                    targetToDrag.position = newWorldPos;
+                }
             }
             if (keepRelativeRotation) {
                 targetToDrag.rotation = e.pressEventCamera.transform.rotation * _relativeRotation;

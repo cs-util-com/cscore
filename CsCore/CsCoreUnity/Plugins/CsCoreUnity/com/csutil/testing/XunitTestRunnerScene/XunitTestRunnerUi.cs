@@ -6,28 +6,34 @@ using System.Linq;
 using ReuseScroller;
 using System.Reflection;
 using System;
+using System.Threading.Tasks;
+using com.csutil.keyvaluestore;
 using com.csutil.progress;
+using Newtonsoft.Json;
 
 namespace com.csutil.testing {
 
     public class XunitTestRunnerUi : BaseController<XunitTestRunner.Test> {
 
-        private const int timeoutInMs = 30000;
+        private const int timeoutInMs = 90000;
 
         public bool autoRunAllTests = false;
         public List<string> anyTypeInTargetAssembly = new List<string>() {
             "e.g. MyNamespace.MyClass1, MyAssembly1",
             "com.csutil.tests.MathTests, CsCoreXUnitTests"
         };
-        private List<XunitTestRunner.Test> allTests;
+        private IEnumerable<XunitTestRunner.Test> allTests;
         private ProgressManager pm;
+        private IKeyValueStore _historyStore;
 
         protected override void Start() {
             base.Start();
 
+            _historyStore = PlayerPrefsStore.NewPreferencesUsingPlayerPrefs();
+            AssertHistoryStoreHasPersistedData().LogOnError();
+
             var assembliesToTest = anyTypeInTargetAssembly.Map(typeString => {
-                try { return Type.GetType(typeString).Assembly; }
-                catch (Exception) {
+                try { return Type.GetType(typeString).Assembly; } catch (Exception) {
                     Log.e("Please check the XunitTestRunnerUi.anyTypeInTargetAssembly " +
                         "list in your scene UI, it if's configured correctly. Could " +
                         "not find type for string '" + typeString + "'", gameObject);
@@ -43,13 +49,19 @@ namespace com.csutil.testing {
             // On the parent canvas level collect all links:
             var links = GetComponentInParent<Canvas>().gameObject.GetLinkMap();
             var autoRunToggle = links.Get<Toggle>("AutoRunToggle");
+            var hidePassedTestsToggle = GetHidePassedTestsToggle(links);
+
             autoRunToggle.isOn = autoRunAllTests;
             autoRunToggle.SetOnValueChangedAction(isChecked => {
                 autoRunAllTests = isChecked;
                 return true;
             });
-            links.Get<Button>("StartButton").SetOnClickAction((_) => {
-                CollectTests(assembliesToTest, links);
+            hidePassedTestsToggle.SetOnValueChangedAction(isChecked => {
+                UpdateSearchFilter(links);
+                return true;
+            });
+            links.Get<Button>("StartButton").SetOnClickAction(async (_) => {
+                await CollectTests(assembliesToTest, links);
                 UpdateSearchFilter(links);
             });
             links.Get<InputField>("SearchInput").SetOnValueChangedActionThrottled((_) => {
@@ -57,14 +69,25 @@ namespace com.csutil.testing {
             }, 200);
         }
 
-        private void UpdateSearchFilter(Dictionary<string, Link> links) {
-            var newSearchText = links.Get<InputField>("SearchInput").text;
-            newSearchText = newSearchText.ToLowerInvariant();
-            if (allTests.IsNullOrEmpty()) { return; }
-            CellData = allTests.Filter(t => t.name.ToLowerInvariant().Contains(newSearchText)).ToList();
+        private async Task AssertHistoryStoreHasPersistedData() {
+            var testLKey = await _historyStore.Get<string>("TestKey", null);
+            if (testLKey != "TestValue") {
+                Debug.LogError($"Warning: No history data found in history store, this only makes sense if you are running the tests for the very first time");
+                await _historyStore.Set("TestKey", "TestValue");
+            }
         }
 
-        private void CollectTests(IEnumerable<Assembly> assembliesToTest, Dictionary<string, Link> links) {
+        private static Toggle GetHidePassedTestsToggle(Dictionary<string, Link> links) { return links.Get<Toggle>("HidePassedTestsToggle"); }
+
+        private void UpdateSearchFilter(Dictionary<string, Link> links) {
+            var newSearchText = links.Get<InputField>("SearchInput").text;
+            var hidePassedTests = GetHidePassedTestsToggle(links).isOn;
+            newSearchText = newSearchText.ToLowerInvariant();
+            if (allTests.IsNullOrEmpty()) { return; }
+            CellData = allTests.Filter(t => t.name.ToLowerInvariant().Contains(newSearchText) && (!hidePassedTests || !t.IsCompletedSuccessfull())).ToList();
+        }
+
+        private async Task CollectTests(IEnumerable<Assembly> assembliesToTest, Dictionary<string, Link> links) {
             var allClasses = assembliesToTest.SelectMany(assembly => {
                 if (assembly == null) { return new Type[0]; } // return emtpy list
                 return assembly.GetExportedTypes();
@@ -72,19 +95,55 @@ namespace com.csutil.testing {
             allTests = XunitTestRunner.CollectAllTests(allClasses, (test) => {
                 // callback before a test is executed
             });
-            AssertV3.AreNotEqual(0, allTests.Count);
+            allTests = await SortByLastTestExecutionDuration(allTests);
+            AssertV3.AreNotEqual(0, allTests.Count());
             StartCoroutine(ShowAllFoundTests(allTests));
             if (autoRunAllTests) {
-                links.Get<Text>("ButtonText").text = "Now running " + allTests.Count + " tests..";
+                links.Get<Text>("ButtonText").text = "Now running " + allTests.Count() + " tests..";
             } else {
-                links.Get<Text>("ButtonText").text = "Found " + allTests.Count + " tests (click one to run it)";
+                links.Get<Text>("ButtonText").text = "Found " + allTests.Count() + " tests (click one to run it)";
             }
         }
 
-        private IEnumerator ShowAllFoundTests(List<XunitTestRunner.Test> allTests) {
-            this.CellData = allTests;
+        private async Task<IOrderedEnumerable<XunitTestRunner.Test>> SortByLastTestExecutionDuration(IEnumerable<XunitTestRunner.Test> tests) {
+            var histories = await tests.MapAsync(GetTestHistoryFor);
+            var historyDict = histories.Filter(x => x != null).ToDictionary(x => x.Name, x => x);
+            IOrderedEnumerable<XunitTestRunner.Test> result = tests.OrderBy(t => {
+                if (historyDict.TryGetValue(t.name, out var entry)) {
+                    if (!entry.IsCompletedSuccessfully) { return TestHistory.durationIfFailed; } // failed tests to the front
+                    return entry.TestExecutionDurationInMs; // successful tests by duration (faster tests first)
+                }
+                return TestHistory.durationIfNeverRun; // tests that never where executed right after failed tests
+            });
+            return result;
+        }
+
+        private class TestHistory {
+
+            /// <summary> failed tests to the front </summary>
+            public const long durationIfFailed = -2;
+            /// <summary> tests that never where executed right after failed tests </summary>
+            public const long durationIfNeverRun = -1;
+            /// <summary> Will be moved to the very end of the test execution to run as many tests as possible with each run </summary>
+            public const long durationIfStartedButNeverFinished = long.MaxValue;
+
+            public readonly string Name;
+            public readonly long TestExecutionDurationInMs;
+            public readonly bool IsCompletedSuccessfully;
+
+            [JsonConstructor]
+            public TestHistory(string name, long testExecutionDurationInMs, bool isCompletedSuccessfully) {
+                Name = name;
+                TestExecutionDurationInMs = testExecutionDurationInMs;
+                IsCompletedSuccessfully = isCompletedSuccessfully;
+            }
+
+        }
+
+        private IEnumerator ShowAllFoundTests(IEnumerable<XunitTestRunner.Test> allTests) {
+            this.SetListData(allTests);
             if (autoRunAllTests) {
-                using (var progress = pm.GetOrAddProgress("RunAllTests", allTests.Count, true)) {
+                using (var progress = pm.GetOrAddProgress("RunAllTests", allTests.Count(), true)) {
                     foreach (var test in allTests) {
                         progress.IncrementCount();
                         yield return RunTestCoroutine(test);
@@ -97,12 +156,30 @@ namespace com.csutil.testing {
         public void RunTest(XunitTestRunner.Test test) { StartCoroutine(RunTestCoroutine(test)); }
 
         private IEnumerator RunTestCoroutine(XunitTestRunner.Test test) {
+            yield return UpdateTestHistory(test, TestHistory.durationIfStartedButNeverFinished).AsCoroutine();
+            var timing = StopwatchV2.StartNewV2();
             test.StartTest();
             ReloadData();
             yield return new WaitForEndOfFrame();
             yield return test.testTask.AsCoroutine((e) => { Log.e(e); }, timeoutInMs);
+            timing.Stop();
+            yield return UpdateTestHistory(test, timing.ElapsedMilliseconds).AsCoroutine();
             ReloadData();
             yield return new WaitForEndOfFrame();
+        }
+
+        private const string PREFIX = "XUnityTest_";
+
+        private Task<TestHistory> GetTestHistoryFor(XunitTestRunner.Test test) {
+            return _historyStore.Get<TestHistory>(PREFIX + test.name, null);
+        }
+
+        private async Task UpdateTestHistory(XunitTestRunner.Test test, long timing) {
+            var testHistory = new TestHistory(test.name, timing, test.IsCompletedSuccessfull());
+            await _historyStore.Set(PREFIX + test.name, testHistory);
+            // Assert that it was stored:
+            var history = await GetTestHistoryFor(test);
+            AssertV3.IsNotNull(history, "history");
         }
 
     }

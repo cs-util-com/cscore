@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -138,6 +137,7 @@ namespace com.csutil.logging {
                 UpdateFilter(NewFilter());
                 return true;
             });
+            UpdateFilter(NewFilter());
         }
 
         private void InitMap() {
@@ -151,9 +151,9 @@ namespace com.csutil.logging {
 
         public void ShowConsole(bool isConsoleVisible) {
             gameObject.SetActiveV2(isConsoleVisible);
+            var menuButtons = map.Get<GameObject>("MenuButtons");
+            menuButtons.SetActiveV2(isConsoleVisible);
             InitMap();
-            map.Get<CanvasGroup>("MenuButtons").interactable = isConsoleVisible;
-            map.Get<CanvasGroup>("MenuButtons").blocksRaycasts = isConsoleVisible;
         }
 
         public void ClearConsole() {

@@ -29,6 +29,9 @@ namespace com.csutil.ui {
         }
 
         private static Task Show(string caption, string message, string confirmText, string dialogPrefabName) {
+            if (!ApplicationV2.isPlaying) {
+                throw new System.NotSupportedException("Showing dialogs are only supported in play mode");
+            }
             var dialog = new Dialog(caption, message, confirmText);
             var dialogLoader = new DialogLoader<Dialog>(dialog);
             var rootCanvas = RootCanvas.GetOrAddRootCanvasV2().gameObject;

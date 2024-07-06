@@ -15,6 +15,7 @@ namespace ThisOtherThing.UI.Shapes
             set
             {
                 ShapeProperties.FillColor = value;
+				base.color = value;
                 ForceMeshUpdate();
             }
         }

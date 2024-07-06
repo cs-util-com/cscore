@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Numerics;
 
 namespace com.csutil.gps {
@@ -61,11 +62,27 @@ namespace com.csutil.gps {
         public static void CalcRelativeCoordsInMeters(this IHasLatLong zeroPoint, IHasLatLong inputPoint, double[] resultCoordsInMeters) {
             CalcRelativeCoordsInMeters(zeroPoint, inputPoint.Latitude, inputPoint.Longitude, resultCoordsInMeters);
         }
-        
+
         public static double DistanceInMeters(this IHasLatLong self, IHasLatLong otherGpsCoords) {
             double[] res = new double[2];
             self.CalcRelativeCoordsInMeters(otherGpsCoords, res);
             return Math.Sqrt(res[0] * res[0] + res[1] * res[1]);
+        }
+
+        public static string GetGoogleMapsLink(this IHasLatLong self) {
+            var lat = self.Latitude.ToString(CultureInfo.InvariantCulture);
+            var lng = self.Longitude.ToString(CultureInfo.InvariantCulture);
+            // See https://developers.google.com/maps/documentation/urls/get-started#forming-the-url
+            return $"https://www.google.com/maps/search/?api=1&query={lat}%2C{lng}";
+        }
+
+        public static string GetGoogleMapsLink(this IHasLatLong destination, IHasLatLong startPos) {
+            var startLat = startPos.Latitude.ToString(CultureInfo.InvariantCulture);
+            var startLng = startPos.Longitude.ToString(CultureInfo.InvariantCulture);
+            var destinationLat = destination.Latitude.ToString(CultureInfo.InvariantCulture);
+            var destinationLng = destination.Longitude.ToString(CultureInfo.InvariantCulture);
+            // See https://developers.google.com/maps/documentation/urls/get-started#directions-action
+            return $"https://www.google.com/maps/dir/?api=1&origin={startLat}%2C{startLng}&destination={destinationLat}%2C{destinationLng}";
         }
 
     }

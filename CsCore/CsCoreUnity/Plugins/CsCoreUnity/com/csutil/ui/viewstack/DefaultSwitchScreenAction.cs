@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using Xunit;
 
 namespace com.csutil.ui.viewstack {
 
@@ -9,20 +10,28 @@ namespace com.csutil.ui.viewstack {
         public enum SwitchDirection { backwards, forwards, loadNextScreenViaPrefab, backwardsOrForwards }
 
         public SwitchDirection switchDirection = SwitchDirection.backwards;
+
         /// <summary> A reference to a prefab, that is then instanciated on runtime and shown as the next view </summary>
         public GameObject nextScreenPrefab;
+
         /// <summary> e.g. "uis/MyScreenPrefab1" - The path of the prefab that should be loaded as the next view </summary>
         public string nextScreenPrefabName;
+
         /// <summary> If true the action will be added even if there are already other click listeners registered for the button </summary>
         public bool forceAddingAction = false;
+
         /// <summary> If true and the final view in the stack is reached then the stack will be destroyed </summary>
         public bool destroyViewStackWhenLastScreenReached = false;
-        /// <summary> If false the current active view will not be hidden and the new one shown on top </summary>
+
+        /// <summary> If false the current active view will not be hidden and the new one shown on top.
+        /// Not applicable if <see cref="SwitchDirection.backwards"/> is used </summary>
         public bool hideCurrentView = true;
+
         /// <summary> If true the current view on the stack will be set to inactive instead of destroying it </summary>
         public bool hideNotDestroyCurrentViewWhenGoingBackwards = false;
 
         private void Start() {
+            AssertV3.IsNull(GetComponent<ViewStack>(), "DefaultSwitchScreenAction.GetComponent<ViewStack>");
             var b = gameObject.GetComponentV2<Button>();
             if (b == null) { throw Log.e("No button found, cant setup automatic switch trigger", gameObject); }
             if (b.onClick.GetPersistentEventCount() == 0 || forceAddingAction) {
@@ -70,6 +79,7 @@ namespace com.csutil.ui.viewstack {
         private bool GoForwards() { return gameObject.GetViewStack().SwitchToNextView(gameObject, hideCurrentView); }
 
         private bool GoBackwards() {
+            AssertV3.IsFalse(gameObject.GetViewStack().gameObject == gameObject, () => "The back button logic should not be in the same GameObject as the view stack itself");
             return gameObject.GetViewStack().SwitchBackToLastView(gameObject, destroyViewStackWhenLastScreenReached, hideNotDestroyCurrentViewWhenGoingBackwards, destroyViewStackWhenLastScreenReached);
         }
 
