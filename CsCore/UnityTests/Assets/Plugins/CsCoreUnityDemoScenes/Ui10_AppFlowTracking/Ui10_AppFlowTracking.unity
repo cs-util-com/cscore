@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
+  m_IndirectSpecularColor: {r: 0.44402242, g: 0.49316543, b: 0.5722324, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -67,9 +67,6 @@ LightmapSettings:
     m_LightmapParameters: {fileID: 0}
     m_LightmapsBakeMode: 1
     m_TextureCompression: 1
-    m_FinalGather: 0
-    m_FinalGatherFiltering: 1
-    m_FinalGatherRayCount: 256
     m_ReflectionCompression: 2
     m_MixedBakeMode: 2
     m_BakeBackend: 1
@@ -104,7 +101,7 @@ NavMeshSettings:
   serializedVersion: 2
   m_ObjectHideFlags: 0
   m_BuildSettings:
-    serializedVersion: 2
+    serializedVersion: 3
     agentTypeID: 0
     agentRadius: 0.5
     agentHeight: 2
@@ -117,7 +114,7 @@ NavMeshSettings:
     cellSize: 0.16666667
     manualTileSize: 0
     tileSize: 256
-    accuratePlacement: 0
+    buildHeightMesh: 0
     maxJobWorkers: 0
     preserveTilesOutsideBounds: 0
     debug:
@@ -327,6 +324,7 @@ MonoBehaviour:
     colorValue: {r: 1, g: 1, b: 1, a: 1}
   - colorName: buttonContrastWeak
     colorValue: {r: 0.8666667, g: 0.8666667, b: 0.8666667, a: 1}
+  doAutomaticRuntimeColorUpdates: 0
 --- !u!1 &524211135
 GameObject:
   m_ObjectHideFlags: 0
@@ -417,6 +415,7 @@ Canvas:
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
+  m_VertexColorAlwaysGammaSpace: 0
   m_AdditionalShaderChannelsFlag: 0
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
@@ -473,6 +472,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f231c4fb786f3946a6b90b886c48677, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_SendPointerHoverToParent: 1
   m_HorizontalAxis: Horizontal
   m_VerticalAxis: Vertical
   m_SubmitButton: Submit
@@ -674,7 +674,7 @@ LightingSettings:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Settings.lighting
-  serializedVersion: 5
+  serializedVersion: 7
   m_GIWorkflowMode: 1
   m_EnableBakedLightmaps: 1
   m_EnableRealtimeLightmaps: 1
@@ -685,6 +685,7 @@ LightingSettings:
   m_UsingShadowmask: 1
   m_BakeBackend: 1
   m_LightmapMaxSize: 1024
+  m_LightmapSizeFixed: 0
   m_BakeResolution: 40
   m_Padding: 2
   m_LightmapCompression: 3
@@ -702,9 +703,6 @@ LightingSettings:
   m_RealtimeResolution: 2
   m_ForceWhiteAlbedo: 0
   m_ForceUpdates: 0
-  m_FinalGather: 0
-  m_FinalGatherRayCount: 256
-  m_FinalGatherFiltering: 1
   m_PVRCulling: 1
   m_PVRSampling: 1
   m_PVRDirectSampleCount: 32
@@ -729,7 +727,7 @@ LightingSettings:
   m_PVRFilteringAtrousPositionSigmaIndirect: 2
   m_PVRFilteringAtrousPositionSigmaAO: 1
   m_PVRTiledBaking: 0
-  m_NumRaysToShootPerTexel: -1
+  m_RespectSceneVisibilityWhenBakingGI: 0
 --- !u!224 &1856941227 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 8936524265433788257, guid: dd589601377b8c94c9c5ffc2d155e8a0,
@@ -776,9 +774,17 @@ Camera:
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
+  m_Iso: 200
+  m_ShutterSpeed: 0.005
+  m_Aperture: 16
+  m_FocusDistance: 10
+  m_FocalLength: 50
+  m_BladeCount: 5
+  m_Curvature: {x: 2, y: 11}
+  m_BarrelClipping: 0.25
+  m_Anamorphism: 0
   m_SensorSize: {x: 36, y: 24}
   m_LensShift: {x: 0, y: 0}
-  m_FocalLength: 50
   m_NormalizedViewPortRect:
     serializedVersion: 2
     x: 0
@@ -825,7 +831,7 @@ PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
-    serializedVersion: 2
+    serializedVersion: 3
     m_TransformParent: {fileID: 764135632}
     m_Modifications:
     - target: {fileID: 823705729239622281, guid: 249b9553dbaafad4a9b746515bdff0e3,
@@ -931,27 +937,27 @@ PrefabInstance:
     - target: {fileID: 8316939608145673427, guid: 249b9553dbaafad4a9b746515bdff0e3,
         type: 3}
       propertyPath: m_SizeDelta.x
-      value: 261.29608
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8316939608145673427, guid: 249b9553dbaafad4a9b746515bdff0e3,
         type: 3}
       propertyPath: m_SizeDelta.y
-      value: 148.57043
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8316939608145673427, guid: 249b9553dbaafad4a9b746515bdff0e3,
         type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.7527946
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8316939608145673427, guid: 249b9553dbaafad4a9b746515bdff0e3,
         type: 3}
       propertyPath: m_LocalScale.y
-      value: 0.7527946
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8316939608145673427, guid: 249b9553dbaafad4a9b746515bdff0e3,
         type: 3}
       propertyPath: m_LocalScale.z
-      value: 0.7527946
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8316939608145673427, guid: 249b9553dbaafad4a9b746515bdff0e3,
         type: 3}
@@ -1044,14 +1050,16 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
+    m_RemovedGameObjects: []
     m_AddedGameObjects: []
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 249b9553dbaafad4a9b746515bdff0e3, type: 3}
 --- !u!1001 &8936524265729573834
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
-    serializedVersion: 2
+    serializedVersion: 3
     m_TransformParent: {fileID: 764135632}
     m_Modifications:
     - target: {fileID: 338747990550162294, guid: dd589601377b8c94c9c5ffc2d155e8a0,
@@ -1088,6 +1096,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_AnchoredPosition.y
       value: -24
+      objectReference: {fileID: 0}
+    - target: {fileID: 1082395723048171731, guid: dd589601377b8c94c9c5ffc2d155e8a0,
+        type: 3}
+      propertyPath: id
+      value: Caption
       objectReference: {fileID: 0}
     - target: {fileID: 4275828016363214139, guid: dd589601377b8c94c9c5ffc2d155e8a0,
         type: 3}
@@ -1197,27 +1210,27 @@ PrefabInstance:
     - target: {fileID: 8936524265433788257, guid: dd589601377b8c94c9c5ffc2d155e8a0,
         type: 3}
       propertyPath: m_SizeDelta.x
-      value: 261.29608
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8936524265433788257, guid: dd589601377b8c94c9c5ffc2d155e8a0,
         type: 3}
       propertyPath: m_SizeDelta.y
-      value: 148.57043
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8936524265433788257, guid: dd589601377b8c94c9c5ffc2d155e8a0,
         type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.7527946
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8936524265433788257, guid: dd589601377b8c94c9c5ffc2d155e8a0,
         type: 3}
       propertyPath: m_LocalScale.y
-      value: 0.7527946
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8936524265433788257, guid: dd589601377b8c94c9c5ffc2d155e8a0,
         type: 3}
       propertyPath: m_LocalScale.z
-      value: 0.7527946
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8936524265433788257, guid: dd589601377b8c94c9c5ffc2d155e8a0,
         type: 3}
@@ -1280,5 +1293,7 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
+    m_RemovedGameObjects: []
     m_AddedGameObjects: []
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: dd589601377b8c94c9c5ffc2d155e8a0, type: 3}
