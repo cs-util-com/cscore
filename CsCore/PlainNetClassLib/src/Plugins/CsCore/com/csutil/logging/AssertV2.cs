@@ -154,8 +154,8 @@ namespace com.csutil {
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         public static void AreEqualJson(object a, object b, params object[] args) {
             if (ReferenceEquals(a, b)) { throw new ArgumentException("Both references pointed to the same object"); }
-            var jsonDiff = MergeJson.GetDiff(a, b);
-            Assert(jsonDiff == null, "Difference found:\n" + jsonDiff?.ToPrettyString(), args);
+            var jsonDiff = MergeJson.GetDiffV2(a, b);
+            Assert(MergeJson.HasNoDifferences(jsonDiff), "Difference found:\n" + jsonDiff?.ToPrettyString(), args);
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
