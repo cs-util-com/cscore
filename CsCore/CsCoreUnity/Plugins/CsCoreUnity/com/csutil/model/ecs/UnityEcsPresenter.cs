@@ -48,11 +48,16 @@ namespace com.csutil.model.ecs {
 
         private void OnEntityUpdated(IEntity<T> iEntity, EntityComponentSystem<T>.UpdateType type, T oldstate, T newstate) {
             AssertV3.IsTrue(iEntity.IsAlive(), () => "Entity is not alive");
+            var originalStackTrace = StackTraceV2.NewStackTrace();
             MainThread.Invoke(() => {
                 // If the entity is no longer alive after the main thread switch, ignore the update (except for remove events):
                 var isUpdateInMainThreadStillPossible = iEntity.IsAlive() || type == EntityComponentSystem<T>.UpdateType.Remove;
                 if (isUpdateInMainThreadStillPossible) {
-                    HandleEntityUpdate(iEntity, type, oldstate, newstate);
+                    try {
+                        HandleEntityUpdate(iEntity, type, oldstate, newstate);
+                    } catch (Exception e) {
+                        throw e.WithAddedOriginalStackTrace(originalStackTrace);
+                    }
                 }
             });
         }
