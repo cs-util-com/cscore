@@ -71,7 +71,7 @@ namespace com.csutil.model.ecs {
                     RemoveGoFor(iEntity, oldstate);
                     break;
                 case EntityComponentSystem<T>.UpdateType.Update:
-                case EntityComponentSystem<T>.UpdateType.TemplateUpdate:    
+                case EntityComponentSystem<T>.UpdateType.TemplateUpdate:
                     UpdateGoFor(iEntity, oldstate, newstate, type);
                     break;
                 default: throw new ArgumentOutOfRangeException(nameof(type), type, null);
@@ -182,21 +182,25 @@ namespace com.csutil.model.ecs {
         protected virtual void OnComponentRemoved(IEntity<T> iEntity, string deleted, GameObject targetParentGo) {
             var allPresenters = GetComponentPresenters(iEntity);
             if (allPresenters.Any(x => x.ComponentId == deleted)) {
-                GetComponentPresenter(iEntity, deleted).DisposeV2();
+                if (TryGetComponentPresenter(iEntity, deleted, out var compPresenter)) {
+                    compPresenter.DisposeV2();
+                }
             } else {
                 Log.d($"No component found for the deleted entity component with id={deleted} in entity={iEntity}. "
                     + $"allPresenters={allPresenters.ToStringV2(x => "\n" + x)}", targetParentGo);
             }
         }
 
-        private IComponentPresenter<T> GetComponentPresenter(IEntity<T> iEntity, string componentId) {
+        private bool TryGetComponentPresenter(IEntity<T> iEntity, string componentId, out IComponentPresenter<T> componentPresenter) {
             try {
                 var componentPresenters = GetComponentPresenters(iEntity);
-                return componentPresenters.Single(x => x.ComponentId == componentId);
+                componentPresenter = componentPresenters.SingleOrDefault(x => x.ComponentId == componentId);
+                return componentPresenter != null;
             } catch (Exception e) {
                 var entityView = _entityViews[iEntity.Id];
                 Log.e($"Failed to find exactly 1 component with id={componentId} in entity={iEntity}", e, entityView);
-                throw;
+                componentPresenter = null;
+                return false;
             }
         }
 
@@ -205,11 +209,12 @@ namespace com.csutil.model.ecs {
         }
 
         protected virtual void OnComponentUpdated(IEntity<T> iEntity, IComponentData oldState, KeyValuePair<string, IComponentData> updatedState, GameObject targetParentGo) {
-            var compView = GetComponentPresenter(iEntity, updatedState.Key);
-            if (compView is Behaviour mono) {
-                mono.enabled = updatedState.Value.IsActive;
+            if (TryGetComponentPresenter(iEntity, updatedState.Key, out var compView)) {
+                if (compView is Behaviour mono) {
+                    mono.enabled = updatedState.Value.IsActive;
+                }
+                compView.OnUpdateUnityComponent(iEntity, oldState, updatedState.Value);
             }
-            compView.OnUpdateUnityComponent(iEntity, oldState, updatedState.Value);
         }
 
     }
