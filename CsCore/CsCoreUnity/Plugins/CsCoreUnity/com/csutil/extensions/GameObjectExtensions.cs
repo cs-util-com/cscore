@@ -43,10 +43,27 @@ namespace com.csutil {
 
         public static int GetChildCount(this GameObject self) { return self.transform.childCount; }
 
-        /// <summary> Unity returns a comp that pretents to be null so return actual null </summary>
-        public static T GetComponentV2<T>(this GameObject self) {
+        /// <summary> Unity returns a comp that pretends to be null so return actual null </summary>
+        public static T GetComponentV2<T>(this GameObject self, bool throwExceptionIfNull = false) {
             var existingComp = self.GetComponent<T>();
-            return IsComponentNull(existingComp) ? default : existingComp;
+            if (!IsComponentNull(existingComp)) {
+                return existingComp;
+            }
+            if (throwExceptionIfNull) {
+                throw Log.e($"Component of type {typeof(T)} not found on GameObject {self}", self);
+            }
+            return default;
+        }
+        
+        public static T GetComponentInChildrenV2<T>(this GameObject self, bool includeInactive = false, bool throwExceptionIfNull = false) {
+            var existingComp = self.GetComponentInChildren<T>(includeInactive);
+            if (!IsComponentNull(existingComp)) {
+                return existingComp;
+            }
+            if (throwExceptionIfNull) {
+                throw Log.e($"Component of type {typeof(T)} not found on GameObject {self}", self);
+            }
+            return default;
         }
 
         private static bool IsComponentNull(object existingComp) {
@@ -78,7 +95,7 @@ namespace com.csutil {
             existingComp = self.GetComponentV2<T>();
             return existingComp != null;
         }
-        
+
         public static bool HasComponent<T>(this Component self, out T existingComp) {
             existingComp = self.GetComponentV2<T>();
             return existingComp != null;
@@ -167,7 +184,7 @@ namespace com.csutil {
         public static void UnregisterOnDestroy<T>(this GameObject self, object injector) {
             UnregisterOnDestroy(self, injector, typeof(T));
         }
-        
+
         public static void UnregisterOnDestroy(this GameObject self, object injector, Type type) {
             self.AddComponent<OnDestroyMono>().onDestroy.AddListenerV2(() => {
                 IoC.inject.UnregisterInjector(injector, type);

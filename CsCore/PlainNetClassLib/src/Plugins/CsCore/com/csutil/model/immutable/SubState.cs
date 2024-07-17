@@ -17,6 +17,10 @@ namespace com.csutil.model.immutable {
             }
         }
 
+        public override string ToString() {
+            return $"SubState<{typeof(T).Name}, {typeof(S).Name}>";
+        }
+
         /// <summary> If someone subscribes to the substate but the substate itself is not yet subscribed to
         /// any parent substate or the store itself, then register the substate with the store </summary>
         private void RegisterInStoreIfNeeded(Action value) {
@@ -57,7 +61,7 @@ namespace com.csutil.model.immutable {
             if (triggerInstantToInit) { onChanged(GetState()); }
             return newListener;
         }
-        
+
         public void RemoveStateChangeListener(Action onChanged) {
             onStateChanged -= onChanged;
         }

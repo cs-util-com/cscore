@@ -183,7 +183,12 @@ namespace com.csutil.model.ecs {
             var allPresenters = GetComponentPresenters(iEntity);
             if (allPresenters.Any(x => x.ComponentId == deleted)) {
                 if (TryGetComponentPresenter(iEntity, deleted, out var compPresenter)) {
-                    compPresenter.DisposeV2();
+                    if (compPresenter is IEcsComponentDestroyHandler handler && !handler.OnDestroyRequest()) {
+                        // Do not dispose the comp presenter, since the handle logic should already have handled the
+                        // remove request (e.g. by disposing the presenter or just resetting it)
+                    } else {
+                        compPresenter.DisposeV2();
+                    }
                 }
             } else {
                 Log.d($"No component found for the deleted entity component with id={deleted} in entity={iEntity}. "
