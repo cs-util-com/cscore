@@ -128,6 +128,11 @@ namespace com.csutil {
         public static void AreNotEqual(double expected, double actual, string varName = "", params object[] args) {
             Assert(!Equals(expected, actual), () => $"Assert.AreNotEqual() FAILED: expected number {varName}= {expected} IS equal to actual {varName}= {actual}", args);
         }
+        
+        [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
+        public static void AreNotEqual(float expected, float actual, string varName = "", params object[] args) {
+            Assert(!Equals(expected, actual), () => $"Assert.AreNotEqual() FAILED: expected number {varName}= {expected} IS equal to actual {varName}= {actual}", args);
+        }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         public static void AreNotEqual(long expected, long actual, string varName = "", params object[] args) {
