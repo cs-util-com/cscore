@@ -62,7 +62,7 @@ namespace com.csutil {
         }
 
         private static void SubscribeToStateChanges<T, S, Sub>(UnityEngine.Object ui, SubState<T, S> sub, Func<S, Sub> getSubState, Action<Sub> updateUi) {
-            sub.GetSubStateForUnity(ui, getSubState, updateUi);
+            sub.GetSubStateForUnity(ui, getSubState, updateUi, ignoreUpdatesWhileInactiveOrDisabled: false);
         }
         
         public static SubState<T, Sub> GetSubStateForUnity<T, Sub>(this IDataStore<T> store, UnityEngine.Object context, Func<T, Sub> getSubState, Action<Sub> onChanged, bool eventsAlwaysInMainThread = true, bool triggerInstantToInit = true) {
@@ -86,7 +86,7 @@ namespace com.csutil {
         }
 
         public static SubState<T, SubSub> GetSubStateForUnity<T, Sub, SubSub>(this SubState<T, Sub> parentSubState, UnityEngine.Object context, Func<Sub, SubSub> getSubState,
-            Action<SubSub> onChanged, bool eventsAlwaysInMainThread = true, bool triggerInstantToInit = true) {
+            Action<SubSub> onChanged, bool eventsAlwaysInMainThread = true, bool triggerInstantToInit = true, bool ignoreUpdatesWhileInactiveOrDisabled = true) {
             {
                 if (context.IsNullOrDestroyed()) {
                     throw new ArgumentNullException("The Unity context object must not be null!");
@@ -102,13 +102,27 @@ namespace com.csutil {
                 subState.RemoveFromParent = () => { parentSubState.onStateChanged -= ownListenerInParent; };
                 subState.AddStateChangeListener((newSubSub) => {
                     if (eventsAlwaysInMainThread) {
-                        MainThread.Invoke(() => { onChanged(newSubSub); });
+                        MainThread.Invoke(() => {
+                            if (IsUnityElementActive(context) || !ignoreUpdatesWhileInactiveOrDisabled) {
+                                onChanged(newSubSub);
+                            }
+                        });
                     } else {
-                        onChanged(newSubSub);
+                        if (IsUnityElementActive(context) || !ignoreUpdatesWhileInactiveOrDisabled) {
+                            onChanged(newSubSub);
+                        }
                     }
                 }, triggerInstantToInit);
                 return subState;
             }
+        }
+
+        private static bool IsUnityElementActive(UnityEngine.Object context) {
+            AssertV3.IsFalse(context.IsNullOrDestroyed(), () => "The Unity context object was null or destroyed");
+            if (context is Behaviour b) { return b.isActiveAndEnabled; }
+            if (context is GameObject go) { return go.activeInHierarchy; }
+            Log.e($"The context object is not a GameObject or Behaviour: {context} (type={context.GetType()})", context);
+            return false;
         }
 
         private static void OnSubstateChangedForUnity<T, S>(SubState<T, S> subState, S newVal, UnityEngine.Object context) {
