@@ -249,6 +249,24 @@ namespace com.csutil.tests.model.esc {
                 Assert_AlmostEqual(new Vector3(0, 2, 0), e2.GlobalPose().position);
             }
 
+            {
+                // Test the GetConcatinatedChildrenPositionsChain method to return an
+                // almost unique string (usable e.g. for seeding) for each entity:
+                var e5_2 = e4.AddChild(new Entity() {
+                    LocalPose = Pose3d.NewMatrix(new Vector3(0, -1, 0), 0, 0.5f)
+                });
+                var e5Number = e5.GetAlmostUniqueNumberForEntity();
+                Assert.NotEqual(e5Number, e5_2.GetAlmostUniqueNumberForEntity());
+                // The same number is returned if there were no changes to the ECS in between: 
+                Assert.Equal(e5Number, e5.GetAlmostUniqueNumberForEntity()); 
+
+                // The entities on the root level also have different values:
+                var e1_2 = ecs.Add(new Entity() {
+                    LocalPose = Pose3d.NewMatrix(new Vector3(0, 1, 0))
+                });
+                Assert.NotEqual(e1.GetAlmostUniqueNumberForEntity(), e1_2.GetAlmostUniqueNumberForEntity());
+            }
+
         }
 
         [Fact]

@@ -214,6 +214,15 @@ namespace com.csutil.model.ecs {
             return self.GlobalPoseMatrix().ToPose();
         }
 
+        /// <summary> This method returns a number that is unique if no changes are made to the ecs in between multiple calls to this method.
+        /// If two entities request their number at the same time without moving/removing/adding any entities in between these
+        /// two ids cant result in the same string.
+        /// This returned number is not guaranteed to stay the same when the ECS is modified </summary>
+        public static int GetAlmostUniqueNumberForEntity<T>(this IEntity<T> self) where T : IEntityData {
+            var id = self.Id;
+            return self.Ecs.Entities.IndexOf(x => x.Key == id);
+        }
+
         public static Pose3d ToPose(this Matrix4x4? matrix) {
             if (matrix == null) { return null; }
             return matrix.Value.ToPose();
