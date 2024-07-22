@@ -14,7 +14,7 @@ namespace com.csutil.tests.AlgorithmTests.images {
 
             var folder = EnvironmentV2.instance.GetOrAddTempFolder("TestFloodFillVsColorCheckAlgo");
             var imgFile = folder.GetChild("0_inputImage.jpg");
-            var image = await MyImageFileRef.DownloadFileIfNeeded(imgFile, "https://raw.githubusercontent.com/cs-util-com/cscore/update/release_1_10_prep/CsCore/assets/16999.jpg");
+            var image = await MyImageFileRef.DownloadFileIfNeeded(imgFile, "https://raw.githubusercontent.com/cs-util-com/cscore/master/CsCore/assets/16999.jpg");
 
             var width = image.Width;
             var height = image.Height;
@@ -46,7 +46,7 @@ namespace com.csutil.tests.AlgorithmTests.images {
 
             var folder = EnvironmentV2.instance.GetOrAddTempFolder("TestTrimapGeneration");
             var imgFile = folder.GetChild("0_inputImage.jpg");
-            var image = await MyImageFileRef.DownloadFileIfNeeded(imgFile, "https://raw.githubusercontent.com/cs-util-com/cscore/update/release_1_10_prep/CsCore/assets/16999.jpg");
+            var image = await MyImageFileRef.DownloadFileIfNeeded(imgFile, "https://raw.githubusercontent.com/cs-util-com/cscore/master/CsCore/assets/16999.jpg");
 
             var width = image.Width;
             var height = image.Height;
