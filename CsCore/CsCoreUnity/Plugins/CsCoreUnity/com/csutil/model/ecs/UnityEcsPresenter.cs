@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -121,15 +122,17 @@ namespace com.csutil.model.ecs {
             if (oldState.Name != "" + newState) {
                 go.name = "" + iEntity;
             }
+            var newLocalPose3d = newState.LocalPose.ToPose();
+            AssertV3.IsNotNull(newLocalPose3d, "newLocalPose3d");
             if (oldState.ParentId != newState.ParentId) {
                 if (newState.ParentId != null) {
-                    OnChangeParent(newState, go, iEntity.LocalPose());
+                    OnChangeParent(newState, go, newLocalPose3d);
                 } else {
-                    OnDetachFromParent(go, iEntity.LocalPose());
+                    OnDetachFromParent(go, newLocalPose3d);
                 }
             }
             if (oldState.LocalPose != newState.LocalPose) {
-                OnPoseUpdate(iEntity, go, iEntity.LocalPose());
+                OnPoseUpdate(iEntity, go, newLocalPose3d);
             }
             var newIsActiveState = newState.IsActiveSelf();
             if (oldState.IsActiveSelf() != newIsActiveState) {

@@ -1,12 +1,41 @@
-﻿using UnityEngine;
+﻿using System.Diagnostics;
+using UnityEngine;
 
 namespace com.csutil.model.ecs {
-    
+
     public static class PoseExtensionsForUnity {
 
-        public static void ApplyTo(this Pose3d self, Transform goTransform) {
-            goTransform.SetLocalPositionAndRotation(self.position.ToUnityVec(), self.rotation.ToUnityRot());
-            goTransform.localScale = self.scale.ToUnityVec();
+        public static void ApplyTo(this Pose3d pose3d, Transform goTransform) {
+            AssertV3.IsNotNull(pose3d, "pose3d");
+            goTransform.localScale = pose3d.scale.ToUnityVec();
+            goTransform.SetLocalPositionAndRotation(pose3d.position.ToUnityVec(), pose3d.rotation.ToUnityRot());
+            AssertAfterPoseUpdatePresenterAndModelInSync(pose3d, goTransform);
+        }
+
+        [Conditional("DEBUG")]
+        private static void AssertAfterPoseUpdatePresenterAndModelInSync(Pose3d newLocalPose3d, Transform goTransform) {
+            if (!Equals(goTransform.localPosition, newLocalPose3d.position.ToUnityVec())) {
+                var goTransformPose3d = goTransform.ToLocalPose3d();
+                Log.e($"After Unity presenter update local Unity pos is not same as entity local pos: "
+                    + $"\n newPose3d={newLocalPose3d} "
+                    + $"\n transform={goTransformPose3d}", goTransform.gameObject);
+            }
+        }
+
+        public static Pose3d ToLocalPose3d(this Transform self) {
+            return new Pose3d(ToNumericsVec(self.localPosition), ToNumericsRot(self.localRotation), ToNumericsVec(self.localScale));
+        }
+
+        public static Pose3d ToGlobalPose3d(this Transform self) {
+            return new Pose3d(ToNumericsVec(self.position), ToNumericsRot(self.rotation), ToNumericsVec(self.lossyScale));
+        }
+
+        public static System.Numerics.Vector3 ToNumericsVec(this Vector3 self) {
+            return new System.Numerics.Vector3(self.x, self.y, self.z);
+        }
+
+        public static System.Numerics.Quaternion ToNumericsRot(this Quaternion self) {
+            return new System.Numerics.Quaternion(self.x, self.y, self.z, self.w);
         }
 
         public static Quaternion ToUnityRot(this System.Numerics.Quaternion self) {

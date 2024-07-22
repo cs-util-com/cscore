@@ -224,7 +224,7 @@ namespace com.csutil.model.ecs {
         }
 
         public static Pose3d ToPose(this Matrix4x4? matrix) {
-            if (matrix == null) { return null; }
+            if (matrix == null) { return Pose3d.Identity; }
             return matrix.Value.ToPose();
         }
 
@@ -242,9 +242,7 @@ namespace com.csutil.model.ecs {
 
         public static Pose3d LocalPose<T>(this IEntity<T> self) where T : IEntityData {
             self.ThrowErrorIfDisposed();
-            var localPose = self.LocalPose;
-            if (!localPose.HasValue) { return Matrix4x4.Identity.ToPose(); }
-            return localPose.Value.ToPose();
+            return self.LocalPose.ToPose();
         }
 
         public static Task SaveChanges<T>(this IEntity<T> self) where T : IEntityData {
