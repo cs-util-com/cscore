@@ -197,12 +197,12 @@ namespace com.csutil.model.ecs {
             if (parent == null) { return globalPose; }
             return parent.ToLocalPose(globalPose);
         }
-        
+
         public static Matrix4x4 ToLocalPose<T>(this IEntity<T> self, Matrix4x4 globalPose) where T : IEntityData {
             self.ThrowErrorIfDisposed();
             return self.GlobalPoseMatrix().Inverse() * globalPose;
         }
-        
+
         // ToGlobalPose (which takes an IEntity in and a local pose in that entities space and calculates the global pose)
         public static Matrix4x4 ToGlobalPose<T>(this IEntity<T> self, Matrix4x4 localPose) where T : IEntityData {
             self.ThrowErrorIfDisposed();
@@ -320,6 +320,15 @@ namespace com.csutil.model.ecs {
             return self.IsActive && self.CollectAllParents().Map(id => self.Ecs.GetEntity(id)).All(x => x.IsActive);
         }
 
+        public static string ToExtendedEntityString(this IEntityData self) {
+            var result = self.ToString();
+            result += ", " + self.LocalPose.ToPose();
+            result += ", Parent=<<" + self.ParentId + ">>";
+            result += ", Children=[[" + self.ChildrenIds.ToStringV2() + "]]";
+            result += ", Components={{" + self.Components.ToStringV2(x => "" + x.Value) + "}}";
+            return result;
+        }
+
     }
 
     public static class EcsExtensions {
@@ -346,11 +355,11 @@ namespace com.csutil.model.ecs {
         public static IReadOnlyList<string> CollectAllParents<T>(this IEntity<T> entity) where T : IEntityData {
             return CollectAllParents(entity, new List<string>());
         }
-        
+
         public static IReadOnlyList<IEntity<T>> CollectAllParentEntities<T>(this IEntity<T> entity) where T : IEntityData {
             return entity.CollectAllParents().Map(x => entity.Ecs.GetEntity(x)).ToImmutableList();
         }
-        
+
         public static string GetFullEcsPathString<T>(this IEntity<T> iEntity) where T : IEntityData {
             var fromRootToEntity = iEntity.CollectAllParentEntities().Reverse().AddViaUnion(iEntity);
             return "[ Root -> " + fromRootToEntity.ToStringV2(x => "" + x, bracket1: "", separator: " -> ", bracket2: "") + "]";

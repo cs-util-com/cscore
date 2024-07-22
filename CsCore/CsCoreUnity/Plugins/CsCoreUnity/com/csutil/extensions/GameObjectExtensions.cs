@@ -41,6 +41,12 @@ namespace com.csutil {
         public static IEnumerable<GameObject> GetChildrenIEnumerable(this GameObject self) { return self.transform.Cast<Transform>().Map(x => x.gameObject); }
         public static List<GameObject> GetChildren(this GameObject self) { return self.GetChildrenIEnumerable().ToList(); }
 
+        public static IEnumerable<GameObject> GetBreadthFirstChildrenTree(this GameObject self, bool includeInactive = true) {
+            var childTree = TreeFlattenTraverse.BreadthFirst(self, c => c.GetChildrenIEnumerable());
+            if (!includeInactive) { return childTree.Where(c => c.activeInHierarchy); }
+            return childTree;
+        }
+        
         public static int GetChildCount(this GameObject self) { return self.transform.childCount; }
 
         /// <summary> Unity returns a comp that pretends to be null so return actual null </summary>

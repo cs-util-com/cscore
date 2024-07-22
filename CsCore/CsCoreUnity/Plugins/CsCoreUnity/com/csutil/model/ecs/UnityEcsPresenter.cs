@@ -82,6 +82,8 @@ namespace com.csutil.model.ecs {
         private void CreateGoFor(IEntity<T> iEntity) {
             if (_entityViews.ContainsKey(iEntity.Id)) { return; }
             GameObject go = NewGameObjectFor(iEntity);
+            AssertV3.IsNull(go.GetComponent<EntityView>(), "go.GetComponent<EntityView>()");
+            go.AddComponent<EntityView>().Init(iEntity);
             _entityViews.Add(iEntity.Id, go);
             go.name = "" + iEntity;
             if (iEntity.ParentId != null) {
@@ -212,8 +214,8 @@ namespace com.csutil.model.ecs {
             }
         }
 
-        private IComponentPresenter<T>[] GetComponentPresenters(IEntity<T> iEntity) {
-            return _entityViews[iEntity.Id].GetComponentsInChildren<IComponentPresenter<T>>(true);
+        private IEnumerable<IComponentPresenter<T>> GetComponentPresenters(IEntity<T> iEntity) {
+            return _entityViews[iEntity.Id].GetComponentsInOwnEcsPresenterChildren<IComponentPresenter<T>>(iEntity, includeInactive: true);
         }
 
         protected virtual void OnComponentUpdated(IEntity<T> iEntity, IComponentData oldState, KeyValuePair<string, IComponentData> updatedState, GameObject targetParentGo) {
