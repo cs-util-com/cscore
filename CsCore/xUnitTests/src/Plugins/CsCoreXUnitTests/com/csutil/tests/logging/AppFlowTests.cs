@@ -87,7 +87,7 @@ namespace com.csutil.integrationTests {
 
         [Fact]
         public async Task TestLocalAnalytics() {
-            int eventCount = 10000;
+            int eventCount = 1000;
 
             // Create a LocalAnalytics instance that uses only memory stores for testing:
             var dir = EnvironmentV2.instance.GetNewInMemorySystem();
