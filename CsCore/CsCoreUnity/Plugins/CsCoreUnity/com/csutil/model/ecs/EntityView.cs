@@ -14,6 +14,15 @@ namespace com.csutil.model.ecs {
             this.IEntity = iEntity;
         }
 
+#if UNITY_EDITOR
+        public string debugJsonIEntity;
+
+        // In editor update the debugJsonIEntity when the gameobject is selected:
+        private void OnValidate() {
+            if (IEntity != null) { debugJsonIEntity = IEntity.ToExtendedEntityString(); }
+        }
+#endif
+
     }
 
 }
