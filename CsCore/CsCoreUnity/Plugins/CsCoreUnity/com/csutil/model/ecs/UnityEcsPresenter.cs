@@ -169,7 +169,7 @@ namespace com.csutil.model.ecs {
         protected virtual void OnComponentAdded(IEntity<T> iEntity, KeyValuePair<string, IComponentData> added, GameObject targetParentGo) {
             var createdComponent = AddComponentTo(targetParentGo, added.Value, iEntity);
             if (createdComponent == null) {
-                Log.d($"AddComponentTo returned NULL for component={added.Value} and targetParentGo={targetParentGo}", targetParentGo);
+                //Log.d($"AddComponentTo returned NULL for component={added.Value} and targetParentGo={targetParentGo}", targetParentGo);
             } else {
                 createdComponent.ComponentId = added.Value.GetId();
                 if (createdComponent is Behaviour mono) {
