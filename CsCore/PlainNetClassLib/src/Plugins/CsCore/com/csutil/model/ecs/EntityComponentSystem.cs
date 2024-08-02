@@ -60,6 +60,7 @@ namespace com.csutil.model.ecs {
 
         public IReadOnlyDictionary<string, IEntity<T>> Entities => _entities;
         public IReadOnlyCollection<string> TemplateIds => _variants.Keys;
+        public IEnumerable<IEntity<T>> Templates => TemplateIds.Map(GetEntity);
 
         /// <summary> If set to true the T class used in IEntity<T> must be immutable in all fields </summary>
         public readonly bool IsModelImmutable;

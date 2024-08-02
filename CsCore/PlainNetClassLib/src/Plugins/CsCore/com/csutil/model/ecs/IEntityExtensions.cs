@@ -315,6 +315,10 @@ namespace com.csutil.model.ecs {
             return self.IsActive;
         }
 
+        public static bool IsAliveAndActiveInHierarchy<T>(this IEntity<T> self) where T : IEntityData {
+            return self.IsAlive() && self.IsActiveInHierarchy();
+        }
+        
         public static bool IsActiveInHierarchy<T>(this IEntity<T> self) where T : IEntityData {
             self.ThrowErrorIfDisposed();
             return self.IsActive && self.CollectAllParents().Map(id => self.Ecs.GetEntity(id)).All(x => x.IsActive);
