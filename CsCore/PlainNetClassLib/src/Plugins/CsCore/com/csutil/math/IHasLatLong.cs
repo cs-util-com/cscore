@@ -62,6 +62,12 @@ namespace com.csutil.gps {
         public static void CalcRelativeCoordsInMeters(this IHasLatLong zeroPoint, IHasLatLong inputPoint, double[] resultCoordsInMeters) {
             CalcRelativeCoordsInMeters(zeroPoint, inputPoint.Latitude, inputPoint.Longitude, resultCoordsInMeters);
         }
+        
+        public static double[] CalcRelativeCoordsInMeters(this IHasLatLong zeroPoint, IHasLatLong inputPoint) {
+            double[] res = new double[2];
+            CalcRelativeCoordsInMeters(zeroPoint, inputPoint, res);
+            return res;
+        }
 
         public static double DistanceInMeters(this IHasLatLong self, IHasLatLong otherGpsCoords) {
             double[] res = new double[2];
