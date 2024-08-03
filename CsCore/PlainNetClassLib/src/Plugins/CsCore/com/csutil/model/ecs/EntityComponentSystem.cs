@@ -21,6 +21,7 @@ namespace com.csutil.model.ecs {
                 Ecs = ecs;
             }
 
+            public Action<IEntity<T>> OnCreate { get; set; }
             public Action<T, IEntity<T>, UpdateType> OnUpdate { get; set; }
 
             public string Id => Data.Id;
@@ -65,13 +66,10 @@ namespace com.csutil.model.ecs {
         /// <summary> If set to true the T class used in IEntity<T> must be immutable in all fields </summary>
         public readonly bool IsModelImmutable;
 
-        /// <summary> Triggered when the entity is directly or indirectly changed (e.g. when a template entity is changed).
-        /// Will path the IEntity wrapper, the old and the new data </summary>
+        /// <summary> Triggered when the entity is created, removed or directly/indirectly changed (e.g. when a template entity is changed).
+        /// Will pass the IEntity wrapper, the old and the new data </summary>
         public event IEntityUpdateListener OnIEntityUpdated;
 
-        /// <summary>
-        /// 
-        /// </summary>
         public delegate void IEntityUpdateListener(IEntity<T> iEntity, UpdateType updateType, T oldState, T newState);
 
         public enum UpdateType {
@@ -120,6 +118,14 @@ namespace com.csutil.model.ecs {
             _entities[entityId] = entity;
             UpdateVariantsLookup(entity.Data);
             OnIEntityUpdated?.Invoke(entity, UpdateType.Add, oldEntityData, entity.Data);
+            entity.OnCreate?.Invoke(entity);
+            if (entity.Components != null) {
+                foreach (var comp in entity.Components.Values) {
+                    if (comp is IAddedToEntityListener<T> l) {
+                        l.OnAddedToEntity(entity);
+                    }
+                }
+            }
             return entity;
         }
 

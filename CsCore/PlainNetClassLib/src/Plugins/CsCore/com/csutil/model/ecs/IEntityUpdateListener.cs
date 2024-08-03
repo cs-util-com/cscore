@@ -9,4 +9,10 @@ namespace com.csutil.model.ecs {
 
     }
     
+    public interface IAddedToEntityListener<T> where T : IEntityData {
+
+        void OnAddedToEntity(IEntity<T> entity);
+
+    }
+    
 }
