@@ -295,9 +295,9 @@ namespace com.csutil.model.ecs {
         }
 
         public static bool TryGetComponentInParents<T, V>(this IEntity<T> self, out V foundComp, out IEntity<T> parent) where T : IEntityData where V : IComponentData {
-            foreach (var parentId in self.CollectAllParents()) {
-                parent = self.Ecs.GetEntity(parentId);
-                if (parent.TryGetComponent(out foundComp)) {
+            foreach (var parentEntity in self.CollectAllParentsV2()) {
+                if (parentEntity.TryGetComponent(out foundComp)) {
+                    parent = parentEntity;
                     return true;
                 }
             }
@@ -318,10 +318,15 @@ namespace com.csutil.model.ecs {
         public static bool IsAliveAndActiveInHierarchy<T>(this IEntity<T> self) where T : IEntityData {
             return self.IsAlive() && self.IsActiveInHierarchy();
         }
-        
+
         public static bool IsActiveInHierarchy<T>(this IEntity<T> self) where T : IEntityData {
             self.ThrowErrorIfDisposed();
-            return self.IsActive && self.CollectAllParents().Map(id => self.Ecs.GetEntity(id)).All(x => x.IsActive);
+            try {
+                return self.IsActive && self.CollectAllParentsV2().All(x => x.IsActive);
+            } catch (Exception e) {
+                Log.e($"Failed to check IsActiveInHierarchy for {self} \n{e}", e);
+                return false;
+            }
         }
 
         public static string ToExtendedEntityString(this IEntityData self) {
@@ -356,12 +361,8 @@ namespace com.csutil.model.ecs {
             return true;
         }
 
-        public static IReadOnlyList<string> CollectAllParents<T>(this IEntity<T> entity) where T : IEntityData {
-            return CollectAllParents(entity, new List<string>());
-        }
-
         public static IReadOnlyList<IEntity<T>> CollectAllParentEntities<T>(this IEntity<T> entity) where T : IEntityData {
-            return entity.CollectAllParents().Map(x => entity.Ecs.GetEntity(x)).ToImmutableList();
+            return entity.CollectAllParentsV2().ToImmutableList();
         }
 
         public static string GetFullEcsPathString<T>(this IEntity<T> iEntity) where T : IEntityData {
@@ -369,10 +370,29 @@ namespace com.csutil.model.ecs {
             return "[ Root -> " + fromRootToEntity.ToStringV2(x => "" + x, bracket1: "", separator: " -> ", bracket2: "") + "]";
         }
 
+        [Obsolete("Use CollectAllParentsV2 instead")]
+        public static IReadOnlyList<string> CollectAllParents<T>(this IEntity<T> entity) where T : IEntityData {
+            return CollectAllParents(entity, new List<string>());
+        }
+
+        [Obsolete("Use CollectAllParentsV2 instead")]
         private static IReadOnlyList<string> CollectAllParents<T>(IEntity<T> entity, List<string> parentsLookup) where T : IEntityData {
             if (entity.ParentId != null) {
                 parentsLookup.Add(entity.ParentId);
                 CollectAllParents(entity.GetParent(), parentsLookup);
+            }
+            return parentsLookup;
+        }
+
+        public static IReadOnlyList<IEntity<T>> CollectAllParentsV2<T>(this IEntity<T> entity) where T : IEntityData {
+            if (entity.ParentId == null) { return new List<IEntity<T>>(); }
+            return CollectAllParentsV2(entity.GetParent(), new List<IEntity<T>>());
+        }
+
+        private static IReadOnlyList<IEntity<T>> CollectAllParentsV2<T>(IEntity<T> parent, List<IEntity<T>> parentsLookup) where T : IEntityData {
+            parentsLookup.Add(parent);
+            if (parent.ParentId != null) {
+                CollectAllParentsV2(parent.GetParent(), parentsLookup);
             }
             return parentsLookup;
         }
