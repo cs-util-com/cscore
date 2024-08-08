@@ -133,12 +133,10 @@ namespace com.csutil.integrationTests.http {
                     yesNoAnswer = true,
                     explanation = "The sky is blue because of the way the atmosphere interacts with sunlight."
                 };
-                messages.AddUserLineWithJsonResultStructureV2("Can dogs look up?", yesNoResponseFormat);
+                messages.AddUserLine("Can dogs look up?");
 
                 // Send the messages to the AI and get the response:
-                var schemaName = yesNoResponseFormat.GetType().Name;
-                var jsonSchema = ChatGptExtensions.CreateJsonSchema(yesNoResponseFormat);
-                var response = await openAi.ChatGpt(NewGpt4StrictJsonRequestWithFullConversation(messages, schemaName, jsonSchema));
+                var response = await openAi.ChatGpt(NewGpt4StrictJsonRequestWithFullConversation(messages, yesNoResponseFormat));
                 ChatGpt.Line newLine = response.choices.Single().message;
                 messages.Add(newLine);
 
@@ -413,10 +411,18 @@ namespace com.csutil.integrationTests.http {
             return request;
         }
 
-        private static ChatGpt.Request NewGpt4StrictJsonRequestWithFullConversation(List<ChatGpt.Line> conversationSoFar, string schemaName, JsonSchema jsonSchema) {
+        private static ChatGpt.Request NewGpt4StrictJsonRequestWithFullConversation<T>(List<ChatGpt.Line> conversationSoFar, T exampleResponse) {
+            // TODO currently this would be added for every request again, so potentially many redundant times in the conversation:
+            conversationSoFar.AddValidExampleSchemaResponses(exampleResponse);
+            
             var request = new ChatGpt.Request(conversationSoFar);
-            // Use json as the response format:
+            
+            // Use json schema as the response format:
+            var schemaName = exampleResponse.GetType().Name;
+            var jsonSchema = ChatGptExtensions.CreateJsonSchema(exampleResponse);
             request.response_format = ChatGpt.Request.ResponseFormat.NewJsonSchema(schemaName, jsonSchema);
+            
+            // TODO around 2024-09-13 this preview version here will become the detault, so afterwards this can be changed to "gpt-4o" 
             request.model = "gpt-4o-2024-08-06"; // See https://platform.openai.com/docs/models/gpt-4o
             return request;
         }

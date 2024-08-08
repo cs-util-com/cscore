@@ -354,8 +354,11 @@ namespace com.csutil.http.apis {
     }
     public static class ChatGptExtensions {
 
-        public static void AddUserLineWithJsonResultStructureV2<T>(this ICollection<ChatGpt.Line> self, string userMessage, params T[] exampleResponses) {
+        public static void AddUserLine(this ICollection<ChatGpt.Line> self, string userMessage) {
             self.Add(new ChatGpt.Line(ChatGpt.Role.user, content: userMessage));
+        }
+
+        public static void AddValidExampleSchemaResponses<T>(this ICollection<ChatGpt.Line> self, params T[] exampleResponses) {
             self.Add(new ChatGpt.Line(ChatGpt.Role.system, content: GetSchemaExamplesString(exampleResponses)));
         }
 
