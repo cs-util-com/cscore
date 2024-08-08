@@ -241,11 +241,14 @@ namespace com.csutil.http.apis {
             public readonly string role;
             public readonly string content;
 
+            /// <summary> https://platform.openai.com/docs/guides/structured-outputs/refusals </summary>
+            public readonly string refusal;
 
             [JsonConstructor]
-            public Line(string role, string content) {
+            public Line(string role, string content, string refusal) {
                 this.role = role;
                 this.content = content;
+                this.refusal = refusal;
             }
 
             public Line(Role role, string content) {
@@ -284,6 +287,14 @@ namespace com.csutil.http.apis {
                 /// <summary> See https://platform.openai.com/docs/guides/text-generation/json-mode </summary>
                 public static ResponseFormat json = new ResponseFormat() { type = "json_object" };
                 public string type { get; set; }
+
+                /// <summary> https://platform.openai.com/docs/guides/structured-outputs/how-to-use?context=without_parse </summary>
+                public bool strict { get; set; } = false;
+
+                /// <summary> The json schema of the response, see
+                /// https://platform.openai.com/docs/guides/structured-outputs/how-to-use?context=without_parse
+                /// </summary>
+                public string json_schema { get; set; }
             }
 
         }
@@ -312,6 +323,7 @@ namespace com.csutil.http.apis {
         }
 
     }
+
     public class VisionGpt {
 
         /// <summary>
@@ -323,20 +335,26 @@ namespace com.csutil.http.apis {
 
             public readonly string role;
             public readonly object content;
+            /// <summary> https://platform.openai.com/docs/guides/structured-outputs/refusals </summary>
+            public readonly string refusal;
 
             public Line(string role, List<Dictionary<string, object>> content) {
                 this.role = role;
                 this.content = content;
             }
+
             public Line(ChatGpt.Role role, List<Dictionary<string, object>> content) {
                 this.role = role.ToString();
                 this.content = content;
             }
+
             [JsonConstructor]
-            public Line(string role, string content) {
+            public Line(string role, string content, string refusal) {
                 this.role = role;
                 this.content = content;
+                this.refusal = refusal;
             }
+
             public Line(ChatGpt.Role role, string content) {
                 this.role = role.ToString();
                 this.content = content;
@@ -467,11 +485,7 @@ namespace com.csutil.http.apis {
         }
         public static void AddUserLineWithJsonResultStructure<T>(this ICollection<VisionGpt.Line> self, string userMessage, T exampleResponse) {
             self.Add(new VisionGpt.Line(ChatGpt.Role.user, content: userMessage));
-            self.Add(new VisionGpt.Line(ChatGpt.Role.system, content: CreateJsonInstructions(exampleResponse)));
-        }
-
-        public static string CreateJsonInstructions<T>(T exampleResponse) {
-            return ChatGptExtensions.CreateJsonInstructions(exampleResponse);
+            self.Add(new VisionGpt.Line(ChatGpt.Role.system, content: ChatGptExtensions.CreateJsonInstructions(exampleResponse)));
         }
 
         public static T ParseNewLineContentAsJson<T>(this VisionGpt.Line newLine) {
