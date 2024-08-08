@@ -79,6 +79,8 @@ namespace com.csutil.model.jsonschema {
         /// https://json-schema.org/understanding-json-schema/reference/generic.html#enumerated-values </summary>
         [JsonProperty("enum")]
         public string[] contentEnum;
+        
+        public bool additionalProperties;
 
         public static string ToTitle(string varName) { return RegexUtil.SplitCamelCaseString(varName); }
 

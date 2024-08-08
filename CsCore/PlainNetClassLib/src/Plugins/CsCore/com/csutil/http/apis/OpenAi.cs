@@ -206,17 +206,41 @@ namespace com.csutil.http.apis {
             }
 
             public class ResponseFormat {
-                /// <summary> See https://platform.openai.com/docs/guides/text-generation/json-mode </summary>
-                public static ResponseFormat json = new ResponseFormat() { type = "json_object" };
-                public string type { get; set; }
 
-                /// <summary> https://platform.openai.com/docs/guides/structured-outputs/how-to-use?context=without_parse </summary>
-                public Nullable<bool> strict { get; set; } = null;
+                /// <summary> See https://platform.openai.com/docs/guides/text-generation/json-mode </summary>
+                [Obsolete("Use ResponseFormat.jsonSchema instead")]
+                public static ResponseFormat json => new ResponseFormat() { type = "json_object" };
+
+                /// <summary> See https://platform.openai.com/docs/guides/structured-outputs/how-to-use </summary>
+                public static ResponseFormat NewJsonSchema(string name, JsonSchema schema) => new ResponseFormat() {
+                    type = "json_schema",
+                    json_schema = new JsonSchemaResponse(name, schema, strict: true)
+                };
+
+                public string type { get; set; }
 
                 /// <summary> The json schema of the response, see
                 /// https://platform.openai.com/docs/guides/structured-outputs/how-to-use?context=without_parse
                 /// </summary>
-                public string json_schema { get; set; }
+                public JsonSchemaResponse json_schema { get; set; }
+
+                public class JsonSchemaResponse {
+
+                    public string name { get; set; }
+
+                    public JsonSchema schema { get; set; }
+
+                    /// <summary> https://platform.openai.com/docs/guides/structured-outputs/how-to-use?context=without_parse </summary>
+                    public bool strict { get; set; }
+
+                    public JsonSchemaResponse(string name, JsonSchema schema, bool strict) {
+                        this.name = name;
+                        this.schema = schema;
+                        this.strict = strict;
+                    }
+
+                }
+
             }
 
         }
@@ -330,27 +354,41 @@ namespace com.csutil.http.apis {
     }
     public static class ChatGptExtensions {
 
+        public static void AddUserLineWithJsonResultStructureV2<T>(this ICollection<ChatGpt.Line> self, string userMessage, params T[] exampleResponses) {
+            self.Add(new ChatGpt.Line(ChatGpt.Role.user, content: userMessage));
+            self.Add(new ChatGpt.Line(ChatGpt.Role.system, content: GetSchemaExamplesString(exampleResponses)));
+        }
+
+        [Obsolete("Use strict json schema mode instead of providing the schema as an input line")]
         public static void AddUserLineWithJsonResultStructure<T>(this ICollection<ChatGpt.Line> self, string userMessage, T exampleResponse) {
             self.Add(new ChatGpt.Line(ChatGpt.Role.user, content: userMessage));
             self.Add(new ChatGpt.Line(ChatGpt.Role.system, content: CreateJsonInstructions(exampleResponse)));
         }
 
+        [Obsolete("Use strict json schema mode instead of providing the schema as an input line", true)]
         public static string CreateJsonInstructions<T>(params T[] exampleResponses) {
             if (exampleResponses.IsNullOrEmpty()) throw new InvalidOperationException();
+            var exampleResponse = exampleResponses[0];
+            var jsonSchema = JsonWriter.GetWriter(exampleResponse).Write(CreateJsonSchema(exampleResponse));
+            var jsonSchemaInfos = " This is the json schema that describes the format you have to use for your json response: " + jsonSchema;
+            return jsonSchemaInfos + GetSchemaExamplesString(exampleResponses);
+        }
 
-            var schemaGenerator = new ModelToJsonSchema(nullValueHandling: Newtonsoft.Json.NullValueHandling.Ignore);
-            var className = typeof(T).Name;
-            JsonSchema schema = schemaGenerator.ToJsonSchema(className, exampleResponses[0]);
-            var schemaJson = JsonWriter.GetWriter(exampleResponses[0]).Write(schema);
-            var jsonSchemaInfos = " This is the json schema that describes the format you have to use for your json response: " + schemaJson;
-            var exampleJsonInfos = " And for that schema, these would be examples of a valid response:";
-
+        private static string GetSchemaExamplesString<T>(T[] exampleResponses) {
+            var exampleJsonInfos = " For the provided json schema, these would be examples of a valid response:";
             foreach (T exampleResponse in exampleResponses) {
                 var exampleJson = JsonWriter.GetWriter(exampleResponses).Write(exampleResponses);
                 exampleJsonInfos += " " + exampleJson;
             }
+            return exampleJsonInfos;
+        }
 
-            return jsonSchemaInfos + exampleJsonInfos;
+        public static JsonSchema CreateJsonSchema<T>(T exampleResponse) {
+            var schemaGenerator = new ModelToJsonSchema(nullValueHandling: NullValueHandling.Ignore);
+            var className = typeof(T).Name;
+            var jsonSchema = schemaGenerator.ToJsonSchema(className, exampleResponse);
+            jsonSchema.additionalProperties = false;
+            return jsonSchema;
         }
 
         public static T ParseNewLineContentAsJson<T>(this ChatGpt.Line newLine) {
@@ -405,6 +443,8 @@ namespace com.csutil.http.apis {
 
             self.Add(new VisionGpt.Line(ChatGpt.Role.user, content: content));
         }
+
+        [Obsolete("Use strict json schema mode instead of providing the schema as an input line")]
         public static void AddUserLineWithJsonResultStructure<T>(this ICollection<VisionGpt.Line> self, string userMessage, T exampleResponse) {
             self.Add(new VisionGpt.Line(ChatGpt.Role.user, content: userMessage));
             self.Add(new VisionGpt.Line(ChatGpt.Role.system, content: ChatGptExtensions.CreateJsonInstructions(exampleResponse)));

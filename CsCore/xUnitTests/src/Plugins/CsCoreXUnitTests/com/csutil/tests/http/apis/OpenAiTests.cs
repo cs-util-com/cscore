@@ -47,7 +47,7 @@ namespace com.csutil.integrationTests.http {
                 new ChatGpt.Line(ChatGpt.Role.user, content: "Why did the chicken cross the road?"),
             };
             var request = new ChatGpt.Request(messages);
-            request.model = "gpt-4o"; // See https://platform.openai.com/docs/models/gpt-4
+            request.model = "gpt-4o"; // See https://platform.openai.com/docs/models/gpt-4o
             var response = await openAi.ChatGpt(request);
             ChatGpt.Line newLine = response.choices.Single().message;
             Assert.Equal("" + ChatGpt.Role.assistant, newLine.role);
@@ -112,6 +112,49 @@ namespace com.csutil.integrationTests.http {
             }
             // Show the entire conversation to make it clear how the responses look as strings:
             Log.d("messages=" + JsonWriter.AsPrettyString(messages));
+        }
+
+        /// <summary>
+        /// See example at https://platform.openai.com/docs/guides/structured-outputs/how-to-use 
+        /// </summary>
+        [Fact]
+        public async Task ExampleUsage3_StrictJsonSchemaResponses() {
+
+            var openAi = new OpenAi(await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey"));
+            var messages = new List<ChatGpt.Line>();
+            messages.Add(new ChatGpt.Line(ChatGpt.Role.system, content: "You are a helpful assistant designed to output JSON."));
+
+            { // The user inputs a question but the response should be automatically parsable as a YesNoResponse:
+
+                // Create an example object so that the AI knows how the response json should look like for user inputs:
+                var yesNoResponseFormat = new YesNoResponse() {
+                    confidence = 100,
+                    inputQuestionInterpreted = "Is the sky blue?",
+                    yesNoAnswer = true,
+                    explanation = "The sky is blue because of the way the atmosphere interacts with sunlight."
+                };
+                messages.AddUserLineWithJsonResultStructureV2("Can dogs look up?", yesNoResponseFormat);
+
+                // Send the messages to the AI and get the response:
+                var schemaName = yesNoResponseFormat.GetType().Name;
+                var jsonSchema = ChatGptExtensions.CreateJsonSchema(yesNoResponseFormat);
+                var response = await openAi.ChatGpt(NewGpt4StrictJsonRequestWithFullConversation(messages, schemaName, jsonSchema));
+                ChatGpt.Line newLine = response.choices.Single().message;
+                messages.Add(newLine);
+
+                // Parse newLine.content as a YesNoResponse:
+                var yesNoResponse = newLine.ParseNewLineContentAsJson<YesNoResponse>();
+
+                // Dogs can look up, lets hope the AI knows that too:
+                Assert.True(yesNoResponse.yesNoAnswer);
+                // Since the input question is very short the interpretation will be the same string:
+                Assert.Contains("dog", yesNoResponse.inputQuestionInterpreted);
+                // The AI is very confident in its answer:
+                Assert.True(yesNoResponse.confidence > 50);
+                // The AI also explains why it gave the answer:
+                Assert.NotEmpty(yesNoResponse.explanation);
+
+            }
         }
 
         #if RUN_EXPENSIVE_TESTS
@@ -361,11 +404,20 @@ namespace com.csutil.integrationTests.http {
             return true;
         }
 
+        [Obsolete("Use NewGpt4StrictJsonRequestWithFullConversation instead")]
         private static ChatGpt.Request NewGpt4JsonRequestWithFullConversation(List<ChatGpt.Line> conversationSoFar) {
             var request = new ChatGpt.Request(conversationSoFar);
             // Use json as the response format:
             request.response_format = ChatGpt.Request.ResponseFormat.json;
-            request.model = "gpt-4o"; // See https://platform.openai.com/docs/models/gpt-4
+            request.model = "gpt-4o"; // See https://platform.openai.com/docs/models/gpt-4o
+            return request;
+        }
+
+        private static ChatGpt.Request NewGpt4StrictJsonRequestWithFullConversation(List<ChatGpt.Line> conversationSoFar, string schemaName, JsonSchema jsonSchema) {
+            var request = new ChatGpt.Request(conversationSoFar);
+            // Use json as the response format:
+            request.response_format = ChatGpt.Request.ResponseFormat.NewJsonSchema(schemaName, jsonSchema);
+            request.model = "gpt-4o-2024-08-06"; // See https://platform.openai.com/docs/models/gpt-4o
             return request;
         }
 
@@ -382,15 +434,19 @@ namespace com.csutil.integrationTests.http {
 
         public class YesNoResponse {
 
+            [Required]
             [Description("The confidence of the AI in the answer")]
             public int confidence { get; set; }
 
+            [Required]
             [Description("The summary of the input question that the AI used to give the answer")]
             public string inputQuestionInterpreted { get; set; }
 
+            [Required]
             [Description("The yes/no decision of the AI for the input question")]
             public bool yesNoAnswer { get; set; }
 
+            [Required]
             [Description("The explanation of the AI why it gave the answer")]
             public string explanation { get; set; }
 
