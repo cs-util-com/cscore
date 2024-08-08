@@ -365,7 +365,7 @@ namespace com.csutil.integrationTests.http {
             var request = new ChatGpt.Request(conversationSoFar);
             // Use json as the response format:
             request.response_format = ChatGpt.Request.ResponseFormat.json;
-            request.model = "gpt-4-1106-preview"; // See https://platform.openai.com/docs/models/gpt-4
+            request.model = "gpt-4o"; // See https://platform.openai.com/docs/models/gpt-4
             return request;
         }
 
