@@ -321,12 +321,7 @@ namespace com.csutil.model.ecs {
 
         public static bool IsActiveInHierarchy<T>(this IEntity<T> self) where T : IEntityData {
             self.ThrowErrorIfDisposed();
-            try {
-                return self.IsActive && self.CollectAllParentsV2().All(x => x.IsActive);
-            } catch (Exception e) {
-                Log.e($"Failed to check IsActiveInHierarchy for {self} \n{e}", e);
-                return false;
-            }
+            return self.IsActive && self.CollectAllParentsV2().All(x => x.IsActive);
         }
 
         public static string ToExtendedEntityString(this IEntityData self) {
