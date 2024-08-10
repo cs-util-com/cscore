@@ -140,6 +140,7 @@ namespace com.csutil.model.ecs {
             this.ThrowErrorIfDisposed();
             var templateId = entity.GetId();
             if (!IsSavedToFiles(templateId)) {
+                Debugger.Break();
                 throw new InvalidOperationException($"The passed entity {entity} first needs to be saved once before it can be used as a template");
             }
             JsonSerializer serializer = GetJsonSerializer();
