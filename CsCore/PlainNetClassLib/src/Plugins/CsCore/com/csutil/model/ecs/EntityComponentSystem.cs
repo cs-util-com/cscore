@@ -101,22 +101,30 @@ namespace com.csutil.model.ecs {
 
         protected virtual void OnDispose() { }
 
-        public IEntity<T> Add(T entityData) {
+        public IEntity<T> Add(T entityData, bool informEntityAddedListeners = true) {
             this.ThrowErrorIfDisposed();
             // First check if the entity already exists:
             if (_entities.TryGetValue(entityData.Id, out var existingEntity)) {
                 throw new InvalidOperationException("Entity already exists with id '" + entityData.Id + "' old=" + existingEntity.Data + " new=" + entityData);
             }
-            return AddEntity(new Entity(entityData, this));
+            return AddEntity(new Entity(entityData, this), informEntityAddedListeners);
         }
 
-        private IEntity<T> AddEntity(Entity entity) {
+        private IEntity<T> AddEntity(Entity entity, bool informEntityAddedListeners) {
             var entityId = entity.Id;
             entityId.ThrowErrorIfNullOrEmpty("entityData.Id");
             var hasOldEntity = _entities.TryGetValue(entityId, out var oldEntity);
             T oldEntityData = hasOldEntity ? oldEntity.Data : default;
             _entities[entityId] = entity;
             UpdateVariantsLookup(entity.Data);
+            if (informEntityAddedListeners) {
+                InformEntityAddedListeners(entity, oldEntityData);
+            }
+            return entity;
+        }
+
+        internal void InformEntityAddedListeners(IEntity<T> entity, T oldEntityData) {
+            AssertV3.IsNull(oldEntityData, "oldEntityData");
             OnIEntityUpdated?.Invoke(entity, UpdateType.Add, oldEntityData, entity.Data);
             entity.OnCreate?.Invoke(entity);
             if (entity.Components != null) {
@@ -126,7 +134,6 @@ namespace com.csutil.model.ecs {
                     }
                 }
             }
-            return entity;
         }
 
         private void UpdateVariantsLookup(T entity) {
@@ -267,9 +274,14 @@ namespace com.csutil.model.ecs {
             }
         }
 
-        public IEntity<T> CreateVariant(T entityData, IReadOnlyDictionary<string, string> newIdsLookup) {
+        /// <summary> Creates a variant instance of the entity (but not its children entities) </summary>
+        /// <param name="sourceEntity"> The entity that will become the template of the created variant </param>
+        /// <param name="newIdsLookup"> the ids that should be used for the variant </param>
+        /// <param name="informEntityAddedListeners"> Should be set to false if multiple entities are created at once for the variant </param>
+        /// <returns> The created variant entity </returns>
+        public IEntity<T> CreateVariant(T sourceEntity, IReadOnlyDictionary<string, string> newIdsLookup, bool informEntityAddedListeners) {
             this.ThrowErrorIfDisposed();
-            return Add(TemplatesIo.CreateVariantInstanceOf(entityData, newIdsLookup));
+            return Add(TemplatesIo.CreateVariantInstanceOf(sourceEntity, newIdsLookup), informEntityAddedListeners);
         }
 
     }

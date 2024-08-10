@@ -265,10 +265,19 @@ namespace com.csutil.model.ecs {
             var all = self.GetSelfAndChildrenTreeBreadthFirst().ToList();
             resultIdLookupTable = all.ToDictionary(x => x.Id, x => "" + GuidV2.NewGuid());
             var fullSubtreeLeavesFirst = all.Skip(1).Reverse();
+            var createdVariantEntities= new List<IEntity<T>>(all.Count);
             foreach (var e in fullSubtreeLeavesFirst) {
-                e.Ecs.CreateVariant(e.Data, resultIdLookupTable);
+                createdVariantEntities.Add(  e.Ecs.CreateVariant(e.Data, resultIdLookupTable, false));
             }
-            var result = self.Ecs.CreateVariant(self.Data, resultIdLookupTable);
+            var result = self.Ecs.CreateVariant(self.Data, resultIdLookupTable, false);
+            createdVariantEntities.Add(result);
+            createdVariantEntities.Reverse(); // So that the root of the variant is the first in the list
+            
+            // Now that all variant entities are created, inform all listeners that the entities where added:
+            foreach (IEntity<T> e in createdVariantEntities) {
+                self.Ecs.InformEntityAddedListeners(e, oldEntityData: default);
+            }
+            
             AssertV3.IsNull(result.ParentId, "result.ParentId");
             AssertV3.AreNotEqual(result.Id, self.Id);
             return result;
