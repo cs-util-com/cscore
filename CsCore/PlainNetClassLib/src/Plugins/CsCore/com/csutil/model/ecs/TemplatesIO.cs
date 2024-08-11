@@ -82,13 +82,18 @@ namespace com.csutil.model.ecs {
             return _taskQueue.Run(delegate {
                 // Try saving with exponential backoff a few times:
                 return TaskV2.TryWithExponentialBackoff(() => {
-                    if (_taskQueue.GetRemainingScheduledTaskCount() > 1) {
-                        Log.d($"Saving entity to disk: {instance} with {_taskQueue.GetRemainingScheduledTaskCount()} other tasks in queue");
-                    }
+                    LogSaveChangesIfThereIsAQueue(instance);
                     file.SaveAsJson(json);
                     return Task.CompletedTask;
                 }, maxNrOfRetries: 3, initialExponent: 4);
             });
+        }
+        
+        [Conditional("DEBUG")]
+        private void LogSaveChangesIfThereIsAQueue(T instance) {
+            if (_taskQueue.GetRemainingScheduledTaskCount() > 1) {
+                Log.d($"Saving entity to disk: {instance} with {_taskQueue.GetRemainingScheduledTaskCount()} other tasks in queue");
+            }
         }
 
         private JToken UpdateJsonState(T entity) {
