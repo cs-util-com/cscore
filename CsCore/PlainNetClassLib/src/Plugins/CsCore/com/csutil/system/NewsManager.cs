@@ -88,7 +88,7 @@ namespace com.csutil.system {
         public LocalData localData { get; set; }
 
         public enum NewsType {
-            Blog, Announcement, ComingSoon, Beta, New, Improvement, Warning, Fix, Unknown
+            Unknown, Blog, Announcement, ComingSoon, Beta, New, Improvement, Warning, Fix, Outage, AppUpdate
         }
 
         public NewsType GetNewsType() { return EnumUtil.TryParse(type, NewsType.Unknown); }
@@ -98,9 +98,14 @@ namespace com.csutil.system {
             return DateTimeV2.ParseUtc(date);
         }
 
+        /// <summary> This is data not received from the remote source but stored locally </summary>
         public class LocalData {
+
+            /// <summary> This is set to true once the user has read the news etnry </summary>
             public bool isRead { get; set; }
+
         }
+
     }
 
 }
