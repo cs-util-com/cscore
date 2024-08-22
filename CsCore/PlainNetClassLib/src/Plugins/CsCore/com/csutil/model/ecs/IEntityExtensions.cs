@@ -240,6 +240,36 @@ namespace com.csutil.model.ecs {
             return self.GlobalPoseMatrix(allEntities).ToPose();
         }
 
+        public static bool IsActiveInHierarchy<T>(this T self, IReadOnlyDictionary<string, T> allEntities) where T : IEntityData {
+            return self.IsActive && self.GetParent(allEntities).IsActiveInHierarchy(allEntities);
+        }
+
+        public static bool TryGetTemplate<T>(this T self, IReadOnlyDictionary<string, T> allEntities, out T template) where T : IEntityData {
+            if (self.TemplateId != null) {
+                template = allEntities[self.TemplateId];
+                return true;
+            }
+            template = default;
+            return false;
+        }
+
+        /// <summary> Iterates over all entities to check if one is found that has the TemplateId set to the id of the entity </summary>
+        public static bool TryGetVariants<T>(this T self, IReadOnlyDictionary<string, T> allEntities, out IEnumerable<T> variants) where T : IEntityData {
+            List<T> result = null;
+            foreach (var entity in allEntities.Values) {
+                if (entity.TemplateId == self.Id) {
+                    if (result == null) { result = new List<T>(); }
+                    result.Add(entity);
+                }
+            }
+            variants = result;
+            return result != null;
+        }
+
+        public static bool IsVariant<T>(this T self) where T : IEntityData {
+            return self.TemplateId != null;
+        }
+
         public static Pose3d LocalPose<T>(this IEntity<T> self) where T : IEntityData {
             self.ThrowErrorIfDisposed();
             return self.LocalPose.ToPose();
@@ -265,19 +295,19 @@ namespace com.csutil.model.ecs {
             var all = self.GetSelfAndChildrenTreeBreadthFirst().ToList();
             resultIdLookupTable = all.ToDictionary(x => x.Id, x => "" + GuidV2.NewGuid());
             var fullSubtreeLeavesFirst = all.Skip(1).Reverse();
-            var createdVariantEntities= new List<IEntity<T>>(all.Count);
+            var createdVariantEntities = new List<IEntity<T>>(all.Count);
             foreach (var e in fullSubtreeLeavesFirst) {
-                createdVariantEntities.Add(  e.Ecs.CreateVariant(e.Data, resultIdLookupTable, false));
+                createdVariantEntities.Add(e.Ecs.CreateVariant(e.Data, resultIdLookupTable, false));
             }
             var result = self.Ecs.CreateVariant(self.Data, resultIdLookupTable, false);
             createdVariantEntities.Add(result);
             createdVariantEntities.Reverse(); // So that the root of the variant is the first in the list
-            
+
             // Now that all variant entities are created, inform all listeners that the entities where added:
             foreach (IEntity<T> e in createdVariantEntities) {
                 self.Ecs.InformEntityAddedListeners(e, oldEntityData: default);
             }
-            
+
             AssertV3.IsNull(result.ParentId, "result.ParentId");
             AssertV3.AreNotEqual(result.Id, self.Id);
             return result;
