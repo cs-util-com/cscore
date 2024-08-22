@@ -241,7 +241,7 @@ namespace com.csutil.model.ecs {
         }
 
         public static bool IsActiveInHierarchy<T>(this T self, IReadOnlyDictionary<string, T> allEntities) where T : IEntityData {
-            return self.IsActive && self.GetParent(allEntities).IsActiveInHierarchy(allEntities);
+            return self.IsActive && (self.ParentId == null || self.GetParent(allEntities).IsActiveInHierarchy(allEntities));
         }
 
         public static bool TryGetTemplate<T>(this T self, IReadOnlyDictionary<string, T> allEntities, out T template) where T : IEntityData {
