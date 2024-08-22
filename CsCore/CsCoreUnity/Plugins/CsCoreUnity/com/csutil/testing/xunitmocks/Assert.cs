@@ -68,6 +68,11 @@ namespace Xunit {
             True(obj is T, "Not Type " + typeof(T) + ": " + obj);
             return (T)obj;
         }
+        
+        public static T IsAssignableFrom<T>(object obj) where T : class {
+            True(typeof(T).IsAssignableFrom(obj.GetType()), "Not assignable from " + typeof(T) + ": " + obj);
+            return (T)obj;
+        }
 
         public static T Throws<T>(Action a) where T : Exception {
             try { a(); } catch (T t) { return t; }
