@@ -283,23 +283,23 @@ namespace com.csutil.model.ecs {
             return Task.WhenAll(tasks);
         }
 
-        public static IEntity<T> CreateVariant<T>(this IEntity<T> self) where T : IEntityData {
-            return self.CreateVariant(out _);
+        public static IEntity<T> CreateVariant<T>(this IEntity<T> self, bool autoSaveIfNeeded = false) where T : IEntityData {
+            return self.CreateVariant(out _, autoSaveIfNeeded);
         }
 
         /// <summary>
         /// Recursively creates variants of all entities in the subtree of the entity and returns a new root entity that has the variant ids in its children lists
         /// </summary>
-        public static IEntity<T> CreateVariant<T>(this IEntity<T> self, out IReadOnlyDictionary<string, string> resultIdLookupTable) where T : IEntityData {
+        public static IEntity<T> CreateVariant<T>(this IEntity<T> self, out IReadOnlyDictionary<string, string> resultIdLookupTable, bool autoSaveIfNeeded = false) where T : IEntityData {
             self.ThrowErrorIfDisposed();
             var all = self.GetSelfAndChildrenTreeBreadthFirst().ToList();
             resultIdLookupTable = all.ToDictionary(x => x.Id, x => "" + GuidV2.NewGuid());
             var fullSubtreeLeavesFirst = all.Skip(1).Reverse();
             var createdVariantEntities = new List<IEntity<T>>(all.Count);
             foreach (var e in fullSubtreeLeavesFirst) {
-                createdVariantEntities.Add(e.Ecs.CreateVariant(e.Data, resultIdLookupTable, false));
+                createdVariantEntities.Add(e.Ecs.CreateVariant(e.Data, resultIdLookupTable, false, autoSaveIfNeeded));
             }
-            var result = self.Ecs.CreateVariant(self.Data, resultIdLookupTable, false);
+            var result = self.Ecs.CreateVariant(self.Data, resultIdLookupTable, false, autoSaveIfNeeded);
             createdVariantEntities.Add(result);
             createdVariantEntities.Reverse(); // So that the root of the variant is the first in the list
 

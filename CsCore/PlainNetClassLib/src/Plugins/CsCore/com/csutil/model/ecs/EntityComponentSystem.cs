@@ -279,9 +279,9 @@ namespace com.csutil.model.ecs {
         /// <param name="newIdsLookup"> the ids that should be used for the variant </param>
         /// <param name="informEntityAddedListeners"> Should be set to false if multiple entities are created at once for the variant </param>
         /// <returns> The created variant entity </returns>
-        public IEntity<T> CreateVariant(T sourceEntity, IReadOnlyDictionary<string, string> newIdsLookup, bool informEntityAddedListeners) {
+        public IEntity<T> CreateVariant(T sourceEntity, IReadOnlyDictionary<string, string> newIdsLookup, bool informEntityAddedListeners, bool autoSaveIfNeeded = false) {
             this.ThrowErrorIfDisposed();
-            return Add(TemplatesIo.CreateVariantInstanceOf(sourceEntity, newIdsLookup), informEntityAddedListeners);
+            return Add(TemplatesIo.CreateVariantInstanceOf(sourceEntity, newIdsLookup, autoSaveIfNeeded), informEntityAddedListeners);
         }
 
     }

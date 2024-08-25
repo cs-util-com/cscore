@@ -141,12 +141,16 @@ namespace com.csutil.model.ecs {
         /// the same parent as the template. </summary>
         /// <param name="newIdsLookup"> Requires to pass in a filled dictionary with the current entity ids
         /// mapping to new ones that will be used for the new instances </param>
-        public T CreateVariantInstanceOf(T entity, IReadOnlyDictionary<string, string> newIdsLookup) {
+        public T CreateVariantInstanceOf(T entity, IReadOnlyDictionary<string, string> newIdsLookup, bool autoSaveIfNeeded = false) {
             this.ThrowErrorIfDisposed();
             var templateId = entity.GetId();
             if (!IsSavedToFiles(templateId)) {
                 Debugger.Break();
-                throw new InvalidOperationException($"The passed entity {entity} first needs to be saved once before it can be used as a template");
+                if (autoSaveIfNeeded) {
+                    SaveChanges(entity).Wait();
+                } else {
+                    throw new InvalidOperationException($"The passed entity {entity} first needs to be saved once before it can be used as a template");
+                }
             }
             JsonSerializer serializer = GetJsonSerializer();
             var variantJson = ToJToken(entity, serializer);
