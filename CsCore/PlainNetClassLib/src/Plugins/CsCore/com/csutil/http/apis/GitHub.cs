@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace com.csutil.http.apis {
 
+    /// <summary> Note: Public GitHub API calls when being unauthenticated are rate limited to 60 requests per hour (see
+    /// https://docs.github.com/de/rest/using-the-rest-api/rate-limits-for-the-rest-api?apiVersion=2022-11-28#primary-rate-limit-for-unauthenticated-users
+    /// ) </summary>
     public static class GitHub {
 
         /// <summary> Loads the content of a target GitHub repository </summary>

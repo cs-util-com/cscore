@@ -43,6 +43,10 @@ namespace com.csutil {
             }
         }
 
+        public static async Task<Stream> CopyToSeekableStreamIfNeeded(this Task<Stream> stream, bool disposeOriginalStream) { 
+            return await (await stream).CopyToSeekableStreamIfNeeded(disposeOriginalStream);
+        }
+
         public static async Task<Stream> CopyToSeekableStreamIfNeeded(this Stream stream, bool disposeOriginalStream) {
             if (stream.CanSeek) { return stream; }
             var seekableStream = new MemoryStream();
