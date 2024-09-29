@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
 
@@ -97,17 +98,26 @@ namespace com.csutil {
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
-        public static void AreEqual<T>(IEnumerable<T> expected, IEnumerable<T> actual, string varName = "", params object[] args) {
-            if (!expected.Equals(actual)) {
-                string errorMsg = $"Assert.AreEqual() FAILED for {varName}: {CalcMultiLineUnequalText(expected, actual)}";
-                Assert(false, () => errorMsg, args);
+        public static void AreEqual<T>(T expected, T actual, string varName = "", params object[] args) {
+            if (expected is IEnumerable<T> expectedList && actual is IEnumerable<T> actualList && !(expected is string)) {
+                if (!expected.Equals(actual)) {
+                    string errorMsg = $"Assert.AreEqual() FAILED for {varName}: {CalcMultiLineUnequalText(expectedList, actualList)}";
+                    Assert(false, () => errorMsg, args);
+                }
+            } else {
+                Assert(Equals(expected, actual), () => $"Assert.AreEqual() FAILED: Actual {varName}= {actual} NOT equal to expected {typeof(T)}= {expected}", args);
             }
         }
-
+        
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
-        public static void AreEqual<T>(T expected, T actual, string varName = "", params object[] args) {
-            Assert(Equals(expected, actual), () => $"Assert.AreEqual() FAILED: Actual {varName}= {actual} NOT equal to expected {typeof(T)}= {expected}", args);
+        public static void IsType<T>(object o, string varName = "", params object[] args) {
+            Assert(o is T, () => $"Assert.IsType() FAILED: {varName} is not of type {typeof(T)}", args);
         }
+        
+        [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
+        public static void IsAssignableFrom<T>(object o, string varName = "", params object[] args) {
+            Assert(typeof(T).IsAssignableFrom(o.GetType()), () => $"Assert.IsAssignableFrom() FAILED: {varName} is not assignable from {typeof(T)}", args);
+        } 
 
         private static string CalcMultiLineUnequalText<T>(IEnumerable<T> expected, IEnumerable<T> actual, string _ = LB + "   ") {
             int diffPos = GetPosOfFirstDiff(expected, actual);
@@ -125,10 +135,15 @@ namespace com.csutil {
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
+        public static void AreNotEqual(Vector3 expected, Vector3 actual, string varName = "", params object[] args) {
+            Assert(!Equals(expected, actual), () => $"Assert.AreNotEqual() FAILED: expected number {varName}= {expected} IS equal to actual {varName}= {actual}", args);
+        }
+
+        [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         public static void AreNotEqual(double expected, double actual, string varName = "", params object[] args) {
             Assert(!Equals(expected, actual), () => $"Assert.AreNotEqual() FAILED: expected number {varName}= {expected} IS equal to actual {varName}= {actual}", args);
         }
-        
+
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         public static void AreNotEqual(float expected, float actual, string varName = "", params object[] args) {
             Assert(!Equals(expected, actual), () => $"Assert.AreNotEqual() FAILED: expected number {varName}= {expected} IS equal to actual {varName}= {actual}", args);
