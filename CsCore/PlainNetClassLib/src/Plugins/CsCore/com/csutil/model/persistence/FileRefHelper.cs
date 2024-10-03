@@ -1,6 +1,7 @@
 ﻿using com.csutil.http;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -41,11 +42,25 @@ namespace com.csutil.model {
         public static async Task<bool> DownloadTo(this IFileRef self, DirectoryEntry targetDirectory, Action<float> onProgress = null, bool useAutoCachedFileRef = false, int maxNrOfRetries = 4) {
             self.AssertValidDirectory(targetDirectory);
             FileEntry cachedFileRef = self.LoadAutoCachedFileRef(targetDirectory, useAutoCachedFileRef);
+            AssertIsValidUrl(self.url);
             RestRequest request = new Uri(self.url).SendGET();
             if (onProgress != null) { request.onProgress = onProgress; }
             bool downloadWasNeeded = await self.DownloadTo(request, targetDirectory, maxNrOfRetries);
             if (useAutoCachedFileRef) { cachedFileRef.SaveAsJson(self, true); }
             return downloadWasNeeded;
+        }
+
+        [Conditional("DEBUG")]
+        private static void AssertIsValidUrl(string url) {
+            if (url.IsNullOrEmpty()) {
+                Log.e("IFileRef.url not set");
+            } else {
+                try {
+                    var uri = new Uri(url);
+                } catch (Exception e) {
+                    Log.e($"IFileRef.url is not a valid url: '{url}'", e);
+                }
+            }
         }
 
         private static FileEntry LoadAutoCachedFileRef(this IFileRef self, DirectoryEntry targetDirectory, bool useAutoCachedFileRef) {
