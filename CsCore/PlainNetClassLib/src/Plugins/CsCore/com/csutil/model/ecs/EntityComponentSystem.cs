@@ -66,6 +66,8 @@ namespace com.csutil.model.ecs {
         /// <summary> If set to true the T class used in IEntity<T> must be immutable in all fields </summary>
         public readonly bool IsModelImmutable;
 
+        public static readonly object threadLock = new object();
+
         /// <summary> Triggered when the entity is created, removed or directly/indirectly changed (e.g. when a template entity is changed).
         /// Will pass the IEntity wrapper, the old and the new data </summary>
         public event IEntityUpdateListener OnIEntityUpdated;
@@ -111,16 +113,18 @@ namespace com.csutil.model.ecs {
         }
 
         private IEntity<T> AddEntity(Entity entity, bool informEntityAddedListeners) {
-            var entityId = entity.Id;
-            entityId.ThrowErrorIfNullOrEmpty("entityData.Id");
-            var hasOldEntity = _entities.TryGetValue(entityId, out var oldEntity);
-            T oldEntityData = hasOldEntity ? oldEntity.Data : default;
-            _entities[entityId] = entity;
-            UpdateVariantsLookup(entity.Data);
-            if (informEntityAddedListeners) {
-                InformEntityAddedListeners(entity, oldEntityData);
+            lock (threadLock) {
+                var entityId = entity.Id;
+                entityId.ThrowErrorIfNullOrEmpty("entityData.Id");
+                var hasOldEntity = _entities.TryGetValue(entityId, out var oldEntity);
+                T oldEntityData = hasOldEntity ? oldEntity.Data : default;
+                _entities[entityId] = entity;
+                UpdateVariantsLookup(entity.Data);
+                if (informEntityAddedListeners) {
+                    InformEntityAddedListeners(entity, oldEntityData);
+                }
+                return entity;
             }
-            return entity;
         }
 
         internal void InformEntityAddedListeners(IEntity<T> entity, T oldEntityData) {
@@ -150,43 +154,45 @@ namespace com.csutil.model.ecs {
         }
 
         private void InternalUpdate(T updatedEntityData, UpdateType updateType) {
-            var entityId = updatedEntityData.Id;
-            var entity = (Entity)_entities[entityId];
-            entity.ThrowErrorIfDisposed();
+            lock (threadLock) {
+                var entityId = updatedEntityData.Id;
+                var entity = (Entity)_entities[entityId];
+                entity.ThrowErrorIfDisposed();
 
-            var oldEntryData = entity.Data;
+                var oldEntryData = entity.Data;
 
-            // e.g. if the entries are mutable this will mostly be true:
-            var wasModified = StateCompare.WasModified(oldEntryData, updatedEntityData);
-            if (IsModelImmutable && !wasModified) {
-                return; // only for immutable data it is now clear that no update is required
-            }
-            if (wasModified) {
-                // Compute json diff to know if the entry really changed and if not skip informing all variants about the change:
-                // This can happen eg if the variant overwrites the field that was just changed in the template
-                if (!TemplatesIo.HasChanges(oldEntryData, updatedEntityData)) {
-                    // Even if entity.Data and updatedEntityData contain the same content, the data must still be set to the new reference:
-                    entity.Data = updatedEntityData;
-                    return;
+                // e.g. if the entries are mutable this will mostly be true:
+                var wasModified = StateCompare.WasModified(oldEntryData, updatedEntityData);
+                if (IsModelImmutable && !wasModified) {
+                    return; // only for immutable data it is now clear that no update is required
                 }
-            }
-            entity.Data = updatedEntityData;
-            UpdateVariantsLookup(entity.Data);
-            // At this point in the update method it is known that the entity really changed  
-            OnIEntityUpdated?.Invoke(entity, updateType, oldEntryData, updatedEntityData);
-            entity.OnUpdate?.Invoke(oldEntryData, entity, updateType);
-            // Also update all components of that entity that implement IEntityUpdateListener:
-            if (updatedEntityData.Components != null) {
-                foreach (var comp in updatedEntityData.Components.Values) {
-                    if (comp is IParentEntityUpdateListener<T> l) {
-                        l.OnParentEntityUpdate(oldEntryData, entity);
+                if (wasModified) {
+                    // Compute json diff to know if the entry really changed and if not skip informing all variants about the change:
+                    // This can happen eg if the variant overwrites the field that was just changed in the template
+                    if (!TemplatesIo.HasChanges(oldEntryData, updatedEntityData)) {
+                        // Even if entity.Data and updatedEntityData contain the same content, the data must still be set to the new reference:
+                        entity.Data = updatedEntityData;
+                        return;
                     }
                 }
-            }
+                entity.Data = updatedEntityData;
+                UpdateVariantsLookup(entity.Data);
+                // At this point in the update method it is known that the entity really changed  
+                OnIEntityUpdated?.Invoke(entity, updateType, oldEntryData, updatedEntityData);
+                entity.OnUpdate?.Invoke(oldEntryData, entity, updateType);
+                // Also update all components of that entity that implement IEntityUpdateListener:
+                if (updatedEntityData.Components != null) {
+                    foreach (var comp in updatedEntityData.Components.Values) {
+                        if (comp is IParentEntityUpdateListener<T> l) {
+                            l.OnParentEntityUpdate(oldEntryData, entity);
+                        }
+                    }
+                }
 
-            // If the entry is a template for other entries, then all variants need to be updated:
-            if (_variants.TryGetValue(updatedEntityData.Id, out var variantIds)) {
-                UpdateVariantsWhenTemplateChanges(variantIds);
+                // If the entry is a template for other entries, then all variants need to be updated:
+                if (_variants.TryGetValue(updatedEntityData.Id, out var variantIds)) {
+                    UpdateVariantsWhenTemplateChanges(variantIds);
+                }
             }
         }
 
@@ -203,9 +209,11 @@ namespace com.csutil.model.ecs {
         }
 
         protected virtual void UpdateVariantsWhenTemplateChanges(HashSet<string> variantIds) {
-            foreach (var variantId in variantIds) {
-                var newVariantState = TemplatesIo.RecreateVariantInstance(variantId);
-                InternalUpdate(newVariantState, UpdateType.TemplateUpdate);
+            lock (threadLock) {
+                foreach (var variantId in variantIds) {
+                    var newVariantState = TemplatesIo.RecreateVariantInstance(variantId);
+                    InternalUpdate(newVariantState, UpdateType.TemplateUpdate);
+                }
             }
         }
 
@@ -234,9 +242,11 @@ namespace com.csutil.model.ecs {
         }
 
         public Task Destroy(IEntity<T> entityToDestroy) {
-            this.ThrowErrorIfDisposed();
-            if (!entityToDestroy.IsAlive()) { return Task.CompletedTask; }
-            return Destroy(entityToDestroy.Id);
+            lock (threadLock) {
+                this.ThrowErrorIfDisposed();
+                if (!entityToDestroy.IsAlive()) { return Task.CompletedTask; }
+                return Destroy(entityToDestroy.Id);
+            }
         }
 
         private Task Destroy(string entityId) {
