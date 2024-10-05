@@ -148,12 +148,10 @@ namespace com.csutil.model.ecs {
 
         public Task Update(T entityData, UpdateType updateType = UpdateType.Update) {
             this.ThrowErrorIfDisposed();
-            var t = TemplatesIo?.SaveChanges(entityData);
-            InternalUpdate(entityData, updateType);
-            return t;
+            return InternalUpdate(entityData, updateType);
         }
 
-        private void InternalUpdate(T updatedEntityData, UpdateType updateType) {
+        private Task InternalUpdate(T updatedEntityData, UpdateType updateType) {
             lock (threadLock) {
                 var entityId = updatedEntityData.Id;
                 var entity = (Entity)_entities[entityId];
@@ -164,17 +162,19 @@ namespace com.csutil.model.ecs {
                 // e.g. if the entries are mutable this will mostly be true:
                 var wasModified = StateCompare.WasModified(oldEntryData, updatedEntityData);
                 if (IsModelImmutable && !wasModified) {
-                    return; // only for immutable data it is now clear that no update is required
+                    return Task.CompletedTask; // only for immutable data it is now clear that no update is required
                 }
                 if (wasModified) {
                     // Compute json diff to know if the entry really changed and if not skip informing all variants about the change:
                     // This can happen eg if the variant overwrites the field that was just changed in the template
                     if (!TemplatesIo.HasChanges(oldEntryData, updatedEntityData)) {
+                        Log.d($"StateCompare.WasModified returned true but no changes were detected, will skip update for entity {entity}");
                         // Even if entity.Data and updatedEntityData contain the same content, the data must still be set to the new reference:
                         entity.Data = updatedEntityData;
-                        return;
+                        return Task.CompletedTask;
                     }
                 }
+                var t = TemplatesIo?.SaveChanges(updatedEntityData);
                 entity.Data = updatedEntityData;
                 UpdateVariantsLookup(entity.Data);
                 // At this point in the update method it is known that the entity really changed  
@@ -193,6 +193,7 @@ namespace com.csutil.model.ecs {
                 if (_variants.TryGetValue(updatedEntityData.Id, out var variantIds)) {
                     UpdateVariantsWhenTemplateChanges(variantIds);
                 }
+                return t;
             }
         }
 
