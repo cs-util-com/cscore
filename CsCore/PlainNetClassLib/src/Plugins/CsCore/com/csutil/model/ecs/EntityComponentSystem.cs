@@ -127,7 +127,7 @@ namespace com.csutil.model.ecs {
             }
         }
 
-        internal void InformEntityAddedListeners(IEntity<T> entity, T oldEntityData) {
+        protected internal void InformEntityAddedListeners(IEntity<T> entity, T oldEntityData) {
             AssertV3.IsNull(oldEntityData, "oldEntityData");
             OnIEntityUpdated?.Invoke(entity, UpdateType.Add, oldEntityData, entity.Data);
             entity.OnCreate?.Invoke(entity);
