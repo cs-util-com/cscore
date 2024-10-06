@@ -133,8 +133,8 @@ namespace com.csutil.model.ecs {
             entity.OnCreate?.Invoke(entity);
             if (entity.Components != null) {
                 foreach (var comp in entity.Components.Values) {
-                    if (comp is IAddedToEntityListener<T> l) {
-                        l.OnAddedToEntity(entity);
+                    if (comp is IEntityInEcsListener<T> l) {
+                        l.OnEntityNowInEcs(entity);
                     }
                 }
             }
