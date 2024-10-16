@@ -20,7 +20,7 @@ namespace com.csutil.http.apis {
         public static Task<Dictionary<string, object>> GetSheetObjects(Uri csvUrl) {
             return TaskV2.TryWithExponentialBackoff(async () => {
                 return GoogleSheetDataParser.ParseRawSheetData(await DownloadAndParseCsvSheet(csvUrl));
-            }, HandleError, maxNrOfRetries: 5);
+            }, HandleError, maxNrOfRetries: 5, initialExponent: 9, maxDelayInMs: 5000);
         }
 
         private static void HandleError(Exception e) {
