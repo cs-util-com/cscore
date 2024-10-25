@@ -22,14 +22,14 @@ namespace com.csutil.integrationTests.http {
         [Fact]
         public async Task ExampleUsage1_ChatGpt() {
             var openAi = new OpenAi(await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey"));
-            var messages = new List<ChatGpt.Line>() {
-                new ChatGpt.Line(ChatGpt.Role.system, content: "You are a standup comedian. You are on stage and about to tell a joke."),
-                new ChatGpt.Line(ChatGpt.Role.user, content: "Do you know the joke about the chicken that crossed the road?"),
-                new ChatGpt.Line(ChatGpt.Role.assistant, content: "Yes I actually happen to know the best one of all chicken jokes."),
-                new ChatGpt.Line(ChatGpt.Role.user, content: "Why did the chicken cross the road?"),
+            var messages = new List<ChatGpt.Message>() {
+                new ChatGpt.Message(ChatGpt.Role.system, content: "You are a standup comedian. You are on stage and about to tell a joke."),
+                new ChatGpt.Message(ChatGpt.Role.user, content: "Do you know the joke about the chicken that crossed the road?"),
+                new ChatGpt.Message(ChatGpt.Role.assistant, content: "Yes I actually happen to know the best one of all chicken jokes."),
+                new ChatGpt.Message(ChatGpt.Role.user, content: "Why did the chicken cross the road?"),
             };
             var response = await openAi.ChatGpt(new ChatGpt.Request(messages));
-            ChatGpt.Line newLine = response.choices.Single().message;
+            ChatGpt.Message newLine = response.choices.Single().message;
             Assert.Equal("" + ChatGpt.Role.assistant, newLine.role);
             Assert.NotEmpty(newLine.content);
 
@@ -40,16 +40,16 @@ namespace com.csutil.integrationTests.http {
         [Fact]
         public async Task ExampleUsage2_ChatGpt4() {
             var openAi = new OpenAi(await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey"));
-            var messages = new List<ChatGpt.Line>() {
-                new ChatGpt.Line(ChatGpt.Role.system, content: "You are a standup comedian. You are on stage and about to tell a joke."),
-                new ChatGpt.Line(ChatGpt.Role.user, content: "Do you know the joke about the chicken that crossed the road?"),
-                new ChatGpt.Line(ChatGpt.Role.assistant, content: "Yes I actually happen to know the best one of all chicken jokes."),
-                new ChatGpt.Line(ChatGpt.Role.user, content: "Why did the chicken cross the road?"),
+            var messages = new List<ChatGpt.Message>() {
+                new ChatGpt.Message(ChatGpt.Role.system, content: "You are a standup comedian. You are on stage and about to tell a joke."),
+                new ChatGpt.Message(ChatGpt.Role.user, content: "Do you know the joke about the chicken that crossed the road?"),
+                new ChatGpt.Message(ChatGpt.Role.assistant, content: "Yes I actually happen to know the best one of all chicken jokes."),
+                new ChatGpt.Message(ChatGpt.Role.user, content: "Why did the chicken cross the road?"),
             };
             var request = new ChatGpt.Request(messages);
             request.model = "gpt-4o"; // See https://platform.openai.com/docs/models/gpt-4o
             var response = await openAi.ChatGpt(request);
-            ChatGpt.Line newLine = response.choices.Single().message;
+            ChatGpt.Message newLine = response.choices.Single().message;
             Assert.Equal("" + ChatGpt.Role.assistant, newLine.role);
             Assert.NotEmpty(newLine.content);
 
@@ -62,8 +62,8 @@ namespace com.csutil.integrationTests.http {
         public async Task ExampleUsage3_ChatGptJsonResponses() {
 
             var openAi = new OpenAi(await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey"));
-            var messages = new List<ChatGpt.Line>();
-            messages.Add(new ChatGpt.Line(ChatGpt.Role.system, content: "You are a helpful assistant designed to output JSON."));
+            var messages = new List<ChatGpt.Message>();
+            messages.Add(new ChatGpt.Message(ChatGpt.Role.system, content: "You are a helpful assistant designed to output JSON."));
 
             { // The user inputs a question but the response should be automatically parsable as a YesNoResponse:
 
@@ -78,7 +78,7 @@ namespace com.csutil.integrationTests.http {
 
                 // Send the messages to the AI and get the response:
                 var response = await openAi.ChatGpt(NewGpt4JsonRequestWithFullConversation(messages));
-                ChatGpt.Line newLine = response.choices.Single().message;
+                ChatGpt.Message newLine = response.choices.Single().message;
                 messages.Add(newLine);
 
                 // Parse newLine.content as a YesNoResponse:
@@ -121,8 +121,8 @@ namespace com.csutil.integrationTests.http {
         public async Task ExampleUsage3_StrictJsonSchemaResponses() {
 
             var openAi = new OpenAi(await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey"));
-            var messages = new List<ChatGpt.Line>();
-            messages.Add(new ChatGpt.Line(ChatGpt.Role.system, content: "You are a helpful assistant designed to output JSON."));
+            var messages = new List<ChatGpt.Message>();
+            messages.Add(new ChatGpt.Message(ChatGpt.Role.system, content: "You are a helpful assistant designed to output JSON."));
 
             { // The user inputs a question but the response should be automatically parsable as a YesNoResponse:
 
@@ -137,7 +137,7 @@ namespace com.csutil.integrationTests.http {
 
                 // Send the messages to the AI and get the response:
                 var response = await openAi.ChatGpt(NewGpt4StrictJsonRequestWithFullConversation(messages, yesNoResponseFormat));
-                ChatGpt.Line newLine = response.choices.Single().message;
+                ChatGpt.Message newLine = response.choices.Single().message;
                 messages.Add(newLine);
 
                 // Parse newLine.content as a YesNoResponse:
@@ -226,7 +226,7 @@ namespace com.csutil.integrationTests.http {
             }
         }
 
-        private static async Task<EmotionalChatResponse> TalkToEmotionalAi(OpenAi openAi, List<ChatGpt.Line> messages, string userInput) {
+        private static async Task<EmotionalChatResponse> TalkToEmotionalAi(OpenAi openAi, List<ChatGpt.Message> messages, string userInput) {
             using var timing = Log.MethodEnteredWith(userInput);
             EmotionalChatResponse emotionalResponseFormat = new EmotionalChatResponse() {
                 emotionOfResponse = EmotionalChatResponse.Emotion.happy,
@@ -234,7 +234,7 @@ namespace com.csutil.integrationTests.http {
             };
             messages.AddUserLineWithJsonResultStructure(userInput, emotionalResponseFormat);
             var response = await openAi.ChatGpt(NewGpt4JsonRequestWithFullConversation(messages));
-            ChatGpt.Line newLine = response.choices.Single().message;
+            ChatGpt.Message newLine = response.choices.Single().message;
             messages.Add(newLine);
 
             // Parse newLine.content as a YesNoResponse:
@@ -367,8 +367,8 @@ namespace com.csutil.integrationTests.http {
         }
 
         private static async Task<List<string>> GenerateQuestionsBasedOnPrompt(OpenAi openAi, string prompt, int numberOfQuestions = 5) {
-            var messages = new List<ChatGpt.Line>();
-            messages.Add(new ChatGpt.Line(ChatGpt.Role.system, content: "You are a helpful assistant designed to output JSON."));
+            var messages = new List<ChatGpt.Message>();
+            messages.Add(new ChatGpt.Message(ChatGpt.Role.system, content: "You are a helpful assistant designed to output JSON."));
 
             var questionsResponseFormat = new QuestionsResponse() {
                 questions = new List<string> {
@@ -385,7 +385,7 @@ namespace com.csutil.integrationTests.http {
 
             // Send the messages to the AI and get the response:
             var response = await openAi.ChatGpt(NewGpt4JsonRequestWithFullConversation(messages));
-            ChatGpt.Line newLine = response.choices.Single().message;
+            ChatGpt.Message newLine = response.choices.Single().message;
             messages.Add(newLine);
 
             // Parse newLine.content as a QuestionsResponse:
@@ -403,7 +403,7 @@ namespace com.csutil.integrationTests.http {
         }
 
         [Obsolete("Use NewGpt4StrictJsonRequestWithFullConversation instead")]
-        private static ChatGpt.Request NewGpt4JsonRequestWithFullConversation(List<ChatGpt.Line> conversationSoFar) {
+        private static ChatGpt.Request NewGpt4JsonRequestWithFullConversation(List<ChatGpt.Message> conversationSoFar) {
             var request = new ChatGpt.Request(conversationSoFar);
             // Use json as the response format:
             request.response_format = ChatGpt.Request.ResponseFormat.json;
@@ -411,7 +411,7 @@ namespace com.csutil.integrationTests.http {
             return request;
         }
 
-        private static ChatGpt.Request NewGpt4StrictJsonRequestWithFullConversation<T>(List<ChatGpt.Line> conversationSoFar, T exampleResponse) {
+        private static ChatGpt.Request NewGpt4StrictJsonRequestWithFullConversation<T>(List<ChatGpt.Message> conversationSoFar, T exampleResponse) {
             // TODO currently this would be added for every request again, so potentially many redundant times in the conversation:
             conversationSoFar.AddValidExampleSchemaResponses(exampleResponse);
             

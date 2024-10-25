@@ -130,10 +130,15 @@ namespace com.csutil.http.apis {
             /// https://platform.openai.com/docs/api-reference/audio/createSpeech
             /// </summary>
             public class TTSRequest {
+                /// <summary> https://platform.openai.com/docs/api-reference/audio/createSpeech#audio-createspeech-input </summary>
                 public string input { get; set; }
+                /// <summary> https://platform.openai.com/docs/api-reference/audio/createSpeech#audio-createspeech-model </summary>
                 public string model { get; set; } = "tts-1";
+                /// <summary> https://platform.openai.com/docs/api-reference/audio/createSpeech#audio-createspeech-voice </summary>
                 public string voice { get; set; } = "alloy";
+                /// <summary> https://platform.openai.com/docs/api-reference/audio/createSpeech#audio-createspeech-response_format </summary>
                 public string response_format { get; set; } = "mp3";
+                /// <summary> https://platform.openai.com/docs/api-reference/audio/createSpeech#audio-createspeech-speed </summary>
                 public double speed { get; set; } = 1.0;
             }
 
@@ -158,7 +163,7 @@ namespace com.csutil.http.apis {
     }
     public class ChatGpt {
 
-        public class Line {
+        public class Message {
 
             public readonly string role;
             public readonly string content;
@@ -167,13 +172,13 @@ namespace com.csutil.http.apis {
             public readonly string refusal;
 
             [JsonConstructor]
-            public Line(string role, string content, string refusal) {
+            public Message(string role, string content, string refusal) {
                 this.role = role;
                 this.content = content;
                 this.refusal = refusal;
             }
 
-            public Line(Role role, string content) {
+            public Message(Role role, string content) {
                 this.role = role.ToString();
                 this.content = content;
             }
@@ -191,12 +196,12 @@ namespace com.csutil.http.apis {
             /// The token count of your prompt plus max_tokens cannot exceed the model's context length.
             /// Most models have a context length of 2048 tokens (except for the newest models, which support 4096). </summary>
             public int max_tokens { get; set; }
-            public List<Line> messages { get; set; }
+            public List<Message> messages { get; set; }
 
             /// <summary> typically null, but if the AI e.g. should respond only with json it should be ChatGpt.Request.ResponseFormat.json </summary>
             public ResponseFormat response_format { get; set; }
 
-            public Request(List<Line> messages, int max_tokens = 4096) {
+            public Request(List<Message> messages, int max_tokens = 4096) {
                 var tokenCountForMessages = JsonWriter.GetWriter(this).Write(messages).Length;
                 if (max_tokens + tokenCountForMessages > 4096) {
                     max_tokens = 4096 - tokenCountForMessages;
@@ -255,7 +260,7 @@ namespace com.csutil.http.apis {
             public List<Choice> choices { get; set; }
 
             public class Choice {
-                public Line message { get; set; }
+                public Message message { get; set; }
                 public string finish_reason { get; set; }
                 public int index { get; set; }
             }
@@ -354,18 +359,18 @@ namespace com.csutil.http.apis {
     }
     public static class ChatGptExtensions {
 
-        public static void AddUserLine(this ICollection<ChatGpt.Line> self, string userMessage) {
-            self.Add(new ChatGpt.Line(ChatGpt.Role.user, content: userMessage));
+        public static void AddUserLine(this ICollection<ChatGpt.Message> self, string userMessage) {
+            self.Add(new ChatGpt.Message(ChatGpt.Role.user, content: userMessage));
         }
 
-        public static void AddValidExampleSchemaResponses<T>(this ICollection<ChatGpt.Line> self, params T[] exampleResponses) {
-            self.Add(new ChatGpt.Line(ChatGpt.Role.system, content: GetSchemaExamplesString(exampleResponses)));
+        public static void AddValidExampleSchemaResponses<T>(this ICollection<ChatGpt.Message> self, params T[] exampleResponses) {
+            self.Add(new ChatGpt.Message(ChatGpt.Role.system, content: GetSchemaExamplesString(exampleResponses)));
         }
 
         [Obsolete("Use strict json schema mode instead of providing the schema as an input line")]
-        public static void AddUserLineWithJsonResultStructure<T>(this ICollection<ChatGpt.Line> self, string userMessage, T exampleResponse) {
-            self.Add(new ChatGpt.Line(ChatGpt.Role.user, content: userMessage));
-            self.Add(new ChatGpt.Line(ChatGpt.Role.system, content: CreateJsonInstructions(exampleResponse)));
+        public static void AddUserLineWithJsonResultStructure<T>(this ICollection<ChatGpt.Message> self, string userMessage, T exampleResponse) {
+            self.Add(new ChatGpt.Message(ChatGpt.Role.user, content: userMessage));
+            self.Add(new ChatGpt.Message(ChatGpt.Role.system, content: CreateJsonInstructions(exampleResponse)));
         }
 
         [Obsolete("Use strict json schema mode instead of providing the schema as an input line", true)]
@@ -394,7 +399,7 @@ namespace com.csutil.http.apis {
             return jsonSchema;
         }
 
-        public static T ParseNewLineContentAsJson<T>(this ChatGpt.Line newLine) {
+        public static T ParseNewLineContentAsJson<T>(this ChatGpt.Message newLine) {
             var responseText = (string)newLine.content;
             if (responseText.StartsWith("```json\n")) {
                 responseText = responseText.Replace("```json\n", "");
