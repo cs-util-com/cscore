@@ -105,7 +105,7 @@ namespace com.csutil.http.cookies {
                     if (cookie.expirationDate.IsAfter(DateTimeV2.UtcNow)) {
                         return cookie;
                     } else {
-                        Log.w("Matching but expired cookie found, expirationDate=" + cookie.expirationDate.ToReadableString() + "; cookie=" + cookie);
+                        Log.w("Matching but expired cookie found, expirationDate=" + cookie.expirationDate.ToReadableStringExact() + "; cookie=" + cookie);
                     }
                 }
             }
