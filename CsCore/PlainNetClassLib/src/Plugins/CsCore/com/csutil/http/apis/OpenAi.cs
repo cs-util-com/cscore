@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using com.csutil.model.jsonschema;
 using Newtonsoft.Json;
 using System.IO;
+using System.Linq;
 using Zio;
 
 namespace com.csutil.http.apis {
@@ -104,7 +105,7 @@ namespace com.csutil.http.apis {
         /// </summary>
         public async Task<Stream> TextToSpeech(Audio.TTSRequest requestParam) {
             return await new Uri("https://api.openai.com/v1/audio/speech").SendPOST().WithAuthorization(apiKey)
-                .WithJsonContent(requestParam).GetResult<Stream>();
+                .WithJsonContent(requestParam).GetResult<Stream>().CopyToSeekableStreamIfNeeded(true);
         }
 
         /// <summary> https://platform.openai.com/docs/guides/speech-to-text
@@ -130,16 +131,23 @@ namespace com.csutil.http.apis {
             /// https://platform.openai.com/docs/api-reference/audio/createSpeech
             /// </summary>
             public class TTSRequest {
+                
                 /// <summary> https://platform.openai.com/docs/api-reference/audio/createSpeech#audio-createspeech-input </summary>
                 public string input { get; set; }
+                
                 /// <summary> https://platform.openai.com/docs/api-reference/audio/createSpeech#audio-createspeech-model </summary>
                 public string model { get; set; } = "tts-1";
-                /// <summary> https://platform.openai.com/docs/api-reference/audio/createSpeech#audio-createspeech-voice </summary>
-                public string voice { get; set; } = "alloy";
+                
+                /// <summary> https://platform.openai.com/docs/api-reference/audio/createSpeech#audio-createspeech-voice
+                /// (and https://platform.openai.com/docs/guides/text-to-speech/voice-options for samples) </summary>
+                public string voice { get; set; } = "onyx";
+                
                 /// <summary> https://platform.openai.com/docs/api-reference/audio/createSpeech#audio-createspeech-response_format </summary>
                 public string response_format { get; set; } = "mp3";
+                
                 /// <summary> https://platform.openai.com/docs/api-reference/audio/createSpeech#audio-createspeech-speed </summary>
                 public double speed { get; set; } = 1.0;
+                
             }
 
             /// <summary>
@@ -168,6 +176,8 @@ namespace com.csutil.http.apis {
             public readonly string role;
             public readonly string content;
 
+            public AudioResponse audio { get; set; }
+
             /// <summary> https://platform.openai.com/docs/guides/structured-outputs/refusals </summary>
             public readonly string refusal;
 
@@ -183,6 +193,11 @@ namespace com.csutil.http.apis {
                 this.content = content;
             }
 
+            public class AudioResponse {
+                public string data { get; set; }
+                public byte[] dataAsBytes => Convert.FromBase64String(data);
+            }
+
         }
 
         public enum Role { system, user, assistant }
@@ -191,12 +206,21 @@ namespace com.csutil.http.apis {
 
             /// <summary> See https://beta.openai.com/docs/models/overview </summary>
             public string model = "gpt-4o-mini";
+            
+            /// <summary> https://platform.openai.com/docs/api-reference/chat/create#chat-create-temperature </summary>
+            public double? temperature { get; set; }
 
             /// <summary> The maximum number of tokens to generate in the completion.
             /// The token count of your prompt plus max_tokens cannot exceed the model's context length.
             /// Most models have a context length of 2048 tokens (except for the newest models, which support 4096). </summary>
             public int max_tokens { get; set; }
             public List<Message> messages { get; set; }
+
+            /// <summary> e.g. "text", "audio" to be able to return both text and audio </summary>
+            public List<string> modalities { get; set; }
+            
+            /// <summary> https://platform.openai.com/docs/api-reference/chat/create#chat-create-audio </summary>
+            public AudioParameters audio { get; set; }
 
             /// <summary> typically null, but if the AI e.g. should respond only with json it should be ChatGpt.Request.ResponseFormat.json </summary>
             public ResponseFormat response_format { get; set; }
@@ -208,6 +232,17 @@ namespace com.csutil.http.apis {
                 }
                 this.messages = messages;
                 this.max_tokens = max_tokens;
+            }
+
+            /// <summary> https://platform.openai.com/docs/guides/audio/quickstart?audio-generation-quickstart-example=audio-out </summary>
+            public class AudioParameters {
+                
+                /// <summary> Voices options see https://platform.openai.com/docs/guides/text-to-speech/voice-options </summary>
+                public string voice { get; set; }
+                
+                /// <summary> Usable formats are wav, mp3, flac, opus, pcm16 (From https://platform.openai.com/docs/api-reference/chat/create#chat-create-audio ) </summary>
+                public string format { get; set; } = "mp3";
+                
             }
 
             public class ResponseFormat {
@@ -357,6 +392,7 @@ namespace com.csutil.http.apis {
         }
 
     }
+
     public static class ChatGptExtensions {
 
         public static void AddUserLine(this ICollection<ChatGpt.Message> self, string userMessage) {
@@ -477,5 +513,32 @@ namespace com.csutil.http.apis {
 
     }
 
+    public static class ChatGptAudioExtensions {
+
+        public static async Task<Stream> TextToSpeech(this OpenAi openAi, string textToSay, string usedVoice) {
+            var responseTTS = await openAi.TextToSpeech(new OpenAi.Audio.TTSRequest() {
+                input = textToSay,
+                model = "tts-1",
+                voice = usedVoice
+            });
+            return responseTTS;
+        }
+
+        public static async Task<byte[]> TextToSpeechWithFurtherInstructions(this OpenAi openai, string textToSay, string voiceActorInstructions, string usedVoice, double temperature = 1.2) {
+            var messages = new List<ChatGpt.Message>() {
+                new ChatGpt.Message(ChatGpt.Role.system, content: $"{voiceActorInstructions}"),
+                new ChatGpt.Message(ChatGpt.Role.user, content: textToSay),
+            };
+            var request = new ChatGpt.Request(messages);
+            request.model = "gpt-4o-audio-preview"; // https://platform.openai.com/docs/guides/audio/quickstart?audio-generation-quickstart-example=audio-out
+            request.modalities = new List<string> { "text", "audio" };
+            request.audio = new ChatGpt.Request.AudioParameters() { voice = usedVoice };
+            request.temperature = temperature;
+            var response = await openai.ChatGpt(request);
+            ChatGpt.Message message = response.choices.Single().message;
+            return message.audio.dataAsBytes;
+        }
+
+    }
 
 }

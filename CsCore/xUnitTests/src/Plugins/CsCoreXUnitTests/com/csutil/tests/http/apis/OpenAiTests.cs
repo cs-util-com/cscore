@@ -360,6 +360,38 @@ namespace com.csutil.integrationTests.http {
             // Both words (Hello & world) should be in the response:
             Assert.True(split.All(word => textToTest.Contains(new string(word.Where(c => Char.IsLetter(c)).ToArray()))));
         }
+        
+        #if RUN_EXPENSIVE_TESTS
+        [Fact]
+        #endif
+        public async Task ExampleUsage8_TextToSpeechVoiceActor() {
+
+            string textToSay = "In a shocking finding, scientist discovered a herd of unicorns living in a remote, previously unexplored valley, in the Andes Mountains.";
+            var usedVoice = "echo"; // https://platform.openai.com/docs/guides/text-to-speech/onyx 
+
+            var openAi = new OpenAi(await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey"));
+
+            { // First the variant without the voice actor instructions:
+                var response1 = await openAi.TextToSpeech(textToSay, usedVoice);
+                await NewAudioFileEntry().SaveStreamAsync(response1);
+            }
+            { // Now the variant with the voice actor instructions:
+                var voiceActorInstructions =
+                    "You are an expert voice actor specializing in silly voices. "
+                    + "Respond and vocalize to the user the EXACT same input text that the user provides, "
+                    + "but in your voice response you MUST express EACH of the vocal cadence, inflection, and tone of ";
+                var character = "Alvin and the Chipmunks";
+                var response2 = await openAi.TextToSpeechWithFurtherInstructions(textToSay, voiceActorInstructions + character, usedVoice);
+                NewAudioFileEntry("+ actor instructions").WriteAllBytes(response2);
+            }
+            
+        }
+
+        private static FileEntry NewAudioFileEntry(string variant = "") {
+            var folder = EnvironmentV2.instance.GetOrAddTempFolder("ExampleUsage8_TextToSpeechVoiceActor");
+            Log.d("Saving audi to " + folder.GetFullFileSystemPath());
+            return folder.GetChild($"{DateTimeV2.Now.ToReadableStringExact()} ExampleUsage8_TextToSpeechVoiceActor {variant}.mp3");
+        }
 
         private static async Task<string> GenerateImage(OpenAi openAi, string prompt) {
             var result = await openAi.TextToImage(new OpenAi.Image.Request() { prompt = prompt });
