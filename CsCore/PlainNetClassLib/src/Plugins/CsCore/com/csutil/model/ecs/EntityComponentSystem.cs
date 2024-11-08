@@ -156,6 +156,8 @@ namespace com.csutil.model.ecs {
                 var entityId = updatedEntityData.Id;
                 var entity = (Entity)_entities[entityId];
                 entity.ThrowErrorIfDisposed();
+                
+                var t = TemplatesIo?.SaveChanges(updatedEntityData);
 
                 var oldEntryData = entity.Data;
 
@@ -174,7 +176,6 @@ namespace com.csutil.model.ecs {
                         return Task.CompletedTask;
                     }
                 }
-                var t = TemplatesIo?.SaveChanges(updatedEntityData);
                 entity.Data = updatedEntityData;
                 UpdateVariantsLookup(entity.Data);
                 // At this point in the update method it is known that the entity really changed  
