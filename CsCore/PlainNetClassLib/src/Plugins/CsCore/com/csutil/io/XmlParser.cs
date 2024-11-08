@@ -7,12 +7,8 @@ namespace com.csutil.xml {
     public static class XmlParser {
 
         public static T ParseAsXmlInto<T>(this Stream self) {
-            if (self.CanSeek) {
-                self.ResetStreamCurserPositionToBeginning();
-            } else if (self.Position != 0) {
-                throw new System.InvalidOperationException("Stream not seekable, cant parse XML from current position, "
-                    + "first use stream.CopyToSeekableStreamIfNeeded() ?");
-            }
+            AssertV3.IsTrue(self.CanSeek, () => "Cant reset stream position to beginning, XML parsing may fail");
+            if (self.CanSeek) { self.ResetStreamCurserPositionToBeginning(); }
             using (var r = XmlReader.Create(self)) {
                 return (T)new XmlSerializer(typeof(T)).Deserialize(r);
             }
