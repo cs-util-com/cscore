@@ -25,7 +25,8 @@ namespace com.csutil.model.ecs {
         /// these need to be combined with all parent entities to get the full entity data </summary>
         private readonly Dictionary<string, JToken> EntityCache = new Dictionary<string, JToken>();
 
-        private Func<JsonSerializer> GetJsonSerializer = () => JsonSerializer.Create(JsonNetSettings.typedJsonSettings);
+        private static JsonSerializer defaultSerializer = JsonSerializer.Create(JsonNetSettings.typedJsonSettings);
+        private Func<JsonSerializer> GetJsonSerializer = () => defaultSerializer;
         private readonly BackgroundTaskQueue _taskQueue;
 
         public TemplatesIO(DirectoryEntry entityDir) {
