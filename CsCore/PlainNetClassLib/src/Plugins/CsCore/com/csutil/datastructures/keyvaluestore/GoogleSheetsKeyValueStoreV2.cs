@@ -61,7 +61,7 @@ namespace com.csutil.keyvaluestore {
             } else { // Assuming that write is much more expensive then read:
                 foreach (var newEntry in newSheetData) {
                     var oldEntry = await fallbackStore.Get<object>(newEntry.Key, null);
-                    if (!JsonWriter.HasEqualJson(oldEntry, newEntry)) {
+                    if (!JsonWriter.GetWriter(newEntry).HasEqualJson(oldEntry, newEntry)) {
                         await fallbackStore.Set(newEntry.Key, newEntry.Value);
                     }
                 }

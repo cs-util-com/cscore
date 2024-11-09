@@ -84,7 +84,8 @@ namespace com.csutil.model.ecs {
                 // Try saving with exponential backoff a few times:
                 return TaskV2.TryWithExponentialBackoff(() => {
                     LogSaveChangesIfThereIsAQueue(instance);
-                    file.SaveAsJson(json);
+                    var jsonString = json.ToString();
+                    file.SaveAsText(jsonString);
                     return Task.CompletedTask;
                 }, maxNrOfRetries: 3, initialExponent: 4);
             });

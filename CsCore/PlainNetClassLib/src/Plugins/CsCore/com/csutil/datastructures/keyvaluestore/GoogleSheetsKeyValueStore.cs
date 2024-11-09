@@ -78,7 +78,7 @@ namespace com.csutil.keyvaluestore {
                 var sheetData = GoogleSheetDataParser.ParseRawSheetData(newRawSheetData);
                 foreach (var newEntry in sheetData) {
                     var oldEntry = await fallbackStore.Get<object>(newEntry.Key, null);
-                    if (!JsonWriter.HasEqualJson(oldEntry, newEntry)) {
+                    if (!JsonWriter.GetWriter(this).HasEqualJson(oldEntry, newEntry)) {
                         await fallbackStore.Set(newEntry.Key, newEntry.Value);
                     }
                 }

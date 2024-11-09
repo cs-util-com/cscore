@@ -54,8 +54,8 @@ namespace com.csutil.http.apis {
         }
 
         private static T ToTypedObject<T>(object o) {
-            var json = JsonWriter.GetWriter().Write(o);
-            return TypedJsonHelper.NewTypedJsonReader().Read<T>(json);
+            var json = JsonWriter.GetWriterTyped(o).Write(o);
+            return JsonReader.GetReaderTyped(o).Read<T>(json);
         }
 
         public static Dictionary<string, object> ParseRawSheetData(List<List<string>> rawSheetData) {

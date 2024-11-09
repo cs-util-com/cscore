@@ -87,10 +87,10 @@ namespace com.csutil.tests.model.immutable {
                 Assert.Equal("a6@b.com", store.GetState().user.email);
 
                 // Simulate persisiting the store to disk and back into memory:
-                string persistedStateJson = TypedJsonHelper.NewTypedJsonWriter().Write(store.GetState());
+                string persistedStateJson = JsonWriter.GetWriterTyped(this).Write(store.GetState());
 
                 store.Destroy(); // Destroy the old store before loading the state again into an new store
-                var data2 = TypedJsonHelper.NewTypedJsonReader().Read<MyAppState1>(persistedStateJson);
+                var data2 = JsonReader.GetReaderTyped(this).Read<MyAppState1>(persistedStateJson);
                 var store2 = new DataStore<MyAppState1>(outboxReducer, data2, loggingMiddleware, thunkMiddleware);
                 IoC.inject.SetSingleton(store2, overrideExisting: true);
                 store2.storeName = "Store 3 (2)";

@@ -10,8 +10,6 @@ namespace com.csutil.model.immutable {
     public class ReplayRecorder<T> {
 
         private IDataStore<T> targetStore;
-        private IJsonReader jsonReader = TypedJsonHelper.NewTypedJsonReader();
-        private IJsonWriter jsonWriter = TypedJsonHelper.NewTypedJsonWriter();
         private IKeyValueStore persistance;
         public int recordedActionsCount { get; private set; }
         public bool isRecording = true;
@@ -42,7 +40,7 @@ namespace com.csutil.model.immutable {
             AssertV3.IsFalse(action is Delegate, () => "The recorder received a delegate action, should be prevented by Thunk");
             try {
                 Entry nextEntry = new Entry() { action = action, e = "" + exception };
-                persistance.Set(GetId(recordedActionsCount), jsonWriter.Write(nextEntry));
+                persistance.Set(GetId(recordedActionsCount), JsonWriter.GetWriterTyped(nextEntry).Write(nextEntry));
                 recordedActionsCount++;
             } catch (Exception e) { Log.e("Could not record action " + action, e); }
         }
@@ -87,7 +85,7 @@ namespace com.csutil.model.immutable {
 
         private async Task DispatchRecordedEntry(int entryNr) {
             var nextEntryJson = await persistance.Get<string>(GetId(entryNr), null);
-            var nextEntry = jsonReader.Read<Entry>(nextEntryJson);
+            var nextEntry = JsonReader.GetReaderTyped(this).Read<Entry>(nextEntryJson);
             try {
                 targetStore.Dispatch(nextEntry.action);
             } catch (Exception e) {

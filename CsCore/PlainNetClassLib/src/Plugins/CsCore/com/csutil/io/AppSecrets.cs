@@ -26,7 +26,7 @@ namespace com.csutil.io {
         }
 
         public Task<string> GetSecret(string key) {
-            var keysDictionary = file.LoadAs<Dictionary<string, string>>();
+            var keysDictionary = file.LoadAs<Dictionary<string, string>>(JsonReader.GetReader(this));
             return Task.FromResult(keysDictionary[key]);
         }
 

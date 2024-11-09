@@ -46,7 +46,7 @@ namespace com.csutil.model {
             RestRequest request = new Uri(self.url).SendGET();
             if (onProgress != null) { request.onProgress = onProgress; }
             bool downloadWasNeeded = await self.DownloadTo(request, targetDirectory, maxNrOfRetries);
-            if (useAutoCachedFileRef) { cachedFileRef.SaveAsJson(self, true); }
+            if (useAutoCachedFileRef) { cachedFileRef.SaveAsJson(self, JsonWriter.GetWriter(self), true); }
             return downloadWasNeeded;
         }
 
@@ -78,7 +78,7 @@ namespace com.csutil.model {
 
         private static void FillFileRefValuesFrom(FileEntry source, IFileRef targetToFill) {
             try {
-                var loaded = source.LoadAs(targetToFill.GetType()) as IFileRef;
+                var loaded = source.LoadAs(targetToFill.GetType(), JsonReader.GetReader(targetToFill)) as IFileRef;
                 if (targetToFill.dir.IsNullOrEmpty()) { targetToFill.dir = loaded.dir; }
                 if (targetToFill.fileName.IsNullOrEmpty()) { targetToFill.fileName = loaded.fileName; }
                 if (targetToFill.checksums.IsNullOrEmpty()) { targetToFill.checksums = loaded.checksums; }

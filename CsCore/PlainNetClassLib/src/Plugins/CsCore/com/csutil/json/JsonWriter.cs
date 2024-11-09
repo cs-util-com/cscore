@@ -23,15 +23,33 @@ namespace com.csutil {
             //return writer;
         }
 
+        /// <summary> Gets the systems current default typed JSON writer.
+        /// Typed here means that it's a writer that tries to keep class inheritance and
+        /// similar non-native json features intact </summary>
+        /// <param name="caller"> Typically the object being written should be passed here </param>
+        public static IJsonWriterTyped GetWriterTyped(object caller) {
+            return IoC.inject.GetOrAddSingleton<IJsonWriterTyped>(caller, () => new JsonNetWriterTyped());
+        }
+
         public static string AsPrettyString(object o) {
-            var jToken = Newtonsoft.Json.Linq.JToken.Parse(GetWriter(o).Write(o));
+            return GetWriter(o).AsPrettyString(o);
+        }
+
+        public static string AsPrettyString(this IJsonWriter jsonWriter, object o) {
+            var jToken = Newtonsoft.Json.Linq.JToken.Parse(jsonWriter.Write(o));
             return jToken.ToPrettyString();
         }
 
+        [Obsolete("Use myJsonWriter.HasEqualJson(..) instead", true)]
         public static bool HasEqualJson<T>(T a, T b) {
             if (a == null && b != null) { return false; }
             if (b == null && a != null) { return false; }
-            var w = GetWriter(a);
+            return GetWriter(a).HasEqualJson(a, b);
+        }
+
+        public static bool HasEqualJson<T>(this IJsonWriter w, T a, T b) {
+            if (a == null && b != null) { return false; }
+            if (b == null && a != null) { return false; }
             return Equals(w.Write(a), w.Write(b));
         }
 

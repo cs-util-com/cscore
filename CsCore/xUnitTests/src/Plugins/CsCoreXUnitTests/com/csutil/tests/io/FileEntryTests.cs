@@ -40,7 +40,7 @@ namespace com.csutil.tests {
             // Saving and loading from files:
             string someTextToStoreInTheFile = "Some text to store in the file";
             file1.SaveAsText(someTextToStoreInTheFile);
-            string loadedText = file1.LoadAs<string>(); // Loading JSON would work as well
+            string loadedText = file1.LoadAs<string>(null); // Loading JSON would work as well
             Assert.Equal(someTextToStoreInTheFile, loadedText);
 
             // Rename the directory:
@@ -224,7 +224,7 @@ namespace com.csutil.tests {
                 // The path to the testFile1 should still exist after copy:
                 Assert.True(testFile1InDir1ChildDir4.IsNotNullAndExists(), "old tf1d4 not found");
                 // The text should not be newTextInTestFile1 anymore after its replaced by the original again:
-                Assert.NotEqual(newTextInTestFile1, testFile1InDir1ChildDir4.LoadAs<string>());
+                Assert.NotEqual(newTextInTestFile1, testFile1InDir1ChildDir4.LoadAs<string>(null));
 
                 Assert.True(dir4.DeleteV2(), "dir4.Delete"); // Delete dir4 again
                 Assert.False(dir4.DeleteV2(), "dir4.Del"); // dir4 now does not exist anymore so false is returned
@@ -248,7 +248,7 @@ namespace com.csutil.tests {
         private static void SaveAndLoadTextToFile(FileEntry testFile, string textToSave) {
             testFile.SaveAsText(textToSave);
             Assert.True(testFile.IsNotNullAndExists());
-            Assert.Equal(textToSave, testFile.LoadAs<string>()); // Load again and compare
+            Assert.Equal(textToSave, testFile.LoadAs<string>(null)); // Load again and compare
         }
 
         [Fact]
@@ -260,12 +260,14 @@ namespace com.csutil.tests {
 
             var objToSave = new MyClass1() { myString = "I am a string", myInt = 123 };
             var jsonFile = rootDir.GetChild("MyClass1InAJsonFile.txt");
-            jsonFile.SaveAsJson(objToSave);
-            jsonFile.SaveAsJson(objToSave); // This will override the existing file
-            MyClass1 loadedObj = jsonFile.LoadAs<MyClass1>(); // Load the object again and compare:
+            var jsonWriter = JsonWriter.GetWriter(this);
+            var jsonReader = JsonReader.GetReader(this);
+            jsonFile.SaveAsJson(objToSave,jsonWriter);
+            jsonFile.SaveAsJson(objToSave, jsonWriter); // This will override the existing file
+            MyClass1 loadedObj = jsonFile.LoadAs<MyClass1>(jsonReader); // Load the object again and compare:
             Assert.Equal(objToSave.myString, loadedObj.myString);
             Assert.Equal(objToSave.myInt, loadedObj.myInt);
-            loadedObj = jsonFile.LoadAs<MyClass1>(); // Load the object again and compare:
+            loadedObj = jsonFile.LoadAs<MyClass1>(jsonReader); // Load the object again and compare:
             Assert.Equal(objToSave.myString, loadedObj.myString);
             Assert.Equal(objToSave.myInt, loadedObj.myInt);
             rootDir.DeleteV2();
@@ -332,7 +334,7 @@ namespace com.csutil.tests {
             var f1 = dir1.GetChild("MyFile1.txt");
             f1.SaveAsText("Some text 1 Some text 1");
             f1.SaveAsText("Some text 2");
-            Assert.Equal("Some text 2", f1.LoadAs<string>());
+            Assert.Equal("Some text 2", f1.LoadAs<string>(null));
         }
 
         [Fact]
@@ -373,7 +375,7 @@ namespace com.csutil.tests {
             var dir1 = CreateDirectoryForTesting("TestSpecialCharacters");
             var badChars = "#%&<>{}/\\+*?$!'\":@|=";
             dir1.GetChildDir(badChars).GetChild(badChars).SaveAsText("abc");
-            Assert.Equal("abc", dir1.GetChildDir(badChars).GetChild(badChars).LoadAs<string>());
+            Assert.Equal("abc", dir1.GetChildDir(badChars).GetChild(badChars).LoadAs<string>(null));
         }
 
     }

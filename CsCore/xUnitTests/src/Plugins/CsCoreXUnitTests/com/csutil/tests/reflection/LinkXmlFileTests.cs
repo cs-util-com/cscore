@@ -32,7 +32,7 @@ namespace com.csutil.integrationTests.datastructures {
 
         [Fact]
         public void TestJsonDeserializeWithImmutableList1() {
-            var r = TypedJsonHelper.NewTypedJsonReader();
+            var r = JsonReader.GetReaderTyped(this);
             List<string> b1 = new List<string>() { "a", "b", "c" };
             var json = JsonWriter.GetWriter().Write(b1);
             Log.MethodEntered("TestJsonDeserializeWithImmutableList1", json);
@@ -43,8 +43,8 @@ namespace com.csutil.integrationTests.datastructures {
 
         [Fact]
         public void TestJsonDeserializeWithImmutableList2() {
-            var w = TypedJsonHelper.NewTypedJsonWriter();
-            var r = TypedJsonHelper.NewTypedJsonReader();
+            var w = JsonWriter.GetWriterTyped(this);
+            var r = JsonReader.GetReaderTyped(this);
             ServerOutbox b1 = new ServerOutbox();
             b1.serverActions = ImmutableList<ServerAction>.Empty.Add(new TestAction() { myString1 = "abc" });
             var json = w.Write(b1);

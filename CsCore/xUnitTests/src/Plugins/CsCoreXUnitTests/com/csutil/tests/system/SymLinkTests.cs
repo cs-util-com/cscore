@@ -25,7 +25,7 @@ namespace com.csutil.tests.system {
             f1.GetChild(fileName).SaveAsText(text);
 
             // Check that the change in f1 also shows in the symlinked TargetForFolder1
-            Assert.Equal(text, targetForF1.GetChild(fileName).LoadAs<string>());
+            Assert.Equal(text, targetForF1.GetChild(fileName).LoadAs<string>(null));
         }
 
     }

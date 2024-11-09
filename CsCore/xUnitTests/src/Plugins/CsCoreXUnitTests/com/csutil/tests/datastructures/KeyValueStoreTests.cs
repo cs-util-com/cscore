@@ -282,8 +282,8 @@ namespace com.csutil.tests.keyvaluestore {
 
         [Fact]
         public void TestEnumSetAndGet1() {
-            var jsonReader = TypedJsonHelper.NewTypedJsonReader();
-            var jsonWriter = TypedJsonHelper.NewTypedJsonWriter();
+            var jsonReader = JsonReader.GetReaderTyped(this);
+            var jsonWriter = JsonWriter.GetWriterTyped(this);
 
             var x1 = new ValueWrapper() { value = MyEnum1.state2 };
             var json = jsonWriter.Write(x1);
@@ -360,8 +360,6 @@ namespace com.csutil.tests.keyvaluestore {
 
         [Fact]
         public async Task TestTypesNotLost() {
-
-            TypedJsonHelper.SetupTypedJsonWriterAndReaderSingletons(overrideExisting: true);
             {
                 var ms = new InMemoryKeyValueStore();
                 await TestTypesNotLostWith(ms, ms);
@@ -370,7 +368,6 @@ namespace com.csutil.tests.keyvaluestore {
                 var folder = EnvironmentV2.instance.GetNewInMemorySystem();
                 await TestTypesNotLostWith(new FileBasedKeyValueStore(folder), new FileBasedKeyValueStore(folder));
             }
-            
         }
 
         [Fact]

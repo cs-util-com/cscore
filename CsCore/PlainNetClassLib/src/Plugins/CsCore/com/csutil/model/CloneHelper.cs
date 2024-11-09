@@ -25,8 +25,8 @@ namespace com.csutil {
 
         public static T DeepCopyViaTypedJson<T>(this T objectToDeepCopy) {
             if (objectToDeepCopy == null) { return objectToDeepCopy; }
-            var json = TypedJsonHelper.NewTypedJsonWriter().Write(objectToDeepCopy);
-            return TypedJsonHelper.NewTypedJsonReader().Read<T>(json);
+            var json = JsonWriter.GetWriterTyped(objectToDeepCopy).Write(objectToDeepCopy);
+            return JsonReader.GetReaderTyped(objectToDeepCopy).Read<T>(json);
         }
 
         public static T DeepCopyViaJson<T>(this T objectToDeepCopy) {

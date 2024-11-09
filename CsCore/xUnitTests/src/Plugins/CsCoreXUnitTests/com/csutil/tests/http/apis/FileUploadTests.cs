@@ -106,7 +106,7 @@ namespace com.csutil.integrationTests.http {
             FileEntry fileToUpload = dir.GetChild("test.txt");
             string textInFile = "I am a text";
             fileToUpload.SaveAsText(textInFile);
-            Assert.Equal(textInFile, fileToUpload.LoadAs<string>());
+            Assert.Equal(textInFile, fileToUpload.LoadAs<string>(null));
 
             RestRequest uploadRequest = new Uri("https://file.io/?expires=1d").SendPOST().AddFileViaForm(fileToUpload);
             uploadRequest.WithRequestHeaderUserAgent("" + GuidV2.NewGuid());
@@ -124,8 +124,8 @@ namespace com.csutil.integrationTests.http {
             var downloadRequest = new Uri(result.link).SendGET();
             downloadRequest.WithRequestHeaderUserAgent("" + GuidV2.NewGuid());
             await downloadRequest.DownloadTo(fileToDownloadTo);
-            //Assert.True(textInFile == fileToDownloadTo.LoadAs<string>(), "Invalid textInFile from " + result.link);
-            Assert.Equal(textInFile, fileToDownloadTo.LoadAs<string>());
+            //Assert.True(textInFile == fileToDownloadTo.LoadAs<string>(null), "Invalid textInFile from " + result.link);
+            Assert.Equal(textInFile, fileToDownloadTo.LoadAs<string>(null));
 
         }
 

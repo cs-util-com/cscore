@@ -88,7 +88,7 @@ namespace com.csutil {
                 var dir = EnvironmentV2.instance.GetCurrentDirectory().GetChildDir("Locales");
                 var f = dir.GetChild(localeName);
                 if (!f.Exists) { f = dir.GetChild(localeName + ".json"); }
-                if (f.Exists) { return ConvertToDictionary(f.LoadAs<List<Translation>>()); }
+                if (f.Exists) { return ConvertToDictionary(f.LoadAs<List<Translation>>(JsonReader.GetReader(null))); }
                 throw new FileNotFoundException("Can't load localization file: " + localeName);
             };
         }

@@ -58,8 +58,8 @@ namespace com.csutil.integrationTests.json {
             // Typed json includes the C# assembly types in the json, so works only in a C# only scenario to parse the
             // json string back into the correct C# class
             MySubClass1 x1 = new MySubClass1() { myString = "I am s1", myComplexField2 = new MySubClass1() { myString = "A2" } };
-            string json = TypedJsonHelper.NewTypedJsonWriter().Write(x1);
-            object x2 = TypedJsonHelper.NewTypedJsonReader().Read<object>(json);
+            string json = JsonWriter.GetWriterTyped(this).Write(x1);
+            object x2 = JsonReader.GetReaderTyped(this).Read<object>(json);
             Assert.True(x2 is MySubClass1);
             var x3 = x2 as MySubClass1;
             Assert.Equal(x3.myString, x1.myString);

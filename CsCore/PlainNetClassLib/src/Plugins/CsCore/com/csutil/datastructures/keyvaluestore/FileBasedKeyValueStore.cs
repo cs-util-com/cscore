@@ -61,10 +61,10 @@ namespace com.csutil.keyvaluestore {
             if (fileForKey.IsNotNullAndExists()) {
                 try {
                     if (type.IsPrimitive) {
-                        result = fileForKey.LoadAs<PrimitiveWrapper>().val;
+                        result = fileForKey.LoadAs<PrimitiveWrapper>(JsonReader.GetReaderTyped(this)).val;
                         return true;
                     }
-                    result = fileForKey.LoadAs(type);
+                    result = fileForKey.LoadAs(type, JsonReader.GetReaderTyped(this));
                     return true;
                 }
                 catch (Exception e) { Log.e(e); }
@@ -89,7 +89,7 @@ namespace com.csutil.keyvaluestore {
                 if (objType == typeof(string)) {
                     file.SaveAsText((string)value);
                 } else {
-                    file.SaveAsText(JsonWriter.GetWriter(value).Write(value));
+                    file.SaveAsText(JsonWriter.GetWriterTyped(value).Write(value));
                 }
                 openChanges = FlushOpenChangesIfNeeded(openChanges + 1);
                 return oldVal;

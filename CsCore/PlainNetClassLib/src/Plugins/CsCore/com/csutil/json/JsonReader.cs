@@ -20,7 +20,8 @@ namespace com.csutil {
 
     public static class JsonReader {
 
-        public static IJsonReader GetReader() { return GetReader(new object()); }
+        [Obsolete("Use version where caller has to be provided")]
+        public static IJsonReader GetReader() { return GetReader(null); }
 
         public static IJsonReader GetReader(object caller) {
             return IoC.inject.GetOrAddSingleton<IJsonReader>(caller, () => new JsonNetReader());
@@ -28,6 +29,10 @@ namespace com.csutil {
             //var reader = new JsonNetReader();
             //IoC.inject.RegisterInjector(caller, (_, createIfNull) => reader);
             //return reader;
+        }
+        
+        public static IJsonReaderTyped GetReaderTyped(object caller) {
+            return IoC.inject.GetOrAddSingleton<IJsonReaderTyped>(caller, () => new JsonNetReaderTyped());
         }
 
         /// <summary> this method makes sure that classes provided by the internal json parsing libs are converted 
