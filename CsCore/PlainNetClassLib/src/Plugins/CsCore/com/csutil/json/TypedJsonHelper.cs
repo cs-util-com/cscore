@@ -18,13 +18,13 @@ namespace com.csutil.json {
 
     public static class TypedJsonHelper {
 
-        [Obsolete("Consider using JsonWriter.GetTypedReader() instead", true)]
+        [Obsolete("Consider using JsonWriter.GetTypedReader() instead")]
         public static IJsonReaderTyped NewTypedJsonReader() { return new JsonNetReaderTyped(null); }
 
-        [Obsolete("Consider using JsonWriter.GetTypedWriter() instead", true)]
+        [Obsolete("Consider using JsonWriter.GetTypedWriter() instead")]
         public static IJsonWriterTyped NewTypedJsonWriter() { return new JsonNetWriterTyped(); }
 
-        [Obsolete("Use JsonWriter.GetTypedWriter() and JsonReader.GetTypedReader() instead", true)]
+        [Obsolete("Use JsonWriter.GetTypedWriter() and JsonReader.GetTypedReader() instead")]
         public static void SetupTypedJsonWriterAndReaderSingletons(bool overrideExisting) {
             IoC.inject.SetSingleton<IJsonWriter>(new JsonNetWriter(JsonNetSettings.typedJsonSettings), overrideExisting);
             IoC.inject.SetSingleton<IJsonReader>(new JsonNetReader(JsonNetSettings.typedJsonSettings), overrideExisting);

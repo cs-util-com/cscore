@@ -13,7 +13,7 @@ namespace com.csutil.http {
 
     public class UriRestRequest : RestRequest {
 
-        public IJsonReader jsonReader = JsonReader.GetReader();
+        public IJsonReader jsonReader = JsonReader.GetReader(null);
         public Action<float> onProgress { get; set; }
         public HttpCompletionOption sendAsyncCompletedAfter = HttpCompletionOption.ResponseHeadersRead;
         public Uri uri { get; }

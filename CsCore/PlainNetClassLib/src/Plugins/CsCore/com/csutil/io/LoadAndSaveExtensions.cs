@@ -40,7 +40,7 @@ namespace com.csutil {
             }
         }
 
-        [Obsolete("Use version where IJsonReader is passed as argument", true)]
+        [Obsolete("Use version where IJsonReader is passed as argument")]
         public static T LoadAs<T>(this Stream self) {
             var jsonReader = JsonReader.GetReader();
             return LoadAs<T>(self, jsonReader);
@@ -55,7 +55,7 @@ namespace com.csutil {
             }
         }
 
-        [Obsolete("Use version where IJsonReader is passed as argument", true)]
+        [Obsolete("Use version where IJsonReader is passed as argument")]
         public static object LoadAs(this Stream self, Type t) {
             return LoadAs(self, t, JsonReader.GetReader());
         }
@@ -69,7 +69,7 @@ namespace com.csutil {
             }
         }
 
-        [Obsolete("Use version where IJsonReader is passed as argument", true)]
+        [Obsolete("Use version where IJsonReader is passed as argument")]
         public static void SaveAsJson<T>(this FileInfo self, T objectToSave) {
             SaveAsJson(self, objectToSave, JsonWriter.GetWriter(objectToSave));
         }
@@ -80,7 +80,7 @@ namespace com.csutil {
             }
         }
 
-        [Obsolete("Use version where IJsonWriter is passed as argument", true)]
+        [Obsolete("Use version where IJsonWriter is passed as argument")]
         public static void SaveAsJson<T>(this FileEntry self, T objectToSave, bool asPrettyString = false) {
             SaveAsJson(self, objectToSave, JsonWriter.GetWriter(objectToSave), asPrettyString);
         }
@@ -146,7 +146,7 @@ namespace com.csutil {
             if (resetStreamToStart) { streamToSave.ResetStreamCurserPositionToBeginning(); }
         }
 
-        [Obsolete("Use version where IJsonWriter is passed as argument", true)]
+        [Obsolete("Use version where IJsonWriter is passed as argument")]
         public static void SaveAsJson<T>(this StreamWriter self, T objectToSave) {
             SaveAsJson(self, objectToSave, JsonWriter.GetWriter(objectToSave));
         }
@@ -155,7 +155,7 @@ namespace com.csutil {
             jsonWriter.Write(objectToSave, self);
         }
 
-        [Obsolete("Use version where IJsonReader is passed as argument", true)]
+        [Obsolete("Use version where IJsonReader is passed as argument")]
         /// <summary> This method helps with decrypting the string before parsing it as a json object </summary>
         public static T LoadAsEncyptedJson<T>(this FileInfo self, string jsonEncrKey, Func<T> getDefaultValue) {
             return LoadAsEncyptedJson(self, jsonEncrKey, getDefaultValue, JsonReader.GetReader());
@@ -171,7 +171,7 @@ namespace com.csutil {
             }
         }
 
-        [Obsolete("Use version where IJsonWriter is passed as argument", true)]
+        [Obsolete("Use version where IJsonWriter is passed as argument")]
         public static void SaveAsEncryptedJson<T>(this FileInfo self, T objectToSave, string jsonEncrKey) {
             SaveAsEncryptedJson(self, objectToSave, jsonEncrKey, JsonWriter.GetWriter(objectToSave));
         }

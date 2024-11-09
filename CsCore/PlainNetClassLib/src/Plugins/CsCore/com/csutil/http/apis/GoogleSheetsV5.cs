@@ -54,7 +54,7 @@ namespace com.csutil.http.apis {
         }
 
         private static T ToTypedObject<T>(object o) {
-            var json = JsonWriter.GetWriterTyped(o).Write(o);
+            var json = JsonWriter.GetWriter(o).Write(o);
             return JsonReader.GetReaderTyped(o).Read<T>(json);
         }
 
@@ -75,7 +75,7 @@ namespace com.csutil.http.apis {
             var vCount = values.Count();
             if (nc < vCount) { throw new IndexOutOfRangeException($"Only {nc} names but {vCount} values in row. names={names.ToStringV2(x => x)} but values={values.ToStringV2(x => x)}"); }
             var result = new Dictionary<string, object>();
-            var jsonReader = JsonReader.GetReader();
+            var jsonReader = JsonReader.GetReader(null);
             for (int i = 0; i < vCount; i++) { AddToResult(result, jsonReader, names[i], values[i].Trim()); }
             return result;
         }

@@ -46,7 +46,7 @@ namespace com.csutil.model.jsonschema {
 
         public JsonSchema ToJsonSchema(string modelName, string json) {
             if (schemas.TryGetValue(modelName, out JsonSchema vm)) { return vm; }
-            return NewJsonSchema(modelName, JsonReader.GetReader().Read<JObject>(json));
+            return NewJsonSchema(modelName, JsonReader.GetReader(this).Read<JObject>(json));
         }
 
         private bool GetExistingSchemaFor(Type modelType, out JsonSchema vm) {

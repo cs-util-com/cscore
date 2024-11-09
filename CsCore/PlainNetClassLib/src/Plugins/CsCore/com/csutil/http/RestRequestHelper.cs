@@ -35,7 +35,7 @@ namespace com.csutil {
         }
 
         public static string ToUriEncodedString(object o) {
-            var map = JsonReader.GetReader().Read<Dictionary<string, object>>(JsonWriter.GetWriter(o).Write(o));
+            var map = JsonReader.GetReader(null).Read<Dictionary<string, object>>(JsonWriter.GetWriter(o).Write(o));
             return map.Select((x) => x.Key + "=" + Uri.EscapeDataString("" + x.Value)).Aggregate((a, b) => a + "&" + b);
         }
 

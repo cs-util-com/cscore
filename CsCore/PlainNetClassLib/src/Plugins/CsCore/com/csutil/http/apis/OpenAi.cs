@@ -503,7 +503,7 @@ namespace com.csutil.http.apis {
                 responseText = responseText.Replace("\n```", "");
             }
             try {
-                return JsonReader.GetReader().Read<T>(responseText);
+                return JsonReader.GetReader(null).Read<T>(responseText);
             } catch (Exception e) {
                 Log.e($"Failed to parse the response as json: {responseText}", e);
                 Debugger.Break();
