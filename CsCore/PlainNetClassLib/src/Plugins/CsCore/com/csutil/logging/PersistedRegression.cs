@@ -40,14 +40,14 @@ namespace com.csutil {
             } else {
                 var jsonString = await regressionStore.Get<string>(id, null);
                 var oldJson = JToken.Parse(jsonString);
-                var newJson = JToken.Parse(JsonWriter.GetWriterTyped(objectsToCheck).Write(objectsToCheck));
+                var newJson = JToken.Parse(JsonWriter.GetWriter(objectsToCheck).Write(objectsToCheck));
                 var diff = new JsonDiffPatch().DiffV2(oldJson, newJson);
                 return diff;
             }
         }
 
         private async Task SaveToRegressionStore(string id, object[] objectsToCheck) {
-            var jToken = JToken.Parse(JsonWriter.GetWriterTyped(objectsToCheck).Write(objectsToCheck));
+            var jToken = JToken.Parse(JsonWriter.GetWriter(objectsToCheck).Write(objectsToCheck));
             await regressionStore.Set(id, jToken.ToPrettyString());
         }
 

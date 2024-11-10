@@ -58,7 +58,7 @@ namespace com.csutil.integrationTests.json {
             // Deleting old diff entries is possible like this:
             // await new PersistedRegression().regressionStore.Remove("PersistedRegressionTests_ExampleUsage2");
 
-            var diffInStateWasAccepted = false;
+            bool? diffInStateWasAccepted = null;
             // A filter can be used to remove/filter out acceptable diffs from the report: 
             await new PersistedRegression().AssertEqualToPersisted("PersistedRegressionTests_ExampleUsage2", (diff) => {
                 // Ignore differences in the field 'myChildren.0.myName' (has a random name in it):
@@ -69,6 +69,7 @@ namespace com.csutil.integrationTests.json {
                 diffInStateWasAccepted = false;
                 return true; // For all other diffs confirm that its a non acceptable diff
             }, myState1);
+            Assert.NotNull(diffInStateWasAccepted);
             Assert.True(diffInStateWasAccepted);
 
             // Make sure the regression entry was really created
