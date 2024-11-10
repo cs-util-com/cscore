@@ -8,6 +8,8 @@ namespace com.csutil.http.apis {
     public static class WttrInApi {
 
         public static async Task<Response> GetWeather(string cityName) {
+            Log.d("Getting weather for " + cityName);
+            cityName.ThrowErrorIfNullOrEmpty("cityName");
             var url = new Uri($"https://wttr.in/{cityName}?M&format=j1");
             return await url.SendGET().GetResult<Response>();
         }
@@ -15,6 +17,7 @@ namespace com.csutil.http.apis {
         public static async Task<Response> GetWeather(double latitude, double longitude) {
             var latitudeString = latitude.ToString(CultureInfo.InvariantCulture);
             var longitudeString = longitude.ToString(CultureInfo.InvariantCulture);
+            Log.d("Getting weather for " + latitudeString + "," + longitudeString);
             var url = new Uri($"https://wttr.in/{latitudeString},{longitudeString}?M&format=j1");
             return await url.SendGET().GetResult<Response>();
         }

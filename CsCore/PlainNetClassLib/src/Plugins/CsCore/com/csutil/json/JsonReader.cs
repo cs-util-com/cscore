@@ -24,13 +24,15 @@ namespace com.csutil {
         public static IJsonReader GetReader() { return GetReader(null); }
 
         public static IJsonReader GetReader(object caller) {
-            return IoC.inject.GetOrAddSingleton<IJsonReader>(caller, () => new JsonNetReader());
+            var reader = IoC.inject.GetOrAddSingleton<IJsonReader>(caller, () => new JsonNetReader());
+            AssertV3.IsFalse(reader is IJsonReaderTyped, () => "The injected reader should NOT be of type IJsonReaderTyped");
+            return reader;
             //if (IoC.inject.TryGet(caller, out IJsonReader r)) { return r; }
             //var reader = new JsonNetReader();
             //IoC.inject.RegisterInjector(caller, (_, createIfNull) => reader);
             //return reader;
         }
-        
+
         public static IJsonReaderTyped GetReaderTyped(object caller) {
             return IoC.inject.GetOrAddSingleton<IJsonReaderTyped>(caller, () => new JsonNetReaderTyped());
         }
