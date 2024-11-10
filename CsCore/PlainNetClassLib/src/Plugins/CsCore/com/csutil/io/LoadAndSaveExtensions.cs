@@ -42,8 +42,7 @@ namespace com.csutil {
 
         [Obsolete("Use version where IJsonReader is passed as argument")]
         public static T LoadAs<T>(this Stream self) {
-            var jsonReader = JsonReader.GetReader();
-            return LoadAs<T>(self, jsonReader);
+            return LoadAs<T>(self, JsonReader.GetReader());
         }
 
         public static T LoadAs<T>(this Stream self, IJsonReader jsonReader) {
