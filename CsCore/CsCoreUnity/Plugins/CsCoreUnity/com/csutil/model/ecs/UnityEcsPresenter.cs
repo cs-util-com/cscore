@@ -17,6 +17,25 @@ namespace com.csutil.model.ecs {
 
         public DisposeState IsDisposed { get; private set; }
 
+        /// <summary> The cache of old states that where already applied to the presenters </summary>
+        private readonly Dictionary<string, T> _oldStates = new Dictionary<string, T>();
+
+        /// <summary> Debouncing the ui/view/unity presenter updates is important to not
+        /// hand over half updated states and in general to not have to update the view too often </summary>
+        private readonly Func<IEntity<T>, Task> _updateGoDebounced;
+
+        protected UnityEcsPresenter(int delayInMs = 10) {
+            Func<IEntity<T>, Task> t = (latestEntityState) => {
+                UpdateGoFor(latestEntityState);
+                return Task.CompletedTask;
+            };
+            if (delayInMs <= 0) {
+                _updateGoDebounced = t;
+            } else {
+                _updateGoDebounced = t.AsThrottledDebounceV2(delayInMs, skipFirstEvent: true);
+            }
+        }
+
         public virtual Task OnLoad(EntityComponentSystem<T> model) {
             targetView.ThrowErrorIfNullOrDestroyed("Root GameObject of the ECS presenter");
             var entitiesInRoot = model.Entities.Values.Filter(x => x.ParentId == null);
@@ -33,6 +52,7 @@ namespace com.csutil.model.ecs {
             }
             _entityViews.Clear();
             _entityViews = null;
+            _oldStates.Clear();
             IsDisposed = DisposeState.Disposed;
         }
 
@@ -50,30 +70,37 @@ namespace com.csutil.model.ecs {
         private void OnEntityUpdated(IEntity<T> iEntity, EntityComponentSystem<T>.UpdateType type, T oldstate, T newstate) {
             AssertV3.IsTrue(iEntity.IsAlive(), () => "Entity is not alive");
             var originalStackTrace = StackTraceV2.NewStackTrace();
-            MainThread.Invoke(() => {
-                // If the entity is no longer alive after the main thread switch, ignore the update (except for remove events):
-                var isUpdateInMainThreadStillPossible = iEntity.IsAlive() || type == EntityComponentSystem<T>.UpdateType.Remove;
-                if (isUpdateInMainThreadStillPossible) {
-                    try {
-                        HandleEntityUpdate(iEntity, type, oldstate, newstate);
-                    } catch (Exception e) {
-                        throw e.WithAddedOriginalStackTrace(originalStackTrace);
+            TaskV2.Run(async () => {
+                // Delay initial creation and updates of presenters so that the model is already in a stable state when the presenter is informed
+                await TaskV2.Delay(100);
+                MainThread.Invoke(() => {
+                    if (!this.IsAlive()) { return; }
+                    // If the entity is no longer alive after the main thread switch, ignore the update (except for remove events):
+                    var isUpdateInMainThreadStillPossible = iEntity.IsAlive() || type == EntityComponentSystem<T>.UpdateType.Remove;
+                    if (isUpdateInMainThreadStillPossible) {
+                        try {
+                            HandleEntityUpdate(iEntity, type, oldstate);
+                        } catch (Exception e) {
+                            throw e.WithAddedOriginalStackTrace(originalStackTrace);
+                        }
                     }
-                }
-            });
+                });
+            }).LogOnError();
         }
 
-        private void HandleEntityUpdate(IEntity<T> iEntity, EntityComponentSystem<T>.UpdateType type, T oldstate, T newstate) {
+        private void HandleEntityUpdate(IEntity<T> iEntity, EntityComponentSystem<T>.UpdateType type, T oldstate) {
             switch (type) {
                 case EntityComponentSystem<T>.UpdateType.Add:
                     CreateGoFor(iEntity);
+                    _oldStates.Add(iEntity.Id, iEntity.Data);
                     break;
                 case EntityComponentSystem<T>.UpdateType.Remove:
                     RemoveGoFor(iEntity, oldstate);
+                    _oldStates.Remove(iEntity.Id);
                     break;
                 case EntityComponentSystem<T>.UpdateType.Update:
                 case EntityComponentSystem<T>.UpdateType.TemplateUpdate:
-                    UpdateGoFor(iEntity, oldstate, newstate, type);
+                    _updateGoDebounced(iEntity);
                     break;
                 default: throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
@@ -115,7 +142,14 @@ namespace com.csutil.model.ecs {
             }
         }
 
-        private void UpdateGoFor(IEntity<T> iEntity, T oldState, T newState, EntityComponentSystem<T>.UpdateType type) {
+        private void UpdateGoFor(IEntity<T> iEntity) {
+
+            T newState = iEntity.Data;
+            if (!_oldStates.TryGetValue(newState.Id, out T oldState)) {
+                throw Log.e($"Failed to find old state for entity={iEntity}");
+            }
+            _oldStates[newState.Id] = newState;
+
             var go = _entityViews[iEntity.Id];
             if (go.IsDestroyed()) {
                 throw Log.e($"The entity view for {iEntity.GetFullEcsPathString()} was destroyed");
