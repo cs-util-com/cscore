@@ -1,8 +1,9 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace com.csutil.model.ecs {
 
+    /// <summary> This presenter/view is added for every <see cref="IEntityData"/> to provide access to
+    /// the model from all other components/views added for the component data of that entity. </summary>
     public class EntityView : MonoBehaviour {
 
         public IEntityData IEntity { get; private set; }
