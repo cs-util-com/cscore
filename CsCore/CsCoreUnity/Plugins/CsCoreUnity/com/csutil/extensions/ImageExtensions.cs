@@ -10,8 +10,9 @@ namespace com.csutil {
 
     public static class ImageExtensions {
 
-        public static Sprite ToSprite(this Texture2D self) {
-            return Sprite.Create(self, new Rect(0, 0, self.width, self.height), new Vector2(0.5f, 0.5f));
+        public static Sprite ToSprite(this Texture2D self, SpriteMeshType meshType = SpriteMeshType.FullRect, uint extrude = 0, float pixelsPerUnit = 100) {
+            // Use SpriteMeshType.FullRect:
+            return Sprite.Create(self, new Rect(0, 0, self.width, self.height), new Vector2(0.5f, 0.5f), pixelsPerUnit, extrude, meshType);
         }
 
         public static async Task<Texture2D> LoadTexture2D(this FileEntry self) {
