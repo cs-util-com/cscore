@@ -93,7 +93,7 @@ namespace com.csutil.model.ecs {
         
         [Conditional("DEBUG")]
         private void LogSaveChangesIfThereIsAQueue(T instance) {
-            if (_taskQueue.GetRemainingScheduledTaskCount() > 1) {
+            if (_taskQueue.GetRemainingScheduledTaskCount() > 100) {
                 Log.d($"Saving entity to disk: {instance} with {_taskQueue.GetRemainingScheduledTaskCount()} other tasks in queue");
             }
         }
