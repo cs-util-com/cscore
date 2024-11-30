@@ -24,7 +24,7 @@ namespace com.csutil.model.ecs {
         /// hand over half updated states and in general to not have to update the view too often </summary>
         private readonly Func<IEntity<T>, Task> _updateGoDebounced;
 
-        protected UnityEcsPresenter(int delayInMs = 10) {
+        protected UnityEcsPresenter(int delayInMs = 50) {
             Func<IEntity<T>, Task> t = (latestEntityState) => {
                 UpdateGoFor(latestEntityState);
                 return Task.CompletedTask;
