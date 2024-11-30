@@ -90,10 +90,10 @@ namespace com.csutil.model.ecs {
                 }, maxNrOfRetries: 3, initialExponent: 4);
             });
         }
-        
+
         [Conditional("DEBUG")]
         private void LogSaveChangesIfThereIsAQueue(T instance) {
-            if (_taskQueue.GetRemainingScheduledTaskCount() > 100) {
+            if (_taskQueue.GetRemainingScheduledTaskCount() % 10 == 0) {
                 Log.d($"Saving entity to disk: {instance} with {_taskQueue.GetRemainingScheduledTaskCount()} other tasks in queue");
             }
         }
