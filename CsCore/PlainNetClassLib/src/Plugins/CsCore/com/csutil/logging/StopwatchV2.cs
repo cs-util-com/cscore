@@ -109,12 +109,13 @@ namespace com.csutil {
             }
         }
 
+        //[Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         public void AssertStepUnderXms(int maxTimeInMs, Func<string> stepName, params object[] args) {
             var ms = ElapsedMilliseconds - lastLogStep;
             lastLogStep = ElapsedMilliseconds;
             if (ms > maxTimeInMs) {
                 int p = (int)(ms * 100f / maxTimeInMs);
-                Log.e($"        +> {stepName()} in {methodName} took {p}% ({ms}ms) longer then allowed ({maxTimeInMs}ms)!", args);
+                Log.e($"        +> {stepName()} took {p}% ({ms}ms) longer then allowed ({maxTimeInMs}ms) in {methodName}!", args);
             }
         }
 
