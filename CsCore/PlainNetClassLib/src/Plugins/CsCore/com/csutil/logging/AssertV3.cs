@@ -24,10 +24,11 @@ namespace com.csutil {
         public static Action<string, object[]> onAssertSuccess;
 
         private static void Assert(bool condition, Func<string> errorMsg, object[] args) {
-            args = new StackTrace(2, true).AddTo(args);
             if (!condition) {
+                args = new StackTrace(2, true).AddTo(args);
                 Fail(errorMsg(), args);
             } else if (onAssertSuccess != null) {
+                args = new StackTrace(2, true).AddTo(args);
                 onAssertSuccess(errorMsg(), args); // If callback set inform it on success
             }
         }
