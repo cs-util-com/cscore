@@ -24,12 +24,10 @@ namespace com.csutil {
 
         // From https://stackoverflow.com/a/863944/165106
         public static bool IsPrimitiveOrSimple(this Type t) {
-            if (t.IsPrimitive || t.IsEnum || t.Equals(typeof(string)) || t.Equals(typeof(decimal))) { return true; }
-            var info = t.GetTypeInfo();
+            if (t.IsPrimitive || t.IsEnum || t == typeof(string) || t == typeof(decimal)) { return true; }
             // nullable type, check if the nested type is simple:
-            if (info.IsGenericType && info.GetGenericTypeDefinition() == typeof(Nullable<>)) {
-                return IsPrimitiveOrSimple(info.GetGenericArguments()[0]);
-            }
+            var underlyingType = Nullable.GetUnderlyingType(t);
+            if (underlyingType != null) { return IsPrimitiveOrSimple(underlyingType); }
             return false;
         }
 
