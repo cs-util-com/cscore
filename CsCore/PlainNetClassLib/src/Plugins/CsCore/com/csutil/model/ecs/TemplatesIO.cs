@@ -25,13 +25,17 @@ namespace com.csutil.model.ecs {
         /// these need to be combined with all parent entities to get the full entity data </summary>
         private readonly Dictionary<string, JToken> EntityCache = new Dictionary<string, JToken>();
 
-        private static JsonSerializer defaultSerializer = JsonSerializer.Create(JsonNetSettings.typedJsonSettings);
-        private Func<JsonSerializer> GetJsonSerializer = () => defaultSerializer;
+        private Func<JsonSerializer> GetJsonSerializer;
         private readonly BackgroundTaskQueue _taskQueue;
 
-        public TemplatesIO(DirectoryEntry entityDir) {
+        public TemplatesIO(DirectoryEntry entityDir, JsonSerializerSettings jsonSettings)
+            : this(entityDir, JsonSerializer.Create(jsonSettings)) {
+        }
+
+        public TemplatesIO(DirectoryEntry entityDir, JsonSerializer jsonSerializer) {
             _entityDir = entityDir;
             _taskQueue = BackgroundTaskQueue.NewBackgroundTaskQueue(1);
+            GetJsonSerializer = () => jsonSerializer;
         }
 
         public void Dispose() {
@@ -45,10 +49,6 @@ namespace com.csutil.model.ecs {
             GetJsonSerializer = newSerializer;
         }
 
-        public void SetJsonSerializer(JsonSerializer newSerializer) {
-            GetJsonSerializer = () => newSerializer;
-        }
-
         /// <summary> Loads all template files from disk into memory </summary>
         public async Task LoadAllTemplateFilesIntoMemory() {
             this.ThrowErrorIfDisposed();
@@ -59,7 +59,7 @@ namespace com.csutil.model.ecs {
             }
             await Task.WhenAll(tasks);
         }
-        
+
         public async Task<List<T>> LoadAllEntitiesFromDisk() {
             this.ThrowErrorIfDisposed();
             await LoadAllTemplateFilesIntoMemory();
