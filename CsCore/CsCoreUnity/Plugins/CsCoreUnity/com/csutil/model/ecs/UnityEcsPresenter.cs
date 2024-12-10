@@ -125,7 +125,7 @@ namespace com.csutil.model.ecs {
             iEntity.LocalPose().ApplyTo(go.transform);
             go.SetActive(iEntity.IsActiveSelf());
             foreach (var x in iEntity.Components) {
-                OnComponentAdded(iEntity, x, targetParentGo: go);
+                OnComponentAdded(iEntity, x.Value, targetParentGo: go);
             }
         }
 
@@ -175,9 +175,9 @@ namespace com.csutil.model.ecs {
                 OnToggleActiveState(go, newIsActiveState);
             }
             var oldComps = oldState.Components;
-            newState.Components.CalcEntryChangesToOldStateV2<IReadOnlyDictionary<string, IComponentData>, string, IComponentData>(ref oldComps,
-                added => OnComponentAdded(iEntity, added, targetParentGo: go),
-                (_, updated) => OnComponentUpdated(iEntity, oldState.Components[updated.Key], updated, targetParentGo: go),
+            newState.Components.CalcEntryChangesToOldStateV4<IReadOnlyDictionary<string, IComponentData>, string, IComponentData>(ref oldComps,
+                (key, added) => OnComponentAdded(iEntity, added, targetParentGo: go),
+                (key, old, updated) => OnComponentUpdated(iEntity, key, oldState.Components[key], updated, targetParentGo: go),
                 deleted => OnComponentRemoved(iEntity, deleted, targetParentGo: go)
             );
         }
@@ -200,19 +200,19 @@ namespace com.csutil.model.ecs {
             newLocalPose.ApplyTo(go.transform);
         }
 
-        protected virtual void OnComponentAdded(IEntity<T> iEntity, KeyValuePair<string, IComponentData> added, GameObject targetParentGo) {
-            var createdComponent = AddComponentTo(targetParentGo, added.Value, iEntity);
+        protected virtual void OnComponentAdded(IEntity<T> iEntity, IComponentData added, GameObject targetParentGo) {
+            var createdComponent = AddComponentTo(targetParentGo, added, iEntity);
             if (createdComponent == null) {
                 //Log.d($"AddComponentTo returned NULL for component={added.Value} and targetParentGo={targetParentGo}", targetParentGo);
             } else {
-                createdComponent.ComponentId = added.Value.GetId();
+                createdComponent.ComponentId = added.GetId();
                 if (createdComponent is Behaviour mono) {
                     mono.enabled = true; // Force to trigger onEnable once (often needed by presenters to init some values)
-                    if (mono.enabled != added.Value.IsActive) {
-                        mono.enabled = added.Value.IsActive;
+                    if (mono.enabled != added.IsActive) {
+                        mono.enabled = added.IsActive;
                     }
                 }
-                createdComponent.OnUpdateUnityComponent(iEntity, default, added.Value);
+                createdComponent.OnUpdateUnityComponent(iEntity, default, added);
             }
         }
 
@@ -252,12 +252,12 @@ namespace com.csutil.model.ecs {
             return _entityViews[iEntity.Id].GetComponentsInOwnEcsPresenterChildren<IComponentPresenter<T>>(iEntity, includeInactive: true);
         }
 
-        protected virtual void OnComponentUpdated(IEntity<T> iEntity, IComponentData oldState, KeyValuePair<string, IComponentData> updatedState, GameObject targetParentGo) {
-            if (TryGetComponentPresenter(iEntity, updatedState.Key, out var compView)) {
+        protected virtual void OnComponentUpdated(IEntity<T> iEntity, string key, IComponentData oldState, IComponentData updatedState, GameObject targetParentGo) {
+            if (TryGetComponentPresenter(iEntity, key, out var compView)) {
                 if (compView is Behaviour mono) {
-                    mono.enabled = updatedState.Value.IsActive;
+                    mono.enabled = updatedState.IsActive;
                 }
-                compView.OnUpdateUnityComponent(iEntity, oldState, updatedState.Value);
+                compView.OnUpdateUnityComponent(iEntity, oldState, updatedState);
             }
         }
 
