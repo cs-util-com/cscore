@@ -11,7 +11,7 @@ namespace com.csutil {
         private long memoryAtStart;
         private long memoryAtStop;
         public string methodName;
-        public Action onDispose;
+        public Action<Stopwatch> onDispose;
         private long lastLogStep = 0;
 
         public bool doMemoryLogging = false;
@@ -28,10 +28,9 @@ namespace com.csutil {
             return true; // In all other environments logging memory usage is fine
         }
 
-        public StopwatchV2([CallerMemberName] string methodName = null, Action onDispose = null) {
+        public StopwatchV2(Action<Stopwatch> onDispose, [CallerMemberName] string methodName = null) {
             this.methodName = methodName;
             this.onDispose = onDispose;
-            if (this.onDispose == null) { this.onDispose = () => Log.MethodDone(this); }
         }
 
         public long allocatedManagedMemBetweenStartAndStop { get { return managedMemoryAtStop - managedMemoryAtStart; } }
@@ -56,7 +55,7 @@ namespace com.csutil {
         }
 
         public static StopwatchV2 StartNewV2([CallerMemberName] string methodName = null) {
-            return new StopwatchV2(methodName).StartV2();
+            return new StopwatchV2(onDispose: t => Log.MethodDone(t), methodName).StartV2();
         }
 
         public void StopV2() {
@@ -102,6 +101,7 @@ namespace com.csutil {
 
         [Conditional("DEBUG"), Conditional("ENFORCE_FULL_LOGGING")]
         public void LogStep(string stepName, string prefix = "        +> ", int skipIfBelowXMs = 10) {
+            this.ThrowErrorIfDisposed();
             var diff = ElapsedMilliseconds - lastLogStep;
             lastLogStep = ElapsedMilliseconds;
             if (diff > skipIfBelowXMs) {
@@ -109,22 +109,44 @@ namespace com.csutil {
             }
         }
 
-        //[Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
-        public void AssertStepUnderXms(int maxTimeInMs, Func<string> stepName, params object[] args) {
-            var ms = ElapsedMilliseconds - lastLogStep;
-            lastLogStep = ElapsedMilliseconds;
-            if (ms > maxTimeInMs) {
-                int p = (int)(ms * 100f / maxTimeInMs);
-                Log.e($"        +> {stepName()} took {p}% ({ms}ms) longer then allowed ({maxTimeInMs}ms) in {methodName}!", args);
+        private int latestMaxTimeInMs;
+        private Func<string> latestStepName;
+        private object[] latestArgs;
+        private long startTime;
+
+        public void CompleteLatestStep() {
+            if (latestStepName != null) {
+                var ms = ElapsedMilliseconds - startTime;
+                if (ms > latestMaxTimeInMs) {
+                    int p = (int)(ms * 100f / latestMaxTimeInMs);
+                    Log.e($"        +> {latestStepName()} took {p}% ({ms}ms) longer then allowed ({latestMaxTimeInMs}ms) in {methodName}!", latestArgs);
+                }
+                latestStepName = null;
             }
         }
-        
+
+        public Action<Func<string>, long, int, object[]> OnStepStart { get; set; }
+
+        [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
+        public void AssertNextStepUnderXms(int maxTimeInMs, Func<string> stepName, params object[] args) {
+            this.ThrowErrorIfDisposed();
+            // First complete the previous step:
+            CompleteLatestStep();
+            // Then store the values for the next/new step:
+            latestMaxTimeInMs = maxTimeInMs;
+            latestStepName = stepName;
+            latestArgs = args;
+            startTime = ElapsedMilliseconds;
+            OnStepStart?.Invoke(latestStepName, startTime, latestMaxTimeInMs, latestArgs);
+        }
+
         public DisposeState IsDisposed { get; private set; } = DisposeState.Active;
 
         public void Dispose() {
             if (IsDisposed != DisposeState.Active) { return; }
+            CompleteLatestStep();
             IsDisposed = DisposeState.DisposingStarted;
-            onDispose?.Invoke();
+            onDispose?.Invoke(this);
             IsDisposed = DisposeState.Disposed;
         }
 

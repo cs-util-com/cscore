@@ -184,7 +184,6 @@ namespace com.csutil {
             Assert(value <= upperBound, () => $"Assert.IsInRange() FAILED: {varName}={value} is ABOVE upper bound=" + upperBound, args);
         }
 
-        public static StopwatchV2 TrackTiming([CallerMemberName] string methodName = null) { return new StopwatchV2(methodName).StartV2(); }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         public static void AssertUnderXms(this Stopwatch self, int maxTimeInMs, params object[] args) {

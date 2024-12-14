@@ -42,6 +42,14 @@ namespace com.csutil.logging {
             return loggers.Map(l => l.BeginThreadProfiling()).Filter(x => x != null).ToList().Single();
         }
         
+        public StopwatchV2 TrackTiming(string methodName, Action<Stopwatch> onDispose) {
+            IEnumerable<StopwatchV2> list = loggers.Map(l => l.TrackTiming(methodName, onDispose)).Filter(x => x != null).ToList();
+            if (list.Count() > 1) {
+                list = list.Filter(x => x.OnStepStart != null);
+            }
+            return list.FirstOrDefault();
+        }
+
     }
 
 }

@@ -106,6 +106,10 @@ namespace com.csutil {
             }
         }
 
+        public static StopwatchV2 TrackTiming([CallerMemberName] string methodName = null, Action<Stopwatch> onDispose = null) {
+            return instance.TrackTiming(methodName, onDispose);
+        }
+
     }
 
     public static class LogExtensions {

@@ -15,6 +15,8 @@ namespace com.csutil.logging {
 
         StopwatchV2 BeginThreadProfiling();
         
+        StopwatchV2 TrackTiming(string methodName, Action<Stopwatch> onDispose);
+
     }
 
 }
