@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace com.csutil {
 
-    public class StopwatchV2 : Stopwatch, IDisposable {
+    public class StopwatchV2 : Stopwatch, IDisposableV2 {
 
         private long managedMemoryAtStart;
         private long managedMemoryAtStop;
@@ -118,8 +118,15 @@ namespace com.csutil {
                 Log.e($"        +> {stepName()} took {p}% ({ms}ms) longer then allowed ({maxTimeInMs}ms) in {methodName}!", args);
             }
         }
+        
+        public DisposeState IsDisposed { get; private set; } = DisposeState.Active;
 
-        public void Dispose() { onDispose?.Invoke(); }
+        public void Dispose() {
+            if (IsDisposed != DisposeState.Active) { return; }
+            IsDisposed = DisposeState.DisposingStarted;
+            onDispose?.Invoke();
+            IsDisposed = DisposeState.Disposed;
+        }
 
     }
 
