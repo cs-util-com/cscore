@@ -38,7 +38,16 @@ namespace com.csutil {
             return IoC.inject.GetOrAddSingleton<TaskV2>(null).RunTask(asyncAction);
         }
 
-        protected virtual Task RunTask(Func<Task> asyncAction) { return Task.Run(asyncAction); }
+        protected virtual Task RunTask(Func<Task> asyncAction) {
+#if UNITY_EDITOR
+            return Task.Run<Task>(() => {
+                using var t = Log.BeginThreadProfiling();
+                t.ThrowErrorIfNull("StopwatchV2");
+                return asyncAction();
+            });
+#endif
+            return Task.Run(asyncAction);
+        }
 
         public static Task Run(Func<Task> asyncAction, CancellationTokenSource cancel, TaskScheduler scheduler) {
             return IoC.inject.GetOrAddSingleton<TaskV2>(null).RunTask(asyncAction, cancel, scheduler);
