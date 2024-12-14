@@ -19,7 +19,12 @@ namespace Xunit {
 
         public static void True(bool? b, string msg = null) {
             if (b is null) { throw new AssertException("Passed in boolean was null"); }
-            if (!b.Value) { throw (msg != null) ? new AssertException(msg) : new AssertException(); }
+            if (!b.Value) { throw (msg != null) ? LogE(new AssertException(msg)) : LogE(new AssertException()); }
+        }
+
+        private static AssertException LogE(AssertException e) {
+            Log.e(e);
+            return e;
         }
 
         public static void False(bool? b, string msg = null) {

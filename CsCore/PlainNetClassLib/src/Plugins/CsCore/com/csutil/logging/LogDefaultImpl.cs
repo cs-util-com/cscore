@@ -99,8 +99,13 @@ namespace com.csutil.logging {
             Log.d(text, new StackFrame(1, true).AddTo(args));
             if (maxAllowedTimeInMs > 0) { timing.AssertUnderXms(maxAllowedTimeInMs); }
         }
-        
-        public virtual StopwatchV2 BeginThreadProfiling() { return null; }
+
+        public virtual StopwatchV2 BeginThreadProfiling() {
+            #if UNITY_EDITOR
+            throw Log.e("The default log implementation of BeginThreadProfiling should never be called in a Unity context");
+            #endif
+            return null;
+        }
         
     }
 
