@@ -40,7 +40,7 @@ namespace com.csutil {
 
         protected virtual Task RunTask(Func<Task> asyncAction) {
 #if UNITY_EDITOR
-            return Task.Run<Task>(() => {
+            return Task.Run(() => {
                 using var t = Log.BeginThreadProfiling();
                 t.ThrowErrorIfNull("StopwatchV2");
                 return asyncAction();
