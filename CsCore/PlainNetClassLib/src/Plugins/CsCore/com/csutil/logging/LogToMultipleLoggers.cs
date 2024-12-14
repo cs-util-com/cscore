@@ -38,6 +38,10 @@ namespace com.csutil.logging {
             foreach (var l in loggers) { l.LogMethodDone(timing, args, maxAllowedTimeInMs, sourceMemberName, sourceFilePath, sourceLineNumber); }
         }
 
+        public virtual StopwatchV2 BeginThreadProfiling() {
+            return loggers.Map(l => l.BeginThreadProfiling()).Filter(x => x != null).ToList().Single();
+        }
+        
     }
 
 }

@@ -99,6 +99,9 @@ namespace com.csutil.logging {
             Log.d(text, new StackFrame(1, true).AddTo(args));
             if (maxAllowedTimeInMs > 0) { timing.AssertUnderXms(maxAllowedTimeInMs); }
         }
+        
+        public virtual StopwatchV2 BeginThreadProfiling() { return null; }
+        
     }
 
 }

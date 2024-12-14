@@ -55,6 +55,15 @@ namespace com.csutil.logging {
             base.LogMethodDone(timing, args, maxAllowedTimeInMs, sourceMemberName, sourceFilePath, sourceLineNumber);
         }
 
+        private int backgroundThreadCounter = 0;
+
+        public override StopwatchV2 BeginThreadProfiling() {
+            Profiler.BeginThreadProfiling("Background Threads", "Task Thread " + ++backgroundThreadCounter);
+            return new StopwatchV2(onDispose: () => {
+                Profiler.EndThreadProfiling();
+            });
+        }
+
     }
 
 }

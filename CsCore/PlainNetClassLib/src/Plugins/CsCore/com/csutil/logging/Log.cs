@@ -53,6 +53,10 @@ namespace com.csutil {
 
         private static T Get<T>(this object[] args) { return args != null ? (T)args.FirstOrDefault(x => x is T) : default(T); }
 
+        public static StopwatchV2 BeginThreadProfiling() {
+            return instance.BeginThreadProfiling();
+        }
+        
         public static StopwatchV2 MethodEntered([CallerMemberName] string methodName = null, params object[] args) {
             return instance.LogMethodEntered(methodName, args);
         }
