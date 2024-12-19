@@ -9,6 +9,20 @@ namespace com.csutil {
         public const double radToDegree = 180d / Math.PI;
         private const double halfPi = Math.PI / 2d;
 
+        public static Quaternion CreateFromYawRotInDegreeAroundUpAxis(float yawRotInDegreeAroundUpAxis) {
+            return CreateFromRotationAnglesInDegree(yawRotInDegreeAroundUpAxis, 0, 0);
+        }
+        
+        public static Quaternion CreateFromRotationAnglesInDegree(float yawRotInDegreeAroundUpAxis, float pitchRotInDegreeAroundUpDownAxis, float rollRotInDegreeAroundBarelRollAxis) {
+            return CreateFromRotationAnglesInRad((float)(yawRotInDegreeAroundUpAxis * degreeToRad),
+                (float)(pitchRotInDegreeAroundUpDownAxis * degreeToRad),
+                (float)(rollRotInDegreeAroundBarelRollAxis * degreeToRad));
+        }
+
+        public static Quaternion CreateFromRotationAnglesInRad(float yawRotInRadAroundUpAxis, float pitchRotInRadAroundUpDownAxis, float rollRotInRadAroundBarrelRollAxis) {
+            return Quaternion.CreateFromYawPitchRoll(yawRotInRadAroundUpAxis, pitchRotInRadAroundUpDownAxis, rollRotInRadAroundBarrelRollAxis);
+        }
+
         public static bool Equals(this Quaternion q1, Quaternion q2, int digits) {
             return Math.Round(q1.X, digits) == Math.Round(q2.X, digits)
                 && Math.Round(q1.Y, digits) == Math.Round(q2.Y, digits)
@@ -29,10 +43,12 @@ namespace com.csutil {
         }
 
         public static Matrix4x4 ToMatrix4X4(this Quaternion self) { return Matrix4x4.CreateFromQuaternion(self); }
-        
+
         /// <summary> diff * q1 = q2  --->  diff = q2 * inverse(q1) </summary>
         public static Quaternion GetRotationDeltaTo(this Quaternion q1, Quaternion q2) { return Quaternion.Inverse(q1) * q2; }
 
+        public static Quaternion Inverse(this Quaternion self) { return Quaternion.Inverse(self); }
+        
         /// <summary>
         /// Returns pitch, yaw, roll in degrees
         /// - Yaw is the rotation around the up axis (compass heading)
