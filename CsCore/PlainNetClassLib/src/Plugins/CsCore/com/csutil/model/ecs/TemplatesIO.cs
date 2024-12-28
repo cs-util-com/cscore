@@ -34,7 +34,7 @@ namespace com.csutil.model.ecs {
 
         public TemplatesIO(DirectoryEntry entityDir, JsonSerializer jsonSerializer) {
             _entityDir = entityDir;
-            _taskQueue = BackgroundTaskQueue.NewBackgroundTaskQueue(1);
+            _taskQueue = BackgroundTaskQueue.NewBackgroundTaskQueueV2(1);
             GetJsonSerializer = () => jsonSerializer;
         }
 

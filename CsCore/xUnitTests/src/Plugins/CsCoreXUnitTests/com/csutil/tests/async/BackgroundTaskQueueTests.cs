@@ -15,7 +15,7 @@ namespace com.csutil.integrationTests.async {
         [Fact]
         public async Task ExampleUsage1() {
 
-            using var taskQueue = BackgroundTaskQueue.NewBackgroundTaskQueue(maxConcurrencyLevel: 1);
+            using var taskQueue = BackgroundTaskQueue.NewBackgroundTaskQueueV2(maxConcurrencyLevel: 1);
 
             // Create both tasks at the same time:
             Task t1 = taskQueue.Run(SomeAsyncTask1);
@@ -43,7 +43,7 @@ namespace com.csutil.integrationTests.async {
         [Fact]
         public async Task TestConcurrency2() {
 
-            using var taskQueue = BackgroundTaskQueue.NewBackgroundTaskQueue(maxConcurrencyLevel: 2);
+            using var taskQueue = BackgroundTaskQueue.NewBackgroundTaskQueueV2(maxConcurrencyLevel: 2);
             taskQueue.ProgressListener = new ProgressV2("Progress Listener", 0);
 
             // Create both tasks at the same time:
@@ -69,7 +69,7 @@ namespace com.csutil.integrationTests.async {
         [Fact]
         public async Task TestCancelRequest() {
 
-            using var taskQueue = BackgroundTaskQueue.NewBackgroundTaskQueue(maxConcurrencyLevel: 1);
+            using var taskQueue = BackgroundTaskQueue.NewBackgroundTaskQueueV2(maxConcurrencyLevel: 1);
 
             // Create both tasks at the same time:
             Task t1 = taskQueue.Run(SomeAsyncTask1);
@@ -97,7 +97,7 @@ namespace com.csutil.integrationTests.async {
         [Fact]
         public async Task TestCancelRequestWithCustomTokenSource() {
 
-            using var taskQueue = BackgroundTaskQueue.NewBackgroundTaskQueue(maxConcurrencyLevel: 1);
+            using var taskQueue = BackgroundTaskQueue.NewBackgroundTaskQueueV2(maxConcurrencyLevel: 1);
             {
                 var t = new CancellationTokenSource();
                 Task t1 = taskQueue.Run(SomeAsyncTask1, t);
