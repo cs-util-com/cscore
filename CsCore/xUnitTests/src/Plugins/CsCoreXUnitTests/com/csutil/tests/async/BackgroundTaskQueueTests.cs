@@ -78,17 +78,15 @@ namespace com.csutil.integrationTests.async {
 
             taskQueue.CancelAllOpenTasks();
             // Awaiting the canceled queue will throw a TaskCanceledException:
-            var exceptions = await Assert.ThrowsAsync<AggregateException>(async () => {
+            var exceptions = await Assert.ThrowsAsync<OperationCanceledException>(async () => {
                 await taskQueue.WhenAllTasksCompleted();
             });
 
-            var innerExceptions = exceptions.InnerExceptions.Cast<TaskCanceledException>();
-            Assert.Single(innerExceptions);
 
             // The first task was started but then canceled while it was already running:
-            Assert.False(t1.IsCanceled);
+            Assert.True(t1.IsCanceled);
             Assert.False(t1.IsCompletedSuccessfully);
-            Assert.True(t1.IsFaulted);
+            Assert.False(t1.IsFaulted);
 
             // The other 2 were canceled before they started:
             Assert.True(t2.IsCanceled);
@@ -108,10 +106,9 @@ namespace com.csutil.integrationTests.async {
 
                 t.Cancel();
                 // Since t1 is already running when cancel is called an aggregate exception is created and t1 is set to faulted:
-                var e = await Assert.ThrowsAsync<AggregateException>(() => Task.WhenAll(t1, t2, t3));
-                Assert.IsType<TaskCanceledException>(e.InnerExceptions.Single());
+                await Assert.ThrowsAsync<OperationCanceledException>(() => Task.WhenAll(t1, t2, t3));
 
-                Assert.True(t1.IsFaulted);
+                Assert.True(t1.IsCanceled);
                 Assert.True(t2.IsCanceled);
                 Assert.True(t3.IsCompletedSuccessfull()); // Only t1 and t2 are canceled by the custom token source
             }
@@ -123,10 +120,9 @@ namespace com.csutil.integrationTests.async {
 
                 t.Cancel();
                 // Since t2 is already running when cancel is called an aggregate exception is created and t2 is set to faulted:
-                var e = await Assert.ThrowsAsync<AggregateException>(() => Task.WhenAll(t1, t2, t3));
-                Assert.IsType<TaskCanceledException>(e.InnerExceptions.Single());
+                await Assert.ThrowsAsync<OperationCanceledException>(() => Task.WhenAll(t1, t2, t3));
                 Assert.True(t1.IsCompletedSuccessfull()); // Only t2 and t3 are canceled by the custom token source
-                Assert.True(t2.IsFaulted);
+                Assert.True(t2.IsCanceled);
                 Assert.True(t3.IsCanceled);
             }
             {
@@ -151,9 +147,8 @@ namespace com.csutil.integrationTests.async {
 
                 taskQueue.CancelAllOpenTasks(); // Canceling all tasks via the task queue is still possible
 
-                var e = await Assert.ThrowsAsync<AggregateException>(() => Task.WhenAll(t1, t2, t3));
-                Assert.IsType<TaskCanceledException>(e.InnerExceptions.Single());
-                Assert.True(t1.IsFaulted);
+                var e = await Assert.ThrowsAsync<OperationCanceledException>(() => Task.WhenAll(t1, t2, t3));
+                Assert.True(t1.IsCanceled);
                 Assert.True(t2.IsCanceled);
                 Assert.True(t3.IsCanceled);
             }

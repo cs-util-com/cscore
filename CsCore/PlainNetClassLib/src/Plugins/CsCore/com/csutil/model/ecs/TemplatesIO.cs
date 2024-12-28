@@ -26,7 +26,7 @@ namespace com.csutil.model.ecs {
         private readonly Dictionary<string, JToken> EntityCache = new Dictionary<string, JToken>();
 
         private Func<JsonSerializer> GetJsonSerializer;
-        private readonly BackgroundTaskQueue _taskQueue;
+        private readonly IBackgroundTaskQueue _taskQueue;
 
         public TemplatesIO(DirectoryEntry entityDir, JsonSerializerSettings jsonSettings)
             : this(entityDir, JsonSerializer.Create(jsonSettings)) {

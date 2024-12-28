@@ -8,10 +8,11 @@ using System.Threading.Tasks.Schedulers;
 
 namespace com.csutil {
 
-    public class BackgroundTaskQueue : IDisposable {
+    public class BackgroundTaskQueue : IBackgroundTaskQueue {
 
-        public static BackgroundTaskQueue NewBackgroundTaskQueue(int maxConcurrencyLevel) {
-            return new BackgroundTaskQueue(new QueuedTaskScheduler(TaskScheduler.Default, maxConcurrencyLevel), new CancellationTokenSource());
+        public static IBackgroundTaskQueue NewBackgroundTaskQueue(int maxConcurrencyLevel) {
+            return new BackgroundTaskQueueV2(maxConcurrencyLevel);
+            // return new BackgroundTaskQueue(new QueuedTaskScheduler(TaskScheduler.Default, maxConcurrencyLevel), new CancellationTokenSource());
         }
 
         public TaskScheduler Scheduler { get; }
