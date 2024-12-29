@@ -15,7 +15,7 @@ namespace com.csutil.integrationTests.async {
         [Fact]
         public async Task ExampleUsage1() {
 
-            using var taskQueue = BackgroundTaskQueue.NewBackgroundTaskQueueV2(maxConcurrencyLevel: 1);
+            using var taskQueue = BackgroundTaskQueue.NewBackgroundTaskQueue(maxConcurrencyLevel: 1);
 
             // Create both tasks at the same time:
             Task t1 = taskQueue.Run(SomeAsyncTask1);
@@ -43,7 +43,7 @@ namespace com.csutil.integrationTests.async {
         [Fact]
         public async Task TestConcurrency2() {
 
-            using var taskQueue = BackgroundTaskQueue.NewBackgroundTaskQueueV2(maxConcurrencyLevel: 2);
+            using var taskQueue = BackgroundTaskQueue.NewBackgroundTaskQueue(maxConcurrencyLevel: 2);
             taskQueue.ProgressListener = new ProgressV2("Progress Listener", 0);
 
             // Create both tasks at the same time:
@@ -91,7 +91,7 @@ namespace com.csutil.integrationTests.async {
         [Fact]
         public async Task TestCancelRequest() {
 
-            using var taskQueue = BackgroundTaskQueue.NewBackgroundTaskQueueV2(maxConcurrencyLevel: 1);
+            using var taskQueue = BackgroundTaskQueue.NewBackgroundTaskQueue(maxConcurrencyLevel: 1);
 
             // Create both tasks at the same time:
             Task t1 = taskQueue.Run(SomeAsyncTask1);
@@ -119,7 +119,7 @@ namespace com.csutil.integrationTests.async {
         [Fact]
         public async Task TestCancelRequestWithCustomTokenSource() {
 
-            using var taskQueue = BackgroundTaskQueue.NewBackgroundTaskQueueV2(maxConcurrencyLevel: 1);
+            using var taskQueue = BackgroundTaskQueue.NewBackgroundTaskQueue(maxConcurrencyLevel: 1);
             {
                 var t = new CancellationTokenSource();
                 Task t1 = taskQueue.Run(SomeAsyncTask1, t);
@@ -127,10 +127,11 @@ namespace com.csutil.integrationTests.async {
                 Task<string> t3 = taskQueue.Run(SomeAsyncTask2);
 
                 t.Cancel();
-                // Since t1 is already running when cancel is called, we expect OperationCanceledException:
-                await Assert.ThrowsAsync<TaskCanceledException>(() => Task.WhenAll(t1, t2, t3));
+                // Since t1 is already running when cancel is called an aggregate exception is created and t1 is set to faulted:
+                var e = await Assert.ThrowsAsync<AggregateException>(() => Task.WhenAll(t1, t2, t3));
+                Assert.IsType<TaskCanceledException>(e.InnerExceptions.Single());
 
-                Assert.True(t1.IsCanceled);
+                Assert.True(t1.IsFaulted);
                 Assert.True(t2.IsCanceled);
                 Assert.True(t3.IsCompletedSuccessfull()); // Only t1 and t2 are canceled by the custom token source
             }
@@ -141,9 +142,11 @@ namespace com.csutil.integrationTests.async {
                 Task t1 = taskQueue.Run(SomeAsyncTask1);
 
                 t.Cancel();
-                await Assert.ThrowsAsync<TaskCanceledException>(() => Task.WhenAll(t1, t2, t3));
-                Assert.True(t1.IsCompletedSuccessfull());
-                Assert.True(t2.IsCanceled);
+                // Since t2 is already running when cancel is called an aggregate exception is created and t2 is set to faulted:
+                var e = await Assert.ThrowsAsync<AggregateException>(() => Task.WhenAll(t1, t2, t3));
+                Assert.IsType<TaskCanceledException>(e.InnerExceptions.Single());
+                Assert.True(t1.IsCompletedSuccessfull()); // Only t2 and t3 are canceled by the custom token source
+                Assert.True(t2.IsFaulted);
                 Assert.True(t3.IsCanceled);
             }
             {
@@ -153,8 +156,10 @@ namespace com.csutil.integrationTests.async {
                 Task<string> t3 = taskQueue.Run(SomeAsyncTask2, t);
 
                 t.Cancel();
+
+                // Since t2 is not yet running when cancel is called both tasks are set to canceled:
                 await Assert.ThrowsAsync<TaskCanceledException>(() => Task.WhenAll(t1, t2, t3));
-                Assert.True(t1.IsCompletedSuccessfull());
+                Assert.True(t1.IsCompletedSuccessfull()); // Only t2 and t3 are canceled by the custom token source
                 Assert.True(t2.IsCanceled);
                 Assert.True(t3.IsCanceled);
             }
@@ -166,8 +171,9 @@ namespace com.csutil.integrationTests.async {
 
                 taskQueue.CancelAllOpenTasks(); // Canceling all tasks via the task queue is still possible
 
-                var e = await Assert.ThrowsAsync<OperationCanceledException>(() => Task.WhenAll(t1, t2, t3));
-                Assert.True(t1.IsCanceled);
+                var e = await Assert.ThrowsAsync<AggregateException>(() => Task.WhenAll(t1, t2, t3));
+                Assert.IsType<TaskCanceledException>(e.InnerExceptions.Single());
+                Assert.True(t1.IsFaulted);
                 Assert.True(t2.IsCanceled);
                 Assert.True(t3.IsCanceled);
             }
@@ -181,7 +187,7 @@ namespace com.csutil.integrationTests.async {
         public async Task TestActualMaxConcurrencyNeverExceeded() {
             // We'll measure how many tasks are running at once and ensure it never goes above the limit
             const int maxConcurrencyLevel = 3;
-            using var taskQueue = BackgroundTaskQueue.NewBackgroundTaskQueueV2(maxConcurrencyLevel);
+            using var taskQueue = BackgroundTaskQueue.NewBackgroundTaskQueue(maxConcurrencyLevel);
             int currentRunningTasks = 0;
             int maxObservedRunningTasks = 0;
             int totalTasks = 10;
@@ -212,7 +218,7 @@ namespace com.csutil.integrationTests.async {
         /// </summary>
         [Fact]
         public async Task TestExceptionPropagation() {
-            using var taskQueue = BackgroundTaskQueue.NewBackgroundTaskQueueV2(maxConcurrencyLevel: 2);
+            using var taskQueue = BackgroundTaskQueue.NewBackgroundTaskQueue(maxConcurrencyLevel: 2);
 
             var taskOk = taskQueue.Run(SomeAsyncTask1); // This one should succeed
             var taskFail = taskQueue.Run(async ct => {
@@ -221,8 +227,9 @@ namespace com.csutil.integrationTests.async {
             });
 
             // When waiting for tasks to complete, we should see the exception from taskFail
-            var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => taskQueue.WhenAllTasksCompleted());
-            Assert.Equal("Some custom failure", ex.Message);
+            var ex = await Assert.ThrowsAsync<AggregateException>(() => taskQueue.WhenAllTasksCompleted());
+            var ex1 = ex.InnerExceptions[0];
+            Assert.Equal("Some custom failure", ex1.Message);
 
             Assert.True(taskOk.IsCompletedSuccessfully);
             Assert.True(taskFail.IsFaulted);
@@ -237,14 +244,14 @@ namespace com.csutil.integrationTests.async {
         /// </summary>
         [Fact]
         public async Task TestDisposalWhileTasksAreRunning() {
-            var taskQueue = BackgroundTaskQueue.NewBackgroundTaskQueueV2(maxConcurrencyLevel: 2);
+            var taskQueue = BackgroundTaskQueue.NewBackgroundTaskQueue(maxConcurrencyLevel: 2);
             Task t1 = taskQueue.Run(SomeAsyncTask1);
             Task t2 = taskQueue.Run(SomeAsyncTask2);
             // Immediately dispose the queue before tasks finish
             taskQueue.Dispose();
             try {
                 await Task.WhenAll(t1, t2);
-            } catch (ObjectDisposedException) {
+            } catch (AggregateException) {
                 // Happens because Dispose() calls .CancelAllOpenTasks()
             }
             Assert.True(t1.IsFaulted);
@@ -253,18 +260,18 @@ namespace com.csutil.integrationTests.async {
 
         [Fact]
         public async Task TestDisposalWhileTasksAreRunning2() {
-            var taskQueue = BackgroundTaskQueue.NewBackgroundTaskQueueV2(maxConcurrencyLevel: 2);
+            var taskQueue = BackgroundTaskQueue.NewBackgroundTaskQueue(maxConcurrencyLevel: 2);
             Task t1 = taskQueue.Run(SomeAsyncTask1);
             Task t2 = taskQueue.Run(SomeAsyncTask2);
             // Immediately cancel all tasks before they finish
             taskQueue.CancelAllOpenTasks();
             try {
                 await Task.WhenAll(t1, t2);
-            } catch (OperationCanceledException) {
+            } catch (AggregateException) {
                 // Happens because CancelAllOpenTasks() was called
             }
-            Assert.True(t1.IsCanceled);
-            Assert.True(t2.IsCanceled);
+            Assert.True(t1.IsFaulted);
+            Assert.True(t2.IsFaulted);
         }
 
 

@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 using com.csutil.progress;
 
 namespace com.csutil {
-    public class BackgroundTaskQueueV2 : IBackgroundTaskQueue, IDisposable {
+    
+    [Obsolete("Does not pass the cancelation tests in BackgroundTaskQueueTests, not ready for production yet", true)]
+    public class BackgroundTaskQueueV2 : IBackgroundTaskQueue {
         /// <summary>
         /// Interface for a queued work item that can run or be canceled.
         /// </summary>
