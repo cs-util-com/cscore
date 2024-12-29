@@ -26,7 +26,7 @@ namespace com.csutil.model.ecs {
         private readonly Dictionary<string, JToken> EntityCache = new Dictionary<string, JToken>();
 
         private Func<JsonSerializer> GetJsonSerializer;
-        private readonly IBackgroundTaskQueue _taskQueue;
+        private readonly IDoEntityTaskInBackground _taskQueue;
 
         public TemplatesIO(DirectoryEntry entityDir, JsonSerializerSettings jsonSettings)
             : this(entityDir, JsonSerializer.Create(jsonSettings)) {
@@ -34,7 +34,7 @@ namespace com.csutil.model.ecs {
 
         public TemplatesIO(DirectoryEntry entityDir, JsonSerializer jsonSerializer) {
             _entityDir = entityDir;
-            _taskQueue = BackgroundTaskQueue.NewBackgroundTaskQueue(1);
+            _taskQueue = new DoEntityTaskInBackground();
             GetJsonSerializer = () => jsonSerializer;
         }
 
@@ -79,24 +79,24 @@ namespace com.csutil.model.ecs {
             this.ThrowErrorIfDisposed();
             var entityId = instance.GetId();
             var json = UpdateJsonState(instance);
-            var file = GetEntityFileForId(entityId);
-            return _taskQueue.Run(delegate {
-                // Try saving with exponential backoff a few times:
-                return TaskV2.TryWithExponentialBackoff(() => {
-                    LogSaveChangesIfThereIsAQueue(instance);
+            return _taskQueue.SetTaskFor(entityId, taskToDoInBackground: delegate {
+                try {
                     var jsonString = json.ToString();
+                    var file = GetEntityFileForId(entityId);
                     file.SaveAsText(jsonString);
-                    return Task.CompletedTask;
-                }, maxNrOfRetries: 3, initialExponent: 4);
+                } catch (Exception e) {
+                    Log.e(e);
+                    throw;
+                }
             });
         }
 
-        [Conditional("DEBUG")]
-        private void LogSaveChangesIfThereIsAQueue(T instance) {
-            if (_taskQueue.GetRemainingScheduledTaskCount() % 50 == 0) {
-                Log.d($"Saving entity to disk: {instance} with {_taskQueue.GetRemainingScheduledTaskCount()} other tasks in queue");
-            }
-        }
+        // [Conditional("DEBUG")]
+        // private void LogSaveChangesIfThereIsAQueue(T instance) {
+        //     if (_taskQueue.GetRemainingScheduledTaskCount() % 50 == 0) {
+        //         Log.d($"Saving entity to disk: {instance} with {_taskQueue.GetRemainingScheduledTaskCount()} other tasks in queue");
+        //     }
+        // }
 
         private JToken UpdateJsonState(T entity) {
             var json = ToJToken(entity, GetJsonSerializer());
@@ -146,7 +146,7 @@ namespace com.csutil.model.ecs {
         public T CreateVariantInstanceOf(T entity, IReadOnlyDictionary<string, string> newIdsLookup, bool autoSaveIfNeeded = false) {
             this.ThrowErrorIfDisposed();
             var templateId = entity.GetId();
-            if (!IsSavedToFiles(templateId)) {
+            if (!IsPresentInCache(templateId)) {
                 Debugger.Break();
                 if (autoSaveIfNeeded) {
                     SaveChanges(entity).Wait();
@@ -174,7 +174,8 @@ namespace com.csutil.model.ecs {
             return ToObject(variantJson, serializer);
         }
 
-        private bool IsSavedToFiles(string entityId) {
+        private bool IsPresentInCache(string entityId) {
+            if (EntityCache.ContainsKey(entityId)) { return true; }
             return GetEntityFileForId(entityId).Exists;
         }
 
