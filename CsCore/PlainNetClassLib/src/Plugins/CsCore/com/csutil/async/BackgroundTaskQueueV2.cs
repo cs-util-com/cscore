@@ -6,23 +6,19 @@ using System.Threading.Tasks;
 using com.csutil.progress;
 
 namespace com.csutil {
-
     public class BackgroundTaskQueueV2 : IBackgroundTaskQueue, IDisposable {
-
         /// <summary>
         /// Interface for a queued work item that can run or be canceled.
         /// </summary>
         private interface IWorkItem {
-            /// <summary> The underlying task (or TCS.Task) for this work item. </summary>
+            /// <summary> The underlying (TCS-backed) Task for this work item. </summary>
             Task BaseTask { get; }
 
-            /// <summary>
-            /// Executes the work item with the given CancellationToken.
-            /// </summary>
+            /// <summary> Executes the work item with the given CancellationToken. </summary>
             Task Run(CancellationToken token);
 
             /// <summary>
-            /// Marks this work item as canceled, so that BaseTask transitions to Canceled state.
+            /// Marks this work item as canceled, so that BaseTask transitions to the Canceled state.
             /// </summary>
             void Cancel();
         }
@@ -96,6 +92,8 @@ namespace com.csutil {
 
         // We store IWorkItem objects instead of just Func<...>.
         private readonly Queue<IWorkItem> _workQueue = new Queue<IWorkItem>();
+
+        // Guards dispatcher state
         private bool _dispatcherRunning;
 
         // Track all tasks (including canceled) so that WhenAllTasksCompleted() can see them.
@@ -124,8 +122,9 @@ namespace com.csutil {
                 _workQueue.Enqueue(workItem);
             }
 
-            _ = RunDispatcher(cts.Token);
-            _ = AddToManagedTasks(workItem.BaseTask);
+            EnsureDispatcher(cts.Token);
+            TrackTask(workItem.BaseTask);
+
             return workItem.BaseTask;
         }
 
@@ -145,49 +144,61 @@ namespace com.csutil {
                 _workQueue.Enqueue(workItem);
             }
 
-            _ = RunDispatcher(cts.Token);
-            _ = AddToManagedTasks(workItem.BaseTask);
+            EnsureDispatcher(cts.Token);
+            TrackTask(workItem.BaseTask);
+
             return (Task<T>)workItem.BaseTask;
         }
 
-        private async Task RunDispatcher(CancellationToken token) {
+        /// <summary>
+        /// Ensures that the dispatcher is running. If it is already running, do nothing.
+        /// Otherwise, start the dispatcher.
+        /// </summary>
+        private void EnsureDispatcher(CancellationToken token) {
             lock (_workQueue) {
                 if (_dispatcherRunning) return;
                 _dispatcherRunning = true;
             }
 
+            _ = RunDispatcher(token);
+        }
+
+        /// <summary>
+        /// Continuously processes items from the queue until empty or canceled.
+        /// </summary>
+        private async Task RunDispatcher(CancellationToken token) {
             try {
                 while (true) {
-                    IWorkItem nextWorkItem = null;
+                    IWorkItem nextWorkItem;
+
                     lock (_workQueue) {
-                        if (_workQueue.Count > 0) {
-                            nextWorkItem = _workQueue.Dequeue();
-                        } else {
+                        if (_workQueue.Count == 0) {
                             _dispatcherRunning = false;
                             return;
                         }
+
+                        nextWorkItem = _workQueue.Dequeue();
                     }
 
                     try {
-                        // No change here
                         await _semaphore.WaitAsync(token);
                     } catch (OperationCanceledException) {
-                        // Cancel the dequeued work item that triggered this exception:
+                        // Cancel the dequeued work item:
                         nextWorkItem.Cancel();
 
-                        // Also immediately cancel all remaining tasks in the queue,
-                        // because we won't be processing them anymore:
+                        // Cancel all remaining queued tasks:
                         lock (_workQueue) {
                             while (_workQueue.Count > 0) {
                                 _workQueue.Dequeue().Cancel();
                             }
+                            // Stop dispatcher (must happen *inside* lock)
+                            _dispatcherRunning = false;
                         }
 
-                        // Finally, stop this dispatcher thread:
-                        _dispatcherRunning = false;
-                        return;
+                        return; // Done
                     }
 
+                    // Process the task on a separate thread, then release semaphore.
                     _ = Task.Run(async () => {
                         try {
                             token.ThrowIfCancellationRequested();
@@ -198,6 +209,7 @@ namespace com.csutil {
                     }, token);
                 }
             } catch {
+                // If there's a major issue, ensure we mark the dispatcher as stopped:
                 lock (_workQueue) {
                     _dispatcherRunning = false;
                 }
@@ -205,19 +217,25 @@ namespace com.csutil {
             }
         }
 
-        private async Task AddToManagedTasks(Task task) {
+        /// <summary>
+        /// Tracks a task in _trackedTasks and triggers progress updates.
+        /// </summary>
+        private void TrackTask(Task task) {
             lock (_trackedTasks) {
                 _trackedTasks.Add(task);
             }
             // Provide initial progress
-            ProgressListener?.SetCount(GetCompletedTasksCount(), GetTotalTasksCount());
+            UpdateProgress();
 
-            try {
-                await task;
-            } finally {
-                // Provide updated progress
-                ProgressListener?.SetCount(GetCompletedTasksCount(), GetTotalTasksCount());
-            }
+            // Use ContinueWith to avoid an unnecessary async/await overhead here
+            task.ContinueWith(_ => {
+                UpdateProgress();
+            }, TaskScheduler.Default);
+        }
+
+        private void UpdateProgress() {
+            // Provide updated progress
+            ProgressListener?.SetCount(GetCompletedTasksCount(), GetTotalTasksCount());
         }
 
         public int GetRemainingScheduledTaskCount() {
@@ -238,22 +256,33 @@ namespace com.csutil {
             }
         }
 
+        /// <summary>
+        /// Waits until all currently tracked tasks (and any tasks queued in the meantime)
+        /// are completed. Re-checks if new tasks have arrived during the wait.
+        /// </summary>
         public async Task WhenAllTasksCompleted(int millisecondsDelay = 50, bool flushQueueAfterCompletion = false) {
-            List<Task> currentSnapshot;
-            lock (_trackedTasks) {
-                currentSnapshot = _trackedTasks.ToList();
-            }
-            await Task.WhenAll(currentSnapshot);
-
-            if (millisecondsDelay > 0) {
-                await Task.Delay(millisecondsDelay);
-            }
-
-            if (!IsAllTasksCompleted()) {
-                await WhenAllTasksCompleted(millisecondsDelay, flushQueueAfterCompletion);
-            } else if (flushQueueAfterCompletion) {
+            while (true) {
+                List<Task> currentSnapshot;
                 lock (_trackedTasks) {
-                    _trackedTasks.Clear();
+                    currentSnapshot = _trackedTasks.ToList();
+                }
+
+                // Wait for current snapshot
+                await Task.WhenAll(currentSnapshot);
+
+                // Optional small delay
+                if (millisecondsDelay > 0) {
+                    await Task.Delay(millisecondsDelay);
+                }
+
+                // If no tasks have been added (or are left incomplete) in the meantime, break
+                if (IsAllTasksCompleted()) {
+                    if (flushQueueAfterCompletion) {
+                        lock (_trackedTasks) {
+                            _trackedTasks.Clear();
+                        }
+                    }
+                    break;
                 }
             }
         }
@@ -261,12 +290,11 @@ namespace com.csutil {
         private bool IsAllTasksCompleted() => GetRemainingScheduledTaskCount() == 0;
 
         public void CancelAllOpenTasks() {
-            // Cancel the global token so that in-flight tasks see the cancellation:
             if (!_globalCts.IsCancellationRequested) {
                 _globalCts.Cancel();
             }
 
-            // Immediately cancel all tasks still in the queue (that haven't started).
+            // Immediately cancel all tasks still in the queue
             lock (_workQueue) {
                 while (_workQueue.Count > 0) {
                     var leftoverWork = _workQueue.Dequeue();
@@ -280,6 +308,5 @@ namespace com.csutil {
             _globalCts.Dispose();
             _semaphore.Dispose();
         }
-
     }
 }
