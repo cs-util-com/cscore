@@ -10,7 +10,7 @@ namespace com.csutil {
 
     public class BackgroundTaskQueue : IBackgroundTaskQueue {
 
-        [Obsolete("Use NewBackgroundTaskQueueV2 instead", true)]
+        [Obsolete("Use NewBackgroundTaskQueueV2 instead")]
         public static IBackgroundTaskQueue NewBackgroundTaskQueue(int maxConcurrencyLevel) {
             return new BackgroundTaskQueue(new QueuedTaskScheduler(TaskScheduler.Default, maxConcurrencyLevel), new CancellationTokenSource());
         }

@@ -53,17 +53,39 @@ namespace com.csutil.integrationTests.async {
             Assert.Equal(3, taskQueue.GetRemainingScheduledTaskCount());
             Assert.Equal(0, taskQueue.ProgressListener.percent);
 
+            Assert.Equal(TaskStatus.WaitingForActivation, t1.Status);
+            Assert.Equal(TaskStatus.WaitingForActivation, t2.Status);
+            Assert.Equal(TaskStatus.WaitingForActivation, t3.Status);
             await t2;
+            Assert.Equal(TaskStatus.RanToCompletion, t2.Status);
+            Assert.Null(t1.Exception);
+            Assert.Null(t3.Exception);
+            Assert.NotEqual(TaskStatus.RanToCompletion, t3.Status);
+            Assert.NotEqual(TaskStatus.RanToCompletion, t1.Status);
             // Since the scheduler allows 2 tasks at a time, t1 will not be complete when t2 is done:
-            Assert.False(t1.IsCompleted);
+            Assert.True(t2.IsCompletedSuccessfull());
             Assert.Equal(1, taskQueue.GetCompletedTasksCount());
             Assert.Equal(1, taskQueue.ProgressListener.GetCount()); // 1 Task should be completed
+            Assert.False(t1.IsCompleted);
 
             await taskQueue.WhenAllTasksCompleted(flushQueueAfterCompletion: true);
             Assert.Equal(0, taskQueue.GetRemainingScheduledTaskCount());
             Assert.Equal(0, taskQueue.GetCompletedTasksCount()); // Queue was flushed
             Assert.Equal(100, taskQueue.ProgressListener.percent); // All tasks should be compleded
 
+        }
+
+        private async Task SomeAsyncTask1(CancellationToken cancelRequest) {
+            var t = Log.MethodEntered();
+            await Task.Delay(2000, cancelRequest);
+            Log.MethodDone(t);
+        }
+
+        private async Task<string> SomeAsyncTask2(CancellationToken cancelRequest) {
+            var t = Log.MethodEntered();
+            await Task.Delay(5, cancelRequest);
+            Log.MethodDone(t);
+            return "Some string result";
         }
 
         [Fact]
@@ -245,18 +267,6 @@ namespace com.csutil.integrationTests.async {
             Assert.True(t2.IsCanceled);
         }
 
-        private async Task SomeAsyncTask1(CancellationToken cancelRequest) {
-            var t = Log.MethodEntered();
-            await TaskV2.Delay(500);
-            Log.MethodDone(t);
-        }
-
-        private async Task<string> SomeAsyncTask2(CancellationToken cancelRequest) {
-            var t = Log.MethodEntered();
-            await TaskV2.Delay(5);
-            Log.MethodDone(t);
-            return "Some string result";
-        }
 
     }
 
