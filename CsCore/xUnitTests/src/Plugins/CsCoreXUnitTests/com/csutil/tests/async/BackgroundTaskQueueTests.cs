@@ -77,7 +77,7 @@ namespace com.csutil.integrationTests.async {
 
         private async Task SomeAsyncTask1(CancellationToken cancelRequest) {
             var t = Log.MethodEntered();
-            await Task.Delay(2000, cancelRequest);
+            await Task.Delay(500, cancelRequest);
             Log.MethodDone(t);
         }
 
@@ -100,7 +100,7 @@ namespace com.csutil.integrationTests.async {
 
             taskQueue.CancelAllOpenTasks();
             // Awaiting the canceled queue will throw OperationCanceledException:
-            await Assert.ThrowsAsync<OperationCanceledException>(async () => {
+            await Assert.ThrowsAsync<TaskCanceledException>(async () => {
                 await taskQueue.WhenAllTasksCompleted();
             });
 
@@ -128,7 +128,7 @@ namespace com.csutil.integrationTests.async {
 
                 t.Cancel();
                 // Since t1 is already running when cancel is called, we expect OperationCanceledException:
-                await Assert.ThrowsAsync<OperationCanceledException>(() => Task.WhenAll(t1, t2, t3));
+                await Assert.ThrowsAsync<TaskCanceledException>(() => Task.WhenAll(t1, t2, t3));
 
                 Assert.True(t1.IsCanceled);
                 Assert.True(t2.IsCanceled);
@@ -141,7 +141,7 @@ namespace com.csutil.integrationTests.async {
                 Task t1 = taskQueue.Run(SomeAsyncTask1);
 
                 t.Cancel();
-                await Assert.ThrowsAsync<OperationCanceledException>(() => Task.WhenAll(t1, t2, t3));
+                await Assert.ThrowsAsync<TaskCanceledException>(() => Task.WhenAll(t1, t2, t3));
                 Assert.True(t1.IsCompletedSuccessfull());
                 Assert.True(t2.IsCanceled);
                 Assert.True(t3.IsCanceled);
