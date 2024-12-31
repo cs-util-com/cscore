@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -23,7 +24,7 @@ namespace com.csutil.model.ecs {
 
         /// <summary> A cache of all loaded templates and variants,
         /// these need to be combined with all parent entities to get the full entity data </summary>
-        private readonly Dictionary<string, JToken> EntityCache = new Dictionary<string, JToken>();
+        private readonly ConcurrentDictionary<string, JToken> EntityCache = new ConcurrentDictionary<string, JToken>();
 
         private Func<JsonSerializer> GetJsonSerializer;
         private readonly IDoEntityTaskInBackground _taskQueue;
@@ -110,9 +111,7 @@ namespace com.csutil.model.ecs {
         }
 
         private void UpdateEntitiesCache(string id, JToken entity) {
-            lock (EntityCache) {
-                EntityCache[id] = entity;
-            }
+            EntityCache[id] = entity;
         }
 
         private FileEntry GetEntityFileForId(string entityId) {
@@ -122,7 +121,7 @@ namespace com.csutil.model.ecs {
 
         public async Task Delete(string entityId) {
             this.ThrowErrorIfDisposed();
-            if (EntityCache.Remove(entityId)) {
+            if (EntityCache.TryRemove(entityId, out var removedEntity)) {
                 var entityFile = GetEntityFileForId(entityId);
                 if (entityFile.Exists) {
                     await TaskV2.TryWithExponentialBackoff(() => {
