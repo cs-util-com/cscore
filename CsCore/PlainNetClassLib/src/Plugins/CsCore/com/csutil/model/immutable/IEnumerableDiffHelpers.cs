@@ -99,7 +99,7 @@ namespace com.csutil {
             var oldStateCopy = oldState;
             oldState = newState;
             if (ReferenceEquals(oldStateCopy, newState)) {
-                Log.w("CalcEntryChangesToOldStateV3: oldStateCopy == newState");
+                Log.d("CalcEntryChangesToOldStateV3: oldStateCopy == newState");
                 return;
             }
             if (oldStateCopy == null) {

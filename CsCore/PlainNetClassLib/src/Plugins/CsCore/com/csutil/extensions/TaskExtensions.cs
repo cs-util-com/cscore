@@ -76,6 +76,10 @@ namespace com.csutil {
         public static bool IsCompletedSuccessfull(this Task self) {
             return self.IsCompleted && !(self.IsFaulted || self.IsCanceled);
         }
+
+        public static bool IsNullOrCompleted(this Task self) {
+            return self == null || self.IsCompleted;
+        }
         
     }
 
