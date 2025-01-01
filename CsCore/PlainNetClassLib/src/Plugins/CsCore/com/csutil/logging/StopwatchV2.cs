@@ -114,6 +114,7 @@ namespace com.csutil {
         private object[] latestArgs;
         private long startTime;
 
+        [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         public void CompleteLatestStep() {
             if (latestStepName != null) {
                 var ms = ElapsedMilliseconds - startTime;
