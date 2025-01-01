@@ -27,7 +27,7 @@ namespace com.csutil.model.ecs {
         private readonly ConcurrentDictionary<string, JToken> EntityCache = new ConcurrentDictionary<string, JToken>();
 
         private Func<JsonSerializer> GetJsonSerializer;
-        private readonly IDoEntityTaskInBackground _taskQueue;
+        private readonly ExpensiveRegularAsyncTaskInBackground _taskQueue;
 
         public TemplatesIO(DirectoryEntry entityDir, JsonSerializerSettings jsonSettings)
             : this(entityDir, JsonSerializer.Create(jsonSettings)) {
@@ -35,7 +35,7 @@ namespace com.csutil.model.ecs {
 
         public TemplatesIO(DirectoryEntry entityDir, JsonSerializer jsonSerializer) {
             _entityDir = entityDir;
-            _taskQueue = new DoEntityTaskInBackground();
+            _taskQueue = new ExpensiveRegularAsyncTaskInBackground();
             GetJsonSerializer = () => jsonSerializer;
         }
 

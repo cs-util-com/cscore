@@ -6,12 +6,12 @@ using Xunit;
 
 namespace com.csutil.tests.model.esc {
 
-    public class DoEntityTaskInBackgroundTests {
+    public class ExpensiveRegularAsyncTaskInBackgroundTests {
 
         [Fact]
         public async Task SingleTask_ExecutesImmediately() {
             // Arrange
-            var service = new DoEntityTaskInBackground();
+            var service = new ExpensiveRegularAsyncTaskInBackground();
             bool taskExecuted = false;
             Action myTask = () => taskExecuted = true;
 
@@ -29,7 +29,7 @@ namespace com.csutil.tests.model.esc {
         [Fact]
         public async Task SecondTask_WaitsForFirstToComplete() {
             // Arrange
-            var service = new DoEntityTaskInBackground();
+            var service = new ExpensiveRegularAsyncTaskInBackground();
             bool firstTaskCompleted = false;
             bool secondTaskExecuted = false;
 
@@ -58,7 +58,7 @@ namespace com.csutil.tests.model.esc {
         [Fact]
         public async Task DifferentEntities_RunInParallel() {
             // Arrange
-            var service = new DoEntityTaskInBackground();
+            var service = new ExpensiveRegularAsyncTaskInBackground();
             bool entity1TaskExecuted = false;
             bool entity2TaskExecuted = false;
 
@@ -89,7 +89,7 @@ namespace com.csutil.tests.model.esc {
         [Fact]
         public async Task MultipleQueuedTasks_ExecuteInFIFOOrder() {
             // Arrange
-            var service = new DoEntityTaskInBackground();
+            var service = new ExpensiveRegularAsyncTaskInBackground();
 
             var executionOrder = new System.Collections.Concurrent.ConcurrentQueue<int>();
 
@@ -116,7 +116,7 @@ namespace com.csutil.tests.model.esc {
         [Fact]
         public async Task ExceptionInFirstTask_ShouldStillRunNextTask() {
             // Arrange
-            var service = new DoEntityTaskInBackground();
+            var service = new ExpensiveRegularAsyncTaskInBackground();
             bool secondTaskExecuted = false;
 
             Action failingTask = () => throw new InvalidOperationException("Failing Task");
