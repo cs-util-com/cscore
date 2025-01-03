@@ -5,7 +5,7 @@ namespace com.csutil {
 
     public static class IDictionaryExtensions {
 
-        /// <summary> Returns false if an existing value was replaced </summary>
+        /// <summary> If an existing value was replaced, it's returned by the method </summary>
         public static V AddOrReplace<T, V>(this IDictionary<T, V> self, T key, V value) {
             if (self.ContainsKey(key)) {
                 var oldV = self[key];
