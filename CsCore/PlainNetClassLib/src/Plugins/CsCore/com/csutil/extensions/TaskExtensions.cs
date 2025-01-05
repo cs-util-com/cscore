@@ -49,7 +49,11 @@ namespace com.csutil {
             }
         }
 
-        public static async Task LogOnError(this Task self) {
+        public static Task LogOnError(this Task self) {
+            return self.LogOnErrorAsync();
+        }
+
+        private static async Task LogOnErrorAsync(this Task self) {
             try {
                 await self;
             } catch (Exception e) {
