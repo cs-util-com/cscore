@@ -1,5 +1,6 @@
-#define RUN_EXPENSIVE_TESTS
+// #define RUN_EXPENSIVE_TESTS
 
+using System.Linq;
 using System.Threading.Tasks;
 using com.csutil.http.apis;
 using Xunit;
@@ -53,8 +54,9 @@ namespace com.csutil.integrationTests.http {
             var elevenLabs = new ElevenLabs(apiKey);
 
             // Specify a custom voice ID and text for speech synthesis.
-            var voiceId = ElevenLabs.Callum;
-            var textToSpeak = "Hello there! Testing ElevenLabs with advanced parameters.";
+            var voices = await elevenLabs.GetVoices();
+            var voiceId = voices.Single(x => x.name == "Callum").voice_id;
+            var textToSpeak = "Hello there! Testing ElevenLabs with advanced parameters and the voice id received via the API.";
 
             // Build a TTS request with optional query parameters.
             var requestParams = new ElevenLabs.TTSRequest { text = textToSpeak };

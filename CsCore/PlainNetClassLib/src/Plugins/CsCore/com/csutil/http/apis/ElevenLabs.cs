@@ -116,6 +116,27 @@ namespace com.csutil.http.apis {
             public string version_id;
         }
 
+        public async Task<List<Voice>> GetVoices() {
+            var url = new Uri($"{baseUrl}/v1/voices");
+            var response = await url.SendGET().GetResult<VoiceListResponse>();
+            return response.voices;
+        }
+
+        public class VoiceListResponse {
+            public List<Voice> voices { get; set; }
+        }
+
+        public class Voice {
+            public string voice_id { get; set; }
+            public string name { get; set; }
+            public string category { get; set; }
+            public string preview_url { get; set; }
+            public List<string> high_quality_base_model_ids { get; set; }
+            public bool is_owner { get; set; }
+            public bool is_legacy { get; set; }
+            public bool is_mixed { get; set; }
+        }
+
     }
 
 }
