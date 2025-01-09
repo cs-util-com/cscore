@@ -68,8 +68,12 @@ namespace com.csutil {
             return new SubFileSystem(self.FileSystem, self.Path).GetDirectoryEntry(UPath.Root);
         }
 
+        private static object threadLock = new object();
+
         public static DirectoryEntry CreateV2(this DirectoryEntry self) {
-            if (!self.Exists) { self.Create(); }
+            lock (threadLock) {
+                if (!self.Exists) { self.Create(); }
+            }
             return self;
         }
 
