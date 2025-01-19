@@ -333,8 +333,9 @@ namespace com.csutil.model.ecs {
             return self.GetComponentsInSelfAndChildren<T, V>().FirstOrDefault();
         }
 
-        public static bool TryGetComponentInParents<T, V>(this IEntity<T> self, out V foundComp, out IEntity<T> parent) where T : IEntityData where V : IComponentData {
-            foreach (var parentEntity in self.CollectAllParentsV2()) {
+        public static bool TryGetComponentInParents<T, V>(this IEntity<T> self, out V foundComp, out IEntity<T> parent) where T : IEntityData {
+            var entitiesToSearch = self.CollectAllParentsV2().AddViaUnion(self, addInFront: true);
+            foreach (var parentEntity in entitiesToSearch) {
                 if (parentEntity.TryGetComponent(out foundComp)) {
                     parent = parentEntity;
                     return true;
@@ -468,7 +469,7 @@ namespace com.csutil.model.ecs {
             return components.Any();
         }
 
-        public static bool HasComponent<V>(this IEntityData self) where V : IComponentData {
+        public static bool HasComponent<V>(this IEntityData self) {
             return self.Components.Values.Any(c => c is V);
         }
 
