@@ -58,13 +58,11 @@ namespace com.csutil {
         }
 
         public static void CalcEntryChangesToOldStateV3<E, K, V>(this E newState, ref E oldState, Action<K, V> onEntryAdded, Action<K, V, V> onEntryUpdated, Action<K> onEntryRemoved) where E : IDictionary<K, V> {
-
-            var oldStateCopy = oldState;
-            oldState = newState;
-            if (ReferenceEquals(oldStateCopy, newState)) {
-                Log.w("CalcEntryChangesToOldStateV3: oldStateCopy == newState");
+            if (ReferenceEquals(oldState, newState)) {
                 return;
             }
+            var oldStateCopy = oldState;
+            oldState = newState;
             if (oldStateCopy == null) {
                 foreach (var kv in newState) { onEntryAdded(kv.Key, kv.Value); }
                 return;
@@ -95,13 +93,11 @@ namespace com.csutil {
         }
         
         public static void CalcEntryChangesToOldStateV4<E, K, V>(this E newState, ref E oldState, Action<K, V> onEntryAdded, Action<K, V, V> onEntryUpdated, Action<K> onEntryRemoved) where E : IReadOnlyDictionary<K, V> {
-
-            var oldStateCopy = oldState;
-            oldState = newState;
-            if (ReferenceEquals(oldStateCopy, newState)) {
-                Log.d("CalcEntryChangesToOldStateV3: oldStateCopy == newState");
+            if (ReferenceEquals(oldState, newState)) {
                 return;
             }
+            var oldStateCopy = oldState;
+            oldState = newState;
             if (oldStateCopy == null) {
                 foreach (var kv in newState) { onEntryAdded(kv.Key, kv.Value); }
                 return;
