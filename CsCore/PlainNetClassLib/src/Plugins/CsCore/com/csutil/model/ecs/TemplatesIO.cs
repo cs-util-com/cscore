@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -23,14 +24,19 @@ namespace com.csutil.model.ecs {
 
         /// <summary> A cache of all loaded templates and variants,
         /// these need to be combined with all parent entities to get the full entity data </summary>
-        private readonly Dictionary<string, JToken> EntityCache = new Dictionary<string, JToken>();
+        private readonly ConcurrentDictionary<string, JToken> EntityCache = new ConcurrentDictionary<string, JToken>();
 
-        private Func<JsonSerializer> GetJsonSerializer = () => JsonSerializer.Create(JsonNetSettings.typedJsonSettings);
-        private readonly BackgroundTaskQueue _taskQueue;
+        private Func<JsonSerializer> GetJsonSerializer;
+        private readonly ExpensiveRegularAsyncTaskInBackground _taskQueue;
 
-        public TemplatesIO(DirectoryEntry entityDir) {
+        public TemplatesIO(DirectoryEntry entityDir, JsonSerializerSettings jsonSettings)
+            : this(entityDir, JsonSerializer.Create(jsonSettings)) {
+        }
+
+        public TemplatesIO(DirectoryEntry entityDir, JsonSerializer jsonSerializer) {
             _entityDir = entityDir;
-            _taskQueue = BackgroundTaskQueue.NewBackgroundTaskQueue(1);
+            _taskQueue = new ExpensiveRegularAsyncTaskInBackground();
+            GetJsonSerializer = () => jsonSerializer;
         }
 
         public void Dispose() {
@@ -44,10 +50,6 @@ namespace com.csutil.model.ecs {
             GetJsonSerializer = newSerializer;
         }
 
-        public void SetJsonSerializer(JsonSerializer newSerializer) {
-            GetJsonSerializer = () => newSerializer;
-        }
-
         /// <summary> Loads all template files from disk into memory </summary>
         public async Task LoadAllTemplateFilesIntoMemory() {
             this.ThrowErrorIfDisposed();
@@ -58,7 +60,7 @@ namespace com.csutil.model.ecs {
             }
             await Task.WhenAll(tasks);
         }
-        
+
         public async Task<List<T>> LoadAllEntitiesFromDisk() {
             this.ThrowErrorIfDisposed();
             await LoadAllTemplateFilesIntoMemory();
@@ -78,18 +80,24 @@ namespace com.csutil.model.ecs {
             this.ThrowErrorIfDisposed();
             var entityId = instance.GetId();
             var json = UpdateJsonState(instance);
-            var file = GetEntityFileForId(entityId);
-            return _taskQueue.Run(delegate {
-                // Try saving with exponential backoff a few times:
-                return TaskV2.TryWithExponentialBackoff(() => {
-                    if (_taskQueue.GetRemainingScheduledTaskCount() > 1) {
-                        Log.d($"Saving entity to disk: {instance} with {_taskQueue.GetRemainingScheduledTaskCount()} other tasks in queue");
-                    }
-                    file.SaveAsJson(json);
-                    return Task.CompletedTask;
-                }, maxNrOfRetries: 3, initialExponent: 4);
+            return _taskQueue.SetTaskFor(entityId, taskToDoInBackground: delegate {
+                try {
+                    var jsonString = json.ToString();
+                    var file = GetEntityFileForId(entityId);
+                    file.SaveAsText(jsonString);
+                } catch (Exception e) {
+                    Log.e(e);
+                    throw;
+                }
             });
         }
+
+        // [Conditional("DEBUG")]
+        // private void LogSaveChangesIfThereIsAQueue(T instance) {
+        //     if (_taskQueue.GetRemainingScheduledTaskCount() % 50 == 0) {
+        //         Log.d($"Saving entity to disk: {instance} with {_taskQueue.GetRemainingScheduledTaskCount()} other tasks in queue");
+        //     }
+        // }
 
         private JToken UpdateJsonState(T entity) {
             var json = ToJToken(entity, GetJsonSerializer());
@@ -103,9 +111,7 @@ namespace com.csutil.model.ecs {
         }
 
         private void UpdateEntitiesCache(string id, JToken entity) {
-            lock (EntityCache) {
-                EntityCache[id] = entity;
-            }
+            EntityCache[id] = entity;
         }
 
         private FileEntry GetEntityFileForId(string entityId) {
@@ -115,7 +121,7 @@ namespace com.csutil.model.ecs {
 
         public async Task Delete(string entityId) {
             this.ThrowErrorIfDisposed();
-            if (EntityCache.Remove(entityId)) {
+            if (EntityCache.TryRemove(entityId, out var removedEntity)) {
                 var entityFile = GetEntityFileForId(entityId);
                 if (entityFile.Exists) {
                     await TaskV2.TryWithExponentialBackoff(() => {
@@ -136,11 +142,16 @@ namespace com.csutil.model.ecs {
         /// the same parent as the template. </summary>
         /// <param name="newIdsLookup"> Requires to pass in a filled dictionary with the current entity ids
         /// mapping to new ones that will be used for the new instances </param>
-        public T CreateVariantInstanceOf(T entity, IReadOnlyDictionary<string, string> newIdsLookup) {
+        public T CreateVariantInstanceOf(T entity, IReadOnlyDictionary<string, string> newIdsLookup, bool autoSaveIfNeeded = false) {
             this.ThrowErrorIfDisposed();
             var templateId = entity.GetId();
-            if (!IsSavedToFiles(templateId)) {
-                throw new InvalidOperationException($"The passed entity {entity} first needs to be saved once before it can be used as a template");
+            if (!IsPresentInCache(templateId)) {
+                Debugger.Break();
+                if (autoSaveIfNeeded) {
+                    SaveChanges(entity).Wait();
+                } else {
+                    throw new InvalidOperationException($"The passed entity {entity} first needs to be saved once before it can be used as a template");
+                }
             }
             JsonSerializer serializer = GetJsonSerializer();
             var variantJson = ToJToken(entity, serializer);
@@ -162,7 +173,8 @@ namespace com.csutil.model.ecs {
             return ToObject(variantJson, serializer);
         }
 
-        private bool IsSavedToFiles(string entityId) {
+        private bool IsPresentInCache(string entityId) {
+            if (EntityCache.ContainsKey(entityId)) { return true; }
             return GetEntityFileForId(entityId).Exists;
         }
 

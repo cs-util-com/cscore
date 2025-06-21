@@ -62,7 +62,7 @@ namespace com.csutil {
         public static Task<T> AddOnClickAction<T>(this Button self, Func<GameObject, T> onClickFunc) {
             onClickFunc.ThrowErrorIfNull("Passed onClickFunc was null");
             var tcs = new TaskCompletionSource<T>();
-            StackTrace originTrace = null; // new StackTrace();
+            StackTrace originTrace = StackTraceV2.NewStackTrace();
             Task alreadyRunningTask = null;
             self.onClick.AddListener(() => {
                 if (alreadyRunningTask != null && !alreadyRunningTask.IsCompleted) { return; }
@@ -95,7 +95,7 @@ namespace com.csutil {
                 await task;
                 return true;
             } catch (Exception e) {
-                Log.e(e);
+                Log.e(e.WithAddedOriginalStackTrace(originTrace));
                 if (task.IsCanceled) { tcs.TrySetCanceled(); }
                 if (task.IsFaulted) { tcs.TrySetException(task.Exception); }
             }

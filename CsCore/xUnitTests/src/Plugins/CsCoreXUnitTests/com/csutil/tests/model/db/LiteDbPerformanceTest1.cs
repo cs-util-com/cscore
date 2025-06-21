@@ -69,17 +69,18 @@ namespace com.csutil.integrationTests.model {
 
         private static async Task WriteFiles(List<TreeElem> dataTree, DirectoryEntry testFolder) {
             var insertTimer = Log.MethodEntered("LiteDbPerformanceTest1.WriteFiles");
+            var jsonWriter = JsonWriter.GetWriter(null);
             await ParallelExec(dataTree, (elem) => {
-                GetFileForElem(testFolder, elem).SaveAsJson(elem);
+                GetFileForElem(testFolder, elem).SaveAsJson(elem, jsonWriter);
             });
             Log.MethodDone(insertTimer, 7000);
         }
 
         private static async Task ReadFiles(List<TreeElem> dataTree, DirectoryEntry testFolder) {
             var readTimer = Log.MethodEntered("LiteDbPerformanceTest1.ReadFiles");
-            var reader = JsonReader.GetReader();
+            var reader = JsonReader.GetReader(null);
             await ParallelExec(dataTree, (elem) => {
-                var found = GetFileForElem(testFolder, elem).LoadAs<TreeElem>();
+                var found = GetFileForElem(testFolder, elem).LoadAs<TreeElem>(reader);
                 Assert.Equal(elem.name, found.name);
             });
             Log.MethodDone(readTimer, 4000);

@@ -59,7 +59,7 @@ namespace com.csutil {
         }
 
         public static bool HasNoDifferences(JToken jsonDiff) {
-            return jsonDiff == null || jsonDiff.ToString() == new JObject().ToString();
+            return jsonDiff.IsNullOrEmpty() || jsonDiff.ToString() == new JObject().ToString();
         }
 
         public static void Patch(object targetToPatch, JToken patchToApply) {

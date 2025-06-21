@@ -7,6 +7,8 @@ namespace com.csutil.xml {
     public static class XmlParser {
 
         public static T ParseAsXmlInto<T>(this Stream self) {
+            AssertV3.IsTrue(self.CanSeek, () => "Cant reset stream position to beginning, XML parsing may fail");
+            if (self.CanSeek) { self.ResetStreamCurserPositionToBeginning(); }
             using (var r = XmlReader.Create(self)) {
                 return (T)new XmlSerializer(typeof(T)).Deserialize(r);
             }

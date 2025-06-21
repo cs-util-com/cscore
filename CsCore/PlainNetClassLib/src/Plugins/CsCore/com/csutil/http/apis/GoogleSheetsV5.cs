@@ -20,7 +20,7 @@ namespace com.csutil.http.apis {
         public static Task<Dictionary<string, object>> GetSheetObjects(Uri csvUrl) {
             return TaskV2.TryWithExponentialBackoff(async () => {
                 return GoogleSheetDataParser.ParseRawSheetData(await DownloadAndParseCsvSheet(csvUrl));
-            }, HandleError, maxNrOfRetries: 5);
+            }, HandleError, maxNrOfRetries: 5, initialExponent: 9, maxDelayInMs: 5000);
         }
 
         private static void HandleError(Exception e) {
@@ -54,8 +54,8 @@ namespace com.csutil.http.apis {
         }
 
         private static T ToTypedObject<T>(object o) {
-            var json = JsonWriter.GetWriter().Write(o);
-            return TypedJsonHelper.NewTypedJsonReader().Read<T>(json);
+            var json = JsonWriter.GetWriter(o).Write(o);
+            return JsonReader.GetReaderTyped(o).Read<T>(json);
         }
 
         public static Dictionary<string, object> ParseRawSheetData(List<List<string>> rawSheetData) {
@@ -75,7 +75,7 @@ namespace com.csutil.http.apis {
             var vCount = values.Count();
             if (nc < vCount) { throw new IndexOutOfRangeException($"Only {nc} names but {vCount} values in row. names={names.ToStringV2(x => x)} but values={values.ToStringV2(x => x)}"); }
             var result = new Dictionary<string, object>();
-            var jsonReader = JsonReader.GetReader();
+            var jsonReader = JsonReader.GetReader(null);
             for (int i = 0; i < vCount; i++) { AddToResult(result, jsonReader, names[i], values[i].Trim()); }
             return result;
         }

@@ -27,12 +27,12 @@ namespace com.csutil.integrationTests {
                 AssertV3.AreNotEqual(1, 2);
             });
 
-            var stopWatch = AssertV3.TrackTiming();
+            var stopWatch = Log.TrackTiming();
             var res = 1f;
             for (float i = 1; i < 500000; i++) { res = i / res + i; }
             Assert.NotEqual(0, res);
 
-            stopWatch.Stop();
+            stopWatch.StopV2();
             AssertV3.ThrowExeptionIfAssertionFails(() => { stopWatch.AssertUnderXms(200); });
             Assert.True(stopWatch.IsUnderXms(200), "More time was needed than expected!");
 

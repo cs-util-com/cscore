@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
+using com.csutil.json;
 using com.csutil.model.ecs;
 using Newtonsoft.Json;
 using Xunit;
+using Zio;
 
 namespace com.csutil.tests.model.esc {
 
@@ -24,7 +26,7 @@ namespace com.csutil.tests.model.esc {
             templatesDir.DeleteV2();
             templatesDir.CreateV2();
 
-            var templates = new TemplatesIO<Entity>(templatesDir);
+            var templates = newTemplatesIO<Entity>(templatesDir);
 
             var enemyTemplate = new Entity() {
                 LocalPose = Matrix4x4.CreateTranslation(1, 2, 3),
@@ -63,7 +65,7 @@ namespace com.csutil.tests.model.esc {
                 Assert.NotEqual(instance3.Id, instance4.Id);
             }
 
-            var ecs2 = new TemplatesIO<Entity>(templatesDir);
+            var ecs2 = newTemplatesIO<Entity>(templatesDir);
 
             var ids = ecs2.GetAllEntityIds().ToList();
             Assert.Equal(3, ids.Count());
@@ -82,6 +84,10 @@ namespace com.csutil.tests.model.esc {
             Assert.Equal(20, enemyComp2.Mana);
 
         }
+        
+        private TemplatesIO<T> newTemplatesIO<T>(DirectoryEntry templatesDir) where T : IEntityData {
+            return new TemplatesIO<T>(templatesDir, JsonNetSettings.typedJsonSettings);
+        }
 
         private Dictionary<string, string> NewIdDict(Entity original) {
             return new Dictionary<string, string>() { { original.Id, "" + GuidV2.NewGuid() } };
@@ -91,7 +97,7 @@ namespace com.csutil.tests.model.esc {
         public async Task ExampleUsageOfEcs() {
 
             var entityDir = EnvironmentV2.instance.GetNewInMemorySystem();
-            var templatesIo = new TemplatesIO<Entity>(entityDir);
+            var templatesIo = newTemplatesIO<Entity>(entityDir);
             var ecs = new EntityComponentSystem<Entity>(templatesIo, isModelImmutable: false);
 
             var entityGroup = ecs.Add(new Entity() {
@@ -181,7 +187,7 @@ namespace com.csutil.tests.model.esc {
              * same result is achieved with Unity) */
 
             var entityDir = EnvironmentV2.instance.GetNewInMemorySystem();
-            var templatesIo = new TemplatesIO<Entity>(entityDir);
+            var templatesIo = newTemplatesIO<Entity>(entityDir);
             var ecs = new EntityComponentSystem<Entity>(templatesIo, isModelImmutable: false);
 
             var e1 = ecs.Add(new Entity() {
@@ -249,6 +255,24 @@ namespace com.csutil.tests.model.esc {
                 Assert_AlmostEqual(new Vector3(0, 2, 0), e2.GlobalPose().position);
             }
 
+            {
+                // Test the GetConcatinatedChildrenPositionsChain method to return an
+                // almost unique string (usable e.g. for seeding) for each entity:
+                var e5_2 = e4.AddChild(new Entity() {
+                    LocalPose = Pose3d.NewMatrix(new Vector3(0, -1, 0), 0, 0.5f)
+                });
+                var e5Number = e5.GetAlmostUniqueNumberForEntity();
+                Assert.NotEqual(e5Number, e5_2.GetAlmostUniqueNumberForEntity());
+                // The same number is returned if there were no changes to the ECS in between: 
+                Assert.Equal(e5Number, e5.GetAlmostUniqueNumberForEntity());
+
+                // The entities on the root level also have different values:
+                var e1_2 = ecs.Add(new Entity() {
+                    LocalPose = Pose3d.NewMatrix(new Vector3(0, 1, 0))
+                });
+                Assert.NotEqual(e1.GetAlmostUniqueNumberForEntity(), e1_2.GetAlmostUniqueNumberForEntity());
+            }
+
         }
 
         [Fact]
@@ -295,7 +319,7 @@ namespace com.csutil.tests.model.esc {
             // First the user creates a scene at runtime:
             var dir = EnvironmentV2.instance.GetNewInMemorySystem();
             {
-                var templatesIo = new TemplatesIO<Entity>(dir);
+                var templatesIo = newTemplatesIO<Entity>(dir);
                 var ecs = new EntityComponentSystem<Entity>(templatesIo, isModelImmutable: false);
 
                 // He defines a few of the entities as templates and other as variants
@@ -435,7 +459,7 @@ namespace com.csutil.tests.model.esc {
             }
             {
                 Assert.NotEmpty(dir.EnumerateEntries());
-                var templatesIo = new TemplatesIO<Entity>(dir);
+                var templatesIo = newTemplatesIO<Entity>(dir);
                 var ecs = new EntityComponentSystem<Entity>(templatesIo, isModelImmutable: false);
                 Assert.Empty(ecs.Entities);
 

@@ -1,7 +1,9 @@
 using System;
+using System.Diagnostics;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Profiling;
+using Debug = UnityEngine.Debug;
 
 namespace com.csutil.logging {
 
@@ -53,6 +55,36 @@ namespace com.csutil.logging {
                                                 string sourceMemberName, string sourceFilePath, int sourceLineNumber) {
             Profiler.EndSample();
             base.LogMethodDone(timing, args, maxAllowedTimeInMs, sourceMemberName, sourceFilePath, sourceLineNumber);
+        }
+
+        private int backgroundThreadCounter = 0;
+
+        public override StopwatchV2 BeginThreadProfiling() {
+            Profiler.BeginThreadProfiling("Background Threads", "Task Thread " + ++backgroundThreadCounter);
+            return new StopwatchV2(onDispose: self => {
+                Profiler.EndThreadProfiling();
+            });
+        }
+
+        public override StopwatchV2 TrackTiming(string methodName, Action<Stopwatch> onDispose) {
+            var t = base.TrackTiming(methodName, onDispose);
+            CustomSampler stepSampler = CustomSampler.Create(methodName);
+            stepSampler.Begin();
+            t.OnStepStart = (stepName, startTime, maxTime, args) => {
+                if (stepSampler != null) {
+                    stepSampler.End();
+                }
+                var samplerName = stepName() + " t-" + startTime;
+                stepSampler = CustomSampler.Create(samplerName);
+                stepSampler.Begin();
+            };
+            t.onDispose = self => {
+                if (stepSampler != null) {
+                    stepSampler.End();
+                }
+                onDispose?.Invoke(self);
+            };
+            return t;
         }
 
     }

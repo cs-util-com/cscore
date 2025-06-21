@@ -52,13 +52,14 @@ namespace com.csutil.model.immutable {
         private static bool WasKeyValuePairModified<S>(S oldState, S newState) {
             var keyProp = typeof(S).GetProperty("Key");
             var valueProp = typeof(S).GetProperty("Value");
-            var oldKey = keyProp.GetValue(oldState, null);
-            var newKey = keyProp.GetValue(newState, null);
             var oldValue = valueProp.GetValue(oldState, null);
             var newValue = valueProp.GetValue(newState, null);
+            if (WasModified(oldValue, newValue)) { return true; }
+            var oldKey = keyProp.GetValue(oldState, null);
+            var newKey = keyProp.GetValue(newState, null);
             AssertV3.IsTrue(Equals(oldKey, newKey),
                 () => $"Key of KeyValuePair must not change, oldKey={oldKey} newKey={newKey}");
-            return !Equals(oldKey, newKey) || WasModified(oldValue, newValue);
+            return !Equals(oldKey, newKey);
         }
 
         public static bool WasModifiedInLastDispatch(IsMutable mutableData) {

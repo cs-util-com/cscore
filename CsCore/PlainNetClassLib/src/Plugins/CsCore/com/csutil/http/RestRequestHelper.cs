@@ -35,13 +35,15 @@ namespace com.csutil {
         }
 
         public static string ToUriEncodedString(object o) {
-            var map = JsonReader.GetReader().Read<Dictionary<string, object>>(JsonWriter.GetWriter(o).Write(o));
+            var map = JsonReader.GetReader(null).Read<Dictionary<string, object>>(JsonWriter.GetWriter(o).Write(o));
             return map.Select((x) => x.Key + "=" + Uri.EscapeDataString("" + x.Value)).Aggregate((a, b) => a + "&" + b);
         }
 
         public static async Task DownloadTo(this RestRequest self, FileEntry targetFile) {
             using (var stream = await self.GetResult<Stream>()) {
-                float totalBytes = (await self.GetResultHeaders()).GetFileSizeInBytesOnServer();
+                var resultHeaders = await self.GetResultHeaders();
+                await self.ThrowIfErrorStatus();
+                float totalBytes = resultHeaders.GetFileSizeInBytesOnServer();
                 AssertV3.IsTrue(totalBytes > 0, () => "GetFileSizeInBytesOnServer totalBytes=" + totalBytes);
                 var progressInPercent = new ChangeTracker<float>(0f);
                 await targetFile.SaveStreamAsync(stream, (savedBytes) => {
@@ -107,6 +109,13 @@ namespace com.csutil {
             return self.WithRequestHeader("Authorization", "Bearer " + key);
         }
 
+        public static async Task ThrowIfErrorStatus(this RestRequest self) {
+            HttpStatusCode statusCode = await self.GetResult<HttpStatusCode>();
+            if (statusCode.IsErrorStatus()) {
+                throw await NoSuccessError.Create(self, statusCode);
+            }
+        }
+
         public static bool IsErrorStatus(this HttpStatusCode statusCode) {
             if (statusCode.IsClientError()) { return true; }
             if (statusCode.IsServerError()) { return true; }
@@ -147,6 +156,15 @@ namespace com.csutil {
         public NoSuccessError() { }
         public NoSuccessError(string message) : base(message) { }
         public NoSuccessError(string message, Exception innerException) : base(message, innerException) { }
+
+        public static async Task<NoSuccessError> Create(RestRequest request, HttpStatusCode statusCode) {
+            return Create(request, statusCode, await request.GetResult<string>());
+        }
+        
+        public static NoSuccessError Create(RestRequest request, HttpStatusCode statusCode, string errorMessage) {
+            AssertV3.IsTrue(statusCode.IsErrorStatus(), () => $"statusCode was not an error code but instead {statusCode}");
+            return new NoSuccessError(statusCode, $"{request.httpMethod} {request.uri}: \n {errorMessage}");
+        }
 
     }
 

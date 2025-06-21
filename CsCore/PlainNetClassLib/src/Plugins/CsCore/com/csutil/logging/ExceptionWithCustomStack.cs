@@ -11,6 +11,10 @@ namespace com.csutil {
             stack = stacktrace;
         }
 
+        public Error(string message, StackTrace stacktrace, Exception innerException) : base(message, innerException) {
+            stack = stacktrace;
+        }
+
         // Required default constructors (https://docs.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca1032):
         public Error() { }
         public Error(string message) : base(message) { }
@@ -32,5 +36,15 @@ namespace com.csutil {
         }
 
     }
-    
+
+    public static class StackTraceV2 {
+
+        public static StackTrace NewStackTrace(int skipFrames = 1) { return new StackTrace(skipFrames, true); }
+
+        public static Error WithAddedOriginalStackTrace<E>(this E self, StackTrace otherStackTrace) where E : Exception {
+            return new Error(self.GetType().Name + ": " + self.Message, otherStackTrace, self);
+        }
+
+    }
+
 }

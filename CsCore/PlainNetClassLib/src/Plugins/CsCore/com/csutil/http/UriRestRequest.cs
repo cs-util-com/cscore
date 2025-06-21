@@ -13,7 +13,7 @@ namespace com.csutil.http {
 
     public class UriRestRequest : RestRequest {
 
-        public IJsonReader jsonReader = JsonReader.GetReader();
+        public IJsonReader jsonReader = JsonReader.GetReader(null);
         public Action<float> onProgress { get; set; }
         public HttpCompletionOption sendAsyncCompletedAfter = HttpCompletionOption.ResponseHeadersRead;
         public Uri uri { get; }
@@ -116,7 +116,7 @@ namespace com.csutil.http {
             waitForRequestToBeConfigured.TrySetResult(true);
             HttpResponseMessage resp = await request;
             if (typeof(T).IsCastableTo<Exception>() && resp.StatusCode.IsErrorStatus()) {
-                return (T)(object)new NoSuccessError(resp.StatusCode, await GetResult<string>());
+                return (T)(object)await NoSuccessError.Create(this, resp.StatusCode);
             }
             if (HttpStatusCode.OK != resp.StatusCode) { Log.w("response.StatusCode=" + resp.StatusCode); }
             if (TypeCheck.AreEqual<T, HttpResponseMessage>()) { return (T)(object)resp; }

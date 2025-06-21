@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
 
@@ -23,10 +24,11 @@ namespace com.csutil {
         public static Action<string, object[]> onAssertSuccess;
 
         private static void Assert(bool condition, Func<string> errorMsg, object[] args) {
-            args = new StackTrace(2, true).AddTo(args);
             if (!condition) {
+                args = new StackTrace(2, true).AddTo(args);
                 Fail(errorMsg(), args);
             } else if (onAssertSuccess != null) {
+                args = new StackTrace(2, true).AddTo(args);
                 onAssertSuccess(errorMsg(), args); // If callback set inform it on success
             }
         }
@@ -97,17 +99,26 @@ namespace com.csutil {
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
-        public static void AreEqual<T>(IEnumerable<T> expected, IEnumerable<T> actual, string varName = "", params object[] args) {
-            if (!expected.Equals(actual)) {
-                string errorMsg = $"Assert.AreEqual() FAILED for {varName}: {CalcMultiLineUnequalText(expected, actual)}";
-                Assert(false, () => errorMsg, args);
+        public static void AreEqual<T>(T expected, T actual, string varName = "", params object[] args) {
+            if (expected is IEnumerable<T> expectedList && actual is IEnumerable<T> actualList && !(expected is string)) {
+                if (!expected.Equals(actual)) {
+                    string errorMsg = $"Assert.AreEqual() FAILED for {varName}: {CalcMultiLineUnequalText(expectedList, actualList)}";
+                    Assert(false, () => errorMsg, args);
+                }
+            } else {
+                Assert(Equals(expected, actual), () => $"Assert.AreEqual() FAILED: Actual {varName}= {actual} NOT equal to expected {typeof(T)}= {expected}", args);
             }
         }
-
+        
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
-        public static void AreEqual<T>(T expected, T actual, string varName = "", params object[] args) {
-            Assert(Equals(expected, actual), () => $"Assert.AreEqual() FAILED: Actual {varName}= {actual} NOT equal to expected {typeof(T)}= {expected}", args);
+        public static void IsType<T>(object o, string varName = "", params object[] args) {
+            Assert(o is T, () => $"Assert.IsType() FAILED: {varName} is not of type {typeof(T)}", args);
         }
+        
+        [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
+        public static void IsAssignableFrom<T>(object o, string varName = "", params object[] args) {
+            Assert(typeof(T).IsAssignableFrom(o.GetType()), () => $"Assert.IsAssignableFrom() FAILED: {varName} is not assignable from {typeof(T)}", args);
+        } 
 
         private static string CalcMultiLineUnequalText<T>(IEnumerable<T> expected, IEnumerable<T> actual, string _ = LB + "   ") {
             int diffPos = GetPosOfFirstDiff(expected, actual);
@@ -125,7 +136,17 @@ namespace com.csutil {
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
+        public static void AreNotEqual(Vector3 expected, Vector3 actual, string varName = "", params object[] args) {
+            Assert(!Equals(expected, actual), () => $"Assert.AreNotEqual() FAILED: expected number {varName}= {expected} IS equal to actual {varName}= {actual}", args);
+        }
+
+        [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         public static void AreNotEqual(double expected, double actual, string varName = "", params object[] args) {
+            Assert(!Equals(expected, actual), () => $"Assert.AreNotEqual() FAILED: expected number {varName}= {expected} IS equal to actual {varName}= {actual}", args);
+        }
+
+        [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
+        public static void AreNotEqual(float expected, float actual, string varName = "", params object[] args) {
             Assert(!Equals(expected, actual), () => $"Assert.AreNotEqual() FAILED: expected number {varName}= {expected} IS equal to actual {varName}= {actual}", args);
         }
 
@@ -146,8 +167,8 @@ namespace com.csutil {
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         public static void AreEqualJson(object a, object b, params object[] args) {
             if (ReferenceEquals(a, b)) { throw new ArgumentException("Both references pointed to the same object"); }
-            var jsonDiff = MergeJson.GetDiff(a, b);
-            Assert(jsonDiff == null, () => "Difference found:\n" + jsonDiff?.ToPrettyString(), args);
+            var jsonDiff = MergeJson.GetDiffV2(a, b);
+            Assert(MergeJson.HasNoDifferences(jsonDiff), () => "Difference found:\n" + jsonDiff?.ToPrettyString(), args);
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
@@ -163,7 +184,6 @@ namespace com.csutil {
             Assert(value <= upperBound, () => $"Assert.IsInRange() FAILED: {varName}={value} is ABOVE upper bound=" + upperBound, args);
         }
 
-        public static StopwatchV2 TrackTiming([CallerMemberName] string methodName = null) { return new StopwatchV2(methodName).StartV2(); }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_ASSERTIONS")]
         public static void AssertUnderXms(this Stopwatch self, int maxTimeInMs, params object[] args) {

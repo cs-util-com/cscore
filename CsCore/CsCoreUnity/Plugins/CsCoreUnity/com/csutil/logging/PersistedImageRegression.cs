@@ -116,7 +116,7 @@ namespace com.csutil {
             var configFile = folder.GetChild(configFileName);
             Config config = this.config;
             if (configFile.IsNotNullAndExists()) {
-                config = configFile.LoadAs<Config>();
+                config = configFile.LoadAs<Config>(JsonReader.GetReader(this));
             } else {
                 folder.GetChild(configFileName + ".example.txt").SaveAsJson(config, asPrettyString: true);
             }

@@ -134,8 +134,8 @@ namespace com.csutil.model.immutable {
         }
 
         private static bool HasDiff(object actionBeforeDispatch, object actionAfter, out JToken diff) {
-            diff = MergeJson.GetDiff(actionAfter, actionBeforeDispatch);
-            return !diff.IsNullOrEmpty();
+            diff = MergeJson.GetDiffV2(actionAfter, actionBeforeDispatch);
+            return !MergeJson.HasNoDifferences(diff);
         }
 
         [Conditional("DEBUG"), Conditional("ENFORCE_FULL_LOGGING")]
@@ -143,7 +143,7 @@ namespace com.csutil.model.immutable {
             try {
                 Log.d(asJson("" + action.GetType().Name, action));
                 if (showStateDiff) {
-                    JToken diff = MergeJson.GetDiff(previousState, newState);
+                    JToken diff = MergeJson.GetDiffV2(previousState, newState);
                     Log.d(asJson("previousState -> newState diff", diff));
                 }
             } catch (Exception e) { Log.e(e); }

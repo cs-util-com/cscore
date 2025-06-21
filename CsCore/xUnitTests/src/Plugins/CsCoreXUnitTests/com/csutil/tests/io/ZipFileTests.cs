@@ -31,7 +31,7 @@ namespace com.csutil.tests {
             zip1.ExtractIntoDir(dir2);
 
             Assert.True(dir2.Exists);
-            Assert.Equal("abc", dir2.GetChildDir("SubDir1").GetChild("t1.txt").LoadAs<string>());
+            Assert.Equal("abc", dir2.GetChildDir("SubDir1").GetChild("t1.txt").LoadAs<string>(null));
 
             { // Alternative 1 to read content directly from zip without extraction:
                 var zip = new ZipFile(new FileStream(zip1.GetFullFileSystemPath(), FileMode.Open, FileAccess.Read));
@@ -85,7 +85,7 @@ namespace com.csutil.tests {
 
             var subDir2 = zipContent.GetChildDir("SubDir2");
             Assert.Equal(2, subDir2.EnumerateEntries().Count());
-            Assert.Equal("def", subDir2.GetChild("t2.txt").LoadAs<string>());
+            Assert.Equal("def", subDir2.GetChild("t2.txt").LoadAs<string>(null));
 
             zipContent.FileSystem.Dispose(); // Close the zip at the end
 

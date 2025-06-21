@@ -21,6 +21,7 @@ namespace com.csutil.model.ecs {
                 Ecs = ecs;
             }
 
+            public Action<IEntity<T>> OnCreate { get; set; }
             public Action<T, IEntity<T>, UpdateType> OnUpdate { get; set; }
 
             public string Id => Data.Id;
@@ -60,17 +61,17 @@ namespace com.csutil.model.ecs {
 
         public IReadOnlyDictionary<string, IEntity<T>> Entities => _entities;
         public IReadOnlyCollection<string> TemplateIds => _variants.Keys;
+        public IEnumerable<IEntity<T>> Templates => TemplateIds.Map(GetEntity);
 
         /// <summary> If set to true the T class used in IEntity<T> must be immutable in all fields </summary>
         public readonly bool IsModelImmutable;
 
-        /// <summary> Triggered when the entity is directly or indirectly changed (e.g. when a template entity is changed).
-        /// Will path the IEntity wrapper, the old and the new data </summary>
+        public static readonly object threadLock = new object();
+
+        /// <summary> Triggered when the entity is created, removed or directly/indirectly changed (e.g. when a template entity is changed).
+        /// Will pass the IEntity wrapper, the old and the new data </summary>
         public event IEntityUpdateListener OnIEntityUpdated;
 
-        /// <summary>
-        /// 
-        /// </summary>
         public delegate void IEntityUpdateListener(IEntity<T> iEntity, UpdateType updateType, T oldState, T newState);
 
         public enum UpdateType {
@@ -102,24 +103,41 @@ namespace com.csutil.model.ecs {
 
         protected virtual void OnDispose() { }
 
-        public IEntity<T> Add(T entityData) {
+        public IEntity<T> Add(T entityData, bool informEntityAddedListeners = true) {
             this.ThrowErrorIfDisposed();
             // First check if the entity already exists:
             if (_entities.TryGetValue(entityData.Id, out var existingEntity)) {
                 throw new InvalidOperationException("Entity already exists with id '" + entityData.Id + "' old=" + existingEntity.Data + " new=" + entityData);
             }
-            return AddEntity(new Entity(entityData, this));
+            return AddEntity(new Entity(entityData, this), informEntityAddedListeners);
         }
 
-        private IEntity<T> AddEntity(Entity entity) {
-            var entityId = entity.Id;
-            entityId.ThrowErrorIfNullOrEmpty("entityData.Id");
-            var hasOldEntity = _entities.TryGetValue(entityId, out var oldEntity);
-            T oldEntityData = hasOldEntity ? oldEntity.Data : default;
-            _entities[entityId] = entity;
-            UpdateVariantsLookup(entity.Data);
+        private IEntity<T> AddEntity(Entity entity, bool informEntityAddedListeners) {
+            lock (threadLock) {
+                var entityId = entity.Id;
+                entityId.ThrowErrorIfNullOrEmpty("entityData.Id");
+                var hasOldEntity = _entities.TryGetValue(entityId, out var oldEntity);
+                T oldEntityData = hasOldEntity ? oldEntity.Data : default;
+                _entities[entityId] = entity;
+                UpdateVariantsLookup(entity.Data);
+                if (informEntityAddedListeners) {
+                    InformEntityAddedListeners(entity, oldEntityData);
+                }
+                return entity;
+            }
+        }
+
+        protected internal void InformEntityAddedListeners(IEntity<T> entity, T oldEntityData) {
+            AssertV3.IsNull(oldEntityData, "oldEntityData");
             OnIEntityUpdated?.Invoke(entity, UpdateType.Add, oldEntityData, entity.Data);
-            return entity;
+            entity.OnCreate?.Invoke(entity);
+            if (entity.Components != null) {
+                foreach (var comp in entity.Components.Values) {
+                    if (comp is IEntityInEcsListener<T> l) {
+                        l.OnEntityNowInEcs(entity);
+                    }
+                }
+            }
         }
 
         private void UpdateVariantsLookup(T entity) {
@@ -130,49 +148,53 @@ namespace com.csutil.model.ecs {
 
         public Task Update(T entityData, UpdateType updateType = UpdateType.Update) {
             this.ThrowErrorIfDisposed();
-            var t = TemplatesIo?.SaveChanges(entityData);
-            InternalUpdate(entityData, updateType);
-            return t;
+            return InternalUpdate(entityData, updateType);
         }
 
-        private void InternalUpdate(T updatedEntityData, UpdateType updateType) {
-            var entityId = updatedEntityData.Id;
-            var entity = (Entity)_entities[entityId];
-            entity.ThrowErrorIfDisposed();
+        private Task InternalUpdate(T updatedEntityData, UpdateType updateType) {
+            lock (threadLock) {
+                var entityId = updatedEntityData.Id;
+                var entity = (Entity)_entities[entityId];
+                entity.ThrowErrorIfDisposed();
+                
+                var t = TemplatesIo?.SaveChanges(updatedEntityData);
 
-            var oldEntryData = entity.Data;
+                var oldEntryData = entity.Data;
 
-            // e.g. if the entries are mutable this will mostly be true:
-            var wasModified = StateCompare.WasModified(oldEntryData, updatedEntityData);
-            if (IsModelImmutable && !wasModified) {
-                return; // only for immutable data it is now clear that no update is required
-            }
-            if (wasModified) {
-                // Compute json diff to know if the entry really changed and if not skip informing all variants about the change:
-                // This can happen eg if the variant overwrites the field that was just changed in the template
-                if (!TemplatesIo.HasChanges(oldEntryData, updatedEntityData)) {
-                    // Even if entity.Data and updatedEntityData contain the same content, the data must still be set to the new reference:
-                    entity.Data = updatedEntityData;
-                    return;
+                // e.g. if the entries are mutable this will mostly be true:
+                var wasModified = StateCompare.WasModified(oldEntryData, updatedEntityData);
+                if (IsModelImmutable && !wasModified) {
+                    return Task.CompletedTask; // only for immutable data it is now clear that no update is required
                 }
-            }
-            entity.Data = updatedEntityData;
-            UpdateVariantsLookup(entity.Data);
-            // At this point in the update method it is known that the entity really changed  
-            OnIEntityUpdated?.Invoke(entity, updateType, oldEntryData, updatedEntityData);
-            entity.OnUpdate?.Invoke(oldEntryData, entity, updateType);
-            // Also update all components of that entity that implement IEntityUpdateListener:
-            if (updatedEntityData.Components != null) {
-                foreach (var comp in updatedEntityData.Components.Values) {
-                    if (comp is IParentEntityUpdateListener<T> l) {
-                        l.OnParentEntityUpdate(oldEntryData, entity);
+                if (wasModified) {
+                    // Compute json diff to know if the entry really changed and if not skip informing all variants about the change:
+                    // This can happen eg if the variant overwrites the field that was just changed in the template
+                    if (!TemplatesIo.HasChanges(oldEntryData, updatedEntityData)) {
+                        // Log.d($"StateCompare.WasModified returned true but no changes were detected, will skip update for entity {entity}");
+                        // Even if entity.Data and updatedEntityData contain the same content, the data must still be set to the new reference:
+                        entity.Data = updatedEntityData;
+                        return Task.CompletedTask;
                     }
                 }
-            }
+                entity.Data = updatedEntityData;
+                UpdateVariantsLookup(entity.Data);
+                // At this point in the update method it is known that the entity really changed  
+                OnIEntityUpdated?.Invoke(entity, updateType, oldEntryData, updatedEntityData);
+                entity.OnUpdate?.Invoke(oldEntryData, entity, updateType);
+                // Also update all components of that entity that implement IEntityUpdateListener:
+                if (updatedEntityData.Components != null) {
+                    foreach (var comp in updatedEntityData.Components.Values) {
+                        if (comp is IParentEntityUpdateListener<T> l) {
+                            l.OnParentEntityUpdate(oldEntryData, entity);
+                        }
+                    }
+                }
 
-            // If the entry is a template for other entries, then all variants need to be updated:
-            if (_variants.TryGetValue(updatedEntityData.Id, out var variantIds)) {
-                UpdateVariantsWhenTemplateChanges(variantIds);
+                // If the entry is a template for other entries, then all variants need to be updated:
+                if (_variants.TryGetValue(updatedEntityData.Id, out var variantIds)) {
+                    UpdateVariantsWhenTemplateChanges(variantIds);
+                }
+                return t;
             }
         }
 
@@ -189,9 +211,11 @@ namespace com.csutil.model.ecs {
         }
 
         protected virtual void UpdateVariantsWhenTemplateChanges(HashSet<string> variantIds) {
-            foreach (var variantId in variantIds) {
-                var newVariantState = TemplatesIo.RecreateVariantInstance(variantId);
-                InternalUpdate(newVariantState, UpdateType.TemplateUpdate);
+            lock (threadLock) {
+                foreach (var variantId in variantIds) {
+                    var newVariantState = TemplatesIo.RecreateVariantInstance(variantId);
+                    InternalUpdate(newVariantState, UpdateType.TemplateUpdate);
+                }
             }
         }
 
@@ -220,9 +244,11 @@ namespace com.csutil.model.ecs {
         }
 
         public Task Destroy(IEntity<T> entityToDestroy) {
-            this.ThrowErrorIfDisposed();
-            if (!entityToDestroy.IsAlive()) { return Task.CompletedTask; }
-            return Destroy(entityToDestroy.Id);
+            lock (threadLock) {
+                this.ThrowErrorIfDisposed();
+                if (!entityToDestroy.IsAlive()) { return Task.CompletedTask; }
+                return Destroy(entityToDestroy.Id);
+            }
         }
 
         private Task Destroy(string entityId) {
@@ -260,9 +286,14 @@ namespace com.csutil.model.ecs {
             }
         }
 
-        public IEntity<T> CreateVariant(T entityData, IReadOnlyDictionary<string, string> newIdsLookup) {
+        /// <summary> Creates a variant instance of the entity (but not its children entities) </summary>
+        /// <param name="sourceEntity"> The entity that will become the template of the created variant </param>
+        /// <param name="newIdsLookup"> the ids that should be used for the variant </param>
+        /// <param name="informEntityAddedListeners"> Should be set to false if multiple entities are created at once for the variant </param>
+        /// <returns> The created variant entity </returns>
+        public IEntity<T> CreateVariant(T sourceEntity, IReadOnlyDictionary<string, string> newIdsLookup, bool informEntityAddedListeners, bool autoSaveIfNeeded = false) {
             this.ThrowErrorIfDisposed();
-            return Add(TemplatesIo.CreateVariantInstanceOf(entityData, newIdsLookup));
+            return Add(TemplatesIo.CreateVariantInstanceOf(sourceEntity, newIdsLookup, autoSaveIfNeeded), informEntityAddedListeners);
         }
 
     }

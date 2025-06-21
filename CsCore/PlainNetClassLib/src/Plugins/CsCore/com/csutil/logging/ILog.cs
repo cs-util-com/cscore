@@ -13,6 +13,10 @@ namespace com.csutil.logging {
         StopwatchV2 LogMethodEntered(string methodName, object[] args);
         void LogMethodDone(Stopwatch timing, object[] args, int maxAllowedTimeInMs, string sourceMemberName, string sourceFilePath, int sourceLineNumber);
 
+        StopwatchV2 BeginThreadProfiling();
+        
+        StopwatchV2 TrackTiming(string methodName, Action<Stopwatch> onDispose);
+
     }
 
 }

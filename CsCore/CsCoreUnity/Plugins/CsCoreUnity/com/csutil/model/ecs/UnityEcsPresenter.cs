@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -15,6 +16,25 @@ namespace com.csutil.model.ecs {
         public IReadOnlyDictionary<string, GameObject> EntityViews => _entityViews;
 
         public DisposeState IsDisposed { get; private set; }
+
+        /// <summary> The cache of old states that where already applied to the presenters </summary>
+        private readonly Dictionary<string, T> _oldStates = new Dictionary<string, T>();
+
+        /// <summary> Debouncing the ui/view/unity presenter updates is important to not
+        /// hand over half updated states and in general to not have to update the view too often </summary>
+        private readonly Func<IEntity<T>, Task> _updateGoDebounced;
+
+        protected UnityEcsPresenter(int delayInMs = 50) {
+            Func<IEntity<T>, Task> t = (latestEntityState) => {
+                UpdateGoFor(latestEntityState);
+                return Task.CompletedTask;
+            };
+            if (delayInMs <= 0) {
+                _updateGoDebounced = t;
+            } else {
+                _updateGoDebounced = t.AsThrottledDebounceV2(delayInMs, skipFirstEvent: true);
+            }
+        }
 
         public virtual Task OnLoad(EntityComponentSystem<T> model) {
             targetView.ThrowErrorIfNullOrDestroyed("Root GameObject of the ECS presenter");
@@ -32,6 +52,7 @@ namespace com.csutil.model.ecs {
             }
             _entityViews.Clear();
             _entityViews = null;
+            _oldStates.Clear();
             IsDisposed = DisposeState.Disposed;
         }
 
@@ -48,26 +69,38 @@ namespace com.csutil.model.ecs {
 
         private void OnEntityUpdated(IEntity<T> iEntity, EntityComponentSystem<T>.UpdateType type, T oldstate, T newstate) {
             AssertV3.IsTrue(iEntity.IsAlive(), () => "Entity is not alive");
-            MainThread.Invoke(() => {
-                // If the entity is no longer alive after the main thread switch, ignore the update (except for remove events):
-                var isUpdateInMainThreadStillPossible = iEntity.IsAlive() || type == EntityComponentSystem<T>.UpdateType.Remove;
-                if (isUpdateInMainThreadStillPossible) {
-                    HandleEntityUpdate(iEntity, type, oldstate, newstate);
-                }
-            });
+            var originalStackTrace = StackTraceV2.NewStackTrace();
+            TaskV2.Run(async () => {
+                // Delay initial creation and updates of presenters so that the model is already in a stable state when the presenter is informed
+                await TaskV2.Delay(100);
+                MainThread.Invoke(() => {
+                    if (!this.IsAlive()) { return; }
+                    // If the entity is no longer alive after the main thread switch, ignore the update (except for remove events):
+                    var isUpdateInMainThreadStillPossible = iEntity.IsAlive() || type == EntityComponentSystem<T>.UpdateType.Remove;
+                    if (isUpdateInMainThreadStillPossible) {
+                        try {
+                            HandleEntityUpdate(iEntity, type, oldstate);
+                        } catch (Exception e) {
+                            throw e.WithAddedOriginalStackTrace(originalStackTrace);
+                        }
+                    }
+                });
+            }).LogOnError();
         }
 
-        private void HandleEntityUpdate(IEntity<T> iEntity, EntityComponentSystem<T>.UpdateType type, T oldstate, T newstate) {
+        private void HandleEntityUpdate(IEntity<T> iEntity, EntityComponentSystem<T>.UpdateType type, T oldstate) {
             switch (type) {
                 case EntityComponentSystem<T>.UpdateType.Add:
                     CreateGoFor(iEntity);
+                    _oldStates.Add(iEntity.Id, iEntity.Data);
                     break;
                 case EntityComponentSystem<T>.UpdateType.Remove:
                     RemoveGoFor(iEntity, oldstate);
+                    _oldStates.Remove(iEntity.Id);
                     break;
                 case EntityComponentSystem<T>.UpdateType.Update:
-                case EntityComponentSystem<T>.UpdateType.TemplateUpdate:    
-                    UpdateGoFor(iEntity, oldstate, newstate, type);
+                case EntityComponentSystem<T>.UpdateType.TemplateUpdate:
+                    _updateGoDebounced(iEntity);
                     break;
                 default: throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
@@ -76,6 +109,8 @@ namespace com.csutil.model.ecs {
         private void CreateGoFor(IEntity<T> iEntity) {
             if (_entityViews.ContainsKey(iEntity.Id)) { return; }
             GameObject go = NewGameObjectFor(iEntity);
+            AssertV3.IsNull(go.GetComponent<EntityView>(), "go.GetComponent<EntityView>()");
+            go.AddComponent<EntityView>().Init(iEntity);
             _entityViews.Add(iEntity.Id, go);
             go.name = "" + iEntity;
             if (iEntity.ParentId != null) {
@@ -90,7 +125,7 @@ namespace com.csutil.model.ecs {
             iEntity.LocalPose().ApplyTo(go.transform);
             go.SetActive(iEntity.IsActiveSelf());
             foreach (var x in iEntity.Components) {
-                OnComponentAdded(iEntity, x, targetParentGo: go);
+                OnComponentAdded(iEntity, x.Value, targetParentGo: go);
             }
         }
 
@@ -107,7 +142,14 @@ namespace com.csutil.model.ecs {
             }
         }
 
-        private void UpdateGoFor(IEntity<T> iEntity, T oldState, T newState, EntityComponentSystem<T>.UpdateType type) {
+        private void UpdateGoFor(IEntity<T> iEntity) {
+
+            T newState = iEntity.Data;
+            if (!_oldStates.TryGetValue(newState.Id, out T oldState)) {
+                throw Log.e($"Failed to find old state for entity={iEntity}");
+            }
+            _oldStates[newState.Id] = newState;
+
             var go = _entityViews[iEntity.Id];
             if (go.IsDestroyed()) {
                 throw Log.e($"The entity view for {iEntity.GetFullEcsPathString()} was destroyed");
@@ -116,24 +158,26 @@ namespace com.csutil.model.ecs {
             if (oldState.Name != "" + newState) {
                 go.name = "" + iEntity;
             }
+            var newLocalPose3d = newState.LocalPose.ToPose();
+            AssertV3.IsNotNull(newLocalPose3d, "newLocalPose3d");
             if (oldState.ParentId != newState.ParentId) {
                 if (newState.ParentId != null) {
-                    OnChangeParent(newState, go, iEntity.LocalPose());
+                    OnChangeParent(newState, go, newLocalPose3d);
                 } else {
-                    OnDetachFromParent(go, iEntity.LocalPose());
+                    OnDetachFromParent(go, newLocalPose3d);
                 }
             }
             if (oldState.LocalPose != newState.LocalPose) {
-                OnPoseUpdate(iEntity, go, iEntity.LocalPose());
+                OnPoseUpdate(iEntity, go, newLocalPose3d);
             }
             var newIsActiveState = newState.IsActiveSelf();
             if (oldState.IsActiveSelf() != newIsActiveState) {
                 OnToggleActiveState(go, newIsActiveState);
             }
             var oldComps = oldState.Components;
-            newState.Components.CalcEntryChangesToOldStateV2<IReadOnlyDictionary<string, IComponentData>, string, IComponentData>(ref oldComps,
-                added => OnComponentAdded(iEntity, added, targetParentGo: go),
-                (_, updated) => OnComponentUpdated(iEntity, oldState.Components[updated.Key], updated, targetParentGo: go),
+            newState.Components.CalcEntryChangesToOldStateV4<IReadOnlyDictionary<string, IComponentData>, string, IComponentData>(ref oldComps,
+                (key, added) => OnComponentAdded(iEntity, added, targetParentGo: go),
+                (key, old, updated) => OnComponentUpdated(iEntity, key, oldState.Components[key], updated, targetParentGo: go),
                 deleted => OnComponentRemoved(iEntity, deleted, targetParentGo: go)
             );
         }
@@ -156,19 +200,19 @@ namespace com.csutil.model.ecs {
             newLocalPose.ApplyTo(go.transform);
         }
 
-        protected virtual void OnComponentAdded(IEntity<T> iEntity, KeyValuePair<string, IComponentData> added, GameObject targetParentGo) {
-            var createdComponent = AddComponentTo(targetParentGo, added.Value, iEntity);
+        protected virtual void OnComponentAdded(IEntity<T> iEntity, IComponentData added, GameObject targetParentGo) {
+            var createdComponent = AddComponentTo(targetParentGo, added, iEntity);
             if (createdComponent == null) {
-                Log.d($"AddComponentTo returned NULL for component={added.Value} and targetParentGo={targetParentGo}", targetParentGo);
+                //Log.d($"AddComponentTo returned NULL for component={added.Value} and targetParentGo={targetParentGo}", targetParentGo);
             } else {
-                createdComponent.ComponentId = added.Value.GetId();
+                createdComponent.ComponentId = added.GetId();
                 if (createdComponent is Behaviour mono) {
                     mono.enabled = true; // Force to trigger onEnable once (often needed by presenters to init some values)
-                    if (mono.enabled != added.Value.IsActive) {
-                        mono.enabled = added.Value.IsActive;
+                    if (mono.enabled != added.IsActive) {
+                        mono.enabled = added.IsActive;
                     }
                 }
-                createdComponent.OnUpdateUnityComponent(iEntity, default, added.Value);
+                createdComponent.OnUpdateUnityComponent(iEntity, default, added);
             }
         }
 
@@ -177,34 +221,44 @@ namespace com.csutil.model.ecs {
         protected virtual void OnComponentRemoved(IEntity<T> iEntity, string deleted, GameObject targetParentGo) {
             var allPresenters = GetComponentPresenters(iEntity);
             if (allPresenters.Any(x => x.ComponentId == deleted)) {
-                GetComponentPresenter(iEntity, deleted).DisposeV2();
+                if (TryGetComponentPresenter(iEntity, deleted, out var compPresenter)) {
+                    if (compPresenter is IEcsComponentDestroyHandler handler && !handler.OnDestroyRequest()) {
+                        // Do not dispose the comp presenter, since the handle logic should already have handled the
+                        // remove request (e.g. by disposing the presenter or just resetting it)
+                    } else {
+                        compPresenter.DisposeV2();
+                    }
+                }
             } else {
                 Log.d($"No component found for the deleted entity component with id={deleted} in entity={iEntity}. "
                     + $"allPresenters={allPresenters.ToStringV2(x => "\n" + x)}", targetParentGo);
             }
         }
 
-        private IComponentPresenter<T> GetComponentPresenter(IEntity<T> iEntity, string componentId) {
+        private bool TryGetComponentPresenter(IEntity<T> iEntity, string componentId, out IComponentPresenter<T> componentPresenter) {
             try {
                 var componentPresenters = GetComponentPresenters(iEntity);
-                return componentPresenters.Single(x => x.ComponentId == componentId);
+                componentPresenter = componentPresenters.SingleOrDefault(x => x.ComponentId == componentId);
+                return componentPresenter != null;
             } catch (Exception e) {
                 var entityView = _entityViews[iEntity.Id];
                 Log.e($"Failed to find exactly 1 component with id={componentId} in entity={iEntity}", e, entityView);
-                throw;
+                componentPresenter = null;
+                return false;
             }
         }
 
-        private IComponentPresenter<T>[] GetComponentPresenters(IEntity<T> iEntity) {
-            return _entityViews[iEntity.Id].GetComponentsInChildren<IComponentPresenter<T>>(true);
+        private IEnumerable<IComponentPresenter<T>> GetComponentPresenters(IEntity<T> iEntity) {
+            return _entityViews[iEntity.Id].GetComponentsInOwnEcsPresenterChildren<IComponentPresenter<T>>(iEntity, includeInactive: true);
         }
 
-        protected virtual void OnComponentUpdated(IEntity<T> iEntity, IComponentData oldState, KeyValuePair<string, IComponentData> updatedState, GameObject targetParentGo) {
-            var compView = GetComponentPresenter(iEntity, updatedState.Key);
-            if (compView is Behaviour mono) {
-                mono.enabled = updatedState.Value.IsActive;
+        protected virtual void OnComponentUpdated(IEntity<T> iEntity, string key, IComponentData oldState, IComponentData updatedState, GameObject targetParentGo) {
+            if (TryGetComponentPresenter(iEntity, key, out var compView)) {
+                if (compView is Behaviour mono) {
+                    mono.enabled = updatedState.IsActive;
+                }
+                compView.OnUpdateUnityComponent(iEntity, oldState, updatedState);
             }
-            compView.OnUpdateUnityComponent(iEntity, oldState, updatedState.Value);
         }
 
     }

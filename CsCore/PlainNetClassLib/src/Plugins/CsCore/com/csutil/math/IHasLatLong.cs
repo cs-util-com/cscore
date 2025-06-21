@@ -62,6 +62,12 @@ namespace com.csutil.gps {
         public static void CalcRelativeCoordsInMeters(this IHasLatLong zeroPoint, IHasLatLong inputPoint, double[] resultCoordsInMeters) {
             CalcRelativeCoordsInMeters(zeroPoint, inputPoint.Latitude, inputPoint.Longitude, resultCoordsInMeters);
         }
+        
+        public static double[] CalcRelativeCoordsInMeters(this IHasLatLong zeroPoint, IHasLatLong inputPoint) {
+            double[] res = new double[2];
+            CalcRelativeCoordsInMeters(zeroPoint, inputPoint, res);
+            return res;
+        }
 
         public static double DistanceInMeters(this IHasLatLong self, IHasLatLong otherGpsCoords) {
             double[] res = new double[2];
@@ -74,6 +80,12 @@ namespace com.csutil.gps {
             var lng = self.Longitude.ToString(CultureInfo.InvariantCulture);
             // See https://developers.google.com/maps/documentation/urls/get-started#forming-the-url
             return $"https://www.google.com/maps/search/?api=1&query={lat}%2C{lng}";
+        }
+        
+        public static string GetOpenStreetMapLink(this IHasLatLong self, int zoomLevel = 19) {
+            var lat = self.Latitude.ToString(CultureInfo.InvariantCulture);
+            var lng = self.Longitude.ToString(CultureInfo.InvariantCulture);
+            return $"https://www.openstreetmap.org/query?lat={lat}&lon={lng}#map={zoomLevel}/{lat}/{lng}";
         }
 
         public static string GetGoogleMapsLink(this IHasLatLong destination, IHasLatLong startPos) {

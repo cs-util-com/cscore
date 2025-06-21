@@ -13,7 +13,7 @@ namespace com.csutil.editor {
                 Log.e("Manifest.json file not found at " + manifestFile);
                 return false;
             }
-            var manifest = manifestFile.LoadAs<Dictionary<string, object>>();
+            var manifest = manifestFile.LoadAs<Dictionary<string, object>>(JsonReader.GetReader(null));
             JObject dependencies = (manifest["dependencies"] as JObject);
             if (dependencies == null) {
                 Log.e("Dependencies list not found in manifest.json");

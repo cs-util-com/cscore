@@ -38,8 +38,8 @@ namespace com.csutil.tests {
 
             FileEntry file1 = dirToTestWith.GetChild(fileName1);
             Assert.True(file1.Exists);
-            var fileContent1 = file1.LoadAs<string>();
-            var fileContent2 = file1.LoadAs(typeof(string));
+            var fileContent1 = file1.LoadAs<string>(null);
+            var fileContent2 = file1.LoadAs(typeof(string), null);
             Assert.NotEmpty(fileContent1);
             Assert.Equal(fileContent1, fileContent2);
 
@@ -55,7 +55,7 @@ namespace com.csutil.tests {
             FileEntry self = subDir2.GetChild("t3.txt");
             string text = "Some text 123";
             self.SaveAsText(text);
-            Assert.Equal(text, self.LoadAs<string>());
+            Assert.Equal(text, self.LoadAs<string>(null));
 
             FileEntry f2 = subDir1.GetChild(fileName2);
             Assert.True(f2.Exists);

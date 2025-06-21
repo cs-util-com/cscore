@@ -33,18 +33,18 @@ namespace com.csutil.tests.model.immutable {
 
             var carlUpdatedCounter = 0;
             var carlsFriendUpdatedCounter = 0;
-            store.AddStateChangeListenerForDictionary(state => state.users,
-                (addedUser) => {
+            store.AddStateChangeListenerForDictionaryV2(state => state.users,
+                (key, addedUser) => {
                     // The only user added to the store (after the initial store creation) will be carlsFriend
-                    Assert.Equal(carlsFriend.name, addedUser.Value.name);
-                }, (_, updatedUser) => {
-                    if (updatedUser.Value.id == carl.id) {
+                    Assert.Equal(carlsFriend.name, addedUser.name);
+                }, (key, old, updatedUser) => {
+                    if (updatedUser.id == carl.id) {
                         carlUpdatedCounter++; // Carl will be updated multiple times
-                    } else if (updatedUser.Value.id == carlsFriend.id) {
-                        Assert.Equal(carlsFriend.name, updatedUser.Value.name);
+                    } else if (updatedUser.id == carlsFriend.id) {
+                        Assert.Equal(carlsFriend.name, updatedUser.name);
                         carlsFriendUpdatedCounter++;
                     } else {
-                        throw Log.e("Unexpected user updated: " + updatedUser.Value);
+                        throw Log.e("Unexpected user updated: " + updatedUser);
                     }
                 }, (removedUser) => {
                     throw Log.e("A user was removed from the store even though there are no remove actions");

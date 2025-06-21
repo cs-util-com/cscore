@@ -88,7 +88,7 @@ namespace com.csutil.tests {
             DateTime myDateTime = DateTimeV2.NewDateTimeFromUnixTimestamp(1547535889000);
 
             // Create a compromise of a human readable sting that is usable for file names etc:
-            Assert.Equal("2019-01-15_07.04", myDateTime.ToReadableString());
+            Assert.Equal("2019-01-15_07.04.49.000", myDateTime.ToReadableStringExact());
 
         }
 

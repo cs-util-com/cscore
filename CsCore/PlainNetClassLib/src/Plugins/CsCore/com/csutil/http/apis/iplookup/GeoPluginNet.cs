@@ -4,8 +4,10 @@ using System.Threading.Tasks;
 namespace com.csutil.http.apis.iplookup {
     public static class GeoPluginNet {
 
-        public static Task<Response> GetResponse() {
-            return new Uri("http://www.geoplugin.net/json.gp").SendGET().GetResult<Response>();
+        public static async Task<Response> GetResponse() {
+            var response = await new Uri("http://www.geoplugin.net/json.gp").SendGET().GetResult<Response>();
+            AssertV3.IsFalse(response.geoplugin_city.IsNullOrEmpty(), () => "geoplugin_city is missing in response");
+            return response;
         }
 
         public class Response { // generated via https://json2csharp.com :
@@ -13,11 +15,17 @@ namespace com.csutil.http.apis.iplookup {
             public int geoplugin_status { get; set; }
             public string geoplugin_delay { get; set; }
             public string geoplugin_credit { get; set; }
+            
+            /// <summary> Can be null, use geoplugin_latitude and geoplugin_longitude as fallback </summary>
             public string geoplugin_city { get; set; }
+            
             public string geoplugin_region { get; set; }
             public string geoplugin_regionCode { get; set; }
             public string geoplugin_regionName { get; set; }
+            
+            /// <summary> Can be null, use geoplugin_latitude and geoplugin_longitude as fallback </summary>
             public string geoplugin_areaCode { get; set; }
+            
             public string geoplugin_dmaCode { get; set; }
             public string geoplugin_countryCode { get; set; }
             public string geoplugin_countryName { get; set; }

@@ -25,15 +25,18 @@ namespace com.csutil.tests.model {
             MyClass1 original = new MyClass1() { name = "1", child = new MyClass1() { name = "2", age = 3 } };
 
             MyClass1 copy = original.DeepCopyViaJson();
-            Assert.Null(MergeJson.GetDiff(original, copy)); // No diff between original and copy
+            var differenceBetweenOriginalAndCopy = MergeJson.GetDiffV2(original, copy);
+            Assert.True(MergeJson.HasNoDifferences(differenceBetweenOriginalAndCopy));
+            Assert.Null(differenceBetweenOriginalAndCopy); // No diff between original and copy
             AssertV3.AreEqualJson(original, copy); // AreEqualJson will use MergeJson.GetDiff internally
             Assert.Equal(original.child.name, copy.child.name);
             // Modify the copy, changing the copy will not change the original:
             copy.child.name = "Some new name..";
             // Check that the change was only done in the copy and not the original:
             Assert.NotEqual(original.child.name, copy.child.name);
-            JToken diffToOriginal = MergeJson.GetDiff(original, copy);
-            Assert.NotNull(diffToOriginal);
+            JToken differenceBetweenOriginalAndModifiedCopy = MergeJson.GetDiffV2(original, copy);
+            Assert.NotNull(differenceBetweenOriginalAndModifiedCopy);
+            Assert.False(MergeJson.HasNoDifferences(differenceBetweenOriginalAndModifiedCopy));
 
             // Objects that impl. IClonable can also ShallowCopy (will call .Clone internally):
             MyClass1 shallowCopy = original.ShallowCopyViaClone();
@@ -42,7 +45,7 @@ namespace com.csutil.tests.model {
 
             // Applying a change to an existing target object is done using MergeJson.Patch:
             var oldName = original.child.name;
-            MergeJson.Patch(original, diffToOriginal); // Apply the changes stored in the diff 
+            MergeJson.Patch(original, differenceBetweenOriginalAndModifiedCopy); // Apply the changes stored in the diff 
             Assert.NotEqual(oldName, original.child.name); // The name field was updated
             Assert.Equal(copy.child.name, original.child.name);
             Assert.Equal(3, original.child.age); // The age field was not changed by the patch

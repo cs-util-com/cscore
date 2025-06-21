@@ -21,7 +21,7 @@ namespace com.csutil.integrationTests.model {
             bool wasDownloadNeeded = await f.DownloadTo(dir, (float progress) => {
                 Log.d($"Download {progress}% done");
             }, useAutoCachedFileRef: true);
-            string licenseText = f.GetFileEntry(dir.FileSystem).LoadAs<string>();
+            string licenseText = f.GetFileEntry(dir.FileSystem).LoadAs<string>(null);
             Assert.Equal(11344, licenseText.Length);
         }
 
@@ -47,7 +47,7 @@ namespace com.csutil.integrationTests.model {
             // ResolveFilePath can be used to resolve full pathes including / characters:
             var file2 = root.ResolveFilePath("" + x2.GetPath());
             Assert.True(file2.Exists);
-            Assert.Equal(savedText, file2.LoadAs<string>());
+            Assert.Equal(savedText, file2.LoadAs<string>(null));
 
         }
 

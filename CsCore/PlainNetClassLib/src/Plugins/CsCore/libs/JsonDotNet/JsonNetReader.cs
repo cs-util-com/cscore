@@ -9,7 +9,7 @@ namespace com.csutil.json {
         /// <summary> If set this will assert, that the passed json was fully parsed into the fields of the target class </summary>
         public IJsonWriter debugWriter;
 
-        private JsonSerializerSettings settings;
+        public JsonSerializerSettings settings { get; private set; }
         private JsonSerializer reader;
 
         public JsonNetReader() : this(JsonNetSettings.defaultSettings) { }

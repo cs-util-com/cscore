@@ -197,12 +197,12 @@ namespace com.csutil.model.ecs {
             if (parent == null) { return globalPose; }
             return parent.ToLocalPose(globalPose);
         }
-        
+
         public static Matrix4x4 ToLocalPose<T>(this IEntity<T> self, Matrix4x4 globalPose) where T : IEntityData {
             self.ThrowErrorIfDisposed();
             return self.GlobalPoseMatrix().Inverse() * globalPose;
         }
-        
+
         // ToGlobalPose (which takes an IEntity in and a local pose in that entities space and calculates the global pose)
         public static Matrix4x4 ToGlobalPose<T>(this IEntity<T> self, Matrix4x4 localPose) where T : IEntityData {
             self.ThrowErrorIfDisposed();
@@ -214,8 +214,17 @@ namespace com.csutil.model.ecs {
             return self.GlobalPoseMatrix().ToPose();
         }
 
+        /// <summary> This method returns a number that is unique if no changes are made to the ecs in between multiple calls to this method.
+        /// If two entities request their number at the same time without moving/removing/adding any entities in between these
+        /// two ids cant result in the same string.
+        /// This returned number is not guaranteed to stay the same when the ECS is modified </summary>
+        public static int GetAlmostUniqueNumberForEntity<T>(this IEntity<T> self) where T : IEntityData {
+            var id = self.Id;
+            return self.Ecs.Entities.IndexOf(x => x.Key == id);
+        }
+
         public static Pose3d ToPose(this Matrix4x4? matrix) {
-            if (matrix == null) { return null; }
+            if (matrix == null) { return Pose3d.Identity; }
             return matrix.Value.ToPose();
         }
 
@@ -231,11 +240,39 @@ namespace com.csutil.model.ecs {
             return self.GlobalPoseMatrix(allEntities).ToPose();
         }
 
+        public static bool IsActiveInHierarchy<T>(this T self, IReadOnlyDictionary<string, T> allEntities) where T : IEntityData {
+            return self.IsActive && (self.ParentId == null || self.GetParent(allEntities).IsActiveInHierarchy(allEntities));
+        }
+
+        public static bool TryGetTemplate<T>(this T self, IReadOnlyDictionary<string, T> allEntities, out T template) where T : IEntityData {
+            if (self.TemplateId != null) {
+                template = allEntities[self.TemplateId];
+                return true;
+            }
+            template = default;
+            return false;
+        }
+
+        /// <summary> Iterates over all entities to check if one is found that has the TemplateId set to the id of the entity </summary>
+        public static bool TryGetVariants<T>(this T self, IReadOnlyDictionary<string, T> allEntities, out IEnumerable<T> variants) where T : IEntityData {
+            List<T> result = null;
+            foreach (var entity in allEntities.Values) {
+                if (entity.TemplateId == self.Id) {
+                    if (result == null) { result = new List<T>(); }
+                    result.Add(entity);
+                }
+            }
+            variants = result;
+            return result != null;
+        }
+
+        public static bool IsVariant<T>(this T self) where T : IEntityData {
+            return self.TemplateId != null;
+        }
+
         public static Pose3d LocalPose<T>(this IEntity<T> self) where T : IEntityData {
             self.ThrowErrorIfDisposed();
-            var localPose = self.LocalPose;
-            if (!localPose.HasValue) { return Matrix4x4.Identity.ToPose(); }
-            return localPose.Value.ToPose();
+            return self.LocalPose.ToPose();
         }
 
         public static Task SaveChanges<T>(this IEntity<T> self) where T : IEntityData {
@@ -246,22 +283,31 @@ namespace com.csutil.model.ecs {
             return Task.WhenAll(tasks);
         }
 
-        public static IEntity<T> CreateVariant<T>(this IEntity<T> self) where T : IEntityData {
-            return self.CreateVariant(out _);
+        public static IEntity<T> CreateVariant<T>(this IEntity<T> self, bool autoSaveIfNeeded = false) where T : IEntityData {
+            return self.CreateVariant(out _, autoSaveIfNeeded);
         }
 
         /// <summary>
         /// Recursively creates variants of all entities in the subtree of the entity and returns a new root entity that has the variant ids in its children lists
         /// </summary>
-        public static IEntity<T> CreateVariant<T>(this IEntity<T> self, out IReadOnlyDictionary<string, string> resultIdLookupTable) where T : IEntityData {
+        public static IEntity<T> CreateVariant<T>(this IEntity<T> self, out IReadOnlyDictionary<string, string> resultIdLookupTable, bool autoSaveIfNeeded = false) where T : IEntityData {
             self.ThrowErrorIfDisposed();
             var all = self.GetSelfAndChildrenTreeBreadthFirst().ToList();
             resultIdLookupTable = all.ToDictionary(x => x.Id, x => "" + GuidV2.NewGuid());
             var fullSubtreeLeavesFirst = all.Skip(1).Reverse();
+            var createdVariantEntities = new List<IEntity<T>>(all.Count);
             foreach (var e in fullSubtreeLeavesFirst) {
-                e.Ecs.CreateVariant(e.Data, resultIdLookupTable);
+                createdVariantEntities.Add(e.Ecs.CreateVariant(e.Data, resultIdLookupTable, false, autoSaveIfNeeded));
             }
-            var result = self.Ecs.CreateVariant(self.Data, resultIdLookupTable);
+            var result = self.Ecs.CreateVariant(self.Data, resultIdLookupTable, false, autoSaveIfNeeded);
+            createdVariantEntities.Add(result);
+            createdVariantEntities.Reverse(); // So that the root of the variant is the first in the list
+
+            // Now that all variant entities are created, inform all listeners that the entities where added:
+            foreach (IEntity<T> e in createdVariantEntities) {
+                self.Ecs.InformEntityAddedListeners(e, oldEntityData: default);
+            }
+
             AssertV3.IsNull(result.ParentId, "result.ParentId");
             AssertV3.AreNotEqual(result.Id, self.Id);
             return result;
@@ -287,10 +333,11 @@ namespace com.csutil.model.ecs {
             return self.GetComponentsInSelfAndChildren<T, V>().FirstOrDefault();
         }
 
-        public static bool TryGetComponentInParents<T, V>(this IEntity<T> self, out V foundComp, out IEntity<T> parent) where T : IEntityData where V : IComponentData {
-            foreach (var parentId in self.CollectAllParents()) {
-                parent = self.Ecs.GetEntity(parentId);
-                if (parent.TryGetComponent(out foundComp)) {
+        public static bool TryGetComponentInParents<T, V>(this IEntity<T> self, out V foundComp, out IEntity<T> parent) where T : IEntityData {
+            var entitiesToSearch = self.CollectAllParentsV2().AddViaUnion(self, addInFront: true);
+            foreach (var parentEntity in entitiesToSearch) {
+                if (parentEntity.TryGetComponent(out foundComp)) {
+                    parent = parentEntity;
                     return true;
                 }
             }
@@ -308,9 +355,22 @@ namespace com.csutil.model.ecs {
             return self.IsActive;
         }
 
+        public static bool IsAliveAndActiveInHierarchy<T>(this IEntity<T> self) where T : IEntityData {
+            return self.IsAlive() && self.IsActiveInHierarchy();
+        }
+
         public static bool IsActiveInHierarchy<T>(this IEntity<T> self) where T : IEntityData {
             self.ThrowErrorIfDisposed();
-            return self.IsActive && self.CollectAllParents().Map(id => self.Ecs.GetEntity(id)).All(x => x.IsActive);
+            return self.IsActive && self.CollectAllParentsV2().All(x => x.IsActive);
+        }
+
+        public static string ToExtendedEntityString(this IEntityData self) {
+            var result = self.ToString();
+            result += ", " + self.LocalPose.ToPose();
+            result += ", Parent=<<" + self.ParentId + ">>";
+            result += ", Children=[[" + self.ChildrenIds.ToStringV2() + "]]";
+            result += ", Components={{" + self.Components.ToStringV2(x => "" + x.Value) + "}}";
+            return result;
         }
 
     }
@@ -336,23 +396,38 @@ namespace com.csutil.model.ecs {
             return true;
         }
 
-        public static IReadOnlyList<string> CollectAllParents<T>(this IEntity<T> entity) where T : IEntityData {
-            return CollectAllParents(entity, new List<string>());
-        }
-        
         public static IReadOnlyList<IEntity<T>> CollectAllParentEntities<T>(this IEntity<T> entity) where T : IEntityData {
-            return entity.CollectAllParents().Map(x => entity.Ecs.GetEntity(x)).ToImmutableList();
+            return entity.CollectAllParentsV2().ToImmutableList();
         }
-        
+
         public static string GetFullEcsPathString<T>(this IEntity<T> iEntity) where T : IEntityData {
             var fromRootToEntity = iEntity.CollectAllParentEntities().Reverse().AddViaUnion(iEntity);
             return "[ Root -> " + fromRootToEntity.ToStringV2(x => "" + x, bracket1: "", separator: " -> ", bracket2: "") + "]";
         }
 
+        [Obsolete("Use CollectAllParentsV2 instead")]
+        public static IReadOnlyList<string> CollectAllParents<T>(this IEntity<T> entity) where T : IEntityData {
+            return CollectAllParents(entity, new List<string>());
+        }
+
+        [Obsolete("Use CollectAllParentsV2 instead")]
         private static IReadOnlyList<string> CollectAllParents<T>(IEntity<T> entity, List<string> parentsLookup) where T : IEntityData {
             if (entity.ParentId != null) {
                 parentsLookup.Add(entity.ParentId);
                 CollectAllParents(entity.GetParent(), parentsLookup);
+            }
+            return parentsLookup;
+        }
+
+        public static IReadOnlyList<IEntity<T>> CollectAllParentsV2<T>(this IEntity<T> entity) where T : IEntityData {
+            if (entity.ParentId == null) { return new List<IEntity<T>>(); }
+            return CollectAllParentsV2(entity.GetParent(), new List<IEntity<T>>());
+        }
+
+        private static IReadOnlyList<IEntity<T>> CollectAllParentsV2<T>(IEntity<T> parent, List<IEntity<T>> parentsLookup) where T : IEntityData {
+            parentsLookup.Add(parent);
+            if (parent.ParentId != null) {
+                CollectAllParentsV2(parent.GetParent(), parentsLookup);
             }
             return parentsLookup;
         }
@@ -394,7 +469,7 @@ namespace com.csutil.model.ecs {
             return components.Any();
         }
 
-        public static bool HasComponent<V>(this IEntityData self) where V : IComponentData {
+        public static bool HasComponent<V>(this IEntityData self) {
             return self.Components.Values.Any(c => c is V);
         }
 

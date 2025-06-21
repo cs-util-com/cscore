@@ -9,4 +9,13 @@ namespace com.csutil.model.ecs {
 
     }
     
+    /// <summary> Can be implemented by an ECS component to get informed when the parent entity of the component becomes part of the ECS system </summary>
+    public interface IEntityInEcsListener<T> where T : IEntityData {
+
+        /// <summary> Will be triggered when the parent entity of the component becomes part of the
+        /// ECS system (because its added to the ECS or because the ECS is loaded/restored) </summary>
+        void OnEntityNowInEcs(IEntity<T> entity);
+
+    }
+    
 }

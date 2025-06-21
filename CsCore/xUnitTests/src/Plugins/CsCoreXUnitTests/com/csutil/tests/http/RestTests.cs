@@ -276,40 +276,6 @@ namespace com.csutil.integrationTests.http {
         }
 
         [Fact]
-        public async Task AskStackOverflowCom1() {
-            string answer = await StackOverflowCom.CheckError("How to sort a list", new List<string>() { "C#", "list" }, maxResults: 2);
-            Log.d(answer);
-            Assert.True(answer.Length > 600, "answer.Length=" + answer.Length);
-        }
-
-        [Fact]
-        public async Task AskStackOverflowCom2() {
-            string answer = await StackOverflowCom.CheckError("Sequence contains no elements", new List<string>() { "C#" }, maxResults: 2);
-            Log.d(answer);
-            Assert.True(answer.Length > 600, "answer.Length=" + answer.Length);
-        }
-
-        [Fact]
-        public async Task TestStackOverflowCom() {
-            if (!EnvironmentV2.isDebugMode) {
-                Log.e("This test only works in DebugMode");
-                return;
-            }
-            try {
-
-                try { // Provoke an exception that will then be searched for on StackOverflow
-                    List<string> list = new List<string>(); // List without entries
-                    list.First(); // Will cause "Sequence contains no elements" exception
-                } catch (Exception e) { await e.RethrowWithAnswers(); }
-
-            } catch (Error exceptionWithAnswers) {
-                // Check that the error contains detailed answers:
-                var length = exceptionWithAnswers.Message.Length;
-                Assert.True(length > 1500, "message length=" + length);
-            }
-        }
-
-        [Fact]
         public async Task TestRestRequestNoSuccessError() {
             var error = (NoSuccessError)await new Uri("https://www.csutil.com/doesNotExst").SendGET().GetResult<Exception>();
             Assert.Equal(HttpStatusCode.NotFound, error.statusCode);

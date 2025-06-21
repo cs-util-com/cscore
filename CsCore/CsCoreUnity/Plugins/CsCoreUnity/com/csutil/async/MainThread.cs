@@ -35,6 +35,7 @@ namespace com.csutil {
 
         private Thread mainThreadRef;
 
+        // If a task takes longer than this it will be split up over multiple frames, default value is 33ms which is about 30fps
         public long maxAllowedTaskDurationInMsPerFrame = 33;
         private Stopwatch stopWatch;
         private readonly ConcurrentQueue<Action> actionsForMainThread = new ConcurrentQueue<Action>();

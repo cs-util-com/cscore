@@ -70,7 +70,7 @@ namespace com.csutil.integrationTests.io {
                 var allFilesInZip = zip.EnumerateEntries().Cast<FileEntry>().ToList();
                 Assert.Equal(FILE_COUNT, allFilesInZip.Count());
                 foreach (var entry in allFilesInZip) {
-                    Assert.Equal("I am file " + entry.Name, entry.LoadAs<string>());
+                    Assert.Equal("I am file " + entry.Name, entry.LoadAs<string>(null));
                 }
             }
         }
@@ -112,7 +112,7 @@ namespace com.csutil.integrationTests.io {
             var allFilesInZip = zip.EnumerateEntries().Cast<FileEntry>().ToList();
             Assert.Equal(FILE_COUNT, allFilesInZip.Count());
             foreach (var entry in allFilesInZip) {
-                Assert.Equal("I am file " + entry.Name, entry.LoadAs<string>());
+                Assert.Equal("I am file " + entry.Name, entry.LoadAs<string>(null));
             }
         }
 

@@ -176,36 +176,37 @@ namespace com.csutil.tests.model.immutable {
             var d3 = new Dictionary<string, int>() { { "a", 1 }, { "b", 99 }, { "c", 3 } };
 
             // No changes if the same:
-            d1_2.CalcEntryChangesToOldState<Dictionary<string, int>, string, int>(ref d1,
-                _ => throw Log.e("Added"),
-                (_, __) => throw Log.e("Updated"),
-                _ => throw Log.e("Removed"));
+            d1_2.CalcEntryChangesToOldStateV3<Dictionary<string, int>, string, int>(ref d1,
+                (key, added) => throw Log.e("Added"),
+                (key, oldState, updatedState) => throw Log.e("Updated"),
+                removed => throw Log.e("Removed"));
             Assert.Equal(2, d1_2.Count);
             Assert.Equal(2, d1.Count);
 
             // Detecting additions:
-            d2.CalcEntryChangesToOldState<Dictionary<string, int>, string, int>(ref d1,
-                added => {
-                    Assert.Equal("c", added.Key);
-                    Assert.Equal(3, added.Value);
+            d2.CalcEntryChangesToOldStateV3<Dictionary<string, int>, string, int>(ref d1,
+                (addedKey, addedValue) => {
+                    Assert.Equal("c", addedKey);
+                    Assert.Equal(3, addedValue);
                 },
-                (_, __) => throw Log.e("Updated"),
+                (key, oldState, updatedState) => throw Log.e("Updated"),
                 removed => throw Log.e("Removed"));
 
             // Detecting removals
-            d1.CalcEntryChangesToOldState<Dictionary<string, int>, string, int>(ref d2,
-                _ => throw Log.e("Added"),
-                (_, __) => throw Log.e("Updated"),
+            d1.CalcEntryChangesToOldStateV3<Dictionary<string, int>, string, int>(ref d2,
+                (key, added) => throw Log.e("Added"),
+                (key, oldState, updatedState) => throw Log.e("Updated"),
                 removed => Assert.Equal("c", removed));
 
             // Detecting updates
-            d3.CalcEntryChangesToOldState<Dictionary<string, int>, string, int>(ref d2,
-                _ => throw Log.e("Added"),
-                (_, updated) => {
-                    Assert.Equal("b", updated.Key);
-                    Assert.Equal(99, updated.Value);
+            d3.CalcEntryChangesToOldStateV3<Dictionary<string, int>, string, int>(ref d2,
+                (key, added) => throw Log.e("Added"),
+                (key, oldState, updatedState) => {
+                    Assert.Equal("b", key);
+                    Assert.Equal(2, oldState);
+                    Assert.Equal(99, updatedState);
                 },
-                _ => throw Log.e("Removed"));
+                removed => throw Log.e("Removed"));
 
         }
 
@@ -216,9 +217,9 @@ namespace com.csutil.tests.model.immutable {
             var d1_2 = new Dictionary<string, int>() { { "a", 1 }, { "b", 2 } };
 
             var count = 0;
-            d1_2.CalcEntryChangesToOldState<Dictionary<string, int>, string, int>(ref d1,
-                _ => throw Log.e("Added"),
-                (_, __) => {
+            d1_2.CalcEntryChangesToOldStateV3<Dictionary<string, int>, string, int>(ref d1,
+                (key, added) => throw Log.e("Added"),
+                (key, oldState, updatedState) => {
                     count++;
                     // The d1 reference here must already be updated:
                     Assert.Same(d1_2, d1);

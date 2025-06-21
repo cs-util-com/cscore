@@ -8,9 +8,11 @@ namespace com.csutil {
     public static class IEnumerableAddRemoveExtensions {
 
         /// <summary> Will not add the element if its already contained </summary>
-        public static IEnumerable<T> AddViaUnion<T>(this IEnumerable<T> self, T value) {
+        public static IEnumerable<T> AddViaUnion<T>(this IEnumerable<T> self, T value, bool addInFront = false) {
             if (self is IImmutableList<T> l) { return l.Add(value); }
-            return self.Union(new T[1] { value });
+            var listToAdd = new T[1] { value };
+            if (addInFront) { return listToAdd.Union(self); }
+            return self.Union(listToAdd);
         }
 
         /// <summary> Will not add the elements if they are already contained </summary>

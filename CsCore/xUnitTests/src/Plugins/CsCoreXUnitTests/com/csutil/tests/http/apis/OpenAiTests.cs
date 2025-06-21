@@ -22,14 +22,14 @@ namespace com.csutil.integrationTests.http {
         [Fact]
         public async Task ExampleUsage1_ChatGpt() {
             var openAi = new OpenAi(await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey"));
-            var messages = new List<ChatGpt.Line>() {
-                new ChatGpt.Line(ChatGpt.Role.system, content: "You are a standup comedian. You are on stage and about to tell a joke."),
-                new ChatGpt.Line(ChatGpt.Role.user, content: "Do you know the joke about the chicken that crossed the road?"),
-                new ChatGpt.Line(ChatGpt.Role.assistant, content: "Yes I actually happen to know the best one of all chicken jokes."),
-                new ChatGpt.Line(ChatGpt.Role.user, content: "Why did the chicken cross the road?"),
+            var messages = new List<ChatGpt.Message>() {
+                new ChatGpt.Message(ChatGpt.Role.system, content: "You are a standup comedian. You are on stage and about to tell a joke."),
+                new ChatGpt.Message(ChatGpt.Role.user, content: "Do you know the joke about the chicken that crossed the road?"),
+                new ChatGpt.Message(ChatGpt.Role.assistant, content: "Yes I actually happen to know the best one of all chicken jokes."),
+                new ChatGpt.Message(ChatGpt.Role.user, content: "Why did the chicken cross the road?"),
             };
             var response = await openAi.ChatGpt(new ChatGpt.Request(messages));
-            ChatGpt.Line newLine = response.choices.Single().message;
+            ChatGpt.Message newLine = response.choices.Single().message;
             Assert.Equal("" + ChatGpt.Role.assistant, newLine.role);
             Assert.NotEmpty(newLine.content);
 
@@ -40,16 +40,16 @@ namespace com.csutil.integrationTests.http {
         [Fact]
         public async Task ExampleUsage2_ChatGpt4() {
             var openAi = new OpenAi(await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey"));
-            var messages = new List<ChatGpt.Line>() {
-                new ChatGpt.Line(ChatGpt.Role.system, content: "You are a standup comedian. You are on stage and about to tell a joke."),
-                new ChatGpt.Line(ChatGpt.Role.user, content: "Do you know the joke about the chicken that crossed the road?"),
-                new ChatGpt.Line(ChatGpt.Role.assistant, content: "Yes I actually happen to know the best one of all chicken jokes."),
-                new ChatGpt.Line(ChatGpt.Role.user, content: "Why did the chicken cross the road?"),
+            var messages = new List<ChatGpt.Message>() {
+                new ChatGpt.Message(ChatGpt.Role.system, content: "You are a standup comedian. You are on stage and about to tell a joke."),
+                new ChatGpt.Message(ChatGpt.Role.user, content: "Do you know the joke about the chicken that crossed the road?"),
+                new ChatGpt.Message(ChatGpt.Role.assistant, content: "Yes I actually happen to know the best one of all chicken jokes."),
+                new ChatGpt.Message(ChatGpt.Role.user, content: "Why did the chicken cross the road?"),
             };
             var request = new ChatGpt.Request(messages);
-            request.model = "gpt-4o"; // See https://platform.openai.com/docs/models/gpt-4
+            request.model = "gpt-4o"; // See https://platform.openai.com/docs/models/gpt-4o
             var response = await openAi.ChatGpt(request);
-            ChatGpt.Line newLine = response.choices.Single().message;
+            ChatGpt.Message newLine = response.choices.Single().message;
             Assert.Equal("" + ChatGpt.Role.assistant, newLine.role);
             Assert.NotEmpty(newLine.content);
 
@@ -62,8 +62,8 @@ namespace com.csutil.integrationTests.http {
         public async Task ExampleUsage3_ChatGptJsonResponses() {
 
             var openAi = new OpenAi(await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey"));
-            var messages = new List<ChatGpt.Line>();
-            messages.Add(new ChatGpt.Line(ChatGpt.Role.system, content: "You are a helpful assistant designed to output JSON."));
+            var messages = new List<ChatGpt.Message>();
+            messages.Add(new ChatGpt.Message(ChatGpt.Role.system, content: "You are a helpful assistant designed to output JSON."));
 
             { // The user inputs a question but the response should be automatically parsable as a YesNoResponse:
 
@@ -78,7 +78,7 @@ namespace com.csutil.integrationTests.http {
 
                 // Send the messages to the AI and get the response:
                 var response = await openAi.ChatGpt(NewGpt4JsonRequestWithFullConversation(messages));
-                ChatGpt.Line newLine = response.choices.Single().message;
+                ChatGpt.Message newLine = response.choices.Single().message;
                 messages.Add(newLine);
 
                 // Parse newLine.content as a YesNoResponse:
@@ -112,6 +112,47 @@ namespace com.csutil.integrationTests.http {
             }
             // Show the entire conversation to make it clear how the responses look as strings:
             Log.d("messages=" + JsonWriter.AsPrettyString(messages));
+        }
+
+        /// <summary>
+        /// See example at https://platform.openai.com/docs/guides/structured-outputs/how-to-use 
+        /// </summary>
+        [Fact]
+        public async Task ExampleUsage3_StrictJsonSchemaResponses() {
+
+            var openAi = new OpenAi(await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey"));
+            var messages = new List<ChatGpt.Message>();
+            messages.Add(new ChatGpt.Message(ChatGpt.Role.system, content: "You are a helpful assistant designed to output JSON."));
+
+            { // The user inputs a question but the response should be automatically parsable as a YesNoResponse:
+
+                // Create an example object so that the AI knows how the response json should look like for user inputs:
+                var yesNoResponseFormat = new YesNoResponse() {
+                    confidence = 100,
+                    inputQuestionInterpreted = "Is the sky blue?",
+                    yesNoAnswer = true,
+                    explanation = "The sky is blue because of the way the atmosphere interacts with sunlight."
+                };
+                messages.AddUserLine("Can dogs look up?");
+
+                // Send the messages to the AI and get the response:
+                var response = await openAi.ChatGpt(NewGpt4StrictJsonRequestWithFullConversation(messages, yesNoResponseFormat));
+                ChatGpt.Message newLine = response.choices.Single().message;
+                messages.Add(newLine);
+
+                // Parse newLine.content as a YesNoResponse:
+                var yesNoResponse = newLine.ParseNewLineContentAsJson<YesNoResponse>();
+
+                // Dogs can look up, lets hope the AI knows that too:
+                Assert.True(yesNoResponse.yesNoAnswer);
+                // Since the input question is very short the interpretation will be the same string:
+                Assert.Contains("dog", yesNoResponse.inputQuestionInterpreted);
+                // The AI is very confident in its answer:
+                Assert.True(yesNoResponse.confidence > 50);
+                // The AI also explains why it gave the answer:
+                Assert.NotEmpty(yesNoResponse.explanation);
+
+            }
         }
 
         #if RUN_EXPENSIVE_TESTS
@@ -185,7 +226,7 @@ namespace com.csutil.integrationTests.http {
             }
         }
 
-        private static async Task<EmotionalChatResponse> TalkToEmotionalAi(OpenAi openAi, List<ChatGpt.Line> messages, string userInput) {
+        private static async Task<EmotionalChatResponse> TalkToEmotionalAi(OpenAi openAi, List<ChatGpt.Message> messages, string userInput) {
             using var timing = Log.MethodEnteredWith(userInput);
             EmotionalChatResponse emotionalResponseFormat = new EmotionalChatResponse() {
                 emotionOfResponse = EmotionalChatResponse.Emotion.happy,
@@ -193,7 +234,7 @@ namespace com.csutil.integrationTests.http {
             };
             messages.AddUserLineWithJsonResultStructure(userInput, emotionalResponseFormat);
             var response = await openAi.ChatGpt(NewGpt4JsonRequestWithFullConversation(messages));
-            ChatGpt.Line newLine = response.choices.Single().message;
+            ChatGpt.Message newLine = response.choices.Single().message;
             messages.Add(newLine);
 
             // Parse newLine.content as a YesNoResponse:
@@ -319,6 +360,38 @@ namespace com.csutil.integrationTests.http {
             // Both words (Hello & world) should be in the response:
             Assert.True(split.All(word => textToTest.Contains(new string(word.Where(c => Char.IsLetter(c)).ToArray()))));
         }
+        
+        #if RUN_EXPENSIVE_TESTS
+        [Fact]
+        #endif
+        public async Task ExampleUsage8_TextToSpeechVoiceActor() {
+
+            string textToSay = "In a shocking finding, scientist discovered a herd of unicorns living in a remote, previously unexplored valley, in the Andes Mountains.";
+            var usedVoice = "echo"; // https://platform.openai.com/docs/guides/text-to-speech/onyx 
+
+            var openAi = new OpenAi(await IoC.inject.GetAppSecrets().GetSecret("OpenAiKey"));
+
+            { // First the variant without the voice actor instructions:
+                var response1 = await openAi.TextToSpeech(textToSay, usedVoice);
+                await NewAudioFileEntry().SaveStreamAsync(response1);
+            }
+            { // Now the variant with the voice actor instructions:
+                var voiceActorInstructions =
+                    "You are an expert voice actor specializing in silly voices. "
+                    + "Respond and vocalize to the user the EXACT same input text that the user provides, "
+                    + "but in your voice response you MUST express EACH of the vocal cadence, inflection, and tone of ";
+                var character = "Alvin and the Chipmunks";
+                var response2 = await openAi.TextToSpeechWithFurtherInstructions(textToSay, voiceActorInstructions + character, usedVoice);
+                NewAudioFileEntry("+ actor instructions").WriteAllBytes(response2);
+            }
+            
+        }
+
+        private static FileEntry NewAudioFileEntry(string variant = "") {
+            var folder = EnvironmentV2.instance.GetOrAddTempFolder("ExampleUsage8_TextToSpeechVoiceActor");
+            Log.d("Saving audi to " + folder.GetFullFileSystemPath());
+            return folder.GetChild($"{DateTimeV2.Now.ToReadableStringExact()} ExampleUsage8_TextToSpeechVoiceActor {variant}.mp3");
+        }
 
         private static async Task<string> GenerateImage(OpenAi openAi, string prompt) {
             var result = await openAi.TextToImage(new OpenAi.Image.Request() { prompt = prompt });
@@ -326,8 +399,8 @@ namespace com.csutil.integrationTests.http {
         }
 
         private static async Task<List<string>> GenerateQuestionsBasedOnPrompt(OpenAi openAi, string prompt, int numberOfQuestions = 5) {
-            var messages = new List<ChatGpt.Line>();
-            messages.Add(new ChatGpt.Line(ChatGpt.Role.system, content: "You are a helpful assistant designed to output JSON."));
+            var messages = new List<ChatGpt.Message>();
+            messages.Add(new ChatGpt.Message(ChatGpt.Role.system, content: "You are a helpful assistant designed to output JSON."));
 
             var questionsResponseFormat = new QuestionsResponse() {
                 questions = new List<string> {
@@ -344,7 +417,7 @@ namespace com.csutil.integrationTests.http {
 
             // Send the messages to the AI and get the response:
             var response = await openAi.ChatGpt(NewGpt4JsonRequestWithFullConversation(messages));
-            ChatGpt.Line newLine = response.choices.Single().message;
+            ChatGpt.Message newLine = response.choices.Single().message;
             messages.Add(newLine);
 
             // Parse newLine.content as a QuestionsResponse:
@@ -361,11 +434,28 @@ namespace com.csutil.integrationTests.http {
             return true;
         }
 
-        private static ChatGpt.Request NewGpt4JsonRequestWithFullConversation(List<ChatGpt.Line> conversationSoFar) {
+        [Obsolete("Use NewGpt4StrictJsonRequestWithFullConversation instead")]
+        private static ChatGpt.Request NewGpt4JsonRequestWithFullConversation(List<ChatGpt.Message> conversationSoFar) {
             var request = new ChatGpt.Request(conversationSoFar);
             // Use json as the response format:
             request.response_format = ChatGpt.Request.ResponseFormat.json;
-            request.model = "gpt-4-1106-preview"; // See https://platform.openai.com/docs/models/gpt-4
+            request.model = "gpt-4o"; // See https://platform.openai.com/docs/models/gpt-4o
+            return request;
+        }
+
+        private static ChatGpt.Request NewGpt4StrictJsonRequestWithFullConversation<T>(List<ChatGpt.Message> conversationSoFar, T exampleResponse) {
+            // TODO currently this would be added for every request again, so potentially many redundant times in the conversation:
+            conversationSoFar.AddValidExampleSchemaResponses(exampleResponse);
+            
+            var request = new ChatGpt.Request(conversationSoFar);
+            
+            // Use json schema as the response format:
+            var schemaName = exampleResponse.GetType().Name;
+            var jsonSchema = ChatGptExtensions.CreateJsonSchema(exampleResponse);
+            request.response_format = ChatGpt.Request.ResponseFormat.NewJsonSchema(schemaName, jsonSchema);
+            
+            // TODO around 2024-09-13 this preview version here will become the detault, so afterwards this can be changed to "gpt-4o" 
+            request.model = "gpt-4o-2024-08-06"; // See https://platform.openai.com/docs/models/gpt-4o
             return request;
         }
 
@@ -382,15 +472,19 @@ namespace com.csutil.integrationTests.http {
 
         public class YesNoResponse {
 
+            [Required]
             [Description("The confidence of the AI in the answer")]
             public int confidence { get; set; }
 
+            [Required]
             [Description("The summary of the input question that the AI used to give the answer")]
             public string inputQuestionInterpreted { get; set; }
 
+            [Required]
             [Description("The yes/no decision of the AI for the input question")]
             public bool yesNoAnswer { get; set; }
 
+            [Required]
             [Description("The explanation of the AI why it gave the answer")]
             public string explanation { get; set; }
 

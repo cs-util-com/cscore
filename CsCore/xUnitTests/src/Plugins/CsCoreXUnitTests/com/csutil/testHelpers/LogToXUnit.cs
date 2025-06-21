@@ -10,7 +10,11 @@ namespace Xunit {
 
         ///<summary> Call this to use the xunit Logging system as the output for Log.d(..) etc </summary>
         public static void UseAsLoggingOutput(this ITestOutputHelper xunitLogger) {
+#if UNITY_EDITOR
+            if (!(Log.instance is LogToUnityDebugLog)) { Log.instance = new LogToUnityDebugLog(); }
+#else
             if (!(Log.instance is LogToXUnit)) { Log.instance = new LogToXUnit(xunitLogger); }
+#endif
         }
 
     }

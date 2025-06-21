@@ -8,9 +8,9 @@ using System.Threading.Tasks.Schedulers;
 
 namespace com.csutil {
 
-    public class BackgroundTaskQueue : IDisposable {
+    public class BackgroundTaskQueue : IBackgroundTaskQueue {
 
-        public static BackgroundTaskQueue NewBackgroundTaskQueue(int maxConcurrencyLevel) {
+        public static IBackgroundTaskQueue NewBackgroundTaskQueue(int maxConcurrencyLevel) {
             return new BackgroundTaskQueue(new QueuedTaskScheduler(TaskScheduler.Default, maxConcurrencyLevel), new CancellationTokenSource());
         }
 
