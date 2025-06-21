@@ -1,0 +1,43 @@
+name: Publish to NuGet on Release
+
+# ───── Trigger ───────────────────────────────────────────
+on:
+  release:
+    types: [published]        # fires only after you click “Publish release”
+
+# ───── Default token scopes ──────────────────────────────
+permissions:
+  contents: read              # checkout needs this
+
+# ───── Jobs ──────────────────────────────────────────────
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Check out the sources
+      - uses: actions/checkout@v4
+
+      # 2. Install the .NET SDK you build with
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "7.0.x"  # or 8.0.x / 6.0.x as required
+
+      # 3. Build + pack (creates both .nupkg and .snupkg)
+      - name: Build & pack with symbols
+        run: |
+          dotnet pack src/CScore/CScore.csproj \
+            -c Release \
+            --include-symbols --include-source \
+            -p:SymbolPackageFormat=snupkg \
+            -o out
+        env:
+          DOTNET_NOLOGO: 1
+          DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+
+      # 4. Push package and symbols to nuget.org
+      - name: Publish to NuGet
+        run: dotnet nuget push "out/*.nupkg" \
+             --api-key ${{ secrets.NUGET_API_KEY_TO_PUBLISH_CSCORE }} \
+             --source https://api.nuget.org/v3/index.json \
+             --skip-duplicate
