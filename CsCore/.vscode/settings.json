@@ -1,5 +1,6 @@
 {
     "files.exclude": {
         "**/*.meta": true
-    }
+    },
+    "dotnet.defaultSolution": "CsCore.sln"
 }
