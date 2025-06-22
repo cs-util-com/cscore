@@ -40,7 +40,8 @@ jobs:
 
       # 4. Push package and symbols to nuget.org
       - name: Publish to NuGet
-        run: dotnet nuget push "out/*.nupkg" \
-             --api-key ${{ secrets.NUGET_API_KEY_TO_PUBLISH_CSCORE }} \
-             --source https://api.nuget.org/v3/index.json \
-             --skip-duplicate
+      run: |
+        dotnet nuget push "out/*.nupkg" \
+          --api-key ${{ secrets.NUGET_API_KEY_TO_PUBLISH_CSCORE }} \
+          --source https://api.nuget.org/v3/index.json \
+          --skip-duplicate
