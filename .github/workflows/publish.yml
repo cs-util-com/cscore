@@ -26,10 +26,13 @@ jobs:
       # 3. Build + pack (creates both .nupkg and .snupkg)
       - name: Build & pack with symbols
         run: |
+          # ${GITHUB_REF_NAME} is the tag like "v1.11.0" → trim the leading "v"
+          ver=${GITHUB_REF_NAME#v}
           dotnet pack src/CScore/CScore.csproj \
             -c Release \
             --include-symbols --include-source \
             -p:SymbolPackageFormat=snupkg \
+            -p:PackageVersion=$ver \
             -o out
         env:
           DOTNET_NOLOGO: 1
