@@ -27,7 +27,45 @@ namespace com.csutil {
 
         }
 
-        /// <summary> 
+        /// <summary>
+        ///
+        ///     Generates a GUID that is **part-random, part-sequential**:
+        /// 
+        ///           xxxxxxxx-xxxx-xxxx-BBBB-CCCCCCCCCCCC
+        ///           └──────────────┘  └───┘ └──────────┘
+        ///                64-bit        ↑         ↑
+        ///              random part   low-order  high-order
+        ///                             counter    counter
+        ///                                bytes      bytes
+        /// 
+        ///       • The **first 8 bytes** come straight from `Guid.NewGuid()`
+        ///         (cryptographically strong RNG → 2⁶⁴ possibilities).
+        /// 
+        ///       • The **last 8 bytes** are overwritten with a 64-bit, per-process,
+        ///         monotonic counter (`Counter.Increment()` must be atomic).
+        /// 
+        ///       Result: IDs look very similar at first glance (only low counter
+        ///       bytes change early on) but collisions are astronomically unlikely.
+        /// 
+        ///     UNIQUENESS ACROSS MACHINES / PROCESSES
+        ///       A duplicate would require *both*:
+        ///         1. Two separate processes receive the same 64-bit random prefix, AND
+        ///         2. Their counters hit the same 64-bit value.
+        ///       Probability ≈ 1 / 2⁶⁴ even after billions of IDs → effectively zero.
+        /// 
+        ///     IMPORTANT NOTES
+        /// 
+        ///       • **Counter wrap-around:** a 64-bit counter lasts ~584 years at
+        ///         1 million IDs/sec, but wrapping would collide *within* one process.
+        /// 
+        ///       • **Process restarts:** a restart resets the counter, yet the fresh
+        ///         64-bit random prefix still makes repeats virtually impossible.
+        /// 
+        ///       • **Ordering:** because low-order counter bytes lie in the 4th UUID
+        ///         segment, simple lexical sorting ≠ creation order.  If strict
+        ///         monotonic ordering in databases is required, consider a COMB /
+        ///         UUID v7 timestamp-first layout instead.
+        /// 
         ///     <para>
         ///         Generates <b>sequential / parially ordered</b> <see cref="Guid" /> values which allows ordering and is 
         ///         optimized for use in databases (like Microsoft SQL server) clustered keys or indexes,
