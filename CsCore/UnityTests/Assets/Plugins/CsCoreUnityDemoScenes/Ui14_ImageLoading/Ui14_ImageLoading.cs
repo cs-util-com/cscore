@@ -37,7 +37,7 @@ namespace com.csutil.tests {
                 DirectoryEntry targetDir = EnvironmentV2.instance.GetOrAddTempFolder("Ui14_ImageLoading_LoadAndPersistTo");
 
                 var imgRefFile = targetDir.GetChild("imgRef.txt");
-                FileRef imgRef = imgRefFile.Exists ? imgRefFile.LoadAs<FileRef>() : null;
+                FileRef imgRef = imgRefFile.Exists ? imgRefFile.LoadAs<FileRef>(JsonReader.GetReader(this)) : null;
                 if (imgRef == null) { imgRef = new FileRef() { url = testUrl }; }
 
                 var t = Log.MethodEntered("LoadAndPersistTo with imgRef=" + imgRef);
