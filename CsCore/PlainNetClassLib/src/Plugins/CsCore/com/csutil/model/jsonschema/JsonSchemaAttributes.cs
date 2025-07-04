@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using com.csutil.model.jsonschema;
 
 namespace com.csutil.model.jsonschema {
 
@@ -85,4 +86,13 @@ namespace com.csutil.model.jsonschema {
         public string dropdownId;
     }
 
+}
+
+namespace System.ComponentModel.DataAnnotations {
+    
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
+    public class MaxWordsAttribute : RegexAttribute {
+        public MaxWordsAttribute(int maxWords) : base($"^(?:\\S+\\s+){{0,{maxWords - 1}}}\\S+$") { }
+    }
+    
 }
