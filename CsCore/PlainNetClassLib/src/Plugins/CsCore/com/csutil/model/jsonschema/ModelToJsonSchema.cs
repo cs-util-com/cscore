@@ -106,15 +106,15 @@ namespace com.csutil.model.jsonschema {
             ExtractFieldDocu(newField, model, modelType, jTokenType, pInstance, jpInstance);
             if (model != null) {
                 if (!model.CanWriteTo()) { newField.readOnly = true; }
-                if (model.TryGetCustomAttribute(out RegexAttribute attr)) { newField.pattern = attr.regex; }
+                if (model.TryGetCustomAttribute(out RegexAttribute attr)) { newField.pattern = attr.Pattern; }
                 if (model.TryGetCustomAttribute(out ContentAttribute c)) { newField.format = "" + c.type; }
                 if (model.TryGetCustomAttribute(out MinMaxRangeAttribute ra)) {
-                    newField.minimum = ra.minimum;
-                    newField.maximum = ra.maximum;
+                    newField.minimum = (float)ra.Minimum;
+                    newField.maximum = (float)ra.Maximum;
                 }
                 if (model.TryGetCustomAttribute(out InputLengthAttribute ila)) {
-                    if (ila.minLength > 0) { newField.minLength = ila.minLength; }
-                    if (ila.maxLength > 0) { newField.maxLength = ila.maxLength; }
+                    if (ila.MinimumLength > 0) { newField.minLength = ila.MinimumLength; }
+                    if (ila.MaximumLength > 0) { newField.maxLength = ila.MaximumLength; }
                 }
                 if (model.TryGetCustomAttribute(out EnumAttribute e)) {
                     newField.contentEnum = e.names;
@@ -174,7 +174,7 @@ namespace com.csutil.model.jsonschema {
         public virtual bool ExtractFieldDocu(JsonSchema field, MemberInfo m, Type modelType, JTokenType t, object pInstance, JToken jpInstance) {
             var descrAttr = m?.GetCustomAttribute<DescriptionAttribute>(true);
             if (descrAttr != null) {
-                field.description = descrAttr.description;
+                field.description = descrAttr.Description;
                 field.defaultVal = descrAttr.defaultVal;
                 return true;
             }

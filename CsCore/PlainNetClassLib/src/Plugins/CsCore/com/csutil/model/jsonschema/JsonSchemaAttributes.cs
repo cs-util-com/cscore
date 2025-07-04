@@ -1,98 +1,111 @@
 ﻿using System;
-using System.Linq;
-using com.csutil.model.jsonschema;
+using System.ComponentModel.DataAnnotations;
 
 namespace com.csutil.model.jsonschema {
 
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
-    public class DescriptionAttribute : Attribute {
-        public string description;
-        public string defaultVal;
+    public class DescriptionAttribute : System.ComponentModel.DescriptionAttribute {
+        public string defaultVal { get; }
+        [Obsolete("Use 'Description' property instead")]
+        public string description => Description; // old field kept alive as read-only wrapper
 
-        public DescriptionAttribute(string description) { this.description = description; }
-        public DescriptionAttribute(string description, string defaultVal) {
-            this.description = description;
-            this.defaultVal = defaultVal;
-        }
+        public DescriptionAttribute(string description) : base(description) { }
+        public DescriptionAttribute(string description, string defaultVal)
+            : base(description) => this.defaultVal = defaultVal;
     }
 
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
-    public class RegexAttribute : Attribute {
-        public string regex;
-
-        public RegexAttribute(params string[] regex) { this.regex = RegexUtil.CombineViaAnd(regex); }
-
-        private void SetRegex(string[] regex, string s) {
-            var minMaxRegex = new string[1] { s };
-            this.regex = RegexUtil.CombineViaAnd(minMaxRegex.Union(regex).ToArray());
+    public class RegexAttribute : RegularExpressionAttribute {
+        [Obsolete("Use 'Pattern' property instead")]
+        public string regex => Pattern; // compat shim
+        public RegexAttribute(params string[] patterns)
+            : base(RegexUtil.CombineViaAnd(patterns)) {
         }
     }
 
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
     public class ContentAttribute : DescriptionAttribute {
-        public ContentFormat type;
-
-        public ContentAttribute(ContentFormat type, string description) : base(description) { this.type = type; }
+        public ContentFormat type { get; }
+        public ContentAttribute(ContentFormat type, string description)
+            : base(description) => this.type = type;
     }
 
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
     public class EnumAttribute : DescriptionAttribute {
-        public string[] names;
-        /// <summary> Controls whether it's valid to enter any value that is not in the names list, if set to true the 
-        /// enum functions as a sort of suggestion list that the user can ignore and enter any other string.
-        /// See also https://json-schema.org/understanding-json-schema/reference/array.html#tuple-validation why 
-        /// this is set to false by default for enums </summary>
-        public bool allowOtherInput = false;
+        public string[] names { get; }
+        public bool allowOtherInput { get; set; }
 
-        public EnumAttribute(string description, params string[] names) : base(description) { this.names = names; }
-        public EnumAttribute(string description, bool allowOtherInput, params string[] names) : base(description) {
+        public EnumAttribute(string description, params string[] names)
+            : this(description, false, names) {
+        }
+
+        public EnumAttribute(string description, bool allowOtherInput, params string[] names)
+            : base(description) {
             this.names = names;
             this.allowOtherInput = allowOtherInput;
         }
-        public EnumAttribute(string description, Type enumType, bool allowOtherInput = false) : base(description) {
+
+        public EnumAttribute(string description, Type enumType, bool allowOtherInput = false)
+            : base(description) {
             names = Enum.GetNames(enumType);
             this.allowOtherInput = allowOtherInput;
         }
     }
 
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
-    public class RequiredAttribute : Attribute { }
-
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
-    public class MinMaxRangeAttribute : Attribute {
-        public float? minimum;
-        public float? maximum;
-
-        public MinMaxRangeAttribute(float min) { minimum = min; }
-        public MinMaxRangeAttribute(float max, bool exclusiveMaximum = false) { maximum = exclusiveMaximum ? max + float.Epsilon : max; }
-        public MinMaxRangeAttribute(float min, float max) { minimum = min; maximum = max; }
+    public class RequiredAttribute : System.ComponentModel.DataAnnotations.RequiredAttribute {
     }
 
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
-    public class InputLengthAttribute : Attribute {
-        /// <summary> If set to 0 will be ingored </summary>
-        public int minLength;
-        /// <summary> If set to 0 will be ingored </summary>
-        public int maxLength;
+    public class MinMaxRangeAttribute : RangeAttribute {
 
-        public InputLengthAttribute(int max) { maxLength = max; }
-        public InputLengthAttribute(int min, int max = 0) { minLength = min; maxLength = max; }
+        public MinMaxRangeAttribute(float min) : base(min, float.MaxValue) { }
+
+        public MinMaxRangeAttribute(float max, bool exclusiveMaximum = false)
+            : base(float.MinValue, exclusiveMaximum ? max - float.Epsilon : max) {
+        }
+
+        public MinMaxRangeAttribute(float min, float max) : base(min, max) { }
+
+        [Obsolete("Use 'Minimum' property (casted to float or double) instead")]
+        public float? minimum => (float?)Minimum;
+        [Obsolete("Use 'Maximum' property (casted to float or double) instead")]
+        public float? maximum => (float?)Maximum;
+    }
+
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
+    public class InputLengthAttribute : StringLengthAttribute {
+
+        public InputLengthAttribute(int max) : base(max) { }
+
+        public InputLengthAttribute(int min, int max = 0)
+            : base(max == 0 ? int.MaxValue : max) {
+            MinimumLength = min;
+        }
+
+        [Obsolete("Use 'MinimumLength' property instead")]
+        public int minLength => MinimumLength;
+        [Obsolete("Use 'MaximumLength' property instead")]
+        public int maxLength => MaximumLength;
     }
 
     /// <summary> A class must have 2 of these annotations per dropdownId, one on a string[] field (For the dropdown options) and
     /// one on an int field (for the selected index in the dropdown) </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
     public class DropDownAttribute : Attribute {
-        public string dropdownId;
+        public string dropdownId { get; set; }
+        /// <summary> [DropDown(dropdownId: "MyDropdown1")] </summary>
+        public DropDownAttribute() { }
+        /// <summary> [DropDown("MyDropdown1")] </summary>
+        public DropDownAttribute(string dropdownId) => this.dropdownId = dropdownId;
     }
-
 }
 
 namespace System.ComponentModel.DataAnnotations {
-    
+
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
-    public class MaxWordsAttribute : RegexAttribute {
+    public class MaxWordsAttribute : com.csutil.model.jsonschema.RegexAttribute {
         public MaxWordsAttribute(int maxWords) : base($"^(?:\\S+\\s+){{0,{maxWords - 1}}}\\S+$") { }
     }
-    
+
 }
