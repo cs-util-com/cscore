@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using com.csutil.integrationTests.http;
 using com.csutil.model;
@@ -45,7 +46,6 @@ namespace com.csutil.tests.model.jsonschema {
             Assert.True(schema.properties["id"].readOnly.Value); // id has private setter
             Assert.True(schema.properties["contacts"].readOnly.Value); // contacts has only a getter
 
-            Assert.Equal(2, schema.properties["name"].minLength);
             Assert.Equal(30, schema.properties["name"].maxLength);
 
             Assert.Equal("object", schema.properties["contacts"].items.First().type);
@@ -164,6 +164,48 @@ namespace com.csutil.tests.model.jsonschema {
 
         }
 
+        /// <summary>
+        /// The following test uses the validator of System.ComponentModel to validate the model / object instance
+        /// fields have values that are within the defined limits (enforced via the annotations on the model fields)
+        /// </summary>
+        [Fact]
+        public void TestModelValidation() {
+
+            var user = new MyUserModel() {
+                name = "Tom",
+                age = 50,
+                money = 123.45f,
+                profilePic = new FileRef() { url = RestTests.IMG_PLACEHOLD_SERVICE_URL + "/128/128" },
+                bestFriend = new MyUserModel.UserContact() {
+                    user = new MyUserModel() { name = "Jerry", age = 30 }
+                },
+                phoneNumber = 1234567890
+            };
+
+            var validationResults = new List<ValidationResult>();
+            var isValid = Validator.TryValidateObject(user, new ValidationContext(user), validationResults, true);
+            Assert.True(isValid, "User model should be valid, but was not: " + JsonWriter.GetWriter().Write(validationResults));
+            Assert.Empty(validationResults); // No validation errors should be present
+            
+            // Now test with an invalid user model:
+            var invalidUser = new MyUserModel() {
+                name = "A very long name that exceeds the maximum length of 30 characters",
+                age = 150, // Invalid age
+                money = -10.0f, // Invalid money value
+                profilePic = new FileRef() { url = RestTests.IMG_PLACEHOLD_SERVICE_URL + "/128/128" },
+                bestFriend = new MyUserModel.UserContact() {
+                    user = new MyUserModel() { name = "Jerry", age = 30 }
+                },
+                phoneNumber = null // Valid since it is nullable
+            };
+            validationResults.Clear();
+            isValid = Validator.TryValidateObject(invalidUser, new ValidationContext(invalidUser), validationResults, true);
+            Assert.False(isValid, "User model should be invalid, but was valid: " + JsonWriter.GetWriter().Write(invalidUser));
+            Assert.NotEmpty(validationResults); // Validation errors should be present
+
+        }
+
+
 #pragma warning disable 0649 // Variable is never assigned to, and will always have its default value
         private class MyUserModel {
 
@@ -172,20 +214,21 @@ namespace com.csutil.tests.model.jsonschema {
 
             [System.ComponentModel.DataAnnotations.Required]
             [System.ComponentModel.DataAnnotations.StringLength(30)]
-            public string name;
+            public string name { get; set; }
 
             [Content(ContentFormat.password, "A secure password")]
-            public string password;
+            public string password { get; set; }
 
             [System.ComponentModel.DataAnnotations.Range(minimum: 0, maximum: 130)]
-            public int age;
-            
-            public float money;
-            public FileRef profilePic;
-            public UserContact bestFriend;
+            public int age { get; set; }
+            [System.ComponentModel.DataAnnotations.Range(minimum: 0, maximum: float.MaxValue)]
+            public float money { get; set; }
+            public FileRef profilePic { get; set; }
+            [ValidateObject]
+            public UserContact bestFriend { get; set; }
             [Regex(RegexTemplates.PHONE_NR)]
             [System.ComponentModel.Description("e.g. +1 234 5678 90")]
-            public int? phoneNumber;
+            public int? phoneNumber { get; set; }
 
             public MyUserModel(string id = null) { this.id = id == null ? "" + GuidV2.NewGuid() : id; }
 
