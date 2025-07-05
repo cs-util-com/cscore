@@ -188,20 +188,38 @@ namespace com.csutil.tests.model.jsonschema {
             Assert.Empty(validationResults); // No validation errors should be present
             
             // Now test with an invalid user model:
-            var invalidUser = new MyUserModel() {
-                name = "A very long name that exceeds the maximum length of 30 characters",
-                age = 150, // Invalid age
-                money = -10.0f, // Invalid money value
-                profilePic = new FileRef() { url = RestTests.IMG_PLACEHOLD_SERVICE_URL + "/128/128" },
-                bestFriend = new MyUserModel.UserContact() {
-                    user = new MyUserModel() { name = "Jerry", age = 30 }
-                },
-                phoneNumber = null // Valid since it is nullable
-            };
-            validationResults.Clear();
-            isValid = Validator.TryValidateObject(invalidUser, new ValidationContext(invalidUser), validationResults, true);
-            Assert.False(isValid, "User model should be invalid, but was valid: " + JsonWriter.GetWriter().Write(invalidUser));
-            Assert.NotEmpty(validationResults); // Validation errors should be present
+            {
+                var invalidUser1 = new MyUserModel() {
+                    name = "A very long name that exceeds the maximum length of 30 characters",
+                    age = 150, // Invalid age
+                    money = -10.0f, // Invalid money value
+                    profilePic = new FileRef() { url = RestTests.IMG_PLACEHOLD_SERVICE_URL + "/128/128" },
+                    bestFriend = new MyUserModel.UserContact() {
+                        user = new MyUserModel() { name = "Jerry", age = 30 }
+                    },
+                    phoneNumber = null // Valid since it is nullable
+                };
+                validationResults.Clear();
+                isValid = Validator.TryValidateObject(invalidUser1, new ValidationContext(invalidUser1), validationResults, true);
+                Assert.False(isValid, "User model should be invalid, but was valid: " + JsonWriter.GetWriter().Write(invalidUser1));
+                Assert.NotEmpty(validationResults); // Validation errors should be present
+            }
+            {
+                var invalidUser2 = new MyUserModel() {
+                    name = "Tom",
+                    age = 50,
+                    money = 123.45f,
+                    profilePic = new FileRef() { url = RestTests.IMG_PLACEHOLD_SERVICE_URL + "/128/128" },
+                    bestFriend = new MyUserModel.UserContact() {
+                        user = new MyUserModel() { name = "A very long name that exceeds the maximum length of 30 characters", age = 130 }
+                    },
+                    phoneNumber = 1234567890
+                };
+                validationResults.Clear();
+                isValid = Validator.TryValidateObject(invalidUser2, new ValidationContext(invalidUser2), validationResults, true);
+                Assert.False(isValid, "User model should be invalid, but was valid: " + JsonWriter.GetWriter().Write(invalidUser2));
+                Assert.NotEmpty(validationResults); // Validation errors should be present
+            }
 
         }
 
@@ -236,7 +254,7 @@ namespace com.csutil.tests.model.jsonschema {
             public List<UserContact> contacts { get; } = new List<UserContact>();
 
             public class UserContact {
-                public MyUserModel user;
+                [ValidateObject] public MyUserModel user;
                 public int[] phoneNumbers { get; set; }
                 public List<MyUserModel> enemies;
             }
