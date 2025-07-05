@@ -13,10 +13,10 @@ namespace com.csutil.settings {
         [DropDown(dropdownId = "Quality Level")]
         int QualityLevel { get; set; }
 
-        [MinMaxRange(0, 120)]
+        [System.ComponentModel.DataAnnotations.Range(0, 120)]
         int TargetFrameRate { get; set; }
 
-        [Description("On mobile On is the default and should result in better performance")]
+        [System.ComponentModel.Description("On mobile On is the default and should result in better performance")]
         bool UseVSync { get; set; }
 
         [DropDown(dropdownId = "Resolution")]

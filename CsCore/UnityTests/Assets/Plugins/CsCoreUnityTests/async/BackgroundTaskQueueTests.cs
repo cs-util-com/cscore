@@ -48,7 +48,7 @@ namespace com.csutil.tests.threading {
 
             var timing = Log.MethodEntered("TestTaskCancel");
 
-            BackgroundTaskQueue queue = BackgroundTaskQueue.NewBackgroundTaskQueue(1);
+            var queue = BackgroundTaskQueue.NewBackgroundTaskQueue(1);
 
             var counter = 0;
             var task1 = queue.Run(async (c) => {
@@ -79,7 +79,7 @@ namespace com.csutil.tests.threading {
             var timing = Log.MethodEntered("TestTaskCancel");
 
             GameObject queueGo = new GameObject("BackgroundTaskQueue");
-            BackgroundTaskQueue queue = queueGo.SetUpDisposeOnDestroy(BackgroundTaskQueue.NewBackgroundTaskQueue(1));
+            var queue = queueGo.SetUpDisposeOnDestroy(BackgroundTaskQueue.NewBackgroundTaskQueue(1));
 
             var task1 = queue.Run(async (c) => { await TaskV2.Delay(10); });
             var task2 = queue.Run(async (c) => { await TaskV2.Delay(10); });

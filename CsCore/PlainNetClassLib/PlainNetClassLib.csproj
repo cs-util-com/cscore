@@ -47,6 +47,11 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
   </ItemGroup>
 
+  <!-- https://www.nuget.org/packages/system.componentmodel.annotations/ -->
+  <ItemGroup>
+    <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
+  </ItemGroup>
+  
   <!-- https://www.nuget.org/packages/System.Collections.Immutable/ -->
   <ItemGroup>
     <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />

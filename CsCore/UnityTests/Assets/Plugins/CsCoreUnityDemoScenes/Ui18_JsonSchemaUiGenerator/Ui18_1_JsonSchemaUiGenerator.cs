@@ -160,11 +160,11 @@ namespace com.csutil.tests.jsonschema {
             [JsonProperty(Required = Required.Always)]
             public string id { get; private set; } = Guid.NewGuid().ToString();
 
-            [InputLength(2, 30)]
+            [System.ComponentModel.DataAnnotations.Range(2, 30)]
             [Content(ContentFormat.name, "e.g. Tom")]
             public string name;
 
-            [Required]
+            [System.ComponentModel.DataAnnotations.Required]
             [Content(ContentFormat.name, "e.g. Riddle")]
             public string lastName;
 
@@ -173,16 +173,16 @@ namespace com.csutil.tests.jsonschema {
             public string email;
 
             [Content(ContentFormat.password, "Lenght >= 6 & has A-Z a-z 0-9 ?!..")]
-            [InputLength(min: 6)]
+            [System.ComponentModel.DataAnnotations.Range(minimum: 6, maximum: 100)]
             [Regex(RegexTemplates.HAS_UPPERCASE, RegexTemplates.HAS_LOWERCASE, RegexTemplates.HAS_NUMBER, RegexTemplates.HAS_SPECIAL_CHAR)]
             public string password;
 
-            [Description("e.g. 99")]
-            [MinMaxRange(0, 130)]
+            [System.ComponentModel.Description("e.g. 99")]
+            [System.ComponentModel.DataAnnotations.Range(0, 130)]
             public int? age;
 
-            [Description("e.g. 99")]
-            [MinMaxRange(0, 160)]
+            [System.ComponentModel.Description("e.g. 99")]
+            [System.ComponentModel.DataAnnotations.Range(0, 160)]
             public int? progress { get; private set; } = 60;
 
             public float money;
@@ -191,14 +191,14 @@ namespace com.csutil.tests.jsonschema {
             [Enum("Level of experience 1", typeof(Experience), allowOtherInput = true)]
             public string exp1;
 
-            [Description("Level of experience 2")]
+            [System.ComponentModel.Description("Level of experience 2")]
             public Experience exp2;
 
-            [Description("Checked if there is any money")]
+            [System.ComponentModel.Description("Checked if there is any money")]
             public bool hasMoney;
 
             [Regex(RegexTemplates.PHONE_NR)]
-            [Description("e.g. +1 234 5678 90")]
+            [System.ComponentModel.Description("e.g. +1 234 5678 90")]
             public string phoneNumber;
 
             public FileRef profilePic;
