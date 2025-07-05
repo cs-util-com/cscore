@@ -4,6 +4,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
 
@@ -116,11 +117,27 @@ namespace com.csutil.model.jsonschema {
                     if (ila.MinimumLength > 0) { newField.minLength = ila.MinimumLength; }
                     if (ila.MaximumLength > 0) { newField.maxLength = ila.MaximumLength; }
                 }
+                if (model.TryGetCustomAttribute(out StringLengthAttribute sla)) {
+                    if (sla.MinimumLength > 0) { newField.minLength = sla.MinimumLength; }
+                    if (sla.MaximumLength > 0) { newField.maxLength = sla.MaximumLength; }
+                }
+                if (model.TryGetCustomAttribute(out System.ComponentModel.DataAnnotations.RangeAttribute range)) {
+                    // If Minimum is a number > 0 then it is used as the minimum value:
+                    if (range.Minimum is int || range.Minimum is long || range.Minimum is float || range.Minimum is double) {
+                        newField.minimum = Convert.ToSingle(range.Minimum);
+                    }
+                    // If Maximum is a number > 0 then it is used as the maximum value:
+                    if (range.Maximum is int || range.Maximum is long || range.Maximum is float || range.Maximum is double) {
+                        newField.maximum = Convert.ToSingle(range.Maximum);
+                    }
+                }
                 if (model.TryGetCustomAttribute(out EnumAttribute e)) {
                     newField.contentEnum = e.names;
                     newField.additionalItems = e.allowOtherInput;
                 }
-                if (model.TryGetCustomAttribute(out RequiredAttribute r)) { newField.mandatory = true; }
+                if (model.TryGetCustomAttribute(out System.ComponentModel.DataAnnotations.RequiredAttribute r)) {
+                    newField.mandatory = true;
+                }
                 if (model.TryGetCustomAttribute(out JsonPropertyAttribute p)) {
                     if (p.Required == Required.Always || p.Required == Required.DisallowNull) {
                         newField.mandatory = true;
@@ -172,10 +189,12 @@ namespace com.csutil.model.jsonschema {
         }
 
         public virtual bool ExtractFieldDocu(JsonSchema field, MemberInfo m, Type modelType, JTokenType t, object pInstance, JToken jpInstance) {
-            var descrAttr = m?.GetCustomAttribute<DescriptionAttribute>(true);
+            var descrAttr = m?.GetCustomAttribute<System.ComponentModel.DescriptionAttribute>(true);
             if (descrAttr != null) {
                 field.description = descrAttr.Description;
-                field.defaultVal = descrAttr.defaultVal;
+                if (descrAttr is com.csutil.model.jsonschema.DescriptionAttribute descrWithDefaultValAttr) {
+                    field.defaultVal = descrWithDefaultValAttr.defaultVal;
+                }
                 return true;
             }
             if (IsSimpleType(t)) {

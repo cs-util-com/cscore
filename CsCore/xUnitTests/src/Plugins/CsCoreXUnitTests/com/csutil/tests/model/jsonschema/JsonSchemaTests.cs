@@ -170,20 +170,21 @@ namespace com.csutil.tests.model.jsonschema {
             [JsonProperty(Required = Required.Always)]
             public string id { get; private set; } = GuidV2.NewGuid().ToString();
 
-            [Required]
-            [InputLength(2, 30)]
+            [System.ComponentModel.DataAnnotations.Required]
+            [System.ComponentModel.DataAnnotations.StringLength(30)]
             public string name;
 
             [Content(ContentFormat.password, "A secure password")]
             public string password;
 
-            [MinMaxRange(min: 0, max: 130)]
+            [System.ComponentModel.DataAnnotations.Range(minimum: 0, maximum: 130)]
             public int age;
+            
             public float money;
             public FileRef profilePic;
             public UserContact bestFriend;
             [Regex(RegexTemplates.PHONE_NR)]
-            [Description("e.g. +1 234 5678 90")]
+            [System.ComponentModel.Description("e.g. +1 234 5678 90")]
             public int? phoneNumber;
 
             public MyUserModel(string id = null) { this.id = id == null ? "" + GuidV2.NewGuid() : id; }
@@ -203,7 +204,7 @@ namespace com.csutil.tests.model.jsonschema {
 
             public string dir { get; set; }
             public string fileName { get; set; }
-            [Required]
+            [System.ComponentModel.DataAnnotations.Required]
             public string url { get; set; }
             public Dictionary<string, object> checksums { get; set; }
             public string mimeType { get; set; }

@@ -7,7 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using com.csutil.http.apis;
-using com.csutil.model.jsonschema;
+using System.ComponentModel;
 using Xunit;
 using Newtonsoft.Json;
 using System.IO;
@@ -472,19 +472,19 @@ namespace com.csutil.integrationTests.http {
 
         public class YesNoResponse {
 
-            [Required]
+            [System.ComponentModel.DataAnnotations.Required]
             [Description("The confidence of the AI in the answer")]
             public int confidence { get; set; }
 
-            [Required]
+            [System.ComponentModel.DataAnnotations.Required]
             [Description("The summary of the input question that the AI used to give the answer")]
             public string inputQuestionInterpreted { get; set; }
 
-            [Required]
+            [System.ComponentModel.DataAnnotations.Required]
             [Description("The yes/no decision of the AI for the input question")]
             public bool yesNoAnswer { get; set; }
 
-            [Required]
+            [System.ComponentModel.DataAnnotations.Required]
             [Description("The explanation of the AI why it gave the answer")]
             public string explanation { get; set; }
 

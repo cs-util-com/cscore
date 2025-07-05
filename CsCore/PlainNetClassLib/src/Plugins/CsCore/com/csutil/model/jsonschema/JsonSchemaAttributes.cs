@@ -3,7 +3,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace com.csutil.model.jsonschema {
 
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
+    [Obsolete("Use '[System.ComponentModel.Description]' instead")]
+    [AttributeUsage(AttributeTargets.All)]
     public class DescriptionAttribute : System.ComponentModel.DescriptionAttribute {
         public string defaultVal { get; }
         [Obsolete("Use 'Description' property instead")]
@@ -14,6 +15,7 @@ namespace com.csutil.model.jsonschema {
             : base(description) => this.defaultVal = defaultVal;
     }
 
+    [Obsolete("Use '[RegularExpression(...)]' instead")]
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
     public class RegexAttribute : RegularExpressionAttribute {
         [Obsolete("Use 'Pattern' property instead")]
@@ -23,15 +25,15 @@ namespace com.csutil.model.jsonschema {
         }
     }
 
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
-    public class ContentAttribute : DescriptionAttribute {
+    [AttributeUsage(AttributeTargets.All)]
+    public class ContentAttribute : System.ComponentModel.DescriptionAttribute {
         public ContentFormat type { get; }
         public ContentAttribute(ContentFormat type, string description)
             : base(description) => this.type = type;
     }
 
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
-    public class EnumAttribute : DescriptionAttribute {
+    [AttributeUsage(System.AttributeTargets.All)]
+    public class EnumAttribute : System.ComponentModel.DescriptionAttribute {
         public string[] names { get; }
         public bool allowOtherInput { get; set; }
 
@@ -52,10 +54,12 @@ namespace com.csutil.model.jsonschema {
         }
     }
 
+    [Obsolete("Use '[System.ComponentModel.DataAnnotations.Required]' instead")]
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
     public class RequiredAttribute : System.ComponentModel.DataAnnotations.RequiredAttribute {
     }
 
+    [Obsolete("Use '[System.ComponentModel.DataAnnotations.Range]' instead")]
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
     public class MinMaxRangeAttribute : RangeAttribute {
 
@@ -73,6 +77,7 @@ namespace com.csutil.model.jsonschema {
         public float? maximum => (float?)Maximum;
     }
 
+    [Obsolete("Use '[System.ComponentModel.DataAnnotations.StringLength]' instead")]
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
     public class InputLengthAttribute : StringLengthAttribute {
 
@@ -93,18 +98,23 @@ namespace com.csutil.model.jsonschema {
     /// one on an int field (for the selected index in the dropdown) </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
     public class DropDownAttribute : Attribute {
+        
         public string dropdownId { get; set; }
+        
         /// <summary> [DropDown(dropdownId: "MyDropdown1")] </summary>
         public DropDownAttribute() { }
+        
         /// <summary> [DropDown("MyDropdown1")] </summary>
         public DropDownAttribute(string dropdownId) => this.dropdownId = dropdownId;
+        
     }
+    
 }
 
 namespace System.ComponentModel.DataAnnotations {
 
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
-    public class MaxWordsAttribute : com.csutil.model.jsonschema.RegexAttribute {
+    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter, AllowMultiple = false)]
+    public class MaxWordsAttribute : RegularExpressionAttribute {
         public MaxWordsAttribute(int maxWords) : base($"^(?:\\S+\\s+){{0,{maxWords - 1}}}\\S+$") { }
     }
 
