@@ -58,7 +58,7 @@ Shader "Custom/BlurURP"
             {
                 float4 pos:SV_POSITION;
                 float2 uvMask:TEXCOORD0;
-                float2 uvScreen:TEXCOORD1;
+                float4 screenPos:TEXCOORD1;
             };
 
             v2f vert(appdata v)
@@ -67,40 +67,39 @@ Shader "Custom/BlurURP"
                 o.pos = TransformObjectToHClip(v.pos.xyz);
                 o.uvMask = TRANSFORM_TEX(v.uv, _MainTex);
 
-                float2 uv = o.pos.xy / o.pos.w;
-                #if UNITY_UV_STARTS_AT_TOP
-                uv.y = -uv.y;
-                #endif
-                o.uvScreen = uv * 0.5 + 0.5;
+                // Use ComputeScreenPos for proper screen space coordinates
+                // This handles world space UI canvases correctly
+                o.screenPos = ComputeScreenPos(o.pos);
+
                 return o;
             }
 
             // -------- fragment
             half4 frag(v2f i) : SV_Target
             {
-                float2 texelSize = _CameraOpaqueTexture_TexelSize.xy;
+                // Convert screen position to UV coordinates
+                float2 uvScreen = i.screenPos.xy / i.screenPos.w;
+
                 half3 result = 0;
                 float totalWeight = 0;
 
-                // Much stronger blur using circular sampling pattern
+                // Blur sampling with simpler approach
                 for (int x = -_Samples / 2; x <= _Samples / 2; x++)
                 {
                     for (int y = -_Samples / 2; y <= _Samples / 2; y++)
                     {
-                        float2 offset = float2(x, y) * _Size * texelSize;
+                        float2 offset = float2(x, y) * _Size * _CameraOpaqueTexture_TexelSize.xy;
                         float distance = length(offset);
 
                         // Gaussian weight based on distance
                         float weight = exp(-distance * distance * 0.5);
 
-                        // Sample both opaque and color textures to include UI elements
-                        half4 opaqueSample = tex2D(_CameraOpaqueTexture, i.uvScreen + offset);
-                        half4 colorSample = tex2D(_CameraColorTexture, i.uvScreen + offset);
+                        float2 sampleUV = uvScreen + offset;
 
-                        // Blend the samples - use color texture if it has transparency info, otherwise opaque
-                        half3 finalSample = lerp(opaqueSample.rgb, colorSample.rgb, colorSample.a);
+                        // Sample the opaque texture (which should contain all rendered content including world space UI)
+                        half3 sample = tex2D(_CameraOpaqueTexture, sampleUV).rgb;
 
-                        result += finalSample * weight;
+                        result += sample * weight;
                         totalWeight += weight;
                     }
                 }
@@ -108,7 +107,7 @@ Shader "Custom/BlurURP"
                 // Normalize by total weight
                 half3 blur = result / totalWeight;
                 half3 tinted = blur * _MultiplyColor.rgb + _AdditiveColor.rgb;
-                half alpha = tex2D(_MainTex, i.uvMask).a;
+                half alpha = tex2D(_MainTex, i.uvMask).a * _MultiplyColor.a;
                 return half4(tinted, alpha);
             }
             ENDHLSL
