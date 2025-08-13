@@ -1,7 +1,8 @@
 Shader "Custom/BlurURP"
 {
     Properties{
-        _Size           ("Blur Radius"           , Range(0,40)) = 1.0
+        _Size           ("Blur Radius"           , Range(0,100)) = 1.0
+        _Iterations     ("Blur Iterations"       , Range(1,3)) = 1
         _MainTex        ("Mask Texture (Alpha)" , 2D)          = "white" {}
         _MultiplyColor  ("Multiply Tint Color"  , Color)       = (1,1,1,1)
         _AdditiveColor  ("Additive Tint Color"  , Color)       = (0,0,0,0)
@@ -30,6 +31,7 @@ Shader "Custom/BlurURP"
             sampler2D _MainTex;               float4 _MainTex_ST;
             sampler2D _CameraOpaqueTexture;   float4 _CameraOpaqueTexture_TexelSize;
             float    _Size;
+            int      _Iterations;
             float4   _MultiplyColor, _AdditiveColor;
 
             // -------- vertex
@@ -38,7 +40,7 @@ Shader "Custom/BlurURP"
 
             v2f vert (appdata v){
                 v2f o;
-                o.pos       = mul(UNITY_MATRIX_MVP, v.pos);
+                o.pos       = TransformObjectToHClip(v.pos.xyz);
                 o.uvMask    = TRANSFORM_TEX(v.uv, _MainTex);
 
                 float2 uv   = o.pos.xy / o.pos.w;
@@ -52,16 +54,40 @@ Shader "Custom/BlurURP"
             // -------- fragment
             half4 frag (v2f i) : SV_Target{
                 float2 t = _CameraOpaqueTexture_TexelSize.xy;
-                half  w[5] = { 0.18h, 0.15h, 0.12h, 0.09h, 0.05h };   // weights 0..4
+                
+                // Improved Gaussian weights for stronger blur (7 samples each direction)
+                half  w[7] = { 0.0044299121055113265h, 0.05399096651318806h, 0.2419707245191454h, 
+                              0.39894228040143267h, 0.2419707245191454h, 0.05399096651318806h, 0.0044299121055113265h };
 
-                // Horizontal + vertical blur (9 × 2 taps)
-                half3 sumH = 0, sumV = 0;
-                [unroll] for(int k=-4;k<=4;++k){
-                    int idx = abs(k);
-                    sumH += tex2D(_CameraOpaqueTexture, i.uvScreen + float2(k*_Size*t.x,0)).rgb * w[idx];
-                    sumV += tex2D(_CameraOpaqueTexture, i.uvScreen + float2(0,k*_Size*t.y)).rgb * w[idx];
+                half3 result = 0;
+                
+                // Multiple iterations for much stronger blur
+                for(int iter = 0; iter < _Iterations; iter++){
+                    float iterSize = _Size * (iter + 1);
+                    
+                    // Horizontal blur (13 samples)
+                    half3 sumH = 0;
+                    [unroll] for(int k=-6; k<=6; ++k){
+                        int idx = abs(k); 
+                        if(idx < 7){
+                            sumH += tex2D(_CameraOpaqueTexture, i.uvScreen + float2(k*iterSize*t.x,0)).rgb * w[idx];
+                        }
+                    }
+                    
+                    // Vertical blur (13 samples)
+                    half3 sumV = 0;
+                    [unroll] for(int k=-6; k<=6; ++k){
+                        int idx = abs(k);
+                        if(idx < 7){
+                            sumV += tex2D(_CameraOpaqueTexture, i.uvScreen + float2(0,k*iterSize*t.y)).rgb * w[idx];
+                        }
+                    }
+                    
+                    result += (sumH + sumV) * 0.5;
                 }
-                half3 blur    = (sumH + sumV)*0.5;
+                
+                // Average across iterations
+                half3 blur = result / _Iterations;
                 half3 tinted  = blur * _MultiplyColor.rgb + _AdditiveColor.rgb;
                 half  alpha   = tex2D(_MainTex, i.uvMask).a;
                 return half4(tinted, alpha);
